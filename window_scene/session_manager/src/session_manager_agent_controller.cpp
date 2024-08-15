@@ -14,13 +14,11 @@
  */
 
 #include "session_manager_agent_controller.h"
-#include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerAgentController"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerAgentController"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerAgentController)
 

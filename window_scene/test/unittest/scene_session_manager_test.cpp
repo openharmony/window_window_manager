@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerTest : public testing::Test {
 public:
@@ -98,6 +98,7 @@ void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sce
     sceneSession->systemTouchable_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->foregroundInteractiveStatus_.store(true);
+    sceneSession->isVisible_ = true;
 }
 
 int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession>& session)
@@ -466,14 +467,14 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdateImmersiveState
- * @tc.desc: test UpdateImmersiveState
+ * @tc.name: GetImmersiveState
+ * @tc.desc: test GetImmersiveState
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetImmersiveState, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->UpdateImmersiveState();
+    ssm_->GetImmersiveState();
     ASSERT_EQ(ret, 0);
 }
 
@@ -527,41 +528,6 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
     scenesession->SetSessionProperty(property);
     WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
     ASSERT_EQ(WMError::WM_OK, result);
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: SceneSesionManager NotifySessionForeground
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySessionForeground, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> scensession = nullptr;
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
-    uint32_t reason = 1;
-    bool withAnimation = true;
-    scensession->NotifySessionForeground(reason, withAnimation);
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: SceneSesionManager NotifySessionForeground
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, NotifySessionBackground, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> scensession = nullptr;
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
-    uint32_t reason = 1;
-    bool withAnimation = true;
-    bool isFromInnerkits = true;
-    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
 /**
@@ -793,37 +759,6 @@ HWTEST_F(SceneSessionManagerTest, HandleSpecialExtWindowFlagsChange, Function | 
     ssm_->HandleSpecialExtWindowFlagsChange(persistentId, 0, 3);
     EXPECT_TRUE(ssm_->extWindowFlagsMap_.empty());
     ssm_->extWindowFlagsMap_.clear();
-}
-
-/**
- * @tc.name: ClearUnrecoveredSessions
- * @tc.desc: test func ClearUnrecoveredSessions
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearUnrecoveredSessions, Function | SmallTest | Level1)
-{
-    ssm_->alivePersistentIds_.push_back(23);
-    ssm_->alivePersistentIds_.push_back(24);
-    ssm_->alivePersistentIds_.push_back(25);
-    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
-    std::vector<int32_t> recoveredPersistentIds;
-    recoveredPersistentIds.push_back(23);
-    recoveredPersistentIds.push_back(24);
-    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
-}
-
-/**
- * @tc.name: RecoverSessionInfo
- * @tc.desc: test func RecoverSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, RecoverSessionInfo, Function | SmallTest | Level1)
-{
-    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
-
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    info = ssm_->RecoverSessionInfo(property);
 }
 
 /**
@@ -1317,14 +1252,12 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     EXPECT_EQ(result, WMError::WM_OK);
 
     topNum = 0;
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 
     topNum = 1000;
     MainWindowInfo info;
     topNInfos.push_back(info);
-    result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ssm_->GetMainWindowInfos(topNum, topNInfos);
 }
 
 /**

@@ -151,15 +151,6 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    // return when screen is locked and show without ShowWhenLocked flag
-    if (false && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) && !IsShowWhenLocked() &&
-        sessionInfo_.bundleName_.find("startupguide") == std::string::npos &&
-        sessionInfo_.bundleName_.find("samplemanagement") == std::string::npos) {
-        TLOGW(WmsLogTag::WMS_LIFE, "failed: Screen is locked, session %{public}d show without ShowWhenLocked flag",
-            GetPersistentId());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
@@ -318,7 +309,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
-        session->isTerminating = false;
+        session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
@@ -376,9 +367,14 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
-                session->IsFocused() && session->IsMovableWindowType() &&
-                session->moveDragController_->HasPointDown())) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
+                  session->IsFocused() && session->IsMovableWindowType() &&
+                  session->moveDragController_->HasPointDown() &&
+                  session->moveDragController_->GetMovable())) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
+                    "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, "
+                    "movable: %{public}d", session->GetPersistentId(), session->moveDragController_->GetStartDragFlag(),
+                    session->IsFocused(), session->IsMovableWindowType(), session->moveDragController_->HasPointDown(),
+                    session->moveDragController_->GetMovable());
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
@@ -404,6 +400,32 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     };
     PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<int>(event)));
     return WSError::WS_OK;
+}
+
+WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
+{
+    if (event != SessionEvent::EVENT_START_MOVE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [weakThis = wptr(this), event, this]() {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->moveDragController_->GetStartMoveFlag()) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
+            return WSError::WS_ERROR_REPEAT_OPERATION;
+        }
+        OnSessionEvent(event);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "OnSystemSessionEvent");
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY)
@@ -459,6 +481,23 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
+void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = std::move(callback);
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -476,7 +515,7 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
     return PostSyncTask(task, "SetGlobalMaximizeMode");
 }
 
-WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
+WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     auto task = [weakThis = wptr(this), &mode]() {
         auto session = weakThis.promote();
@@ -579,9 +618,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::UNDEFINED &&
-            session->reason_ != SizeChangeReason::DRAG_END) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d!", session->GetPersistentId());
+        if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
+            (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
+                session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
@@ -646,7 +687,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
             return;
         }
-        static bool isPhone = systemConfig_.uiType_ == "phone";
+        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
         if (IsKeyboardNeedLeftOffset(isPhone, sessionProperty)) {
             keyboardSession->winRect_.posX_ += panelSession->winRect_.posX_;
         } else {
@@ -738,6 +779,8 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
 {
     SessionGravity gravity;
     uint32_t percent = 0;
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
@@ -746,29 +789,31 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplayInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is nullptr");
-            return false;
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
+            sessionProperty->GetDisplayId());
+        if (screenSession != nullptr) {
+            screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+            screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
         }
 
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            defaultDisplayInfo->GetWidth() : rect.width_;
+            static_cast<int32_t>(screenWidth) : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
         newWinRect.height_ =
             (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0)
-                ? static_cast<int32_t>(static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u)
-                : rect.height_;
+                ? static_cast<int32_t>(screenHeight * percent / 100u) : rect.height_;
         newRequestRect.height_ = newWinRect.height_;
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : newRequestRect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
-        newWinRect.posY_ = defaultDisplayInfo->GetHeight() - static_cast<int32_t>(newWinRect.height_);
+        newWinRect.posY_ = static_cast<int32_t>(screenHeight) - newWinRect.height_;
         newRequestRect.posY_ = newWinRect.posY_;
         TLOGI(WmsLogTag::WMS_KEYBOARD, "rect: %{public}s, newRequestRect: %{public}s, newWinRect: %{public}s",
             rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return true;
     }
-    WLOGFD("There is no need to update input rect");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "There is no need to update input rect");
     return false;
 }
 
@@ -792,6 +837,33 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
         return WSError::WS_OK;
     };
     PostTask(task, "SetSessionRectChangeCallback");
+}
+
+void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "session or keyboardLayoutFunc is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->adjustKeyboardLayoutFunc_ = func;
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "property is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
+        session->adjustKeyboardLayoutFunc_(params);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify adjust keyboard layout when register, keyboardId: %{public}d, "
+            "gravity: %{public}u, LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+            "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", session->GetPersistentId(),
+            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
+            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
+            params.PortraitPanelRect_.ToString().c_str());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetAdjustKeyboardLayoutCallback");
 }
 
 void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func)
@@ -1072,7 +1144,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
+        (systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1107,7 +1179,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, status bar rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -1120,7 +1192,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
+         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1147,12 +1220,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, keyboard rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, input method bar rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s input method %{public}s",
                   rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
@@ -1184,7 +1257,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, cutout area rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
@@ -1211,7 +1284,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, AI navigation bar rect %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
@@ -1225,8 +1298,12 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
     std::string uiType = systemConfig_.uiType_;
     if (WindowHelper::IsMainWindow(winType)) {
+        if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
+            return false;
+        }
+
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            uiType == "phone" || uiType == "pad") {
+            uiType == UI_TYPE_PHONE || uiType == UI_TYPE_PAD) {
             return true;
         }
     }
@@ -1365,10 +1442,6 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             return {};
         }
 
-        if (session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
-            return {};
-        }
-
         AvoidArea avoidArea;
         WSRect rect = session->GetSessionRect();
         switch (type) {
@@ -1392,7 +1465,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
+                TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
                     type, session->GetPersistentId());
                 return avoidArea;
             }
@@ -1620,7 +1693,11 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialog = WindowHelper::IsDialogWindow(windowType);
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
-    if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog) &&
+    bool isDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled() &&
+        !isDialog;
+    TLOGD(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
+        WindowHelper::IsSystemWindow(windowType), property->GetDragEnabled());
+    if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog || isDragEnabledSystemWindow) &&
         !isMaxModeAvoidSysBar) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
@@ -1632,8 +1709,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
-        if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
-            auto isPC = systemConfig_.uiType_ == "pc";
+        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
+            || isDragEnabledSystemWindow) {
+            auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
             if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
@@ -1962,10 +2040,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
 
     if (reason == SizeChangeReason::DRAG_END) {
-        if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");
-            WSRect restoringRect = {0, 0, 0, 0};
-            SetRestoringRectForKeyboard(restoringRect);
+        if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
+            SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -2030,6 +2107,10 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
+        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
+        TLOGD(WmsLogTag::WMS_SYSTEM, "systemwindow setSurfaceBounds");
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
@@ -2139,7 +2220,7 @@ std::string SceneSession::GetSessionSnapshotFilePath() const
     return "";
 }
 
-void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon)
+void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
     if (scenePersistence_ != nullptr) {
@@ -2184,6 +2265,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         if (!session->GetSessionProperty()) {
             WLOGFE("UpdateNativeVisibility property is null");
             return;
+        }
+        if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
+            session->updatePrivateStateAndNotifyFunc_(persistentId);
         }
     };
     PostTask(task, "UpdateNativeVisibility");
@@ -2516,7 +2600,7 @@ void SceneSession::SetClientIdentityToken(const std::string& clientIdentityToken
     clientIdentityToken_ = clientIdentityToken;
 }
 
-void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const
+void SceneSession::DumpSessionInfo(std::vector<std::string>& info) const
 {
     std::string dumpInfo = "      Session ID #" + std::to_string(persistentId_);
     info.push_back(dumpInfo);
@@ -2690,6 +2774,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.reuse = abilitySessionInfo->reuse;
     info.processOptions = abilitySessionInfo->processOptions;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
+    info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
         info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -2715,8 +2800,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto isSACalling = SessionPermission::IsSACalling();
-    auto task = [weakThis = wptr(this), abilitySessionInfo, isSACalling]() {
+    bool isFoundationCall = SessionPermission::IsFoundationCall();
+    auto task = [weakThis = wptr(this), abilitySessionInfo, isFoundationCall]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2726,25 +2811,19 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (!session->IsPcOrPadEnableActivation() && !isSACalling &&
-            WindowHelper::IsMainWindow(session->GetWindowType())) {
-            auto sessionState = session->GetSessionState();
-            if ((sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE) &&
-                !(session->GetForegroundInteractiveStatus())) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, ForegroundInteractiveStatus: %{public}u",
-                    session->GetForegroundInteractiveStatus());
+        if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
+            SessionState sessionState = session->GetSessionState();
+            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, "
+                "isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
+                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
+            bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
+                sessionState == SessionState::STATE_ACTIVE;
+            if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
+                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, sceneSession in a non interactive state");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
-            auto callingTokenId = abilitySessionInfo->callingTokenId;
-            auto startAbilityBackground = SessionPermission::VerifyPermissionByCallerToken(
-                callingTokenId, "ohos.permission.START_ABILITIES_FROM_BACKGROUND") ||
-                SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
-                "ohos.permission.START_ABILIIES_FROM_BACKGROUND");
-            if (sessionState != SessionState::STATE_FOREGROUND && sessionState != SessionState::STATE_ACTIVE &&
-                !(startAbilityBackground || abilitySessionInfo->hasContinuousTask)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, window state: %{public}d, \
-                    startAbilityBackground:%{public}u, hasContinuousTask: %{public}u",
-                    sessionState, startAbilityBackground, abilitySessionInfo->hasContinuousTask);
+            if (!isSessionForeground && !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
+                TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
         }
@@ -3277,11 +3356,11 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSession: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3321,11 +3400,11 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
                 session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3376,14 +3455,30 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
-WSRect SceneSession::GetRestoringRectForKeyboard() const
+void SceneSession::SetMovable(bool movable)
 {
-    return restoringRectForKeyboard_;
+    auto task = [weakThis = wptr(this), movable] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        if (session->moveDragController_) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMovable: %{public}d", session->GetPersistentId(), movable);
+            session->moveDragController_->SetMovable(movable);
+        }
+    };
+    PostTask(task, "SetMovable");
 }
 
-void SceneSession::SetRestoringRectForKeyboard(WSRect rect)
+int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    restoringRectForKeyboard_ = rect;
+    return oriPosYBeforeRaisedByKeyboard_;
+}
+
+void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
+{
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
@@ -3577,7 +3672,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), rect, reason, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3611,7 +3706,7 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), controlType, status, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3957,6 +4052,11 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return WMError::WM_OK;
 }
 
+void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
+{
+    updatePrivateStateAndNotifyFunc_ = func;
+}
+
 int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
@@ -4162,12 +4262,93 @@ bool SceneSession::IsImmersiveType() const
 
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     auto property = GetSessionProperty();
     bool isPcAppInPad = false;
     if (property != nullptr) {
         isPcAppInPad = property->GetIsPcAppInPad();
     }
     return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
+}
+
+void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
+    const sptr<WindowSessionProperty>& sessionProperty)
+{
+    SessionGravity gravity;
+    uint32_t percent = 0;
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    Rect rect = {0, 0, 0, 0};
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
+        return;
+    }
+    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
+        sessionProperty->GetDisplayId());
+    if (screenSession != nullptr) {
+        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
+    }
+    bool isLandscape = screenWidth > screenHeight ? true : false;
+    rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    gravity = static_cast<SessionGravity>(params.gravity_);
+    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
+        UpdateInputMethodSessionRect(SessionHelper::TransferToWSRect(rect), newWinRect, newRequestRect);
+    } else if (rect.width_ > 0 && rect.height_ > 0) {
+        newWinRect = SessionHelper::TransferToWSRect(rect);
+        newRequestRect = SessionHelper::TransferToWSRect(rect);
+    }
+    SetSessionRequestRect(newRequestRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, newRequestRect: %{public}s,"
+        "isLandscape: %{public}d", GetPersistentId(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
+        isLandscape);
+}
+
+void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
+    isMinimizedByUserSwitch_ = isMinimized;
+}
+
+bool SceneSession::IsMinimizedByUserSwitch() const
+{
+    return isMinimizedByUserSwitch_;
+}
+
+void SceneSession::UnregisterSessionChangeListeners()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("UnregisterSessionChangeListeners session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
+            session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
+            session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
+            session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
+            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
+            session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
+            session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
+            session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+            session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
+            session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+            session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
+            session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
+            session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
+            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
+        }
+        session->Session::UnregisterSessionChangeListeners();
+    };
+    PostTask(task, "UnregisterSessionChangeListeners");
 }
 } // namespace OHOS::Rosen

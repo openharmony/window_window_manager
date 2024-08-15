@@ -108,15 +108,17 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
+        TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
     };
 
-    virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
-    virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
-    virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
-    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;
-    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) = 0;
-    virtual WSError GetFocusSessionToken(sptr<IRemoteObject> &token) = 0;
+    virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
+    virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
+    virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
 
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
@@ -126,12 +128,12 @@ public:
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
-    virtual WSError DumpSessionAll(std::vector<std::string> &infos) override { return WSError::WS_OK; }
-    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override
+    virtual WSError DumpSessionAll(std::vector<std::string>& infos) override { return WSError::WS_OK; }
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos) override
     {
         return WSError::WS_OK;
     }
-    virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
+    virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
 
     virtual WSError TerminateSessionNew(
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
@@ -155,7 +157,7 @@ public:
     }
 
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -243,6 +245,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    WSError GetFreeMultiWindowEnableState(bool& enable) override
+    {
+        return WSError::WS_OK;
+    }
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override
     {
         return WMError::WM_OK;
@@ -254,6 +260,9 @@ public:
     WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
 
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
+
+    virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

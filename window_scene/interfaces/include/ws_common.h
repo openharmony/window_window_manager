@@ -36,6 +36,9 @@ struct AbilityInfo;
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
+const std::string UI_TYPE_PHONE = "phone";
+const std::string UI_TYPE_PC = "pc";
+const std::string UI_TYPE_PAD = "pad";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -304,15 +307,15 @@ struct SessionInfo {
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
 
-    mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
-    std::shared_ptr<AAFwk::Want> closeAbilityWant;
+    mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
+    std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode = -1;
-    int32_t requestCode;
-    int32_t errorCode;
-    std::string errorReason;
+    int32_t requestCode = -1;
+    int32_t errorCode = -1;
+    std::string errorReason = "";
     int32_t persistentId_ = INVALID_SESSION_ID;
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     std::string callerBundleName_ = "";
@@ -323,12 +326,12 @@ struct SessionInfo {
     int32_t windowMode = 0;
     StartMethod startMethod = StartMethod::START_NORMAL;
     bool lockedState = false;
-    std::string time;
+    std::string time = "";
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
-    int32_t ancoSceneState;
+    int32_t ancoSceneState = 0;
     bool isClearSession = false;
-    std::string sessionAffinity;
+    std::string sessionAffinity = "";
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
@@ -342,6 +345,7 @@ struct SessionInfo {
     uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
+    bool isBackTransition_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -553,7 +557,7 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-    std::string uiType_ = "phone";
+    std::string uiType_ = UI_TYPE_PHONE;
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;

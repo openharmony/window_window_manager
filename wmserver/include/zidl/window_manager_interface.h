@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -135,8 +136,8 @@ public:
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
-    virtual WSError DumpSessionAll(std::vector<std::string> &infos) { return WSError::WS_OK; }
-    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionAll(std::vector<std::string>& infos) { return WSError::WS_OK; }
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos) { return WSError::WS_OK; }
     virtual WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
     {
         return WSError::WS_OK;
@@ -146,7 +147,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
     virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
     {
@@ -217,6 +218,10 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError GetFreeMultiWindowEnableState(bool& enable)
     {
         return WSError::WS_OK;
     }

@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SysCapUtil"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SysCapUtil"};
 }
 
 std::string SysCapUtil::GetClientName()
@@ -43,7 +43,7 @@ std::string SysCapUtil::GetClientName()
         return pn;
     }
 
-    WLOGFD("unknow name");
+    WLOGFD("unknown name");
     return "unknown";
 }
 

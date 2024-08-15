@@ -104,6 +104,14 @@ FoldDisplayMode ScreenSessionManagerLite::GetFoldDisplayMode()
     return FoldDisplayMode::UNKNOWN;
 }
 
+void ScreenSessionManagerLite::SetFoldDisplayMode(const FoldDisplayMode displayMode)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        screenSessionManager_->SetFoldDisplayMode(displayMode);
+    }
+}
+
 bool ScreenSessionManagerLite::IsFoldable()
 {
     ConnectToServer();

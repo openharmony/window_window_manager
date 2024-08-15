@@ -47,6 +47,7 @@ public:
     WSError TransferAccessibilityChildTreeUnregister() override;
     WSError TransferAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) override;
+        
 private:
     static inline BrokerDelegator<WindowEventChannelProxy> delegator_;
 };

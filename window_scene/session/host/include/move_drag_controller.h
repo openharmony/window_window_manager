@@ -48,6 +48,8 @@ public:
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
     bool HasPointDown();
+    void SetMovable(bool movable);
+    bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
@@ -129,6 +131,7 @@ private:
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
+    bool isMovable_ = true;
     bool isDecorEnable_ = true;
     bool hasPointDown_ = false;
     float aspectRatio_ = 0.0f;

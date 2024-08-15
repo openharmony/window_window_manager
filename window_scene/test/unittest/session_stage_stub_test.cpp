@@ -18,19 +18,16 @@
 #include <ipc_types.h>
 #include <iremote_stub.h>
 
-#include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include <message_option.h>
 #include <message_parcel.h>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "window_manager.h"
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "window_manager_hilog.h"
 
 
 using namespace testing;
@@ -85,6 +82,11 @@ HWTEST_F(SessionStageStubTest, OnRemoteRequest, Function | SmallTest | Level1)
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(22, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    MessageParcel errorData;
+    errorData.WriteInterfaceToken(u"OHOS.ISessionStage.TEST");
+    code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ACTIVE);
+    ASSERT_EQ(ERR_TRANSACTION_FAILED, sessionStageStub_->OnRemoteRequest(code, errorData, reply, option));
 }
 
 /**
@@ -96,10 +98,12 @@ HWTEST_F(SessionStageStubTest, HandleSetActive, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ACTIVE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleSetActive(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -111,237 +115,12 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateRect(data, reply));
-}
-
-/**
- * @tc.name: HandleBackEventInner
- * @tc.desc: test function : HandleBackEventInner
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleBackEventInner, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(false);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleBackEventInner(data, reply));
-}
-
-/**
- * @tc.name: HandleUpdateFocus
- * @tc.desc: test function : HandleUpdateFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleUpdateFocus, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(false);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateFocus(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyDestroy
- * @tc.desc: test function : HandleNotifyDestroy
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyDestroy(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyTransferComponentData
- * @tc.desc: test function : HandleNotifyTransferComponentData
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentData, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(22, sessionStageStub_->HandleNotifyTransferComponentData(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyOccupiedAreaChange
- * @tc.desc: test function : HandleNotifyOccupiedAreaChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(22, sessionStageStub_->HandleNotifyOccupiedAreaChange(data, reply));
-}
-
-/**
- * @tc.name: HandleUpdateAvoidArea
- * @tc.desc: test function : HandleUpdateAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleUpdateAvoidArea, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(22, sessionStageStub_->HandleUpdateAvoidArea(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyScreenshot
- * @tc.desc: test function : HandleNotifyScreenshot
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyScreenshot(data, reply));
-}
-
-/**
- * @tc.name: HandleDumpSessionElementInfo
- * @tc.desc: test function : HandleDumpSessionElementInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleDumpSessionElementInfo, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    std::vector<std::string> params;
-    params.push_back("test1");
-    params.push_back("test2");
-    data.WriteStringVector(params);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleDumpSessionElementInfo(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyTouchOutside
- * @tc.desc: test function : HandleNotifyTouchOutside
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyTouchOutside, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyTouchOutside(data, reply));
-}
-
-/**
- * @tc.name: HandleUpdateWindowMode
- * @tc.desc: test function : HandleUpdateWindowMode
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateWindowMode(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyForegroundInteractiveStatus
- * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyForegroundInteractiveStatus(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionForeground
- * @tc.desc: test function : NotifySessionForeground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionForeground(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionFullScreen
- * @tc.desc: test function : NotifySessionFullScreen
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteBool(true);
-    ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
-}
-
-/**
- * @tc.name: NotifySessionBackground
- * @tc.desc: test function : NotifySessionBackground
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(1);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
-}
-
-/**
- * @tc.name: HandleNotifyWindowVisibilityChange
- * @tc.desc: test function : HandleNotifyWindowVisibilityChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -353,8 +132,11 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyWindowVisibilityChange(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -366,21 +148,216 @@ HWTEST_F(SessionStageStubTest, HandleUpdateOrientation, Function | SmallTest | L
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateOrientation(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
- * @tc.name: HandleNotifyCloseExistPipWindow
- * @tc.desc: test function : HandleNotifyCloseExistPipWindow
+ * @tc.name: HandleBackEventInner
+ * @tc.desc: test function : HandleBackEventInner
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleBackEventInner, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyCloseExistPipWindow(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyDestroy
+ * @tc.desc: test function : HandleNotifyDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DESTROY);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateFocus
+ * @tc.desc: test function : HandleUpdateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateFocus, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyTransferComponentData
+ * @tc.desc: test function : HandleNotifyTransferComponentData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentData, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyTransferComponentDataSync
+ * @tc.desc: test function : HandleNotifyTransferComponentDataSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentDataSync, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(static_cast<int>(WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED),
+        sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyOccupiedAreaChange
+ * @tc.desc: test function : HandleNotifyOccupiedAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateAvoidArea
+ * @tc.desc: test function : HandleUpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateAvoidArea, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyScreenshot
+ * @tc.desc: test function : HandleNotifyScreenshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleDumpSessionElementInfo
+ * @tc.desc: test function : HandleDumpSessionElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleDumpSessionElementInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    std::vector<std::string> params;
+    params.push_back("test1");
+    params.push_back("test2");
+    data.WriteStringVector(params);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyTouchOutside
+ * @tc.desc: test function : HandleNotifyTouchOutside
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyTouchOutside, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateWindowMode
+ * @tc.desc: test function : HandleUpdateWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyForegroundInteractiveStatus
+ * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -392,8 +369,64 @@ HWTEST_F(SessionStageStubTest, HandleUpdateMaximizeMode, Function | SmallTest | 
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateMaximizeMode(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyCloseExistPipWindow
+ * @tc.desc: test function : HandleNotifyCloseExistPipWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CLOSE_EXIST_PIP_WINDOW);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifySessionForeground
+ * @tc.desc: test function : HandleNotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FOREGROUND);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifySessionBackground
+ * @tc.desc: test function : HandleNotifySessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_BACKGROUND);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    data.WriteBool(false);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -405,8 +438,11 @@ HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTes
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TITLE_POSITION_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleUpdateTitleInTargetPos(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -418,21 +454,62 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTe
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyDensityFollowHost(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
- * @tc.name: HandleGetUIContentRemoteObj
- * @tc.desc: test function : HandleGetUIContentRemoteObj
+ * @tc.name: HandleNotifyWindowVisibilityChange
+ * @tc.desc: test function : HandleNotifyWindowVisibilityChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleGetUIContentRemoteObj(data, reply));
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_VISIBILITY_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyTransformChange
+ * @tc.desc: test function : HandleNotifyTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyTransformChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyDialogStateChange
+ * @tc.desc: test function : HandleNotifyDialogStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDialogStateChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -444,10 +521,13 @@ HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, Function | SmallTest | L
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteString("str");
     data.WriteInt32(1);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    ASSERT_EQ(0, sessionStageStub_->HandleSetPipActionEvent(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -459,12 +539,150 @@ HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, Function | SmallTest | 
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_CONTROL_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
     auto status = WsPiPControlStatus::PLAY;
     data.WriteUint32(static_cast<uint32_t>(controlType));
     data.WriteInt32(static_cast<int32_t>(status));
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleSetPiPControlEvent(data, reply));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateDisplayId
+ * @tc.desc: test function : HandleUpdateDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateDisplayId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAYID_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint64(2);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyDisplayMove
+ * @tc.desc: test function : HandleNotifyDisplayMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDisplayMove, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DISPLAY_MOVE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint64(0); // from
+    data.WriteUint64(1); // to
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleSwitchFreeMultiWindow
+ * @tc.desc: test function : HandleSwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true); // enable
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleGetUIContentRemoteObj
+ * @tc.desc: test function : HandleGetUIContentRemoteObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardPanelInfoChange
+ * @tc.desc: test function : HandleNotifyKeyboardPanelInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    KeyboardPanelInfo* keyboardPanelInfo = new KeyboardPanelInfo();
+    data.WriteParcelable(keyboardPanelInfo);
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    delete keyboardPanelInfo;
+}
+
+/**
+ * @tc.name: HandleCompatibleFullScreenRecover
+ * @tc.desc: test function : HandleCompatibleFullScreenRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleCompatibleFullScreenMinimize
+ * @tc.desc: test function : HandleCompatibleFullScreenMinimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleCompatibleFullScreenClose
+ * @tc.desc: test function : HandleCompatibleFullScreenClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
@@ -476,10 +694,32 @@ HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | Smal
 {
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteBool(true);
     data.WriteFloat(3.25f);
-    ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleSetUniqueVirtualPixelRatio(data, reply));
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifySessionFullScreen
+ * @tc.desc: test function : HandleNotifySessionFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteBool(false);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
 }
 }
 }

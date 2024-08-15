@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManagerFuzzTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManagerFuzzTest"};
 }
 
 using DMMessage = IScreenSessionManager::DisplayManagerMessage;

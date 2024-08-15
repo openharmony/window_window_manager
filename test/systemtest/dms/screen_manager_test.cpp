@@ -33,8 +33,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManagerTest"};
-    constexpr uint32_t COLOR_RED = 0xffff0000;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManagerTest"};
+constexpr uint32_t COLOR_RED = 0xffff0000;
 }
 class ScreenGroupChangeListener;
 class ScreenManagerTest : public testing::Test {

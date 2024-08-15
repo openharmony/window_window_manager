@@ -21,16 +21,16 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotStub"};
 }
 
-int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     WLOGI("SnapshotStub::OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed!");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     switch (code) {
         case TRANS_ID_GET_SNAPSHOT : {
@@ -50,7 +50,7 @@ int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 }
 }

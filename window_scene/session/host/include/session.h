@@ -47,6 +47,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -62,12 +63,13 @@ using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
-using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
-using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
+using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
+using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyClickModalSpecificWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
@@ -164,7 +166,7 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -233,16 +235,17 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear(bool needStartCaller = false);
-    WSError SetSessionLabel(const std::string &label);
+    WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
-    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
-    void UnregisterSessionChangeListeners();
+    virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
+    void SetClickModalSpecificWindowOutsideListener(const NotifyClickModalSpecificWindowOutsideFunc& func);
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
@@ -285,6 +288,7 @@ public:
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
+    WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -356,8 +360,8 @@ public:
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void NotifyScreenshot();
-    void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
-    void PostLifeCycleTask(Task &&task, const std::string &name, const LifeCycleTaskType &taskType);
+    void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
+    void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
@@ -418,6 +422,7 @@ public:
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
     void CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode);
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
+    void ProcessClickModalSpecificWindowOutside(int32_t posX, int32_t posY);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
@@ -438,7 +443,7 @@ public:
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
-        SessionLifeCycleTask(const Task &task, const std::string &name, const LifeCycleTaskType &type)
+        SessionLifeCycleTask(const Task& task, const std::string& name, const LifeCycleTaskType& type)
             : task(task), name(name), type(type) {}
         Task task;
         const std::string name;
@@ -505,6 +510,7 @@ protected:
     bool isVisible_ = false;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
+    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -512,6 +518,7 @@ protected:
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
+    NotifyClickModalSpecificWindowOutsideFunc clickModalSpecificWindowOutsideFunc_;
     NotifyUIRequestFocusFunc requestFocusFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
     GetStateFromManagerFunc getStateFromManagerFunc_;
@@ -544,7 +551,7 @@ protected:
     bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
-    bool isTerminating = false;
+    bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
@@ -614,7 +621,7 @@ private:
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
-    std::string callingBundleName_ { "unknow" };
+    std::string callingBundleName_ { "unknown" };
     bool isRSVisible_ {false};
     WindowVisibilityState visibilityState_ { WINDOW_LAYER_STATE_MAX};
     bool needNotify_ {true};
@@ -628,7 +635,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex;
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };

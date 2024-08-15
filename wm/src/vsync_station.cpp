@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,12 @@
 
 #include "vsync_station.h"
 
+#include <functional>
+
+#include <transaction/rs_interfaces.h>
+#include <ui/rs_ui_display_soloist.h>
+
 #include "window_frame_trace.h"
-#include "transaction/rs_interfaces.h"
-#include "ui/rs_frame_rate_linker.h"
 #include "window_manager_hilog.h"
 
 using namespace FRAME_TRACE;
@@ -25,145 +28,132 @@ using namespace FRAME_TRACE;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
-    const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task_";
-    constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
+const std::string VSYNC_THREAD_ID = "VsyncThread";
+const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task_";
+constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 }
 
-VsyncStation::VsyncStation(NodeId nodeId) : nodeId_(nodeId)
+VsyncStation::VsyncStation(NodeId nodeId, const std::shared_ptr<AppExecFwk::EventHandler>& vsyncHandler)
+    : nodeId_(nodeId),
+      vsyncHandler_(vsyncHandler),
+      vsyncTimeoutTaskName_(VSYNC_TIME_OUT_TASK + std::to_string(nodeId_)),
+      frameRateLinker_(RSFrameRateLinker::Create())
 {
-    vsyncTimeoutTaskName_ = VSYNC_TIME_OUT_TASK + std::to_string(nodeId_);
-    TLOGI(WmsLogTag::WMS_MAIN, "Vsync Constructor");
+    if (!vsyncHandler_) {
+        auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+        if (mainEventRunner != nullptr) {
+            vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+        } else {
+            TLOGW(WmsLogTag::WMS_MAIN, "MainEventRunner is not available");
+            vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
+                AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
+        }
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " created", nodeId_);
 }
 
 VsyncStation::~VsyncStation()
 {
-    std::lock_guard<std::mutex> lock(mtx_);
-    destroyed_ = true;
-    if (vsyncHandler_) {
-        vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
+    TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " destroyed", nodeId_);
+}
+
+bool VsyncStation::IsVsyncReceiverCreated()
+{
+    return GetOrCreateVsyncReceiver() != nullptr;
+}
+
+std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiver()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return GetOrCreateVsyncReceiverLocked();
+}
+
+std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiverLocked()
+{
+    if (receiver_ == nullptr) {
+        auto& rsClient = RSInterfaces::GetInstance();
+        auto receiver = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
+            vsyncHandler_, nodeId_);
+        if (receiver == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Fail to create vsync receiver, nodeId: %{public}" PRIu64, nodeId_);
+            return nullptr;
+        }
+        auto result = receiver->Init();
+        if (result == VSYNC_ERROR_OK) {
+            receiver_ = std::move(receiver);
+        } else {
+            TLOGE(WmsLogTag::WMS_MAIN, "Fail to init vsync receiver, nodeId: %{public}" PRIu64
+                ", error %{public}d", nodeId_, static_cast<int>(result));
+        }
     }
+    return receiver_;
 }
 
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
+    std::shared_ptr<VSyncReceiver> receiver;
     {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (destroyed_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        receiver = GetOrCreateVsyncReceiverLocked();
+        if (receiver == nullptr) {
             return;
         }
+
         vsyncCallbacks_.insert(vsyncCallback);
 
-        Init();
+        // if Vsync has been requested, just wait callback or timeout
         if (hasRequestedVsync_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "Vsync has requested, nodeId: %{public}" PRIu64, nodeId_);
             return;
         }
         hasRequestedVsync_ = true;
-        if (vsyncHandler_) {
-            vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
-            vsyncHandler_->PostTask(vsyncTimeoutCallback_, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
-        }
+
+        // post timeout task for a new vsync
+        vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
+        auto task = [weakThis = std::weak_ptr<VsyncStation>(shared_from_this())] {
+            if (auto sp = weakThis.lock()) {
+                sp->OnVsyncTimeOut();
+            }
+        };
+        vsyncHandler_->PostTask(task, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
     }
+
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
-    receiver_->RequestNextVSync(frameCallback_);
+    auto task = [weakThis = std::weak_ptr<VsyncStation>(shared_from_this())]
+        (int64_t timestamp, int64_t frameCount, void* client) {
+        if (auto sp = weakThis.lock()) {
+            sp->VsyncCallbackInner(timestamp, frameCount);
+            WindowFrameTraceImpl::GetInstance()->VsyncStopFrameTrace();
+        }
+    };
+    receiver->RequestNextVSync({
+        .userData_ = nullptr, .callbackWithId_ = task,
+    });
 }
 
 int64_t VsyncStation::GetVSyncPeriod()
 {
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        Init();
-    }
     int64_t period = 0;
-    if (receiver_ != nullptr) {
-        receiver_->GetVSyncPeriod(period);
+    if (auto receiver = GetOrCreateVsyncReceiver()) {
+        receiver->GetVSyncPeriod(period);
     }
     return period;
 }
 
-FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
-{
-    if (frameRateLinker_) {
-        return frameRateLinker_->GetId();
-    }
-    return 0;
-}
-
-void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
-{
-    if (frameRateLinker_ && frameRateLinker_->IsEnable()) {
-        WLOGD("VsyncStation::FlushFrameRate %{public}d, linkerID = %{public}" PRIu64, rate, frameRateLinker_->GetId());
-        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
-        frameRateLinker_->UpdateFrameRateRange(range, animatorExpectedFrameRate);
-    }
-}
-
-void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
-{
-    if (frameRateLinker_) {
-        if (!enabled) {
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
-            WLOGI("VsyncStation::FlushFrameRateImme %{public}d, linkerID = %{public}" PRIu64,
-                range.preferred_, frameRateLinker_->GetId());
-            frameRateLinker_->UpdateFrameRateRange(range);
-            frameRateLinker_->UpdateFrameRateRangeImme(range);
-        }
-        frameRateLinker_->SetEnable(enabled);
-    }
-}
-
-void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
-{
-    RSDisplaySoloistManager& soloistManager = RSDisplaySoloistManager::GetInstance();
-    soloistManager.SetMainFrameRateLinkerEnable(enabled);
-}
-
-void VsyncStation::Init()
-{
-    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
-        auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
-        if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
-            WLOGI("MainEventRunner is available");
-            vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
-        } else {
-            WLOGI("MainEventRunner is not available");
-            if (!vsyncHandler_) {
-                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
-                    AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
-            }
-        }
-        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-        frameRateLinker_ = OHOS::Rosen::RSFrameRateLinker::Create();
-        while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
-                vsyncHandler_, nodeId_);
-            TLOGI(WmsLogTag::WMS_MAIN, "Create vsync receiver for nodeId:%{public}" PRIu64"", nodeId_);
-        }
-        receiver_->Init();
-        hasInitVsyncReceiver_ = true;
-    }
-}
-
 void VsyncStation::RemoveCallback()
 {
-    WLOGI("Remove Vsync callback");
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (destroyed_) {
-        return;
-    }
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    std::lock_guard<std::mutex> lock(mutex_);
     vsyncCallbacks_.clear();
 }
 
 void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 {
-    std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks;
+    Callbacks vsyncCallbacks;
     {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (destroyed_) {
-            return;
-        }
+        std::lock_guard<std::mutex> lock(mutex_);
         hasRequestedVsync_ = false;
-        vsyncCallbacks = vsyncCallbacks_;
+        vsyncCallbacks = std::move(vsyncCallbacks_);
         vsyncCallbacks_.clear();
         vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
     }
@@ -174,36 +164,51 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
     }
 }
 
-void VsyncStation::OnVsync(int64_t timestamp, int64_t frameCount, void* client)
+void VsyncStation::OnVsyncTimeOut()
 {
-    auto vsyncClient = static_cast<VsyncStation*>(client);
-    if (vsyncClient) {
-        vsyncClient->VsyncCallbackInner(timestamp, frameCount);
-        WindowFrameTraceImpl::GetInstance()->VsyncStopFrameTrace();
-    } else {
-        WLOGFE("VsyncClient is null");
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    std::lock_guard<std::mutex> lock(mutex_);
+    hasRequestedVsync_ = false;
+}
+
+FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
+{
+    return frameRateLinker_->GetId();
+}
+
+void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
+{
+    if (frameRateLinker_->IsEnable()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker_->GetId());
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
+        frameRateLinker_->UpdateFrameRateRange(range, animatorExpectedFrameRate);
     }
 }
 
-void VsyncStation::OnVsyncTimeOut()
+void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
 {
-    WLOGD("Vsync time out");
-    std::lock_guard<std::mutex> lock(mtx_);
-    hasRequestedVsync_ = false;
+    if (!enabled) {
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
+        TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
+            range.preferred_, frameRateLinker_->GetId());
+        frameRateLinker_->UpdateFrameRateRange(range);
+        frameRateLinker_->UpdateFrameRateRangeImme(range);
+    }
+    frameRateLinker_->SetEnable(enabled);
+}
+
+void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
+{
+    RSDisplaySoloistManager& soloistManager = RSDisplaySoloistManager::GetInstance();
+    soloistManager.SetMainFrameRateLinkerEnable(enabled);
 }
 
 void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (destroyed_) {
-            return;
-        }
-        Init();
-    }
-    if (receiver_ != nullptr) {
-        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
+    if (auto receiver = GetOrCreateVsyncReceiver()) {
+        receiver->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
-}
-}
+
+} // namespace Rosen
+} // namespace OHOS

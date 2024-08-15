@@ -33,8 +33,10 @@ public:
     virtual sptr<Window> CreateWindow(sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context,
         const sptr<IRemoteObject>& iSession, const std::string& identityToken = "");
     virtual std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
+
 protected:
     StaticCall() = default;
+    
 private:
     static inline SingletonDelegator<StaticCall> delegator_;
 };

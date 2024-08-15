@@ -39,8 +39,6 @@ public:
     void VsyncStopFrameTrace() override;
 
 private:
-    bool judgeFrameTrace_ = false;
-    bool accessFrameTrace_ = false;
     struct TraceHandle* handleUI_ = nullptr;
     std::string intervalName_ = "ui";
 

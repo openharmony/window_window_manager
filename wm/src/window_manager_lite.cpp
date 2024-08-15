@@ -689,7 +689,6 @@ WMError WindowManagerLite::RegisterWindowStyleChangedListener(const sptr<IWindow
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-        delete(pImpl_->windowStyleListenerAgent_);
         pImpl_->windowStyleListenerAgent_ = nullptr;
         auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
         if (iter != pImpl_->windowStyleListeners_.end()) {
@@ -721,7 +720,6 @@ WMError WindowManagerLite::UnregisterWindowStyleChangedListener(const sptr<IWind
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
         if (ret == WMError::WM_OK) {
             std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-            delete(pImpl_->windowStyleListenerAgent_);
             pImpl_->windowStyleListenerAgent_ = nullptr;
         }
     }

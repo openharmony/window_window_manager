@@ -45,6 +45,7 @@ public:
     static void SetAnimationConfig(AnimationConfig config);
     static bool transAnimateEnable_;
     static std::string uiType_;
+    
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
     static WMError SetStartingWindowAnimation(wptr<WindowNode> weak);

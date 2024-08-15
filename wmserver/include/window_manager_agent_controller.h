@@ -39,6 +39,7 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
+    
 private:
     WindowManagerAgentController() {}
     virtual ~WindowManagerAgentController() = default;
