@@ -96,6 +96,7 @@ public:
     void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
@@ -235,6 +236,13 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual WMError EnableDrag(bool enableDrag) override;
+    WMError SetContinueState(int32_t continueState) override;
+
+    /*
+     * UIExtension
+     */
+    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
 
 protected:
     WMError Connect();
@@ -274,6 +282,7 @@ protected:
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
+    WindowStatus GetWindowStatusInner(WindowMode mode);
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
@@ -315,6 +324,11 @@ protected:
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
+
+    /*
+     * UIExtension
+     */
+    wptr<Window> parentExtensionWindow_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -371,10 +385,12 @@ private:
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
+    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     bool IsNotifyInteractiveDuplicative(bool interactive);

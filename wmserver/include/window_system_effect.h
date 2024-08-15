@@ -57,6 +57,7 @@ public:
     static WMError SetWindowEffect(const sptr<WindowNode>& node, bool needCheckAnimation = true);
     static WMError SetWindowShadow(const sptr<WindowNode>& node);
     static WMError SetCornerRadius(const sptr<WindowNode>& node, bool needCheckAnimation = true);
+    
 private:
     static float ConvertRadiusToSigma(float radius)
     {

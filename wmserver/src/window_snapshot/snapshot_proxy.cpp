@@ -22,10 +22,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotProxy"};
 }
 
-int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot)
+int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject>& token, AAFwk::Snapshot& snapshot)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -41,7 +41,12 @@ int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snap
         return static_cast<int32_t>(WMError::WM_ERROR_IPC_FAILED);
     }
 
-    if (Remote()->SendRequest(TRANS_ID_GET_SNAPSHOT, data, reply, option) != ERR_NONE) {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return static_cast<int32_t>(WMError::WM_ERROR_IPC_FAILED);
+    }
+    if (remote->SendRequest(TRANS_ID_GET_SNAPSHOT, data, reply, option) != ERR_NONE) {
         return static_cast<int32_t>(WMError::WM_ERROR_IPC_FAILED);
     }
 

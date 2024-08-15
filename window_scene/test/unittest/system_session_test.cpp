@@ -18,6 +18,7 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
+#include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "session/host/include/session.h"
 #include <ui/rs_surface_node.h>
@@ -31,6 +32,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+constexpr int WAIT_ASYNC_US = 1000000;
 class SystemSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -42,6 +44,8 @@ public:
     sptr<SystemSession> systemSession_;
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    sptr<SystemSession> GetSystemSession(const std::string& name);
+    sptr<SceneSession> GetSceneSession(const std::string& name);
 };
 
 void SystemSessionTest::SetUpTestCase()
@@ -75,89 +79,27 @@ RSSurfaceNode::SharedPtr SystemSessionTest::CreateRSSurfaceNode()
     return surfaceNode;
 }
 
+sptr<SystemSession> SystemSessionTest::GetSystemSession(const std::string& name)
+{
+    SessionInfo info;
+    info.abilityName_ = name;
+    info.moduleName_ = name;
+    info.bundleName_ = name;
+    auto sysSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+    return sysSession;
+}
+
+sptr<SceneSession> SystemSessionTest::GetSceneSession(const std::string& name)
+{
+    SessionInfo info;
+    info.abilityName_ = name;
+    info.moduleName_ = name;
+    info.bundleName_ = name;
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    return sceneSession;
+}
+
 namespace {
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-
-    ASSERT_TRUE((systemSession_ != nullptr));
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show02, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE((property != nullptr));
-    property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
-    ASSERT_TRUE((systemSession_ != nullptr));
-    systemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Show
- * @tc.desc: test function : Show
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Show03, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE((property != nullptr));
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_TRUE((systemSession_ != nullptr));
-    systemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
-}
-
-/**
- * @tc.name: Reconnect01
- * @tc.desc: check func Reconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Reconnect01, Function | SmallTest | Level1)
-{
-    auto surfaceNode = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(nullptr, mockSessionStage);
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(nullptr, testWindowEventChannel);
-
-    auto result = systemSession_->Reconnect(nullptr, nullptr, nullptr, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(nullptr, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-
-    property->windowState_ = WindowState::STATE_SHOWN;
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    property->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
 
 /**
  * @tc.name: TransferKeyEvent01
@@ -341,33 +283,6 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Hide
- * @tc.desc: test function : Hide
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Hide, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(systemSession_ != nullptr);
-
-    auto ret = systemSession_->Hide();
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: Disconnect
- * @tc.desc: test function : Disconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, Disconnect, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(systemSession_ != nullptr);
-
-    bool isFromClient = true;
-    auto ret = systemSession_->Disconnect(isFromClient);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
  * @tc.name: ProcessPointDownSession
  * @tc.desc: test function : ProcessPointDownSession
  * @tc.type: FUNC
@@ -469,6 +384,460 @@ HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | Sma
     systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto ret = systemSession_->SetDialogSessionBackGestureEnabled(true);
     ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateCameraWindowStatus01
+ * @tc.desc: test function : UpdateCameraWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, Function | SmallTest | Level1)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCallback, nullptr);
+    bool result = false;
+
+    systemSession_->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, false);
+
+    systemSession_->specificCallback_ = specificCallback;
+    systemSession_->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, false);
+
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    systemSession_->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, false);
+
+    systemSession_->specificCallback_->onCameraFloatSessionChange_ =
+        [&result] (uint32_t accessTokenId, bool isShowing) {
+            result = isShowing;
+        };
+    systemSession_->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: UpdateCameraWindowStatus02
+ * @tc.desc: test function : UpdateCameraWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("UpdateCameraWindowStatus02");
+    ASSERT_NE(sysSession, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCallback, nullptr);
+    bool result = false;
+    sysSession->specificCallback_ = specificCallback;
+    
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    sysSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sysSession->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, false);
+
+    sysSession->specificCallback_->onCameraSessionChange_ =
+        [&result](uint32_t accessTokenId, bool isShowing) {
+            result = isShowing;
+        };
+
+    result = false;
+    sysSession->pipTemplateInfo_.pipTemplateType =
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
+    sysSession->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, true);
+
+    result = false;
+    sysSession->pipTemplateInfo_.pipTemplateType =
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
+    sysSession->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, true);
+
+    result = false;
+    sysSession->pipTemplateInfo_.pipTemplateType =
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE);
+    sysSession->UpdateCameraWindowStatus(true);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: Show01
+ * @tc.desc: test function : Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
+{
+    // for CheckPermissionWithPropertyAnimation;
+    auto windowProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowProperty, nullptr);
+    windowProperty->animationFlag_ = static_cast<uint32_t>(WindowAnimation::CUSTOM);
+
+    // for TOAST or FLOAT permission
+    systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    systemSession_->Show(windowProperty);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(systemSession_->property_->animationFlag_, static_cast<uint32_t>(WindowAnimation::CUSTOM));
+}
+
+/**
+ * @tc.name: Hide01
+ * @tc.desc: test function : Hide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, Hide01, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("Hide01");
+    ASSERT_NE(sysSession, nullptr);
+
+    // for CheckPermissionWithPropertyAnimation;
+    auto windowProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowProperty, nullptr);
+    windowProperty->animationFlag_ = static_cast<uint32_t>(WindowAnimation::CUSTOM);
+
+    sysSession->property_ = windowProperty;
+    // for TOAST or FLOAT permission
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+
+    // for IsSessionValid
+    sysSession->sessionInfo_.isSystem_ = false;
+    sysSession->state_ = SessionState::STATE_CONNECT;
+    sysSession->isActive_ = true;
+
+    auto ret = sysSession->Hide();
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    windowProperty->animationFlag_ = static_cast<uint32_t>(WindowAnimation::DEFAULT);
+    ret = sysSession->Hide();
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    ret = sysSession->Hide();
+    sysSession->property_ = nullptr;
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessPointDownSession01
+ * @tc.desc: test function : ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("ProcessPointDownSession01");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    auto parentSesssion = GetSceneSession("parentSession");
+    ASSERT_NE(parentSesssion, nullptr);
+    sysSession->parentSession_ = parentSesssion;
+
+    parentSesssion->dialogVec_.push_back(sysSession);
+    auto ret = sysSession->ProcessPointDownSession(0, 0);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    // for IsTopDialog true
+    auto topDialog = GetSystemSession("TopDialogSession");
+    ASSERT_NE(topDialog, nullptr);
+    topDialog->persistentId_ = 2;
+    topDialog->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    topDialog->state_ = SessionState::STATE_ACTIVE;
+    parentSesssion->dialogVec_.push_back(topDialog);
+
+    ret = sysSession->ProcessPointDownSession(0, 0);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessPointDownSession02
+ * @tc.desc: test function : ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("ProcessPointDownSession02");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    sysSession->property_->raiseEnabled_ = false;
+    auto ret = sysSession->ProcessPointDownSession(0, 0);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sysSession->property_->raiseEnabled_ = true;
+    ret = sysSession->ProcessPointDownSession(0, 0);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TransferKeyEvent04
+ * @tc.desc: test function : TransferKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("TransferKeyEvent04");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+
+    auto ret = sysSession->TransferKeyEvent(nullptr);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransferKeyEvent05
+ * @tc.desc: test function : TransferKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, TransferKeyEvent05, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+
+    auto sysSession = GetSystemSession("TransferKeyEvent05");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    auto ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    auto parentSesssion = GetSceneSession("parentSession");
+    ASSERT_NE(parentSesssion, nullptr);
+    sysSession->parentSession_ = parentSesssion;
+
+    // for CheckKeyEventDispatch return true;
+    parentSesssion->state_ = SessionState::STATE_FOREGROUND;
+    ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_HOME);
+    parentSesssion->dialogVec_.push_back(sysSession);
+    ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    auto topDialog = GetSystemSession("TopDialogSession");
+    ASSERT_NE(topDialog, nullptr);
+    topDialog->persistentId_ = 2;
+    topDialog->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    topDialog->state_ = SessionState::STATE_ACTIVE;
+    parentSesssion->dialogVec_.push_back(topDialog);
+    ret = sysSession->TransferKeyEvent(keyEvent);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: ProcessBackEvent02
+ * @tc.desc: test function : ProcessBackEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, ProcessBackEvent02, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("ProcessBackEvent02");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    sysSession->dialogSessionBackGestureEnabled_ = false;
+    auto ret = sysSession->ProcessBackEvent();
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sysSession->dialogSessionBackGestureEnabled_ = true;
+    ret = sysSession->ProcessBackEvent();
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = sysSession->ProcessBackEvent();
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: CheckKeyEventDispatch03
+ * @tc.desc: test function : CheckKeyEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, CheckKeyEventDispatch03, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    auto sysSession = GetSystemSession("CheckKeyEventDispatch03");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+    sysSession->isRSVisible_ = false;
+
+    auto ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    sysSession->isRSVisible_ = true;
+    sysSession->winRect_.width_ = 0;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    sysSession->isRSVisible_ = true;
+    sysSession->winRect_.width_ = 1;
+    sysSession->winRect_.height_ = 0;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    sysSession->isRSVisible_ = true;
+    sysSession->winRect_.width_ = 1;
+    sysSession->winRect_.height_ = 1;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckKeyEventDispatch04
+ * @tc.desc: test function : CheckKeyEventDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, CheckKeyEventDispatch04, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    auto sysSession = GetSystemSession("CheckKeyEventDispatch04");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->isRSVisible_ = true;
+    sysSession->winRect_.width_ = 1;
+    sysSession->winRect_.height_ = 1;
+    sysSession->state_ = SessionState::STATE_DISCONNECT;
+
+    auto parentSesssion = GetSceneSession("parentSession");
+    ASSERT_NE(parentSesssion, nullptr);
+    sysSession->parentSession_ = parentSesssion;
+
+    parentSesssion->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    parentSesssion->state_ = SessionState::STATE_ACTIVE;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    parentSesssion->state_ = SessionState::STATE_DISCONNECT;
+    sysSession->state_ = SessionState::STATE_FOREGROUND;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+
+    parentSesssion->state_ = SessionState::STATE_DISCONNECT;
+    sysSession->state_ = SessionState::STATE_DISCONNECT;
+    ret = sysSession->CheckKeyEventDispatch(keyEvent);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect02
+ * @tc.desc: test function : NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("NotifyClientToUpdateRect02");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    //for NotifyClientToUpdateRectTask
+    sysSession->isKeyboardPanelEnabled_ = true;
+
+    sysSession->dirtyFlags_ = 0;
+    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+    sysSession->NotifyClientToUpdateRect(nullptr);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+
+    sysSession->reason_ = SizeChangeReason::DRAG;
+    sysSession->NotifyClientToUpdateRect(nullptr);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(sysSession->reason_, SizeChangeReason::DRAG);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect03
+ * @tc.desc: test function : NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("NotifyClientToUpdateRect03");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+
+    sysSession->isKeyboardPanelEnabled_ = true;
+    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCallback, nullptr);
+    sysSession->specificCallback_ = specificCallback;
+    sysSession->NotifyClientToUpdateRect(nullptr);
+    usleep(WAIT_ASYNC_US);
+    EXPECT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+
+    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+    sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
+    sysSession->NotifyClientToUpdateRect(nullptr);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+}
+
+/**
+ * @tc.name: IsVisibleForeground01
+ * @tc.desc: test function : IsVisibleForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+{
+    auto sysSession = GetSystemSession("IsVisibleForeground01");
+    ASSERT_NE(sysSession, nullptr);
+    sysSession->persistentId_ = 1;
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sysSession->state_ = SessionState::STATE_ACTIVE;
+    sysSession->isVisible_ = false;
+
+    auto ret = sysSession->IsVisibleForeground();
+    ASSERT_EQ(ret, false);
+
+    sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = sysSession->IsVisibleForeground();
+    ASSERT_EQ(ret, false);
+
+    auto parentSesssion = GetSceneSession("parentSession");
+    ASSERT_NE(parentSesssion, nullptr);
+    sysSession->parentSession_ = parentSesssion;
+    parentSesssion->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = sysSession->IsVisibleForeground();
+    ASSERT_EQ(ret, false);
+
+    parentSesssion->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = sysSession->IsVisibleForeground();
+    ASSERT_EQ(ret, false);
 }
 
 } // namespace

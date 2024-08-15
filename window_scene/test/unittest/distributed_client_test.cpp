@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 
 #include "ability_manager_errors.h"
@@ -129,7 +130,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos03, Function | SmallTest | Level2
 HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo start.";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     EXPECT_EQ(distributedClient_->GetRemoteMissionSnapshotInfo("", 0, missionSnapshot), ERR_NULL_OBJECT);
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo end.";
 }
@@ -144,7 +145,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo02, Function | Small
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo02 start.";
     std::string deviceID = "123456789";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     EXPECT_NE(distributedClient_->GetRemoteMissionSnapshotInfo(deviceID, 0, missionSnapshot), ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();
@@ -161,7 +162,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo03, Function | Small
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo03 start.";
     std::string deviceID = "123456789";
-    std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshot;
+    AAFwk::MissionSnapshot missionSnapshot;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     EXPECT_NE(distributedClient_->GetRemoteMissionSnapshotInfo(deviceID, 0, missionSnapshot), ERR_NONE);
     MockMessageParcel::ClearAllErrorFlag();
@@ -199,6 +200,42 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | 
     EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState end.";
+}
+
+/**
+ * @tc.name: SetMissionContinueState02
+ * @tc.desc: SetMissionContinueState test
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(DistributedClientTest, SetMissionContinueState02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 start.";
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 end.";
+}
+
+/**
+ * @tc.name: SetMissionContinueState03
+ * @tc.desc: SetMissionContinueState test
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(DistributedClientTest, SetMissionContinueState03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 start.";
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 end.";
 }
 }
 }

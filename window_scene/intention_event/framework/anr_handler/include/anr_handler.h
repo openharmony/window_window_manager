@@ -33,9 +33,10 @@ class ANRHandler {
 public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
 
-    void SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage);
+    void SetSessionStage(int32_t eventId, const wptr<ISessionStage>& sessionStage);
     void HandleEventConsumed(int32_t eventId, int64_t actionTime);
     void OnWindowDestroyed(int32_t persistentId);
+
 private:
     using Task = std::function<void()>;
     bool PostTask(Task &&task, const std::string& name = "ANRHandlerTask", int64_t delayTime = 0);
@@ -46,6 +47,7 @@ private:
     int32_t GetPersistentIdOfEvent(int32_t eventId);
     bool IsOnEventHandler(int32_t persistentId);
     void UpdateLatestEventId(int32_t eventId);
+    
 private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
     struct ANRHandlerState {

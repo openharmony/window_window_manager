@@ -19,6 +19,8 @@
 #include "window_extension_stub_impl.h"
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
+#include "iremote_object_mocker.h"
+#include "window_extension_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +35,7 @@ public:
     void TearDown() override;
     sptr<WindowExtensionStub> mockWindowExtensionStub_;
     sptr<WindowExtensionProxy> windowExtensionProxy_;
+    wptr<Window> window_ = nullptr;
 };
 
 void WindowExtensionStubImplTest::SetUpTestCase()
@@ -67,9 +70,13 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     auto res = windowExtensionStubImpl.CreateWindow(rect, parentWindowId, context, iSession);
     ASSERT_EQ(nullptr, res);
+
+    iSession = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iSession);
     option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     res = windowExtensionStubImpl.CreateWindow(rect, parentWindowId, context, iSession);
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), res);
+    ASSERT_EQ(nullptr, res);
 }
 
 /**
@@ -79,10 +86,27 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
  */
 HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 {
-    Rect rect;
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
+    Rect rect = { 150, 150, 400, 600 };
     windowExtensionStubImpl.SetBounds(rect);
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowRect(rect);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetWindowRect(rect);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.SetBounds(rect);
+
+    Rect rect2 = { 100, 100, 200, 300 };
+    windowExtensionStubImpl.SetBounds(rect2);
+
+    rect2 = { 100, 150, 200, 600 };
+    windowExtensionStubImpl.SetBounds(rect2);
+
+    rect2 = { 150, 100, 400, 300 };
+    windowExtensionStubImpl.SetBounds(rect2);
 }
 
 /**
@@ -93,9 +117,14 @@ HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.Hide();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.Hide();
 }
 
 /**
@@ -106,9 +135,14 @@ HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.Show();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.Show();
 }
 
 /**
@@ -119,9 +153,14 @@ HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
 HWTEST_F(WindowExtensionStubImplTest, RequestFocus, Function | SmallTest | Level2)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
-    auto window = windowExtensionStubImpl.window_.promote();
     windowExtensionStubImpl.RequestFocus();
-    ASSERT_EQ(windowExtensionStubImpl.window_.promote(), windowExtensionStubImpl.GetWindow());
+
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    windowExtensionStubImpl.window_ = window;
+    windowExtensionStubImpl.RequestFocus();
 }
 
 /**

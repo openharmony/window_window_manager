@@ -125,7 +125,7 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, avoidArea, type, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_, avoidArea, type, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]this listener or eng is nullptr");

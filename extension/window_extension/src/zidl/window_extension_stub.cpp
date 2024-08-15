@@ -19,7 +19,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStub"};
 }
 
 int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -27,7 +27,7 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     WLOGFD("code is %{public}u", code);
     switch (code) {
@@ -63,7 +63,7 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

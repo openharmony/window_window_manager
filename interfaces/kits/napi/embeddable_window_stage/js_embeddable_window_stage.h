@@ -23,6 +23,7 @@
 #include "js_extension_window_register_manager.h"
 #include "session_info.h"
 #include "window.h"
+
 namespace OHOS {
 namespace Rosen {
 class JsEmbeddableWindowStage {

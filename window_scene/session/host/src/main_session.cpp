@@ -22,7 +22,6 @@
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 namespace {

@@ -310,7 +310,6 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
-    return;
 }
 
 napi_value JsExtensionWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info)
@@ -887,7 +886,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             auto extWindow = weak->GetWindow();
             if (extWindow == nullptr) {
                 task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensio's window is null"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
             }
             auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
             if (window == nullptr) {
@@ -895,6 +894,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
                 return;
             }
+            window->SetParentExtensionWindow(extWindow);
             task.Resolve(env, CreateJsWindowObject(env, window));
             TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Create sub window %{public}s end", windowName.c_str());
         };

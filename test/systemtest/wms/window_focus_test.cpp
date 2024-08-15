@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowFocusTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowFocusTest"};
 }
 
 using Utils = WindowTestUtils;
@@ -155,7 +155,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentId = window3->GetWindowId();
     const sptr<Window>& subWindow = Utils::CreateTestWindow(subAppInfo_);
-
+    ASSERT_NE(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, window3->Show());
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);

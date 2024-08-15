@@ -32,10 +32,11 @@ public:
     void SubscriberEvent();
     void UnSubscriberEvent();
     void OnReceiveEvent(const EventFwk::CommonEventData& data);
+
 private:
     class EventSubscriber : public EventFwk::CommonEventSubscriber {
     public:
-        EventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo,
+        EventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscriberInfo,
             const std::shared_ptr<WindowCommonEvent>& eventHandler)
             : EventFwk::CommonEventSubscriber(subscriberInfo), eventHandler_(eventHandler) {};
         ~EventSubscriber() = default;
@@ -43,6 +44,7 @@ private:
         {
             eventHandler_->OnReceiveEvent(data);
         }
+        
     private:
         std::shared_ptr<WindowCommonEvent> eventHandler_;
     };

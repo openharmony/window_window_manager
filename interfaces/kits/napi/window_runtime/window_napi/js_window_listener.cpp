@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListener"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListener"};
 }
 
 JsWindowListener::~JsWindowListener()
@@ -67,7 +67,8 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
+    if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
+        reason != WindowSizeChangeReason::DRAG_END) {
         WLOGFD("[NAPI]no need to change size");
         return;
     }
@@ -103,8 +104,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnSizeChange", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
-    currentWidth_ = rect.width_;
-    currentHeight_ = rect.height_;
+    currRect_ = rect;
 }
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
@@ -118,7 +118,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
+            NapiAsyncTask& task, int32_t status) {
             
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -152,7 +152,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
+            NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -270,7 +270,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, info, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
+            NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -291,7 +291,7 @@ void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -311,7 +311,7 @@ void JsWindowListener::OnScreenshot()
 {
     WLOGI("CALLED");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = wptr<JsWindowListener>(this)] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -330,7 +330,7 @@ void JsWindowListener::OnScreenshot()
 void JsWindowListener::OnDialogTargetTouch() const
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -349,7 +349,7 @@ void JsWindowListener::OnDialogTargetTouch() const
 void JsWindowListener::OnDialogDeathRecipient() const
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -368,7 +368,7 @@ void JsWindowListener::OnDialogDeathRecipient() const
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, enable, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_, enable, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -388,7 +388,7 @@ void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
 void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, showWaterMark, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_, showWaterMark, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -418,7 +418,7 @@ int64_t JsWindowListener::GetTimeout() const
 void JsWindowListener::OnWindowNoInteractionCallback()
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -440,7 +440,7 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, windowstatus, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
+            NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -463,7 +463,7 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("This listener or eng is nullptr");
@@ -485,7 +485,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
     WLOGFD("[NAPI]OnWindowTitleButtonRectChanged");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, titleButtonRect, eng = env_] (napi_env env,
-            NapiAsyncTask &task, int32_t status) {
+            NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -508,7 +508,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason == WindowSizeChangeReason::UNDEFINED) {
+    if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
         return;
     }
@@ -553,8 +553,7 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
     eventHandler_->PostTask(jsCallback, "wms:JsWindowRectListener::OnRectChange", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    currentWidth_ = rect.width_;
-    currentHeight_ = rect.height_;
+    currRect_ = rect;
     currentReason_ = rectChangReason;
 }
 

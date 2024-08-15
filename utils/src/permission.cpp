@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
 }
 
 bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCalling)
@@ -40,11 +40,11 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCallin
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId: %{private}u, flag: %{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("not system service calling, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "not system service calling, tokenId: %{private}u, flag: %{public}u", tokenId, flag);
     }
     return false;
 }
