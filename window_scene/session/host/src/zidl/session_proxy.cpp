@@ -668,6 +668,31 @@ WSError SessionProxy::RaiseToAppTop()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::NotifyFrameLayoutFinishFromApp()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::RaiseAboveTarget(int32_t subWindowId)
 {
     MessageParcel data;

@@ -80,6 +80,7 @@ using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t pers
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
+using NotifyFrameLayoutFinishFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -359,6 +360,7 @@ public:
     bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
+    void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -541,6 +543,7 @@ protected:
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
+    NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
