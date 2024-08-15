@@ -3085,7 +3085,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         TLOGI(WmsLogTag::WMS_MULTI_USER,
             "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
             isUserActive, currentUserId_);
-        isUserBackground_ = !isUserActive;
+        isUserBackground_.store(!isUserActive);
         SceneInputManager::GetInstance().SetUserBackground(isUserBackground_);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
@@ -8917,7 +8917,7 @@ void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int3
 
 void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
-    if (isUserBackground_) {
+    if (isUserBackground_.load()) {
         TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
         return;
     }
@@ -9596,7 +9596,7 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
 
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
-    if (isUserBackground_) {
+    if (isUserBackground_.load()) {
         TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to notify accessibility info");
         return;
     }
