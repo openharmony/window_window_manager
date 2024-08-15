@@ -222,26 +222,26 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [this, env, task = napiAsyncTask.get(), pipOption]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
             return;
         }
         sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
         auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
         if (context == nullptr) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
             return;
         }
         sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
         if (mainWindow == nullptr) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
             return;
         }
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
-        task.Resolve(env, CreateJsPipControllerObject(env, pipController));
+        task->Resolve(env, CreateJsPipControllerObject(env, pipController));
         delete task;
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
