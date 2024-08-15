@@ -462,6 +462,21 @@ public:
 };
 
 /**
+ * @class ISwitchFreeMultiWindowListener
+ *
+ * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
+ */
+class ISwitchFreeMultiWindowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free multi window state changed.
+     *
+     * @param enable Whether free multi window state enabled.
+     */
+    virtual void OnSwitchFreeMultiWindow(bool enable) {}
+};
+
+/**
  * @class IKeyboardPanelInfoChangeListener
  *
  * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
@@ -2000,6 +2015,24 @@ public:
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ 
+    /**
+     * @brief Unregister switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set Shaped Window Mask.
      *
      * @param windowMask Mask of the shaped window.
@@ -2184,6 +2217,13 @@ public:
      * @param errorCode error code when UIExtension timeout
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
+    /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 };
 }
 }

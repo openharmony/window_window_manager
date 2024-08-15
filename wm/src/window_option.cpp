@@ -269,6 +269,16 @@ bool WindowOption::GetOnlySupportSceneBoard() const
     return onlySupportSceneBoard_;
 }
 
+void WindowOption::SetRealParentId(int32_t realParentId)
+{
+    realParentId_ = realParentId;
+}
+
+int32_t WindowOption::GetRealParentId() const
+{
+    return realParentId_;
+}
+
 void WindowOption::SetExtensionTag(bool isExtensionTag)
 {
     isExtensionTag_ = isExtensionTag;
