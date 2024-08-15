@@ -376,7 +376,7 @@ public:
     bool IsPcOrPadEnableActivation() const;
 
     /*
-     * User Switch
+     * Multi User
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
@@ -558,7 +558,7 @@ private:
     // Session recover
     bool isRecovered_ = false;
 
-    // User switch
+    // Multi User
     bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen
