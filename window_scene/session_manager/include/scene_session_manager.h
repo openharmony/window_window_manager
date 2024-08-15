@@ -636,7 +636,7 @@ private:
 
     // User switch
     int32_t currentUserId_;
-    std::atomic<bool> isUserBackground_ = false;
+    std::atomic<bool> isUserBackground_ { false };
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.

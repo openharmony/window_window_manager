@@ -65,7 +65,7 @@ private:
     int32_t lastFocusId_ { -1 };
     int32_t currentUserId_ { -1 };
     int32_t focusedSessionId_ { -1 };
-    std::atomic<bool> isUserBackground_ = false;
+    isUserBackground_ = false;
 };
 }//Rosen
 }//OHOS
