@@ -9909,13 +9909,31 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
 WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density,
     bool enable)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateDisplayHookInfo width: %{public}u, height: %{public}u, "
-        "density: %{public}f, bool: %{public}d", width, height, density, enable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, enable: %{public}d",
+        width, height, density, enable);
 
     DMHookInfo dmHookInfo;
     dmHookInfo.width_ = width;
     dmHookInfo.height_ = height;
     dmHookInfo.density_ = density;
+    dmHookInfo.rotation_ = 0;
+    dmHookInfo.enableHookRotation_ = false;
+    ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, rotation: %{public}u, "
+        "enableHookRotation: %{public}d, enable: %{public}d", hookInfo.width_, hookInfo.height_, hookInfo.density_,
+        hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
+
+    DMHookInfo dmHookInfo;
+    dmHookInfo.width_ = hookInfo.width_;
+    dmHookInfo.height_ = hookInfo.height_;
+    dmHookInfo.density_ = hookInfo.density_;
+    dmHookInfo.rotation_ = hookInfo.rotation_;
+    dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }

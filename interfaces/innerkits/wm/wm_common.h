@@ -97,6 +97,19 @@ enum class WindowType : uint32_t {
 };
 
 /**
+ * @struct HookInfo.
+ *
+ * @brief hook diaplayinfo deepending on the window size.
+ */
+struct HookInfo {
+    uint32_t width_;
+    uint32_t height_;
+    float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
+};
+
+/**
  * @brief Enumerates mode of window.
  */
 enum class WindowMode : uint32_t {

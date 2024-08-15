@@ -120,7 +120,7 @@ public:
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
-    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override;
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
