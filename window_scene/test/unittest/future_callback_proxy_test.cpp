@@ -57,7 +57,7 @@ HWTEST_F(FutureCallbackProxyTest, OnUpdateSessionRect, Function | SmallTest | Le
 {
     GTEST_LOG_(INFO) << "FutureCallbackProxyTest: OnUpdateSessionRect start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    FutureCallbackProxy* fProxy = new(std::nothrow) FutureCallbackProxy(iRemoteObjectMocker);
+    sptr<FutureCallbackProxy> fProxy = sptr<FutureCallbackProxy>::MakeSptr(iRemoteObjectMocker);
     WSRect rect{.posX_ = 1, .posY_ = 1, .width_ = 100, .height_ = 100};
     WSError res = fProxy->OnUpdateSessionRect(rect);
     ASSERT_EQ(res, WSError::WS_OK);

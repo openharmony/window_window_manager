@@ -28,10 +28,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneI
 const std::string SCENE_INPUT_MANAGER_THREAD = "SceneInputManager";
 const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
 
-constexpr float DIRECTION0 = 0;
-constexpr float DIRECTION90 = 90;
-constexpr float DIRECTION180 = 180;
-constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
@@ -457,7 +453,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
-    std::vector<MMI::WindowInfo>& windowInfoList)
+    std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
         return;
@@ -509,7 +505,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -518,7 +514,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;
         }
-        UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+        UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
     };
     if (eventHandler_) {
         eventHandler_->PostTask(task);

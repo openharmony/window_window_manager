@@ -270,8 +270,9 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     DmsXcollie dmsXcollie("DMS:RegisterDisplayManagerAgent", XCOLLIE_TIMEOUT_10S);
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
+        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
+        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -295,8 +296,9 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
+        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
+        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -670,11 +672,27 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
-        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f",
-            info.width_, info.height_, info.density_);
+        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
+            "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
+            "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
+            info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
+            displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
         displayInfo->SetVirtualPixelRatio(info.density_);
+        if (info.enableHookRotation_) {
+            sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
+            if (screenSession) {
+                Rotation targetRotation = screenSession->ConvertIntToRotation(static_cast<int32_t>(info.rotation_));
+                displayInfo->SetRotation(targetRotation);
+                DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
+                    FoldDisplayMode::UNKNOWN);
+                TLOGI(WmsLogTag::DMS, "targetRotation: %{public}u, targetOrientation: %{public}u",
+                    targetRotation, displayOrientation);
+                displayInfo->SetDisplayOrientation(displayOrientation);
+            }
+        }
     }
     return displayInfo;
 }
@@ -691,7 +709,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        // 在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
         displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
@@ -831,7 +849,7 @@ bool ScreenSessionManager::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 }
 
-void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo permission denied!");
@@ -2386,8 +2404,10 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
-    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
-        !SessionPermission::IsShellCall()) {
+    if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
+        return ERROR_ID_NOT_SYSTEM_APP;
+    }
+    if (Permission::IsSystemCalling() && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) {
         TLOGE(WmsLogTag::DMS, "create virtual screen permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -3589,6 +3609,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");
 
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        return nullptr;
+    }
+
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGI(WmsLogTag::DMS, "GetDisplaySnapshot was disabled by edm!");
         return nullptr;
@@ -4010,6 +4035,10 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return DMError::DM_ERROR_NULLPTR;
@@ -4165,6 +4194,18 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+}
+
+DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    SetFoldDisplayMode(displayMode);
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
@@ -4360,6 +4401,18 @@ void ScreenSessionManager::SetFoldStatusLocked(bool locked)
         return;
     }
     foldScreenController_->LockDisplayStatus(locked);
+}
+
+DMError ScreenSessionManager::SetFoldStatusLockedFromJs(bool locked)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    SetFoldStatusLocked(locked);
+    return DMError::DM_OK;
 }
 
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()

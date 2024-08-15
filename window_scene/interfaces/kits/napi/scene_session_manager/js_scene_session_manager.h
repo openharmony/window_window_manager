@@ -96,6 +96,7 @@ public:
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
+    static napi_value UpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     static napi_value SwitchFreeMultiWindow(napi_env env, napi_callback_info info);
@@ -154,6 +155,7 @@ private:
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
+    napi_value OnUpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
