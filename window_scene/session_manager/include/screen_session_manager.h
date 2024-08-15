@@ -175,7 +175,7 @@ public:
     void NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
-    void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override;
+    void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId screenId);
