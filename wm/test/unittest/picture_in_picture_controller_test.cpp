@@ -757,7 +757,6 @@ HWTEST_F(PictureInPictureControllerTest, RegisterListener, Function | SmallTest 
     ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPLifecycle(listener1));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->UnregisterPiPLifecycle(nullptr));
     ASSERT_EQ(WMError::WM_OK, pipControl->UnregisterPiPLifecycle(listener));
->>>>>>> master
 }
 
 /**
