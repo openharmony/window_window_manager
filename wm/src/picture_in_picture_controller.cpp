@@ -80,8 +80,10 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
     int32_t clientUserId = GetUserIdByUid(getuid());
     TLOGI(WmsLogTag::WMS_PIP, "clientUserId = %{public}d", clientUserId);
     setting_url_proxy_ = SETTINGS_URL_PROXY_HEAD + std::to_string(clientUserId) + SETTINGS_URL_PROXY_TAIL;
-    mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr();
-    mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
+    if (mainWindow_ != nullptr) {
+        mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr();
+        mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
+    }
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbilityManager return nullptr");
