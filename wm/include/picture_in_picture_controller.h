@@ -98,6 +98,7 @@ public:
     napi_ref GetCustomNodeController();
     napi_ref GetTypeNode() const;
     void OnPictureInPictureStart();
+    bool IsTypeNodeEnabled() const;
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:
@@ -148,7 +149,7 @@ private:
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
-    void UpdateXComponentPositionAndSize();
+    void UpdateWinRectByComponent();
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
@@ -172,7 +173,6 @@ private:
     std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
-    bool useTypeNode_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

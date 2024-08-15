@@ -20,7 +20,6 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
-#include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
 #include <algorithm>
 
@@ -151,8 +150,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
     napi_ref nodeControllerRef = nullptr;
-    napi_value typeNode = nullptr;
-    napi_ref typeNodeRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
@@ -169,8 +166,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
-    napi_get_named_property(env, optionObject, "typeNode", &typeNode);
-    napi_create_reference(env, typeNode, 1, &typeNodeRef);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
@@ -186,7 +181,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
     option.SetNodeControllerRef(nodeControllerRef);
-    option.SetTypeNodeRef(typeNodeRef);
     return checkOptionParams(option);
 }
 
@@ -222,30 +216,11 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnCreatePipController(env, info) : nullptr;
 }
 
-napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
+napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "OnCreatePipController called");
-    std::lock_guard<std::mutex> lock(mutex_);
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        return NapiThrowInvalidParam(env, "Missing args when creating pipController");
-    }
-    napi_value config = argv[0];
-    if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "config is null");
-        return NapiThrowInvalidParam(env, "Failed to convert object to pipConfiguration or pipConfiguration is null");
-    }
-    PipOption pipOption;
-    if (GetPictureInPictureOptionFromJs(env, config, pipOption) == -1) {
-        std::string errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
-            " or controlGroup mismatch the corresponding pipTemplateType";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
-    }
-    napi_value callback = argc > 1 ? (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr) : nullptr;
-    NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get(), pipOption]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
@@ -267,11 +242,53 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task.Resolve(env, CreateJsPipControllerObject(env, pipController));
+        delete task;
     };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipWindowManager::OnCreatePipController", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
+}
+
+napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+    std::lock_guard<std::mutex> lock(mutex_);
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        return NapiThrowInvalidParam(env, "Missing args when creating pipController");
+    }
+    napi_value config = argv[0];
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "config is null");
+        return NapiThrowInvalidParam(env, "Failed to convert object to pipConfiguration or pipConfiguration is null");
+    }
+    PipOption pipOption;
+    if (GetPictureInPictureOptionFromJs(env, config, pipOption) == -1) {
+        std::string errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
+            " or controlGroup mismatch the corresponding pipTemplateType";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
+    }
+    if (argc > 1) {
+        napi_value typeNode = argv[1];
+        napi_ref typeNodeRef = nullptr;
+        if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
+            TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
+            pipOption.SetTypeNodeEnabled(true);
+            napi_create_reference(env, typeNode, 1, &typeNodeRef);
+            pipOption.SetTypeNodeRef(typeNodeRef);
+        } else {
+            pipOption.SetTypeNodeEnabled(false);
+            pipOption.SetTypeNodeRef(nullptr);
+        }
+    }
+    return NapiSendTask(env, pipOption);
 }
 
 napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)
