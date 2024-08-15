@@ -32,6 +32,7 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -80,6 +81,16 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
             break;
     }
     return contentInfoType;
+}
+
+bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+        wmReason == WindowSizeChangeReason::MAXIMIZE) {
+        return false;
+    }
+    return true;
 }
 }
 
@@ -188,11 +199,11 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    property_->SetLayoutCallback(layoutCallback);
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    property_->SetLayoutCallback(layoutCallback);
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
@@ -241,9 +252,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
         case WindowType::WINDOW_TYPE_UI_EXTENSION:
             TLOGI(WmsLogTag::WMS_LIFE, "uiExtensionUsage = %{public}u", property_->GetUIExtensionUsage());
             if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
-                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_NODE;
+                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_SECURE_NODE;
             } else {
-                rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+                rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
             break;
         default:
@@ -562,16 +573,6 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
-{
-    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
-        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
-        wmReason == WindowSizeChangeReason::MAXIMIZE) {
-        return false;
-    }
-    return true;
-}
-
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -593,7 +594,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
-    } else if (handler_ != nullptr && rsTransaction != nullptr && CheckIfNeedCommitRsTransaction(wmReason)) {
+    } else if (handler_ != nullptr) {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
@@ -609,7 +610,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             layoutCallback->OnUpdateSessionRect(rect);
         }
     }
-
     return WSError::WS_OK;
 }
 
@@ -659,13 +659,14 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
-        if (rsTransaction) {
+        bool ifNeedCommitRsTransaction = CheckIfNeedCommitRsTransaction(wmReason);
+        if (rsTransaction && ifNeedCommitRsTransaction) {
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
@@ -675,7 +676,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             window->lastSizeChangeReason_ = wmReason;
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        if (rsTransaction) {
+        if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
         window->postTaskDone_ = true;

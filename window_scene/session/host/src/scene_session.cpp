@@ -367,9 +367,14 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
-                session->IsFocused() && session->IsMovableWindowType() &&
-                session->moveDragController_->HasPointDown())) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d", session->GetPersistentId());
+                  session->IsFocused() && session->IsMovableWindowType() &&
+                  session->moveDragController_->HasPointDown() &&
+                  session->moveDragController_->GetMovable())) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
+                    "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, "
+                    "movable: %{public}d", session->GetPersistentId(), session->moveDragController_->GetStartDragFlag(),
+                    session->IsFocused(), session->IsMovableWindowType(), session->moveDragController_->HasPointDown(),
+                    session->moveDragController_->GetMovable());
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
@@ -3450,6 +3455,22 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
+void SceneSession::SetMovable(bool movable)
+{
+    auto task = [weakThis = wptr(this), movable] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        if (session->moveDragController_) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMovable: %{public}d", session->GetPersistentId(), movable);
+            session->moveDragController_->SetMovable(movable);
+        }
+    };
+    PostTask(task, "SetMovable");
+}
+
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
     return oriPosYBeforeRaisedByKeyboard_;
@@ -4296,5 +4317,38 @@ void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
 bool SceneSession::IsMinimizedByUserSwitch() const
 {
     return isMinimizedByUserSwitch_;
+}
+
+void SceneSession::UnregisterSessionChangeListeners()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("UnregisterSessionChangeListeners session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
+            session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
+            session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
+            session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
+            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
+            session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
+            session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
+            session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+            session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
+            session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+            session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
+            session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
+            session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
+            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
+        }
+        session->Session::UnregisterSessionChangeListeners();
+    };
+    PostTask(task, "UnregisterSessionChangeListeners");
 }
 } // namespace OHOS::Rosen

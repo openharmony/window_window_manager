@@ -1431,44 +1431,12 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window could not move, winId:%{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
+            GetWindowId(), GetMode());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
-    const auto& windowRect = GetRect();
-    const auto& requestRect = GetRequestRect();
-    if (WindowHelper::IsSubWindow(GetType())) {
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr && (mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-                                      mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
-            if (requestRect.posX_ == x && requestRect.posY_ == y) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same position in multiWindow will not update");
-                return WMError::WM_OK;
-            }
-        }
-    }
-    Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
-        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
-        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
-        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
-        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
-        newRect.width_, newRect.height_);
-
-    property_->SetRequestRect(newRect);
-    WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    auto ret = MoveTo(x, y);
     if (state_ == WindowState::STATE_SHOWN && property_) {
         sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
         if (layoutCallback) {
@@ -1631,45 +1599,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
-        property_->GetPersistentId(), width, height);
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId: %{public}u, mode:%{public}u",
+            GetWindowId(), GetMode());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
-    LimitWindowSize(width, height);
-    const auto& windowRect = GetRect();
-    const auto& requestRect = GetRequestRect();
-    if (WindowHelper::IsSubWindow(GetType())) {
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr && (mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-                                      mainWindow->GetMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
-            if (width == requestRect.width_ && height == requestRect.height_) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same size in multiWindow will not update, return");
-                return WMError::WM_OK;
-            }
-        }
-    }
-    Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
-        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
-        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
-        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
-        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
-        newRect.width_, newRect.height_);
-    property_->SetRequestRect(newRect);
-    WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    auto ret = Resize(width, height);
     if (state_ == WindowState::STATE_SHOWN && property_) {
         sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
         if (layoutCallback) {
