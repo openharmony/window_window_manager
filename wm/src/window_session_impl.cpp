@@ -3354,6 +3354,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
