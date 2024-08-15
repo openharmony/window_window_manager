@@ -52,7 +52,7 @@ export struct PiPContent {
 
   aboutToAppear(): void {
     this.nodeController = pip.getCustomUIController();
-    this.xComponent = pip.getTypeNode;
+    this.xComponent = pip.getTypeNode();
     if (this.xComponent === null || this.xComponent === undefined) {
       return;
     }
