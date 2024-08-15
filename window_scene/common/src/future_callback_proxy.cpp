@@ -33,17 +33,17 @@ WSError FutureCallbackProxy::OnUpdateSessionRect(const WSRect& rect)
     }
 
     if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
-        data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
+          data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write WindowRect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(FutureCallbackMessage::TRANS_ID_UPDATE_SESSION_RECT),
-        data, reply, option) != ERR_NONE) {
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(FutureCallbackMessage::TRANS_ID_UPDATE_SESSION_RECT),
+        data, reply, option);
+    if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 } // namespace Rosen

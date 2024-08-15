@@ -76,6 +76,11 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
+void MoveDragController::SetMovable(bool isMovable)
+{
+    isMovable_ = isMovable;
+}
+
 void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback)
 {
     pidChangeCallback_ = callback;
@@ -90,6 +95,11 @@ bool MoveDragController::GetStartMoveFlag() const
 bool MoveDragController::GetStartDragFlag() const
 {
     return isStartDrag_;
+}
+
+bool MoveDragController::GetMovable() const
+{
+    return isMovable_;
 }
 
 WSRect MoveDragController::GetTargetRect() const

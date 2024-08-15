@@ -1037,14 +1037,12 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
 HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
-    Parcel parcel = Parcel();
+    MessageParcel parcel;
     property->SetLayoutCallback(nullptr);
-    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+    property->SetLayoutCallback(layoutCallback);
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
 }
 
 /**
@@ -1055,16 +1053,23 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallT
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingFutureCallback, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
-    Parcel parcel = Parcel();
+    MessageParcel parcelFalse;
+    parcelFalse.WriteBool(false);
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    windowSessionProperty.UnmarshallingFutureCallback(parcelFalse, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
     ASSERT_NE(nullptr, layoutCallback);
-    parcel.WriteObject(layoutCallback->AsObject());
-    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    MessageParcel parcelTrue;
+    parcelTrue.WriteBool(true);
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrue, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
+    MessageParcel parcelTrueWithObject;
+    parcelTrueWithObject.WriteBool(true);
+    parcelTrueWithObject.WriteObject(layoutCallback->AsObject());
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrueWithObject, property);
     ASSERT_NE(nullptr, property->GetLayoutCallback());
 }
 } // namespace
