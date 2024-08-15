@@ -1350,6 +1350,58 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: HandleActionUpdatePrivacyMode1
+ * @tc.desc: HandleActionUpdatePrivacyMode1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdatePrivacyMode1";
+    info.bundleName_ = "HandleActionUpdatePrivacyMode1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_NE(session->property_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->property_->SetPrivacyMode(false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    auto res =
+        session->HandleActionUpdatePrivacyMode(property, session, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(true, session->property_->GetPrivacyMode());
+}
+
+/**
+ * @tc.name: HandleActionUpdatePrivacyMode2
+ * @tc.desc: HandleActionUpdatePrivacyMode2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode2, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdatePrivacyMode2";
+    info.bundleName_ = "HandleActionUpdatePrivacyMode2";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_NE(session->property_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->property_->SetPrivacyMode(true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    auto res =
+        session->HandleActionUpdatePrivacyMode(property, session, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(false, session->property_->GetPrivacyMode());
+}
+
 }
 }
 }

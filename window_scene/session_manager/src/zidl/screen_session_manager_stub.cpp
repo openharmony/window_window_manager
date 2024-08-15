@@ -808,6 +808,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.width_ = data.ReadUint32();
             hookInfo.height_ = data.ReadUint32();
             hookInfo.density_ = data.ReadFloat();
+            hookInfo.rotation_ = data.ReadUint32();
+            hookInfo.enableHookRotation_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
