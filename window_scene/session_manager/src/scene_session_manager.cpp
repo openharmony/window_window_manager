@@ -3091,6 +3091,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
+            NotifyAllAccessibilityInfo();
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
         }
@@ -9594,6 +9595,10 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
 
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
+    if (SceneInputManager::GetInstance().IsUserBackground()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to notify accessibility info");
+        return;
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::NotifyAllAccessibilityInfo");
     std::vector<sptr<SceneSession>> sceneSessionList;
     GetAllSceneSessionForAccessibility(sceneSessionList);
