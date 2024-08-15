@@ -440,11 +440,6 @@ void SceneInputManager::SetUserBackground(bool userBackground)
     isUserBackground_ = userBackground;
 }
 
-bool SceneInputManager::IsUserBackground()
-{
-    return isUserBackground_;
-}
-
 void SceneInputManager::SetCurrentUserId(int32_t userId)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "Current userId = %{public}d", userId);

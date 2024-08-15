@@ -39,7 +39,6 @@ public:
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
     void SetUserBackground(bool userBackground);
-    bool IsUserBackground();
     void SetCurrentUserId(int32_t userId);
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
 
