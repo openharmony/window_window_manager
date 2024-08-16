@@ -1829,16 +1829,16 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifySetUIContent, Function | SmallTes
 }
 
 /**
- * @tc.name: AddSetUIContentTimeoutListener
- * @tc.desc: AddSetUIContentTimeoutListener Test
+ * @tc.name: AddUIContentSettingTimeoutCheck
+ * @tc.desc: AddUIContentSettingTimeoutCheck Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, AddSetUIContentTimeoutListener, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, AddUIContentSettingTimeoutCheck, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
-    window_->AddSetUIContentTimeoutListener();
+    window_->AddUIContentSettingTimeoutCheck();
     window_->handler_ = nullptr;
-    window_->AddSetUIContentTimeoutListener();
+    window_->AddUIContentSettingTimeoutCheck();
 }
 
 /**

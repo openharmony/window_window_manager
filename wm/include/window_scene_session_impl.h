@@ -170,6 +170,8 @@ public:
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
+    void NotifySetUIContent() override;
+    void AddUIContentSettingTimeoutCheck();
 
 protected:
     void DestroySubWindow();
@@ -192,6 +194,7 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    std::atomic_bool setUIContentFlag_ { false };
 
 private:
     WMError DestroyInner(bool needNotifyServer);

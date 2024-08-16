@@ -110,7 +110,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
-    AddSetUIContentTimeoutListener();
+    AddUIContentSettingTimeoutCheck();
     return WMError::WM_OK;
 }
 
@@ -460,7 +460,7 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
-void WindowExtensionSessionImpl::AddSetUIContentTimeoutListener()
+void WindowExtensionSessionImpl::AddUIContentSettingTimeoutCheck()
 {
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "handler is nullptr");
