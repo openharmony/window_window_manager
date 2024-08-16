@@ -1945,7 +1945,6 @@ HWTEST_F(WindowSessionImplTest, SetUIContentFlag, Function | SmallTest | Level2)
 
     window->SetUIContentFlag();
     EXPECT_EQ(window->setUIContentFlag_.load(), true);
-
 }
 }
 } // namespace Rosen
