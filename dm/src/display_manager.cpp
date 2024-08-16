@@ -1497,7 +1497,7 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         displayModeListeners = displayModeListeners_;
     }
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
     NotifyDisplayChange(displayInfo);
     for (auto& listener : displayModeListeners) {
         listener->OnDisplayModeChanged(displayMode);
