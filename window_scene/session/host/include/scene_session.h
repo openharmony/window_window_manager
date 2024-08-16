@@ -165,6 +165,8 @@ public:
     virtual void OpenKeyboardSyncTransaction() {};
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, bool isRotating) {};
+    virtual void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
+        uint32_t screenHeight) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
