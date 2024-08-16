@@ -29,13 +29,13 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::map<Orientation, DisplayOrientation> WINDOW_TO_DISPLAY_ORIENTATION_MAP {
-        {Orientation::VERTICAL,            DisplayOrientation::PORTRAIT   },
-        {Orientation::HORIZONTAL,          DisplayOrientation::LANDSCAPE   },
-        {Orientation::REVERSE_VERTICAL,    DisplayOrientation::PORTRAIT_INVERTED   },
-        {Orientation::REVERSE_HORIZONTAL,  DisplayOrientation::LANDSCAPE_INVERTED   },
-    };
-    const bool FIX_ORIENTATION_ENABLE = system::GetBoolParameter("persist.window.fixoriention.enable", true);
+const std::map<Orientation, DisplayOrientation> WINDOW_TO_DISPLAY_ORIENTATION_MAP {
+    {Orientation::VERTICAL,            DisplayOrientation::PORTRAIT   },
+    {Orientation::HORIZONTAL,          DisplayOrientation::LANDSCAPE   },
+    {Orientation::REVERSE_VERTICAL,    DisplayOrientation::PORTRAIT_INVERTED   },
+    {Orientation::REVERSE_HORIZONTAL,  DisplayOrientation::LANDSCAPE_INVERTED   },
+};
+const bool FIX_ORIENTATION_ENABLE = system::GetBoolParameter("persist.window.fixoriention.enable", true);
 }
 
 class WmsUtils {

@@ -327,5 +327,20 @@ bool SessionPermission::IsFoundationCall()
     return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
+std::string SessionPermission::GetCallingBundleName()
+{
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
+        WLOGFE("failed to get BundleManagerServiceProxy");
+        return "";
+    }
+    int uid = IPCSkeleton::GetCallingUid();
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string callingBundleName;
+    bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return callingBundleName;
+}
 } // namespace Rosen
 } // namespace OHOS

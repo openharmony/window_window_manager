@@ -48,8 +48,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
-    const std::string PARAM_DUMP_HELP = "-h";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+const std::string PARAM_DUMP_HELP = "-h";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -179,7 +179,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = windowSystemConfig_.uiType_ == "phone";
+    auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
     if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
@@ -362,6 +362,11 @@ const std::string& WindowImpl::GetWindowName() const
 uint32_t WindowImpl::GetWindowId() const
 {
     return property_->GetWindowId();
+}
+
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return property_->GetDisplayId();
 }
 
 uint32_t WindowImpl::GetWindowFlags() const
@@ -1209,7 +1214,7 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
-    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+    if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden

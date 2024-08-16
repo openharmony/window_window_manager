@@ -28,12 +28,12 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaControllerTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaControllerTest"};
 
-    const Rect EMPTY_RECT = { 0, 0, 0, 0 };
-    const float BARRATIO = 0.3;
-    const long TIME_OUT = 1000;
-    const AvoidArea EMPTY_AVOID_AREA = {};
+const Rect EMPTY_RECT = { 0, 0, 0, 0 };
+const float BARRATIO = 0.3;
+const long TIME_OUT = 1000;
+const AvoidArea EMPTY_AVOID_AREA = {};
 }
 
 class AvoidAreaControllerTest : public testing::Test {

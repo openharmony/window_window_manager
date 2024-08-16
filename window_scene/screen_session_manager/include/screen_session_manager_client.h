@@ -75,7 +75,7 @@ public:
     ScreenId GetDefaultScreenId();
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
-    void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo);
+    void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
     void SwitchingCurrentUser();
@@ -83,8 +83,7 @@ public:
 
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
 
-    void UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
-        const float pivotX, const float pivotY);
+    void UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY);
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

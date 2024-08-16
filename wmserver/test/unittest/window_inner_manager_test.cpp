@@ -30,8 +30,8 @@ using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventPriority = OHOS::AppExecFwk::EventQueue::Priority;
 
 namespace {
-    const std::string INNER_WM_THREAD_NAME = "TestInnerWindowManager";
-    constexpr int32_t TEST_CUSTOM_ID = 100;
+const std::string INNER_WM_THREAD_NAME = "TestInnerWindowManager";
+constexpr int32_t TEST_CUSTOM_ID = 100;
 }
 
 class WindowInnerManagerTest : public testing::Test {

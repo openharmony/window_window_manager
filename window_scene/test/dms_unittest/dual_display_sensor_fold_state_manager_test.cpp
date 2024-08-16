@@ -26,19 +26,19 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
-    const float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.folded_threshold", 85));
-    const float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.expand_threshold", 145));
-    const float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.half_folded_max_threshold", 135));
-    const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.half_folded_min_threshold", 85));
-    constexpr int32_t HALL_THRESHOLD = 1;
-    constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
-    constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
-    constexpr float ANGLE_BUFFER = 0.001F;
+constexpr uint32_t SLEEP_TIME_US = 100000;
+const float INWARD_FOLDED_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.fold.folded_threshold", 85));
+const float INWARD_EXPAND_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.fold.expand_threshold", 145));
+const float INWARD_HALF_FOLDED_MAX_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.half_folded_max_threshold", 135));
+const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.fold.half_folded_min_threshold", 85));
+constexpr int32_t HALL_THRESHOLD = 1;
+constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
+constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
+constexpr float ANGLE_BUFFER = 0.001F;
 }
 
 class DualDisplaySensorFoldStateManagerTest : public testing::Test {
