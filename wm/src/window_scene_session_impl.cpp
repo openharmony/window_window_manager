@@ -1378,8 +1378,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-    const WindowType& type = GetType();
-    if (WindowHelper::IsMainWindow(type) && !setUIContentFlag_.load() && handler_ != nullptr) {
+    if (WindowHelper::IsMainWindow(GetType()) && !setUIContentFlag_.load() && handler_ != nullptr) {
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
