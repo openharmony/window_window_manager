@@ -486,8 +486,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
-        if (WindowHelper::IsMainWindow(GetType()))
-        {
+        if (WindowHelper::IsMainWindow(GetType())) {
             AddUIContentSettingTimeoutCheck();
         }
         
@@ -1381,11 +1380,9 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     ClearVsyncStation();
     const WindowType& type = GetType();
-    if (WindowHelper::IsMainWindow(type) && !setUIContentFlag_.load() && handler_ != nullptr)
-    {
+    if (WindowHelper::IsMainWindow(type) && !setUIContentFlag_.load() && handler_ != nullptr) {
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     }
-    
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
 }
@@ -3844,7 +3841,7 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
 void WindowSceneSessionImpl::NotifySetUIContent()
 {
     const WindowType& type = GetType();
-    if (WindowHelper::IsMainWindow(type)){ // main window
+    if (WindowHelper::IsMainWindow(type)) { // main window
         if (setUIContentFlag_.load()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
             return;
@@ -3857,7 +3854,7 @@ void WindowSceneSessionImpl::NotifySetUIContent()
         TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete mainWindow persistentId=%{public}d", GetPersistentId());
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
         setUIContentFlag_.store(true);
-    } else if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)){ // sub window
+    } else if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
             mainWindow->NotifySetUIContent();
