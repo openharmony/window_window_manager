@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Cascade"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Cascade"};
 }
 
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(DisplayGroupWindowTree& displayGroupWindowTree)

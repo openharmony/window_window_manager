@@ -79,8 +79,8 @@ using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
-using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable)>;
-using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
+using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -138,6 +138,7 @@ public:
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
+    void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
@@ -359,8 +360,9 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
+    WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
-    void ProcessDisplayScale(sptr<DisplayInfo> displayInfo);
+    void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
      * Fold Screen Status Change Report
@@ -555,7 +557,7 @@ private:
     void RegisterSecSurfaceInfoListener();
 
     /*
-     * User Switch
+     * Multi User
      */
     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
@@ -610,9 +612,7 @@ private:
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
     bool openDebugTrace {false};
-    int32_t currentUserId_;
     std::atomic<bool> enableInputEvent_ = true;
-    bool gestureNavigationEnabled_ {true};
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
@@ -634,6 +634,10 @@ private:
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
+
+    // Multi User
+    int32_t currentUserId_;
+    bool isUserBackground_ = false; // Only accessed on SSM thread
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.
@@ -704,7 +708,6 @@ private:
     bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
-    void NotifyStatusBarEnabledChange(bool enable);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
