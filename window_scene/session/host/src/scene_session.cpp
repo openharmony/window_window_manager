@@ -4274,34 +4274,6 @@ bool SceneSession::IsPcOrPadEnableActivation() const
     return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
 }
 
-void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
-    const sptr<WindowSessionProperty>& sessionProperty)
-{
-    SessionGravity gravity;
-    uint32_t percent = 0;
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    auto newWinRect = winRect_;
-    auto newRequestRect = GetSessionRequestRect();
-    Rect rect = {0, 0, 0, 0};
-    if (!GetScreenWidthAndHeight(sessionProperty, screenWidth, screenHeight)) {
-        return;
-    }
-    bool isLandscape = screenWidth > screenHeight ? true : false;
-    rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
-    gravity = static_cast<SessionGravity>(params.gravity_);
-    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        UpdateInputMethodSessionRect(SessionHelper::TransferToWSRect(rect), newWinRect, newRequestRect);
-    } else if (rect.width_ > 0 && rect.height_ > 0) {
-        newWinRect = SessionHelper::TransferToWSRect(rect);
-        newRequestRect = SessionHelper::TransferToWSRect(rect);
-    }
-    SetSessionRequestRect(newRequestRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, newRequestRect: %{public}s,"
-        "isLandscape: %{public}d, screenWidth:%{public}u, screenHeight:%{public}u", GetPersistentId(),
-        rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
-}
-
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "winId: %{public}d, isMinimized: %{public}d", GetPersistentId(), isMinimized);
