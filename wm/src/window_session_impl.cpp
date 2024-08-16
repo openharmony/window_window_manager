@@ -3655,11 +3655,11 @@ WMError WindowSessionImpl::SetContinueState(int32_t continueState)
 void WindowSessionImpl::SetUIContentFlag()
 {
     if (setUIContentFlag_.load()) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "already SetUIContent");
+        TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
         return;
     }
     if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "handler is nullptr");
+        TLOGI(WmsLogTag::WMS_UIEXT, "handler is nullptr");
         return;
     }
 

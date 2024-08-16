@@ -1924,6 +1924,7 @@ HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function |
     window1->AddUIContentSettingTimeoutCheck();
 
     WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    option->SetWindowType(type2);
     sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window2, nullptr);
     window2->AddUIContentSettingTimeoutCheck();
