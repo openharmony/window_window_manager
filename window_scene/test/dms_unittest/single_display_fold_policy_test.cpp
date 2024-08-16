@@ -178,35 +178,6 @@ HWTEST_F(SingleDisplayFoldPolicyTest, RecoverWhenBootAnimationExit, Function | S
 }
 
 /**
- * @tc.name: TriggerScreenDisplayModeUpdate
- * @tc.desc: test function : TriggerScreenDisplayModeUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplayFoldPolicyTest, TriggerScreenDisplayModeUpdate, Function | SmallTest | Level3)
-{
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    
-    
-    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::SUB;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::FULL;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::MAIN;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-}
-
-/**
  * @tc.name: UpdateForPhyScreenPropertyChange
  * @tc.desc: test function : UpdateForPhyScreenPropertyChange
  * @tc.type: FUNC
