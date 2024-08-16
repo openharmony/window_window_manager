@@ -36,8 +36,6 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
-const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
-constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 
@@ -110,7 +108,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
-    AddUIContentSettingTimeoutCheck();
+    WindowSessionImpl::AddUIContentSettingTimeoutCheck();
     return WMError::WM_OK;
 }
 
@@ -460,29 +458,6 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
-void WindowExtensionSessionImpl::AddUIContentSettingTimeoutCheck()
-{
-    if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-        return;
-    }
-
-    auto task = [this] {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SetUIContent timeout, persistentId=%{public}d", GetPersistentId());
-        std::ostringstream oss;
-        oss << "Transparent UIExtension uid: " << getuid();
-        oss << ", windowName: " << property_->GetWindowName();
-        if (context_) {
-            oss << ", bundleName: " << context_->GetBundleName();
-        }
-        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
-        NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
-    };
-    handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
-        SET_UICONTENT_TIMEOUT_TIME_MS);
-}
-
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -509,7 +484,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        NotifySetUIContent();
+        SetUIContentFlag();
     }
 
     UpdateAccessibilityTreeInfo();
@@ -1029,22 +1004,6 @@ bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
     SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable = %{public}u", enable);
     return enable;
-}
-
-void WindowExtensionSessionImpl::NotifySetUIContent()
-{
-    if (setUIContentFlag_.load()) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "already SetUIContent");
-        return;
-    }
-    if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-        return;
-    }
-
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete persistentId=%{public}d", GetPersistentId());
-    handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
-    setUIContentFlag_.store(true);
 }
 
 void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)

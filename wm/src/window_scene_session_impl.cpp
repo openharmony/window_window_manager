@@ -93,8 +93,6 @@ constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
-const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
-constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -3840,54 +3838,13 @@ void WindowSceneSessionImpl::NotifySetUIContent()
 {
     const WindowType& type = GetType();
     if (WindowHelper::IsMainWindow(type)) { // main window
-        if (setUIContentFlag_.load()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
-            return;
-        }
-        if (handler_ == nullptr) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-            return;
-        }
-
-        TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete mainWindow persistentId=%{public}d", GetPersistentId());
-        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
-        setUIContentFlag_.store(true);
+        SetUIContentFlag();
     } else if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
             mainWindow->NotifySetUIContent();
         }
     }
-}
-
-void WindowSceneSessionImpl::AddUIContentSettingTimeoutCheck()
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "Come in AddUIContentSettingTimeoutCheck");
-    if (handler_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-        return;
-    }
-
-    auto task = [this] {
-        if (setUIContentFlag_.load()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
-            return;
-        }
-
-        TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent timeout, persistentId=%{public}d", GetPersistentId());
-        std::ostringstream oss;
-        oss << "SetUIContent timeout uid: " << getuid();
-        if (property_) {
-            oss << ", windowName: " << property_->GetWindowName();
-        }
-        if (context_) {
-            oss << ", bundleName: " << context_->GetBundleName();
-        }
-        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
-    };
-    handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
-        SET_UICONTENT_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
 }
 } // namespace Rosen
 } // namespace OHOS
