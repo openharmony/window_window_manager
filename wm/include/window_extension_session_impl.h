@@ -112,7 +112,7 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
-    void AddSetUIContentTimeoutListener();
+    void AddUIContentSettingTimeoutCheck();
 
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
