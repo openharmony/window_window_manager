@@ -1019,6 +1019,29 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
 }
+
+/**
+ * @tc.name: NotifySetUIContent
+ * @tc.desc: NotifySetUIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifySetUIContent");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContent();
+    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContent();
+    EXPECT_EQ(window->setUIContentFlag_.load(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

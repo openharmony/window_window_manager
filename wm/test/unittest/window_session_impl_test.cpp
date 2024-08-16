@@ -1898,6 +1898,55 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
 }
+
+/**
+ * @tc.name: AddUIContentSettingTimeoutCheck
+ * @tc.desc: AddUIContentSettingTimeoutCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function | SmallTest | Level2)
+{   
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->handler_ = nullptr;
+    window->property_ = nullptr;
+    window->context_ = nullptr;
+    window->AddUIContentSettingTimeoutCheck();
+
+    option->SetWindowName("AddUIContentSettingTimeoutCheck_test");
+    option->SetBundleName("UTtest");
+    WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;
+    option->SetWindowType(type1);
+    sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window1, nullptr);
+    window1->AddUIContentSettingTimeoutCheck();
+
+    WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window2, nullptr);
+    window2->AddUIContentSettingTimeoutCheck();
+}
+
+/**
+ * @tc.name: SetUIContentFlag
+ * @tc.desc: SetUIContentFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentFlag, Function | SmallTest | Level2)
+{   
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUIContentFlag();
+    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+
+    window->SetUIContentFlag();
+    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
