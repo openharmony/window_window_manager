@@ -1387,6 +1387,7 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
     return PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 
+/** @note @window.hierarchy */
 WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {

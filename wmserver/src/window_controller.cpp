@@ -1262,6 +1262,8 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
+
+/** @note @window.hierarchy */
 WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);

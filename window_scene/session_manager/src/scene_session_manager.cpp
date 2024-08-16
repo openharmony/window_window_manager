@@ -3349,6 +3349,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     return abilityInfo;
 }
 
+/** @note @window.hierarchy */
 WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     const auto& callingPid = IPCSkeleton::GetCallingRealPid();
@@ -3451,6 +3452,7 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
     NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
+/** @note @window.hierarchy */
 WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
@@ -8688,6 +8690,7 @@ void SceneSessionManager::PostProcessProperty()
     }
 }
 
+/** @note @window.hierarchy */
 WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 {
     WLOGFI("RaiseWindowToTop, id %{public}d", persistentId);
@@ -9593,6 +9596,7 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
     sceneSessionList = result;
 }
 
+/** @note @window.hierarchy */
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     if (isUserBackground_) {

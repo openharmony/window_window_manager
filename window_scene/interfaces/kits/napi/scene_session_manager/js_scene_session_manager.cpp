@@ -522,6 +522,7 @@ napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnProcessBackEvent(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsSceneSessionManager::CheckSceneZOrder(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
