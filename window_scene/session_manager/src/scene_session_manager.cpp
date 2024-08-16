@@ -203,6 +203,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     SceneEventPublish::UnSubscribe(g_scbSubscriber);
+    MMI::InputManager::GetInstance()->RegisterWindowStateErrorCallback(nullptr);
 }
 
 void SceneSessionManager::Init()
@@ -6521,6 +6522,10 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
 void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d, persistentId: %{public}d", pid, persistentId);
+    if (pid == -1) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid pid");
+        return;
+    }
     auto task = [this, pid, persistentId] {
         int32_t ret = HiSysEventWrite(
             HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
