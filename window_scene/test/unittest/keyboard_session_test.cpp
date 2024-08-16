@@ -1381,7 +1381,6 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
     resultId = keyboardSession->GetCallingSessionId();
     ASSERT_EQ(resultId, 100);
 }
-
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS
