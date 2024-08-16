@@ -86,7 +86,7 @@ void FoldScreenPolicy::SetLastCacheDisplayMode(FoldDisplayMode mode)
     lastCachedisplayMode_ = mode;
 }
 
-int64_t FoldScreenPolicy::getFoldtoExpandElapsedMs()
+int64_t FoldScreenPolicy::getFoldingElapsedMs()
 {
     if (endTimePoint_ < startTimePoint_) {
         TLOGE(WmsLogTag::DMS, "invalid timepoint. endTimePoint less startTimePoint");
