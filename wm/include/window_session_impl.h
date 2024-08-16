@@ -459,6 +459,7 @@ private:
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+    std::atomic<int32_t> isUiContentDestructing_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
