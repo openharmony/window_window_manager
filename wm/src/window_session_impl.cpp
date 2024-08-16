@@ -595,7 +595,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             lastSizeChangeReason_ = wmReason;
             postTaskDone_ = true;
         }
-        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        handler_->PostTask([weak = wptr(this), wmReason, wmRect, rsTransaction]() {
+            auto window = weak.promote();
+            if (!window) {
+                return;
+            }
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+            window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        });
     }
     if (property_) {
         sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
@@ -1048,6 +1055,23 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
                     "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
                 // false: Make the function callable
                 window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+            }
+        }
+    });
+    uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            return;
+        }
+        bool setCallBackEnable = true;
+        if (window->enableFrameLayoutFinishCb_.compare_exchange_strong(setCallBackEnable, false)) {
+            auto hostSession = window->GetHostSession();
+            if (hostSession) {
+                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                    "NotifyFrameLayoutFinish, windowId: %u", window->GetWindowId());
+                TLOGI(WmsLogTag::WMS_MULTI_WINDOW,
+                    "NotifyFrameLayoutFinish, windowId: %{public}u", window->GetWindowId());
+                hostSession->NotifyFrameLayoutFinishFromApp();
             }
         }
     });
@@ -3354,6 +3378,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
@@ -3600,6 +3625,20 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
         isForceSplit, homePage.c_str());
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
+{
+    enableFrameLayoutFinishCb_ = enable;
+}
+
+void WindowSessionImpl::UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT || wmReason == WindowSizeChangeReason::SPLIT_TO_FULL ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL) {
+        TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable framelayoutfinish callback reason:%{public}u", wmReason);
+        SetFrameLayoutCallbackEnable(true);
+    }
 }
 
 WMError WindowSessionImpl::SetContinueState(int32_t continueState)
