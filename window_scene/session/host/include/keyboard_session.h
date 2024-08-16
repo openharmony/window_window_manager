@@ -65,6 +65,7 @@ private:
     void RaiseCallingSession(const WSRect& keyboardPanelRect,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
     void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
     void RelayoutKeyBoard();

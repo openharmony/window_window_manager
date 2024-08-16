@@ -173,16 +173,12 @@ WSError KeyboardSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction>
     return WSError::WS_OK;
 }
 
-void KeyboardSession::OnKeyboardPanelUpdated()
+void KeyboardSession::UpdateKeyboardAvoidArea()
 {
-    if (!isKeyboardPanelEnabled_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
+    if (!IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
-    WSRect panelRect = { 0, 0, 0, 0 };
-    panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
-    RaiseCallingSession(panelRect);
     if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_ != nullptr) {
         if (Session::IsScbCoreEnabled()) {
             dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
@@ -190,6 +186,15 @@ void KeyboardSession::OnKeyboardPanelUpdated()
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
     }
+}
+
+void KeyboardSession::OnKeyboardPanelUpdated()
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
+    WSRect panelRect = { 0, 0, 0, 0 };
+    panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
+    RaiseCallingSession(panelRect);
+    UpdateKeyboardAvoidArea();
 }
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
@@ -335,10 +340,6 @@ void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& cal
 
 void KeyboardSession::NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow)
 {
-    if (!isKeyboardPanelEnabled_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardPanel is not enabled");
-        return;
-    }
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionStage_ is nullptr, notify keyboard panel rect change failed");
         return;
@@ -396,6 +397,10 @@ static bool IsCallingSessionSplitMode(const sptr<SceneSession>& callingSession)
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (!IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
+        return;
+    }
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
@@ -576,13 +581,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         }
         if (isKeyboardShow) {
             session->RaiseCallingSession(keyboardPanelRect, rsTransaction);
-            if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-                if (Session::IsScbCoreEnabled()) {
-                    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-                } else {
-                    session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-                }
-            }
+            session->UpdateKeyboardAvoidArea();
         } else {
             session->RestoreCallingSession(rsTransaction);
             auto sessionProperty = session->GetSessionProperty();
