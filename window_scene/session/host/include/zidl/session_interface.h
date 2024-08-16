@@ -86,6 +86,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyFrameLayoutFinishFromApp() {return WSError::WS_OK; }
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}

@@ -502,13 +502,11 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
     screenSession->SetScreenSceneDpi(virtualPixelRatio);
 }
 
-void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
-    if (!screenSessionManager_) {
-        WLOGFE("screenSessionManager_ is null");
-        return;
+    if (screenSessionManager_) {
+        screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
     }
-    screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
@@ -518,8 +516,7 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     }
 }
 
-void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
-    const float pivotX, const float pivotY)
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY)
 {
     auto session = GetScreenSession(id);
     if (session == nullptr) {

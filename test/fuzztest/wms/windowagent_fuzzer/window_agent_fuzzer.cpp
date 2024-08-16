@@ -29,8 +29,8 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAgentFuzzTest"};
+constexpr size_t DATA_MIN_SIZE = 2;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAgentFuzzTest"};
 }
 
 template<class T>

@@ -29,7 +29,6 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
-#include "common/include/future_callback.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -97,6 +96,7 @@ public:
     void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
@@ -233,6 +233,8 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
+    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -254,6 +256,7 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
+    void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
@@ -268,6 +271,7 @@ protected:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
+    void NotifySwitchFreeMultiWindow(bool enable);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
@@ -304,6 +308,7 @@ protected:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     bool isFocused_ { false };
+    std::atomic_bool enableFrameLayoutFinishCb_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -368,6 +373,8 @@ private:
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -383,7 +390,6 @@ private:
     inline void DestroyExistUIContent();
     std::string GetRestoredRouterStack();
 
-    bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
@@ -394,6 +400,8 @@ private:
     void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    void SetFrameLayoutCallbackEnable(bool enable);
+    void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
@@ -412,6 +420,7 @@ private:
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex subWindowCloseListenersMutex_;
+    static std::mutex switchFreeMultiWindowListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
@@ -428,6 +437,7 @@ private:
         windowTitleButtonRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
+    static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
@@ -449,6 +459,7 @@ private:
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+    std::atomic<int32_t> isUiContentDestructing_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

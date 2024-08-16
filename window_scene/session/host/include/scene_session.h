@@ -21,18 +21,18 @@
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
-    class RunningLock;
+class RunningLock;
 }
 
 namespace OHOS::Rosen {
 namespace PARAM_KEY {
-    const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
-    const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
-    const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
+const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
+const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 namespace {
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =
@@ -200,6 +200,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WSError NotifyFrameLayoutFinishFromApp() override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
@@ -214,6 +215,7 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
+    void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
@@ -292,6 +294,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
     void ClearSpecificSessionCbMap();
@@ -359,7 +362,6 @@ public:
     {
         return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
     }
-    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty);
 
     // WMSPipeline-related: only accessed on SSM thread
     uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
@@ -374,10 +376,11 @@ public:
     bool IsPcOrPadEnableActivation() const;
 
     /*
-     * User Switch
+     * Multi User
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
+    void UnregisterSessionChangeListeners() override;
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -386,6 +389,7 @@ protected:
     std::string GetRatioPreferenceKey();
     WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
+    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty);
 
     std::string GetRectInfo(const WSRect& rect)
     {
@@ -422,7 +426,6 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
-    WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -440,6 +443,9 @@ private:
     WSError RaiseAppMainWindowToTop() override;
     void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
+    bool IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty);
+    bool GetScreenWidthAndHeight(const sptr<WindowSessionProperty>& sessionProperty,
+        uint32_t& screenWidth, uint32_t& screenHeight);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
@@ -555,7 +561,7 @@ private:
     // Session recover
     bool isRecovered_ = false;
 
-    // User switch
+    // Multi User
     bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen

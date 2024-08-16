@@ -40,15 +40,15 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
-    constexpr Rect g_emptyRect = {0, 0, 0, 0};
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
-    constexpr size_t INDEX_ZERO = 0;
-    constexpr size_t INDEX_ONE = 1;
-    constexpr size_t INDEX_TWO = 2;
-    constexpr double MIN_GRAY_SCALE = 0.0;
-    constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
+constexpr Rect g_emptyRect = {0, 0, 0, 0};
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
+constexpr double MIN_GRAY_SCALE = 0.0;
+constexpr double MAX_GRAY_SCALE = 1.0;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -181,7 +181,7 @@ napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 {
-    WLOGI("MoveTo");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowToAsync(env, info) : nullptr;
 }
@@ -205,7 +205,7 @@ napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 {
-    WLOGI("Resize");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindowAsync(env, info) : nullptr;
 }
@@ -1417,33 +1417,25 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
     wptr<Window> weakToken, int32_t x, int32_t y, std::shared_ptr<WmErrorCode> errCodePtr)
 {
-    execute = [weakToken, errCodePtr, x, y]() {
+    execute = [weakToken, errCodePtr, x, y] {
         if (errCodePtr == nullptr) {
             return;
         }
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto spWindow = weakToken.promote();
-        if (spWindow == nullptr) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(spWindow->MoveToAsync(x, y));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveToAsync(x, y));
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        if (*errCodePtr == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Get invalid param");
-            return;
-        }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
             task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -1452,8 +1444,6 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnMoveWindowToAsync failed"));
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
 }
 
@@ -1464,7 +1454,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     size_t argc = 4; // 4: number of arg
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) { // 2:minimum param num
+    if (argc < 2) { // 2: minimum param num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
@@ -1614,34 +1604,26 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
     wptr<Window> weakToken, int32_t width, int32_t height, std::shared_ptr<WmErrorCode> errCodePtr)
 {
-    execute = [weakToken, errCodePtr, width, height]() {
+    execute = [weakToken, errCodePtr, width, height] {
         if (errCodePtr == nullptr) {
             return;
         }
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto spWindow = weakToken.promote();
-        if (spWindow == nullptr) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
-            spWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
+            weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] resize end, err = %{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        if (*errCodePtr == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Get invalid param");
-            return;
-        }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
             task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -1650,8 +1632,6 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnResizeWindowAsync failed"));
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] resize end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
 }
 

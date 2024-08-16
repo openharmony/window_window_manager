@@ -26,8 +26,8 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
-    constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -462,6 +462,8 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     napi_set_named_property(env, objValue, "isRoundCorner", CreateJsValue(env, false)); // empty method
     napi_set_named_property(env, objValue, "dimBehindValue", CreateJsValue(env, 0));
     napi_set_named_property(env, objValue, "id", CreateJsValue(env, window->GetWindowId()));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env,
+        static_cast<int64_t>(window->GetDisplayId())));
     return objValue;
 }
 

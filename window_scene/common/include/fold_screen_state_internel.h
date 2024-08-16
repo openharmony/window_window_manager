@@ -23,10 +23,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
-    static const  std::string SINGLE_DISPLAY = "1";
-    static const std::string DUAL_DISPLAY = "2";
-    static const std::string SINGLE_POCKET_DISPLAY = "4";
+static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
+static const  std::string SINGLE_DISPLAY = "1";
+static const std::string DUAL_DISPLAY = "2";
+static const std::string SINGLE_POCKET_DISPLAY = "4";
 }
 class FoldScreenStateInternel {
 public:

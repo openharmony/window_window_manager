@@ -40,19 +40,19 @@ static void SensorHallDataCallback(SensorEvent *event)
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr float ANGLE_MIN_VAL = 0.0F;
-    constexpr float ANGLE_MAX_VAL = 180.0F;
-    constexpr int32_t SENSOR_SUCCESS = 0;
-    constexpr int32_t POSTURE_INTERVAL = 100000000;
-    constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-    constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
-    static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.fold.half_folded_min_threshold", 85));
-    static float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
-        ("const.large_fold.half_folded_min_threshold", 25));
-    constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
-    float oldFoldAngle = 0.0F;
+constexpr float ANGLE_MIN_VAL = 0.0F;
+constexpr float ANGLE_MAX_VAL = 180.0F;
+constexpr int32_t SENSOR_SUCCESS = 0;
+constexpr int32_t POSTURE_INTERVAL = 100000000;
+constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
+constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
+static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.fold.half_folded_min_threshold", 85));
+static float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    ("const.large_fold.half_folded_min_threshold", 25));
+constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
+float oldFoldAngle = 0.0F;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
