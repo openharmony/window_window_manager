@@ -86,6 +86,7 @@ public:
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     int32_t GetStatusBarHeight() override;
+    WSError NotifyFrameLayoutFinishFromApp() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 private:

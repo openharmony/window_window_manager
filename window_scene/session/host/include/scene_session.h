@@ -200,6 +200,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WSError NotifyFrameLayoutFinishFromApp() override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
@@ -376,7 +377,7 @@ public:
     bool IsPcOrPadEnableActivation() const;
 
     /*
-     * User Switch
+     * Multi User
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
@@ -558,7 +559,7 @@ private:
     // Session recover
     bool isRecovered_ = false;
 
-    // User switch
+    // Multi User
     bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen

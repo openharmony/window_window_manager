@@ -222,6 +222,24 @@ WSError SceneSession::Background(bool isFromClient)
     return BackgroundTask(true);
 }
 
+WSError SceneSession::NotifyFrameLayoutFinishFromApp()
+{
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->frameLayoutFinishFunc_) {
+            TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d", session->GetPersistentId());
+            session->frameLayoutFinishFunc_();
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "NotifyFrameLayoutFinishFromApp");
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 {
     auto task = [weakThis = wptr(this), isSaveSnapshot]() {
