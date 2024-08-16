@@ -3842,7 +3842,7 @@ void WindowSceneSessionImpl::NotifySetUIContent()
     } else if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
-            mainWindow->NotifySetUIContent();
+            mainWindow->SetUIContentFlag();
         }
     }
 }
