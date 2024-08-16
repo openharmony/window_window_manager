@@ -1905,7 +1905,7 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function | SmallTest | Level2)
-{   
+{
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
@@ -1935,7 +1935,7 @@ HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function |
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest, SetUIContentFlag, Function | SmallTest | Level2)
-{   
+{
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
