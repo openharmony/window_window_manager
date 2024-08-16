@@ -37,7 +37,7 @@
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "session/screen/include/screen_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
@@ -49,7 +49,6 @@
 #include "screen_manager.h"
 #include "screen.h"
 #include "singleton_container.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
 #include "fold_screen_state_internel.h"
 
 #ifdef POWER_MANAGER_ENABLE

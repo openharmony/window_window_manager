@@ -22,7 +22,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_keyboard_session.h"
 #include "session/host/include/session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
