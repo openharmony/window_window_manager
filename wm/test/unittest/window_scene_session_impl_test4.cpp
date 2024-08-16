@@ -1037,7 +1037,7 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContent, Function | SmallTest |
     EXPECT_EQ(window->setUIContentFlag_.load(), true);
 
     option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContent();
     EXPECT_EQ(window->setUIContentFlag_.load(), false);
