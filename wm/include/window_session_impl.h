@@ -335,8 +335,8 @@ protected:
     }
     std::atomic_bool setUIContentFlag_ { false };
     enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000;
-    }
+        SET_UICONTENT_TIMEOUT = 1000
+    };
 
     /*
      * UIExtension
