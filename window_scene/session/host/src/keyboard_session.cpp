@@ -271,6 +271,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             return WSError::WS_ERROR_NULLPTR;
         }
         sessionProperty->SetKeyboardLayoutParams(params);
+        sessionProperty->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
         session->MoveAndResizeKeyboard(params, sessionProperty);
         session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
 

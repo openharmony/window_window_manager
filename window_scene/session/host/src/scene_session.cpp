@@ -672,19 +672,22 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
-static bool IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
+bool SceneSession::IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
 {
     static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
     bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
     bool isDualDevice = FoldScreenStateInternel::IsDualDisplayFoldDevice();
-    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
-        sessionProperty->GetDisplayId());
-    Rotation rotation = (screenSession != nullptr) ? screenSession->GetRotation() : Rotation::ROTATION_0;
-    bool isLandscape = (rotation == Rotation::ROTATION_90) || (rotation == Rotation::ROTATION_270);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    if (!GetScreenWidthAndHeight(sessionProperty, screenWidth, screenHeight)) {
+        return false;
+    }
+    bool isLandscape = screenWidth > screenHeight ? true : false;
     bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
     TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
-        "isDualDevice:%{public}d, rotation:%{public}d, isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable,
-        isFolded, isDualDevice, rotation, result);
+        "isDualDevice:%{public}d, isLandscape:%{public}d, screenWidth:%{public}u, screenHeight:%{public}u, "
+        "isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable, isFolded, isDualDevice, isLandscape,
+        screenWidth, screenHeight, result);
     return result;
 }
 
@@ -793,7 +796,29 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
     return WSError::WS_OK;
 }
 
-bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWinRect, WSRect& newRequestRect)
+bool SceneSession::GetScreenWidthAndHeight(const sptr<WindowSessionProperty>& sessionProperty,
+    uint32_t& screenWidth, uint32_t& screenHeight)
+{
+    const auto& screenSession = sessionProperty != nullptr ?
+        ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId()) : nullptr;
+    if (screenSession != nullptr) {
+        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    } else {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "sessionProperty or screenSession is nullptr, use defaultDisplayInfo");
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+            screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is null, get screenWidth and screenHeight failed");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
 {
     SessionGravity gravity;
     uint32_t percent = 0;
@@ -807,15 +832,9 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
-            sessionProperty->GetDisplayId());
-        if (screenSession != nullptr) {
-            screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
-            screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
+        if (!GetScreenWidthAndHeight(sessionProperty, screenWidth, screenHeight)) {
+            return false;
         }
-
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
             static_cast<int32_t>(screenWidth) : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
@@ -823,7 +842,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
             (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0)
                 ? static_cast<int32_t>(screenHeight * percent / 100u) : rect.height_;
         newRequestRect.height_ = newWinRect.height_;
-        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : newRequestRect.posX_;
+        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
         newWinRect.posY_ = static_cast<int32_t>(screenHeight) - newWinRect.height_;
         newRequestRect.posY_ = newWinRect.posY_;
@@ -1584,40 +1603,6 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     }
     HandleStyleEvent(area);
     return WSError::WS_OK;
-}
-
-WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    if (pointerEvent == nullptr) {
-        WLOGFE("pointerEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!(pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-         pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) {
-        return WSError::WS_DO_NOTHING;
-    }
-
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        WLOGFE("Get pointeritem failed");
-        pointerEvent->MarkProcessed();
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    int32_t mousePointX = pointerItem.GetDisplayX();
-    int32_t mousePointY = pointerItem.GetDisplayY();
-
-    auto displayInfo = DisplayManager::GetInstance().GetDisplayById(pointerEvent->GetTargetDisplayId());
-    if (displayInfo != nullptr) {
-        float vpr = displayInfo->GetVirtualPixelRatio();
-        if (vpr <= 0) {
-            vpr = 1.5f;
-        }
-        Session::SetVpr(vpr);
-    }
-    return HandleEnterWinwdowArea(mousePointX, mousePointY);
 }
 
 WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
@@ -4299,17 +4284,8 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
     Rect rect = {0, 0, 0, 0};
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
+    if (!GetScreenWidthAndHeight(sessionProperty, screenWidth, screenHeight)) {
         return;
-    }
-    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
-        sessionProperty->GetDisplayId());
-    if (screenSession != nullptr) {
-        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
-        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
-    } else {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
     }
     bool isLandscape = screenWidth > screenHeight ? true : false;
     rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
@@ -4322,8 +4298,8 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     }
     SetSessionRequestRect(newRequestRect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, newRequestRect: %{public}s,"
-        "isLandscape: %{public}d", GetPersistentId(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
-        isLandscape);
+        "isLandscape: %{public}d, screenWidth:%{public}u, screenHeight:%{public}u", GetPersistentId(),
+        rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
 
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
