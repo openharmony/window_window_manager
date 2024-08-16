@@ -43,6 +43,8 @@ namespace Rosen {
 namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
+constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 }
 
 struct WindowTitleVisibleFlags {
@@ -240,6 +242,8 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
+    void SetUIContentFlag();
+    void AddUIContentSettingTimeoutCheck();
 
     /*
      * UIExtension
@@ -328,6 +332,10 @@ protected:
     bool IsFreeMultiWindowMode() const
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
+    }
+    std::atomic_bool setUIContentFlag_ { false };
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000;
     }
 
     /*

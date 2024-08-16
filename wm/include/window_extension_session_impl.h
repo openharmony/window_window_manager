@@ -92,7 +92,6 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void NotifySetUIContent() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
 

@@ -171,7 +171,6 @@ public:
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     void NotifySetUIContent() override;
-    void AddUIContentSettingTimeoutCheck();
 
 protected:
     void DestroySubWindow();
