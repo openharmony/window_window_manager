@@ -49,8 +49,8 @@ public:
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
     /*
-        Avoid fold to expand process queues public interface
-    */
+     *    Avoid fold to expand process queues public interface
+     */
     bool GetModeChangeRunningStatus();
     void SetdisplayModeChangeStatus(bool status);
     bool GetdisplayModeRunningStatus();

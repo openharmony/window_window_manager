@@ -63,7 +63,6 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
 
 void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
 {
-    /* start fold to expand process*/
     if (status) {
         pengdingTask_ = FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
@@ -90,8 +89,8 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         return;
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
-        displayMode, getFoldtoExpandElapsedMs());
-    SetdisplayModeChangeStatus(true);
+        displayMode, getFoldingElapsedMs());
+    
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
@@ -105,6 +104,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
+        SetdisplayModeChangeStatus(true);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
@@ -169,34 +169,6 @@ void SingleDisplayFoldPolicy::RecoverWhenBootAnimationExit()
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (currentDisplayMode_ != displayMode) {
         ChangeScreenDisplayMode(displayMode);
-    }
-}
-
-void SingleDisplayFoldPolicy::TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode)
-{
-    TLOGI(WmsLogTag::DMS, "TriggerScreenDisplayModeUpdate displayMode = %{public}d", displayMode);
-    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "TriggerScreenDisplayModeUpdate default screenSession is null");
-        return;
-    }
-    switch (displayMode) {
-        case FoldDisplayMode::MAIN: {
-            ChangeScreenDisplayModeToMain(screenSession);
-            break;
-        }
-        case FoldDisplayMode::FULL: {
-            ChangeScreenDisplayModeToFull(screenSession);
-            break;
-        }
-        case FoldDisplayMode::UNKNOWN: {
-            TLOGI(WmsLogTag::DMS, "TriggerScreenDisplayModeUpdate displayMode is unknown");
-            break;
-        }
-        default: {
-            TLOGI(WmsLogTag::DMS, "TriggerScreenDisplayModeUpdate displayMode is invalid");
-            break;
-        }
     }
 }
 
