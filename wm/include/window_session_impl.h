@@ -242,7 +242,7 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
-    void SetUIContentFlag();
+    void SetUIContentFlag() override;
     void AddUIContentSettingTimeoutCheck();
 
     /*

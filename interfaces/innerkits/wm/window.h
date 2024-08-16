@@ -2212,6 +2212,11 @@ public:
     virtual void NotifySetUIContent() {}
 
     /**
+     * @brief Notify UIContentFlag_
+     */
+    virtual void SetUIContentFlag() {}
+
+    /**
      * @brief Notify host that UIExtension timeout
      *
      * @param errorCode error code when UIExtension timeout
