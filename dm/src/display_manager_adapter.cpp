@@ -28,7 +28,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
@@ -609,6 +609,13 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
+DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
+}
+
 void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,
     float scaleX, float scaleY, float pivotX, float pivotY)
 {
@@ -622,6 +629,13 @@ void DisplayManagerAdapter::SetFoldStatusLocked(bool locked)
     INIT_PROXY_CHECK_RETURN();
 
     return displayManagerServiceProxy_->SetFoldStatusLocked(locked);
+}
+
+DMError DisplayManagerAdapter::SetFoldStatusLockedFromJs(bool locked)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->SetFoldStatusLockedFromJs(locked);
 }
 
 sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()

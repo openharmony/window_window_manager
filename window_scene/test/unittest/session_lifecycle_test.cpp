@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string UNDEFINED = "undefined";
+const std::string UNDEFINED = "undefined";
 }
 
 class WindowSessionLifecycleTest : public testing::Test {

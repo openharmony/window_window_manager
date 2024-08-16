@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_FUTURE_CALLBACK_H
 #define OHOS_ROSEN_FUTURE_CALLBACK_H
 
-#include "future.h"
 #include "future_callback_stub.h"
 #include "interfaces/include/ws_common.h"
 
@@ -25,8 +24,8 @@ namespace Rosen {
 class FutureCallback : public FutureCallbackStub {
 public:
     WSError OnUpdateSessionRect(const WSRect& rect) override;
-    virtual WSRect GetResult(long timeOut) override;
-    virtual void ResetLock() override;
+    WSRect GetResult(long timeOut) override;
+    void ResetLock() override;
 private:
     RunnableFuture<WSRect> future_{};
 };

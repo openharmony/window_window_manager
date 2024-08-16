@@ -175,7 +175,7 @@ public:
     void NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
-    void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override;
+    void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId screenId);
@@ -200,12 +200,14 @@ public:
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
         float pivotX, float pivotY) override;
 
     void SetFoldStatusLocked(bool locked) override;
+    DMError SetFoldStatusLockedFromJs(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
 
@@ -456,6 +458,17 @@ private:
     void SetDpiFromSettingData();
     void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
+    void UpdateDisplayScaleState(ScreenId screenId);
+    void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
+                                  const float& pivotY);
+    void UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
+                                const float& pivotX, const float& pivotY);
+    void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                   const float& scaleY, const float& pivotX, const float& pivotY,
+                                                   float& translateX, float& translateY);
+    void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
+                                            const float& pivotX, const float& pivotY, float& translateX,
+                                            float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsValidDisplayModeCommand(std::string command);

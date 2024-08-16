@@ -101,6 +101,11 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 
+const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
+constexpr int32_t FOLDABLE_DEVICE { 2 };
+constexpr float DEFAULT_PIVOT = 0.5f;
+constexpr float DEFAULT_SCALE = 1.0f;
+
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -265,8 +270,9 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     DmsXcollie dmsXcollie("DMS:RegisterDisplayManagerAgent", XCOLLIE_TIMEOUT_10S);
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
+        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
+        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -290,8 +296,9 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
-    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !SessionPermission::IsSystemCalling()
-        && !SessionPermission::IsStartByHdcd()) {
+    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
+        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
+        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -665,11 +672,27 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
-        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f",
-            info.width_, info.height_, info.density_);
+        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
+            "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
+            "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
+            info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
+            displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
         displayInfo->SetVirtualPixelRatio(info.density_);
+        if (info.enableHookRotation_) {
+            sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
+            if (screenSession) {
+                Rotation targetRotation = screenSession->ConvertIntToRotation(static_cast<int32_t>(info.rotation_));
+                displayInfo->SetRotation(targetRotation);
+                DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
+                    FoldDisplayMode::UNKNOWN);
+                TLOGI(WmsLogTag::DMS, "targetRotation: %{public}u, targetOrientation: %{public}u",
+                    targetRotation, displayOrientation);
+                displayInfo->SetDisplayOrientation(displayOrientation);
+            }
+        }
     }
     return displayInfo;
 }
@@ -686,7 +709,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        // 在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
         displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
@@ -826,7 +849,7 @@ bool ScreenSessionManager::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 }
 
-void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo permission denied!");
@@ -1974,7 +1997,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-
+    UpdateDisplayScaleState(screenId);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
@@ -2381,8 +2404,10 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
-    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
-        !SessionPermission::IsShellCall()) {
+    if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
+        return ERROR_ID_NOT_SYSTEM_APP;
+    }
+    if (Permission::IsSystemCalling() && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) {
         TLOGE(WmsLogTag::DMS, "create virtual screen permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -3584,6 +3609,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");
 
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        return nullptr;
+    }
+
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGI(WmsLogTag::DMS, "GetDisplaySnapshot was disabled by edm!");
         return nullptr;
@@ -4005,6 +4035,10 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return DMError::DM_ERROR_NULLPTR;
@@ -4162,6 +4196,184 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
+DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    SetFoldDisplayMode(displayMode);
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
+{
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    const ScreenProperty& property = session->GetScreenProperty();
+    if (property.GetScaleX() - DEFAULT_SCALE < FLT_EPSILON && property.GetScaleY() - DEFAULT_SCALE < FLT_EPSILON &&
+        property.GetPivotX() - DEFAULT_PIVOT < FLT_EPSILON && property.GetPivotY() - DEFAULT_PIVOT < FLT_EPSILON) {
+        TLOGD(WmsLogTag::DMS, "The scale and pivot is default value now. There is no need to update");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+          screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(), property.GetPivotY());
+    SetDisplayScaleInner(screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(),
+                         property.GetPivotY());
+}
+
+void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY,
+                                                const float& pivotX, const float& pivotY)
+{
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
+          screenId, scaleX, scaleY, pivotX, pivotY);
+    UpdateDisplayNodeScale(session, scaleX, scaleY, pivotX, pivotY);
+    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(), {},
+                             DisplayStateChangeType::UPDATE_SCALE);
+}
+
+void ScreenSessionManager::UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX,
+                                                  const float& scaleY, const float& pivotX, const float& pivotY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    auto displayNode = session->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+    if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
+        CalcDisplayNodeTranslateOnFoldableRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    } else {
+        CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    }
+    TLOGD(WmsLogTag::DMS, "translate [%{public}f, %{public}f] scale [%{public}f, %{public}f]", translateX, translateY,
+          scaleX, scaleY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetTranslateX(translateX);
+    displayNode->SetTranslateY(translateY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+}
+
+void ScreenSessionManager::CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                                      const float& scaleY, const float& pivotX,
+                                                                      const float& pivotY, float& translateX,
+                                                                      float& translateY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is nullptr");
+        return;
+    }
+    const ScreenProperty& screenProperty = session->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    Rotation rotation = session->GetRotation();
+    float rotatedPivotX = DEFAULT_PIVOT;
+    float rotatedPivotY = DEFAULT_PIVOT;
+    float width = 0.0f;
+    float height = 0.0f;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            rotatedPivotX = pivotY;
+            rotatedPivotY = 1.0f - pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_90:
+            rotatedPivotX = 1.0f - pivotX;
+            rotatedPivotY = 1.0f - pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_180:
+            rotatedPivotX = 1.0f - pivotY;
+            rotatedPivotY = pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_270:
+            rotatedPivotX = pivotX;
+            rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        default:
+            TLOGE(WmsLogTag::DMS, "Unknown Rotation %{public}d", rotation);
+            break;
+    }
+    translateX = (DEFAULT_PIVOT - rotatedPivotX) * (scaleX - DEFAULT_SCALE) * width;
+    translateY = (DEFAULT_PIVOT - rotatedPivotY) * (scaleY - DEFAULT_SCALE) * height;
+}
+
+void ScreenSessionManager::CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                              const float& scaleY, const float& pivotX,
+                                                              const float& pivotY, float& translateX, float& translateY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is nullptr");
+        return;
+    }
+    const ScreenProperty& screenProperty = session->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    Rotation rotation = session->GetRotation();
+    float rotatedPivotX = DEFAULT_PIVOT;
+    float rotatedPivotY = DEFAULT_PIVOT;
+    float width = 0.0f;
+    float height = 0.0f;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            rotatedPivotX = pivotX;
+            rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_90:
+            rotatedPivotX = pivotY;
+            rotatedPivotY = 1.0f - pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_180:
+            rotatedPivotX = 1.0f - pivotX;
+            rotatedPivotY = 1.0f - pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_270:
+            rotatedPivotX = 1.0f - pivotY;
+            rotatedPivotY = pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        default:
+            TLOGE(WmsLogTag::DMS, "Unknown Rotation %{public}d", rotation);
+            break;
+    }
+    translateX = (DEFAULT_PIVOT - rotatedPivotX) * (scaleX - DEFAULT_SCALE) * width;
+    translateY = (DEFAULT_PIVOT - rotatedPivotY) * (scaleY - DEFAULT_SCALE) * height;
+}
+
 void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX,
     float pivotY)
 {
@@ -4170,34 +4382,7 @@ void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, floa
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    auto session = GetScreenSession(screenId);
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::DMS, "session is null");
-        return;
-    }
-    auto displayNode = GetDisplayNode(screenId);
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayNode is null");
-        return;
-    }
-    TLOGD(WmsLogTag::DMS,
-        "scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
-        scaleX,
-        scaleY,
-        pivotX,
-        pivotY);
-    displayNode->SetScale(scaleX, scaleY);
-    displayNode->SetPivot(pivotX, pivotY);
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
-
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
-    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(),
-        emptyMap, DisplayStateChangeType::UPDATE_SCALE);
+    SetDisplayScaleInner(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
@@ -4216,6 +4401,18 @@ void ScreenSessionManager::SetFoldStatusLocked(bool locked)
         return;
     }
     foldScreenController_->LockDisplayStatus(locked);
+}
+
+DMError ScreenSessionManager::SetFoldStatusLockedFromJs(bool locked)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    SetFoldStatusLocked(locked);
+    return DMError::DM_OK;
 }
 
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()

@@ -930,22 +930,26 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 
 bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
 {
-    if (layoutCallback_ == nullptr) {
-        return false;
-    }
-    if (!parcel.WriteObject(layoutCallback_->AsObject())) {
-        return false;
+    if (!layoutCallback_) {
+        if (!parcel.WriteBool(false)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteBool(true) ||
+            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(layoutCallback_->AsObject())) {
+            return false;
+        }
     }
     return true;
 }
 
 void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
 {
-    auto readObject = parcel.ReadObject<IRemoteObject>();
-    sptr<IFutureCallback> callback = nullptr;
-    if (readObject != nullptr) {
-        callback = iface_cast<IFutureCallback>(readObject);
+    if (!parcel.ReadBool()) {
+        return;
     }
+    sptr<IFutureCallback> callback =
+        iface_cast<IFutureCallback>((static_cast<MessageParcel*>(&parcel))->ReadRemoteObject());
     if (callback != nullptr) {
         property->SetLayoutCallback(callback);
     }
@@ -982,6 +986,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
+        parcel.WriteInt32(realParentId_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         MarshallingWindowMask(parcel) &&
@@ -1046,6 +1051,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
+    property->SetRealParentId(parcel.ReadInt32());
     property->SetExtensionFlag(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
@@ -1413,6 +1419,16 @@ bool WindowSessionProperty::IsLayoutFullScreen() const
 void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
 {
     isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
+void WindowSessionProperty::SetRealParentId(int32_t realParentId)
+{
+    realParentId_ = realParentId;
+}
+
+int32_t WindowSessionProperty::GetRealParentId() const
+{
+    return realParentId_;
 }
 
 void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)

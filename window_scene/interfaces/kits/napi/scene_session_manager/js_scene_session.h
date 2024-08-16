@@ -72,6 +72,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_GRAVITY_CHANGE_CB,
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
+    NEXT_FRAME_LAYOUT_FINISH_CB,
 };
 
 class SceneSession;
@@ -103,6 +104,7 @@ private:
     static napi_value CloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
     static napi_value SetWindowLastSafeRect(napi_env env, napi_callback_info info);
+    static napi_value SetMovable(napi_env env, napi_callback_info info);
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     static napi_value SetOffset(napi_env env, napi_callback_info info);
@@ -144,6 +146,7 @@ private:
     napi_value OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLastSafeRect(napi_env env, napi_callback_info info);
+    napi_value OnSetMovable(napi_env env, napi_callback_info info);
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info);
     napi_value OnSetOffset(napi_env env, napi_callback_info info);
@@ -211,6 +214,7 @@ private:
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
+    void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
@@ -258,6 +262,7 @@ private:
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
+    void NotifyFrameLayoutFinish();
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 

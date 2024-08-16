@@ -20,7 +20,7 @@ namespace Rosen {
 int FutureCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "OnRemoteRequest code is %{public}u", code);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "InterfaceToken check failed");
         return ERR_INVALID_STATE;
@@ -43,7 +43,7 @@ int FutureCallbackStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data,
 
 int FutureCallbackStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "UpdateSessionRect!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
     OnUpdateSessionRect(rect);
     return ERR_NONE;
