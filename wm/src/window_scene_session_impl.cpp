@@ -3719,21 +3719,33 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange()
 WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
 {
     Rect newRect = {0, 0, 0, 0};
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
-            property_->GetWindowName().c_str(), GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
+    if (display != nullptr) {
+        displayWidth = display->GetWidth();
+        displayHeight = display->GetHeight();
+    } else {
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            displayWidth = defaultDisplayInfo->GetWidth();
+            displayHeight = defaultDisplayInfo->GetHeight();
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
+                property_->GetWindowName().c_str(), GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
     }
-    bool isLandscape = display->GetWidth() > display->GetHeight() ? true : false;
+    bool isLandscape = displayWidth > displayHeight ? true : false;
     newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     property_->SetRequestRect(newRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "success, Id: %{public}d, newRect: %{public}s, "
-        "isLandscape: %{public}d", GetPersistentId(), newRect.ToString().c_str(), isLandscape);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "success, Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d, "
+        "displayWidth: %{public}d, displayHeight: %{public}d", GetPersistentId(), newRect.ToString().c_str(),
+        isLandscape, displayWidth, displayHeight);
     return WMError::WM_OK;
 }
 
