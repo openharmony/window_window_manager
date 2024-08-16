@@ -17,7 +17,7 @@
 #include "session/host/include/session.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
 #include <parameters.h>
 #include "window_helper.h"

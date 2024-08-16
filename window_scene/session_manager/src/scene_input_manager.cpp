@@ -17,7 +17,7 @@
 
 #include <hitrace_meter.h>
 #include "scene_session_dirty_manager.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS {
