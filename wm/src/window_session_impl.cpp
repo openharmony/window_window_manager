@@ -637,7 +637,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
+            if (window->rotationAnimationCount_ == 0 && !window->isUiContentDestructing_) {
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -992,11 +992,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 {
     DestroyExistUIContent();
     std::unique_ptr<Ace::UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else {
-        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-    }
+    uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1034,11 +1031,13 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+        isUiContentDestructing_ = true;
         uiContent_ = std::move(uiContent);
         RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
+    isUiContentDestructing_ = false;
     return WMError::WM_OK;
 }
 
@@ -2321,13 +2320,16 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->Destroy();
         }
-
-        std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            uiContent_ = nullptr;
-            TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
-                GetPersistentId());
+        {
+            std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+            isUiContentDestructing_ = true;
+            if (uiContent_ != nullptr) {
+                uiContent_ = nullptr;
+                TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
+                    GetPersistentId());
+            }
         }
+        isUiContentDestructing_ = false;
     };
     if (handler_) {
         handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");
