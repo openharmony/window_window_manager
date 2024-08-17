@@ -203,7 +203,9 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     SceneEventPublish::UnSubscribe(g_scbSubscriber);
-    MMI::InputManager::GetInstance()->RegisterWindowStateErrorCallback(nullptr);
+    if (MMI::InputManager::GetInstance() != nullptr) {
+        MMI::InputManager::GetInstance()->RegisterWindowStateErrorCallback(nullptr);
+    }
 }
 
 void SceneSessionManager::Init()
