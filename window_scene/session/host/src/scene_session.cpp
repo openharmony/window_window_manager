@@ -4041,7 +4041,7 @@ WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
     
     auto property = GetSessionProperty();
     if (property == nullptr) {
-       return WSError::WS_ERROR_NULLPTR;
+        return WSError::WS_ERROR_NULLPTR;
     }
 
     if (!WindowHelper::isSystemWindow(GetWindowType())) {
