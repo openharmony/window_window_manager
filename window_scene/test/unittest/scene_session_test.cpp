@@ -1585,7 +1585,7 @@ HWTEST_F(SceneSessionTest, UpdateRect, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason);
+    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
