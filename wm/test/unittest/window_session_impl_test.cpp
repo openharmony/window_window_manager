@@ -1941,11 +1941,11 @@ HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Lev
     ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    window->SetUIContentFlag();
-    EXPECT_EQ(window->SetUIContentComplete.load(), true);
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 
-    window->SetUIContentFlag();
-    EXPECT_EQ(window->SetUIContentComplete.load(), true);
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 }
 } // namespace Rosen

@@ -195,9 +195,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
-    if (!setUIContentCompleted_.load() && handler_ != nullptr) {
-        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
-    }
+    SetUIContentComplete()
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
@@ -484,8 +482,8 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        SetUIContentComplete();
     }
+    SetUIContentComplete();
 
     UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
