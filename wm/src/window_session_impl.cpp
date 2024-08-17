@@ -991,8 +991,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent;
-    uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
         Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
