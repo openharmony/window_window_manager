@@ -2206,18 +2206,6 @@ public:
      */
     virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
 
-    /**
-     * @brief Notify the window that set UI content complete
-     */
-    virtual void NotifySetUIContent() {}
-
-    /**
-     * @brief Notify host that UIExtension timeout
-     *
-     * @param errorCode error code when UIExtension timeout
-     */
-    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
-
     /*
      * @brief Get the real parent id of UIExtension
      *
