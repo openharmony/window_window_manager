@@ -1376,8 +1376,13 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-    if (WindowHelper::IsMainWindow(GetType()) && !setUIContentCompleted_.load() && handler_ != nullptr) {
-        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+
+    if (WindowHelper::IsMainWindow(GetType())) {
+        bool setUIContentCompleted = false;
+        if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+            handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+        }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;

@@ -353,7 +353,6 @@ protected:
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
     };
-    void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
     virtual void NotifySetUIContentComplete() {};
     virtual void NotifyExtensionTimeout(int32_t errorCode) {};
