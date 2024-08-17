@@ -4044,7 +4044,7 @@ WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
     }
 
     if (!WindowHelper::isSystemWindow(GetWindowType)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system windoe");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
     }
 
     auto task = [property, enableDrag]() {
