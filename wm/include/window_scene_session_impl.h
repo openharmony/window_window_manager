@@ -193,7 +193,6 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
-    std::atomic_bool setUIContentFlag_ { false };
 
 private:
     WMError DestroyInner(bool needNotifyServer);
