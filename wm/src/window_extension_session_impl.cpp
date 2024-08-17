@@ -484,7 +484,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        SetUIContentFlag();
+        SetUIContentComplete();
     }
 
     UpdateAccessibilityTreeInfo();

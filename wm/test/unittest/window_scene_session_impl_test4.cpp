@@ -1034,13 +1034,13 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContentComplete, Function | Sma
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 
     option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentFlag_.load(), false);
+    EXPECT_EQ(window->setUIContentCompleted_.load(), false);
 }
 }
 } // namespace Rosen
