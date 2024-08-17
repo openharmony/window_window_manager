@@ -4031,6 +4031,31 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
     return WMError::WM_OK;
 }
 
+WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
+    if (!SessionPermission::IsSystemCalling) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+    }
+    
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+       return WSError::WS_ERROR_NULLPTR;
+    }
+
+    if (!WindowHelper::isSystemWindow(GetWindowType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system windoe");
+    }
+
+    auto task = [property, enableDrag]() {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task enableDrag : %{public}d", enableDrag);
+        property->SetDragEnabled(enableDrag);
+        return WSError::WS_OK;
+    }
+    PostTask(task, "SetSystemWindowEnableDrag");
+    return WSError::WS_OK;
+}
+
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {

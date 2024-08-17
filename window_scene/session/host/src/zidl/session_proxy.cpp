@@ -1364,6 +1364,35 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SetSystemWindowEnableDrag(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write enableDrag failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::UpdateRectChangeListenerRegistered(bool isRegister)
 {
     MessageParcel data;
