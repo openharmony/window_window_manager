@@ -278,6 +278,23 @@ HWTEST_F(SessionProxyTest, UpdateWindowSceneAfterCustomAnimation, Function | Sma
 }
 
 /**
+ * @tc.name: SetSystemWindowEnableDrag
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetSystemWindowEnableDrag, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetSystemWindowEnableDrag start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    bool enableDrag = false;
+    WSError res = sProxy->SetSystemWindowEnableDrag(enableDrag);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetSystemWindowEnableDrag end";
+}
+
+/**
  * @tc.name: TransferAbilityResult
  * @tc.desc: normal function
  * @tc.type: FUNC
