@@ -1021,11 +1021,11 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: NotifySetUIContent
- * @tc.desc: NotifySetUIContent
+ * @tc.name: NotifySetUIContentComplete
+ * @tc.desc: NotifySetUIContentComplete
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContentComplete, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -1033,13 +1033,13 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContent, Function | SmallTest |
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    window->NotifySetUIContent();
+    window->NotifySetUIContentComplete();
     EXPECT_EQ(window->setUIContentFlag_.load(), true);
 
     option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    window->NotifySetUIContent();
+    window->NotifySetUIContentComplete();
     EXPECT_EQ(window->setUIContentFlag_.load(), false);
 }
 }
