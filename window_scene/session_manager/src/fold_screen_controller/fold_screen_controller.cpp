@@ -174,4 +174,24 @@ void FoldScreenController::ExitCoordination()
 {
     foldScreenPolicy_->ExitCoordination();
 }
+
+bool FoldScreenController::GetModeChangeRunningStatus()
+{
+    return foldScreenPolicy_->GetModeChangeRunningStatus();
+}
+
+void FoldScreenController::SetdisplayModeChangeStatus(bool status)
+{
+    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+}
+
+bool FoldScreenController::GetdisplayModeRunningStatus()
+{
+    return foldScreenPolicy_->GetdisplayModeRunningStatus();
+}
+
+FoldDisplayMode FoldScreenController::GetLastCacheDisplayMode()
+{
+    return foldScreenPolicy_->GetLastCacheDisplayMode();
+}
 } // namespace OHOS::Rosen
