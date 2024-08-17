@@ -249,6 +249,35 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
     }
 }
 
+static void AddDialogSessionMapItem(std::map<int32_t, sptr<SceneSession>>& dialogMap,
+    const sptr<SceneSession>& session)
+{
+    const auto& mainSession = session->GetMainSession();
+    if (mainSession == nullptr) {
+        return;
+    }
+    bool isTopmostModalSubWindow = false;
+    const auto& property = session->GetSessionProperty();
+    if (property != nullptr && property->IsTopmost()) {
+        isTopmostModalSubWindow = true;
+    }
+    if (auto iter = dialogMap.find(mainSession->GetPersistentId());
+        iter != dialogMap.end() && iter->second != nullptr) {
+        auto& targetSession = iter->second;
+        if (targetSession->GetSessionProperty() &&
+            targetSession->GetSessionProperty()->IsTopmost() &&
+            !isTopmostModalSubWindow) {
+            return;
+        }
+        if (targetSession->GetZOrder() > session->GetZOrder()) {
+            return;
+        }
+    }
+    dialogMap[mainSession->GetPersistentId()] = session;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
+        session->GetPersistentId(), mainSession->GetPersistentId());
+}
+
 std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSessionMap(
     const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
 {
@@ -264,22 +293,7 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             isModalSubWindow = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
         }
         if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            const auto& parentSession = session->GetParentSession();
-            if (parentSession == nullptr) {
-                continue;
-            }
-            bool isTopmostModalSubWindow = false;
-            if (property != nullptr && property->IsTopmost()) {
-                isTopmostModalSubWindow = true;
-            }
-            auto iter = dialogMap.find(parentSession->GetPersistentId());
-            if (iter != dialogMap.end() && iter->second != nullptr && iter->second->GetSessionProperty() &&
-                iter->second->GetSessionProperty()->IsTopmost() && isTopmostModalSubWindow == false) {
-                continue;
-            }
-            dialogMap[parentSession->GetPersistentId()] = session;
-            WLOGFI("Add dialog session, id: %{public}d, parentId: %{public}d",
-                session->GetPersistentId(), parentSession->GetPersistentId());
+            AddDialogSessionMapItem(dialogMap, session);
         }
     }
     return dialogMap;
@@ -397,17 +411,19 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
         auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
-        auto iter = (sceneSessionValue->GetParentPersistentId() == INVALID_SESSION_ID) ?
+        auto iter = (sceneSessionValue->GetMainSessionId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
-            dialogMap.find(sceneSessionValue->GetParentPersistentId());
+            dialogMap.find(sceneSessionValue->GetMainSessionId());
         if (iter != dialogMap.end() && iter->second != nullptr &&
-            sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId()) {
+            sceneSessionValue->GetPersistentId() != iter->second->GetPersistentId() &&
+            iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
         } else if (sceneSessionValue->HasModalUIExtension()) {
             AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
         }
-
+        TLOGD(WmsLogTag::WMS_EVENT, "windowId = %{public}d, agentWindowId = %{public}d, zOrder = %{public}f",
+            windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
         pixelMapList.emplace_back(pixelMap);
         // set the number of hot areas to the maximum number of hot areas when it exceeds the maximum number
