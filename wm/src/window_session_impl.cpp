@@ -1092,10 +1092,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
+
     auto parentExtensionWindow = parentExtensionWindow_.promote();
-    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
-        parentExtensionWindow->SetUIContentFlag();
+    if (parentExtensionWindow != nullptr && property_ != nullptr && property_->GetExtensionFlag()) {
+        static_cast<WindowExtensionSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
     }
+
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -1149,7 +1151,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    NotifySetUIContent();
+
+    NotifySetUIContentComplete();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -3652,50 +3655,44 @@ WMError WindowSessionImpl::SetContinueState(int32_t continueState)
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::SetUIContentFlag()
+void WindowSessionImpl::SetUIContentComplete()
 {
-    if (setUIContentFlag_.load()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
-        return;
+    bool setUIContentCompleted = false;
+    if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
     }
-    if (handler_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-        return;
-    }
-
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent complete persistentId=%{public}d", GetPersistentId());
-    handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
-    setUIContentFlag_.store(true);
 }
 
-void WindowSessionImpl::AddUIContentSettingTimeoutCheck()
+void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Come in AddUIContentSettingTimeoutCheck");
-    if (handler_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "handler is nullptr");
-        return;
-    }
+    auto task = [weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        
 
-    auto task = [this] {
-        if (setUIContentFlag_.load()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "already SetUIContent");
+        if (window->setUIContentCompleted_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;
         }
 
-        TLOGI(WmsLogTag::WMS_UIEXT, "SetUIContent timeout, persistentId=%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
-        if (property_) {
-            oss << ", windowName: " << property_->GetWindowName();
-        }
-        if (context_) {
-            oss << ", bundleName: " << context_->GetBundleName();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
 
-        if (WindowHelper::IsUIExtensionWindow(GetType())) {
-            NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
         }
     };
     handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),

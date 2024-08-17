@@ -485,7 +485,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
         if (WindowHelper::IsMainWindow(GetType())) {
-            AddUIContentSettingTimeoutCheck();
+            AddSetUIContentTimeoutCheck();
         }
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
@@ -1376,7 +1376,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-    if (WindowHelper::IsMainWindow(GetType()) && !setUIContentFlag_.load() && handler_ != nullptr) {
+    if (WindowHelper::IsMainWindow(GetType()) && !setUIContentCompleted_.load() && handler_ != nullptr) {
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
@@ -3834,15 +3834,14 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     return WMError::WM_OK;
 }
 
-void WindowSceneSessionImpl::NotifySetUIContent()
+void WindowSceneSessionImpl::NotifySetUIContentComplete()
 {
-    const WindowType& type = GetType();
-    if (WindowHelper::IsMainWindow(type)) { // main window
-        SetUIContentFlag();
-    } else if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
+    if (WindowHelper::IsMainWindow(GetType())) { // main window
+        SetUIContentComplete();
+    } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) { // sub window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
-            mainWindow->SetUIContentFlag();
+            mainWindow->SetUIContentComplete();
         }
     }
 }
