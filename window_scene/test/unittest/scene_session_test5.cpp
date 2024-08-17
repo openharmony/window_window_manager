@@ -1024,7 +1024,6 @@ HWTEST_F(SceneSessionTest5, SetSystemWindowEnableDrag, Function | SmallTest | Le
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto ret = session->SetSystemWindowEnableDrag(true);
     EXPECT_NE(WSError::WS_OK, ret);
-
 }
 
 /**
