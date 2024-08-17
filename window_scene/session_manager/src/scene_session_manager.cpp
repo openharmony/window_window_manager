@@ -243,11 +243,13 @@ void SceneSessionManager::Init()
     SceneInputManager::GetInstance().Init();
 
     // MMI window state error check
-    int32_t retCode = MMI::InputManager::GetInstance()->
-        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
-        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
-    });
-    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+    if (MMI::InputManager::GetInstance() != nullptr) {
+        int32_t retCode = MMI::InputManager::GetInstance()->
+            RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+            this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+        });
+        TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+    }
 }
 
 void SceneSessionManager::InitScheduleUtils()
