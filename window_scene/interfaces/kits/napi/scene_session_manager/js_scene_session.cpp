@@ -290,6 +290,8 @@ void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_valu
 {
     BindNativeFunction(env, objValue, "setAppSupportPhoneInPc", moduleName,
         JsSceneSession::SetAppSupportPhoneInPc);
+    BindNativeFunction(env, objValue, "setCompatibleWindowSizeInPc", moduleName,
+        JsSceneSession::SetCompatibleWindowSizeInPc);
     BindNativeFunction(env, objValue, "compatibleFullScreenRecover", moduleName,
         JsSceneSession::CompatibleFullScreenRecover);
     BindNativeFunction(env, objValue, "compatibleFullScreenMinimize", moduleName,
@@ -1323,6 +1325,13 @@ napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI] called");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI] called");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetCompatibleWindowSizeInPc(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
@@ -3310,6 +3319,54 @@ napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->SetAppSupportPhoneInPc(isSupportPhone);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_FOUR) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t portraitWidth = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], portraitWidth)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to portraitWidth");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t portraitHeight = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], portraitHeight)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to portraitHeight");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t landscapeWidth = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], landscapeWidth)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to landscapeWidth");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t landscapeHeight = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], landscapeHeight)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to landscapeHeight");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
     return NapiGetUndefined(env);
 }
 
