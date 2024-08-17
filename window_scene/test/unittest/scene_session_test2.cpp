@@ -526,7 +526,7 @@ HWTEST_F(SceneSessionTest2, NotifyClientToUpdateRect01, Function | SmallTest | L
     ASSERT_NE(mockSessionStage, nullptr);
     scensession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     scensession->sessionStage_ = mockSessionStage;
-    auto ret = scensession->NotifyClientToUpdateRect(nullptr);
+    auto ret = scensession->NotifyClientToUpdateRect("SceneSessionTest2", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 

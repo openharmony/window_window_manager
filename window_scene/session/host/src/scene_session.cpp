@@ -628,9 +628,9 @@ WSError SceneSession::SetAspectRatio(float ratio)
 }
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rect, reason, rsTransaction]() {
+    auto task = [weakThis = wptr(this), rect, reason, rsTransaction,  updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -661,10 +661,10 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         } else {
             session->winRect_ = rect;
-            session->NotifyClientToUpdateRect(rsTransaction);
+            session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
-            session->GetPersistentId(), session->reason_, rect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s",
+            session->GetPersistentId(), session->reason_, updateReason.c_str(), rect.ToString().c_str());
 
         return WSError::WS_OK;
     };
@@ -722,7 +722,8 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
         keyboardSession->winRect_.ToString().c_str(), gravity);
 }
 
-WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction)
+WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
+    std::shared_ptr<RSTransaction> rsTransaction)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
         GetPersistentId(), reason_, winRect_.ToString().c_str());
@@ -753,9 +754,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
     if (reason_ == SizeChangeReason::UNDEFINED || reason_ == SizeChangeReason::MOVE ||
         reason_ == SizeChangeReason::RESIZE) {
-        ret = Session::UpdateRect(winRect_, reason_, nullptr);
+        ret = Session::UpdateRect(winRect_, reason_, updateReason, nullptr);
     } else {
-        ret = Session::UpdateRect(winRect_, reason_, rsTransaction);
+        ret = Session::UpdateRect(winRect_, reason_, updateReason, rsTransaction);
 #ifdef DEVICE_STATUS_ENABLE
         // When the drag is in progress, the drag window needs to be notified to rotate.
         if (rsTransaction != nullptr) {
@@ -767,15 +768,16 @@ WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction
     return ret;
 }
 
-WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
+WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
+    std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction]() {
+    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret == WSError::WS_OK) {
             if (session->specificCallback_ != nullptr) {
                 if (Session::IsScbCoreEnabled()) {
@@ -1417,9 +1419,9 @@ ExtensionWindowEventInfo SceneSession::GetLastModalUIExtensionEventInfo()
     return modalUIExtensionInfoList_.back();
 }
 
-Vector2f SceneSession::GetPosition(bool useUIExtension)
+Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
-    WSRect windowRect = GetSessionRect();
+    WSRect windowRect = GetSessionGlobalRect();
     if (useUIExtension && HasModalUIExtension()) {
         auto rect = GetLastModalUIExtensionEventInfo().windowRect;
         windowRect.posX_ = rect.posX_;
@@ -1974,14 +1976,14 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
-            UpdateRect(rect, reason);
+            UpdateRect(rect, reason, "compatibleInPcPortrait");
         } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
             rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
             rect.width_ = compatibleInPcLandscapeWidth;
             rect.height_ = compatibleInPcLandscapeHeight;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
-            UpdateRect(rect, reason);
+            UpdateRect(rect, reason, "compatibleInPcLandscape");
         } else {
             if (windowWidth < windowHeight) {
                 rect.width_ = compatibleInPcPortraitWidth;
@@ -2038,7 +2040,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
-            UpdateRect(rect, reason);
+            UpdateRect(rect, reason, "OnMoveDragCallback");
         }
     }
 
@@ -4096,7 +4098,7 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
     dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
     dirtyFlags_ |= UpdateInteractiveInner(uiParam.interactive_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::INTERACTIVE) : 0;
-    dirtyFlags_ |= UpdateRectInner(uiParam.rect_, reason_) ?
+    dirtyFlags_ |= UpdateRectInner(uiParam, reason_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::RECT) : 0;
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
@@ -4145,9 +4147,9 @@ bool SceneSession::PipelineNeedNotifyClientToUpdateRect() const
     return IsVisibleForeground() && GetForegroundInteractiveStatus();
 }
 
-bool SceneSession::UpdateRectInner(const WSRect& rect, SizeChangeReason reason)
+bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason)
 {
-    if (!((NotifyServerToUpdateRect(rect, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
+    if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
@@ -4155,16 +4157,19 @@ bool SceneSession::UpdateRectInner(const WSRect& rect, SizeChangeReason reason)
     if (transactionController) {
         rsTransaction = transactionController->GetRSTransaction();
     }
-    NotifyClientToUpdateRect(rsTransaction);
+    NotifyClientToUpdateRect("WMSPipeline", rsTransaction);
     return true;
 }
 
-bool SceneSession::NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason reason)
+bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason)
 {
     if (!GetForegroundInteractiveStatus()) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip recent, id:%{public}d", GetPersistentId());
         return false;
     }
+    globalRect_ = uiParam.rect_;
+    WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
+        uiParam.rect_.width_, uiParam.rect_.height_ };
     if (winRect_ == rect) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s!",
             GetPersistentId(), rect.ToString().c_str());
@@ -4175,6 +4180,8 @@ bool SceneSession::NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason
             GetPersistentId(), rect.ToString().c_str());
         return false;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect rectAfter:%{public}s preRect:%{public}s",
+        GetPersistentId(), rect.ToString().c_str(), winRect_.ToString().c_str());
     winRect_ = rect;
     RectCheckProcess();
     return true;

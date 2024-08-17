@@ -815,10 +815,10 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFD("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "
-        "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
+        "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
     if (!IsSessionValid()) {
         winRect_ = rect;
         TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
@@ -896,8 +896,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     callingPid_ = pid;
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
-        NotifyClientToUpdateRect(nullptr);
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
+        NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
@@ -2420,6 +2420,14 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+WSRect Session::GetSessionGlobalRect() const
+{
+    if (IsScbCoreEnabled()) {
+        return globalRect_;
+    }
+    return winRect_;
+}
+
 void Session::SetSessionLastRect(const WSRect& rect)
 {
     if (lastWinRect_ == rect) {
@@ -2861,7 +2869,7 @@ void Session::SetOffset(float x, float y)
         .height_ = std::round(bounds_.height_),
     };
     if (newRect != winRect_) {
-        UpdateRect(newRect, SizeChangeReason::UNDEFINED);
+        UpdateRect(newRect, SizeChangeReason::UNDEFINED, "SetOffset");
     }
 }
 
