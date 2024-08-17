@@ -195,7 +195,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
-    SetUIContentComplete()
+    SetUIContentComplete();
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
