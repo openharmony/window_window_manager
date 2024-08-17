@@ -913,6 +913,11 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     pipControl->window_ = window;
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->pipOption_->SetNavigationId("");
+    pipControl->mainWindow_ = mw;
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 
 /**
