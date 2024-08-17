@@ -1900,11 +1900,11 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
 }
 
 /**
- * @tc.name: AddUIContentSettingTimeoutCheck
- * @tc.desc: AddUIContentSettingTimeoutCheck
+ * @tc.name: AddSetUIContentTimeoutCheck
+ * @tc.desc: AddSetUIContentTimeoutCheck
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1913,39 +1913,39 @@ HWTEST_F(WindowSessionImplTest, AddUIContentSettingTimeoutCheck_test, Function |
     window->handler_ = nullptr;
     window->property_ = nullptr;
     window->context_ = nullptr;
-    window->AddUIContentSettingTimeoutCheck();
+    window->AddSetUIContentTimeoutCheck();
 
-    option->SetWindowName("AddUIContentSettingTimeoutCheck_test");
+    option->SetWindowName("AddSetUIContentTimeoutCheck_test");
     option->SetBundleName("UTtest");
     WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;
     option->SetWindowType(type1);
     sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window1, nullptr);
-    window1->AddUIContentSettingTimeoutCheck();
+    window1->AddSetUIContentTimeoutCheck();
 
     WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
     option->SetWindowType(type2);
     sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window2, nullptr);
-    window2->AddUIContentSettingTimeoutCheck();
+    window2->AddSetUIContentTimeoutCheck();
 }
 
 /**
- * @tc.name: SetUIContentFlag
- * @tc.desc: SetUIContentFlag
+ * @tc.name: SetUIContentComplete
+ * @tc.desc: SetUIContentComplete
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, SetUIContentFlag, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->SetUIContentFlag();
-    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+    EXPECT_EQ(window->SetUIContentComplete.load(), true);
 
     window->SetUIContentFlag();
-    EXPECT_EQ(window->setUIContentFlag_.load(), true);
+    EXPECT_EQ(window->SetUIContentComplete.load(), true);
 }
 }
 } // namespace Rosen
