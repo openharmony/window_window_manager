@@ -3843,7 +3843,7 @@ void WindowSceneSessionImpl::NotifySetUIContentComplete()
     } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) { // sub window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
-            static_cast<WindowSceneSessionImpl*>(mainWindow.GetPtr())->SetUIContentComplete();
+            static_cast<WindowSceneSessionImpl*>(mainWindow.GetRefPtr())->SetUIContentComplete();
         }
     }
 }
