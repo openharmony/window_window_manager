@@ -2066,7 +2066,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
         ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetUIContentByName(contextUrl, env, nativeStorage, ability));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage, BackupAndRestoreType::NONE, nullptr, ability));
+            weakWindow->NapiSetUIContent(contextUrl, env, nativeStorage, false, nullptr, ability));
     }
     if (ret == WmErrorCode::WM_OK) {
         task.Resolve(env, NapiGetUndefined(env));

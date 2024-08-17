@@ -50,27 +50,6 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
     const std::string PARAM_DUMP_HELP = "-h";
-
-Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
-{
-    auto contentInfoType = Ace::ContentInfoType::NONE;
-    switch (type) {
-        case BackupAndRestoreType::CONTINUATION:
-            contentInfoType = Ace::ContentInfoType::CONTINUATION;
-            break;
-        case BackupAndRestoreType::APP_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
-            break;
-        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
-            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
-            break;
-        case BackupAndRestoreType::NONE:
-            [[fallthrough]];
-        default:
-            break;
-    }
-    return contentInfoType;
-}
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
@@ -569,29 +548,26 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage,
-        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
-        type, ability);
+        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
 }
 
 WMError WindowImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME,
-        BackupAndRestoreType::NONE, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
 }
 
 WMError WindowImpl::SetUIContentByAbc(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC,
-        BackupAndRestoreType::NONE, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
 }
 
 WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
+    WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     if (!IsWindowValid()) {
@@ -614,21 +590,13 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     }
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    switch (setUIContentType) {
+    switch (type) {
         default:
-        case WindowSetUIContentType::DEFAULT: {
-            auto routerStack = GetRestoredRouterStack();
-            auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
-            if (!routerStack.empty() &&
-                uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
-                TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
-                break;
-            }
+        case WindowSetUIContentType::DEFAULT:
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
-        }
-        case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+        case WindowSetUIContentType::DISTRIBUTE:
+            aceRet = uiContent->Restore(this, contentInfo, storage);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -721,31 +689,14 @@ Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
     return nullptr;
 }
 
-std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
+std::string WindowImpl::GetContentInfo()
 {
     WLOGFD("GetContentInfo");
-    if (type == BackupAndRestoreType::NONE) {
-        return "";
-    }
-
     if (uiContent_ == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
-}
-
-WMError WindowImpl::SetRestoredRouterStack(const std::string& routerStack)
-{
-    TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
-    restoredRouterStack_ = routerStack;
-    return WMError::WM_OK;
-}
-
-std::string WindowImpl::GetRestoredRouterStack()
-{
-    TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
-    return std::move(restoredRouterStack_);
+    return uiContent_->GetContentInfo();
 }
 
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
