@@ -203,9 +203,6 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     SceneEventPublish::UnSubscribe(g_scbSubscriber);
-    if (MMI::InputManager::GetInstance() != nullptr) {
-        MMI::InputManager::GetInstance()->RegisterWindowStateErrorCallback(nullptr);
-    }
 }
 
 void SceneSessionManager::Init()
@@ -245,13 +242,11 @@ void SceneSessionManager::Init()
     SceneInputManager::GetInstance().Init();
 
     // MMI window state error check
-    if (MMI::InputManager::GetInstance() != nullptr) {
-        int32_t retCode = MMI::InputManager::GetInstance()->
-            RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
-            this->NotifyWindowStateErrorFromMMI(pid, persistentId);
-        });
-        TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
-    }
+    int32_t retCode = MMI::InputManager::GetInstance()->
+        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+    });
+    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 }
 
 void SceneSessionManager::InitScheduleUtils()
