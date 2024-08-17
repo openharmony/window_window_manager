@@ -3676,7 +3676,6 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             return;
         }
         
-
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;
