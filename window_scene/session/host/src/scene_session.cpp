@@ -2654,7 +2654,7 @@ bool SceneSession::IsVisibleForAccessibility() const
 {
     if (Session::IsScbCoreEnabled()) {
         return GetSystemTouchable() && GetForegroundInteractiveStatus() && IsVisible() &&
-            (state_ != SessionState::STATE_BACKGROUND);
+            (state_ != SessionState::STATE_BACKGROUND) && (state_ != SessionState::STATE_DISCONNECT);
     }
     return GetSystemTouchable() && GetForegroundInteractiveStatus() &&
         (IsVisible() || state_ == SessionState::STATE_ACTIVE || state_ == SessionState::STATE_FOREGROUND);
