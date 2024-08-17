@@ -82,6 +82,16 @@ napi_ref PipOption::GetNodeControllerRef() const
     return customNodeController_;
 }
 
+void PipOption::SetTypeNodeRef(napi_ref ref)
+{
+    typeNode_ = ref;
+}
+
+napi_ref PipOption::GetTypeNodeRef() const
+{
+    return typeNode_;
+}
+
 void* PipOption::GetContext() const
 {
     return contextPtr_;
@@ -126,6 +136,16 @@ void PipOption::SetXComponentController(std::shared_ptr<XComponentController> xC
 std::shared_ptr<XComponentController> PipOption::GetXComponentController()
 {
     return xComponentController_;
+}
+
+void PipOption::SetTypeNodeEnabled(bool enable)
+{
+    useTypeNode_ = enable;
+}
+
+bool PipOption::IsTypeNodeEnabled() const
+{
+    return useTypeNode_;
 }
 } // namespace Rosen
 } // namespace OHOS

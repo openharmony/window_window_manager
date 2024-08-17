@@ -383,6 +383,7 @@ enum class SizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     END,
 };
 
