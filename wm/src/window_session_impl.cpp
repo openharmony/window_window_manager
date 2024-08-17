@@ -1590,8 +1590,8 @@ WMError WindowSessionImpl::EnableDrag(bool enableDrag)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WSError errorCode = hostSession->SetSystemWindowEnableDrag(enableDrag);
     TLOGI(WmsLogTag::WMS_EVENT, "IPC, sessionId: %{public}d ,errcode: %{public}d", GetPersistentId(),
-        static_cast<int>(errorcode));
-    return static_cast<WMError>(errcode);
+        static_cast<int>(errorCode));
+    return static_cast<WMError>(errorCode);
 }
 
 WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
