@@ -185,6 +185,12 @@ public:
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
 
+    /**
+     * Sub Window
+     */
+    void SetSubWindowLevel(uint32_t subWindowLevel);
+    uint32_t GetSubWindowLevel() const;
+
     /*
      * UIExtension
      */
@@ -315,6 +321,11 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
+
+    /**
+     * Sub Window
+     */
+    uint32_t subWindowLevel_ = 1;
 
     /*
      * UIExtension
