@@ -108,7 +108,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
-    WindowSessionImpl::AddUIContentSettingTimeoutCheck();
+    AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
 
@@ -195,7 +195,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
-    if (!setUIContentFlag_.load() && handler_ != nullptr) {
+    if (!setUIContentCompleted_.load() && handler_ != nullptr) {
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     }
     RemoveExtensionWindowStageFromSCB();

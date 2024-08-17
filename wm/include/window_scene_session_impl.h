@@ -170,7 +170,7 @@ public:
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
-    void NotifySetUIContent() override;
+    void NotifySetUIContentComplete() override;
 
 protected:
     void DestroySubWindow();
