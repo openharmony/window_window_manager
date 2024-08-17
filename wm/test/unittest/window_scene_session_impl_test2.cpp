@@ -727,7 +727,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     windowSceneSessionImpl->property_->SetPersistentId(6);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
-    auto ret = windowSceneSessionImpl->RaiseToAppTop();
+    auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 }
 
