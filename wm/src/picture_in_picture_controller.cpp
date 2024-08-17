@@ -417,7 +417,9 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
             TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
         }
     }
-    mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
+    if (mainWindow_ != nullptr) {
+        mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
+    }
     mainWindowLifeCycleListener_ = nullptr;
     return WMError::WM_OK;
 }
