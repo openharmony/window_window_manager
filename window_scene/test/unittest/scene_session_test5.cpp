@@ -987,34 +987,27 @@ HWTEST_F(SceneSessionTest5, SetForegroundInteractiveStatus, Function | SmallTest
 }
 
 /**
- * @tc.name: SetForegroundInteractiveStatus
- * @tc.desc: SetForegroundInteractiveStatus function01
+ * @tc.name: HandleUpdatePropertyByAction
+ * @tc.desc: HandleUpdatePropertyByAction function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, SetForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetForegroundInteractiveStatus";
-    info.bundleName_ = "SetForegroundInteractiveStatus";
+    info.abilityName_ = "HandleUpdatePropertyByAction";
+    info.bundleName_ = "HandleUpdatePropertyByAction";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_NE(session, nullptr);
-    session->toastSession_.clear();
-    session->toastSession_.push_back(session);
-    session->SetForegroundInteractiveStatus(false);
-    session->toastSession_.clear();
-    session->SetSessionState(SessionState::STATE_ACTIVE);
-    session->toastSession_.push_back(session);
-    session->SetForegroundInteractiveStatus(false);
-    session->toastSession_.clear();
-    session->SetSessionState(SessionState::STATE_CONNECT);
-    session->toastSession_.push_back(session);
-    session->SetForegroundInteractiveStatus(false);
-    session->toastSession_.clear();
-    session->SetSessionState(SessionState::STATE_ACTIVE);
-    session->toastSession_.push_back(nullptr);
-    session->SetForegroundInteractiveStatus(false);
-    session->toastSession_.clear();
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
+    auto res = session->HandleUpdatePropertyByAction(nullptr, nullptr, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    res = session->HandleUpdatePropertyByAction(nullptr, session, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    res = session->HandleUpdatePropertyByAction(property, session, action);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
+    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
+    res = session->HandleUpdatePropertyByAction(property, session, action);
+    EXPECT_EQ(WMError::WM_OK, res);
 }
 
 /**
