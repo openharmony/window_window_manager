@@ -4044,7 +4044,7 @@ WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    if (!WindowHelper::isSystemWindow(GetWindowType())) {
+    if (!WindowHelper::IsSystemWindow(GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
         return WSError::WS_ERROR_INVALID_CALLING;
     }
