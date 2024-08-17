@@ -4034,8 +4034,9 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
-    if (!SessionPermission::IsSystemCalling) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     
     auto property = GetSessionProperty();
@@ -4043,15 +4044,16 @@ WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
        return WSError::WS_ERROR_NULLPTR;
     }
 
-    if (!WindowHelper::isSystemWindow(GetWindowType)) {
+    if (!WindowHelper::isSystemWindow(GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
+        return WSError::WS_ERROR_INVALID_CALLING;
     }
 
     auto task = [property, enableDrag]() {
         TLOGI(WmsLogTag::WMS_LAYOUT, "task enableDrag : %{public}d", enableDrag);
         property->SetDragEnabled(enableDrag);
         return WSError::WS_OK;
-    }
+    };
     PostTask(task, "SetSystemWindowEnableDrag");
     return WSError::WS_OK;
 }
