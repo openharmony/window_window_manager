@@ -859,6 +859,27 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | 
     ASSERT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, windowStatus);
 }
 
+/**
+ * @tc.name: VerifySubWindowLevel
+ * @tc.desc: VerifySubWindowLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    EXPECT_NE(nullptr, option);
+    option->SetWindowName("VerifySubWindowLevel");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetDisplayId(0);
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    EXPECT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    EXPECT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_EQ(false, window->VerifySubWindowLevel(window->GetParentId()));
+}
 
 /**
  * @tc.name: MoveTo03

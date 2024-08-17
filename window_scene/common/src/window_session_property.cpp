@@ -918,6 +918,16 @@ bool WindowSessionProperty::GetIsPcAppInPad() const
     return isPcAppInPad_;
 }
 
+void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
+{
+    subWindowLevel_ = subWindowLevel;
+}
+
+uint32_t WindowSessionProperty::GetSubWindowLevel() const
+{
+    return subWindowLevel_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -995,7 +1005,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) &&
-        MarshallingFutureCallback(parcel);
+        MarshallingFutureCallback(parcel) &&
+        parcel.WriteUint32(subWindowLevel_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1066,6 +1077,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     UnmarshallingFutureCallback(parcel, property);
+    property->SetSubWindowLevel(parcel.ReadUint32());
     return property;
 }
 
