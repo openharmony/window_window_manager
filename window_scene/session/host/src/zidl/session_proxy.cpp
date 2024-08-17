@@ -1364,7 +1364,7 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SetSystemWindowEnableDrag(bool enableDrag)
+WSError SessionProxy::SetSystemWindowEnableDrag(bool enableDrag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     MessageParcel data;
