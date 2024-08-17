@@ -49,6 +49,7 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
+#include "window_extension_session_impl.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
