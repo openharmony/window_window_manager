@@ -138,7 +138,8 @@ public:
         sptr<PiPMainWindowListenerImpl> windowListener_;
     };
 
-    class WindowLifeCycleListener : public Rosen::IWindowLifeCycle {
+private:
+    class WindowLifeCycleListener : public IWindowLifeCycle {
     public:
         void AfterDestroyed() override;
     };
@@ -164,6 +165,7 @@ private:
     std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
     sptr<Window> window_;
     sptr<Window> mainWindow_;
+    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_;
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
@@ -175,7 +177,6 @@ private:
     std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
-    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_;
 };
 } // namespace Rosen
 } // namespace OHOS
