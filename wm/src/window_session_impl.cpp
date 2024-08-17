@@ -49,7 +49,6 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
-#include "window_extension_session_impl.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -1096,7 +1095,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
 
     auto parentExtensionWindow = parentExtensionWindow_.promote();
     if (parentExtensionWindow != nullptr && property_ != nullptr && property_->GetExtensionFlag()) {
-        static_cast<WindowExtensionSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
+        static_cast<WindowSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
     }
 
     WindowType winType = GetType();
