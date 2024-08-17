@@ -352,6 +352,8 @@ protected:
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
     };
+    bool hasFirstNotifyInteractive_ = false;
+    bool interactive_ = true;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -475,8 +477,6 @@ private:
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
-    bool hasFirstNotifyInteractive_ = false;
-    bool interactive_ = true;
     std::atomic<bool> isUiContentDestructing_ = false;
 };
 } // namespace Rosen
