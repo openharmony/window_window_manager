@@ -144,9 +144,7 @@ int SceneSessionManagerLiteStub::HandleIsValidSessionIds(MessageParcel &data, Me
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
     std::vector<bool> results;
-    WSError errCode = IsValidSessionIds(sessionIds, results);
     reply.WriteBoolVector(results);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

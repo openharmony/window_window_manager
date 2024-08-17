@@ -1378,25 +1378,6 @@ HWTEST_F(WindowImplTest, Create3, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, res);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
-/**
- * @tc.name: SetRestoredRouterStack_0100
- * @tc.desc: basic function test of set or get restored router stack.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(WindowImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    std::string routerStack = "stackInfo:{}";
-    EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    std::string gettedStack = window->GetRestoredRouterStack();
-    EXPECT_EQ(gettedStack, routerStack);
-    EXPECT_TRUE(window->GetRestoredRouterStack().empty());
-}
 }
 } // namespace Rosen
 } // namespace OHOS
