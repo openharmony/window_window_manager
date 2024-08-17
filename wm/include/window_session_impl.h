@@ -43,6 +43,12 @@ namespace Rosen {
 namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+
+/*
+ * DFX
+ */
+const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
+constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 }
 
 struct WindowTitleVisibleFlags {
@@ -334,6 +340,18 @@ protected:
      * UIExtension
      */
     wptr<Window> parentExtensionWindow_ = nullptr;
+
+    /*
+     * DFX
+     */
+    void SetUIContentComplete();
+    void AddSetUIContentTimeoutCheck();
+    virtual void NotifySetUIContentComplete() {}
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+    std::atomic_bool setUIContentCompleted_ { false };
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000
+    };
 
 private:
     //Trans between colorGamut and colorSpace

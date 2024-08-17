@@ -193,6 +193,11 @@ protected:
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
 
+    /*
+     * DFX
+     */
+    void NotifySetUIContentComplete() override;
+
 private:
     WMError DestroyInner(bool needNotifyServer);
     WMError SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);

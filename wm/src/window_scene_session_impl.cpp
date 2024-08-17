@@ -484,6 +484,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
+
+        if (WindowHelper::IsMainWindow(GetType())) {
+            AddSetUIContentTimeoutCheck();
+        }
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
@@ -1373,6 +1377,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
+
+    if (WindowHelper::IsMainWindow(GetType())) {
+        SetUIContentComplete();
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
 }
@@ -3826,6 +3834,18 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "WinId:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::NotifySetUIContentComplete()
+{
+    if (WindowHelper::IsMainWindow(GetType())) { // main window
+        SetUIContentComplete();
+    } else if (WindowHelper::IsSubWindow(GetType()) && (property_->GetExtensionFlag() == false)) { // sub window
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr) {
+            static_cast<WindowSceneSessionImpl*>(mainWindow.GetRefPtr())->SetUIContentComplete();
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

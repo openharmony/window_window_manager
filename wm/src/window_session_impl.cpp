@@ -1090,10 +1090,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
+
     auto parentExtensionWindow = parentExtensionWindow_.promote();
-    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
-        parentExtensionWindow->NotifySetUIContent();
+    if (parentExtensionWindow != nullptr && property_ != nullptr && property_->GetExtensionFlag()) {
+        static_cast<WindowSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
     }
+
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -1147,6 +1149,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+
+    NotifySetUIContentComplete();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -3650,6 +3654,49 @@ WMError WindowSessionImpl::SetContinueState(int32_t continueState)
     }
     property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetUIContentComplete()
+{
+    bool setUIContentCompleted = false;
+    if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+    }
+}
+
+void WindowSessionImpl::AddSetUIContentTimeoutCheck()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        
+        if (window->setUIContentCompleted_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+            return;
+        }
+
+        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        std::ostringstream oss;
+        oss << "SetUIContent timeout uid: " << getuid();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
+        }
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+        }
+    };
+    handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
+        SET_UICONTENT_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
 }
 } // namespace Rosen
 } // namespace OHOS
