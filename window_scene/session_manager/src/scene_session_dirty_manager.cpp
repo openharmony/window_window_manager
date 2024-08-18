@@ -249,8 +249,8 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
     }
 }
 
-static void AddDialogSessionMapItem(std::map<int32_t, sptr<SceneSession>>& dialogMap,
-    const sptr<SceneSession>& session)
+static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
+    std::map<int32_t, sptr<SceneSession>>& dialogMap)
 {
     const auto& mainSession = session->GetMainSession();
     if (mainSession == nullptr) {
@@ -293,7 +293,7 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
             isModalSubWindow = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
         }
         if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            AddDialogSessionMapItem(dialogMap, session);
+            AddDialogSessionMapItem(session, dialogMap);
         }
     }
     return dialogMap;
