@@ -3367,7 +3367,7 @@ static void GetTopWindowByTraverseSessionTree(const sptr<SceneSession>& session,
             continue;
         }
         if ((subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
-            subSession->GetSessionState() == SessionState::STATE_ACTIVE) &&
+             subSession->GetSessionState() == SessionState::STATE_ACTIVE) &&
             subSession->GetZOrder() > zOrder) {
             topWinId = static_cast<uint32_t>(subSession->GetPersistentId());
             zOrder = subSession->GetZOrder();
