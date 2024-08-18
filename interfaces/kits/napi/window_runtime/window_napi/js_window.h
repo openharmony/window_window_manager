@@ -162,6 +162,7 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
+
     /**
      * Sub Window
      */

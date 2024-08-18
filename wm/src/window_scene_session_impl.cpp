@@ -148,11 +148,12 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
         if (window && window->GetProperty() && window->GetWindowId() == parentId) {
             if (WindowHelper::IsMainWindow(window->GetType()) || WindowHelper::IsSystemWindow(window->GetType())) {
                 WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
-                    window->GetProperty()->GetWindowName().c_str(), parentId, window->GetProperty()->GetPersistentId());
+                    window->GetProperty()->GetWindowName().c_str(), parentId,
+                    window->GetProperty()->GetPersistentId());
                 return window;
             } else if (WindowHelper::IsSubWindow(window->GetType()) &&
                 (IsSessionMainWindow(window->GetParentId()) || window->GetProperty()->GetExtensionFlag() ||
-                VerifySubWindowLevel(window->GetParentId()))) {
+                 VerifySubWindowLevel(window->GetParentId()))) {
                 // subwindow's grandparent is mainwindow or subwindow's parent is an extension subwindow
                 return window;
             }
@@ -179,7 +180,7 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& [_, pair] : windowSessionMap_) {
         auto& window = pair.second;
-        if (window && window->GetProperty() && window->GetWindowId() == parentId &&
+        if (window && window->GetWindowId() == parentId && window->GetProperty() &&
             window->GetProperty()->GetSubWindowLevel() < MAX_SUB_WINDOW_LEVEL) {
             return true;
         }
