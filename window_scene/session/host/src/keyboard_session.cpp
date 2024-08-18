@@ -543,7 +543,6 @@ void KeyboardSession::RelayoutKeyBoard()
     sessionProperty->SetRequestRect(requestRect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s", GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
-    UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()
@@ -658,18 +657,16 @@ bool KeyboardSession::GetScreenWidthAndHeight(const sptr<WindowSessionProperty>&
 void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     const sptr<WindowSessionProperty>& sessionProperty)
 {
-    SessionGravity gravity;
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
-    Rect rect = {0, 0, 0, 0};
     if (!GetScreenWidthAndHeight(sessionProperty, screenWidth, screenHeight)) {
         return;
     }
     bool isLandscape = screenWidth > screenHeight ? true : false;
-    rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
-    gravity = static_cast<SessionGravity>(params.gravity_);
+    Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
             static_cast<int32_t>(screenWidth) : rect.width_;
