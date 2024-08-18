@@ -224,7 +224,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
-    BindNativeMethod2(env, objValue, moduleName);
+    BindNativeMethodForKeyboard(env, objValue, moduleName);
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
@@ -254,8 +254,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
     BindNativeFunction(env, objValue, "setWindowLastSafeRect", moduleName, JsSceneSession::SetWindowLastSafeRect);
     BindNativeFunction(env, objValue, "setMovable", moduleName, JsSceneSession::SetMovable);
-    BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
-    BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
     BindNativeFunction(env, objValue, "setExitSplitOnBackground", moduleName,
         JsSceneSession::SetExitSplitOnBackground);
@@ -267,10 +265,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
         JsSceneSession::SetTemporarilyShowWhenLocked);
     BindNativeFunction(env, objValue, "setSkipDraw", moduleName, JsSceneSession::SetSkipDraw);
-    BindNativeFunction(env, objValue, "openKeyboardSyncTransaction", moduleName,
-        JsSceneSession::OpenKeyboardSyncTransaction);
-    BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
-        JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
         JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
@@ -288,8 +282,14 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetStartingWindowExitAnimationFlag);
 }
 
-void JsSceneSession::BindNativeMethod2(napi_env env, napi_value objValue, const char* moduleName)
+void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
 {
+    BindNativeFunction(env, objValue, "setSCBKeepKeyboard", moduleName, JsSceneSession::SetSCBKeepKeyboard);
+    BindNativeFunction(env, objValue, "requestHideKeyboard", moduleName, JsSceneSession::RequestHideKeyboard);
+    BindNativeFunction(env, objValue, "openKeyboardSyncTransaction", moduleName,
+        JsSceneSession::OpenKeyboardSyncTransaction);
+    BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
+        JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "notifyTargetScreenWidthAndHeight", moduleName,
         JsSceneSession::NotifyTargetScreenWidthAndHeight);
 }
