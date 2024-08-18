@@ -352,6 +352,10 @@ protected:
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
     };
+
+    /*
+     * Window Lifecycle
+     */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
 
