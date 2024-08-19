@@ -4031,31 +4031,39 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
     return WMError::WM_OK;
 }
 
-WSError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
+WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
+
 
     if (!WindowHelper::IsSystemWindow(GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
-        return WSError::WS_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    auto task = [property, enableDrag]() {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "task enableDrag : %{public}d", enableDrag);
-        property->SetDragEnabled(enableDrag);
-        return WSError::WS_OK;
+    auto task = [weakThis = wptr(this), enableDrag]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        if (!sessionProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+        return WMError::WM_OK;
     };
     PostTask(task, "SetSystemWindowEnableDrag");
-    return WSError::WS_OK;
+    return WMError::WS_OK;
 }
 
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,

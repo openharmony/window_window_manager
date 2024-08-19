@@ -687,7 +687,7 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = data.ReadBool();
-    TLOGI(WmsLogTag::WMS_EVENT, "handle, enableDrag: %{public}d", enableDrag);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "handle, enableDrag: %{public}d", enableDrag);
     WSError errcode = SetSystemWindowEnableDrag(enableDrag);
     reply.WriteInt32(static_cast<int32_t>(errcode));
     return ERR_NONE;

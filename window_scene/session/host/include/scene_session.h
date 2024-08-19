@@ -205,7 +205,7 @@ public:
     WSError NotifyFrameLayoutFinishFromApp() override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
-    WSError SetSystemWindowEnableDrag(bool enableDrag) override;
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
