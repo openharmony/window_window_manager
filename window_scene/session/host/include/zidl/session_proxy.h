@@ -88,6 +88,7 @@ public:
     int32_t GetStatusBarHeight() override;
     WSError NotifyFrameLayoutFinishFromApp() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

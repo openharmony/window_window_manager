@@ -1033,6 +1033,22 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSystemWindowEnableDrag
+ * @tc.desc: SetSystemWindowEnableDrag function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSystemWindowEnableDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemWindowEnableDrag";
+    info.bundleName_ = "SetSystemWindowEnableDrag";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DESKTOP);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = session->SetSystemWindowEnableDrag(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: HandleActionUpdateSetBrightness
  * @tc.desc: HandleActionUpdateSetBrightness function01
  * @tc.type: FUNC
