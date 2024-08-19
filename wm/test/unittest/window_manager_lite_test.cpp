@@ -60,8 +60,8 @@ public:
 class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
 public:
     void OnConnected(int32_t userId, int32_t screenId) override {};
-    void OnDisConnected(int32_t userId, int32_t screenId) override {};
-}
+    void OnDisconnected(int32_t userId, int32_t screenId) override {};
+};
 
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
@@ -446,6 +446,27 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyFocusedWithUn
+ * @tc.desc: NotifyFocused With MotifyUnFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Level2)
+{
+    WindowManagerLite lite;
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    ASSERT_EQ(focusChangeInfo, nullptr);
+    focusChangeInfo = new (std::nothrow) FocusChangeInfo();
+    lite.pImpl_->focusChangedListeners_.push_back(nullptr);
+    sptr<TestFocusChangedListener> testFocusChangedListener = new (std::nothrow) TestFocusChangedListener();
+    lite.pImpl_->focusChangedListeners_.push_back(testFocusChangedListener);
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    ASSERT_NE(focusChangeInfo, nullptr);
+}
+
+/**
  * @tc.name: NotifyWindowDrawingContentInfoChanged02
  * @tc.desc: NotifyWindowDrawingContentInfoChanged
  * @tc.type: FUNC
@@ -726,9 +747,9 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Lev
 {
     WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = new IWMSConnectionChangedListenerSon();
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
-    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullpter);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
-    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullpter);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
 }
 /**
  * @tc.name: RegisterWindowStyleChangedListener
@@ -877,9 +898,9 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
  */
 HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
 {
-    WindowManagerLite::GetInstance.destroyed_ = true;
-    WindowManagerLite::GetInstance.OnRemoteDied();
-    ASSERT_EQ(WindowManagerLite::GetInstance.destroyed_, true);
+    WindowManagerLite::GetInstance().destroyed_ = true;
+    WindowManagerLite::GetInstance().OnRemoteDied();
+    ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
 }
 }
 }

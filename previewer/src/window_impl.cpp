@@ -1002,9 +1002,10 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
     return true;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetAspectRatio(float ratio)
@@ -1099,14 +1100,16 @@ WMError WindowImpl::SetResizeByDragEnabled(bool dragEnabled)
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseAboveTarget(int32_t subWindowId)
 {
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::HideNonSystemFloatingWindows(bool shouldHide)

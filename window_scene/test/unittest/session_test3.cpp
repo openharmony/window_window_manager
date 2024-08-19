@@ -680,16 +680,16 @@ HWTEST_F(WindowSessionTest3, Snapshot, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     session_->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(session_->surfaceNode_, nullptr);
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_ = nullptr;
-    EXPECT_EQ(nullptr, session_->Snapshot(0.0f));
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 }
 
 /**
@@ -779,13 +779,13 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
     session_->property_ = nullptr;
     auto enable = true;
     auto isSupportDragInPcCompatibleMode = true;
-    ASSERT_NE(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     enable = false;
-    ASSERT_NE(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 }
 
 /**

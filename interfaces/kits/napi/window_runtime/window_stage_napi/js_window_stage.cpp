@@ -124,6 +124,7 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindowStage::SetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]SetShowOnLockScreen");

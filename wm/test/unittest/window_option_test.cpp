@@ -422,6 +422,21 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: RealParentId
+ * @tc.desc: RealParentId setter and getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetRealParentId, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetRealParentId(114);
+    EXPECT_EQ(114, option->GetRealParentId());
+    option->SetRealParentId(514);
+    EXPECT_EQ(514, option->GetRealParentId());
+}
+
+/**
  * @tc.name: UIExtensionUsage
  * @tc.desc: UIExtensionUsage setter and getter test
  * @tc.type: FUNC

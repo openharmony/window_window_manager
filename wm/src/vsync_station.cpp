@@ -36,7 +36,7 @@ constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 VsyncStation::VsyncStation(NodeId nodeId, const std::shared_ptr<AppExecFwk::EventHandler>& vsyncHandler)
     : nodeId_(nodeId),
       vsyncHandler_(vsyncHandler),
-      vsyncTimeoutTaskName_(VSYNC_TIME_OUT_TASK + std::to_string(nodeId_)),
+      vsyncTimeoutTaskName_(VSYNC_TIME_OUT_TASK + std::to_string(nodeId)),
       frameRateLinker_(RSFrameRateLinker::Create())
 {
     if (!vsyncHandler_) {

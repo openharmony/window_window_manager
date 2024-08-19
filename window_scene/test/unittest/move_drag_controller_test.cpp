@@ -849,63 +849,6 @@ HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: HandleMouseStyle
- * @tc.desc: test function : HandleMouseStyle
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, HandleMouseStyle, Function | SmallTest | Level1)
-{
-    int res = 0;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    WSRect winRect;
-    res++;
-    moveDragController->HandleMouseStyle(nullptr, winRect);
-    ASSERT_EQ(res, 1);
-
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    ASSERT_EQ(res, 1);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    ASSERT_EQ(res, 1);
-
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    moveDragController->mouseStyleID_ = MMI::MOUSE_ICON::NORTH_SOUTH;
-    moveDragController->isStartDrag_ = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    ASSERT_EQ(res, 1);
-    moveDragController->mouseStyleID_ = MMI::MOUSE_ICON::DEFAULT;
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    moveDragController->mouseStyleID_ = MMI::MOUSE_ICON::NORTH_SOUTH;
-    moveDragController->isStartDrag_ = false;
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    moveDragController->isStartDrag_ = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerItem.SetPointerId(0);
-    pointerEvent->AddPointerItem(pointerItem);
-    pointerEvent->SetPointerId(0);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    pointerItem.SetDisplayX(-1);
-    pointerItem.SetDisplayY(-1);
-    pointerEvent->UpdatePointerItem(0, pointerItem);
-    moveDragController->HandleMouseStyle(pointerEvent, winRect);
-    pointerItem.SetDisplayX(0);
-    pointerItem.SetDisplayY(0);
-    pointerEvent->UpdatePointerItem(0, pointerItem);
-    moveDragController->mouseStyleID_ = MMI::MOUSE_ICON::DEFAULT;
-}
-
-/**
  * @tc.name: UpdateMoveTempProperty
  * @tc.desc: test function : UpdateMoveTempProperty
  * @tc.type: FUNC

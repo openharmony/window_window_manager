@@ -437,12 +437,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
-    isUserBackground_ = userBackground;
-}
-
-bool SceneInputManager::IsUserBackground()
-{
-    return isUserBackground_;
+    isUserBackground_.store(userBackground);
 }
 
 void SceneInputManager::SetCurrentUserId(int32_t userId)
@@ -453,7 +448,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
-    std::vector<MMI::WindowInfo>& windowInfoList)
+    std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
         return;
@@ -494,7 +489,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
-        if (isUserBackground_) {
+        if (isUserBackground_.load()) {
             TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
@@ -505,7 +500,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -514,7 +509,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;
         }
-        UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+        UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
     };
     if (eventHandler_) {
         eventHandler_->PostTask(task);

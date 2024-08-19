@@ -80,6 +80,7 @@ using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t pers
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
+using NotifyFrameLayoutFinishFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -166,7 +167,7 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -241,7 +242,7 @@ public:
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
-    void UnregisterSessionChangeListeners();
+    virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
@@ -259,6 +260,7 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
+    sptr<Session> GetMainSession();
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
@@ -289,6 +291,8 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
+    WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
+        int32_t landscapeWidth, int32_t landscapeHeight);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -359,6 +363,7 @@ public:
     bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
+    void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -541,6 +546,7 @@ protected:
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
+    NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
