@@ -159,7 +159,7 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
     WLOGFD("run HandlePendingSessionToForeground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFD("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToForeground(token);
@@ -172,7 +172,7 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
     WLOGFD("run HandlePendingSessionToBackground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFD("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToBackgroundForDelegator(token);
