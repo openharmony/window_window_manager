@@ -348,6 +348,9 @@ protected:
     void AddSetUIContentTimeoutCheck();
     virtual void NotifySetUIContentComplete() {}
     std::atomic_bool setUIContentCompleted_ { false };
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000
+    };
 
     /*
      * Window Lifecycle
