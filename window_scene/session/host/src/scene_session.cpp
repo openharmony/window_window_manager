@@ -384,15 +384,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
-            if (!(session->moveDragController_ && !session->moveDragController_->GetStartDragFlag() &&
-                  session->IsFocused() && session->IsMovableWindowType() &&
-                  session->moveDragController_->HasPointDown() &&
-                  session->moveDragController_->GetMovable())) {
-                TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
-                    "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, "
-                    "movable: %{public}d", session->GetPersistentId(), session->moveDragController_->GetStartDragFlag(),
-                    session->IsFocused(), session->IsMovableWindowType(), session->moveDragController_->HasPointDown(),
-                    session->moveDragController_->GetMovable());
+            if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
@@ -1764,6 +1756,23 @@ bool SceneSession::IsFullScreenMovable()
     }
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsWindowModeSupported(property->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING);
+}
+
+bool SceneSession::IsMovable()
+{
+    if (!moveDragController_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null, id: %{public}d", GetPersistentId());
+        return false;
+    }
+    if (!(!moveDragController_->GetStartDragFlag() && IsFocused() && IsMovableWindowType() &&
+          moveDragController_->HasPointDown() && moveDragController_->GetMovable())) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
+            "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, movable: %{public}d",
+            GetPersistentId(), moveDragController_->GetStartDragFlag(), IsFocused(), IsMovableWindowType(),
+            moveDragController_->HasPointDown(), moveDragController_->GetMovable());
+        return false;
+    }
+    return true;
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
