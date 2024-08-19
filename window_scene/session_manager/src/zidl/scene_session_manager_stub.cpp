@@ -392,7 +392,7 @@ int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel& dat
     WLOGFI("run HandlePendingSessionToForeground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToForeground(token);
@@ -405,7 +405,7 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
     WLOGFI("run HandlePendingSessionToBackground!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFI("token is nullptr");
+        WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionToBackgroundForDelegator(token);
@@ -418,9 +418,9 @@ int SceneSessionManagerStub::HandleRegisterSessionListener(MessageParcel& data, 
     WLOGFI("run HandleRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        WLOGFI("listen is nullptr");
-        return ERR_INVALID_DATA;
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
+        WLOGFI("listener is nullptr");
+        return ERR_NONE;
     }
     WSError errCode = RegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -434,7 +434,7 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
     if (listener == nullptr) {
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
         WLOGFI("listener is nullptr");
-        return ERR_INVALID_DATA;
+        return ERR_NONE;
     }
     WSError errCode = UnRegisterSessionListener(listener);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -803,7 +803,7 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, Mes
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
     if (collaborator == nullptr) {
-        WLOGFI("collaborator is nullptr");
+        WLOGFE("collaborator is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
