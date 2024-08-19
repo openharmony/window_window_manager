@@ -1025,6 +1025,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
 
     rsTransaction = nullptr;
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    window_->UpdateRectForOtherReason(rect, wmReason);
 
     window_->handler_ = nullptr;
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);

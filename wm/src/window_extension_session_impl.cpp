@@ -527,6 +527,8 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else if (handler_ != nullptr) {
+        UpdateRectForOtherReason(wmRect, wmReason);
     } else {
         NotifySizeChange(wmRect, wmReason);
         UpdateViewportConfig(wmRect, wmReason);
@@ -561,22 +563,11 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
-        window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
-            auto window = weak.promote();
-            if (!window) {
-                return;
-            }
-            window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
-                RSSystemProperties::SetDrawTextAsBitmap(false);
-            }
-        });
+        RSNode::OpenImplicitAnimation(protocol, curve);
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
@@ -589,6 +580,22 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
+}
+
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+{
+    auto task = [weak = wptr(this), wmReason, wmRect] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+            return;
+        }
+        window->NotifySizeChange(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason);
+    };
+    if (handler_) {
+        handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
