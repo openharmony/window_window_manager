@@ -196,6 +196,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetRealParentId(option->GetRealParentId());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
     property_->SetLayoutCallback(layoutCallback);
@@ -594,7 +595,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             lastSizeChangeReason_ = wmReason;
             postTaskDone_ = true;
         }
-        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        handler_->PostTask([weak = wptr(this), wmReason, wmRect, rsTransaction]() {
+            auto window = weak.promote();
+            if (!window) {
+                return;
+            }
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+            window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        });
     }
     if (property_) {
         sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
@@ -629,7 +637,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
+            if (window->rotationAnimationCount_ == 0 && !window->isUiContentDestructing_) {
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -983,12 +991,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else {
-        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-    }
+    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1026,11 +1030,13 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+        isUiContentDestructing_ = true;
         uiContent_ = std::move(uiContent);
         RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
+    isUiContentDestructing_ = false;
     return WMError::WM_OK;
 }
 
@@ -1047,6 +1053,23 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
                     "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
                 // false: Make the function callable
                 window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
+            }
+        }
+    });
+    uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            return;
+        }
+        bool setCallBackEnable = true;
+        if (window->enableFrameLayoutFinishCb_.compare_exchange_strong(setCallBackEnable, false)) {
+            auto hostSession = window->GetHostSession();
+            if (hostSession) {
+                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                    "NotifyFrameLayoutFinish, windowId: %u", window->GetWindowId());
+                TLOGI(WmsLogTag::WMS_MULTI_WINDOW,
+                    "NotifyFrameLayoutFinish, windowId: %{public}u", window->GetWindowId());
+                hostSession->NotifyFrameLayoutFinishFromApp();
             }
         }
     });
@@ -1067,10 +1090,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
+
     auto parentExtensionWindow = parentExtensionWindow_.promote();
-    if (property_ != nullptr && property_->GetExtensionFlag() && parentExtensionWindow != nullptr) {
-        parentExtensionWindow->NotifySetUIContent();
+    if (parentExtensionWindow != nullptr && property_ != nullptr && property_->GetExtensionFlag()) {
+        static_cast<WindowSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
     }
+
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -1124,6 +1149,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+
+    NotifySetUIContentComplete();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -2296,13 +2323,16 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->Destroy();
         }
-
-        std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            uiContent_ = nullptr;
-            TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
-                GetPersistentId());
+        {
+            std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+            isUiContentDestructing_ = true;
+            if (uiContent_ != nullptr) {
+                uiContent_ = nullptr;
+                TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
+                    GetPersistentId());
+            }
         }
+        isUiContentDestructing_ = false;
     };
     if (handler_) {
         handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");
@@ -3353,6 +3383,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
@@ -3601,6 +3632,20 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
 }
 
+void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
+{
+    enableFrameLayoutFinishCb_ = enable;
+}
+
+void WindowSessionImpl::UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT || wmReason == WindowSizeChangeReason::SPLIT_TO_FULL ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL) {
+        TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable framelayoutfinish callback reason:%{public}u", wmReason);
+        SetFrameLayoutCallbackEnable(true);
+    }
+}
+
 WMError WindowSessionImpl::SetContinueState(int32_t continueState)
 {
     if (continueState > ContinueState::CONTINUESTATE_MAX || continueState < ContinueState::CONTINUESTATE_UNKNOWN) {
@@ -3609,6 +3654,49 @@ WMError WindowSessionImpl::SetContinueState(int32_t continueState)
     }
     property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetUIContentComplete()
+{
+    bool setUIContentCompleted = false;
+    if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+    }
+}
+
+void WindowSessionImpl::AddSetUIContentTimeoutCheck()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        
+        if (window->setUIContentCompleted_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+            return;
+        }
+
+        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        std::ostringstream oss;
+        oss << "SetUIContent timeout uid: " << getuid();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
+        }
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+        }
+    };
+    handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
+        SET_UICONTENT_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
 }
 } // namespace Rosen
 } // namespace OHOS
