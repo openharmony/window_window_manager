@@ -7922,7 +7922,9 @@ void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
             displayInfo->GetScaleX(),
             displayInfo->GetScaleY(),
             displayInfo->GetPivotX(),
-            displayInfo->GetPivotY());
+            displayInfo->GetPivotY(),
+            displayInfo->GetTranslateX(),
+            displayInfo->GetTranslateY());
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
         return WSError::WS_OK;
@@ -7947,6 +7949,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
         }
         case DisplayStateChangeType::UPDATE_SCALE: {
             SceneSessionManager::GetInstance().ProcessDisplayScale(displayInfo);
+            break;
         }
         default:
             return;

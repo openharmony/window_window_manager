@@ -120,7 +120,7 @@ public:
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
 
-    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX, float translateY);
 
     std::string GetName();
     ScreenId GetScreenId();

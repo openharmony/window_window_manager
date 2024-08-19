@@ -59,6 +59,12 @@ public:
     void SetPivotY(float pivotY);
     float GetPivotY() const;
 
+    void SetTranslateX(float translateX);
+    float GetTranslateX() const;
+
+    void SetTranslateY(float translateY);
+    float GetTranslateY() const;
+
     float GetDensity();
     float GetDefaultDensity();
     void SetDefaultDensity(float defaultDensity);
@@ -137,6 +143,8 @@ private:
     float scaleY_ { 1.0f };
     float pivotX_ { 0.5f };
     float pivotY_ { 0.5f };
+    float translateX_ { 0.0f };
+    float translateY_ { 0.0f };
 
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };

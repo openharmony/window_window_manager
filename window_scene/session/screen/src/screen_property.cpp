@@ -89,6 +89,26 @@ float ScreenProperty::GetPivotY() const
     return pivotY_;
 }
 
+void ScreenProperty::SetTranslateX(float translateX)
+{
+    translateX_ = translateX;
+}
+
+float ScreenProperty::GetTranslateX() const
+{
+    return translateX_;
+}
+
+void ScreenProperty::SetTranslateY(float translateY)
+{
+    translateY_ = translateY;
+}
+
+float ScreenProperty::GetTranslateY() const
+{
+    return translateY_;
+}
+
 void ScreenProperty::SetPhyBounds(const RRect& phyBounds)
 {
     phyBounds_ = phyBounds;
