@@ -17,6 +17,7 @@
 #define OHOS_JS_PIP_WINDOW_MANAGER_H
 
 #include "js_runtime_utils.h"
+#include "picture_in_picture_manager.h"
 #include <mutex>
 
 namespace OHOS {
@@ -30,8 +31,9 @@ public:
     static napi_value IsPipEnabled(napi_env env, napi_callback_info info);
     static napi_value CreatePipController(napi_env env, napi_callback_info info);
 private:
-    static napi_value OnIsPipEnabled(napi_env env, napi_callback_info info);
-    static napi_value OnCreatePipController(napi_env env, napi_callback_info info);
+    napi_value OnIsPipEnabled(napi_env env, napi_callback_info info);
+    napi_value OnCreatePipController(napi_env env, napi_callback_info info);
+    napi_value NapiSendTask(napi_env env, PipOption& pipOption);
     static std::mutex mutex_;
 };
 }

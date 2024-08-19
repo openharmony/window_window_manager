@@ -535,7 +535,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
     auto ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(6);
@@ -544,7 +544,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**

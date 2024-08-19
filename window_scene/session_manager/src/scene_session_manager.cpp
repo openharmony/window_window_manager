@@ -240,6 +240,13 @@ void SceneSessionManager::Init()
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
     SceneInputManager::GetInstance().Init();
+
+    // MMI window state error check
+    int32_t retCode = MMI::InputManager::GetInstance()->
+        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+    });
+    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -2404,7 +2411,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP ||
-        type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+        type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_TOAST) {
         // some system types could be created by normal app
         return true;
     }
@@ -3349,6 +3356,30 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     return abilityInfo;
 }
 
+static void GetTopWindowByTraverseSessionTree(const sptr<SceneSession>& session,
+    uint32_t& topWinId, uint32_t& zOrder)
+{
+    const auto& subVec = session->GetSubSession();
+    for (const auto& subSession : subVec) {
+        if (subSession == nullptr || subSession->GetCallingPid() != session->GetCallingPid()) {
+            TLOGW(WmsLogTag::WMS_SUB,
+                "subSession is null or subWin's callingPid is not equal to mainWin's callingPid");
+            continue;
+        }
+        if ((subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+             subSession->GetSessionState() == SessionState::STATE_ACTIVE) &&
+            subSession->GetZOrder() > zOrder) {
+            topWinId = static_cast<uint32_t>(subSession->GetPersistentId());
+            zOrder = subSession->GetZOrder();
+            TLOGD(WmsLogTag::WMS_SUB, "Current zorder is larger than mainWin, mainId: %{public}d, "
+                "topWinId: %{public}d, zOrder: %{public}d", session->GetPersistentId(), topWinId, zOrder);
+        }
+        if (subSession->GetSubSession().size() > 0) {
+            GetTopWindowByTraverseSessionTree(subSession, topWinId, zOrder);
+        }
+    }
+}
+
 /** @note @window.hierarchy */
 WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
@@ -3363,23 +3394,9 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
             WLOGFE("Permission denied, not destroy by the same process");
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        const auto& subVec = mainSession->GetSubSession();
         uint32_t zOrder = mainSession->GetZOrder();
         topWinId = mainWinId;
-        for (const auto& subSession : subVec) {
-            if (subSession == nullptr || subSession->GetCallingPid() != mainSession->GetCallingPid()) {
-                TLOGW(WmsLogTag::WMS_SUB,
-                    "[GetTopWin] subSession is null or subWin's callingPid is not equal to mainWin's callingPid");
-                continue;
-            }
-            if ((subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
-                subSession->GetSessionState() == SessionState::STATE_ACTIVE) && subSession->GetZOrder() > zOrder) {
-                topWinId = static_cast<uint32_t>(subSession->GetPersistentId());
-                zOrder = subSession->GetZOrder();
-                WLOGFD("[GetTopWin] Current zorder is larger than mainWin, mainId: %{public}d, topWinId: %{public}d, "
-                    "zOrder: %{public}d", mainWinId, topWinId, zOrder);
-            }
-        }
+        GetTopWindowByTraverseSessionTree(mainSession, topWinId, zOrder);
         TLOGI(WmsLogTag::WMS_SUB, "[GetTopWin] Get top window, mainId: %{public}d, topWinId: %{public}d, "
             "zOrder: %{public}d", mainWinId, topWinId, zOrder);
         return WMError::WM_OK;
@@ -6511,6 +6528,41 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
     };
 
     taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
+}
+
+void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d, persistentId: %{public}d", pid, persistentId);
+    if (pid == -1) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid pid");
+        return;
+    }
+    auto task = [this, pid, persistentId] {
+        int32_t ret = HiSysEventWrite(
+            HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "WINDOW_STATE_ERROR",
+            HiviewDFX::HiSysEvent::EventType::FAULT,
+            "PID", pid,
+            "PERSISTENT_ID", persistentId);
+        if (ret != 0) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+        }
+
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (!sceneSession || pid != sceneSession->GetCallingPid() ||
+                !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+            if (abilitySessionInfo) {
+                TLOGI(WmsLogTag::WMS_LIFE, "terminate session, persistentId: %{public}d",
+                    abilitySessionInfo->persistentId);
+                sceneSession->TerminateSessionNew(abilitySessionInfo, false, false);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyWindowStateErrorFromMMI");
 }
 
 sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)

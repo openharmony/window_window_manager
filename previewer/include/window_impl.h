@@ -199,7 +199,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
-    WmErrorCode RaiseToAppTop() override;
+    WMError RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
     virtual WMError ResetAspectRatio() override;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
@@ -216,7 +216,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) override;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) override;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) override;
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
