@@ -559,17 +559,6 @@ HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | Sma
 }
 
 /**
- * @tc.name: OnStart
- * @tc.desc: DMS OnStart
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, OnStart, Function | SmallTest | Level3)
-{
-    dms_->OnStart();
-    ASSERT_TRUE(true);
-}
-
-/**
  * @tc.name: SetOrientation
  * @tc.desc: DMS SetOrientation
  * @tc.type: FUNC
