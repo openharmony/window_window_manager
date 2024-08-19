@@ -4070,6 +4070,39 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
     return WMError::WM_OK;
 }
 
+WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if (!WindowHelper::IsSystemWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    auto task = [weakThis = wptr(this), enableDrag]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        if (!sessionProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+    };
+    PostTask(task, "SetSystemWindowEnableDrag");
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
