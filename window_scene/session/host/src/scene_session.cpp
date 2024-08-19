@@ -4048,7 +4048,7 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
-            return WMError::WM_ERROR_INVALID_SESSION;
+            return;
         }
         auto sessionProperty = session->GetSessionProperty();
 
@@ -4056,10 +4056,9 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
             session->GetPersistentId(), enableDrag);
         if (!sessionProperty) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
-            return WMError::WM_ERROR_INVALID_SESSION;
+            return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
-        return WMError::WM_OK;
     };
     PostTask(task, "SetSystemWindowEnableDrag");
     return WMError::WM_OK;
