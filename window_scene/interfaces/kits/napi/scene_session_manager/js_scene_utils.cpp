@@ -901,6 +901,8 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto params = sessionInfo.want->GetParams();
         napi_set_named_property(env, objValue, "fileManagerMode",
             CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        napi_set_named_property(env, objValue, "floatingDisplayMode",
+            CreateJsValue(env, params.GetIntParam("floatingDisplayMode", INVALID_VAL)));
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
@@ -1001,6 +1003,8 @@ void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
         static_cast<int32_t>(SizeChangeReason::PIP_AUTO_START)));
     napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
+    napi_set_named_property(env, objValue, "PIP_RESTORE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RESTORE)));
 }
 
 napi_value CreateJsSessionStartupVisibility(napi_env env)

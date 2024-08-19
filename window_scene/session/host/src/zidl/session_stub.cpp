@@ -151,6 +151,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
+            return HandleNotifyFrameLayoutFinish(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -284,11 +286,22 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
+{
+    WSError errCode = NotifyFrameLayoutFinishFromApp();
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

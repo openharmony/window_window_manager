@@ -336,16 +336,21 @@ struct SessionInfo {
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
-    bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
+
+    /*
+     * UIExtension
+     */
+    int32_t realParentId_ = INVALID_SESSION_ID;
+    uint32_t uiExtensionUsage_ = 0;
+    bool isAsyncModalBinding_ = false;
 };
 
 enum class SessionFlag : uint32_t {
@@ -378,6 +383,7 @@ enum class SizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     END,
 };
 
