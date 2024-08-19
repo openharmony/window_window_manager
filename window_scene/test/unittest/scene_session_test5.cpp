@@ -1023,7 +1023,7 @@ HWTEST_F(SceneSessionTest5, SetSystemWindowEnableDrag, Function | SmallTest | Le
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DESKTOP);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto ret = session->SetSystemWindowEnableDrag(true);
-    EXPECT_NE(WSError::WS_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
