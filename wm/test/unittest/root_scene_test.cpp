@@ -151,7 +151,6 @@ HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
-    rootScene.vsyncStation_ = nullptr;
     rootScene.RequestVsync(vsyncCallback);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -164,11 +163,6 @@ HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-
-    rootScene.vsyncStation_ = nullptr;
-    rootScene.GetVSyncPeriod();
-
-    rootScene.vsyncStation_ = std::make_shared<VsyncStation>(0);
     rootScene.GetVSyncPeriod();
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -183,11 +177,6 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
     RootScene rootScene;
     uint32_t rate = 120;
     int32_t animatorExpectedFrameRate = -1;
-
-    rootScene.vsyncStation_ = nullptr;
-    rootScene.FlushFrameRate(rate, animatorExpectedFrameRate);
-
-    rootScene.vsyncStation_ = std::make_shared<VsyncStation>(0);
     rootScene.FlushFrameRate(rate, animatorExpectedFrameRate);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -226,7 +215,6 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    rootScene.vsyncStation_ = nullptr;
     rootScene.SetUiDvsyncSwitch(true);
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
