@@ -1178,8 +1178,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     uint64_t displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         (systemConfig_.uiType_ == UI_TYPE_PHONE ||
          (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode())) &&
