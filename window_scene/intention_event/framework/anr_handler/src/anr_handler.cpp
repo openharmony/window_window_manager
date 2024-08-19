@@ -49,7 +49,7 @@ ANRHandler::ANRHandler()
 
 ANRHandler::~ANRHandler() {}
 
-void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
+void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage>& sessionStage)
 {
     auto task = [this, eventId, sessionStage]() {
         sptr<ISessionStage> session = sessionStage.promote();

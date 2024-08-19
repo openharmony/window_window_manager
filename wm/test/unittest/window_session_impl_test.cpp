@@ -1211,6 +1211,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSubWindowCloseListeners(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<ISwitchFreeMultiWindowListener> listener11 = nullptr;
+    res = window->RegisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
@@ -1720,6 +1726,9 @@ HWTEST_F(WindowSessionImplTest, Notify02, Function | SmallTest | Level2)
     window->NotifySubWindowClose(terminateCloseProcess);
     ASSERT_EQ(terminateCloseProcess, false);
 
+    bool enable = false;
+    window->NotifySwitchFreeMultiWindow(enable);
+
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: Notify02 end";
 }
@@ -1888,6 +1897,55 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
     ASSERT_NE(window, nullptr);
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
+}
+
+/**
+ * @tc.name: AddSetUIContentTimeoutCheck
+ * @tc.desc: AddSetUIContentTimeoutCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->handler_ = nullptr;
+    window->property_ = nullptr;
+    window->context_ = nullptr;
+    window->AddSetUIContentTimeoutCheck();
+
+    option->SetWindowName("AddSetUIContentTimeoutCheck_test");
+    option->SetBundleName("UTtest");
+    WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;
+    option->SetWindowType(type1);
+    sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window1, nullptr);
+    window1->AddSetUIContentTimeoutCheck();
+
+    WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    option->SetWindowType(type2);
+    sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window2, nullptr);
+    window2->AddSetUIContentTimeoutCheck();
+}
+
+/**
+ * @tc.name: SetUIContentComplete
+ * @tc.desc: SetUIContentComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 }
 } // namespace Rosen

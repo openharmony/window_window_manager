@@ -47,16 +47,16 @@ public:
     void SetPhyBounds(const RRect& phyBounds);
     RRect GetPhyBounds() const;
 
-    void SetScaleX(const float scaleX);
+    void SetScaleX(float scaleX);
     float GetScaleX() const;
 
-    void SetScaleY(const float scaleY);
+    void SetScaleY(float scaleY);
     float GetScaleY() const;
 
-    void SetPivotX(const float pivotX);
+    void SetPivotX(float pivotX);
     float GetPivotX() const;
 
-    void SetPivotY(const float pivotY);
+    void SetPivotY(float pivotY);
     float GetPivotY() const;
 
     float GetDensity();

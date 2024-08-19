@@ -29,7 +29,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceTest"};
 }
 
 class MockSessionManagerServiceTest : public testing::Test {
@@ -192,6 +192,21 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Functi
     auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceByUserId(100);
     ASSERT_EQ(nullptr, sessionManagerService);
     MockSessionManagerService::GetInstance().RemoveSessionManagerServiceByUserId(100);
+}
+
+/**
+ * @tc.name: GetSessionManagerServiceByUserId
+ * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+{
+    int32_t pid = 123;
+    std::vector<uint64_t> persistentIds = {1, 2, 3};
+    std::vector<uint64_t> surfaceNodeIds;
+    MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
+        pid, persistentIds, surfaceNodeIds);
+    ASSERT_EQ(0, surfaceNodeIds.size());
 }
 }
 }

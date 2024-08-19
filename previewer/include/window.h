@@ -137,6 +137,7 @@ public:
     virtual float GetAlpha() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() const = 0;
+    virtual uint64_t GetDisplayId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
     virtual WindowState GetWindowState() const = 0;
     virtual WMError SetFocusable(bool isFocusable) = 0;
@@ -166,7 +167,9 @@ public:
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;
@@ -183,7 +186,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
     virtual WMError SetDialogBackGestureEnabled(bool isEnabled) = 0;
-    virtual WmErrorCode RaiseToAppTop() = 0;
+    virtual WMError RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
     virtual WMError SetShadowRadius(float radius) = 0;
@@ -262,6 +265,7 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual void StartMove() = 0;
+    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_OK; };
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
     virtual bool IsSupportWideGamut() = 0;
@@ -288,7 +292,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
     virtual bool IsTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
@@ -298,6 +302,7 @@ public:
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

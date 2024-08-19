@@ -78,7 +78,7 @@ std::vector<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId
         return {};
     }
     auto &events = events_[persistentId];
-    auto fistMatchIter = find_if(events.begin(), events.end(), [eventId](const auto &item) {
+    auto fistMatchIter = find_if(events.begin(), events.end(), [eventId](const auto& item) {
         return item.eventId > eventId;
     });
     std::vector<int32_t> timerIds;

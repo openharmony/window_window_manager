@@ -35,7 +35,7 @@ public:
         return 0;
     }
 
-    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         return 0;
     }
@@ -50,12 +50,12 @@ public:
         return true;
     }
 
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient)
+    bool AddDeathRecipient(const sptr<DeathRecipient>& recipient)
     {
         return true;
     }
 
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient)
+    bool RemoveDeathRecipient(const sptr<DeathRecipient>& recipient)
     {
         return true;
     }
@@ -65,7 +65,7 @@ public:
         return nullptr;
     }
 
-    int Dump(int fd, const std::vector<std::u16string> &args)
+    int Dump(int fd, const std::vector<std::u16string>& args)
     {
         return 0;
     }
@@ -85,7 +85,7 @@ public:
         return 0;
     }
 
-    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         return sendRequestResult_;
     }
@@ -100,12 +100,12 @@ public:
         return true;
     }
 
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient)
+    bool AddDeathRecipient(const sptr<DeathRecipient>& recipient)
     {
         return true;
     }
 
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient)
+    bool RemoveDeathRecipient(const sptr<DeathRecipient>& recipient)
     {
         return true;
     }
@@ -115,7 +115,7 @@ public:
         return nullptr;
     }
 
-    int Dump(int fd, const std::vector<std::u16string> &args)
+    int Dump(int fd, const std::vector<std::u16string>& args)
     {
         return 0;
     }

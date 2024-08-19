@@ -25,6 +25,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+constexpr int32_t MAX_INTERVAL_MS = 10000;
+constexpr int32_t MIN_DELAY = 5000;
 class TimerManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -49,6 +51,13 @@ void TimerManagerTest::TearDown()
 {
 }
 
+int64_t GetMillisTime()
+{
+    auto timeNow = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now());
+    auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow.time_since_epoch());
+    return tmp.count();
+}
+
 namespace {
 /**
  * @tc.name: Init
@@ -59,6 +68,7 @@ HWTEST_F(TimerManagerTest, Init, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::Init start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     timermanager->Init();
     timermanager->Init();
     int32_t res = timermanager->RemoveTimer(0);
@@ -76,6 +86,7 @@ HWTEST_F(TimerManagerTest, RemoveTimer, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::RemoveTimer start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->RemoveTimer(0);
     ASSERT_EQ(-1, res);
     delete timermanager;
@@ -91,6 +102,7 @@ HWTEST_F(TimerManagerTest, OnThread, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::OnThread start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     timermanager->OnThread();
     ASSERT_EQ(-1, timermanager->RemoveTimerInternal(0));
     delete timermanager;
@@ -106,6 +118,7 @@ HWTEST_F(TimerManagerTest, TakeNextTimerId, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::TakeNextTimerId start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->TakeNextTimerId();
     ASSERT_EQ(res, 0);
     delete timermanager;
@@ -121,8 +134,16 @@ HWTEST_F(TimerManagerTest, RemoveTimerInternal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::RemoveTimerInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->RemoveTimerInternal(0);
     ASSERT_EQ(res, -1);
+
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timermanager->timers_.push_back(std::move(timer));
+    res = timermanager->RemoveTimerInternal(0);
+    ASSERT_EQ(res, 0);
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::RemoveTimerInternal start";
 }
@@ -136,8 +157,24 @@ HWTEST_F(TimerManagerTest, CalcNextDelayInternal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::CalcNextDelayInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->CalcNextDelayInternal();
-    ASSERT_EQ(res, 5000);
+    ASSERT_EQ(res, MIN_DELAY);
+
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timermanager->timers_.push_back(std::move(timer));
+    res = timermanager->CalcNextDelayInternal();
+    ASSERT_EQ(res, 0);
+
+    auto nowTime = GetMillisTime();
+    if (!timermanager->timers_.empty()) {
+        auto& firstTimer = timermanager->timers_.front();
+        firstTimer->nextCallTime = nowTime + 10000;
+    }
+    res = timermanager->CalcNextDelayInternal();
+    ASSERT_EQ(res, 10000);
+
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::CalcNextDelayInternal start";
 }
@@ -151,9 +188,34 @@ HWTEST_F(TimerManagerTest, ProcessTimersInternal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     timermanager->ProcessTimersInternal();
-    int32_t res = timermanager->RemoveTimerInternal(0);
-    ASSERT_EQ(res, -1);
+    ASSERT_EQ(timermanager->timers_.size(), 0);
+
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->nextCallTime = GetMillisTime() + 10000;
+    timermanager->timers_.push_back(std::move(timer));
+    timermanager->ProcessTimersInternal();
+
+    if (!timermanager->timers_.empty()) {
+        auto& firstTimer = timermanager->timers_.front();
+        ASSERT_NE(firstTimer, nullptr);
+        firstTimer->nextCallTime = 0;
+        ASSERT_EQ(firstTimer->callback, nullptr);
+        timermanager->ProcessTimersInternal();
+    }
+    timermanager->timers_.clear();
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timer2->callback = []() {
+        return;
+    };
+    ASSERT_NE(timer2->callback, nullptr);
+    timermanager->timers_.push_back(std::move(timer2));
+    timermanager->ProcessTimersInternal();
+
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
 }
@@ -167,6 +229,7 @@ HWTEST_F(TimerManagerTest, ANRManagerInit, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ANRManager::Init start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     anrManager->Init();
     ASSERT_EQ(anrManager->switcher_, false);
     delete anrManager;
@@ -182,6 +245,7 @@ HWTEST_F(TimerManagerTest, ANRManagerAddTimer, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ANRManager::AddTimer start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     anrManager->AddTimer(0, 1);
     anrManager->AddTimer(1, 1);
     anrManager->AddTimer(1, 0);
@@ -199,6 +263,7 @@ HWTEST_F(TimerManagerTest, ANRManagerMarkProcessed, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ANRManager::MarkProcessed start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     anrManager->MarkProcessed(0, 0);
     anrManager->MarkProcessed(0, 1);
     anrManager->MarkProcessed(1, 1);
@@ -217,6 +282,7 @@ HWTEST_F(TimerManagerTest, ANRManagerRemoveTimers, Function | SmallTest | Level2
 {
     GTEST_LOG_(INFO) << "ANRManager::RemoveTimers start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     anrManager->RemoveTimers(0);
     ASSERT_EQ(anrManager->anrTimerCount_, 0);
     delete anrManager;
@@ -232,6 +298,7 @@ HWTEST_F(TimerManagerTest, ANRManagerSwitchAnr, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ANRManager::SwitchAnr start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     anrManager->RemoveTimers(true);
     ASSERT_EQ(anrManager->switcher_, true);
     delete anrManager;
@@ -247,6 +314,7 @@ HWTEST_F(TimerManagerTest, ANRManagerSetAppInfoGetter, Function | SmallTest | Le
 {
     GTEST_LOG_(INFO) << "ANRManager::SetAppInfoGetter start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     std::function<void(int32_t, std::string&, int32_t)> callback;
     anrManager->SetAppInfoGetter(callback);
     ASSERT_EQ(anrManager->appInfoGetter_, nullptr);
@@ -263,11 +331,12 @@ HWTEST_F(TimerManagerTest, ANRManagerGetBundleName, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ANRManager::GetBundleName start";
     ANRManager* anrManager = new ANRManager();
+    ASSERT_NE(anrManager, nullptr);
     auto res = anrManager->GetBundleName(0, 0);
     anrManager->GetBundleName(0, 1);
     anrManager->GetBundleName(1, 0);
     anrManager->GetBundleName(1, 1);
-    ASSERT_EQ(res, "unknow");
+    ASSERT_EQ(res, "unknown");
     delete anrManager;
     GTEST_LOG_(INFO) << "ANRManager::GetBundleName end";
 }
@@ -281,6 +350,7 @@ HWTEST_F(TimerManagerTest, AddTimer001, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "AddTimer001::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t intervalMs = 1;
     std::function<void()> callback;
     int32_t res = timermanager->AddTimer(intervalMs, callback);
@@ -301,6 +371,7 @@ HWTEST_F(TimerManagerTest, ProcessTimers002, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ProcessTimers002::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int res = 0;
     std::function<void()> func = [&]() {
         timermanager->ProcessTimers();
@@ -321,6 +392,7 @@ HWTEST_F(TimerManagerTest, OnStop003, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "OnStop003::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int res = 0;
     std::function<void()> func = [&]() {
         timermanager->OnStop();
@@ -341,10 +413,15 @@ HWTEST_F(TimerManagerTest, AddTimerInternal004, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "AddTimerInternal004::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
     int32_t intervalMs = 1;
     std::function<void()> callback;
     int32_t res = timermanager->AddTimerInternal(intervalMs, callback);
     ASSERT_EQ(res, -1);
+
+    res = timermanager->AddTimerInternal(MAX_INTERVAL_MS + 1, callback);
+    ASSERT_EQ(res, -1);
+
     delete(timermanager);
     GTEST_LOG_(INFO) << "AddTimerInternal004::ProcessTimersInternal start";
 }
@@ -446,6 +523,68 @@ HWTEST_F(TimerManagerTest, UpdateLatestEventId, Function | SmallTest | Level2)
     ASSERT_EQ(eventId, -1);
     delete ANRHandler;
     GTEST_LOG_(INFO) << "ANRHandler::UpdateLatestEventId end";
+}
+
+
+/**
+ * @tc.name: CalcNextDelay
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, CalcNextDelay, Function | SmallTest | Level2)
+{
+    TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
+    timermanager->state_ = TimerMgrState::STATE_NOT_START;
+    int32_t res = timermanager->CalcNextDelay();
+    ASSERT_EQ(res, -1);
+
+    timermanager->state_ = TimerMgrState::STATE_RUNNING;
+    res = timermanager->CalcNextDelay();
+    auto res2 = timermanager->CalcNextDelayInternal();
+    ASSERT_EQ(res, res2);
+    delete timermanager;
+}
+
+/**
+ * @tc.name: ProcessTimers
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, ProcessTimers, Function | SmallTest | Level2)
+{
+    int res = 0;
+    TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
+    timermanager->state_ = TimerMgrState::STATE_NOT_START;
+    timermanager->ProcessTimers();
+    timermanager->state_ = TimerMgrState::STATE_RUNNING;
+    timermanager->ProcessTimers();
+    ASSERT_EQ(res, 0);
+    delete timermanager;
+}
+
+/**
+ * @tc.name: InsertTimerInternal
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, InsertTimerInternal, Function | SmallTest | Level2)
+{
+    int res = 0;
+    TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timer->nextCallTime = 1;
+    timermanager->timers_.push_back(std::move(timer));
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timermanager->InsertTimerInternal(timer2);
+    ASSERT_EQ(res, 0);
+    delete timermanager;
 }
 }
 }

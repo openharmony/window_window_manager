@@ -155,6 +155,7 @@ int32_t CJWindowStageImpl::DisableWindowDecor()
     return static_cast<int32_t>(WmErrorCode::WM_OK);
 }
 
+/** @note @window.hierarchy */
 int32_t CJWindowStageImpl::SetShowOnLockScreen(bool showOnLockScreen)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {

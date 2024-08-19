@@ -76,12 +76,14 @@ HWTEST_F(PictureInPictureOptionTest, PipTemplate, Function | SmallTest | Level2)
  * @tc.desc: SetPiPControlStatus/GetControlStatus
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, PiPControlStatus, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetPiPControlStatus, Function | SmallTest | Level2)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto status = PiPControlStatus::PLAY;
+    option->SetPiPControlStatus(controlType, status);
+    controlType = PiPControlType::END;
     option->SetPiPControlStatus(controlType, status);
     ASSERT_NE(0, option->GetControlStatus().size());
 }
@@ -91,12 +93,14 @@ HWTEST_F(PictureInPictureOptionTest, PiPControlStatus, Function | SmallTest | Le
  * @tc.desc: SetPiPControlEnabled/GetControlEnable
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, PiPControlEnable, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetPiPControlEnabled, Function | SmallTest | Level2)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto enabled = PiPControlStatus::ENABLED;
+    option->SetPiPControlEnabled(controlType, enabled);
+    controlType = PiPControlType::END;
     option->SetPiPControlEnabled(controlType, enabled);
     ASSERT_NE(0, option->GetControlEnable().size());
 }
@@ -158,6 +162,32 @@ HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Leve
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetNodeControllerRef(nullptr);
     ASSERT_EQ(option->GetNodeControllerRef(), nullptr);
+}
+
+/**
+ * @tc.name: TypeNodeRef
+ * @tc.desc: SetTypeNodeRef/GetTypeNodeRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->SetTypeNodeRef(nullptr);
+    ASSERT_EQ(option->GetTypeNodeRef(), nullptr);
+}
+
+/**
+ * @tc.name: TypeNodeEnabled
+ * @tc.desc: SetTypeNodeEnabled/IsTypeNodeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->SetTypeNodeEnabled(true);
+    ASSERT_TRUE(option->IsTypeNodeEnabled());
+    option->SetTypeNodeEnabled(false);
+    ASSERT_TRUE(!option->IsTypeNodeEnabled());
 }
 }
 }

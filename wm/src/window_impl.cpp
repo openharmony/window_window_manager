@@ -48,8 +48,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
-    const std::string PARAM_DUMP_HELP = "-h";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+const std::string PARAM_DUMP_HELP = "-h";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -179,7 +179,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = windowSystemConfig_.uiType_ == "phone";
+    auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
     if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
@@ -362,6 +362,11 @@ const std::string& WindowImpl::GetWindowName() const
 uint32_t WindowImpl::GetWindowId() const
 {
     return property_->GetWindowId();
+}
+
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return property_->GetDisplayId();
 }
 
 uint32_t WindowImpl::GetWindowFlags() const
@@ -666,7 +671,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
-        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr) {
+            config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
+            TLOGI(WmsLogTag::WMS_LIFE, "notify window orientation change end.");
+        }
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
@@ -1205,6 +1214,9 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
+    if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
@@ -2012,22 +2024,23 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());
@@ -4031,7 +4044,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
+    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
     return false;
 }
 

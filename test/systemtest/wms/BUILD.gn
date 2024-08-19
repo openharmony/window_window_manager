@@ -30,6 +30,7 @@ group("systemtest") {
     ":wms_window_gamut_test",
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_immersive_test",
+    ":wms_window_immersive_test2",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
     ":wms_window_layout_test",
@@ -58,7 +59,17 @@ ohos_systemtest("wms_window_layout_test") {
 
   sources = [ "window_layout_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/interfaces/include",
+  ]
+
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session:scene_session",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -145,6 +156,29 @@ ohos_systemtest("wms_window_immersive_test") {
   sources = [ "window_immersive_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "power_manager:powermgr_client",
+  ]
+}
+
+ohos_systemtest("wms_window_immersive_test2") {
+  module_out_path = module_out_path
+
+  sources = [ "window_immersive_test2.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/interfaces/kits/napi/window_runtime/window_napi",
+  ]
+
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
+  ]
 
   external_deps = [
     "c_utils:utils",

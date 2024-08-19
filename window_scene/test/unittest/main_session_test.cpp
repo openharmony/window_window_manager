@@ -134,7 +134,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
 {
     mainSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-
+    mainSession_->ClearDialogVector();
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, mainSession_->TransferKeyEvent(keyEvent));
 }
 
@@ -171,6 +171,16 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Leve
     mainSession_->ClearDialogVector();
     EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
 }
+/**
+ * @tc.name: ProcessPointDownSession02
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+{
+    mainSession_->BindDialogToParentSession(mainSession_);
+    EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
+}
 
 /**
  * @tc.name: SetTopmost01
@@ -180,6 +190,24 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Leve
 HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
 {
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
+    EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
+}
+/**
+ * @tc.name: SetTopmost02
+ * @tc.desc: check func SetTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    mainSession_->SetSessionProperty(property);
+    ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
+    EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
+
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback = new SceneSession::SessionChangeCallback();
+    ASSERT_TRUE(sessionChangeCallback != nullptr);
+
+    mainSession_->RegisterSessionChangeCallback(sessionChangeCallback);
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
 }
 
@@ -215,6 +243,10 @@ HWTEST_F(MainSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Le
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
     mainSession_->CheckPointerEventDispatch(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_DOWN);
+    mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
+    mainSession_->CheckPointerEventDispatch(pointerEvent);
 }
 
 /**
@@ -230,6 +262,88 @@ HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
     mainSession_->RectCheck(1000000000, 1000000000);
 }
 
+/**
+ * @tc.name: SetExitSplitOnBackground
+ * @tc.desc: check func SetExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetExitSplitOnBackground, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = true;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    ASSERT_EQ(true, isExitSplitOnBackground);
+}
+
+/**
+ * @tc.name: IsExitSplitOnBackground01
+ * @tc.desc: check func IsExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground01, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = true;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    bool ret = mainSession_->IsExitSplitOnBackground();
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: IsExitSplitOnBackground02
+ * @tc.desc: check func IsExitSplitOnBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Level1)
+{
+    bool isExitSplitOnBackground = false;
+    mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
+    bool ret = mainSession_->IsExitSplitOnBackground();
+    ASSERT_EQ(false, ret);
+}
+/**
+ * @tc.name: NotifyClientToUpdateInteractive01
+ * @tc.desc: check func NotifyClientToUpdateInteractive
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive01, Function | SmallTest | Level1)
+{
+    mainSession_->NotifyClientToUpdateInteractive(true);
+    ASSERT_TRUE(true); // exec success
+}
+/**
+ * @tc.name: NotifyClientToUpdateInteractive02
+ * @tc.desc: check func NotifyClientToUpdateInteractive
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive02, Function | SmallTest | Level1)
+{
+    auto surfaceNode = CreateRSSurfaceNode();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    EXPECT_NE(nullptr, testWindowEventChannel);
+
+    auto result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    mainSession_->NotifyClientToUpdateInteractive(true);
+    ASSERT_TRUE(true); // exec success
+
+    mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
+    mainSession_->NotifyClientToUpdateInteractive(true);
+    ASSERT_TRUE(true); // exec success
+
+    mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    mainSession_->NotifyClientToUpdateInteractive(true);
+    ASSERT_TRUE(true); // exec success
+
+    mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
+    bool visible = mainSession_->UpdateVisibilityInner(true);
+    ASSERT_TRUE(visible);
+    mainSession_->NotifyClientToUpdateInteractive(true);
+    ASSERT_TRUE(true); // exec success
+}
 }
 }
 }

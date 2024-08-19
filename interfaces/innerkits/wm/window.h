@@ -20,6 +20,7 @@
 #include <parcel.h>
 #include <iremote_object.h>
 
+#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
@@ -27,31 +28,31 @@
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
-    class Configuration;
-    class Ability;
+class Configuration;
+class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
-    class AbilityContext;
-    class Context;
+class AbilityContext;
+class Context;
 }
 
 namespace OHOS::AAFwk {
-    class Want;
-    class WantParams;
+class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
-    class UIContent;
+class UIContent;
 }
 
 namespace OHOS::Media {
-    class PixelMap;
+class PixelMap;
 }
 
 namespace OHOS::Accessibility {
@@ -461,6 +462,21 @@ public:
 };
 
 /**
+ * @class ISwitchFreeMultiWindowListener
+ *
+ * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
+ */
+class ISwitchFreeMultiWindowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free multi window state changed.
+     *
+     * @param enable Whether free multi window state enabled.
+     */
+    virtual void OnSwitchFreeMultiWindow(bool enable) {}
+};
+
+/**
  * @class IKeyboardPanelInfoChangeListener
  *
  * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
@@ -616,6 +632,12 @@ public:
      * @return ID of window.
      */
     virtual uint32_t GetWindowId() const { return INVALID_WINDOW_ID; }
+    /**
+     * @brief Get displayId of window.
+     *
+     * @return displayId of window.
+     */
+    virtual uint64_t GetDisplayId() const { return DISPLAY_ID_INVALID; }
     /**
      * @brief Get flag of window.
      *
@@ -818,6 +840,14 @@ public:
      */
     virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
     /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
@@ -825,6 +855,14 @@ public:
      * @return WMError
      */
     virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    /**
+     * @brief resize the window instance (w,h)
+     *
+     * @param width
+     * @param height
+     * @return WMError
+     */
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief set the window gravity
      *
@@ -940,7 +978,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseToAppTop() { return WmErrorCode::WM_OK; }
+    virtual WMError RaiseToAppTop() { return WMError::WM_OK; }
     /**
      * @brief Set skip flag of snapshot.
      *
@@ -1472,6 +1510,11 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief start move system window. It is called by application.
+     *
+     */
+    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief Set flag that need remove window input channel.
      *
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
@@ -1603,7 +1646,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Hide non-system floating windows.
@@ -1811,6 +1854,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable drag window.
+     *
+     * @param enableDrag The value true means to enable window dragging, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set whether to display the maximize, minimize, split buttons of main window.
      *
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
@@ -1962,6 +2013,24 @@ public:
      */
     virtual WMError UnregisterSubWindowCloseListeners(
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ 
+    /**
+     * @brief Unregister switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set Shaped Window Mask.
@@ -2121,6 +2190,28 @@ public:
      * @return WMError.
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the ContinueState of window.
+     *
+     * @param continueState of the window.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
+     * @brief Set the parent window of sub window created by UIExtension
+     *
+     * @param parent window
+     */
+    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
+
+    /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 };
 }
 }

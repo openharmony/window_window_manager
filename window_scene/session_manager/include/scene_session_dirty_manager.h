@@ -50,7 +50,8 @@ public:
 
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
-    std::vector<MMI::WindowInfo> GetFullWindowInfoList();
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+        GetFullWindowInfoList();
     void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
@@ -58,7 +59,8 @@ public:
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
-    MMI::WindowInfo GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
+    std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>>
+        GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
     void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;

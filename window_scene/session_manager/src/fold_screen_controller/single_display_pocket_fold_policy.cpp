@@ -28,16 +28,16 @@
 
 namespace OHOS::Rosen {
 namespace {
-    const ScreenId SCREEN_ID_FULL = 0;
-    const ScreenId SCREEN_ID_MAIN = 5;
+const ScreenId SCREEN_ID_FULL = 0;
+const ScreenId SCREEN_ID_MAIN = 5;
 
-    #ifdef TP_FEATURE_ENABLE
-    const int32_t TP_TYPE = 12;
-    const int32_t TP_TYPE_MAIN = 18;
-    const std::string FULL_TP = "0";
-    const std::string MAIN_TP = "1";
-    const std::string MAIN_TP_OFF = "1,1";
-    #endif
+#ifdef TP_FEATURE_ENABLE
+const int32_t TP_TYPE = 12;
+const int32_t TP_TYPE_MAIN = 18;
+const std::string FULL_TP = "0";
+const std::string MAIN_TP = "1";
+const std::string MAIN_TP_OFF = "1,1";
+#endif
 } // namespace
 
 SingleDisplayPocketFoldPolicy::SingleDisplayPocketFoldPolicy(std::recursive_mutex& displayInfoMutex,

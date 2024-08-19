@@ -31,9 +31,10 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace AbilityRuntime;
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
-void BindFunctions(napi_env env, napi_value object, const char *moduleName);
+void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
@@ -53,8 +54,10 @@ public:
     static napi_value Recover(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
+    static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
     static napi_value SetWindowType(napi_env env, napi_callback_info info);
     static napi_value SetWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetProperties(napi_env env, napi_callback_info info);
@@ -120,6 +123,7 @@ public:
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value IsFocused(napi_env env, napi_callback_info info);
+    static napi_value StartMoving(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -157,6 +161,12 @@ public:
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value EnableDrag(napi_env env, napi_callback_info info);
+
+    /**
+     * Sub Window
+     */
+    static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -178,8 +188,10 @@ private:
     napi_value OnRecover(napi_env env, napi_callback_info info);
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
+    napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowType(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetProperties(napi_env env, napi_callback_info info);
@@ -282,10 +294,21 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
+    napi_value OnEnableDrag(napi_env env, napi_callback_info info);
+    napi_value OnStartMoving(napi_env env, napi_callback_info info);
+
+    /**
+     * Sub Window
+     */
+    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
+
+    NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDrag, const wptr<Window>& weakToken,
+        std::shared_ptr<WmErrorCode> &errCodePtr) const;
+    NapiAsyncTask::CompleteCallback GetEnableDragCompleteCallback(const std::shared_ptr<WmErrorCode>& errCodePtr) const;
 };
 }  // namespace Rosen
 }  // namespace OHOS

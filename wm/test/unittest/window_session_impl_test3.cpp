@@ -112,6 +112,23 @@ HWTEST_F(WindowSessionImplTest3, SetInputEventConsumer01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetContinueState
+ * @tc.desc: SetContinueState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetContinueState, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState start";
+    window_ = GetTestWindowImpl("SetContinueState");
+    ASSERT_NE(window_, nullptr);
+    WMError ret = window_->SetContinueState(static_cast<int32_t>(ContinueState::CONTINUESTATE_INACTIVE));
+    ASSERT_EQ(ret, WMError::WM_OK);
+    ret = window_->SetContinueState(-100);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState end";
+}
+
+/**
  * @tc.name: GetListeners
  * @tc.desc: GetListeners01 IDisplayMoveListener
  * @tc.type: FUNC

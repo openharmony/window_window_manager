@@ -15,6 +15,7 @@
 
 #include "window_impl.h"
 
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "window_option.h"
@@ -24,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
@@ -183,6 +184,11 @@ const std::string& WindowImpl::GetWindowName() const
 uint32_t WindowImpl::GetWindowId() const
 {
     return windowId_;
+}
+
+uint64_t WindowImpl::GetDisplayId() const
+{
+    return DISPLAY_ID_INVALID;
 }
 
 uint32_t WindowImpl::GetWindowFlags() const
@@ -996,9 +1002,10 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
     return true;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetAspectRatio(float ratio)
@@ -1093,14 +1100,16 @@ WMError WindowImpl::SetResizeByDragEnabled(bool dragEnabled)
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseAboveTarget(int32_t subWindowId)
 {
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::HideNonSystemFloatingWindows(bool shouldHide)

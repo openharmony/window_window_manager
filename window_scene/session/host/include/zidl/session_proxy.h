@@ -45,6 +45,7 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
@@ -85,6 +86,7 @@ public:
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     int32_t GetStatusBarHeight() override;
+    WSError NotifyFrameLayoutFinishFromApp() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 private:

@@ -80,7 +80,7 @@ const char *DEFAULT_SNAPSHOT_PREFIX = "/snapshot";
 const char *VALID_SNAPSHOT_SUFFIX = ".jpeg";
 const char *VALID_SNAPSHOT_PNG_SUFFIX = ".png";
 
-void SnapShotUtils::PrintUsage(const std::string &cmdLine)
+void SnapShotUtils::PrintUsage(const std::string& cmdLine)
 {
     std::cout << "usage: " << cmdLine.c_str() <<
         " [-i displayId] [-f output_file] [-w width] [-h height] [-t type] [-m]" << std::endl;
@@ -108,7 +108,7 @@ std::string SnapShotUtils::GenerateFileName(std::string fileType, int offset)
     return fileName;
 }
 
-bool SnapShotUtils::CheckFileNameValid(const std::string &fileName, std::string fileType)
+bool SnapShotUtils::CheckFileNameValid(const std::string& fileName, std::string fileType)
 {
     std::cout << "fileType: " << fileType << std::endl;
     size_t fileMinLength = (fileType == "png") ? strlen(VALID_SNAPSHOT_PNG_SUFFIX) : strlen(VALID_SNAPSHOT_SUFFIX);
@@ -156,7 +156,7 @@ bool SnapShotUtils::CheckWidthAndHeightValid(int32_t w, int32_t h)
     return CheckWHValid(w) && CheckWHValid(h);
 }
 
-bool SnapShotUtils::CheckParamValid(const WriteToJpegParam &param)
+bool SnapShotUtils::CheckParamValid(const WriteToJpegParam& param)
 {
     switch (param.format) {
         case Media::PixelFormat::RGBA_8888:
@@ -188,7 +188,7 @@ bool SnapShotUtils::CheckParamValid(const WriteToJpegParam &param)
     return true;
 }
 
-bool SnapShotUtils::RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t *rgb888Buf, int32_t size)
+bool SnapShotUtils::RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t* rgb888Buf, int32_t size)
 {
     if (rgba8888Buf == nullptr || rgb888Buf == nullptr || size <= 0) {
         std::cout << __func__ << ": params are invalid." << std::endl;
@@ -203,7 +203,7 @@ bool SnapShotUtils::RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t *rgb888
     return true;
 }
 
-bool SnapShotUtils::RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t *rgb888Buf, int32_t size)
+bool SnapShotUtils::RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t* rgb888Buf, int32_t size)
 {
     if (rgb565Buf == nullptr || rgb888Buf == nullptr || size <= 0) {
         std::cout << __func__ << ": params are invalid." << std::endl;
@@ -267,7 +267,7 @@ bool SnapShotUtils::WriteRgb888ToJpeg(FILE* file, uint32_t width, uint32_t heigh
     return true;
 }
 
-bool SnapShotUtils::WriteToJpeg(const std::string &fileName, const WriteToJpegParam &param)
+bool SnapShotUtils::WriteToJpeg(const std::string& fileName, const WriteToJpegParam& param)
 {
     bool ret = false;
     if (!CheckFileNameValid(fileName)) {
@@ -315,7 +315,7 @@ bool SnapShotUtils::WriteToJpeg(const std::string &fileName, const WriteToJpegPa
     return ret;
 }
 
-bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam &param)
+bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam& param)
 {
     bool ret = false;
     if (!CheckParamValid(param)) {
@@ -358,7 +358,7 @@ bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam &param)
     return ret;
 }
 
-bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &pixelMap, std::string fileType)
+bool SnapShotUtils::SaveSnapShot(const std::string& fileName, Media::PixelMap& pixelMap, std::string fileType)
 {
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
@@ -383,7 +383,7 @@ bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &p
     return true;
 }
 
-bool SnapShotUtils::WriteToJpegWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap)
+bool SnapShotUtils::WriteToJpegWithPixelMap(const std::string& fileName, Media::PixelMap& pixelMap)
 {
     if (pixelMap.GetAllocatorType() == Media::AllocatorType::DMA_ALLOC) {
         return SaveSnapShot(fileName, pixelMap);
@@ -397,7 +397,7 @@ bool SnapShotUtils::WriteToJpegWithPixelMap(const std::string &fileName, Media::
     return SnapShotUtils::WriteToJpeg(fileName, param);
 }
 
-bool SnapShotUtils::WriteToJpegWithPixelMap(int fd, Media::PixelMap &pixelMap)
+bool SnapShotUtils::WriteToJpegWithPixelMap(int fd, Media::PixelMap& pixelMap)
 {
     WriteToJpegParam param;
     param.width = static_cast<uint32_t>(pixelMap.GetWidth());
@@ -408,7 +408,7 @@ bool SnapShotUtils::WriteToJpegWithPixelMap(int fd, Media::PixelMap &pixelMap)
     return SnapShotUtils::WriteToJpeg(fd, param);
 }
 
-bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplayIdSet)
+bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId& displayId, bool isDisplayIdSet)
 {
     if (!isDisplayIdSet) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
@@ -433,7 +433,7 @@ bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplay
     return true;
 }
 
-bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArguments &cmdArguments)
+bool SnapShotUtils::ProcessArgs(int argc, char* const argv[], CmdArguments& cmdArguments)
 {
     int opt = 0;
     const struct option longOption[] = {

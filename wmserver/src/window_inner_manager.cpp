@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InnerManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InnerManager"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowInnerManager)
 
@@ -136,7 +136,7 @@ void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type,
     return;
 }
 
-void WindowInnerManager::MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser)
+void WindowInnerManager::MinimizeAbility(const wptr<WindowNode>& node, bool isFromUser)
 {
     // asynchronously calls the MinimizeAbility of AbilityManager
     auto weakNode = node.promote();
@@ -157,7 +157,7 @@ void WindowInnerManager::MinimizeAbility(const wptr<WindowNode> &node, bool isFr
     PostTask(task, "MinimizeAbility");
 }
 
-void WindowInnerManager::TerminateAbility(const wptr<WindowNode> &node)
+void WindowInnerManager::TerminateAbility(const wptr<WindowNode>& node)
 {
     // asynchronously calls the TerminateAbility of AbilityManager
     auto weakNode = node.promote();
@@ -179,7 +179,7 @@ void WindowInnerManager::TerminateAbility(const wptr<WindowNode> &node)
     PostTask(task, "TerminateAbility");
 }
 
-void WindowInnerManager::CloseAbility(const wptr<WindowNode> &node)
+void WindowInnerManager::CloseAbility(const wptr<WindowNode>& node)
 {
     // asynchronously calls the CloseAbility of AbilityManager
     auto weakNode = node.promote();
@@ -201,7 +201,7 @@ void WindowInnerManager::CloseAbility(const wptr<WindowNode> &node)
     PostTask(task, "CloseAbility");
 }
 
-void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode> &node)
+void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode>& node)
 {
     // asynchronously calls the CloseAbility of AbilityManager
     auto weakNode = node.promote();
@@ -222,7 +222,7 @@ void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode> &node)
     PostTask(task, "CompleteFirstFrameDrawing");
 }
 
-void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode> &node, std::shared_ptr<Media::PixelMap> pixelMap)
+void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode>& node, std::shared_ptr<Media::PixelMap> pixelMap)
 {
     // asynchronously calls the UpdateMissionSnapShot of AbilityManager
     auto weakNode = node.promote();
@@ -343,7 +343,7 @@ void WindowInnerManager::StartWindowInfoReportLoop()
     isReportTaskStart_ = true;
 }
 
-void WindowInnerManager::SetWindowRoot(const sptr<WindowRoot> &windowRoot)
+void WindowInnerManager::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
 {
     if (moveDragController_ != nullptr) {
         moveDragController_->SetWindowRoot(windowRoot);

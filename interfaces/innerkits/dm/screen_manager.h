@@ -112,6 +112,27 @@ public:
      */
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
+     /**
+     * @brief Make screens as mirror-screen
+     *
+     * @param mainScreenId Main screen id.
+     * @param secondaryScreenId secondary screen id.
+     * @param secondaryScreenMode Screen Combination Mode.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        ScreenSourceMode secondaryScreenMode);
+
+     /**
+     * @brief Set Screen Relative Position
+     *
+     * @param mainScreenOption Main screen id and position.
+     * @param secondaryScreenOption secondary screen id and position.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
+        ExtendOption secondaryScreenOption);
+
     /**
     * @brief Make screens as unique-screen.
     *
@@ -331,6 +352,14 @@ public:
      * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
+
+    /**
+     * @brief when casting the screen, Virtual screen playback and pause function.
+     *
+     * @param screenId screenId used in virtual screen.
+     * @return screenStatus VIRTUAL_SCREEN_PLAY or VIRTUAL_SCREEN_PAUSE.
+     */
+    bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
 private:
     ScreenManager();
     ~ScreenManager();

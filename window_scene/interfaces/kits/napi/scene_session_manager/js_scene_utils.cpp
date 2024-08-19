@@ -29,21 +29,27 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
-constexpr int32_t NUMBER_2 = 2;
-constexpr int32_t NUMBER_3 = 3;
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+// Refer to OHOS::Ace::TouchType
+enum class AceTouchType : int32_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+};
 
 int32_t GetMMITouchType(int32_t aceType)
 {
     switch (aceType) {
-        case 0:
+        case static_cast<int32_t>(AceTouchType::DOWN):
             return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case 1:
+        case static_cast<int32_t>(AceTouchType::UP):
             return MMI::PointerEvent::POINTER_ACTION_UP;
-        case NUMBER_2:
+        case static_cast<int32_t>(AceTouchType::MOVE):
             return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case NUMBER_3:
+        case static_cast<int32_t>(AceTouchType::CANCEL):
             return MMI::PointerEvent::POINTER_ACTION_CANCEL;
         default:
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
@@ -474,6 +480,56 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
     return true;
 }
 
+bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo)
+{
+    napi_value jsWidth = nullptr;
+    napi_get_named_property(env, jsObject, "width", &jsWidth);
+    napi_value jsHeight = nullptr;
+    napi_get_named_property(env, jsObject, "height", &jsHeight);
+    napi_value jsDensity = nullptr;
+    napi_get_named_property(env, jsObject, "density", &jsDensity);
+    napi_value jsRotation = nullptr;
+    napi_get_named_property(env, jsObject, "rotation", &jsRotation);
+    napi_value jsEnableHookRotation = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
+    
+    uint32_t width = 0;
+    if (!ConvertFromJsValue(env, jsWidth, width)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        return false;
+    }
+    hookInfo.width_ = width;
+
+    uint32_t height = 0;
+    if (!ConvertFromJsValue(env, jsHeight, height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        return false;
+    }
+    hookInfo.height_ = height;
+
+    double_t density = 1.0;
+    if (!ConvertFromJsValue(env, jsDensity, density)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        return false;
+    }
+    hookInfo.density_ = static_cast<float_t>(density);
+
+    uint32_t rotation = 0;
+    if (!ConvertFromJsValue(env, jsRotation, rotation)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rotation");
+        return false;
+    }
+    hookInfo.rotation_ = rotation;
+
+    bool enableHookRotation = false;
+    if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
+        return false;
+    }
+    hookInfo.enableHookRotation_ = enableHookRotation;
+    return true;
+}
+
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
     auto vpr = RootScene::staticRootScene_->GetDisplayDensity();
@@ -635,7 +691,7 @@ bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent&
     return true;
 }
 
-bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList)
 {
     bool isArray = false;
     napi_is_array(env, jsObject, &isArray);
@@ -660,7 +716,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     return true;
 }
 
-bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap)
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap)
 {
     if (value == nullptr) {
         WLOGFE("value is nullptr");
@@ -701,7 +757,7 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
     return true;
 }
 
-bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
+bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
         WLOGFE("array is nullptr!");
@@ -779,16 +835,20 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     napi_set_named_property(env, objValue, "isAtomicService",
         CreateJsValue(env, sessionInfo.isAtomicService_));
+    napi_set_named_property(env, objValue, "isBackTransition",
+        CreateJsValue(env, sessionInfo.isBackTransition_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
     }
+    napi_set_named_property(env, objValue, "errorReason",
+        CreateJsValue(env, sessionInfo.errorReason));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     return objValue;
 }
 
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property)
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -841,6 +901,8 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto params = sessionInfo.want->GetParams();
         napi_set_named_property(env, objValue, "fileManagerMode",
             CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        napi_set_named_property(env, objValue, "floatingDisplayMode",
+            CreateJsValue(env, params.GetIntParam("floatingDisplayMode", INVALID_VAL)));
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
@@ -941,6 +1003,8 @@ void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
         static_cast<int32_t>(SizeChangeReason::PIP_AUTO_START)));
     napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
+    napi_set_named_property(env, objValue, "PIP_RESTORE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RESTORE)));
 }
 
 napi_value CreateJsSessionStartupVisibility(napi_env env)

@@ -20,8 +20,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SYSTEM_BAR_PROPERTY_MAX_NUM = 2;
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t SYSTEM_BAR_PROPERTY_MAX_NUM = 2;
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
 }
 WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
 {

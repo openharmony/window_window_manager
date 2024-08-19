@@ -29,13 +29,13 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
-    const static uint32_t MAX_RETRY_NUM = 6;
-    const static uint32_t RETRY_WAIT_MS = 500;
-    const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 25000;
-    std::atomic<bool> g_dmIsDestroyed = false;
-    std::mutex snapBypickerMutex;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
+const static uint32_t MAX_RETRY_NUM = 6;
+const static uint32_t RETRY_WAIT_MS = 500;
+const static uint32_t MAX_DISPLAY_SIZE = 32;
+const static uint32_t MAX_INTERVAL_US = 25000;
+std::atomic<bool> g_dmIsDestroyed = false;
+std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -58,8 +58,10 @@ public:
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
+    DMError SetFoldStatusLockedFromJs(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -87,6 +89,7 @@ public:
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
@@ -499,6 +502,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
+    WLOGFI("Clear displaymanager listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -538,7 +542,7 @@ DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFD("Destroy displaymanager instance");
+    WLOGFI("Destroy displaymanager instance");
     g_dmIsDestroyed = true;
 }
 
@@ -846,6 +850,11 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
+DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+{
+    return pImpl_->SetFoldDisplayModeFromJs(mode);
+}
+
 void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
 {
     pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
@@ -862,14 +871,29 @@ void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
 }
 
+DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeFromJs(mode);
+}
+
 void DisplayManager::SetFoldStatusLocked(bool locked)
 {
     pImpl_->SetFoldStatusLocked(locked);
 }
 
+DMError DisplayManager::SetFoldStatusLockedFromJs(bool locked)
+{
+    return pImpl_->SetFoldStatusLockedFromJs(locked);
+}
+
 void DisplayManager::Impl::SetFoldStatusLocked(bool locked)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLocked(locked);
+}
+
+DMError DisplayManager::Impl::SetFoldStatusLockedFromJs(bool locked)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLockedFromJs(locked);
 }
 
 sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
@@ -1473,6 +1497,8 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         displayModeListeners = displayModeListeners_;
     }
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    NotifyDisplayChange(displayInfo);
     for (auto& listener : displayModeListeners) {
         listener->OnDisplayModeChanged(displayMode);
     }
@@ -1908,6 +1934,19 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    return pImpl_->SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
+}
+
+DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
+        screenId, pid, windowIdList);
 }
 } // namespace OHOS::Rosen
 
