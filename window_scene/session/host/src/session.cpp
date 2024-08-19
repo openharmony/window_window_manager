@@ -160,6 +160,11 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
+void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc &func)
+{
+    frameLayoutFinishFunc_ = func;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
@@ -1538,6 +1543,17 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
+sptr<Session> Session::GetMainSession()
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return this;
+    } else if (parentSession_) {
+        return parentSession_->GetMainSession();
+    } else {
+        return nullptr;
+    }
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
@@ -1851,7 +1867,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float scaleParam) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
     if (scenePersistence_ == nullptr) {
@@ -1876,7 +1892,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
-    auto pixelMap = callback->GetResult(FFRT_SNAPSHOT_TIMEOUT_MS);
+    auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
@@ -1894,13 +1910,13 @@ void Session::SaveSnapshot(bool useFfrt)
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->snapshot_ = session->Snapshot();
+        session->snapshot_ = session->Snapshot(runInFfrt);
         if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
         }
@@ -1914,11 +1930,11 @@ void Session::SaveSnapshot(bool useFfrt)
         };
         session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
-    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
-    if (!useFfrt || snapshotFfrtHelper == nullptr) {
+    if (!useFfrt) {
         task();
         return;
     }
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
@@ -1959,36 +1975,28 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
 
 void Session::UnregisterSessionChangeListeners()
 {
-    auto task = [weakThis = wptr(this)]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            WLOGFE("session is null");
-            return;
-        }
-        session->sessionStateChangeFunc_ = nullptr;
-        session->sessionFocusableChangeFunc_ = nullptr;
-        session->sessionTouchableChangeFunc_ = nullptr;
-        session->clickFunc_ = nullptr;
-        session->jsSceneSessionExceptionFunc_ = nullptr;
-        session->sessionExceptionFunc_ = nullptr;
-        session->terminateSessionFunc_ = nullptr;
-        session->pendingSessionActivationFunc_ = nullptr;
-        session->changeSessionVisibilityWithStatusBarFunc_ = nullptr;
-        session->bufferAvailableChangeFunc_ = nullptr;
-        session->backPressedFunc_ = nullptr;
-        session->terminateSessionFuncNew_ = nullptr;
-        session->terminateSessionFuncTotal_ = nullptr;
-        session->updateSessionLabelFunc_ = nullptr;
-        session->updateSessionIconFunc_ = nullptr;
-        session->pendingSessionToForegroundFunc_ = nullptr;
-        session->pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
-        session->raiseToTopForPointDownFunc_ = nullptr;
-        session->sessionInfoLockedStateChangeFunc_ = nullptr;
-        session->contextTransparentFunc_ = nullptr;
-        session->sessionRectChangeFunc_ = nullptr;
-        WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", session->GetPersistentId());
-    };
-    PostTask(task, "UnregisterSessionChangeListeners");
+    sessionStateChangeFunc_ = nullptr;
+    sessionFocusableChangeFunc_ = nullptr;
+    sessionTouchableChangeFunc_ = nullptr;
+    clickFunc_ = nullptr;
+    jsSceneSessionExceptionFunc_ = nullptr;
+    sessionExceptionFunc_ = nullptr;
+    terminateSessionFunc_ = nullptr;
+    pendingSessionActivationFunc_ = nullptr;
+    changeSessionVisibilityWithStatusBarFunc_ = nullptr;
+    bufferAvailableChangeFunc_ = nullptr;
+    backPressedFunc_ = nullptr;
+    terminateSessionFuncNew_ = nullptr;
+    terminateSessionFuncTotal_ = nullptr;
+    updateSessionLabelFunc_ = nullptr;
+    updateSessionIconFunc_ = nullptr;
+    pendingSessionToForegroundFunc_ = nullptr;
+    pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
+    raiseToTopForPointDownFunc_ = nullptr;
+    sessionInfoLockedStateChangeFunc_ = nullptr;
+    contextTransparentFunc_ = nullptr;
+    sessionRectChangeFunc_ = nullptr;
+    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
@@ -2283,6 +2291,11 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+                surfaceNode_->MarkUifirstNode(false);
+            }
+        } else {
+            surfaceNode_->MarkUifirstNode(true);
         }
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
@@ -2671,8 +2684,8 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = systemConfig_.uiType_ == "pc";
-    bool isPhone = systemConfig_.uiType_ == "phone";
+    bool isPc = systemConfig_.uiType_ == UI_TYPE_PC;
+    bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
     if (!isPc && !isPhone) {
         TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
@@ -3070,7 +3083,7 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("const.product.devicetype", "unknown") == "phone" &&
+    return system::GetParameter("const.product.devicetype", "unknown") == UI_TYPE_PHONE &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
 } // namespace OHOS::Rosen

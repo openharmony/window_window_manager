@@ -518,8 +518,8 @@ HWTEST_F(WindowManagerProxyTest, OffWindowZoom, Function | SmallTest | Level2)
 HWTEST_F(WindowManagerProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
-    WmErrorCode err = windowManagerProxy_->RaiseToAppTop(windowId);
-    EXPECT_EQ(err, WmErrorCode::WM_OK);
+    WMError err = windowManagerProxy_->RaiseToAppTop(windowId);
+    EXPECT_EQ(err, WMError::WM_OK);
 }
 
 /**

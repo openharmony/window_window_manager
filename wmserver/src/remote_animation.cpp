@@ -40,9 +40,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "RemoteAnimation"};
-    const std::string ANIMATION_TIME_OUT_TASK = "remote_animation_time_out_task";
-    constexpr int64_t ANIMATION_TIME_OUT_MILLISECONDS = 3000; // 3000 is max time
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "RemoteAnimation"};
+const std::string ANIMATION_TIME_OUT_TASK = "remote_animation_time_out_task";
+constexpr int64_t ANIMATION_TIME_OUT_MILLISECONDS = 3000; // 3000 is max time
 }
 bool RemoteAnimation::isRemoteAnimationEnable_ = true;
 std::atomic<uint32_t> RemoteAnimation::allocationId_ = 0;

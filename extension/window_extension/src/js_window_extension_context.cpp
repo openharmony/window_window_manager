@@ -31,9 +31,9 @@ namespace Rosen {
 using namespace AbilityRuntime;
 
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtensionContext"};
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    constexpr int32_t MIN_ARG_COUNT = 2;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtensionContext"};
+std::shared_ptr<AppExecFwk::EventHandler> handler_;
+constexpr int32_t MIN_ARG_COUNT = 2;
 }
 
 napi_value NapiGetUndefined(napi_env env)

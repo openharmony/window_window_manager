@@ -90,8 +90,6 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
-    void SetExtensionFlag(bool isExtensionFlag);
-    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
@@ -145,8 +143,6 @@ public:
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
-    bool GetExtensionFlag() const;
-    UIExtensionUsage GetUIExtensionUsage() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -188,6 +184,22 @@ public:
     void Read(Parcel& parcel, WSPropertyChangeAction action);
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
+
+    /**
+     * Sub Window
+     */
+    void SetSubWindowLevel(uint32_t subWindowLevel);
+    uint32_t GetSubWindowLevel() const;
+
+    /*
+     * UIExtension
+     */
+    void SetRealParentId(int32_t realParentId);
+    int32_t GetRealParentId() const;
+    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
+    UIExtensionUsage GetUIExtensionUsage() const;
+    void SetExtensionFlag(bool isExtensionFlag);
+    bool GetExtensionFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -298,8 +310,6 @@ private:
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
-    bool isExtensionFlag_ = false;
-    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
 
     bool isShaped_ = false;
     bool fullScreenStart_ = false;
@@ -311,6 +321,18 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
+
+    /**
+     * Sub Window
+     */
+    uint32_t subWindowLevel_ = 1;
+
+    /*
+     * UIExtension
+     */
+    int32_t realParentId_ = INVALID_SESSION_ID;
+    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
+    bool isExtensionFlag_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

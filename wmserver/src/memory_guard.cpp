@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Rosen {
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MemoryGuard"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MemoryGuard"};
 }
 #endif
 MemoryGuard::MemoryGuard()

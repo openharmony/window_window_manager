@@ -268,40 +268,6 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandlePointerStyle
- * @tc.desc: HandlePointerStyle function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, HandlePointerStyle, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandlePointerStyle";
-    info.bundleName_ = "HandlePointerStyle";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandlePointerStyle(nullptr));
-    pointerEvent->SetSourceType(20);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetSourceType(1);
-    pointerEvent->SetPointerAction(-3);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetPointerAction(3);
-    pointerEvent->SetButtonId(1);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetButtonId(-1);
-    pointerEvent->RemoveAllPointerItems();
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandlePointerStyle(pointerEvent));
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerItem.SetPointerId(2024);
-    pointerEvent->AddPointerItem(pointerItem);
-    pointerEvent->SetPointerId(2024);
-    EXPECT_EQ(WSError::WS_OK, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->RemoveAllPointerItems();
-}
-
-/**
  * @tc.name: NotifyOutsideDownEvent
  * @tc.desc: NotifyOutsideDownEvent function
  * @tc.type: FUNC
@@ -1348,6 +1314,58 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     res = session->HandleActionUpdateTurnScreenOn(
         property, session_, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleActionUpdatePrivacyMode1
+ * @tc.desc: HandleActionUpdatePrivacyMode1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdatePrivacyMode1";
+    info.bundleName_ = "HandleActionUpdatePrivacyMode1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_NE(session->property_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->property_->SetPrivacyMode(false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    auto res =
+        session->HandleActionUpdatePrivacyMode(property, session, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(true, session->property_->GetPrivacyMode());
+}
+
+/**
+ * @tc.name: HandleActionUpdatePrivacyMode2
+ * @tc.desc: HandleActionUpdatePrivacyMode2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode2, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdatePrivacyMode2";
+    info.bundleName_ = "HandleActionUpdatePrivacyMode2";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_NE(session->property_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->property_->SetPrivacyMode(true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    auto res =
+        session->HandleActionUpdatePrivacyMode(property, session, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(false, session->property_->GetPrivacyMode());
 }
 
 }
