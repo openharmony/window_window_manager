@@ -927,6 +927,30 @@ HWTEST_F(SceneSessionTest5, SetSystemSceneOcclusionAlpha, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSystemSceneForceUIFirst
+ * @tc.desc: SetSystemSceneForceUIFirst function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSystemSceneForceUIFirst, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemSceneForceUIFirst";
+    info.bundleName_ = "SetSystemSceneForceUIFirst";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->SetSystemSceneForceUIFirst(true);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->SetSystemSceneForceUIFirst(true);
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->SetSystemSceneForceUIFirst(true);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
  * @tc.name: UpdateWindowAnimationFlag
  * @tc.desc: UpdateWindowAnimationFlag function01
  * @tc.type: FUNC
