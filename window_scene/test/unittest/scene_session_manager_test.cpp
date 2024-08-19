@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerTest : public testing::Test {
 public:
@@ -98,6 +98,7 @@ void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sce
     sceneSession->systemTouchable_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->foregroundInteractiveStatus_.store(true);
+    sceneSession->isVisible_ = true;
 }
 
 int32_t SceneSessionManagerTest::GetTaskCount(sptr<SceneSession>& session)
@@ -466,14 +467,14 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdateImmersiveState
- * @tc.desc: test UpdateImmersiveState
+ * @tc.name: GetImmersiveState
+ * @tc.desc: test GetImmersiveState
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, UpdateImmersiveState, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetImmersiveState, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->UpdateImmersiveState();
+    ssm_->GetImmersiveState();
     ASSERT_EQ(ret, 0);
 }
 

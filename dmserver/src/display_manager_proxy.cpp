@@ -24,7 +24,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerProxy"};
 }
 
 sptr<DisplayInfo> DisplayManagerProxy::GetDefaultDisplayInfo()
@@ -744,6 +744,12 @@ DMError DisplayManagerProxy::SetScreenColorSpace(ScreenId screenId, GraphicCM_Co
 DMError DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("RegisterDisplayManagerAgent: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -762,7 +768,7 @@ DMError DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayMana
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -773,6 +779,12 @@ DMError DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayMana
 DMError DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("UnregisterDisplayManagerAgent: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -791,7 +803,7 @@ DMError DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayMa
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -801,6 +813,12 @@ DMError DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayMa
 
 bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]WakeUpBegin: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -812,7 +830,7 @@ bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
         WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -822,6 +840,12 @@ bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerProxy::WakeUpEnd()
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]WakeUpEnd: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -829,7 +853,7 @@ bool DisplayManagerProxy::WakeUpEnd()
         WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -839,6 +863,12 @@ bool DisplayManagerProxy::WakeUpEnd()
 
 bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]SuspendBegin: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -850,7 +880,7 @@ bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
         WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -860,6 +890,12 @@ bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerProxy::SuspendEnd()
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]SuspendEnd: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -867,7 +903,7 @@ bool DisplayManagerProxy::SuspendEnd()
         WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -877,6 +913,12 @@ bool DisplayManagerProxy::SuspendEnd()
 
 bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]SetScreenPowerForAll: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -892,7 +934,7 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
         WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -902,6 +944,12 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
 
 bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]SetSpecifiedScreenPower: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -921,7 +969,7 @@ bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPower
         WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -931,6 +979,12 @@ bool DisplayManagerProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenPower
 
 ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetScreenPower: remote is nullptr");
+        return ScreenPowerState::INVALID_STATE;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -942,7 +996,7 @@ ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
         WLOGFE("Write dmsScreenId failed");
         return ScreenPowerState::INVALID_STATE;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
         data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return ScreenPowerState::INVALID_STATE;
@@ -952,6 +1006,12 @@ ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
 
 bool DisplayManagerProxy::SetDisplayState(DisplayState state)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]SetDisplayState: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -963,7 +1023,7 @@ bool DisplayManagerProxy::SetDisplayState(DisplayState state)
         WLOGFE("[UL_POWER]Write DisplayState failed");
         return false;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
@@ -973,6 +1033,12 @@ bool DisplayManagerProxy::SetDisplayState(DisplayState state)
 
 DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetDisplayState: remote is nullptr");
+        return DisplayState::UNKNOWN;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -984,7 +1050,7 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
         WLOGFE("Write displayId failed");
         return DisplayState::UNKNOWN;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
         data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return DisplayState::UNKNOWN;
@@ -995,6 +1061,12 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
 std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
 {
     std::vector<DisplayId> allDisplayIds;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetAllDisplayIds: remote is nullptr");
+        return allDisplayIds;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1002,7 +1074,7 @@ std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
         WLOGFE("WriteInterfaceToken failed");
         return allDisplayIds;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
         data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return allDisplayIds;
@@ -1041,6 +1113,12 @@ sptr<CutoutInfo> DisplayManagerProxy::GetCutoutInfo(DisplayId displayId)
 DMError DisplayManagerProxy::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("AddSurfaceNodeToDisplay: remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1056,7 +1134,7 @@ DMError DisplayManagerProxy::AddSurfaceNodeToDisplay(DisplayId displayId,
         WLOGFE("Write windowProperty failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_SURFACE_NODE),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_SURFACE_NODE),
         data, reply, option) != ERR_NONE) {
         WLOGFW("Send request failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1068,6 +1146,12 @@ DMError DisplayManagerProxy::AddSurfaceNodeToDisplay(DisplayId displayId,
 DMError DisplayManagerProxy::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("RemoveSurfaceNodeFromDisplay: remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1083,7 +1167,7 @@ DMError DisplayManagerProxy::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         WLOGFE("Write windowProperty failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_SURFACE_NODE),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_SURFACE_NODE),
         data, reply, option) != ERR_NONE) {
         WLOGFW("Send request failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1094,6 +1178,12 @@ DMError DisplayManagerProxy::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
 
 DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("HasPrivateWindow: remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1105,7 +1195,7 @@ DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPriv
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW),
         data, reply, option) != ERR_NONE) {
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -1116,6 +1206,12 @@ DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPriv
 
 void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyDisplayEvent: remote is nullptr");
+        return;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1127,7 +1223,7 @@ void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
         WLOGFE("[UL_POWER]Write DisplayEvent failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return;
@@ -1136,6 +1232,12 @@ void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
 
 bool DisplayManagerProxy::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
 {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetFreeze: remote is nullptr");
+        return false;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1152,7 +1254,7 @@ bool DisplayManagerProxy::SetFreeze(std::vector<DisplayId> displayIds, bool isFr
         return false;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return false;
@@ -1507,7 +1609,7 @@ DMError DisplayManagerProxy::GetDensityInCurResolution(ScreenId screenId, float&
         WLOGFE("write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

@@ -22,13 +22,13 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceStub" };
 }
 
-int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
 
     auto msgId = static_cast<SessionManagerServiceMessage>(code);
@@ -46,6 +46,6 @@ int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace OHOS::Rosen

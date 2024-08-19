@@ -46,9 +46,9 @@ enum XmlNodeElement {
     DEFAULT_DEVICE_ROTATION_OFFSET,
     DEFAULT_DISPLAY_CUTOUT_PATH,
     SUB_DISPLAY_CUTOUT_PATH,
-    ROTATION_POLICY,
     HALL_SWITCH_APP,
     PACKAGE_NAME,
+    ROTATION_POLICY,
     SCREEN_SNAPSHOT_BUNDLE_NAME,
     SCREEN_SNAPSHOT_ABILITY_NAME,
     IS_RIGHT_POWER_BUTTON,
@@ -81,9 +81,9 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {DEFAULT_DEVICE_ROTATION_OFFSET, "defaultDeviceRotationOffset"},
     {DEFAULT_DISPLAY_CUTOUT_PATH, "defaultDisplayCutoutPath"},
     {SUB_DISPLAY_CUTOUT_PATH, "subDisplayCutoutPath"},
-    {ROTATION_POLICY, "rotationPolicy"},
     {HALL_SWITCH_APP, "hallSwitchApp"},
     {PACKAGE_NAME, "packageName"},
+    {ROTATION_POLICY, "rotationPolicy"},
     {SCREEN_SNAPSHOT_BUNDLE_NAME, "screenSnapshotBundleName"},
     {SCREEN_SNAPSHOT_ABILITY_NAME, "screenSnapshotAbilityName"},
     {IS_RIGHT_POWER_BUTTON, "isRightPowerButton"},
@@ -327,10 +327,13 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 
 void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std::string name)
 {
-    xmlChar* rootContext = xmlNodeGetContent(rootNode);
     if (rootNode == nullptr || rootNode->name == nullptr) {
         TLOGE(WmsLogTag::DMS, "[SsConfig] get root element failed!");
-        xmlFree(rootContext);
+        return;
+    }
+    xmlChar* rootContext = xmlNodeGetContent(rootNode);
+    if (rootContext == nullptr) {
+        TLOGE(WmsLogTag::DMS, "rootContext is null");
         return;
     }
     std::vector<std::string> stringVec;

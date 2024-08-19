@@ -28,8 +28,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
-    const int WAIT_FOR_SYNC_US = 1000 * 500;  // 500ms
+const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
+const int WAIT_FOR_SYNC_US = 1000 * 500;  // 500ms
 }
 class SurfaceDrawTest : public testing::Test {
 public:

@@ -131,6 +131,7 @@ public:
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     virtual uint32_t GetWindowFlags() const override;
     uint32_t GetRequestModeSupportInfo() const override;
     bool IsMainHandlerAvailable() const override;
@@ -184,7 +185,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
-    WmErrorCode RaiseToAppTop() override;
+    WMError RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
     virtual WMError ResetAspectRatio() override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;

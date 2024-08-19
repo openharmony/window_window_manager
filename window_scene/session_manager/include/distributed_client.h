@@ -32,8 +32,8 @@ public:
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
                             std::vector<AAFwk::MissionInfo>& missionInfos);
     int32_t GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
-                                         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot);
-    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state);
+                                         AAFwk::MissionSnapshot& missionSnapshot);
+    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state);
     void ClearDmsProxy();
     enum {
         START_REMOTE_ABILITY = 1,

@@ -21,6 +21,7 @@
 #include <float.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace Rosen {
@@ -93,6 +94,19 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 
     WINDOW_TYPE_UI_EXTENSION = 3000
+};
+
+/**
+ * @struct HookInfo.
+ *
+ * @brief hook diaplayinfo deepending on the window size.
+ */
+struct HookInfo {
+    uint32_t width_;
+    uint32_t height_;
+    float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
 };
 
 /**
@@ -253,7 +267,8 @@ enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
+    FOLLOW_SETTING = 1 << 2
 };
 
 /**
@@ -350,6 +365,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     UPDATE_DPI_SYNC,
     END,
 };
@@ -444,7 +460,7 @@ struct PointInfo {
  * @brief topN main window info.
  */
 struct MainWindowInfo : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(pid_)) {
             return false;
@@ -833,6 +849,30 @@ public:
         delete avoidArea;
         return nullptr;
     }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        if (isEmptyAvoidArea()) {
+            ss << "empty";
+            return ss.str();
+        }
+
+        std::vector<std::pair<std::string, Rect>> rects = {
+            std::make_pair("top", topRect_),
+            std::make_pair("bottom", bottomRect_),
+            std::make_pair("left", leftRect_),
+            std::make_pair("right", rightRect_)
+        };
+        for (const auto& pair: rects) {
+            if (!pair.second.IsUninitializedRect()) {
+                auto rect = pair.second;
+                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
+                    << rect.width_ << " " << rect.height_ << "] ";
+            }
+        }
+        return ss.str();
+    }
 };
 
 /**
@@ -971,10 +1011,10 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
-    uint32_t minWidth_ = 0;
-    uint32_t minHeight_ = 0;
+    uint32_t maxWidth_ = INT32_MAX;
+    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t minWidth_ = 1;
+    uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;

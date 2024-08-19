@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string UNDEFINED = "undefined";
+const std::string UNDEFINED = "undefined";
 }
 
 class WindowSessionLifecycleTest : public testing::Test {
@@ -56,6 +56,22 @@ private:
     sptr <Session> session_ = nullptr;
     static constexpr uint32_t
     WAIT_SYNC_IN_NS = 500000;
+
+    class TLifecycleListener : public ILifecycleListener {
+    public:
+        virtual ~TLifecycleListener() {}
+        void OnActivation() override {}
+        void OnConnect() override {}
+        void OnForeground() override {}
+        void OnBackground() override {}
+        void OnDisconnect() override {}
+        void OnExtensionDied() override {}
+        void OnExtensionTimeout(int32_t errorCode) override {}
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+            int64_t uiExtensionIdLevel) override {}
+        void OnDrawingCompleted() override {}
+    };
+    std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
 
 void WindowSessionLifecycleTest::SetUpTestCase()
@@ -445,8 +461,12 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyActivation022, Function | SmallTest |
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyActivation();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyActivation();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -473,8 +493,12 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyForeground024, Function | SmallTest |
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyForeground();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyForeground();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -501,8 +525,12 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyBackground025, Function | SmallTest |
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyBackground();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyBackground();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -527,7 +555,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    session_->isTerminating = true;
+    session_->isTerminating_ = true;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
@@ -541,7 +569,9 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    session_->isTerminating = false;
+    session_->isTerminating_ = false;
+    NotifyTerminateSessionFuncTotal func = nullptr;
+    session_->SetTerminateSessionListenerTotal(func);
     ASSERT_EQ(WSError::WS_OK,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
@@ -567,8 +597,12 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyConnect023, Function | SmallTest | Le
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyConnect();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyConnect();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
@@ -581,8 +615,12 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyDisconnect026, Function | SmallTest |
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyDisconnect();
+
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyDisconnect();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
     ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 

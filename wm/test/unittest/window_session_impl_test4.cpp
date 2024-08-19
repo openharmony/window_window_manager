@@ -19,6 +19,7 @@
 #include "ability_context_impl.h"
 #include "accessibility_event_info.h"
 #include "color_parser.h"
+#include "common/include/future_callback.h"
 #include "mock_session.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
@@ -437,6 +438,28 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     window->GetCallingWindowRect(rect);
+}
+
+
+/**
+ * @tc.name: EnableDrag
+ * @tc.desc: EnableDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, EnableDrag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("EnableDrag");
+    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, windowSession);
+    windowSession->property_->SetPersistentId(1);
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    windowSession->hostSession_ = session;
+    windowSession->EnableDrag(true);
 }
 
 /**
@@ -898,6 +921,46 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateRect03
+ * @tc.desc: UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateRect03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowSessionCreateCheck");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WSRect rect;
+    rect.posX_ = 0;
+    rect.posY_ = 0;
+    rect.height_ = 0;
+    rect.width_ = 0;
+
+    Rect rectW; // GetRect().IsUninitializedRect is true
+    rectW.posX_ = 0;
+    rectW.posY_ = 0;
+    rectW.height_ = 0; // rectW - rect > 50
+    rectW.width_ = 0;  // rectW - rect > 50
+
+    window->property_->SetWindowRect(rectW);
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    WSError res = window->UpdateRect(rect, reason);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    rect.height_ = 50;
+    rect.width_ = 50;
+    rectW.height_ = 50;
+    rectW.width_ = 50;
+    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
+    window->property_->SetLayoutCallback(layoutCallback);
+    window->property_->SetWindowRect(rectW);
+    res = window->UpdateRect(rect, reason);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetTitleButtonVisible02
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
@@ -935,9 +998,11 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetTitleButtonVisible03");
+    option->SetDisplayId(1);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
+    ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
     uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
     window->property_->SetModeSupportInfo(modeSupportInfo);
@@ -951,6 +1016,81 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetAppForceLandscapeConfig01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    AppForceLandscapeConfig config = {};
+    window->GetAppForceLandscapeConfig(config);
+    window->hostSession_ = nullptr;
+    WMError res = window->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: UpdatePiPControlStatus01
+ * @tc.desc: UpdatePiPControlStatus
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdatePiPControlStatus01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::ENABLED;
+    window->UpdatePiPControlStatus(controlType, status);
+    window->hostSession_ = nullptr;
+    window->UpdatePiPControlStatus(controlType, status);
+}
+
+/**
+ * @tc.name: NotifyWindowVisibility01
+ * @tc.desc: NotifyWindowVisibility
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyWindowVisibility01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->NotifyWindowVisibility(false);
+    sptr<IWindowVisibilityChangedListener> listener = new IWindowVisibilityChangedListener();
+    window->RegisterWindowVisibilityChangeListener(listener);
+    window->NotifyWindowVisibility(false);
+    window->UnregisterWindowVisibilityChangeListener(listener);
 }
 }
 } // namespace Rosen

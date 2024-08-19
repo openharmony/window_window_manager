@@ -25,7 +25,7 @@ using namespace OHOS::Media;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReader"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReader"};
 } // namespace
 const int BPP = 4; // bytes per pixel
 
@@ -107,7 +107,7 @@ void SurfaceReader::SetHandler(sptr<SurfaceReaderHandler> handler)
     handler_ = handler;
 }
 
-bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
+bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer>& buf)
 {
     if (handler_ == nullptr) {
         WLOGFE("SurfaceReaderHandler not set");

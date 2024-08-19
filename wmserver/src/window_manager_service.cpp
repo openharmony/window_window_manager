@@ -53,7 +53,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMS"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMS"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -142,7 +142,7 @@ void WindowManagerService::PostVoidSyncTask(Task task, const std::string& taskNa
     }
 }
 
-void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     WLOGI("systemAbilityId: %{public}d, start", systemAbilityId);
     switch (systemAbilityId) {
@@ -1387,11 +1387,12 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
     return PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 
-WmErrorCode WindowManagerService::RaiseToAppTop(uint32_t windowId)
+/** @note @window.hierarchy */
+WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("window raise to app top permission denied!");
-        return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);

@@ -27,12 +27,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneInputManager" };
 const std::string SCENE_INPUT_MANAGER_THREAD = "SceneInputManager";
 const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
-std::recursive_mutex g_instanceMutex;
 
-constexpr float DIRECTION0 = 0;
-constexpr float DIRECTION90 = 90;
-constexpr float DIRECTION180 = 180;
-constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
@@ -151,7 +146,7 @@ bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const s
     return true;
 }
 
-std::string DumpTransformInDisplayInfo(const std::vector<float> &transform)
+std::string DumpTransformInDisplayInfo(const std::vector<float>& transform)
 {
     std::stringstream stream("[");
     for (float transformItem : transform) {
@@ -168,34 +163,24 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
         "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
         "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
         " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction : " + std::to_string(static_cast<int>(info.direction)) +
+        " direction: " + std::to_string(static_cast<int>(info.direction)) +
         " transform: " + DumpTransformInDisplayInfo(info.transform);
     return infoStr;
 }
 } //namespace
 
-SceneInputManager& SceneInputManager::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneInputManager *instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneInputManager();
-        instance->Init();
-    }
-    return *instance;
-}
+
+WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
 void SceneInputManager::Init()
 {
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    if (sceneSessionDirty_) {
-        auto callback = [this]() {
-            FlushDisplayInfoToMMI();
-        };
-        sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
-    }
+    auto callback = [this]() {
+        FlushDisplayInfoToMMI();
+    };
+    sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
 }
 
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
@@ -413,12 +398,25 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         windowEventID = 0;
     }
     focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
+    static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
         idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(e.zOrder) + "|" +
+            std::to_string(static_cast<int32_t>(e.zOrder)) + "|" +
             std::to_string(e.pid) + "|" +
-            std::to_string(e.defaultHotAreas.size()) + ",";
+            std::to_string(e.defaultHotAreas.size());
 
+        if (e.defaultHotAreas.size() > 0) {
+            auto iter = lastWindowDefaultHotArea.find(e.id);
+            if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
+                idList += "|" + std::to_string(e.defaultHotAreas[0].x) + "|" +
+                    std::to_string(e.defaultHotAreas[0].y) + "|" +
+                    std::to_string(e.defaultHotAreas[0].width) + "|" +
+                    std::to_string(e.defaultHotAreas[0].height);
+            }
+            currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
+        }
+        idList += ",";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
         }
@@ -426,6 +424,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             DumpUIExtentionWindowInfo(e);
         }
     }
+    lastWindowDefaultHotArea = currWindowDefaultHotArea;
     idList += std::to_string(focusedSessionId_);
     if (lastIdList != idList) {
         windowEventID++;
@@ -438,12 +437,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
-    isUserBackground_ = userBackground;
-}
-
-bool SceneInputManager::IsUserBackground()
-{
-    return isUserBackground_;
+    isUserBackground_.store(userBackground);
 }
 
 void SceneInputManager::SetCurrentUserId(int32_t userId)
@@ -454,7 +448,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
-    std::vector<MMI::WindowInfo>& windowInfoList)
+    std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
         return;
@@ -495,7 +489,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
-        if (isUserBackground_) {
+        if (isUserBackground_.load()) {
             TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
@@ -506,7 +500,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        std::vector<MMI::WindowInfo> windowInfoList = sceneSessionDirty_->GetFullWindowInfoList();
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -515,7 +509,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             FlushFullInfoToMMI(displayInfos, windowInfoList);
             return;
         }
-        UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+        UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
     };
     if (eventHandler_) {
         eventHandler_->PostTask(task);

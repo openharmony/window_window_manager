@@ -63,12 +63,15 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
+    WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveToAsync(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
-    WmErrorCode RaiseToAppTop() override;
-    WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
+    WMError ResizeAsync(uint32_t width, uint32_t height) override;
+    WMError RaiseToAppTop() override;
+    WMError RaiseAboveTarget(int32_t subWindowId) override;
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
@@ -176,6 +179,7 @@ protected:
     WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
+    bool VerifySubWindowLevel(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
@@ -189,6 +193,11 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+
+    /*
+     * DFX
+     */
+    void NotifySetUIContentComplete() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -214,6 +223,12 @@ private:
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange();
+
+    /**
+     * Window Immersive
+     */
+    void UpdateDefaultStatusBarColor();
+    WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
@@ -222,6 +237,7 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type);
+    void InitSystemSessionEnableDrag();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

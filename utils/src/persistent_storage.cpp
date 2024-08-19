@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PersistentStorage"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PersistentStorage"};
 }
 
 template void PersistentStorage::Insert(const std::string&, const int&, PersistentStorageType);

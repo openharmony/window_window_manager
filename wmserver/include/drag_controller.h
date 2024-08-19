@@ -42,6 +42,7 @@ public:
     void StartDrag(uint32_t windowId);
     void UpdateDragInfo(uint32_t windowId);
     void FinishDrag(uint32_t windowId);
+    
 private:
     sptr<WindowNode> GetHitWindow(DisplayId id, const PointInfo point);
     bool GetHitPoint(uint32_t windowId, PointInfo& point);

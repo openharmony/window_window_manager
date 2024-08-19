@@ -36,7 +36,7 @@ namespace {
     const std::string CONTROL_EVENT_CB = "controlEvent";
 }
 
-void BindFunctions(napi_env env, napi_value object, const char *moduleName)
+void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
     BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);

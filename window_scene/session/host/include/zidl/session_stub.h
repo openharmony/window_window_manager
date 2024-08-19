@@ -30,7 +30,7 @@ public:
     SessionStub() = default;
     virtual ~SessionStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     int HandleConnect(MessageParcel& data, MessageParcel& reply);
@@ -43,6 +43,7 @@ private:
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
@@ -55,9 +56,9 @@ private:
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
-    int HandleRaiseAppMainWindowToTop(MessageParcel &data, MessageParcel &reply);
-    int HandleChangeSessionVisibilityWithStatusBar(MessageParcel &data, MessageParcel &reply);
-    int HandlePendingSessionActivation(MessageParcel &data, MessageParcel &reply);
+    int HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply);
+    int HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
@@ -72,6 +73,7 @@ private:
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
 
     // extension extension

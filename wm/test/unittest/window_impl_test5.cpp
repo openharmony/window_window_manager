@@ -1333,8 +1333,10 @@ HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTes
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
+    option->SetDisplayId(1);
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
+    ASSERT_EQ(1, window->GetDisplayId());
 
     std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
