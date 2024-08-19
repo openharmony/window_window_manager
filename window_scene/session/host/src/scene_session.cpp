@@ -1958,18 +1958,25 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
 void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
     bool isSupportDragInPcCompatibleMode)
 {
-    const int32_t compatibleInPcPortraitWidth = 585;
-    const int32_t compatibleInPcPortraitHeight = 1268;
-    const int32_t compatibleInPcLandscapeWidth = 1447;
-    const int32_t compatibleInPcLandscapeHeight = 965;
-    const int32_t compatibleInPcDragLimit = 430;
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_SCB, "sessionProperty is null");
+        return;
+    }
+    WindowLimits windowLimits = sessionProperty->GetWindowLimits();
+    const int32_t compatibleInPcPortraitWidth = sessionProperty->GetCompatibleInPcPortraitWidth();
+    const int32_t compatibleInPcPortraitHeight = sessionProperty->GetCompatibleInPcPortraitHeight();
+    const int32_t compatibleInPcLandscapeWidth = sessionProperty->GetCompatibleInPcLandscapeWidth();
+    const int32_t compatibleInPcLandscapeHeight = sessionProperty->GetCompatibleInPcLandscapeHeight();
+    const int32_t compatibleInPcDragLimit = compatibleInPcLandscapeWidth - compatibleInPcPortraitWidth;
     WSRect windowRect = GetSessionRect();
     auto windowWidth = windowRect.width_;
     auto windowHeight = windowRect.height_;
 
     if (reason != SizeChangeReason::MOVE) {
         if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
-            rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit) {
+            (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
+             rect.width_ == windowLimits.minWidth_)) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
