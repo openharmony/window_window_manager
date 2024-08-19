@@ -44,6 +44,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateDensity(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_CHANGE):
             return HandleUpdateOrientation(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG):
+            return HandleUpdateSessionViewportConfig(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT):
             return HandleBackEventInner(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DESTROY):
@@ -158,6 +160,20 @@ int SessionStageStub::HandleUpdateOrientation(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::DMS, "HandleUpdateOrientation!");
     WSError errCode = UpdateOrientation();
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateSessionViewportConfig(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateSessionViewportConfig!");
+    SessionViewportConfig config;
+    if (!data.ReadBool(config.isDensityFollowHost_) || !data.ReadFloat(config.density_) ||
+        !data.ReadUint64(config.displayId_) || !data.ReadInt32(config.orientation_) ||
+        !data.ReadUint32(config.transform_)) {
+        WLOGFE("Read HandleUpdateSessionViewportConfig data failed!");
+        return ERR_INVALID_DATA;
+    };
+    UpdateSessionViewportConfig(config);
     return ERR_NONE;
 }
 

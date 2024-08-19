@@ -94,6 +94,7 @@ public:
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -110,6 +111,10 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+    float UpdateExtensionDensity(const SessionViewportConfig& config);
+    void NotifyDisplayInfoChange(const SessionViewportConfig& config);
+    WSError UpdateSessionViewportConfigInner(
+        const SessionViewportConfig& config, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
 
@@ -122,6 +127,8 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    float lastDensity_ { 0.0f };
+    int32_t lastOrientation_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

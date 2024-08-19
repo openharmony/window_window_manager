@@ -193,6 +193,29 @@ WSError SessionStageProxy::UpdateOrientation()
     return ret;
 }
 
+WSError SessionStageProxy::UpdateSessionViewportConfig(const SessionViewportConfig& config)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteBool(config.isDensityFollowHost_) && data.WriteFloat(config.density_) &&
+            data.WriteUint64(config.displayId_) && data.WriteInt32(config.orientation_) &&
+            data.WriteUint32(config.transform_))) {
+        WLOGFE("Write config failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::HandleBackEvent()
 {
     MessageParcel data;
