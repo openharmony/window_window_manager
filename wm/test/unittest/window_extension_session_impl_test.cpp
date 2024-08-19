@@ -1814,6 +1814,26 @@ HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Fun
 }
 
 /**
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window_->hostSession_ = session;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(1);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+
+    window_->hostSession_ = nullptr;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(0);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+}
+
+/**
  * @tc.name: GetRealParentId
  * @tc.desc: GetRealParentId Test
  * @tc.type: FUNC
