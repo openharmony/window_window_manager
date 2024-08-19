@@ -688,7 +688,7 @@ int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& r
 {
     bool enableDrag = data.ReadBool();
     TLOGI(WmsLogTag::WMS_LAYOUT, "handle, enableDrag: %{public}d", enableDrag);
-    WSError errcode = SetSystemWindowEnableDrag(enableDrag);
+    WMError errcode = SetSystemWindowEnableDrag(enableDrag);
     reply.WriteInt32(static_cast<int32_t>(errcode));
     return ERR_NONE;
 }

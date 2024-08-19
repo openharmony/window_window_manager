@@ -289,7 +289,7 @@ HWTEST_F(SessionProxyTest, SetSystemWindowEnableDrag, Function | SmallTest | Lev
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     bool enableDrag = false;
     WSError res = sProxy->SetSystemWindowEnableDrag(enableDrag);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: SetSystemWindowEnableDrag end";
 }

@@ -4063,7 +4063,7 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
         return WMError::WM_OK;
     };
     PostTask(task, "SetSystemWindowEnableDrag");
-    return WMError::WS_OK;
+    return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
