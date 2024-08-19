@@ -58,8 +58,10 @@ public:
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
+    DMError SetFoldStatusLockedFromJs(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -848,6 +850,11 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
+DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+{
+    return pImpl_->SetFoldDisplayModeFromJs(mode);
+}
+
 void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
 {
     pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
@@ -864,14 +871,29 @@ void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
 }
 
+DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeFromJs(mode);
+}
+
 void DisplayManager::SetFoldStatusLocked(bool locked)
 {
     pImpl_->SetFoldStatusLocked(locked);
 }
 
+DMError DisplayManager::SetFoldStatusLockedFromJs(bool locked)
+{
+    return pImpl_->SetFoldStatusLockedFromJs(locked);
+}
+
 void DisplayManager::Impl::SetFoldStatusLocked(bool locked)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLocked(locked);
+}
+
+DMError DisplayManager::Impl::SetFoldStatusLockedFromJs(bool locked)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLockedFromJs(locked);
 }
 
 sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
@@ -1475,6 +1497,8 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         displayModeListeners = displayModeListeners_;
     }
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    NotifyDisplayChange(displayInfo);
     for (auto& listener : displayModeListeners) {
         listener->OnDisplayModeChanged(displayMode);
     }

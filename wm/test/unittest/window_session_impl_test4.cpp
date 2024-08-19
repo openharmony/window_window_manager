@@ -1019,92 +1019,78 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
 }
 
 /**
- * @tc.name: CheckIfNeedCommitRsTransaction
- * @tc.desc: CheckIfNeedCommitRsTransaction Test
+ * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("CheckIfNeedCommitRsTransaction");
+    option->SetWindowName("GetAppForceLandscapeConfig01");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
-    WindowSizeChangeReason wmReaseon = WindowSizeChangeReason::FULL_TO_SPLIT;
-    ASSERT_EQ(window->CheckIfNeedCommitRsTransaction(wmReaseon), false);
-    wmReaseon = WindowSizeChangeReason::FULL_TO_FLOATING;
-    ASSERT_EQ(window->CheckIfNeedCommitRsTransaction(wmReaseon), false);
-    wmReaseon = WindowSizeChangeReason::RECOVER;
-    ASSERT_EQ(window->CheckIfNeedCommitRsTransaction(wmReaseon), false);
-    wmReaseon = WindowSizeChangeReason::MAXIMIZE;
-    ASSERT_EQ(window->CheckIfNeedCommitRsTransaction(wmReaseon), false);
-    wmReaseon = WindowSizeChangeReason::ROTATION;
-    ASSERT_EQ(window->CheckIfNeedCommitRsTransaction(wmReaseon), true);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    AppForceLandscapeConfig config = {};
+    window->GetAppForceLandscapeConfig(config);
+    window->hostSession_ = nullptr;
+    WMError res = window->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable Test
+ * @tc.name: UpdatePiPControlStatus01
+ * @tc.desc: UpdatePiPControlStatus
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSessionImplTest4, SetForceSplitEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetForceSplitEnable");
+    option->SetWindowName("UpdatePiPControlStatus01");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->SetForceSplitEnable(true);
-    ASSERT_NE(window->property_, nullptr);
-    window->uiContent_ = nullptr;
-    window->SetForceSplitEnable(false);
-    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::ENABLED;
+    window->UpdatePiPControlStatus(controlType, status);
+    window->hostSession_ = nullptr;
+    window->UpdatePiPControlStatus(controlType, status);
 }
 
 /**
- * @tc.name: NotifyUIContentFocusStatus
- * @tc.desc: NotifyUIContentFocusStatus Test
+ * @tc.name: NotifyWindowVisibility01
+ * @tc.desc: NotifyWindowVisibility
  * @tc.type: FUNC
 */
-HWTEST_F(WindowSessionImplTest4, NotifyUIContentFocusStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("NotifyUIContentFocusStatus");
+    option->SetWindowName("NotifyWindowVisibility01");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->NotifyUIContentFocusStatus();
-    ASSERT_NE(window->property_, nullptr);
-    window->uiContent_ = nullptr;
-    window->NotifyUIContentFocusStatus();
-    ASSERT_NE(window->property_, nullptr);
-}
-
-/**
- * @tc.name: SetAPPWindowIcon
- * @tc.desc: SetAPPWindowIcon Test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionImplTest4, SetAPPWindowIcon, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetAPPWindowIcon");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    auto icon = std::make_shared<Media::PixelMap>();
-    ASSERT_EQ(window->SetAPPWindowIcon(icon), WMError::WM_OK);
-    window->uiContent_ = nullptr;
-    ASSERT_EQ(window->SetAPPWindowIcon(icon), WMError::WM_ERROR_NULLPTR);
-    icon = nullptr;
-    ASSERT_EQ(window->SetAPPWindowIcon(icon), WMError::WM_ERROR_NULLPTR);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->NotifyWindowVisibility(false);
+    sptr<IWindowVisibilityChangedListener> listener = new IWindowVisibilityChangedListener();
+    window->RegisterWindowVisibilityChangeListener(listener);
+    window->NotifyWindowVisibility(false);
+    window->UnregisterWindowVisibilityChangeListener(listener);
 }
 }
 } // namespace Rosen

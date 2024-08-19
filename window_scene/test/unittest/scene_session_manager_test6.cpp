@@ -159,6 +159,159 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetWindowVisibilityChangeInfo01
+ * @tc.desc: GetWindowVisibilityChangeInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    currVisibleData.push_back(std::make_pair(3, WindowVisibilityState::WINDOW_LAYER_STATE_MAX));
+    ssm_->lastVisibleData_.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 3);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo02
+ * @tc.desc: GetWindowVisibilityChangeInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    ssm_->lastVisibleData_.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 2);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo03
+ * @tc.desc: GetWindowVisibilityChangeInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 1);
+}
+
+/**
+ * @tc.name: DealwithVisibilityChange01
+ * @tc.desc: DealwithVisibilityChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession2->GetPersistentId(), sceneSession2));
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode1 = RSSurfaceNode::Create(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode2 = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode1);
+    ASSERT_NE(nullptr, surfaceNode2);
+    surfaceNode1->SetId(1);
+    surfaceNode2->SetId(2);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->surfaceNode_ = surfaceNode1;
+    sceneSession1->SetCallingPid(1);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetParentSession(sceneSession1);
+    sceneSession2->surfaceNode_ = surfaceNode2;
+    sceneSession2->SetCallingPid(2);
+    ASSERT_NE(nullptr, sceneSession1->property_);
+    ASSERT_NE(nullptr, sceneSession2->property_);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession1->property_->SetWindowName("visibility1");
+    sceneSession2->property_->SetWindowName("visibility2");
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    visibilityChangeInfos.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), true);
+    ASSERT_EQ(sceneSession2->GetRSVisible(), true);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession1->SetRSVisible(false);
+    sceneSession2->SetRSVisible(false);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), true);
+    ASSERT_EQ(sceneSession2->GetRSVisible(), false);
+}
+
+/**
+ * @tc.name: DealwithVisibilityChange02
+ * @tc.desc: DealwithVisibilityChange02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession2->GetPersistentId(), sceneSession2));
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode1 = RSSurfaceNode::Create(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode2 = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode1);
+    ASSERT_NE(nullptr, surfaceNode2);
+    surfaceNode1->SetId(1);
+    surfaceNode2->SetId(2);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->surfaceNode_ = surfaceNode1;
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetParentSession(sceneSession1);
+    sceneSession2->surfaceNode_ = surfaceNode2;
+    ASSERT_NE(nullptr, sceneSession1->property_);
+    ASSERT_NE(nullptr, sceneSession2->property_);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession1->property_->SetWindowName("visibility1");
+    sceneSession2->property_->SetWindowName("visibility2");
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    visibilityChangeInfos.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    sceneSession1->SetRSVisible(true);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ASSERT_EQ(sceneSession2->GetRSVisible(), true);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession1->SetRSVisible(false);
+    sceneSession2->SetRSVisible(false);
+    sceneSession1->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ASSERT_EQ(sceneSession2->GetRSVisible(), false);
+}
+
+/**
  * @tc.name: UpdateWindowMode
  * @tc.desc: UpdateWindowMode
  * @tc.type: FUNC
@@ -977,6 +1130,7 @@ HWTEST_F(SceneSessionManagerTest6, JudgeNeedNotifyPrivacyInfo, Function | SmallT
 {
     DisplayId displayId = 1;
     std::unordered_set<std::string> privacyBundles;
+    ssm_->privacyBundleMap_.clear();
     ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->JudgeNeedNotifyPrivacyInfo(displayId, privacyBundles);
     EXPECT_EQ(true, ret);
@@ -1024,6 +1178,47 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | Small
     ssm_->UpdatePrivateStateAndNotify(1);
     ASSERT_NE(nullptr, ssm_);
     ssm_->UpdatePrivateStateAndNotifyForAllScreens();
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify2
+ * @tc.desc: UpdatePrivateStateAndNotify2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->privacyBundleMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(1);
+    std::unordered_set<std::string> privacyBundles1;
+    std::unordered_set<std::string> privacyBundles2;
+    std::unordered_set<std::string> privacyBundles3;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->privacyBundleMap_.insert({1, privacyBundles1});
+    ssm_->privacyBundleMap_.insert({2, privacyBundles2});
+    ssm_->privacyBundleMap_.insert({3, privacyBundles3});
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(2);
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 0);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_->SetPrivacyMode(false);
+    sceneSession->property_->SetDisplayId(3);
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[3].size(), 0);
 }
 
 /**

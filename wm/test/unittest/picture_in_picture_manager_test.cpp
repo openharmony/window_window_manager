@@ -376,6 +376,9 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::autoStartController_ = pipController;
     ASSERT_EQ(navId, "");
+    option->SetTypeNodeEnabled(true);
+    PictureInPictureManager::AutoStartPipWindow(navId);
+    option->SetTypeNodeEnabled(false);
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
     navId = "NavId";
