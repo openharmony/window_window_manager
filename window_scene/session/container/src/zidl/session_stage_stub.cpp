@@ -165,12 +165,12 @@ int SessionStageStub::HandleUpdateOrientation(MessageParcel& data, MessageParcel
 
 int SessionStageStub::HandleUpdateSessionViewportConfig(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateSessionViewportConfig!");
+    TLOGD(WmsLogTag::WMS_UIEXT, "HandleUpdateSessionViewportConfig!");
     SessionViewportConfig config;
     if (!data.ReadBool(config.isDensityFollowHost_) || !data.ReadFloat(config.density_) ||
         !data.ReadUint64(config.displayId_) || !data.ReadInt32(config.orientation_) ||
         !data.ReadUint32(config.transform_)) {
-        WLOGFE("Read HandleUpdateSessionViewportConfig data failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read HandleUpdateSessionViewportConfig data failed!");
         return ERR_INVALID_DATA;
     };
     UpdateSessionViewportConfig(config);
