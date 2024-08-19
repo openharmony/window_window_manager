@@ -28,14 +28,14 @@ class XCNodeController extends NodeController {
     }
 
     makeNode(i2) {
-        var j2;
+        let j2;
         this.node = new FrameNode(i2);
         this.node.appendChild(this.mXComponent);
         return this.node;
     }
 
     removeNode() {
-        var h2;
+        let h2;
         (h2 = this.node) === null || h2 === void 0 ? void 0 : h2.removeChild(this.mXComponent);
     }
 }
@@ -102,7 +102,7 @@ export class PiPContent extends ViewPU {
         this.mXCNodeController = new XCNodeController(this.xComponent);
         console.info(TAG, 'use Node Controller');
         pip.on('stateChange', (w1) => {
-            var x1;
+            let x1;
             console.info(TAG, `stateChange state: ${w1}`);
             if (w1 === ABOUT_TO_STOP) {
                 (x1 = this.mXCNodeController) === null || x1 === void 0 ? void 0 : x1.removeNode();
