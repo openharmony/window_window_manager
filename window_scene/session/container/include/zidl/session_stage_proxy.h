@@ -35,6 +35,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;

@@ -272,6 +272,22 @@ WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densi
     return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
 }
 
+WSError ExtensionSession::UpdateSessionViewportConfig(const SessionViewportConfig& config)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session is invalid");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "winId: %{public}d, isDensityFollowHost_:%{public}d, "
+        "displayId:%{public}lu,density:%{public}f,orientation:%{public}d.",
+        GetPersistentId(), config.isDensityFollowHost_, config.displayId_, config.density_, config.orientation_);
+    return sessionStage_->UpdateSessionViewportConfig(config);
+}
+
 void ExtensionSession::TriggerBindModalUIExtension()
 {
     if (isFirstTriggerBindModal_ && extSessionEventCallback_ != nullptr &&

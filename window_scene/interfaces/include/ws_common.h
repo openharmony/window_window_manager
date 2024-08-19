@@ -294,6 +294,14 @@ enum class SceneType : uint8_t {
     INPUT_SCENE,
 };
 
+struct SessionViewportConfig {
+    bool isDensityFollowHost_ = false;
+    float density_ = 1.0f;
+    uint64_t displayId_ = 0;
+    int32_t orientation_ = 0;
+    uint32_t transform_ = 0;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -351,6 +359,7 @@ struct SessionInfo {
     int32_t realParentId_ = INVALID_SESSION_ID;
     uint32_t uiExtensionUsage_ = 0;
     bool isAsyncModalBinding_ = false;
+    SessionViewportConfig config_;
 };
 
 enum class SessionFlag : uint32_t {
