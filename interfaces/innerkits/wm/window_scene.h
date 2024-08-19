@@ -26,7 +26,7 @@
 #include "wm_common.h"
 
 namespace OHOS::AppExecFwk {
-    class Configuration;
+class Configuration;
 }
 
 namespace OHOS {

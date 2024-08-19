@@ -96,6 +96,9 @@ public:
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
     napi_ref GetCustomNodeController();
+    napi_ref GetTypeNode() const;
+    void OnPictureInPictureStart();
+    bool IsTypeNodeEnabled() const;
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:
@@ -139,6 +142,12 @@ public:
     };
 
 private:
+    class WindowLifeCycleListener : public IWindowLifeCycle {
+    public:
+        void AfterDestroyed() override;
+    };
+
+private:
     static sptr<IRemoteObject> remoteObj_;
     static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
     uint32_t GetPipPriority(uint32_t pipTemplateType);
@@ -146,7 +155,7 @@ private:
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
-    void UpdateXComponentPositionAndSize();
+    void UpdateWinRectByComponent();
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
@@ -159,6 +168,7 @@ private:
     std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
     sptr<Window> window_;
     sptr<Window> mainWindow_;
+    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_;
     uint32_t mainWindowId_;
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;

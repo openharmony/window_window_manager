@@ -39,7 +39,6 @@ public:
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
     void SetUserBackground(bool userBackground);
-    bool IsUserBackground();
     void SetCurrentUserId(int32_t userId);
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
 
@@ -57,7 +56,7 @@ private:
         const std::vector<MMI::WindowInfo>& windowInfoList);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
     void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
-        std::vector<MMI::WindowInfo>& windowInfoList);
+        std::vector<MMI::WindowInfo> windowInfoList);
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
@@ -66,7 +65,7 @@ private:
     int32_t lastFocusId_ { -1 };
     int32_t currentUserId_ { -1 };
     int32_t focusedSessionId_ { -1 };
-    std::atomic<bool> isUserBackground_ = false;
+    std::atomic<bool> isUserBackground_ { false };
 };
 }//Rosen
 }//OHOS
