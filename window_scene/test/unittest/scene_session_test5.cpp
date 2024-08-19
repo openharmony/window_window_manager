@@ -1174,8 +1174,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateModeSupportInfo, Function | SmallT
     info.bundleName_ = "HandleActionUpdateModeSupportInfo";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
-    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session2, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->isSystemCalling_ = true;
     ASSERT_NE(session, nullptr);
@@ -1279,8 +1277,6 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
     SessionInfo info_;
     info_.abilityName_ = "ProcessUpdatePropertyByAction_";
     info_.bundleName_ = "ProcessUpdatePropertyByAction_";
-    sptr<SceneSession> session_ = sptr<SceneSession>::MakeSptr(info_, nullptr);
-    EXPECT_NE(session_, nullptr);
 
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
@@ -1332,8 +1328,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     SessionInfo info_;
     info_.abilityName_ = "ProcessUpdatePropertyByAction_";
     info_.bundleName_ = "ProcessUpdatePropertyByAction_";
-    sptr<SceneSession> session_ = sptr<SceneSession>::MakeSptr(info_, nullptr);
-    EXPECT_NE(session_, nullptr);
 
     auto res = session->HandleActionUpdateTurnScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);

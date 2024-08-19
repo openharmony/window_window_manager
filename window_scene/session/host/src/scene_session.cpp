@@ -3017,7 +3017,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
 {
     SetTurnScreenOn(property->IsTurnScreenOn());
 #ifdef POWER_MANAGER_ENABLE
-    auto task = [this, weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)]() {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
             TLOGE(WmsLogTag::DEFAULT, "session is invalid");
@@ -3029,7 +3029,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
         if (sceneSession->IsTurnScreenOn()) {
             TLOGI(WmsLogTag::DEFAULT, "turn screen on");
             if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-                isDeviceWakeupByApplication_.store(true);
+                sceneSession->isDeviceWakeupByApplication_.store(true);
             }
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }

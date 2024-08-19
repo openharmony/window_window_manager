@@ -246,10 +246,6 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, property);
-    sptr<SceneSession> sceneSession1 = nullptr;
-    sceneSession->SetWindowFlags(property);
-    sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession1);
     sceneSession->SetWindowFlags(property);
 
     OHOS::Rosen::Session session(info);
