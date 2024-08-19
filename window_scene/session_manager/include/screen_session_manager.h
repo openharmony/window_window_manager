@@ -463,8 +463,6 @@ private:
     void UpdateDisplayScaleState(ScreenId screenId);
     void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
                                   const float& pivotY);
-    void UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
-                                const float& pivotX, const float& pivotY);
     void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
                                                    const float& scaleY, const float& pivotX, const float& pivotY,
                                                    float& translateX, float& translateY);

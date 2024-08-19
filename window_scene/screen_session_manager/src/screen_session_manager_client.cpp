@@ -516,14 +516,30 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     }
 }
 
-void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY)
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY,
+                                                    float translateX, float translateY)
 {
     auto session = GetScreenSession(id);
     if (session == nullptr) {
         TLOGE(WmsLogTag::DMS, "session is null");
         return;
     }
-
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    auto displayNode = session->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+          translateX, translateY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetTranslateX(translateX);
+    displayNode->SetTranslateY(translateY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
 } // namespace OHOS::Rosen
