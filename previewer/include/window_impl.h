@@ -72,6 +72,7 @@ public:
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     virtual uint32_t GetWindowFlags() const override;
     uint32_t GetRequestModeSupportInfo() const override;
     bool IsMainHandlerAvailable() const override;

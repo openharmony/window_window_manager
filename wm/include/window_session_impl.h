@@ -96,6 +96,7 @@ public:
     void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
+    uint64_t GetDisplayId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
     std::string GetContentInfo() override;
