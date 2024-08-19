@@ -450,7 +450,8 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    WSError errCode = UpdateSessionRect(rect, reason);
+    auto isGlobal = data.ReadBool();
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -960,20 +960,31 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
         newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
+    WSRect newRect = rect;
+    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
+        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
+         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+        auto parentSession = GetParentSession();
+        if (parentSession) {
+            auto parentRect = parentSession->GetSessionRect();
+            newRect.posX_ -= parentRect.posX_;
+            newRect.posY_ -= parentRect.posY_;
+        }
+    }
     Session::RectCheckProcess();
-    auto task = [weakThis = wptr(this), rect, reason]() {
+    auto task = [weakThis = wptr(this), newRect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->UpdateSessionRectInner(rect, reason);
+        session->UpdateSessionRectInner(newRect, reason);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));
