@@ -475,14 +475,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
     ssm_->RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
     EXPECT_NE(nullptr, sceneSession->sessionChangeByActionNotifyManagerFunc_);
 
-    sptr<SceneSession> sceneSession1 = nullptr;
     sptr<WindowSessionProperty> property = nullptr;
-
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    
-    sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession1);
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 
@@ -508,9 +501,6 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
 
     ssm_->RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
     EXPECT_NE(nullptr, sceneSession->sessionChangeByActionNotifyManagerFunc_);
-
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession1);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
