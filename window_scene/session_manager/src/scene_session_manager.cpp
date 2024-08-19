@@ -9648,7 +9648,6 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
     sceneSessionList = result;
 }
 
-/** @note @window.hierarchy */
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     if (isUserBackground_) {
