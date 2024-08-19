@@ -1024,32 +1024,32 @@ void WindowManagerProxy::OffWindowZoom()
 }
 
 /** @note @window.hierarchy */
-WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
+WMError WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write anchor delatX failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
     if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowId)

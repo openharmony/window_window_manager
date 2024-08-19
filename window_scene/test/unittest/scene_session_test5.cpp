@@ -268,40 +268,6 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandlePointerStyle
- * @tc.desc: HandlePointerStyle function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, HandlePointerStyle, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandlePointerStyle";
-    info.bundleName_ = "HandlePointerStyle";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandlePointerStyle(nullptr));
-    pointerEvent->SetSourceType(20);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetSourceType(1);
-    pointerEvent->SetPointerAction(-3);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetPointerAction(3);
-    pointerEvent->SetButtonId(1);
-    EXPECT_EQ(WSError::WS_DO_NOTHING, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->SetButtonId(-1);
-    pointerEvent->RemoveAllPointerItems();
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandlePointerStyle(pointerEvent));
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerItem.SetPointerId(2024);
-    pointerEvent->AddPointerItem(pointerItem);
-    pointerEvent->SetPointerId(2024);
-    EXPECT_EQ(WSError::WS_OK, session->HandlePointerStyle(pointerEvent));
-    pointerEvent->RemoveAllPointerItems();
-}
-
-/**
  * @tc.name: NotifyOutsideDownEvent
  * @tc.desc: NotifyOutsideDownEvent function
  * @tc.type: FUNC

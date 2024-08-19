@@ -2025,22 +2025,22 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 }
 
 /** @note @window.hierarchy */
-WmErrorCode WindowImpl::RaiseToAppTop()
+WMError WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());

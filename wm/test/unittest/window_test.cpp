@@ -738,7 +738,7 @@ HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->RaiseToAppTop();
-    ASSERT_EQ(WmErrorCode::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2202,7 +2202,7 @@ HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->RaiseAboveTarget(2));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->RaiseAboveTarget(2));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
