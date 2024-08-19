@@ -2726,18 +2726,32 @@ DMError ScreenSessionManager::MultiScreenModeSwitch(ScreenId mainScreenId, Scree
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::MultiScreenRelativePosition(ExtendOption mainScreenOption,
-    ExtendOption secondaryScreenOption)
+DMError ScreenSessionManager::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+    ExtendOption secondScreenOption)
 {
     TLOGI(WmsLogTag::DMS,
         "mID:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sID:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        mainScreenOption.screenId_, mainScreenOption.startX_, mainScreenOption.startY_,
-        secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
+        firstScreenOption.screenId_, firstScreenOption.startX_, firstScreenOption.startY_,
+        secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    sptr<ScreenSession> firstScreenSession = GetScreenSession(firstScreenOption.screenId_);
+    if (!firstScreenSession) {
+        TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenProperty firstProperty = firstScreenSession->GetScreenProperty();
+    sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
+    if (!secondScreenSession) {
+        TLOGE(WmsLogTag::DMS, "secondScreenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
+    firstProperty.SetStartPosition(firstScreenOption.startX_, firstScreenOption.startY_);
+    secondProperty.SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     return DMError::DM_OK;
 }
 
