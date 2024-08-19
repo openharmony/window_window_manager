@@ -2089,7 +2089,9 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        if (surfaceNode_ != nullptr) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
