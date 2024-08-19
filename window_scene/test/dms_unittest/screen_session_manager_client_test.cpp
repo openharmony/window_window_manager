@@ -973,8 +973,11 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallT
     const float scaleY = 1.0f;
     const float pivotX = 0.5f;
     const float pivotY = 0.5f;
+    const float translateX = 0.0f;
+    const float translateY = 0.0f;
     ScreenId defaultScreenId = screenSessionManagerClient_->GetDefaultScreenId();
-    screenSessionManagerClient_->UpdateDisplayScale(defaultScreenId, scaleX, scaleY, pivotX, pivotY);
+    screenSessionManagerClient_->UpdateDisplayScale(defaultScreenId, scaleX, scaleY, pivotX, pivotY, translateX,
+                                                    translateY);
 }
 
 /**
@@ -989,8 +992,11 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallT
     const float scaleY = 1.0f;
     const float pivotX = 0.5f;
     const float pivotY = 0.5f;
+    const float translateX = 0.0f;
+    const float translateY = 0.0f;
     uint64_t fakeScreenId = 100;
-    screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
+    screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY, translateX,
+                                                    translateY);
 }
 
 /**
