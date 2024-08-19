@@ -4164,4 +4164,38 @@ bool SceneSession::IsPcOrPadEnableActivation() const
     }
     return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
 }
+
+void SceneSession::UnregisterSessionChangeListeners()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("UnregisterSessionChangeListeners session is null");
+            return;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
+            session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
+            session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
+            session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
+            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
+            session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
+            session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
+            session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+            session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+            session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
+            session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+            session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
+            session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
+            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
+            session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
+            session->sessionChangeCallback_->onAdjustKeyboardLayout_ = nullptr;
+            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
+        }
+        session->Session::UnregisterSessionChangeListeners();
+    };
+    PostTask(task, "UnregisterSessionChangeListeners");
+}
 } // namespace OHOS::Rosen

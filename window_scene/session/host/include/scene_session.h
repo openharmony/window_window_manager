@@ -370,6 +370,7 @@ public:
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
+    void UnregisterSessionChangeListeners() override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
