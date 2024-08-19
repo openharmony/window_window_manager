@@ -980,6 +980,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     return WSError::WS_OK;
 }
 
+/** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -1002,6 +1003,7 @@ WSError SceneSession::RaiseToAppTop()
     return PostSyncTask(task, "RaiseToAppTop");
 }
 
+/** @note @window.hierarchy */
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -1076,6 +1078,7 @@ void SceneSession::NotifyPropertyWhenConnect()
     OnShowWhenLocked(GetShowWhenLockedFlagValue());
 }
 
+/** @note @window.hierarchy */
 WSError SceneSession::RaiseAppMainWindowToTop()
 {
     auto task = [weakThis = wptr(this)]() {

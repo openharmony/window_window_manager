@@ -3380,6 +3380,7 @@ static void GetTopWindowByTraverseSessionTree(const sptr<SceneSession>& session,
     }
 }
 
+/** @note @window.hierarchy */
 WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     const auto& callingPid = IPCSkeleton::GetCallingRealPid();
@@ -3468,6 +3469,7 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
     NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
+/** @note @window.hierarchy */
 WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
@@ -8740,6 +8742,7 @@ void SceneSessionManager::PostProcessProperty()
     }
 }
 
+/** @note @window.hierarchy */
 WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 {
     WLOGFI("RaiseWindowToTop, id %{public}d", persistentId);

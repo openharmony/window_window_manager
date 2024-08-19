@@ -1662,6 +1662,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
     return static_cast<WMError>(hostSession->SetAspectRatio(0.0f));
 }
 
+/** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
     WLOGFI("[WMSCom] id: %{public}d", GetPersistentId());
@@ -1686,6 +1687,7 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
     return static_cast<WMError>(ret);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     auto parentId = GetParentId();
@@ -2529,6 +2531,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     }
 }
 
+/** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     uint32_t mainWinId = INVALID_WINDOW_ID;
@@ -2561,6 +2564,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
     return FindWindowById(topWinId);
 }
 
+/** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
     TLOGI(WmsLogTag::DEFAULT, "mainId:%{public}u", mainWinId);

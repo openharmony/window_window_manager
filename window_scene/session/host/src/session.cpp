@@ -2625,12 +2625,14 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
+/** @note @window.hierarchy */
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
     NotifySessionInfoChange();
 }
 
+/** @note @window.hierarchy */
 uint32_t Session::GetZOrder() const
 {
     return zOrder_;
