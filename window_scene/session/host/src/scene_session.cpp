@@ -2389,6 +2389,33 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
+        leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
+    } else if (surfaceNode_ != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
+        surfaceNode_->SetForceUIFirst(forceUIFirst);
+    }
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     auto task = [weakThis = wptr(this), needDefaultAnimationFlag]() {
