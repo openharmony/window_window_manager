@@ -122,7 +122,6 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
-    std::atomic_bool setUIContentFlag_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
