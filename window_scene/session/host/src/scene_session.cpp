@@ -3340,16 +3340,21 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     return WMError::WM_OK;
 }
 
-void SceneSession::HandleSpecificSystemBarProperty(WindowType type,
-    const sptr<WindowSessionProperty>& property)
+void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
-    for (auto iter : systemBarProperties) {
-        if (iter.first == type) {
-            SetSystemBarProperty(iter.first, iter.second);
-            TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperty: %{public}d, enable: %{public}d",
-                static_cast<int32_t>(iter.first), iter.second.enable_);
+    if (auto iter = systemBarProperties.find(type); iter != systemBarProperties.end()) {
+        if (GetIsDisplayStatusBarTemporarily() && specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
+            SetIsDisplayStatusBarTemporarily(false);
+            if (Session::IsScbCoreEnabled()) {
+                dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+            } else {
+                specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+            }
         }
+        SetSystemBarProperty(iter->first, iter->second);
+        TLOGD(WmsLogTag::WMS_IMMS, "%{public}d, enable: %{public}d",
+            static_cast<int32_t>(iter->first), iter->second.enable_);
     }
 }
 
