@@ -128,10 +128,8 @@ WSError SceneSessionManagerProxy::RecoverAndConnectSpecificSession(const sptr<IS
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    if (token != nullptr) {
-        if (!data.WriteRemoteObject(token)) {
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
+    if (token != nullptr && !data.WriteRemoteObject(token)) {
+        return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -187,10 +185,8 @@ WSError SceneSessionManagerProxy::RecoverAndReconnectSceneSession(const sptr<ISe
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    if (token != nullptr) {
-        if (!data.WriteRemoteObject(token)) {
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
+    if (token != nullptr && !data.WriteRemoteObject(token)) {
+        return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
