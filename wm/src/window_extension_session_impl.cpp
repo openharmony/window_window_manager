@@ -641,13 +641,12 @@ float WindowExtensionSessionImpl::UpdateExtensionDensity(const SessionViewportCo
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
-    auto density = 1.0f;
+    isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
-        isDensityFollowHost_ = config.isDensityFollowHost_;
         hostDensityValue_ = config.density_;
         return config.density_;
     }
-
+    auto density = 1.0f;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "display is null!");
@@ -663,7 +662,7 @@ float WindowExtensionSessionImpl::UpdateExtensionDensity(const SessionViewportCo
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
 {
-    if (property_ && property_->GetDisplayId() == config.displayId_ && NearEqual(lastDensity_, config.density_) &&
+    if (property_->GetDisplayId() == config.displayId_ && NearEqual(lastDensity_, config.density_) &&
         lastOrientation_ == config.orientation_) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No parameters have changed, no need to update");
         return;
