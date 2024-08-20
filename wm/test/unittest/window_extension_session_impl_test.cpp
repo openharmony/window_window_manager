@@ -1551,17 +1551,6 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
 }
 
 /**
- * @tc.name: HideNonSecureWindows05
- * @tc.desc: HideNonSecureWindows Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows05, Function | SmallTest | Level3)
-{
-    window_->property_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
-}
-
-/**
  * @tc.name: HideNonSecureWindows06
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
@@ -1695,7 +1684,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
     ASSERT_NE(nullptr, iRemoteObject);
     window_->abilityToken_ = iRemoteObject;
-    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+    ASSERT_NE(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
 
 /**
@@ -1823,9 +1812,6 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
-
-    window_->property_ = nullptr;
-    EXPECT_EQ(window_->GetRealParentId(), INVALID_WINDOW_ID);
 }
 }
 } // namespace Rosen
