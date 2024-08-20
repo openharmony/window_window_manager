@@ -100,8 +100,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
-        sptr<Window> self(this);
-        InputTransferStation::GetInstance().AddInputWindow(self);
+        InputTransferStation::GetInstance().AddInputWindow(this);
     }
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
