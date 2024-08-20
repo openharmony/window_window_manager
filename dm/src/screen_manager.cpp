@@ -492,14 +492,14 @@ DMError ScreenManager::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId sec
     return ret;
 }
 
-DMError ScreenManager::MultiScreenRelativePosition(ExtendOption mainScreenOption,
-    ExtendOption secondaryScreenOption)
+DMError ScreenManager::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+    ExtendOption secondScreenOption)
 {
     WLOGFI("mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        mainScreenOption.screenId_, mainScreenOption.startX_, mainScreenOption.startY_,
-        secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenRelativePosition(mainScreenOption,
-        secondaryScreenOption);
+        firstScreenOption.screenId_, firstScreenOption.startX_, firstScreenOption.startY_,
+        secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(firstScreenOption,
+        secondScreenOption);
     return ret;
 }
 

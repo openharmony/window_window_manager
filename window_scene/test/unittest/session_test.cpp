@@ -197,7 +197,8 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
+        SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
     SystemSessionConfig sessionConfig;
@@ -207,14 +208,15 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
             mockEventChannel, nullptr, sessionConfig, property));
 
     rect = {0, 0, 100, 100};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
+        SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     ASSERT_EQ(rect, session_->winRect_);
 
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
 
     session_->sessionStage_ = nullptr;
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
 }
 
 /**

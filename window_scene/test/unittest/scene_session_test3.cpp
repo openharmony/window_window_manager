@@ -207,19 +207,19 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason);
+    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->winRect_ = rect;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->reason_ = SizeChangeReason::DRAG_END;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     WSRect rect2({0, 0, 0, 0});
-    result = scensession->UpdateRect(rect2, reason);
+    result = scensession->UpdateRect(rect2, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -303,21 +303,21 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
 
     sceneSession->SetSessionProperty(property);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    auto result = sceneSession->NotifyClientToUpdateRectTask(nullptr);
+    auto result = sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(nullptr));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(nullptr));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     std::shared_ptr<RSTransaction> rs;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(rs));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
 }
 
 /**

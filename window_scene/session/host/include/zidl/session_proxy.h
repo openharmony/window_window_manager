@@ -48,7 +48,7 @@ public:
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
@@ -88,6 +88,7 @@ public:
     int32_t GetStatusBarHeight() override;
     WSError NotifyFrameLayoutFinishFromApp() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

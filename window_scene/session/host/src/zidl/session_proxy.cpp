@@ -269,6 +269,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetFullScreenStart(reply.ReadBool());
         property->SetCompatibleModeInPc(reply.ReadBool());
+        property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
+                                              reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
         property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
@@ -631,7 +633,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteBool(isMoveToGlobal)) {
+    if (!data.WriteBool(isGlobal)) {
         WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -650,6 +652,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.hierarchy */
 WSError SessionProxy::RaiseToAppTop()
 {
     MessageParcel data;
@@ -698,6 +701,7 @@ WSError SessionProxy::NotifyFrameLayoutFinishFromApp()
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.hierarchy */
 WSError SessionProxy::RaiseAboveTarget(int32_t subWindowId)
 {
     MessageParcel data;
@@ -1367,6 +1371,35 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WMError SessionProxy::SetSystemWindowEnableDrag(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write enableDrag failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 
 WSError SessionProxy::UpdateRectChangeListenerRegistered(bool isRegister)

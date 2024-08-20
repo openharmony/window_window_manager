@@ -111,6 +111,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
+            return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY):
             return HandleSetKeyboardSessionGravity(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
@@ -286,6 +288,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
@@ -681,6 +687,15 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     } else {
         return ERR_INVALID_DATA;
     }
+}
+
+int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
+{
+    bool enableDrag = data.ReadBool();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "handle, enableDrag: %{public}d", enableDrag);
+    WMError errcode = SetSystemWindowEnableDrag(enableDrag);
+    reply.WriteInt32(static_cast<int32_t>(errcode));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)

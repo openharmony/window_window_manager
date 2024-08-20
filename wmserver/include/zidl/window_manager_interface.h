@@ -131,7 +131,7 @@ public:
     virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale) = 0;
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
     virtual void OffWindowZoom() = 0;
-    virtual WmErrorCode RaiseToAppTop(uint32_t windowId) = 0;
+    virtual WMError RaiseToAppTop(uint32_t windowId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
