@@ -318,6 +318,12 @@ protected:
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
 
+    /*
+     * Window Lifecycle
+     */
+    bool hasFirstNotifyInteractive_ = false;
+    bool interactive_ = true;
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -429,9 +435,6 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
-
-    bool hasFirstNotifyInteractive_ = false;
-    bool interactive_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS
