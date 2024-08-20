@@ -695,7 +695,9 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 DisplayOrientation targetOrientation = screenSession->CalcDisplayOrientation(targetRotation,
                     FoldDisplayMode::UNKNOWN);
                 TLOGI(WmsLogTag::DMS, "tR: %{public}u, tO: %{public}u", targetRotation, targetOrientation);
-                displayInfo->SetDisplayOrientation(targetOrientation);
+                if (targetOrientation != DisplayOrientation::UNKNOWN) {
+                    displayInfo->SetDisplayOrientation(targetOrientation);
+                }            
             }
         }
     }
