@@ -1032,9 +1032,6 @@ void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
 
 int32_t WindowExtensionSessionImpl::GetRealParentId() const
 {
-    if (property_ == nullptr) {
-        return static_cast<int32_t>(INVALID_WINDOW_ID);
-    }
     return property_->GetRealParentId();
 }
 
