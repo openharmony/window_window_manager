@@ -1589,12 +1589,19 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
     return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
+/**
+ * Currently only supports system wiindows.
+ */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
-    return WMError::WM_OK;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WMError errorCode = hostSession->SetSystemWindowEnableDrag(enableDrag);
+    TLOGI(WmsLogTag::WMS_EVENT, "IPC, sessionId: %{public}d ,errcode: %{public}d", GetPersistentId(),
+        static_cast<int>(errorCode));
+    return static_cast<WMError>(errorCode);
 }
 
 WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)

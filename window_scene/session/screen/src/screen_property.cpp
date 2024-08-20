@@ -89,6 +89,26 @@ float ScreenProperty::GetPivotY() const
     return pivotY_;
 }
 
+void ScreenProperty::SetTranslateX(float translateX)
+{
+    translateX_ = translateX;
+}
+
+float ScreenProperty::GetTranslateX() const
+{
+    return translateX_;
+}
+
+void ScreenProperty::SetTranslateY(float translateY)
+{
+    translateY_ = translateY;
+}
+
+float ScreenProperty::GetTranslateY() const
+{
+    return translateY_;
+}
+
 void ScreenProperty::SetPhyBounds(const RRect& phyBounds)
 {
     phyBounds_ = phyBounds;
@@ -337,6 +357,32 @@ void ScreenProperty::SetOffset(int32_t offsetX, int32_t offsetY)
 {
     offsetX_ = offsetX;
     offsetY_ = offsetY;
+}
+
+void ScreenProperty::SetStartX(uint32_t startX)
+{
+    startX_ = startX;
+}
+
+uint32_t ScreenProperty::GetStartX() const
+{
+    return startX_;
+}
+
+void ScreenProperty::SetStartY(uint32_t startY)
+{
+    startY_ = startY;
+}
+
+uint32_t ScreenProperty::GetStartY() const
+{
+    return startY_;
+}
+
+void ScreenProperty::SetStartPosition(uint32_t startX, uint32_t startY)
+{
+    startX_ = startX;
+    startY_ = startY;
 }
 
 void ScreenProperty::SetScreenType(ScreenType type)

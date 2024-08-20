@@ -106,8 +106,8 @@ public:
         ScreenId& screenGroupId) override;
     virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
         ScreenSourceMode secondaryScreenMode) override;
-    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption) override;
+    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+        ExtendOption secondScreenOption) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
@@ -463,8 +463,6 @@ private:
     void UpdateDisplayScaleState(ScreenId screenId);
     void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
                                   const float& pivotY);
-    void UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
-                                const float& pivotX, const float& pivotY);
     void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
                                                    const float& scaleY, const float& pivotX, const float& pivotY,
                                                    float& translateX, float& translateY);

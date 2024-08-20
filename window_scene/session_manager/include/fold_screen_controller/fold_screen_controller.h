@@ -55,6 +55,7 @@ public:
     void SetdisplayModeChangeStatus(bool status);
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
