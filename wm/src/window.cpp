@@ -40,12 +40,11 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     sptr<WindowSessionImpl> windowSessionImpl = nullptr;
     auto sessionType = option->GetWindowSessionType();
     if (sessionType == WindowSessionType::SCENE_SESSION) {
-        windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
+        windowSessionImpl = new WindowSceneSessionImpl(option);
     } else if (sessionType == WindowSessionType::EXTENSION_SESSION) {
         option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-        windowSessionImpl = new(std::nothrow) WindowExtensionSessionImpl(option);
+        windowSessionImpl = new WindowExtensionSessionImpl(option);
     }
-
     if (windowSessionImpl == nullptr) {
         WLOGFE("malloc windowSessionImpl failed");
         return nullptr;
@@ -55,7 +54,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     WMError error = windowSessionImpl->Create(context, iSession, identityToken);
     if (error != WMError::WM_OK) {
         errCode = error;
-        WLOGFD("CreateWindowWithSession, error: %{public}u", static_cast<uint32_t>(errCode));
+        WLOGFE("CreateWindowWithSession, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
@@ -69,14 +68,10 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     if (option == nullptr) {
-        option = new(std::nothrow) WindowOption();
-        if (option == nullptr) {
-            WLOGFE("malloc option failed");
-            return nullptr;
-        }
+        option = new WindowOption();
     }
     uint32_t version = 10;
-    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+    if (context != nullptr && context->GetApplicationInfo() != nullptr) {
         version = context->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
@@ -96,7 +91,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
-    sptr<WindowImpl> windowImpl = new(std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl = new WindowImpl(option);
     if (windowImpl == nullptr) {
         WLOGFE("malloc windowImpl failed");
         return nullptr;
@@ -131,8 +126,8 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     }
     WindowType type = option->GetWindowType();
-    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type)
-        || WindowHelper::IsAppComponentWindow(type))) {
+    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type) ||
+          WindowHelper::IsAppComponentWindow(type))) {
         WLOGFE("window type is invalid %{public}d", type);
         return nullptr;
     }
@@ -158,14 +153,12 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
         TLOGE(WmsLogTag::WMS_PIP, "window type is not pip window.");
         return nullptr;
     }
-    sptr<WindowSessionImpl> windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSceneSessionImpl(option);
     if (windowSessionImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "malloc windowSessionImpl failed.");
         return nullptr;
     }
-    if (windowSessionImpl->GetProperty() != nullptr) {
-        windowSessionImpl->GetProperty()->SetPiPTemplateInfo(pipTemplateInfo);
-    }
+    windowSessionImpl->GetProperty()->SetPiPTemplateInfo(pipTemplateInfo);
     WMError error = windowSessionImpl->Create(context, nullptr);
     if (error != WMError::WM_OK) {
         errCode = error;
