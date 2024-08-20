@@ -630,6 +630,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         if (!window) {
             return;
         }
+        if (window->isDensityFollowHost_) {
+            TLOGW(WmsLogTag::WMS_UIEXT, "Density is follow host");
+            return;
+        }
         SessionViewportConfig config;
         if (window->GetSystemViewportConfig(config) != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Get system viewportConfig failed");
@@ -828,9 +832,7 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
 WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     CheckAndAddExtWindowFlags();
-    if (!isDensityFollowHost_) {
-        UpdateSystemViewportConfig();
-    }
+    UpdateSystemViewportConfig();
     return this->WindowSessionImpl::Show(reason, withAnimation);
 }
 
