@@ -151,6 +151,19 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+
+    // return when screen is locked and show without ShowWhenLocked flag
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    auto sessionProperty = GetSessionProperty();
+    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
+        (sessionProperty != nullptr && defaultScreenId == sessionProperty->GetDisplayId()) &&
+        !IsShowWhenLocked()) {
+        TLOGW(WmsLogTag::WMS_LIFE, "failed: screen is locked, session %{public}d show without ShowWhenLocked flag",
+            GetPersistentId());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
