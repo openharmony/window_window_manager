@@ -1057,6 +1057,9 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         UpdateSubWindowState(type);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        if (!interactive_) {
+            hasFirstNotifyInteractive_ = false;
+        }
     }
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
