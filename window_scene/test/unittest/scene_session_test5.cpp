@@ -130,14 +130,14 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     session->isKeyboardPanelEnabled_ = false;
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
     EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
     session->moveDragController_->isStartDrag_ = true;
@@ -145,16 +145,16 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     session->isKeyboardPanelEnabled_ = true;
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
-    EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask(nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 }
 
 /**
@@ -532,7 +532,7 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRect, Function | SmallTest | Lev
     session->Session::SetSessionState(SessionState::STATE_CONNECT);
     session->specificCallback_ = nullptr;
     session->reason_ = SizeChangeReason::DRAG;
-    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect(nullptr));
+    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionTest5", nullptr));
 
     UpdateAvoidAreaCallback func = [](const int32_t& persistentId) {
         return;
@@ -542,7 +542,7 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRect, Function | SmallTest | Lev
     specificCallback->onUpdateAvoidArea_ = func;
     session->specificCallback_ = specificCallback;
     session->reason_ = SizeChangeReason::RECOVER;
-    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect(nullptr));
+    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionTest5", nullptr));
 }
 
 /**

@@ -168,7 +168,7 @@ public:
     virtual void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
         uint32_t screenHeight) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
@@ -177,7 +177,8 @@ public:
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
 
@@ -357,7 +358,7 @@ public:
     bool HasModalUIExtension();
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
-    Vector2f GetPosition(bool useUIExtension);
+    Vector2f GetSessionGlobalPosition(bool useUIExtension);
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
@@ -392,7 +393,7 @@ protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
-    WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
+    WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty);
 
@@ -407,8 +408,8 @@ protected:
     bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
-    bool UpdateRectInner(const WSRect& rect, SizeChangeReason reason);
-    bool NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason reason);
+    bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
+    bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
     virtual void NotifyClientToUpdateAvoidArea();
