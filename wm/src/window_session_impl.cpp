@@ -904,7 +904,6 @@ int32_t WindowSessionImpl::GetFloatingWindowParentId()
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
-            winPair.second.second->GetProperty() &&
             context_.get() == winPair.second.second->GetContext().get()) {
             WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}d]",
                 winPair.second.second->GetProperty()->GetWindowName().c_str(), GetPersistentId());
