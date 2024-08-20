@@ -639,7 +639,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
 
 float WindowExtensionSessionImpl::UpdateExtensionDensity(const SessionViewportConfig& config)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d densityValue:%{public}f", config.isDensityFollowHost_,
+    TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
     auto density = 1.0f;
     if (config.isDensityFollowHost_) {

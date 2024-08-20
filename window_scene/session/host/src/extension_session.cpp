@@ -283,7 +283,7 @@ WSError ExtensionSession::UpdateSessionViewportConfig(const SessionViewportConfi
         return WSError::WS_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "winId: %{public}d, isDensityFollowHost_:%{public}d, "
-        "displayId:%{public}lu,density:%{public}f,orientation:%{public}d.",
+        "displayId:%{public}lu, density:%{public}f, orientation:%{public}d.",
         GetPersistentId(), config.isDensityFollowHost_, config.displayId_, config.density_, config.orientation_);
     return sessionStage_->UpdateSessionViewportConfig(config);
 }
