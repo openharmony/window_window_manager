@@ -346,7 +346,6 @@ protected:
     void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
     virtual void NotifySetUIContentComplete() {}
-    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     std::atomic_bool setUIContentCompleted_ { false };
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
