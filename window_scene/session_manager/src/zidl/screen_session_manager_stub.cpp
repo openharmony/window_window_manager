@@ -258,17 +258,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint64_t secondaryScreenId = data.ReadUint64();
             uint32_t secondaryScreenX = data.ReadUint32();
             uint32_t secondaryScreenY = data.ReadUint32();
-            ExtendOption mainScreenOption = {
+            ExtendOption firstScreenOption = {
                 .screenId_ = mainScreenId,
                 .startX_ = mainScreenX,
                 .startY_ = mainScreenY,
             };
-            ExtendOption secondaryScreenOption = {
+            ExtendOption secondScreenOption = {
                 .screenId_ = secondaryScreenId,
                 .startX_ = secondaryScreenX,
                 .startY_ = secondaryScreenY,
             };
-            DMError ret = MultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+            DMError ret = SetMultiScreenRelativePosition(firstScreenOption, secondScreenOption);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

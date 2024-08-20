@@ -48,6 +48,14 @@ public:
     void SetOnBootAnimation(bool onBootAnimation);
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
+    /*
+     *    Avoid fold to expand process queues public interface
+     */
+    bool GetModeChangeRunningStatus();
+    void SetdisplayModeChangeStatus(bool status);
+    bool GetdisplayModeRunningStatus();
+    FoldDisplayMode GetLastCacheDisplayMode();
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

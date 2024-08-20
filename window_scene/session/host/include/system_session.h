@@ -36,7 +36,8 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError ProcessBackEvent() override;
 
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
@@ -45,7 +46,7 @@ protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
-    
+
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);

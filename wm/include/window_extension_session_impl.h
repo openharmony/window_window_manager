@@ -36,7 +36,7 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
@@ -92,7 +92,6 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void NotifySetUIContent() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
 
@@ -110,13 +109,9 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
-    void AddSetUIContentTimeoutListener();
-
-    enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000
-    };
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -127,8 +122,6 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
-    int16_t rotationAnimationCount_ { 0 };
-    std::atomic_bool setUIContentFlag_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

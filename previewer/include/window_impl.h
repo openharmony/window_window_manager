@@ -102,7 +102,7 @@ public:
     virtual WMError Destroy() override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
-    virtual WMError MoveTo(int32_t x, int32_t y) override;
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -199,7 +199,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
-    WmErrorCode RaiseToAppTop() override;
+    WMError RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
     virtual WMError ResetAspectRatio() override;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
@@ -216,7 +216,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) override;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) override;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) override;
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) override;

@@ -17,6 +17,7 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
@@ -58,4 +59,42 @@ void FoldScreenPolicy::ClearState()
 }
 
 void FoldScreenPolicy::ExitCoordination() {};
+
+bool FoldScreenPolicy::GetModeChangeRunningStatus()
+{
+    auto currentTime = std::chrono::steady_clock::now();
+    auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTimePoint_).count();
+    if (intervalMs > MODE_CHANGE_TIMEOUT_MS) {
+        TLOGE(WmsLogTag::DMS, "mode change timeout.");
+        return false;
+    }
+    return GetdisplayModeRunningStatus();
+}
+
+bool FoldScreenPolicy::GetdisplayModeRunningStatus()
+{
+    return displayModeChangeRunning_.load();
+}
+
+FoldDisplayMode FoldScreenPolicy::GetLastCacheDisplayMode()
+{
+    return lastCachedisplayMode_.load();
+}
+
+void FoldScreenPolicy::SetLastCacheDisplayMode(FoldDisplayMode mode)
+{
+    lastCachedisplayMode_ = mode;
+}
+
+int64_t FoldScreenPolicy::getFoldingElapsedMs()
+{
+    if (endTimePoint_ < startTimePoint_) {
+        TLOGE(WmsLogTag::DMS, "invalid timepoint. endTimePoint less startTimePoint");
+        return 0;
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTimePoint_ - startTimePoint_).count();
+    return static_cast<int64_t>(elapsed);
+}
+
+void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
 } // namespace OHOS::Rosen

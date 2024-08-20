@@ -27,7 +27,8 @@ public:
     void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     void PresentFocusIfPointDown() override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void PresentFoucusIfNeed(int32_t pointerAcrion) override;

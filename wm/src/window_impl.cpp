@@ -1726,7 +1726,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
@@ -2024,22 +2024,23 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());

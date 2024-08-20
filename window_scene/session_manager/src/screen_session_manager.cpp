@@ -100,6 +100,7 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
+constexpr int32_t REMOVE_DISPLAY_MODE = 0;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -184,6 +185,9 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
             #endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (foldScreenController_ != nullptr) {
+                foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
+            }
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
@@ -198,6 +202,9 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
             #endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (foldScreenController_ != nullptr) {
+                foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
+            }
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         } else {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Init, invalid active screen id");
@@ -872,7 +879,13 @@ bool ScreenSessionManager::IsFreezed(const int32_t& agentPid, const DisplayManag
     if (freezedPidList_.count(agentPid) == 0) {
         return false;
     }
-    agentTypeSet_.insert(agentType); // 冻结的应用记录应用注册的 agentType
+    // 冻结的应用记录应用 pid 和注册的 agentType
+    if (pidAgentTypeMap_.count(agentPid) == 0) {
+        std::set agentTypes = { agentType };
+        pidAgentTypeMap_[agentPid] = agentTypes;
+    } else {
+        pidAgentTypeMap_[agentPid].insert(agentType);
+    }
     TLOGD(WmsLogTag::DMS, "Agent is freezed, no need notify. PID: %{public}d.", agentPid);
     return true;
 }
@@ -1708,6 +1721,10 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
 void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
 {
+    if (foldScreenController_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenController_ is null");
+        return;
+    }
     SetScreenPowerForFold(foldScreenController_->GetCurrentScreenId(), status);
 }
 
@@ -2407,7 +2424,8 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
         return ERROR_ID_NOT_SYSTEM_APP;
     }
-    if (Permission::IsSystemCalling() && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) {
+    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
+        !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DMS, "create virtual screen permission denied!");
         TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -2720,18 +2738,32 @@ DMError ScreenSessionManager::MultiScreenModeSwitch(ScreenId mainScreenId, Scree
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::MultiScreenRelativePosition(ExtendOption mainScreenOption,
-    ExtendOption secondaryScreenOption)
+DMError ScreenSessionManager::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+    ExtendOption secondScreenOption)
 {
     TLOGI(WmsLogTag::DMS,
         "mID:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sID:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        mainScreenOption.screenId_, mainScreenOption.startX_, mainScreenOption.startY_,
-        secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
+        firstScreenOption.screenId_, firstScreenOption.startX_, firstScreenOption.startY_,
+        secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    sptr<ScreenSession> firstScreenSession = GetScreenSession(firstScreenOption.screenId_);
+    if (!firstScreenSession) {
+        TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenProperty firstProperty = firstScreenSession->GetScreenProperty();
+    sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
+    if (!secondScreenSession) {
+        TLOGE(WmsLogTag::DMS, "secondScreenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
+    firstProperty.SetStartPosition(firstScreenOption.startX_, firstScreenOption.startY_);
+    secondProperty.SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     return DMError::DM_OK;
 }
 
@@ -4216,13 +4248,13 @@ void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
         return;
     }
     const ScreenProperty& property = session->GetScreenProperty();
-    if (property.GetScaleX() - DEFAULT_SCALE < FLT_EPSILON && property.GetScaleY() - DEFAULT_SCALE < FLT_EPSILON &&
-        property.GetPivotX() - DEFAULT_PIVOT < FLT_EPSILON && property.GetPivotY() - DEFAULT_PIVOT < FLT_EPSILON) {
+    if (std::fabs(property.GetScaleX() - DEFAULT_SCALE) < FLT_EPSILON &&
+        std::fabs(property.GetScaleY() - DEFAULT_SCALE) < FLT_EPSILON &&
+        std::fabs(property.GetPivotX() - DEFAULT_PIVOT) < FLT_EPSILON &&
+        std::fabs(property.GetPivotY() - DEFAULT_PIVOT) < FLT_EPSILON) {
         TLOGD(WmsLogTag::DMS, "The scale and pivot is default value now. There is no need to update");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
-          screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(), property.GetPivotY());
     SetDisplayScaleInner(screenId, property.GetScaleX(), property.GetScaleY(), property.GetPivotX(),
                          property.GetPivotY());
 }
@@ -4235,25 +4267,6 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
         TLOGE(WmsLogTag::DMS, "session is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "screenId %{public}" PRIu64 " scale [%{public}f, %{public}f] pivot [%{public}f, %{public}f]",
-          screenId, scaleX, scaleY, pivotX, pivotY);
-    UpdateDisplayNodeScale(session, scaleX, scaleY, pivotX, pivotY);
-    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(), {},
-                             DisplayStateChangeType::UPDATE_SCALE);
-}
-
-void ScreenSessionManager::UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX,
-                                                  const float& scaleY, const float& pivotX, const float& pivotY)
-{
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::DMS, "session is null");
-        return;
-    }
-    auto displayNode = session->GetDisplayNode();
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayNode is null");
-        return;
-    }
     float translateX = 0.0f;
     float translateY = 0.0f;
     if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
@@ -4261,18 +4274,13 @@ void ScreenSessionManager::UpdateDisplayNodeScale(sptr<ScreenSession>& session, 
     } else {
         CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     }
-    TLOGD(WmsLogTag::DMS, "translate [%{public}f, %{public}f] scale [%{public}f, %{public}f]", translateX, translateY,
-          scaleX, scaleY);
-    displayNode->SetScale(scaleX, scaleY);
-    displayNode->SetTranslateX(translateX);
-    displayNode->SetTranslateY(translateY);
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    } else {
-        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
-    }
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    TLOGD(WmsLogTag::DMS,
+          "screenId %{public}" PRIu64 ", scale [%{public}f, %{public}f], "
+          "pivot [%{public}f, %{public}f], translate [%{public}f, %{public}f]",
+          screenId, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    NotifyDisplayStateChange(GetDefaultScreenId(), session->ConvertToDisplayInfo(), {},
+                             DisplayStateChangeType::UPDATE_SCALE);
 }
 
 void ScreenSessionManager::CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
@@ -5159,13 +5167,16 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldToExpandCompletion ENTER");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "notify permission denied");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
+    }
+    /* Avoid fold to expand process queues */
+    if (foldScreenController_ != nullptr) {
+        foldScreenController_->SetdisplayModeChangeStatus(false);
     }
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {
@@ -5225,17 +5236,18 @@ DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, b
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& pidList, const sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
+    const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession)
 {
-    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
-    for (auto agentType : agentTypeSet_) {
+    bool isAgentTypeNotify = false;
+    for (auto agentType : pidAgentTypes) {
         auto agents = dmAgentContainer_.GetAgentsByType(agentType);
         for (auto agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
-            if (pidList.count(agentPid) == 0) {
+            if (agentPid != pid || unfreezedPidList.count(pid) == 0) {
                 continue;
             }
-
+            isAgentTypeNotify = true;
             if (agentType == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
                 agent->OnDisplayChange(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_UNFREEZED);
             } else if (agentType == DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
@@ -5256,8 +5268,28 @@ void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& pidList, con
                 std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
                 agent->NotifyDisplayChangeInfoChanged(lastDisplayChangeInfo_);
             } else {
+                isAgentTypeNotify = false;
                 TLOGI(WmsLogTag::DMS, "Unknown agentType.");
             }
+        }
+        if (isAgentTypeNotify) {
+            pidAgentTypeMap_[pid].erase(agentType);
+        }
+    }
+}
+
+void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList,
+    const sptr<ScreenSession>& screenSession)
+{
+    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+    for (auto iter = pidAgentTypeMap_.begin(); iter != pidAgentTypeMap_.end();) {
+        int32_t pid = iter->first;
+        auto pidAgentTypes = iter->second;
+        NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
+        if (pidAgentTypeMap_[pid].empty()) {
+            iter = pidAgentTypeMap_.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
@@ -5270,7 +5302,7 @@ DMError ScreenSessionManager::ResetAllFreezeStatus()
     }
     std::lock_guard<std::mutex> lock(freezedPidListMutex_);
     freezedPidList_.clear();
-    agentTypeSet_.clear();
+    pidAgentTypeMap_.clear();
     TLOGI(WmsLogTag::DMS, "freezedPidList_ has been clear.");
     return DMError::DM_OK;
 }

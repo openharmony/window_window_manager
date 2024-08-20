@@ -228,6 +228,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetScaleY(property_.GetScaleY());
     displayInfo->SetPivotX(property_.GetPivotX());
     displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
     return displayInfo;
 }
 
@@ -280,12 +282,15 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
-void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY)
+void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
+                                   float translateY)
 {
     property_.SetScaleX(scaleX);
     property_.SetScaleY(scaleY);
     property_.SetPivotX(pivotX);
     property_.SetPivotY(pivotY);
+    property_.SetTranslateX(translateX);
+    property_.SetTranslateY(translateY);
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
