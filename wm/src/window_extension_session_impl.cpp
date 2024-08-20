@@ -598,6 +598,52 @@ void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, Wi
     }
 }
 
+WMError WindowExtensionSessionImpl::GetSystemViewportConfig(SessionViewportConfig& config)
+{
+    config.displayId_ = property->GetDisplayId();
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "display is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    config.density_ = displayInfo->GetVirtualPixelRatio();
+    auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
+    auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
+    config.transform_ = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
+    config.orientation_ = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
+{
+    if (!handler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto task = [weak = wptr(this)]() {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        SessionViewportConfig config;
+        if (window->GetSystemViewportConfig(config) != WMError::WM_OK){
+            TLOGE(WmsLogTag::WMS_UIEXT, "Get system viewportConfig failed");
+            return;
+        }
+        if (!MathHelper::NearZero(window->lastDensity_ - config.density_)) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "System density is changed");
+            window->UpdateSessionViewportConfig(config);
+        }
+    };
+    handler_->PostTask(task, "UpdateSystemViewportConfig");
+    return WSError::WS_OK;
+}
+
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
 {
     if (std::islessequal(config.density_, 0.0f)) {
@@ -783,6 +829,9 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
 WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     CheckAndAddExtWindowFlags();
+    if (!isDensityFollowHost_) {
+        UpdateSystemViewportConfig();
+    }
     return this->WindowSessionImpl::Show(reason, withAnimation);
 }
 
@@ -854,7 +903,8 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is nullptr");
         return vpr;
     }
-    return displayInfo->GetVirtualPixelRatio();
+    lastDensity_ = displayInfo->GetVirtualPixelRatio();
+    return lastDensity_;
 }
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)

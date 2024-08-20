@@ -58,8 +58,6 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t ANIMATION_TIME = 400;
-constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)

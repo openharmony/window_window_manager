@@ -111,6 +111,8 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+    WMError GetSystemViewportConfig(SessionViewportConfig& config);
+    void UpdateSystemViewportConfig();
     float UpdateExtensionDensity(const SessionViewportConfig& config);
     void NotifyDisplayInfoChange(const SessionViewportConfig& config);
     WSError UpdateSessionViewportConfigInner(
