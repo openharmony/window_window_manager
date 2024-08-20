@@ -631,7 +631,7 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
             return;
         }
         SessionViewportConfig config;
-        if (window->GetSystemViewportConfig(config) != WMError::WM_OK){
+        if (window->GetSystemViewportConfig(config) != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Get system viewportConfig failed");
             return;
         }
@@ -641,7 +641,6 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         }
     };
     handler_->PostTask(task, "UpdateSystemViewportConfig");
-    return WSError::WS_OK;
 }
 
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
