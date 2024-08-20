@@ -17,6 +17,7 @@
 
 #include <functional>
 
+#include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_ui_display_soloist.h>
 
@@ -54,7 +55,15 @@ VsyncStation::VsyncStation(NodeId nodeId, const std::shared_ptr<AppExecFwk::Even
 
 VsyncStation::~VsyncStation()
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " destructed", nodeId_);
+}
+
+void VsyncStation::Destroy()
+{
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " destroyed", nodeId_);
+    std::lock_guard<std::mutex> lock(mutex_);
+    destroyed_ = true;
+    receiver_.reset();
 }
 
 bool VsyncStation::IsVsyncReceiverCreated()
@@ -70,6 +79,10 @@ std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiver()
 
 std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiverLocked()
 {
+    if (destroyed_) {
+        TLOGW(WmsLogTag::WMS_MAIN, "VsyncStation has been destroyed");
+        return nullptr;
+    }
     if (receiver_ == nullptr) {
         auto& rsClient = RSInterfaces::GetInstance();
         auto receiver = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getprocpid()), frameRateLinker_->GetId(),
@@ -94,6 +107,7 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
     std::shared_ptr<VSyncReceiver> receiver;
     {
         std::lock_guard<std::mutex> lock(mutex_);
+        // check if receiver is ready
         receiver = GetOrCreateVsyncReceiverLocked();
         if (receiver == nullptr) {
             return;
@@ -149,6 +163,8 @@ void VsyncStation::RemoveCallback()
 
 void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "OnVsyncCallback " PRId64 ":" PRId64, timestamp, frameCount);
     Callbacks vsyncCallbacks;
     {
         std::lock_guard<std::mutex> lock(mutex_);
