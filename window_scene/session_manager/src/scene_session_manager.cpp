@@ -215,6 +215,7 @@ void SceneSessionManager::Init()
 
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
+    LoadWindowParameter();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
@@ -312,6 +313,13 @@ void SceneSessionManager::RegisterAppListener()
             WLOGFI("Register app debug listener success.");
         }
     }
+}
+
+void SceneSessionManager::LoadWindowParameter()
+{
+    std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    systemConfig_.multiWindowUIType_ = multiWindowUIType;
+    appWindowSceneConfig_.multiWindowUIType_ = multiWindowUIType;
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
