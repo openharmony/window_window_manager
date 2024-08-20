@@ -100,14 +100,13 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
+        sptr<Window> self(this);
+        InputTransferStation::GetInstance().AddInputWindow(self);
     }
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
         property_->GetWindowName().c_str(), GetPersistentId());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
     AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
@@ -159,11 +158,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    if (needRemoveWindowInputChannel_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d Destroy", GetPersistentId());
-        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
-        needRemoveWindowInputChannel_ = false;
-    }
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
