@@ -92,7 +92,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 {
     auto task = [this, sessionInfo]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
-        auto tempSessionInfo = sessionInfo;
+        SessionInfo tempSessionInfo = sessionInfo;
         if (!tempSessionInfo.config_.isDensityFollowHost_) {
             tempSessionInfo.config_.density_ = GetSystemDensity(tempSessionInfo.config_.displayId_);
         }
