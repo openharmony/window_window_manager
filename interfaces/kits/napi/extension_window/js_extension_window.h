@@ -91,6 +91,7 @@ private:
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
     static void SetWindowOption(sptr<Rosen::WindowOption> windowOption);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option);
+    static void ProcessAfterCreateSubWindow(sptr<Rosen::Window> extWindow, sptr<Rosen::Window> subWindow);
 };
 }  // namespace Rosen
 }  // namespace OHOS

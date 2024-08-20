@@ -2212,6 +2212,13 @@ public:
      * @return Real parent id of UIExtension
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
+
+    /**
+     * @brief Notify modal UIExtension it may be covered
+     *
+     * @param byLoadContent True when called by loading content, false when called by creating non-modal subwindow
+     */
+    virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 };
 }
 }
