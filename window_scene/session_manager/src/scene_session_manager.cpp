@@ -2411,7 +2411,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP ||
-        type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_TOAST) {
+        type == WindowType::WINDOW_TYPE_TOAST) {
         // some system types could be created by normal app
         return true;
     }
