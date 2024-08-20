@@ -37,6 +37,7 @@ public:
     virtual void SetOnBootAnimation(bool onBootAnimation);
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();
+    virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();

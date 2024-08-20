@@ -172,6 +172,10 @@ void FoldScreenController::UpdateForPhyScreenPropertyChange()
 
 void FoldScreenController::ExitCoordination()
 {
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
     foldScreenPolicy_->ExitCoordination();
 }
 
@@ -193,5 +197,14 @@ bool FoldScreenController::GetdisplayModeRunningStatus()
 FoldDisplayMode FoldScreenController::GetLastCacheDisplayMode()
 {
     return foldScreenPolicy_->GetLastCacheDisplayMode();
+}
+
+void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
 }
 } // namespace OHOS::Rosen

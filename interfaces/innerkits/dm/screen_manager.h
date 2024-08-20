@@ -126,12 +126,12 @@ public:
      /**
      * @brief Set Screen Relative Position
      *
-     * @param mainScreenOption Main screen id and position.
-     * @param secondaryScreenOption secondary screen id and position.
+     * @param firstScreenOption Main screen id and position.
+     * @param secondScreenOption secondary screen id and position.
      * @return DM_OK means make mirror success, others means make mirror failed.
      */
-    DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption);
+    DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+        ExtendOption secondScreenOption);
 
     /**
     * @brief Make screens as unique-screen.

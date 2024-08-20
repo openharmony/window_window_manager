@@ -108,7 +108,6 @@ public:
 private:
     void RegisterInputEventListener();
 
-    std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
