@@ -1997,6 +1997,7 @@ HWTEST_F(WindowSessionTest2, CreateWindowStateDetectTask, Function | SmallTest |
 HWTEST_F(WindowSessionTest2, SetOffset01, Function | SmallTest | Level2)
 {
     session_->SetOffset(0, 0);
+    ASSERT_EQ(session_->GetOffsetX(), 0);
 }
 }
 } // namespace Rosen
