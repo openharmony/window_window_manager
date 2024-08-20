@@ -86,10 +86,8 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         return WMError::WM_ERROR_NULLPTR;
     }
     SetDefaultDisplayIdIfNeed();
-    {
-        std::lock_guard<std::mutex> lock(hostSessionMutex_);
-        hostSession_ = iSession;
-    }
+    // Since here is init of this window, no other threads will rw it.
+    hostSession_ = iSession;
     context_ = context;
     if (context_) {
         abilityToken_ = context_->GetToken();
@@ -104,7 +102,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
-    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
+    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d success.",
         property_->GetWindowName().c_str(), GetPersistentId());
     AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
@@ -163,7 +161,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (auto hostSession = GetHostSession()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Disconnected with host session, id: %{public}d.", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "Disconnect with host session, id: %{public}d.", GetPersistentId());
         hostSession->Disconnect();
     }
     NotifyBeforeDestroy(GetWindowName());
@@ -184,20 +182,20 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.erase(this);
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Erase windowExtensionSession in set, id: %{public}d.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Erase in set, id: %{public}d.", GetPersistentId());
     if (context_) {
         context_.reset();
     }
     ClearVsyncStation();
     SetUIContentComplete();
     RemoveExtensionWindowStageFromSCB();
-    TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
 
 WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGFD("Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    WLOGFD("Id:%{public}d xy %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -210,7 +208,7 @@ WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGFD("Id:%{public}d Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
+    WLOGFD("Id:%{public}d wh %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -224,7 +222,7 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("Window session invalid.");
+        WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     auto hostSession = GetHostSession();
@@ -235,7 +233,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("Window session invalid.");
+        WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     auto hostSession = GetHostSession();
@@ -246,7 +244,7 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("Window session invalid.");
+        WLOGFE("Window invalid.");
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);
@@ -257,7 +255,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "Called.");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in.");
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -267,7 +265,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
@@ -290,7 +288,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
 
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
-    WLOGFD("called");
+    WLOGFD("in");
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->TriggerBindModalUIExtension();
@@ -298,10 +296,10 @@ void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
         isPrivacyMode);
     if (surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     surfaceNode_->SetSecurityLayer(isPrivacyMode);
@@ -465,7 +463,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
             uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
         }
         if (uiContent == nullptr) {
-            WLOGFE("fail to NapiSetUIContent id: %{public}d", GetPersistentId());
+            WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
@@ -503,10 +501,10 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
     auto preRect = GetRect();
     if (rect.width_ == static_cast<int>(preRect.width_) && rect.height_ == static_cast<int>(preRect.height_)) {
-        WLOGFD("Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+        WLOGFD("EQ [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
             rect.height_, static_cast<int>(reason));
     } else {
-        WLOGFI("Update rect [%{public}d, %{public}d, reason: %{public}d]", rect.width_,
+        WLOGFI("[%{public}d, %{public}d, reason: %{public}d]", rect.width_,
             rect.height_, static_cast<int>(reason));
     }
     property_->SetWindowRect(wmRect);
@@ -694,15 +692,14 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Hide, reason:%{public}u, state:%{public}u",
         GetPersistentId(), reason, state_);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        WLOGFE("session invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     CheckAndRemoveExtWindowFlags();
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        TLOGD(WmsLogTag::WMS_LIFE, "window extension session is already hidden "
-            "[name:%{public}s, id:%{public}d, type: %{public}u]",
+        TLOGD(WmsLogTag::WMS_LIFE, "already hidden [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
@@ -714,7 +711,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
     } else {
-        TLOGD(WmsLogTag::WMS_LIFE, "window extension session Hide to Background is error");
+        TLOGD(WmsLogTag::WMS_LIFE, "window extension session Hide to Background error");
     }
     return WMError::WM_OK;
 }
@@ -764,15 +761,11 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}u, shouldHide: %{public}u", GetPersistentId(), shouldHide);
-    if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "property_ is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, shouldHide: %{public}u", GetPersistentId(), shouldHide);
     if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
          property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
-        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property to false is not allowed in %{public}s UIExtension.",
+        TLOGE(WmsLogTag::WMS_UIEXT, "Set property to false Not allowed in %{public}s UIExtension.",
             property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -1014,9 +1007,6 @@ void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
 
 int32_t WindowExtensionSessionImpl::GetRealParentId() const
 {
-    if (property_ == nullptr) {
-        return static_cast<int32_t>(INVALID_WINDOW_ID);
-    }
     return property_->GetRealParentId();
 }
 } // namespace Rosen
