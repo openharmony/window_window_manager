@@ -612,7 +612,7 @@ WMError WindowExtensionSessionImpl::GetSystemViewportConfig(SessionViewportConfi
         return WMError::WM_ERROR_NULLPTR;
     }
     config.density_ = displayInfo->GetVirtualPixelRatio();
-    auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
+    auto rotation = ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     config.transform_ = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     config.orientation_ = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
