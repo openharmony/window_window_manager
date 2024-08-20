@@ -136,7 +136,6 @@ HWTEST_F(WindowImplTest3, RegisterAnimationTransitionController, Function | Smal
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     EXPECT_CALL(*content, SetNextFrameLayoutCallback(_));
     window->RegisterAnimationTransitionController(listener);
-    window->property_ = new WindowProperty();
     EXPECT_CALL(*content, SetNextFrameLayoutCallback(_));
     window->RegisterAnimationTransitionController(listener);
     window->property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
