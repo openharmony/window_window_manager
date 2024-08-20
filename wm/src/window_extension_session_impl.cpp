@@ -600,7 +600,7 @@ void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, Wi
 
 WMError WindowExtensionSessionImpl::GetSystemViewportConfig(SessionViewportConfig& config)
 {
-    config.displayId_ = property->GetDisplayId();
+    config.displayId_ = property_->GetDisplayId();
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "display is null!");
@@ -623,7 +623,7 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
 {
     if (!handler_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
-        return WSError::WS_ERROR_NULLPTR;
+        return;
     }
     auto task = [weak = wptr(this)]() {
         auto window = weak.promote();
