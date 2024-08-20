@@ -43,6 +43,7 @@ public:
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
 private:
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
+    static DeviceRotation ConvertSinglePocketOuterRotation(DeviceRotation deviceRotation);
 };
 } // Rosen
 } // OHOS
