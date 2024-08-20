@@ -94,6 +94,7 @@ public:
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
+    void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -112,6 +113,8 @@ private:
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
+    WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
+    void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -122,6 +125,7 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    bool modalUIExtensionMayBeCovered_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
