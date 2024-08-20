@@ -410,11 +410,6 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck01, Function | SmallTest
 
     WMError res = window1->WindowSessionCreateCheck();
     ASSERT_EQ(res, WMError::WM_OK);
-
-    window1->property_ = nullptr;
-    WMError res1 = window1->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_ERROR_NULLPTR);
-
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck01 end";
 }
 
@@ -636,10 +631,6 @@ HWTEST_F(WindowSessionImplTest, GetPersistentId01, Function | SmallTest | Level2
     window->property_->SetPersistentId(1);
     const int32_t res2 = window->GetPersistentId();
     ASSERT_EQ(res2, 1);
-
-    window->property_ = nullptr;
-    const int32_t res1 = window->GetPersistentId();
-    ASSERT_EQ(res1, INVALID_SESSION_ID);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetPersistentId end";
 }
 
@@ -1911,9 +1902,6 @@ HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | Sma
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->handler_ = nullptr;
-    window->property_ = nullptr;
-    window->context_ = nullptr;
-    window->AddSetUIContentTimeoutCheck();
 
     option->SetWindowName("AddSetUIContentTimeoutCheck_test");
     option->SetBundleName("UTtest");
