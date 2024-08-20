@@ -1414,8 +1414,9 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 }
 
 static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t x, int32_t y, std::shared_ptr<WmErrorCode> errCodePtr)
+    wptr<Window> weakToken, int32_t x, int32_t y)
 {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, errCodePtr, x, y] {
         if (errCodePtr == nullptr) {
             return;
@@ -1471,10 +1472,9 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(errCode);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToAsyncTask(execute, complete, weakToken, x, y, errCodePtr);
+    SetMoveWindowToAsyncTask(execute, complete, weakToken, x, y);
 
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
@@ -1598,8 +1598,9 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 }
 
 static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t width, int32_t height, std::shared_ptr<WmErrorCode> errCodePtr)
+    wptr<Window> weakToken, int32_t width, int32_t height)
 {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, errCodePtr, width, height] {
         if (errCodePtr == nullptr) {
             return;
@@ -1660,10 +1661,9 @@ napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(errCode);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetResizeWindowAsyncTask(execute, complete, weakToken, width, height, errCodePtr);
+    SetResizeWindowAsyncTask(execute, complete, weakToken, width, height);
 
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
