@@ -2513,7 +2513,7 @@ WSError WindowSessionImpl::NotifyDestroy()
             }
         }
     } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_ && needRemoveWindowInputChannel_) {
+        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_) {
             Destroy();
         }
     }
