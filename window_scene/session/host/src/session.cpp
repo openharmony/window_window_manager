@@ -972,8 +972,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
-        GetPersistentId(), static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u, isTerminating:%{public}d",
+        GetPersistentId(), static_cast<uint32_t>(state), isTerminating_);
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
@@ -993,6 +993,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
 
     NotifyForeground();
+
+    isTerminating_ = false;
     return WSError::WS_OK;
 }
 
