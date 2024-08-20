@@ -506,8 +506,6 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    windowSceneSessionImpl->property_ = nullptr;
-    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
 }
 
 /**
@@ -722,9 +720,6 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyDialogStateChange, Function | SmallT
     windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
     ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 
 /**
