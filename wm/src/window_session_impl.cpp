@@ -202,8 +202,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -397,7 +397,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 
 void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Called");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     auto displayId = property_->GetDisplayId();
     if (displayId == DISPLAY_ID_INVALID) {
         auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
@@ -408,15 +408,9 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
     }
 }
 
-WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
-{
-    return WMError::WM_OK;
-}
-
 WMError WindowSessionImpl::Connect()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Called");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     sptr<ISessionStage> iSessionStage(this);
@@ -2155,9 +2149,8 @@ void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDes
 
 void WindowSessionImpl::ClearVsyncStation()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ != nullptr) {
-        vsyncStation_.reset();
+        vsyncStation_->Destroy();
     }
 }
 
@@ -2197,17 +2190,16 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         CALL_UI_CONTENT(Foreground);
     }
 
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "vsyncStation is nullptr");
-        return;
-    }
-    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: true, linkerId = %{public}" PRIu64,
-        vsyncStation_->GetFrameRateLinkerId());
-    vsyncStation_->SetFrameRateLinkerEnable(true);
-    if (WindowHelper::IsMainWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: %{public}d, WindowType: %{public}d",
-            WindowHelper::IsMainWindow(GetType()), GetType());
-        vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(true);
+    if (vsyncStation_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_MAIN, "enable FrameRateLinker, linkerId = %{public}" PRIu64,
+            vsyncStation_->GetFrameRateLinkerId());
+        vsyncStation_->SetFrameRateLinkerEnable(true);
+        if (WindowHelper::IsMainWindow(GetType())) {
+            TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: enable soloist linker");
+            vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(true);
+        }
+    } else {
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
 }
 
@@ -2223,17 +2215,16 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         CALL_UI_CONTENT(Background);
     }
 
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "vsyncStation is nullptr");
-        return;
-    }
-    TLOGD(WmsLogTag::WMS_MAIN, "SetFrameRateLinkerEnable: false, linkerId = %{public}" PRIu64,
-        vsyncStation_->GetFrameRateLinkerId());
-    vsyncStation_->SetFrameRateLinkerEnable(false);
-    if (WindowHelper::IsMainWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: %{public}d, WindowType: %{public}d",
-            WindowHelper::IsMainWindow(GetType()), GetType());
-        vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(false);
+    if (vsyncStation_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_MAIN, "disable FrameRateLinker, linkerId = %{public}" PRIu64,
+            vsyncStation_->GetFrameRateLinkerId());
+        vsyncStation_->SetFrameRateLinkerEnable(false);
+        if (WindowHelper::IsMainWindow(GetType())) {
+            TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: disable soloist linker");
+            vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(false);
+        }
+    } else {
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
 }
 
@@ -3169,14 +3160,8 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (state_ == WindowState::STATE_DESTROYED) {
-        WLOGFE("failed, window is destroyed");
-        return;
-    }
-
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "failed, vsyncStation is null");
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
     vsyncStation_->RequestVsync(vsyncCallback);
@@ -3184,9 +3169,8 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
 
 int64_t WindowSessionImpl::GetVSyncPeriod()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync period failed, vsyncStation is nullptr");
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return 0;
     }
     return vsyncStation_->GetVSyncPeriod();
@@ -3194,9 +3178,8 @@ int64_t WindowSessionImpl::GetVSyncPeriod()
 
 void WindowSessionImpl::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "failed, vsyncStation is nullptr");
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
@@ -3591,9 +3574,8 @@ WMError WindowSessionImpl::GetCallingWindowRect(Rect& rect) const
 
 void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "vsyncStation is null");
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);

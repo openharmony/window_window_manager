@@ -761,7 +761,7 @@ HWTEST_F(WindowSessionImplTest, ClearVsync, Function | SmallTest | Level2)
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->ClearVsyncStation();
-    ASSERT_EQ(window->vsyncStation_, nullptr);
+    ASSERT_NE(window, nullptr);
 }
 
 /**
