@@ -813,7 +813,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, vsyncStation is null");
         return;
     }
     vsyncStation_->RequestVsync(vsyncCallback);
