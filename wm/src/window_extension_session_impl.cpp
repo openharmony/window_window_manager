@@ -711,11 +711,6 @@ float WindowExtensionSessionImpl::UpdateExtensionDensity(const SessionViewportCo
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
 {
-    if (property_->GetDisplayId() == config.displayId_ && NearEqual(lastDensity_, config.density_) &&
-        lastOrientation_ == config.orientation_) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "No parameters have changed, no need to update");
-        return;
-    }
     if (context_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed because of context is null.",
             GetPersistentId());
