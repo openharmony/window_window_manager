@@ -41,6 +41,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable) override;
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWindowStyleChange(WindowStyleType type) override;
+    void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

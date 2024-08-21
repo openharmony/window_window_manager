@@ -638,6 +638,27 @@ HWTEST_F(WindowSessionLifecycleTest, UpdateSessionState32, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateSessionState01
+ * @tc.desc: UpdateSessionState01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, UpdateSessionState01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSessionState(SessionState::STATE_CONNECT);
+    session_->UpdateSessionState(SessionState::STATE_CONNECT);
+    ASSERT_EQ(session_->state_, SessionState::STATE_CONNECT);
+
+    session_->SetSessionState(SessionState::STATE_CONNECT);
+    session_->UpdateSessionState(SessionState::STATE_FOREGROUND);
+    ASSERT_EQ(session_->state_, SessionState::STATE_FOREGROUND);
+
+    session_->SetSessionState(SessionState::STATE_ACTIVE);
+    session_->UpdateSessionState(SessionState::STATE_INACTIVE);
+    ASSERT_EQ(session_->state_, SessionState::STATE_INACTIVE);
+}
+
+/**
  * @tc.name: IsSystemSession44
  * @tc.desc: IsSystemSession
  * @tc.type: FUNC

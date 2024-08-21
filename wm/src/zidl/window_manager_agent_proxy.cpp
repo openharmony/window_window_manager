@@ -381,6 +381,37 @@ void WindowManagerAgentProxy::NotifyWindowStyleChange(WindowStyleType type)
     }
 }
 
+void WindowManagerAgentProxy::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
+{
+    MessageParcel data;
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid window pid visibility info.");
+        return;
+    }
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(info)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write windowPidVisibilityInfo failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

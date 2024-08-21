@@ -64,6 +64,7 @@
 #include "res_type.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
+#include "window_pid_visibility_info.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -122,6 +123,15 @@ constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
+
+const std::map<SessionState, bool> VISIBILITY_STATE_MAP = {
+    { SessionState::STATE_DISCONNECT, false },
+    { SessionState::STATE_CONNECT, false },
+    { SessionState::STATE_FOREGROUND, true },
+    { SessionState::STATE_ACTIVE, true },
+    { SessionState::STATE_INACTIVE, false },
+    { SessionState::STATE_BACKGROUND, false },
+};
 
 std::string GetCurrentTime()
 {
@@ -1536,6 +1546,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
     RegisterSessionExceptionFunc(sceneSession);
+    RegisterVisibilityChangedDetectFunc(sceneSession);
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
@@ -3818,6 +3829,52 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     };
     sceneSession->SetSessionExceptionListener(sessionExceptionFunc, false);
     TLOGD(WmsLogTag::WMS_LIFE, "RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return;
+    }
+    VisibilityChangedDetectFunc func = [this](const int32_t pid, SessionState oldState, SessionState newState) {
+        if (VISIBILITY_STATE_MAP.at(oldState) == VISIBILITY_STATE_MAP.at(newState)) {
+            return;
+        }
+        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = new WindowPidVisibilityInfo();
+        windowPidVisibilityInfo->pid_ = pid;
+        std::shared_lock<std::shared_mutex> lock(visibleWindowCountMapMutex_);
+        if (VISIBILITY_STATE_MAP.at(oldState) && !VISIBILITY_STATE_MAP.at(newState)) {
+            visibleWindowCountMap_[pid]--;
+            if (visibleWindowCountMap_[pid] == 0) {
+                TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to invisibility.", pid);
+                windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::INVISIBILITY_STATE;
+                SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+            } else if (visibleWindowCountMap_[pid] < 0) {
+                RecoveryVisibilityPidCount(pid);
+            }
+        }else if (!VISIBILITY_STATE_MAP.at(oldState) && VISIBILITY_STATE_MAP.at(newState)) {
+            visibleWindowCountMap_[pid]++;
+            if (visibleWindowCountMap_[pid] == 1) {
+                TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
+                windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
+                SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+            }
+        }
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(func);
+}
+
+void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    visibleWindowCountMap_.erase(pid);
+    for (auto iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetCallingPid() == pid && VISIBILITY_STATE_MAP.at(session->GetSessionState())) {
+            visibleWindowCountMap_[pid]++;
+        }
+    }
 }
 
 void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)

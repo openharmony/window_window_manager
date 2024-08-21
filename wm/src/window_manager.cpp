@@ -65,6 +65,7 @@ public:
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -94,6 +95,8 @@ public:
     sptr<WindowManagerAgent> windowStyleListenerAgent_;
     std::map<sptr<IRemoteObject>,
         std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
+    std::vector<sptr<IWindowPidVisibilityChangedListener>> windowPidVisibilityListeners_;
+    sptr<WindowManagerAgent> windowPidVisibilityListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -337,6 +340,19 @@ void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
         TLOGI(WmsLogTag::WMS_MAIN, "WindowStyleChange type: %{public}d",
               static_cast<uint8_t>(type));
         listener->OnWindowStyleUpdate(type);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowPidVisibilityChanged(
+    const sptr<WindowPidVisibilityInfo>& info)
+{
+    std::vector<sptr<IWindowPidVisibilityChangedListener>> windowPidVisibilityListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowPidVisibilityListeners = windowPidVisibilityListeners_;
+    }
+    for (auto &listener : windowPidVisibilityListeners) {
+        listener->NotifyWindowPidVisibilityChanged(info);
     }
 }
 
@@ -945,6 +961,63 @@ WMError WindowManager::UnregisterDisplayInfoChangedListener(const sptr<IRemoteOb
     return WMError::WM_OK;
 }
 
+WMError WindowManager::RegisterWindowPidVisibilityChangedListener(
+    const sptr<IWindowPidVisibilityChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPidVisibilityListenerAgent_ == nullptr) {
+        pImpl_->windowPidVisibilityListenerAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+        pImpl_->windowPidVisibilityListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "RegisterWindowManagerAgent failed!");
+        pImpl_->windowPidVisibilityListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
+            pImpl_->windowPidVisibilityListeners_.end(), listener);
+        if (iter != pImpl_->windowPidVisibilityListeners_.end()) {
+            WLOGI("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowPidVisibilityListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowPidVisibilityChangedListener(
+    const sptr<IWindowPidVisibilityChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
+        pImpl_->windowPidVisibilityListeners_.end(), listener);
+    if (iter == pImpl_->windowPidVisibilityListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowPidVisibilityListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPidVisibilityListeners_.empty() && pImpl_->windowPidVisibilityListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+            pImpl_->windowPidVisibilityListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPidVisibilityListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
 WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
     float density, DisplayOrientation orientation)
 {
@@ -1112,6 +1185,11 @@ void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
 void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
 {
     pImpl_->NotifyGestureNavigationEnabledResult(enable);
+}
+
+void WindowManager::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const
+{
+    pImpl_->NotifyWindowPidVisibilityChanged(info);
 }
 
 WMError WindowManager::RaiseWindowToTop(int32_t persistentId)
