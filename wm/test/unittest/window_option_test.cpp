@@ -452,21 +452,6 @@ HWTEST_F(WindowOptionTest, SetUIExtensionUsage, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: IsUIExtensionAbilityProcess
- * @tc.desc: IsUIExtensionAbilityProcess setter and getter test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowOptionTest, SetIsUIExtensionAbilityProcess, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetIsUIExtensionAbilityProcess(true);
-    EXPECT_EQ(true, option->GetIsUIExtensionAbilityProcess());
-    option->SetIsUIExtensionAbilityProcess(false);
-    EXPECT_EQ(false, option->GetIsUIExtensionAbilityProcess());
-}
-
-/**
  * @tc.name: SetDialogDecorEnable
  * @tc.desc: SetDialogDecorEnable
  * @tc.type: FUNC
