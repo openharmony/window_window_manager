@@ -1015,6 +1015,32 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetSubWindowLevel
+ * @tc.desc: SetSubWindowLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    uint32_t level = 4;
+    property->SetSubWindowLevel(level);
+    ASSERT_EQ(level, property->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: GetSubWindowLevel
+ * @tc.desc: GetSubWindowLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);;
+    ASSERT_EQ(1, property->GetSubWindowLevel());
+}
+
+/**
  * @tc.name: MarshallingFutureCallback
  * @tc.desc: MarshallingFutureCallback
  * @tc.type: FUNC

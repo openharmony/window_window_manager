@@ -160,6 +160,11 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
 
+    /**
+     * Sub Window
+     */
+    static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -286,6 +291,11 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
+
+    /**
+     * Sub Window
+     */
+    napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
