@@ -2146,8 +2146,8 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, status:%{public}d", controlType, status);
     auto task = [this, persistentId = persistentId_, controlType, status, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnSessionPiPControlStatusChange jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "OnSessionPiPControlStatusChange jsSceneSession id:%{public}d has been"
+                " destroyed", persistentId);
             return;
         }
         auto jsCallBack = this->GetJSCallback(SESSION_PIP_CONTROL_STATUS_CHANGE_CB);
@@ -2212,8 +2212,8 @@ void JsSceneSession::OnClickModalSpecificWindowOutside()
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnClickModalSpecificWindowOutside jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "OnClickModalSpecificWindowOutside jsSceneSession id:%{public}d has been"
+                " destroyed", persistentId);
             return;
         }
         auto jsCallBack = this->GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB);
@@ -2786,8 +2786,8 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, persistentId = persistentId_, sessionInfo, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionToBackgroundForDelegator jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionToBackgroundForDelegator jsSceneSession id:%{public}d has"
+                " been destroyed", persistentId);
             return;
         }
         auto jsCallBack = this->GetJSCallback(PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB);
@@ -2840,7 +2840,7 @@ void JsSceneSession::OnNeedAvoid(bool status)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
 
-    auto task = [this, persistentId = persistentId_, needAvoid = status, env = env_] {\
+    auto task = [this, persistentId = persistentId_, needAvoid = status, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnNeedAvoid jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
