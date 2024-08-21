@@ -764,6 +764,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
         TLOGE(WmsLogTag::DEFAULT, "windowIdList is null, no need to get surfaceNodeId");
         return;
     }
+    std::vector<int32_t> persistentIds(windowIdList.size());
     std::transform(windowIdList.begin(), windowIdList.end(),
         persistentIds.begin(), [](uint64_t id) { return static_cast<int32_t>(id); });
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
