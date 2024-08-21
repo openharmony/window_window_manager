@@ -74,7 +74,10 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
-
+    if (mainWindow_ != nullptr) {
+        mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr();
+        mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
+    }
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbilityManager return nullptr");
@@ -415,6 +418,9 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
             TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
         }
     }
+    if (mainWindow_ != nullptr) {
+        mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
+    }
     return WMError::WM_OK;
 }
 
@@ -528,6 +534,12 @@ bool PictureInPictureController::IsContentSizeChanged(float width, float height,
     return windowRect_.width_ != static_cast<uint32_t>(width) ||
         windowRect_.height_ != static_cast<uint32_t>(height) ||
         windowRect_.posX_ != static_cast<int32_t>(posX) || windowRect_.posY_ != static_cast<int32_t>(posY);
+}
+
+void PictureInPictureController::WindowLifeCycleListener::AfterDestroyed()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "stop picture_in_picture when attached window destroy");
+    PictureInPictureManager::DoClose(true, true);
 }
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
