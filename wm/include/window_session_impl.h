@@ -17,12 +17,11 @@
 #define OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 
 #include <atomic>
-#include <optional>
+
 #include <shared_mutex>
 #include <ability_context.h>
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
-#include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 #include "display_manager.h"
@@ -388,7 +387,7 @@ private:
     EnableIfSame<T, IWindowTitleButtonRectChangedListener,
         std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
-    RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
+    RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     template<typename T>
