@@ -895,8 +895,7 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is nullptr");
         return vpr;
     }
-    lastDensity_ = displayInfo->GetVirtualPixelRatio();
-    return lastDensity_;
+    return displayInfo->GetVirtualPixelRatio();
 }
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
