@@ -421,6 +421,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     if (mainWindow_ != nullptr) {
         mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
     }
+    mainWindowLifeCycleListener_ = nullptr;
     return WMError::WM_OK;
 }
 
