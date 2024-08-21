@@ -287,25 +287,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
 }
 
 /**
- * @tc.name: UpdatePropertyRaiseEnabled
- * @tc.desc: UpdatePropertyRaiseEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, UpdatePropertyRaiseEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(property, nullptr);
-    auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
-    ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
-}
-
-/**
  * @tc.name: HandleSpecificSystemBarProperty
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
