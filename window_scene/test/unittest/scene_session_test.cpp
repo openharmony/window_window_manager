@@ -1851,15 +1851,15 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetScreenWidthAndHeight
- * @tc.desc: GetScreenWidthAndHeight
+ * @tc.name: GetScreenWidthAndHeightFromServer
+ * @tc.desc: GetScreenWidthAndHeightFromServer
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, GetScreenWidthAndHeight, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetScreenWidthAndHeight";
-    info.bundleName_ = "GetScreenWidthAndHeight";
+    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
+    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
@@ -1876,11 +1876,11 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeight, Function | SmallTest | Level
 
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    bool result = sceneSession->GetScreenWidthAndHeight(property, screenWidth, screenHeight);
+    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
 
     sceneSession->SetSessionProperty(nullptr);
-    result = sceneSession->GetScreenWidthAndHeight(property, screenWidth, screenHeight);
+    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
 }
 }
