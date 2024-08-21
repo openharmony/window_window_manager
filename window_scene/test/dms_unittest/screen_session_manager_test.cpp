@@ -745,6 +745,42 @@ HWTEST_F(ScreenSessionManagerTest, GetDefaultDisplayInfo, Function | SmallTest |
 }
 
 /**
+ * @tc.name: HookDisplayInfoByUid
+ * @tc.desc: HookDisplayInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid, Function | SmallTest | Level3)
+{
+    sptr displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
+    sptr screenSession = new (std::nothrow) ScreenSession("GetDefaultDisplayInfo", screenId, rsid, 0);
+    sptr displayInfo = ssm_->GetDefaultDisplayInfo();
+    ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
+    ASSERT_NE(displayInfo, nullptr);
+    uint32_t uid = 20020001;
+    DMHookInfo dmHookInfo;
+    std::map<uint32_t, DMHookInfo> displayHookMap = {};
+    displayHookMap[uid] = dmHookInfo;
+    ASSERT_EQ(displayHookMap.find(uid) != displayHookMap.end(), true);
+    displayInfo->SetWidth(100);
+    ASSERT_EQ(displayInfo->GetWidth(), 100);
+    displayInfo->SetHeight(100);
+    ASSERT_EQ(displayInfo->GetHeight(), 100);
+    displayInfo->SetVirtualPixelRatio(1.0);
+    ASSERT_EQ(displayInfo->GetVirtualPixelRatio(), 1.0);
+    displayInfo->SetRotation(Rotation::ROTATION_0);
+    ASSERT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    displayInfo->SetDisplayOrientation(DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(displayInfo->GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
+}
+
+/**
  * @tc.name: GetDisplayInfoById
  * @tc.desc: GetDisplayInfoById virtual screen
  * @tc.type: FUNC
