@@ -96,21 +96,8 @@ void SessionListenerController::NotifySessionCreated(int32_t persistentId)
     if (persistentId == -1) {
         return;
     }
-
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionCreated failed");
-            return;
-        }
-        WLOGFI("NotifySessionCreated, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionCreated, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionCreated:PID:" + std::to_string(persistentId));
+    WLOGFI("NotifySessionCreated, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionCreated, persistentId);
 }
 
 void SessionListenerController::NotifySessionDestroyed(int32_t persistentId)
@@ -118,21 +105,8 @@ void SessionListenerController::NotifySessionDestroyed(int32_t persistentId)
     if (persistentId == -1) {
         return;
     }
-
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionDestroyed failed");
-            return;
-        }
-        WLOGFI("NotifySessionDestroyed, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionDestroyed, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionDestroyed:PID:" + std::to_string(persistentId));
+    WLOGFI("NotifySessionDestroyed, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionDestroyed, persistentId);
 }
 
 void SessionListenerController::HandleUnInstallApp(const std::list<int32_t>& sessions)
@@ -141,21 +115,9 @@ void SessionListenerController::HandleUnInstallApp(const std::list<int32_t>& ses
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
+    for (auto id : sessions) {
+        CallListeners(&ISessionListener::OnMissionDestroyed, id);
     }
-    auto task = [weak = weak_from_this(), sessions]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, HandleUnInstallApp failed");
-            return;
-        }
-        for (auto id : sessions) {
-            self->CallListeners(&ISessionListener::OnMissionDestroyed, id);
-        }
-    };
-    taskScheduler_->PostVoidSyncTask(task, "HandleUnInstallApp");
 }
 
 void SessionListenerController::NotifySessionSnapshotChanged(int32_t persistentId)
@@ -164,20 +126,8 @@ void SessionListenerController::NotifySessionSnapshotChanged(int32_t persistentI
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionSnapshotChanged failed");
-            return;
-        }
-        WLOGFI("NotifySessionSnapshotChanged, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionSnapshotChanged, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionSnapshotChanged:PID:" + std::to_string(persistentId));
+    WLOGFI("NotifySessionSnapshotChanged, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionSnapshotChanged, persistentId);
 }
 
 void SessionListenerController::NotifySessionMovedToFront(int32_t persistentId)
@@ -185,21 +135,8 @@ void SessionListenerController::NotifySessionMovedToFront(int32_t persistentId)
     if (persistentId == -1) {
         return;
     }
-
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionMovedToFront failed");
-            return;
-        }
-        WLOGFI("NotifySessionMovedToFront, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionMovedToFront, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionMovedToFront" + std::to_string(persistentId));
+    WLOGFI("NotifySessionMovedToFront, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionMovedToFront, persistentId);
 }
 
 void SessionListenerController::NotifySessionFocused(int32_t persistentId)
@@ -208,20 +145,8 @@ void SessionListenerController::NotifySessionFocused(int32_t persistentId)
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionFocused failed");
-            return;
-        }
-        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionFocused, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionFocused, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionFocused" + std::to_string(persistentId));
+    TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionFocused, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionFocused, persistentId);
 }
 
 void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
@@ -230,20 +155,8 @@ void SessionListenerController::NotifySessionUnfocused(int32_t persistentId)
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "self is nullptr, NotifySessionUnfocused failed");
-            return;
-        }
-        TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionUnfocused, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionUnfocused:PID:" + std::to_string(persistentId));
+    TLOGI(WmsLogTag::WMS_FOCUS, "NotifySessionUnfocused, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionUnfocused, persistentId);
 }
 
 void SessionListenerController::NotifySessionIconChanged(int32_t persistentId,
@@ -253,20 +166,8 @@ void SessionListenerController::NotifySessionIconChanged(int32_t persistentId,
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId, icon]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionIconChanged failed");
-            return;
-        }
-        WLOGFI("NotifySessionIconChanged, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionIconUpdated, persistentId, icon);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionIconChanged:PID:" + std::to_string(persistentId));
+    WLOGFI("NotifySessionIconChanged, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionIconUpdated, persistentId, icon);
 }
 
 void SessionListenerController::NotifySessionClosed(int32_t persistentId)
@@ -275,20 +176,8 @@ void SessionListenerController::NotifySessionClosed(int32_t persistentId)
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionClosed failed");
-            return;
-        }
-        WLOGFI("NotifySessionClosed, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionClosed, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionClosed:PID:" + std::to_string(persistentId));
+    WLOGFI("NotifySessionClosed, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionClosed, persistentId);
 }
 
 void SessionListenerController::NotifySessionLabelUpdated(int32_t persistentId)
@@ -297,20 +186,8 @@ void SessionListenerController::NotifySessionLabelUpdated(int32_t persistentId)
         return;
     }
 
-    if (!taskScheduler_) {
-        WLOGFE("taskScheduler is null");
-        return;
-    }
-    auto task = [weak = weak_from_this(), persistentId]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            WLOGFE("self is nullptr, NotifySessionLabelUpdated failed");
-            return;
-        }
-        WLOGFI("NotifySessionLabelUpdated, persistentId:%{public}d.", persistentId);
-        self->CallListeners(&ISessionListener::OnMissionLabelUpdated, persistentId);
-    };
-    taskScheduler_->PostVoidSyncTask(task, "NotifySessionLabelUpdated" + std::to_string(persistentId));
+    WLOGFI("NotifySessionLabelUpdated, persistentId:%{public}d.", persistentId);
+    CallListeners(&ISessionListener::OnMissionLabelUpdated, persistentId);
 }
 
 void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote)
