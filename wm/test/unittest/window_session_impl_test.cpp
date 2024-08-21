@@ -410,11 +410,6 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck01, Function | SmallTest
 
     WMError res = window1->WindowSessionCreateCheck();
     ASSERT_EQ(res, WMError::WM_OK);
-
-    window1->property_ = nullptr;
-    WMError res1 = window1->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_ERROR_NULLPTR);
-
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck01 end";
 }
 
@@ -636,10 +631,6 @@ HWTEST_F(WindowSessionImplTest, GetPersistentId01, Function | SmallTest | Level2
     window->property_->SetPersistentId(1);
     const int32_t res2 = window->GetPersistentId();
     ASSERT_EQ(res2, 1);
-
-    window->property_ = nullptr;
-    const int32_t res1 = window->GetPersistentId();
-    ASSERT_EQ(res1, INVALID_SESSION_ID);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetPersistentId end";
 }
 
@@ -1900,19 +1891,49 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
 }
 
 /**
- * @tc.name: SetParentExtensionWindow
- * @tc.desc: SetParentExtensionWindow Test
+ * @tc.name: AddSetUIContentTimeoutCheck
+ * @tc.desc: AddSetUIContentTimeoutCheck
  * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionImplTest, SetParentExtensionWindow, Function | SmallTest | Level2)
+ */
+HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetParentExtensionWindow");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    sptr<WindowSessionImpl> parentWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->handler_ = nullptr;
 
-    window->SetParentExtensionWindow(parentWindow);
-    EXPECT_EQ(window->parentExtensionWindow_, sptr<Window>(parentWindow));
+    option->SetWindowName("AddSetUIContentTimeoutCheck_test");
+    option->SetBundleName("UTtest");
+    WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;
+    option->SetWindowType(type1);
+    sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window1, nullptr);
+    window1->AddSetUIContentTimeoutCheck();
+
+    WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    option->SetWindowType(type2);
+    sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window2, nullptr);
+    window2->AddSetUIContentTimeoutCheck();
+}
+
+/**
+ * @tc.name: SetUIContentComplete
+ * @tc.desc: SetUIContentComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 }
 } // namespace Rosen

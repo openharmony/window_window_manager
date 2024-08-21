@@ -383,6 +383,7 @@ enum class SizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     END,
 };
 
@@ -562,6 +563,7 @@ struct WindowImmersive {
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
     std::string uiType_ = UI_TYPE_PHONE;
+    std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
@@ -637,6 +639,8 @@ struct SessionUIParam {
     float scaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
+    float transX_ { 0.0f }; // global translateX
+    float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
 };

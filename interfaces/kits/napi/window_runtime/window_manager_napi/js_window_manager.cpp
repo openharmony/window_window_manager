@@ -108,6 +108,7 @@ napi_value JsWindowManager::GetTopWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetTopWindow(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindowManager::GetLastWindow(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);

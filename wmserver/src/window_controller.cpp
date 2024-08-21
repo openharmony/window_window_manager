@@ -1262,29 +1262,31 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
-WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
+
+/** @note @window.hierarchy */
+WMError WindowController::RaiseToAppTop(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFW("could not find window");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_ERROR_NULLPTR;
     }
 
     auto parentNode = node->parent_;
     if (parentNode == nullptr) {
         WLOGFW("could not find parent");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     if (zOrderRes != WMError::WM_OK) {
         WLOGFE("Raise subwindow zorder fail, ret: %{public}d", zOrderRes);
-        return  WmErrorCode::WM_ERROR_STAGE_ABNORMALLY;
+        return  WMError::WM_DO_NOTHING;
     }
 
     UpdateFocusIfNeededWhenRaiseWindow(node);
     FlushWindowInfo(windowId);
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 void WindowController::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)

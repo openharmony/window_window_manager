@@ -16,10 +16,11 @@
 #ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 
-#include <list>
+#include "window_session_impl.h"
 
 #include "accessibility_element_info.h"
-#include "window_session_impl.h"
+
+#include <optional>
 
 namespace OHOS {
 namespace Rosen {
@@ -92,7 +93,6 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void NotifySetUIContent() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
 
@@ -110,13 +110,9 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
-    void AddSetUIContentTimeoutListener();
-
-    enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000
-    };
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -127,8 +123,6 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
-    int16_t rotationAnimationCount_ { 0 };
-    std::atomic_bool setUIContentFlag_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

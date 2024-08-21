@@ -815,10 +815,10 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFD("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "
-        "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
+        "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
     if (!IsSessionValid()) {
         winRect_ = rect;
         TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
@@ -896,8 +896,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     callingPid_ = pid;
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
-        NotifyClientToUpdateRect(nullptr);
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
+        NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
@@ -932,6 +932,9 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
         property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
+        property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
+            sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
+            sessionProperty->GetCompatibleInPcLandscapeHeight());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -969,8 +972,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
-        GetPersistentId(), static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u, isTerminating:%{public}d",
+        GetPersistentId(), static_cast<uint32_t>(state), isTerminating_);
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
@@ -990,6 +993,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
 
     NotifyForeground();
+
+    isTerminating_ = false;
     return WSError::WS_OK;
 }
 
@@ -1541,6 +1546,17 @@ sptr<Session> Session::GetParentSession() const
 {
     std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
     return parentSession_;
+}
+
+sptr<Session> Session::GetMainSession()
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return this;
+    } else if (parentSession_) {
+        return parentSession_->GetMainSession();
+    } else {
+        return nullptr;
+    }
 }
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)
@@ -2200,6 +2216,20 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
     return WSError::WS_OK;
 }
 
+WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
+    int32_t landscapeWidth, int32_t landscapeHeight)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "compatible size: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetIsPcAppInPad(bool enable)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
@@ -2424,6 +2454,14 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+WSRect Session::GetSessionGlobalRect() const
+{
+    if (IsScbCoreEnabled()) {
+        return globalRect_;
+    }
+    return winRect_;
+}
+
 /** @note @window.layout */
 void Session::SetSessionLastRect(const WSRect& rect)
 {
@@ -2603,12 +2641,14 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
+/** @note @window.hierarchy */
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
     NotifySessionInfoChange();
 }
 
+/** @note @window.hierarchy */
 uint32_t Session::GetZOrder() const
 {
     return zOrder_;
@@ -2867,7 +2907,7 @@ void Session::SetOffset(float x, float y)
         .height_ = std::round(bounds_.height_),
     };
     if (newRect != winRect_) {
-        UpdateRect(newRect, SizeChangeReason::UNDEFINED);
+        UpdateRect(newRect, SizeChangeReason::UNDEFINED, "SetOffset");
     }
 }
 
