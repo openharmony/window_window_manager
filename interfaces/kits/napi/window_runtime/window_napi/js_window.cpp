@@ -868,6 +868,13 @@ napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsFocused(env, info) : nullptr;
 }
 
+napi_value JsWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
 {
@@ -6214,6 +6221,125 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isFocused);
 }
 
+static bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& WindowOption)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "jsObject is null");
+        return true;
+    }
+
+    std::string title;
+    if (ParseJsValue(jsObject, env, "title", title)) {
+        WindowOption->SetSubWindowTitle(title);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+
+    bool decorEnabled;
+    if (ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
+        WindowOption->SetSubWindowDecorEnable(decorEnabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to decorEnabled");
+        return false;
+    }
+
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+        TLOGD(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
+        if (isModal) {
+            WindowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+        }
+    }
+
+    bool isTopmost = false;
+    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
+        if (!isModal && isTopmost) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
+            return false;
+        }
+        WindowOption->SetWindowTopmost(isTopmost);
+    }
+
+    return true;
+}
+
+static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::string& windowName,
+    sptr<WindowOption>& windowOption, napi_env env, NapiAsyncTask& task)
+{
+    if (windowToken == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "window is null");
+        task.Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "window is null"));
+        return;
+    }
+    if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
+        !WindowHelper::IsMainWindow(windowToken->GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "This is not subWindow or mainWindow.");
+        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "This is not subWindow or mainWindow"));
+        return;
+    }
+    windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowOption->SetOnlySupportSceneBoard(true);
+    windowOption->SetParentId(windowToken->GetWindowId());
+    windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+    auto window = Window::Create(windowName, windowOption, windowToken->GetContext());
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "create sub window failed");
+        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "create sub window failed"));
+        return;
+    }
+    task.Resolve(env, CreateJsWindowObject(env, window));
+    TLOGI(WmsLogTag::WMS_SUB, "create sub window %{public}s end", windowName.c_str());
+}
+
+napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) { // 2: minimum params num
+        TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string windowName;
+    if (!ConvertFromJsValue(env, argv[0], windowName)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to windowName");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    sptr<WindowOption> windowOption = new WindowOption();
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "window option is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!ParseSubWindowOptions(env, argv[1], windowOption)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to options");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
+        return NapiGetUndefined(env);
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [windowToken = windowToken_, windowName = std::move(windowName), windowOption](napi_env env,
+            NapiAsyncTask& task, int32_t status) mutable {
+        CreateNewSubWindowTask(windowToken, windowName, windowOption, env, task);
+    };
+    napi_value callback = (argc > 2 && argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ?
+        argv[2] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnCreateSubWindowWithOptions",
+        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char *moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
@@ -6330,6 +6456,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getWindowStatus", moduleName, JsWindow::GetWindowStatus);
     BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
+    BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
 }
 }  // namespace Rosen
 }  // namespace OHOS

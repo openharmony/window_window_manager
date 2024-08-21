@@ -1521,6 +1521,17 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
+sptr<Session> Session::GetMainSession()
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return this;
+    } else if (parentSession_) {
+        return parentSession_->GetMainSession();
+    } else {
+        return nullptr;
+    }
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
