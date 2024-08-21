@@ -4209,6 +4209,10 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
         TLOGE(WmsLogTag::DMS, "session is null");
         return;
     }
+    if (pivotX > 1.0f || pivotX < 0.0f || pivotY > 1.0f || pivotY < 0.0f) {
+        TLOGE(WmsLogTag::DMS, "pivotX [%{public}f] and pivotY [%{public}f] should be in [0.0~1.0f]", pivotX, pivotY);
+        return;
+    }
     float translateX = 0.0f;
     float translateY = 0.0f;
     if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
