@@ -16,10 +16,11 @@
 #ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 
-#include <list>
+#include "window_session_impl.h"
 
 #include "accessibility_element_info.h"
-#include "window_session_impl.h"
+
+#include <optional>
 
 namespace OHOS {
 namespace Rosen {
