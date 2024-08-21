@@ -113,10 +113,9 @@ private:
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
     WMError GetSystemViewportConfig(SessionViewportConfig& config);
     void UpdateSystemViewportConfig();
-    float UpdateExtensionDensity(const SessionViewportConfig& config);
+    void UpdateExtensionDensity(SessionViewportConfig& config);
     void NotifyDisplayInfoChange(const SessionViewportConfig& config);
-    WSError UpdateSessionViewportConfigInner(
-        const SessionViewportConfig& config, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    WSError UpdateSessionViewportConfigInner(const SessionViewportConfig& config);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
 
