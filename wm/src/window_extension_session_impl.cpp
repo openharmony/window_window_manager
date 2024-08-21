@@ -662,10 +662,6 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
         if (!window) {
             return;
         }
-        if (window->property_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "property_ is null");
-            return;
-        }
         auto viewportConfig = config;
         viewportConfig.density_ = window->UpdateExtensionDensity(config);
         TLOGI(WmsLogTag::WMS_UIEXT,
