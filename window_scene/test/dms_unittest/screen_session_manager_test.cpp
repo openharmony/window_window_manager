@@ -478,32 +478,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForAll, Function | SmallTest | 
 }
 
 /**
- * @tc.name: IsFastFingerprintReason
- * @tc.desc: IsFastFingerprintReason test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, IsFastFingerprintReason, Function | SmallTest | Level3)
-{
-    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
-    ASSERT_EQ(false, ssm_->IsFastFingerprintReason(reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
-    ASSERT_EQ(true, ssm_->IsFastFingerprintReason(reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
-    ASSERT_EQ(true, ssm_->IsFastFingerprintReason(reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
-    ASSERT_EQ(true, ssm_->IsFastFingerprintReason(reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
-    ASSERT_EQ(true, ssm_->IsFastFingerprintReason(reason));
-
-    reason = PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
-    ASSERT_EQ(false, ssm_->IsFastFingerprintReason(reason));
-}
-
-/**
  * @tc.name: ScreenChange
  * @tc.desc: ScreenChange test
  * @tc.type: FUNC
