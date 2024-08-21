@@ -631,16 +631,16 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
             return;
         }
         if (window->isDensityFollowHost_) {
-            TLOGW(WmsLogTag::WMS_UIEXT, "Density is follow host");
+            TLOGW(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is follow host");
             return;
         }
         SessionViewportConfig config;
         if (window->GetSystemViewportConfig(config) != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Get system viewportConfig failed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Get system viewportConfig failed");
             return;
         }
         if (!MathHelper::NearZero(window->lastDensity_ - config.density_)) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "System density is changed");
+            TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: System density is changed");
             window->UpdateSessionViewportConfig(config);
         }
     };
