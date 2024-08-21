@@ -81,6 +81,8 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
+using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, SessionState oldState,
+    SessionState newState)>;
 
 class ILifecycleListener {
 public:
@@ -446,6 +448,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -615,6 +618,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<bool()> isScreenLockedCallback_;
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
 
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;

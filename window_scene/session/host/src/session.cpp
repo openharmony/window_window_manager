@@ -427,6 +427,9 @@ void Session::SetSessionState(SessionState state)
         WLOGFD("Invalid session state: %{public}u", state);
         return;
     }
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), state_, state);
+    }
     state_ = state;
     SetMainSessionUIStateDirty(true);
 }
@@ -438,6 +441,9 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_INACTIVE ||
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
+    }
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), state_, state);
     }
     state_ = state;
     SetMainSessionUIStateDirty(true);
@@ -3114,5 +3120,10 @@ bool Session::IsScbCoreEnabled()
 {
     return system::GetParameter("const.product.devicetype", "unknown") == UI_TYPE_PHONE &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+}
+
+void Session::SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func)
+{
+    visibilityChangedDetectFunc_ = func;
 }
 } // namespace OHOS::Rosen
