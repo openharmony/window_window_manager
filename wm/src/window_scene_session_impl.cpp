@@ -3525,7 +3525,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
-    const uint32_t bgraChannel = 4;
+    constexpr uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
     opts.size.width = static_cast<int32_t>(maskWidth);
     opts.size.height = static_cast<int32_t>(maskHeight);
@@ -3535,10 +3535,10 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         WLOGFE("data is nullptr");
         return nullptr;
     }
-    const uint32_t fullChannel = 255;
-    const uint32_t greenChannel = 1;
-    const uint32_t redChannel = 2;
-    const uint32_t alphaChannel = 3;
+    constexpr uint32_t fullChannel = 255;
+    constexpr uint32_t greenChannel = 1;
+    constexpr uint32_t redChannel = 2;
+    constexpr uint32_t alphaChannel = 3;
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
