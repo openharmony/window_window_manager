@@ -296,7 +296,7 @@ enum class SceneType : uint8_t {
 
 struct SessionViewportConfig {
     bool isDensityFollowHost_ = false;
-    float density_ = 1.0f;
+    float density_ = 1.0f; // Indicates the host's density, if following the host, use it, otherwise get it from DMS.
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;

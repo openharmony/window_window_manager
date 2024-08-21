@@ -649,7 +649,7 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
 
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
 {
-    if (std::islessequal(config.density_, 0.0f)) {
+    if (config.isDensityFollowHost_ && std::islessequal(config.density_, 0.0f)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "invalid density_: %{public}f", config.density_);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
@@ -664,9 +664,9 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
         }
         auto viewportConfig = config;
         viewportConfig.density_ = window->UpdateExtensionDensity(config);
-        TLOGI(WmsLogTag::WMS_UIEXT,
-            "UpdateSessionViewportConfig: windowId:%{public}d, isDensityFollowHost_:%{public}d, displayId:%{public}lu,"
-            "density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, lastOrientation:%{public}d",
+        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: windowId:%{public}d, isDensityFollowHost_:%{public}d, "
+            "displayId:%{public}" PRIu64", density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, "
+            "lastOrientation:%{public}d",
             window->GetPersistentId(), viewportConfig.isDensityFollowHost_, viewportConfig.displayId_,
             viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_);
         window->NotifyDisplayInfoChange(viewportConfig);
@@ -682,27 +682,26 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
     return WSError::WS_OK;
 }
 
-float WindowExtensionSessionImpl::UpdateExtensionDensity(const SessionViewportConfig& config)
+void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
         hostDensityValue_ = config.density_;
-        return config.density_;
+        return;
     }
-    auto density = 1.0f;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "display is null!");
-        return density;
+        return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is null");
-        return density;
+        return;
     }
-    return displayInfo->GetVirtualPixelRatio();
+    config.density_ = displayInfo->GetVirtualPixelRatio();
 }
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
@@ -721,8 +720,7 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
         token, config.displayId_, config.density_, static_cast<DisplayOrientation>(config.orientation_));
 }
 
-WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(
-    const SessionViewportConfig& config, const std::shared_ptr<RSTransaction>& rsTransaction)
+WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const SessionViewportConfig& config)
 {
     if (NearEqual(lastDensity_, config.density_) && lastOrientation_ == config.orientation_) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No parameters have changed, no need to update");
