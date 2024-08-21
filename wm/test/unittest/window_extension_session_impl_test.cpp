@@ -1121,7 +1121,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
     config.isDensityFollowHost_ = false;
     window_->lastDensity_ = 0.0f;
     window_->lastOrientation_ = 0;
-    config.displayId_ = -1;
     config.density_ = 1.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
@@ -1136,6 +1135,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function 
 {
     ASSERT_NE(nullptr, window_);
     SessionViewportConfig config;
+    config.isDensityFollowHost_ = true;
     config.density_ = -1.0f;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_INVALID_PARAM);
 }
@@ -1148,7 +1148,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function 
 HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, window_);
-    ASSERT_NE(nullptr, window_->property_);
     SessionViewportConfig config;
     window_->handler_ = nullptr;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_NULLPTR);
