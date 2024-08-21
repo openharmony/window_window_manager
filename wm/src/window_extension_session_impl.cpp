@@ -663,12 +663,13 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
             return;
         }
         auto viewportConfig = config;
-        viewportConfig.density_ = window->UpdateExtensionDensity(config);
-        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: windowId:%{public}d, isDensityFollowHost_:%{public}d, "
+        window->UpdateExtensionDensity(viewportConfig);
+        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: Id:%{public}d, isDensityFollowHost_:%{public}d, "
             "displayId:%{public}" PRIu64", density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, "
             "lastOrientation:%{public}d",
             window->GetPersistentId(), viewportConfig.isDensityFollowHost_, viewportConfig.displayId_,
             viewportConfig.density_, window->lastDensity_, viewportConfig.orientation_, window->lastOrientation_);
+
         window->NotifyDisplayInfoChange(viewportConfig);
         window->property_->SetDisplayId(viewportConfig.displayId_);
 
