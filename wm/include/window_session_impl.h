@@ -17,12 +17,11 @@
 #define OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 
 #include <atomic>
-#include <optional>
+
 #include <shared_mutex>
 #include <ability_context.h>
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
-#include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 #include "display_manager.h"
@@ -319,7 +318,6 @@ protected:
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    bool needRemoveWindowInputChannel_ = false;
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
@@ -347,7 +345,6 @@ protected:
     void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
     virtual void NotifySetUIContentComplete() {}
-    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     std::atomic_bool setUIContentCompleted_ { false };
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
@@ -390,7 +387,7 @@ private:
     EnableIfSame<T, IWindowTitleButtonRectChangedListener,
         std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
-    RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
+    RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
     template<typename T>

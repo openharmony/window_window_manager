@@ -2206,6 +2206,13 @@ public:
      */
     virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
 
+    /**
+     * @brief Notify host that UIExtension timeout
+     *
+     * @param errorCode error code when UIExtension timeout
+     */
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
     /*
      * @brief Get the real parent id of UIExtension
      *

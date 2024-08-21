@@ -530,7 +530,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
