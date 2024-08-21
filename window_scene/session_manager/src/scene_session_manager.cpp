@@ -3433,36 +3433,6 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
 }
 
-WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
-                                                       const sptr<SceneSession>& sceneSession)
-{
-    if (!property->GetSystemCalling()) {
-        WLOGFE("Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetDragEnabled(property->GetDragEnabled());
-    }
-    return WMError::WM_OK;
-}
-
-WMError SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
-                                                        const sptr<SceneSession>& sceneSession)
-{
-    if (!property->GetSystemCalling()) {
-        WLOGFE("Update property raiseEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
-    }
-    return WMError::WM_OK;
-}
-
 void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
