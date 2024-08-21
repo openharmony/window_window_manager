@@ -908,6 +908,16 @@ bool WindowSessionProperty::GetIsPcAppInPad() const
     return isPcAppInPad_;
 }
 
+void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
+{
+    subWindowLevel_ = subWindowLevel;
+}
+
+uint32_t WindowSessionProperty::GetSubWindowLevel() const
+{
+    return subWindowLevel_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
