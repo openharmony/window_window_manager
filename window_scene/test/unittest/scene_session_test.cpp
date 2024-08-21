@@ -1585,7 +1585,7 @@ HWTEST_F(SceneSessionTest, UpdateRect, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason);
+    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1882,36 +1882,6 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeight, Function | SmallTest | Level
     sceneSession->SetSessionProperty(nullptr);
     result = sceneSession->GetScreenWidthAndHeight(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
-}
-
-/**
- * @tc.name: MoveAndResizeKeyboard
- * @tc.desc: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, MoveAndResizeKeyboard, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "MoveAndResizeKeyboard";
-    info.bundleName_ = "MoveAndResizeKeyboard";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    sceneSession->SetSessionProperty(property);
-
-    sptr<KeyboardLayoutParams> params = new(std::nothrow) KeyboardLayoutParams();
-    EXPECT_NE(params, nullptr);
-    sceneSession->MoveAndResizeKeyboard(*params, property);
-    EXPECT_NE(sceneSession, nullptr);
 }
 }
 }

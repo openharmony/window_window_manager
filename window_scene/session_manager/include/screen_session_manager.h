@@ -106,8 +106,8 @@ public:
         ScreenId& screenGroupId) override;
     virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
         ScreenSourceMode secondaryScreenMode) override;
-    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption) override;
+    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
+        ExtendOption secondScreenOption) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
@@ -343,7 +343,9 @@ private:
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
-    void NotifyUnfreezed(const std::set<int32_t>& pidList, const sptr<ScreenSession>& screenSession);
+    void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
+    void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
+        const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -382,7 +384,7 @@ private:
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
-    std::set<DisplayManagerAgentType> agentTypeSet_;
+    std::map<int32_t, std::set<DisplayManagerAgentType>> pidAgentTypeMap_;
     std::vector<float> lastFoldAngles_ {};
     sptr<DisplayChangeInfo> lastDisplayChangeInfo_;
     ScreenChangeEvent lastScreenChangeEvent_;
@@ -461,8 +463,6 @@ private:
     void UpdateDisplayScaleState(ScreenId screenId);
     void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
                                   const float& pivotY);
-    void UpdateDisplayNodeScale(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
-                                const float& pivotX, const float& pivotY);
     void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
                                                    const float& scaleY, const float& pivotX, const float& pivotY,
                                                    float& translateX, float& translateY);

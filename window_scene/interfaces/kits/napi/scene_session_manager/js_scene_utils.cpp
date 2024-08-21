@@ -1003,6 +1003,8 @@ void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
         static_cast<int32_t>(SizeChangeReason::PIP_AUTO_START)));
     napi_set_named_property(env, objValue, "PIP_RATIO_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::PIP_RATIO_CHANGE)));
+    napi_set_named_property(env, objValue, "PIP_RESTORE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PIP_RESTORE)));
 }
 
 napi_value CreateJsSessionStartupVisibility(napi_env env)
