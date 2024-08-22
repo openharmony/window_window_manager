@@ -423,6 +423,215 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Leve
     session->SetRequestedOrientation(orientation);
     EXPECT_NE(nullptr, session->sessionChangeCallback_->OnRequestedOrientationChange_);
 }
+
+/**
+ * @tc.name: UpdateSessionPropertyByAction
+ * @tc.desc: UpdateSessionPropertyByAction function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionPropertyByAction";
+    info.bundleName_ = "UpdateSessionPropertyByAction";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(nullptr, action));
+
+    sceneSession->SetSessionProperty(nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(property, action));
+
+    sceneSession->SetSessionProperty(property);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
+
+    action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->UpdateSessionPropertyByAction(property, action));
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyByAction
+ * @tc.desc: HandleUpdatePropertyByAction function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleUpdatePropertyByAction, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleUpdatePropertyByAction";
+    info.bundleName_ = "HandleUpdatePropertyByAction";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
+    sceneSession->HandleUpdatePropertyByAction(property, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->HandleUpdatePropertyByAction(nullptr, action));
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction1
+ * @tc.desc: ProcessUpdatePropertyByAction1 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction1";
+    info.bundleName_ = "ProcessUpdatePropertyByAction1";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE));
+
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS));
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->state_ = SessionState::STATE_END;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS));
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction2
+ * @tc.desc: ProcessUpdatePropertyByAction2 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction2, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction2";
+    info.bundleName_ = "ProcessUpdatePropertyByAction2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_FLAGS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_MODE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA));
+
+    property->SetSystemCalling(false);
+    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+
+    property->SetSystemCalling(true);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction3
+ * @tc.desc: ProcessUpdatePropertyByAction3 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction3";
+    info.bundleName_ = "ProcessUpdatePropertyByAction3";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
+
+    property->SetSystemCalling(false);
+    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
+
+    property->SetSystemCalling(true);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
+
+    property->SetSystemCalling(false);
+    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+
+    property->SetSystemCalling(true);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TOPMOST));
+
+    property->SetSystemCalling(false);
+    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
+
+    property->SetSystemCalling(true);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
+
+    EXPECT_EQ(WMError::WM_DO_NOTHING, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RECT));
+}
 }
 }
 }
