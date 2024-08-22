@@ -1280,10 +1280,6 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    SessionInfo info_;
-    info_.abilityName_ = "ProcessUpdatePropertyByAction_";
-    info_.bundleName_ = "ProcessUpdatePropertyByAction_";
-
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
@@ -1330,10 +1326,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
-
-    SessionInfo info_;
-    info_.abilityName_ = "ProcessUpdatePropertyByAction_";
-    info_.bundleName_ = "ProcessUpdatePropertyByAction_";
 
     auto res = session->HandleActionUpdateTurnScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
