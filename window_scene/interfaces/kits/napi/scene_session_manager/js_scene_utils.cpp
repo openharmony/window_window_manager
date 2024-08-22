@@ -779,6 +779,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isCalledRightlyByCallerId_));
     napi_set_named_property(env, objValue, "isAtomicService",
         CreateJsValue(env, sessionInfo.isAtomicService_));
+    napi_set_named_property(env, objValue, "isBackTransition",
+        CreateJsValue(env, sessionInfo.isBackTransition_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
