@@ -255,9 +255,9 @@ HWTEST_F(WindowSessionPropertyTest, SetIsUIExtensionAbilityProcess, Function | S
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetIsUIExtensionAbilityProcess(true);
-    EXPECT_EQ(true, option->GetIsUIExtensionAbilityProcess());
+    EXPECT_EQ(true, property->GetIsUIExtensionAbilityProcess());
     property->SetIsUIExtensionAbilityProcess(false);
-    EXPECT_EQ(false, option->GetIsUIExtensionAbilityProcess());
+    EXPECT_EQ(false, property->GetIsUIExtensionAbilityProcess());
 }
 
 /**
