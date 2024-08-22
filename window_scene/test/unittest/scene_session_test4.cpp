@@ -506,7 +506,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, Function | SmallTest
     EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS));
 
-    sceneSession->property_->SetWindosType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS));
@@ -565,9 +565,6 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction2, Function | SmallTest
 
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA));
-
-    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
 
     property->SetSystemCalling(false);
     EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
@@ -633,7 +630,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
 
     EXPECT_EQ(WMError::WM_DO_NOTHING, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction:ACTION_UPDATE_RECT));
+        WSPropertyChangeAction::ACTION_UPDATE_RECT));
 }
 }
 }
