@@ -406,6 +406,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     abilitySessionInfo->canStartAbilityFromBackground = data.ReadBool();
     abilitySessionInfo->isAtomicService = data.ReadBool();
+    abilitySessionInfo->isBackTransition = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
