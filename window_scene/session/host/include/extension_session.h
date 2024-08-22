@@ -100,6 +100,7 @@ public:
     void NotifySyncOn() override;
     void NotifyAsyncOn() override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue = 1.0f);
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config);
     void TriggerBindModalUIExtension() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
