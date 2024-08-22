@@ -506,6 +506,29 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
 }
 
 /**
+ * @tc.name: FindExtensionWindowWithContext01
+ * @tc.desc: FindExtensionWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, FindExtensionWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FindExtensionWindowWithContext01");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    ASSERT_TRUE(windowSceneSession->FindExtensionWindowWithContext() == nullptr);
+
+    windowSceneSession->property_->SetPersistentId(12345);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSceneSession);
+    ASSERT_TRUE(nullptr != windowSceneSession->FindExtensionWindowWithContext());
+    windowSceneSession->Destroy(true);
+}
+
+/**
  * @tc.name: DisableAppWindowDecor01
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC

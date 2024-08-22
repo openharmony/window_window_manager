@@ -127,6 +127,8 @@ std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
+std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
+std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
@@ -1084,11 +1086,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
-    }
-
-    auto parentExtensionWindow = parentExtensionWindow_.promote();
-    if (parentExtensionWindow != nullptr && property_->GetExtensionFlag()) {
-        static_cast<WindowSessionImpl*>(parentExtensionWindow.GetRefPtr())->SetUIContentComplete();
     }
 
     WindowType winType = GetType();
@@ -3597,11 +3594,6 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
-}
-
-void WindowSessionImpl::SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow)
-{
-    parentExtensionWindow_ = parentExtensionWindow;
 }
 
 WMError WindowSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)

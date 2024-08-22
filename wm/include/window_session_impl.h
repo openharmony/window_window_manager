@@ -247,9 +247,9 @@ public:
     WMError SetContinueState(int32_t continueState) override;
 
     /*
-     * UIExtension
+     * DFX
      */
-    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
+    void SetUIContentComplete();
 
 protected:
     WMError Connect();
@@ -308,6 +308,9 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
+    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
+    // protect windowExtensionSessionSet_
+    static std::shared_mutex windowExtensionSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -335,14 +338,8 @@ protected:
     }
 
     /*
-     * UIExtension
-     */
-    wptr<Window> parentExtensionWindow_ = nullptr;
-
-    /*
      * DFX
      */
-    void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
     virtual void NotifySetUIContentComplete() {}
     std::atomic_bool setUIContentCompleted_ { false };

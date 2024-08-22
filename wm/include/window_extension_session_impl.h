@@ -120,8 +120,6 @@ private:
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
 };
 } // namespace Rosen
