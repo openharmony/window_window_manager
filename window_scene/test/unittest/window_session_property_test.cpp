@@ -250,7 +250,7 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
  * @tc.desc: IsUIExtensionAbilityProcess setter and getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetAndGetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
