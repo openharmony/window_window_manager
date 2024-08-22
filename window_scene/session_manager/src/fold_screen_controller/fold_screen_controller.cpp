@@ -68,7 +68,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
             break;
         }
         case DisplayDeviceType::DOUBLE_DISPLAY_DEVICE: {
-            tempPolicy = new DualDisplayFoldPolicy(screenPowerTaskScheduler_);
+            tempPolicy = new DualDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         case DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE:{
