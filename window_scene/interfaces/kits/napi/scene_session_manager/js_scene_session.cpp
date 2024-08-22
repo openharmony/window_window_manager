@@ -925,7 +925,7 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->onSessionTopmostChange_ = [this](bool topmost) {
@@ -933,11 +933,11 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     sessionchangeCallback->onSessionTopmostChange_(session->IsTopmost());
-    TLOGD(WmsLogTag::WMS_LAYOUT, "ProcessSessionTopmostChangeRegister success");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "ProcessSessionTopmostChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
@@ -2307,7 +2307,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
 /** @note @window.hierarchy */
 void JsSceneSession::OnSessionTopmostChange(bool topmost)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]State: %{public}u", topmost);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", topmost);
     auto task = [this, persistentId = persistentId_, topmost, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionTopmostChange jsSceneSession id:%{public}d has been destroyed",
@@ -2316,7 +2316,7 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
         }
         auto jsCallBack = this->GetJSCallback(SESSION_TOP_MOST_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsSessionTouchableObj = CreateJsValue(env, topmost);
