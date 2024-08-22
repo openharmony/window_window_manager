@@ -436,7 +436,7 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, Function | SmallTest 
     info.bundleName_ = "UpdateSessionPropertyByAction";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow)WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(nullptr, action));
@@ -463,7 +463,7 @@ HWTEST_F(SceneSessionTest4, HandleUpdatePropertyByAction, Function | SmallTest |
     info.bundleName_ = "HandleUpdatePropertyByAction";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow)WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
     sceneSession->HandleUpdatePropertyByAction(property, action);
@@ -482,7 +482,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, Function | SmallTest
     info.bundleName_ = "ProcessUpdatePropertyByAction1";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow)WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
@@ -536,7 +536,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction2, Function | SmallTest
     info.bundleName_ = "ProcessUpdatePropertyByAction2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std:nothrow)WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
@@ -587,7 +587,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     info.bundleName_ = "ProcessUpdatePropertyByAction3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std:nothrow)WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
