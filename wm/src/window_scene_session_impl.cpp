@@ -202,6 +202,17 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
     return nullptr;
 }
 
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindExtensionWindowWithContext()
+{
+    std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& window : windowExtensionSessionSet_) {
+        if (window && context_.get() == window->GetContext().get()) {
+            return window;
+        }
+    }
+    return nullptr;
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -3788,10 +3799,19 @@ void WindowSceneSessionImpl::NotifySetUIContentComplete()
 {
     if (WindowHelper::IsMainWindow(GetType())) { // main window
         SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag() == false) { // sub window
+    } else if (WindowHelper::IsSubWindow(GetType()) ||
+               WindowHelper::IsSystemWindow(GetType())) { // sub window or system window
+        // created by UIExtension
+        auto extWindow = FindExtensionWindowWithContext();
+        if (extWindow != nullptr) {
+            extWindow->SetUIContentComplete();
+            return;
+        }
+
+        // created by main window
         auto mainWindow = FindMainWindowWithContext();
         if (mainWindow != nullptr) {
-            static_cast<WindowSceneSessionImpl*>(mainWindow.GetRefPtr())->SetUIContentComplete();
+            mainWindow->SetUIContentComplete();
         }
     }
 }

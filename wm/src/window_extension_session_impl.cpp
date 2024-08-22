@@ -55,9 +55,6 @@ constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
         }                                                                      \
     } while (false)
 
-std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
-std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
-
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
