@@ -1338,7 +1338,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 /** @note @window.hierarchy */
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", topmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", topmost);
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

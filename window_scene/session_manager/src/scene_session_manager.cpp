@@ -3471,7 +3471,7 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
     const sptr<SceneSession>& sceneSession)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
