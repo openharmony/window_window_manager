@@ -2487,7 +2487,7 @@ HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | Smal
     ASSERT_NE(ssm_, nullptr);
     ssm_->PhyMirrorConnectWakeupScreen();
     ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
-    ssm->PhyMirrorConnectWakeupScreen();
+    ssm_->PhyMirrorConnectWakeupScreen();
 }
 }
 } // namespace Rosen
