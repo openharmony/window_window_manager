@@ -1960,9 +1960,7 @@ HWTEST_F(WindowSessionImplTest, FindExtensionWindowWithContext01, Function | Sma
 
     windowSession->property_->SetPersistentId(12345);
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
+    windowSession->context_ = abilityContext_;
     WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
     ASSERT_TRUE(nullptr != windowSession->FindExtensionWindowWithContext());
     windowSession->Destroy(true);
