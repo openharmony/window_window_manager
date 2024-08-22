@@ -189,7 +189,7 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
     ssm_->SetStatusBarEnabledChangeListener(nullptr);
 
     WMError result00 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result00, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(result00, WMError::WM_OK);
 
     ssm_->SetStatusBarEnabledChangeListener(statusBarEnabledCallbackFunc_);
     WMError result01 = ssm_->SetGestureNavigaionEnabled(true);
