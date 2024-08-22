@@ -180,7 +180,7 @@ public:
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
     void GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
-    WMError SetGestureNavigaionEnabled(bool enable) override;
+    WMError SetGestureNavigationEnabled(bool enable) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

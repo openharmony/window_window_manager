@@ -1548,16 +1548,16 @@ void WindowManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivat
     WLOGI("called %{public}u", hasPrivateWindow);
 }
 
-WMError WindowManagerService::SetGestureNavigaionEnabled(bool enable)
+WMError WindowManagerService::SetGestureNavigationEnabled(bool enable)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, enable]() {
-        return windowRoot_->SetGestureNavigaionEnabled(enable);
+        return windowRoot_->SetGestureNavigationEnabled(enable);
     };
-    return PostSyncTask(task, "SetGestureNavigaionEnabled");
+    return PostSyncTask(task, "SetGestureNavigationEnabled");
 }
 
 void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)

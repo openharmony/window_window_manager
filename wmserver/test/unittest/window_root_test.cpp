@@ -569,17 +569,17 @@ HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallT
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled
- * @tc.desc: test WindowRoot SetGestureNavigaionEnabled
+ * @tc.name: SetGestureNavigationEnabled
+ * @tc.desc: test WindowRoot SetGestureNavigationEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
 {
     windowRoot_->lastGestureNativeEnabled_ = false;
-    auto ret = windowRoot_->SetGestureNavigaionEnabled(false);
+    auto ret = windowRoot_->SetGestureNavigationEnabled(false);
     ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
 
-    ret = windowRoot_->SetGestureNavigaionEnabled(true);
+    ret = windowRoot_->SetGestureNavigationEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
 
     windowRoot_->lastGestureNativeEnabled_ = false;

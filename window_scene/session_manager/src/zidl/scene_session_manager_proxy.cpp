@@ -584,7 +584,7 @@ WMError SceneSessionManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgen
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetGestureNavigaionEnabled(bool enable)
+WMError SceneSessionManagerProxy::SetGestureNavigationEnabled(bool enable)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -53,7 +53,7 @@ public:
 
     int32_t GetStatusBarHeight() override
     {
-        const int32_t statusBarHeight = 128;
+        constexpr int32_t statusBarHeight = 128;
         return statusBarHeight;
     }
 
