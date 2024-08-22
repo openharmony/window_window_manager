@@ -2110,7 +2110,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
         napi_value argv[] = { jsBufferAvailableObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnBufferAvailableChange");
 }
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
