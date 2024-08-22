@@ -1986,7 +1986,6 @@ HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Lev
     EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 
-
 /**
  * @tc.name: NotifySetUIContentComplete
  * @tc.desc: NotifySetUIContentComplete
