@@ -246,8 +246,8 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
 }
 
 /**
- * @tc.name: IsUIExtensionAbilityProcess
- * @tc.desc: IsUIExtensionAbilityProcess setter and getter test
+ * @tc.name: SetAndGetIsUIExtensionAbilityProcess
+ * @tc.desc: SetIsUIExtensionAbilityProcess and GetIsUIExtensionAbilityProcess test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, SetAndGetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
