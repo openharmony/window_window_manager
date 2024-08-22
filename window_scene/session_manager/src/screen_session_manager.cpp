@@ -635,26 +635,17 @@ sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
-    TLOGD(WmsLogTag::DMS, "GetDefaultDisplayInfo enter");
     GetDefaultScreenId();
     sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-    auto uid = IPCSkeleton::GetCallingUid();
     if (screenSession) {
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayInfo == nullptr) {
-            TLOGI(WmsLogTag::DMS, "GetDefaultDisplayInfo ConvertToDisplayInfo error, displayInfo is nullptr.");
+            TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
-        if (displayHookMap_.find(uid) != displayHookMap_.end()) {
-            auto info = displayHookMap_[uid];
-            TLOGI(WmsLogTag::DMS, "GetDefaultDisplayInfo hookWidth: %{public}u, hookHeight: %{public}u, "
-                "hookDensity: %{public}f", info.width_, info.height_, info.density_);
-            displayInfo->SetWidth(info.width_);
-            displayInfo->SetHeight(info.height_);
-            displayInfo->SetVirtualPixelRatio(info.density_);
-        }
+        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
         TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
@@ -666,7 +657,6 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DMS, "GetDisplayInfoById enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    auto uid = IPCSkeleton::GetCallingUid();
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -676,20 +666,12 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
         }
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayInfo == nullptr) {
-            TLOGI(WmsLogTag::DMS, "GetDisplayInfoById ConvertToDisplayInfo error, displayInfo is nullptr.");
+            TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             continue;
         }
         if (displayId == displayInfo->GetDisplayId()) {
             TLOGD(WmsLogTag::DMS, "GetDisplayInfoById success");
-            std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
-            if (displayHookMap_.find(uid) != displayHookMap_.end()) {
-                auto info = displayHookMap_[uid];
-                TLOGI(WmsLogTag::DMS, "GetDisplayInfoById hookWidth: %{public}u, hookHeight: %{public}u, "
-                    "hookDensity: %{public}f", info.width_, info.height_, info.density_);
-                displayInfo->SetWidth(info.width_);
-                displayInfo->SetHeight(info.height_);
-                displayInfo->SetVirtualPixelRatio(info.density_);
-            }
+            displayInfo = HookDisplayInfoByUid(displayInfo);
             return displayInfo;
         }
     }
@@ -699,7 +681,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId)
 {
-    TLOGD(WmsLogTag::DMS, "GetDisplayInfoByScreen enter, screenId: %{public}" PRIu64" ", screenId);
+    TLOGD(WmsLogTag::DMS, "enter, screenId: %{public}" PRIu64"", screenId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
