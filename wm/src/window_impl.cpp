@@ -114,14 +114,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    std::string surfaceNodeName;
-    if (auto bundleName = option->GetBundleName(); bundleName != "") {
-        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
-    } else {
-        surfaceNodeName = property_->GetWindowName();
-    }
-    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
-    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
