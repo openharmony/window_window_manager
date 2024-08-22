@@ -1628,6 +1628,40 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(result, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromServer
+ * @tc.desc: GetScreenWidthAndHeightFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
+    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
+    sceneSession->SetSessionProperty(property);
+
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
+    ASSERT_EQ(result, true);
+
+    sceneSession->SetSessionProperty(nullptr);
+    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
+    ASSERT_EQ(result, true);
+}
 }
 }
 }
