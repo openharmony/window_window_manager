@@ -990,6 +990,10 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
 napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     WLOGFD("OnSetWindowLayoutMode");
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set window layout mode permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
     WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
