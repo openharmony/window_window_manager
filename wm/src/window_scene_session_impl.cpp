@@ -188,31 +188,6 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
-{
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            context_.get() == win->GetContext().get()) {
-            return win;
-        }
-    }
-    WLOGFW("Can not find main window, not app type");
-    return nullptr;
-}
-
-sptr<WindowSessionImpl> WindowSceneSessionImpl::FindExtensionWindowWithContext()
-{
-    std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& window : windowExtensionSessionSet_) {
-        if (window && context_.get() == window->GetContext().get()) {
-            return window;
-        }
-    }
-    return nullptr;
-}
-
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -3793,27 +3768,6 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "Id:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
-}
-
-void WindowSceneSessionImpl::NotifySetUIContentComplete()
-{
-    if (WindowHelper::IsMainWindow(GetType())) { // main window
-        SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) ||
-               WindowHelper::IsSystemWindow(GetType())) { // sub window or system window
-        // created by UIExtension
-        auto extWindow = FindExtensionWindowWithContext();
-        if (extWindow != nullptr) {
-            extWindow->SetUIContentComplete();
-            return;
-        }
-
-        // created by main window
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr) {
-            mainWindow->SetUIContentComplete();
-        }
-    }
 }
 } // namespace Rosen
 } // namespace OHOS
