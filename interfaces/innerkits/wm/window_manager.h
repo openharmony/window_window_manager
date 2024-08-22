@@ -618,12 +618,12 @@ public:
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     /**
-     * @brief Set gesture navigaion enabled.
+     * @brief Set gesture navigation enabled.
      *
      * @param enable True means set gesture on, false means set gesture off.
      * @return WM_OK means set success, others means set failed.
      */
-    WMError SetGestureNavigaionEnabled(bool enable) const;
+    WMError SetGestureNavigationEnabled(bool enable) const;
 
     /**
      * @brief Get focus window.
