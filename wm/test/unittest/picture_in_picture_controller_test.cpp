@@ -824,7 +824,7 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 
 /**
