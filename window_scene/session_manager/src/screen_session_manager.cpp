@@ -633,6 +633,40 @@ sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
     return GetScreenSession(defaultScreenId_);
 }
 
+sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
+        return nullptr;
+    }
+    auto uid = IPCSkeleton::GetCallingUid();
+    std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
+    if (displayHookMap_.find(uid) != displayHookMap_.end()) {
+        auto info = displayHookMap_[uid];
+        TLOGI(WmsLogTag::DMS, "hookWidth: %{public}u, hookHeight: %{public}u, hookDensity: %{public}f, "
+            "hookRotation: %{public}u, hookenableHookRotation: %{public}d, displayWidth: %{public}u, "
+            "displayHeigth: %{public}u, displayrotation: %{public}u, displayOrientation: %{public}u",
+            info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(),
+            displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+        displayInfo->SetWidth(info.width_);
+        displayInfo->SetHeight(info.height_);
+        displayInfo->SetVirtualPixelRatio(info.density_);
+        if (info.enableHookRotation_) {
+            sptr<ScreenSession> screenSession = GetScreenSession(displayInfo->GetScreenId());
+            if (screenSession) {
+                Rotation targetRotation = screenSession->ConvertIntToRotation(static_cast<int32_t>(info.rotation_));
+                displayInfo->SetRotation(targetRotation);
+                DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation,
+                    FoldDisplayMode::UNKNOWN);
+                TLOGI(WmsLogTag::DMS, "targetRotation: %{public}u, targetOrientation: %{public}u",
+                    targetRotation, displayOrientation);
+                displayInfo->SetDisplayOrientation(displayOrientation);
+            }
+        }
+    }
+    return displayInfo;
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
     GetDefaultScreenId();
@@ -644,7 +678,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
             TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
             return nullptr;
         }
-        //在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
+        // 在PC/PAD上安装的竖屏应用以及白名单中的应用在显示状态非全屏时需要hook displayinfo
         displayInfo = HookDisplayInfoByUid(displayInfo);
         return displayInfo;
     } else {
@@ -782,7 +816,7 @@ bool ScreenSessionManager::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 }
 
-void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "UpdateDisplayHookInfo permission denied!");
