@@ -475,7 +475,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     return WMError::WM_OK;
 }

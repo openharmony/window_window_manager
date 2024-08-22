@@ -1722,7 +1722,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
