@@ -64,6 +64,7 @@ public:
 private:
     void Init();
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
+    float GetSystemDensity(uint64_t displayId);
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::map<int32_t, sptr<ExtensionSession>> extensionSessionMap_;

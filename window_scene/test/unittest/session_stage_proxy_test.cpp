@@ -130,6 +130,19 @@ HWTEST_F(SessionStageProxyTest, UpdateOrientation, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: UpdateSessionViewportConfig
+ * @tc.desc: test function : UpdateSessionViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateSessionViewportConfig, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    SessionViewportConfig config;
+    WSError res = sessionStage_->UpdateSessionViewportConfig(config);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: HandleBackEvent
  * @tc.desc: test function : HandleBackEvent
  * @tc.type: FUNC
