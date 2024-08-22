@@ -246,11 +246,6 @@ public:
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
-    /*
-     * DFX
-     */
-    void SetUIContentComplete();
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -286,6 +281,8 @@ protected:
     void RegisterFrameLayoutCallback();
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
+    sptr<WindowSessionImpl> FindMainWindowWithContext();
+    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -340,8 +337,9 @@ protected:
     /*
      * DFX
      */
+    void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
-    virtual void NotifySetUIContentComplete() {}
+    void NotifySetUIContentComplete();
     std::atomic_bool setUIContentCompleted_ { false };
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000

@@ -180,8 +180,6 @@ protected:
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
-    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
@@ -194,11 +192,6 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
-
-    /*
-     * DFX
-     */
-    void NotifySetUIContentComplete() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
