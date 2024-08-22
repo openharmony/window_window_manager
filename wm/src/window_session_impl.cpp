@@ -591,7 +591,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
                 return;
             }
             window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-            window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         });
     }
 
@@ -666,6 +665,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             window->lastSizeChangeReason_ = wmReason;
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
