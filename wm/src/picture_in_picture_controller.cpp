@@ -207,10 +207,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             pipOption_->GetPipTemplate(), FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Init main window failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
     if (!IsPullPiPAndHandleNavigation()) {
         TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
