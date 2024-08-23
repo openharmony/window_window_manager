@@ -2341,7 +2341,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
-        auto isPC = systemConfig_.uiType_ == 'pc';
+        auto isPC = systemConfig_.uiType_ == "pc";
         bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
         bool isFreeMultiWindowMode = systemConfig_.IsFreeMultiWindowMode();
         bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
