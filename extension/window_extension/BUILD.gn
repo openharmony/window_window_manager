@@ -83,6 +83,10 @@ ohos_shared_library("libwindow_extension") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+  defines = []
+  if (build_variant == "user"){
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 config("window_extension_module_private_config") {

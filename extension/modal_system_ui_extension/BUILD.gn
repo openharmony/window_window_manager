@@ -61,4 +61,8 @@ ohos_shared_library("libmodal_system_ui_extension_client") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
+  defines = []
+  if (build_variant == "user"){
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
