@@ -491,7 +491,7 @@ void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
     bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
     TLOGI(WmsLogTag::WMS_LAYOUT, "isPC: %{public}d, isDialog: %{public}d, isFreeMultiWindowMode: %{public}d, "
         "isSubWindow: %{public}d", isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
-    if (isPC || isFreeMultiWindowMode} {
+    if (isPC || isFreeMultiWindowMode) {
         if (isSubWindow|| isDialog) {
             property_->SetDragEnabled(true);
         } else {
