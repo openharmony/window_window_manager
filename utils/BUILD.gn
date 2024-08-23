@@ -204,6 +204,11 @@ ohos_shared_library("libwmutil") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 group("test") {
