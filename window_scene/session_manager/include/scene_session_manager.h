@@ -377,6 +377,7 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
+    void RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>& persistentIds)
 
 protected:
     SceneSessionManager();
@@ -776,6 +777,7 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
+    std::map<int32_t, std::vector<int32_t>> idListMap_;
 };
 } // namespace OHOS::Rosen
 
