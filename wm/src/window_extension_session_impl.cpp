@@ -898,7 +898,7 @@ WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool sho
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
         if (modalUIExtensionMayBeCovered_) {
-            ReportModalUIExtensionMayBeCovered(setUIContentCompleted_.load());
+            ReportModalUIExtensionMayBeCovered(modalUIExtensionSelfLoadContent_);
         }
     }
     return WMError::WM_OK;
@@ -1161,6 +1161,9 @@ void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadC
     }
 
     modalUIExtensionMayBeCovered_ = true;
+    if (byLoadContent) {
+        modalUIExtensionSelfLoadContent_ = true;
+    }
     if (extensionWindowFlags_.hideNonSecureWindowsFlag) {
         return;
     }
