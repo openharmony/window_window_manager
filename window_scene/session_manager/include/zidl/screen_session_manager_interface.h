@@ -38,8 +38,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
-    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) override {};
-
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override {};
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override { return DMError::DM_OK; }

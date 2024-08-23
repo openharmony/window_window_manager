@@ -213,9 +213,9 @@ public:
 
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
+    Rotation ConvertIntToRotation(int rotation);
 
 private:
-    Rotation ConvertIntToRotation(int rotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };

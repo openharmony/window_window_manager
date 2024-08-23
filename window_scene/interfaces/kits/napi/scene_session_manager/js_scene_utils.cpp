@@ -474,6 +474,56 @@ bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
     return true;
 }
 
+bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo)
+{
+    napi_value jsWidth = nullptr;
+    napi_get_named_property(env, jsObject, "width", &jsWidth);
+    napi_value jsHeight = nullptr;
+    napi_get_named_property(env, jsObject, "height", &jsHeight);
+    napi_value jsDensity = nullptr;
+    napi_get_named_property(env, jsObject, "density", &jsDensity);
+    napi_value jsRotation = nullptr;
+    napi_get_named_property(env, jsObject, "rotation", &jsRotation);
+    napi_value jsEnableHookRotation = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
+    
+    uint32_t width = 0;
+    if (!ConvertFromJsValue(env, jsWidth, width)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        return false;
+    }
+    hookInfo.width_ = width;
+
+    uint32_t height = 0;
+    if (!ConvertFromJsValue(env, jsHeight, height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        return false;
+    }
+    hookInfo.height_ = height;
+
+    double_t density = 1.0;
+    if (!ConvertFromJsValue(env, jsDensity, density)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        return false;
+    }
+    hookInfo.density_ = static_cast<float_t>(density);
+
+    uint32_t rotation = 0;
+    if (!ConvertFromJsValue(env, jsRotation, rotation)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rotation");
+        return false;
+    }
+    hookInfo.rotation_ = rotation;
+
+    bool enableHookRotation = false;
+    if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
+        return false;
+    }
+    hookInfo.enableHookRotation_ = enableHookRotation;
+    return true;
+}
+
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
     auto vpr = RootScene::staticRootScene_->GetDisplayDensity();
