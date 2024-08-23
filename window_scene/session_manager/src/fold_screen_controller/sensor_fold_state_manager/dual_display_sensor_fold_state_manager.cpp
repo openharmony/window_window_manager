@@ -94,8 +94,8 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD
-        && PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD &&
+        PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         if (std::count(packageNames_.begin(), packageNames_.end(), applicationStateObserver_->GetForegroundApp())) {
             isHallSwitchApp_ = false;
             return;

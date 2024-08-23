@@ -262,7 +262,7 @@ DMError DisplayManagerLite::UnregisterDisplayListener(sptr<IDisplayListener> lis
 void DisplayManagerLite::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(info);
+    static_cast<void>(UpdateDisplayInfoLocked(info));
 }
 
 void DisplayManagerLite::Impl::NotifyDisplayDestroy(DisplayId displayId)
@@ -275,7 +275,7 @@ void DisplayManagerLite::Impl::NotifyDisplayDestroy(DisplayId displayId)
 void DisplayManagerLite::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(displayInfo);
+    static_cast<void>(UpdateDisplayInfoLocked(displayInfo));
 }
 
 bool DisplayManagerLite::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
