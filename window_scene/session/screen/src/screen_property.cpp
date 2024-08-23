@@ -323,12 +323,12 @@ void ScreenProperty::CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight)
     yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
 }
 
-float ScreenProperty::GetXDpi()
+float ScreenProperty::GetXDpi() const
 {
     return xDpi_;
 }
 
-float ScreenProperty::GetYDpi()
+float ScreenProperty::GetYDpi() const
 {
     return yDpi_;
 }

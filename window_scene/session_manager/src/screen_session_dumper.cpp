@@ -307,6 +307,16 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
     dumpInfo_.append(oss.str());
 }
 
+void ScreenSessionDumper::DumpCutoutInfoPrint(std::ostringstream& oss,
+    const OHOS::Rosen::DMRect& areaRect, const std::string& label)
+{
+    oss << std::left << std::setw(LINE_WIDTH) << label
+        << areaRect.posX_ << ", "
+        << areaRect.posY_ << ", "
+        << areaRect.width_ << ", "
+        << areaRect.height_ << std::endl;
+}
+
 void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
 {
     std::ostringstream oss;
@@ -316,26 +326,10 @@ void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_L<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_T<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_R<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_B<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.height_ << std::endl;
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().left, "WaterFall_L<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().top, "WaterFall_T<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().right, "WaterFall_R<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().bottom, "WaterFall_B<X,Y,W,H>: ");
 
     std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
     oss << std::left << std::setw(LINE_WIDTH) << "BoundingRects<X,Y,W,H>: ";
