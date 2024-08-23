@@ -37,7 +37,7 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
@@ -96,6 +96,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -112,6 +113,11 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+    WMError GetSystemViewportConfig(SessionViewportConfig& config);
+    void UpdateSystemViewportConfig();
+    void UpdateExtensionDensity(SessionViewportConfig& config);
+    void NotifyDisplayInfoChange(const SessionViewportConfig& config);
+    WSError UpdateSessionViewportConfigInner(const SessionViewportConfig& config);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
@@ -123,10 +129,10 @@ private:
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     bool modalUIExtensionMayBeCovered_ { false };
+    float lastDensity_ { 0.0f };
+    int32_t lastOrientation_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

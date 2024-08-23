@@ -838,7 +838,7 @@ public:
      * @param y
      * @return WMError
      */
-    virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
      * @brief move the window to (x, y)
      *
@@ -2198,13 +2198,6 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
-
-    /**
-     * @brief Set the parent window of sub window created by UIExtension
-     *
-     * @param parent window
-     */
-    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
 
     /**
      * @brief Notify host that UIExtension timeout

@@ -188,20 +188,6 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
-{
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            context_.get() == win->GetContext().get()) {
-            return win;
-        }
-    }
-    WLOGFW("Can not find main window, not app type");
-    return nullptr;
-}
-
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -1375,7 +1361,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
@@ -1411,7 +1397,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, isMoveToGlobal);
     return static_cast<WMError>(ret);
 }
 
@@ -2422,6 +2408,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
     }
     if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
         WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_FORBID_SPLIT_MOVE");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
@@ -3525,7 +3515,7 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         WLOGFE("WindowMask is invalid");
         return nullptr;
     }
-    const uint32_t bgraChannel = 4;
+    constexpr uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
     opts.size.width = static_cast<int32_t>(maskWidth);
     opts.size.height = static_cast<int32_t>(maskHeight);
@@ -3535,10 +3525,10 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         WLOGFE("data is nullptr");
         return nullptr;
     }
-    const uint32_t fullChannel = 255;
-    const uint32_t greenChannel = 1;
-    const uint32_t redChannel = 2;
-    const uint32_t alphaChannel = 3;
+    constexpr uint32_t fullChannel = 255;
+    constexpr uint32_t greenChannel = 1;
+    constexpr uint32_t redChannel = 2;
+    constexpr uint32_t alphaChannel = 3;
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
@@ -3782,18 +3772,6 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "Id:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
-}
-
-void WindowSceneSessionImpl::NotifySetUIContentComplete()
-{
-    if (WindowHelper::IsMainWindow(GetType())) { // main window
-        SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag() == false) { // sub window
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr) {
-            static_cast<WindowSceneSessionImpl*>(mainWindow.GetRefPtr())->SetUIContentComplete();
-        }
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

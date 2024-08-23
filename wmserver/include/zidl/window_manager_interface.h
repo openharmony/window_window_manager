@@ -133,7 +133,7 @@ public:
     virtual void OffWindowZoom() = 0;
     virtual WMError RaiseToAppTop(uint32_t windowId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
-    virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
+    virtual WMError SetGestureNavigationEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
     virtual WSError DumpSessionAll(std::vector<std::string>& infos) { return WSError::WS_OK; }

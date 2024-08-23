@@ -97,11 +97,7 @@ int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    property_ = new (std::nothrow) WindowProperty();
-    if (property_ == nullptr) {
-        WLOGFE("Property is null");
-        return;
-    }
+    property_ = sptr<WindowProperty>::MakeSptr();
     InitWindowProperty(option);
 
     windowTag_ = option->GetWindowTag();
@@ -1726,7 +1722,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
@@ -3278,7 +3274,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
         return;
     }
 
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         vsyncStation_->RequestVsync(vsyncCallback);
     }
 }
@@ -3286,7 +3282,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
 int64_t WindowImpl::GetVSyncPeriod()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         return vsyncStation_->GetVSyncPeriod();
     }
     return 0;

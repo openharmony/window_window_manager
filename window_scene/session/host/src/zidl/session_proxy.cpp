@@ -609,7 +609,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
@@ -630,6 +630,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("Write SessionSizeChangeReason failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isGlobal)) {
+        WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
