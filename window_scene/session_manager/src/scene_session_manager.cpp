@@ -3838,27 +3838,26 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         return;
     }
     VisibilityChangedDetectFunc func = [this](const int32_t pid, SessionState oldState, SessionState newState) {
-        if (VISIBILITY_STATE_MAP.at(oldState) == VISIBILITY_STATE_MAP.at(newState)) {
-            return;
-        }
-        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
-        windowPidVisibilityInfo->pid_ = pid;
-        std::shared_lock<std::shared_mutex> lock(visibleWindowCountMapMutex_);
-        if (VISIBILITY_STATE_MAP.at(oldState) && !VISIBILITY_STATE_MAP.at(newState)) {
-            visibleWindowCountMap_[pid]--;
-            if (visibleWindowCountMap_[pid] == 0) {
+        if (VISIBILITY_STATE_MAP.at(oldState) != VISIBILITY_STATE_MAP.at(newState)) {
+            sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+            windowPidVisibilityInfo->pid_ = pid;
+            {
+                std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
+                visibleWindowCountMap_[pid] = VISIBILITY_STATE_MAP.at(newState) ?
+                visibleWindowCountMap_[pid] + 1 : visibleWindowCountMap_[pid] - 1;
+                int32_t count = visibleWindowCountMap_[pid];
+            }
+            if (count == 0) {
                 TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to invisibility.", pid);
                 windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::INVISIBILITY_STATE;
                 SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
-            } else if (visibleWindowCountMap_[pid] < 0) {
-                RecoveryVisibilityPidCount(pid);
-            }
-        } else if (!VISIBILITY_STATE_MAP.at(oldState) && VISIBILITY_STATE_MAP.at(newState)) {
-            visibleWindowCountMap_[pid]++;
-            if (visibleWindowCountMap_[pid] == 1) {
+            } else if (count == 1) {
                 TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
                 windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
                 SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+            } else if (count < 0) {
+                TLOGE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
+                RecoveryVisibilityPidCount(pid);
             }
         }
     };
@@ -3868,8 +3867,9 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
 void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    visibleWindowCountMap_.erase(pid);
-    for (auto iter : sceneSessionMap_) {
+    std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
+    visibleWindowCountMap_[pid] = 0;
+    for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetCallingPid() == pid && VISIBILITY_STATE_MAP.at(session->GetSessionState())) {
             visibleWindowCountMap_[pid]++;
