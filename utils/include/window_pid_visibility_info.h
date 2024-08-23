@@ -45,7 +45,7 @@ public:
 
     virtual bool Marshalling(Parcel& parcel) const override;
 
-    static sptr<WindowPidVisibilityInfo> Unmarshalling(Parcel& parcel);
+    static WindowPidVisibilityInfo* Unmarshalling(Parcel& parcel);
 
     int32_t pid_ { 0 };
     WindowPidVisibilityState visibilityState_ = INVISIBILITY_STATE;
