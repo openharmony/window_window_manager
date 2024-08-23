@@ -502,7 +502,7 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
     screenSession->SetScreenSceneDpi(virtualPixelRatio);
 }
 
-void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
