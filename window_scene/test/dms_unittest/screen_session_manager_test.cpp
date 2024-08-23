@@ -730,8 +730,8 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid, Function | SmallTest | 
     virtualOption.name_ = "GetDefaultScreenSession";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
-    sptr screenSession = new (std::nothrow) ScreenSession("GetDefaultDisplayInfo", screenId, rsid, 0);
-    sptr displayInfo = ssm_->GetDefaultDisplayInfo();
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession("GetDefaultDisplayInfo", screenId, rsid, 0);
+    sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = 20020001;
