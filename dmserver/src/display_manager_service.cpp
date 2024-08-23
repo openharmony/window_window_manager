@@ -799,4 +799,22 @@ void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
 {
     DisplayManagerAgentController::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
 }
+
+std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysicalResolution()
+{
+    TLOGI(WmsLogTag::DMS, "zhangyoukangservice");
+    if (allDisplayPhysicalResolution_.empty()) {
+        sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "default display null");
+            return allDisplayPhysicalResolution_;
+        }
+        DisplayPhysicalResolution defaultResolution;
+        defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        defaultResolution.physicalWidth_ = displayInfo->GetPhysicalWidth();
+        defaultResolution.physicalHeight_ = displayInfo->GetPhysicalHeight();
+        allDisplayPhysicalResolution_.emplace_back(defaultResolution);
+    }
+    return allDisplayPhysicalResolution_;
+}
 } // namespace OHOS::Rosen
