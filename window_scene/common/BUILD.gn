@@ -68,6 +68,7 @@ ohos_shared_library("window_scene_common") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
   defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]

@@ -66,6 +66,7 @@ ohos_shared_library("intention_event_anr_manager") {
   }
   part_name = "window_manager"
   subsystem_name = "window"
+
   defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
