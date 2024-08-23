@@ -587,13 +587,13 @@ std::shared_ptr<Media::PixelMap> WindowAdapter::GetSnapshot(int32_t windowId)
     return wmsProxy->GetSnapshot(windowId);
 }
 
-WMError WindowAdapter::SetGestureNavigaionEnabled(bool enable)
+WMError WindowAdapter::SetGestureNavigationEnabled(bool enable)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->SetGestureNavigaionEnabled(enable);
+    return wmsProxy->SetGestureNavigationEnabled(enable);
 }
 
 void WindowAdapter::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)

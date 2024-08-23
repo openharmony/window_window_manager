@@ -140,7 +140,7 @@ HWTEST_F(ScreenSessionPublishTest, PublishDisplayRotationEvent, Function | Small
     sptr<EventFwk::Want> want = new (std::nothrow) EventFwk::Want();
     screenSessionPublish.cesWantMap_.insert(std::make_pair(COMMON_EVENT_DISPLAY_ROTATION_CHANGED, want));
     screenSessionPublish.PublishDisplayRotationEvent(screenId, displayRotation);
-    ASSERT_EQ(screenSessionPublish.cesWantMap_.size(), 1);
+    ASSERT_EQ(screenSessionPublish.cesWantMap_.size(), 2);
 }
 }
 } // namespace Rosen

@@ -1292,46 +1292,6 @@ HWTEST_F(SceneSessionManagerTest4, GetStartupPage, Function | SmallTest | Level3
 }
 
 /**
- * @tc.name: UpdatePropertyDragEnabled
- * @tc.desc: UpdatePropertyDragEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, UpdatePropertyDragEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "abilityName";
-    info.bundleName_ = "bundleName";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetSystemCalling(true);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    auto result = ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-    ASSERT_EQ(result, WMError::WM_OK);
-}
-
-/**
- * @tc.name: UpdatePropertyRaiseEnabled
- * @tc.desc: UpdatePropertyRaiseEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, UpdatePropertyRaiseEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "abilityName";
-    info.bundleName_ = "bundleName";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    property->SetSystemCalling(true);
-    auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
-    EXPECT_EQ(result, WMError::WM_OK);
-}
-
-/**
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: HandleHideNonSystemFloatingWindows
  * @tc.type: FUNC

@@ -108,6 +108,11 @@ bool SessionPermission::IsSystemAppCall()
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
 
+bool SessionPermission::IsSystemAppCall(uint32_t callingTokenId)
+{
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
+}
+
 bool SessionPermission::IsSACalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();

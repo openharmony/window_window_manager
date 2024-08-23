@@ -1095,7 +1095,7 @@ WMError WindowManagerProxy::GetSnapshotByWindowId(int32_t persistentId, std::sha
     return WMError::WM_OK;
 }
 
-WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
+WMError WindowManagerProxy::SetGestureNavigationEnabled(bool enable)
 {
     MessageParcel data;
     MessageParcel reply;
