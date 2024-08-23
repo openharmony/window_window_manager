@@ -37,7 +37,7 @@ constexpr uint32_t BASELINE_DENSITY = 160;
 }
 
 /**
- * @struct DMHookInfo.
+ * @struct HookInfo.
  *
  * @brief hook diaplayinfo deepending on the window size.
  */
