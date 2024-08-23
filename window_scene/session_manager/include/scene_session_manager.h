@@ -571,7 +571,7 @@ private:
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> systemTopSceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> nonSystemFloatSceneSessionMap_;
-    mutable std::shared_mutex visibleWindowCountMapMutex_;
+    std::mutex visibleWindowCountMapMutex_;
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
