@@ -818,6 +818,12 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    pipControl->pipOption_ = nullptr;
+    pipControl->mainWindow_ = nullptr;
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->mainWindow_ = mw;
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 
