@@ -1766,4 +1766,40 @@ DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& scree
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+std::vector<DisplayPhysicalResolution> DisplayManagerProxy::GetAllDisplayPhysicalResolution()
+{
+    TLOGI(WmsLogTag::DMS, "zhangyoukangproxy");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    std::vector<DisplayPhysicalResolution> allPhysicalSize;
+    int32_t displayInfoSize = 0;
+    bool readRet = reply.ReadInt32(displayInfoSize);
+    if (!readRet || displayInfoSize <= 0) {
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    for (int32_t i = 0; i < displayInfoSize; i++) {
+        DisplayPhysicalResolution physicalItem;
+        physicalItem.foldDisplayMode_ = static_cast<FoldDisplayMode>(reply.ReadUint32());
+        physicalItem.physicalWidth_ = reply.ReadUint32();
+        physicalItem.physicalHeight_ = reply.ReadUint32();
+        allPhysicalSize.emplace_back(physicalItem);
+    }
+    return allPhysicalSize;
+}
 } // namespace OHOS::Rosen
