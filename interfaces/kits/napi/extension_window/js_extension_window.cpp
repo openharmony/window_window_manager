@@ -953,7 +953,6 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
 
 void JsExtensionWindow::ProcessAfterCreateSubWindow(sptr<Rosen::Window> extWindow, sptr<Rosen::Window> subWindow)
 {
-    subWindow->SetParentExtensionWindow(extWindow);
     if (!subWindow->IsTopmost()) {
         extWindow->NotifyModalUIExtensionMayBeCovered(false);
     }
