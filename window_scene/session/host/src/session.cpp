@@ -3112,7 +3112,6 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("const.product.devicetype", "unknown") == UI_TYPE_PHONE &&
-        system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
 } // namespace OHOS::Rosen
