@@ -72,7 +72,7 @@ public:
     void OffWindowZoom() override;
     WMError RaiseToAppTop(uint32_t windowId) override;
     std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override;
-    WMError SetGestureNavigaionEnabled(bool enable) override;
+    WMError SetGestureNavigationEnabled(bool enable) override;
     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
