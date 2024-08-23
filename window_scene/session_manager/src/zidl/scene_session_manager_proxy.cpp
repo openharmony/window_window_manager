@@ -1889,4 +1889,37 @@ WMError SceneSessionManagerProxy::GetWindowStyleType(WindowStyleType& windowStyl
     windowStyleType = static_cast<WindowStyleType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+    const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write pid failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32Vector(persistentIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write persistentIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    reply.ReadUInt64Vector(&surfaceNodeIds);
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
