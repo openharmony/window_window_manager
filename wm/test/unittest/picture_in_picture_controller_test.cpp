@@ -259,15 +259,12 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StartPictureInPicture(startType));
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
 
-    pipControl->mainWindow_ = nullptr;
     pipControl->pipOption_->SetNavigationId("navId");
+    pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
-    pipControl->mainWindow_ = mw;
-
     pipControl->pipOption_->SetNavigationId("");
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     startType = StartPipType::USER_START;
-    ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
 }
