@@ -949,19 +949,20 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTe
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     std::string visibilityInfo = "";
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     visibleState = WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION;
     ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -981,7 +982,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTe
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
