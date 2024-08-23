@@ -627,7 +627,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0 && !window->isUiContentDestructing_) {
+            if (window->rotationAnimationCount_ == 0) {
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -676,12 +676,25 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
 {
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFW("uiContent is null!");
-        return;
+    auto task = [weak = wptr(this)] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null");
+            return;
+        }
+        std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+        if (uiContent == nullptr) {
+            WLOGFW("uiContent is null!");
+            return;
+        }
+        uiContent->NotifyRotationAnimationEnd();
+    };
+    if (handler_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "handler is null!");
+        task();
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyRotationAnimationEnd");
     }
-    uiContent->NotifyRotationAnimationEnd();
 }
 
 void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
@@ -1050,13 +1063,11 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-        isUiContentDestructing_ = true;
         uiContent_ = std::move(uiContent);
         RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
-    isUiContentDestructing_ = false;
     return WMError::WM_OK;
 }
 
@@ -2339,14 +2350,12 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
         {
             std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-            isUiContentDestructing_ = true;
             if (uiContent_ != nullptr) {
                 uiContent_ = nullptr;
                 TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
                     GetPersistentId());
             }
         }
-        isUiContentDestructing_ = false;
     };
     if (handler_) {
         handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");

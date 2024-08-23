@@ -481,7 +481,6 @@ private:
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
-    std::atomic<bool> isUiContentDestructing_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
