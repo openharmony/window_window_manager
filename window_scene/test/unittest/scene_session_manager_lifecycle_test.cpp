@@ -913,14 +913,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoveryVisibilityPidCount, Function 
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     sceneSession->SetCallingPid(pid);
-    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
 
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
 
     sceneSession2->SetCallingPid(pid);
-    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->isVisible_ = true;
 
     ssm_->RecoveryVisibilityPidCount(pid);
     EXPECT_EQ(1, ssm_->visibleWindowCountMap_[pid]);
