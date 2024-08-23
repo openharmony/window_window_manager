@@ -232,7 +232,7 @@ private:
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
-    SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
+    SetScreenSceneDpiFunc setScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
 };

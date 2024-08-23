@@ -22,10 +22,19 @@ FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
-void FoldScreenPolicy::LockDisplayStatus(bool locked) { lockDisplayStatus_ = locked; }
+void FoldScreenPolicy::LockDisplayStatus(bool locked)
+{
+    lockDisplayStatus_ = locked;
+}
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
-ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
-sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; }
+ScreenId FoldScreenPolicy::GetCurrentScreenId()
+{
+    return screenId_;
+}
+sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion()
+{
+    return currentFoldCreaseRegion_;
+}
 
 void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
