@@ -922,15 +922,15 @@ HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled
- * @tc.desc: SetGestureNavigaionEnabled test
+ * @tc.name: SetGestureNavigationEnabled
+ * @tc.desc: SetGestureNavigationEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
 {
     bool enable = false;
     ASSERT_TRUE(wms != nullptr);
-    WMError res = wms->SetGestureNavigaionEnabled(enable);
+    WMError res = wms->SetGestureNavigationEnabled(enable);
     ASSERT_EQ(WMError::WM_OK, res);
 }
 

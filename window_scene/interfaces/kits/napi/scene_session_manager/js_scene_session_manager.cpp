@@ -2657,15 +2657,26 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
 
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
+    std::shared_ptr<std::shared_ptr<Media::PixelMap>> pixelPtr = std::make_shared<std::shared_ptr<Media::PixelMap>>();
+    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr]() {
+        if (pixelPtr == nullptr) {
+            return;
+        }
+        *pixelPtr = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam);
+    };
     NapiAsyncTask::CompleteCallback complete =
-        [persistentId, scaleParam](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto pixelMap = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam);
+        [persistentId, scaleParam, pixelPtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (!pixelPtr) {
+                WLOGE("[NAPI] pixelMap ptr not exist");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            }
             napi_value nativeData = nullptr;
-            if (pixelMap) {
-                nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            if (*pixelPtr) {
+                nativeData = Media::PixelMapNapi::CreatePixelMap(env, *pixelPtr);
             }
             if (nativeData) {
-                WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+                WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", (*pixelPtr)->GetWidth(),
+                    (*pixelPtr)->GetHeight());
                 task.Resolve(env, nativeData);
             } else {
                 WLOGE("[NAPI]create native pixelmap fail");
@@ -2675,7 +2686,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     napi_value result = nullptr;
     napi_value lastParam = argv[1];
     NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 

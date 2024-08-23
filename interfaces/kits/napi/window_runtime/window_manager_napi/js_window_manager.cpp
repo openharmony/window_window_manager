@@ -999,6 +999,10 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     WindowLayoutMode winLayoutMode = WindowLayoutMode::CASCADE;
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set window layout mode permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeMode = argv[0];
         if (nativeMode == nullptr) {
@@ -1065,7 +1069,7 @@ napi_value JsWindowManager::OnSetGestureNavigationEnabled(napi_env env, napi_cal
     NapiAsyncTask::CompleteCallback complete =
         [gestureNavigationEnable](napi_env env, NapiAsyncTask& task, int32_t status) {
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SingletonContainer::Get<WindowManager>().SetGestureNavigaionEnabled(gestureNavigationEnable));
+                SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(gestureNavigationEnable));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
                 WLOGD("SetGestureNavigationEnabled success");

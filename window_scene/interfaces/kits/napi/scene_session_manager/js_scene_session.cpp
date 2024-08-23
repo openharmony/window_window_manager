@@ -19,6 +19,7 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
+#include "common/include/session_permission.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -2109,7 +2110,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
         napi_value argv[] = { jsBufferAvailableObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task);
+    taskScheduler_->PostMainThreadTask(task, "OnBufferAvailableChange");
 }
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
@@ -2467,8 +2468,8 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isCalledRightlyByCallerId = (info.callerToken_ == callerSession->GetAbilityToken()) &&
-          info.bundleName_ == "";
+        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
+          info.bundleName_ == "" && SessionPermission::IsSystemAppCall(info.callingTokenId_));
         TLOGI(WmsLogTag::WMS_SCB,
             "isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
