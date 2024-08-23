@@ -2453,6 +2453,39 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
 
     ssm = nullptr;
 }
+
+/**
+ * @tc.name: SetVirtualScreenStatus
+ * @tc.desc: SetVirtualScreenStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, Function | SmallTest | Level3)
+{
+    sptr<ScreenSessionManager> ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ScreenId screenId = 1050;
+    auto ret = ssm->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE);
+    ASSERT_FALSE(ret);
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ScreenId rsScreenId1 = 1060;
+    ssm->screenIdManager_.sms2RsScreenIdMap_[screenId] = rsScreenId1;
+    ASSERT_TRUE(ssm->ConvertScreenIdToRsScreenId(screenId, rsScreenId));
+    ssm->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE);
+    ssm = nullptr;
+}
+
+/**
+ * @tc.name: PhyMirrorConnectWakeupScreen
+ * @tc.desc: PhyMirrorConnectWakeupScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->PhyMirrorConnectWakeupScreen();
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
+    ssm_->PhyMirrorConnectWakeupScreen();
+}
 }
 } // namespace Rosen
 } // namespace OHOS

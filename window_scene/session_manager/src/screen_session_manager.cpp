@@ -584,12 +584,21 @@ void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
     }
 }
 
+void ScreenSessionManager::PhyMirrorConnectWakeupScreen()
+{
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
+        TLOGI(WmsLogTag::DMS, "Connect to an external screen to wakeup the phone screen");
+        FixPowerStatus();
+    }
+}
+
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (phyMirrorEnable) {
+            PhyMirrorConnectWakeupScreen();
             NotifyCastWhenScreenConnectChange(true);
         }
         if (foldScreenController_ != nullptr) {
