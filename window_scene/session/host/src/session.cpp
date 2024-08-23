@@ -2347,7 +2347,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
         TLOGI(WmsLogTag::WMS_LAYOUT, "isPC: %{public}d, isDialog: %{public}d, isFreeMultiWindowMode：%{public}d, isSubWindow: %{public}d"，
             isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
-        if (isPC || IsFreeMultiWindowMode} {
+        if (isPC || isFreeMultiWindowMode} {
             if ( isSubWindow|| isDialog) {
                 property_->SetDragEnabled(true);
             } else {

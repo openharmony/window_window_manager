@@ -480,16 +480,19 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
         "id:%{public}d], state:%{public}u, mode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
-    return ret;
+    return reti
 }
 
 void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "false");
     auto isPC = windowSystemConfig_.uiType_ == 'pc';
     bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
-    if (isPC || IsFreeMultiWindowMode()) {
-        if (WindowHelper::IsSubWindow(property_->GetWindowType()) || isDialog) {
+    bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
+    bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isPC: %{public}d, isDialog: %{public}d, isFreeMultiWindowMode：%{public}d, isSubWindow: %{public}d"，
+            isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
+    if (isPC || isFreeMultiWindowMode} {
+        if ( isSubWindow|| isDialog) {
             property_->SetDragEnabled(true);
         } else {
             property_->SetDragEnabled(false);
