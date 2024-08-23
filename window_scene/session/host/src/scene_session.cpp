@@ -1047,7 +1047,7 @@ WSError SceneSession::RaiseToAppTop()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTop_) {
-            TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", session->GetPersistentId());
+            TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d", session->GetPersistentId());
             session->sessionChangeCallback_->onRaiseToTop_();
             session->SetMainSessionUIStateDirty(true);
         }

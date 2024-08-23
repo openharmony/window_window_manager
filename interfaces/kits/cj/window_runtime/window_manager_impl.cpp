@@ -148,18 +148,18 @@ int32_t WindowManagerImpl::GetLastWindow(OHOS::AbilityRuntime::Context* ctx, int
 {
     sptr<Window> window = nullptr;
     if (ctx == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "[WindowManager]Stage mode without context");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[WindowManager]Stage mode without context");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto sctx = ctx->shared_from_this();
     auto context = std::weak_ptr<AbilityRuntime::Context>(sctx);
     if (sctx == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "[WindowManager]Stage mode without context");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[WindowManager]Stage mode without context");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     window = Window::GetTopWindowWithContext(context.lock());
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "[WindowManager]Get top window failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[WindowManager]Get top window failed");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return FindWindow(window->GetWindowName(), id);
