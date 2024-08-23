@@ -23,9 +23,9 @@ bool WindowPidVisibilityInfo::Marshalling(Parcel& parcel) const
     return parcel.WriteInt32(pid_) && parcel.WriteUint32(static_cast<uint32_t>(visibilityState_));
 }
 
-sptr<WindowPidVisibilityInfo> WindowPidVisibilityInfo::Unmarshalling(Parcel& parcel)
+WindowPidVisibilityInfo* WindowPidVisibilityInfo::Unmarshalling(Parcel& parcel)
 {
-    sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = new (std::nothrow) WindowPidVisibilityInfo();
+    auto windowPidVisibilityInfo = new (std::nothrow) WindowPidVisibilityInfo();
     if (windowPidVisibilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "window pid visibility info is nullptr.");
         return nullptr;
