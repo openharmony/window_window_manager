@@ -485,7 +485,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
 {
-    auto isPC = windowSystemConfig_.uiType_ == 'pc';
+    auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
     bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
     bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
