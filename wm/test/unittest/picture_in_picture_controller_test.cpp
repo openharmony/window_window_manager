@@ -216,6 +216,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
 
     EXPECT_EQ(nullptr, windowOption);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
 
     sptr<Window> window = nullptr;
@@ -264,6 +265,8 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->mainWindow_ = mw;
 
     pipControl->pipOption_->SetNavigationId("");
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    startType = StartPipType::USER_START;
     ASSERT_EQ(true, pipControl->IsPullPiPAndHandleNavigation());
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
@@ -827,7 +830,7 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->window_ = mw;
-    
+
     pipControl->mainWindowXComponentController_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->pipXComponentController_ = nullptr;
