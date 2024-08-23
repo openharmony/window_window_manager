@@ -4304,9 +4304,11 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
         static_cast<uint32_t>(SessionUIDirtyFlag::INTERACTIVE) : 0;
     dirtyFlags_ |= UpdateRectInner(uiParam, reason_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::RECT) : 0;
+    if (!isPcScenePanel_) {
+        dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
+    }
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
-    dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
     if (!lastVisible && IsVisible() && !isFocused_ && !postProcessFocusState_.enabled_ &&
         GetForegroundInteractiveStatus()) {
         postProcessFocusState_.enabled_ = true;
