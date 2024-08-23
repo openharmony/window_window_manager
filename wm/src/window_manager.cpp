@@ -352,7 +352,9 @@ void WindowManager::Impl::NotifyWindowPidVisibilityChanged(
         windowPidVisibilityListeners = windowPidVisibilityListeners_;
     }
     for (auto &listener : windowPidVisibilityListeners) {
-        listener->NotifyWindowPidVisibilityChanged(info);
+        if (listener != nullptr) {
+            listener->NotifyWindowPidVisibilityChanged(info);
+        }
     }
 }
 

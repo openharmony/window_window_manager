@@ -3841,7 +3841,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         if (VISIBILITY_STATE_MAP.at(oldState) == VISIBILITY_STATE_MAP.at(newState)) {
             return;
         }
-        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = new WindowPidVisibilityInfo();
+        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
         windowPidVisibilityInfo->pid_ = pid;
         std::shared_lock<std::shared_mutex> lock(visibleWindowCountMapMutex_);
         if (VISIBILITY_STATE_MAP.at(oldState) && !VISIBILITY_STATE_MAP.at(newState)) {
@@ -3853,7 +3853,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             } else if (visibleWindowCountMap_[pid] < 0) {
                 RecoveryVisibilityPidCount(pid);
             }
-        }else if (!VISIBILITY_STATE_MAP.at(oldState) && VISIBILITY_STATE_MAP.at(newState)) {
+        } else if (!VISIBILITY_STATE_MAP.at(oldState) && VISIBILITY_STATE_MAP.at(newState)) {
             visibleWindowCountMap_[pid]++;
             if (visibleWindowCountMap_[pid] == 1) {
                 TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
