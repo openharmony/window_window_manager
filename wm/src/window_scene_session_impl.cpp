@@ -2410,6 +2410,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
         WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_FORBID_SPLIT_MOVE");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
