@@ -61,7 +61,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
   part_name = "window_manager"
   subsystem_name = "window"
   defines = []
-  if (build_variant == "user"){
+  if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 }

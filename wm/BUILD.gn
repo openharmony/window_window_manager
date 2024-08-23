@@ -313,7 +313,7 @@ ohos_shared_library("libwm") {
   part_name = "window_manager"
   subsystem_name = "window"
 
-  if (build_variant == "user"){
+  if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 }
@@ -390,7 +390,7 @@ ohos_shared_library("libwm_lite") {
   part_name = "window_manager"
   subsystem_name = "window"
 
-  if (build_variant == "user"){
+  if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 }
