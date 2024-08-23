@@ -731,6 +731,7 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, Function |
     sessionInfo.abilityName_ = "DumpSessionWithId";
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
+    sessionInfo.isBackTransition_ = false;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
@@ -756,6 +757,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sessionInfo.abilityName_ = "DumpSessionWithId";
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
+    sessionInfo.isBackTransition_ = false;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
@@ -1273,6 +1275,37 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     RootSceneProcessBackEventFunc func = []() {};
     ssm_->SetRootSceneProcessBackEventFunc(func);
     ssm_->ProcessBackEvent();
+}
+
+/**
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession1->SetCallingPid(123);
+    sceneSession2->SetCallingPid(123);
+    sceneSession3->SetCallingPid(111);
+
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds;
+    std::vector<uint64_t> surfaceNodeIds;
+    persistentIds.push_back(sceneSession1->GetPersistentId());
+    persistentIds.push_back(sceneSession2->GetPersistentId());
+    persistentIds.push_back(sceneSession3->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    
+    ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
+    ASSERT_EQ(0, surfaceNodeIds.size());
 }
 }
 } // namespace Rosen
