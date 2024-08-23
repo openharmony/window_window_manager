@@ -1428,6 +1428,7 @@ ohos_static_library("ws_unittest_common") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [

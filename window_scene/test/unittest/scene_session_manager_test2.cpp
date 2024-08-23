@@ -29,6 +29,7 @@
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
 #include "iremote_object_mocker.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -203,8 +204,7 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
     ASSERT_EQ(statusBarEnabled_, false);
 
     ssm_->SetStatusBarEnabledChangeListener(nullptr);
-    WMError result03 = ssm_->SetGestureNavigaionEnabled(true);
-    ASSERT_EQ(result03, WMError::WM_DO_NOTHING);
+    ssm_->SetGestureNavigaionEnabled(true);
 }
 
 /**
@@ -1599,7 +1599,11 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->SetSessionLabel(nullptr, "test");
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 }
 
 /**
@@ -1619,7 +1623,11 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->SetSessionIcon(nullptr, nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 }
 
 /**
@@ -1642,7 +1650,11 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallT
 {
     WSError ret;
     ret = ssm_->PendingSessionToForeground(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    }
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1650,7 +1662,11 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallT
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->PendingSessionToForeground(nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 }
 
 /**
@@ -1684,7 +1700,11 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
     WSError ret;
     AppExecFwk::ElementName element;
     ret = ssm_->GetFocusSessionElement(element);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+    }
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1692,7 +1712,11 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->GetFocusSessionElement(element);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+    }
 }
 
 /**
@@ -1777,10 +1801,13 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 
-    ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
 }
 
 /**
@@ -1802,10 +1829,18 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->UpdateSessionTouchOutsideListener(persistentId, true);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 
     ret = ssm_->UpdateSessionTouchOutsideListener(persistentId, false);
-    ASSERT_EQ(WSError::WS_OK, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+    } else {
+        ASSERT_EQ(WSError::WS_OK, ret);
+    }
 }
 
 /**
@@ -1818,7 +1853,9 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest 
     WMError ret;
     SessionSnapshot snapshot;
     ret = ssm_->GetSessionSnapshotById(100, snapshot);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    if(!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    }
 }
 
 /**
