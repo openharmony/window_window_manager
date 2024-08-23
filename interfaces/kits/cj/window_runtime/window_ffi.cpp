@@ -348,7 +348,7 @@ int32_t FFiOHOSWindowSetGestureNavigationEnabled(bool enable)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowSetGestureNavigationEnabled start");
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<WindowManager>().SetGestureNavigaionEnabled(enable));
+        SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowSetGestureNavigationEnabled error %{public}d", ret);
         return static_cast<int32_t>(ret);

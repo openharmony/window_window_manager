@@ -238,23 +238,6 @@ namespace {
     }
 
     /**
-     * @tc.name: SendPropertyChangeResult
-     * @tc.desc: SendPropertyChangeResult
-     * @tc.type: FUNC
-     */
-    HWTEST_F(DualDisplayFoldPolicyTest, SendPropertyChangeResult, Function | SmallTest | Level3)
-    {
-        std::recursive_mutex mutex;
-        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        sptr<ScreenSession> screenSession = new ScreenSession();
-        ScreenId screenId = 0;
-        ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
-        dualDisplayFoldPolicy.SendPropertyChangeResult(screenSession, screenId, reason);
-        int res = 0;
-        ASSERT_EQ(res, 0);
-    }
-
-    /**
      * @tc.name: RecoverWhenBootAnimationExit
      * @tc.desc: RecoverWhenBootAnimationExit
      * @tc.type: FUNC

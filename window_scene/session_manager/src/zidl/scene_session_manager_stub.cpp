@@ -594,7 +594,7 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
 {
     WLOGFI("run HandleSetGestureNavigationEnabled!");
     bool enable = data.ReadBool();
-    const WMError &ret = SetGestureNavigaionEnabled(enable);
+    const WMError &ret = SetGestureNavigationEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

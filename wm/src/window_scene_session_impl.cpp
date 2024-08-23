@@ -188,20 +188,6 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
-{
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            context_.get() == win->GetContext().get()) {
-            return win;
-        }
-    }
-    WLOGFW("Can not find main window, not app type");
-    return nullptr;
-}
-
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -2424,6 +2410,10 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
         WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_FORBID_SPLIT_MOVE");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
@@ -3782,18 +3772,6 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "Id:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
-}
-
-void WindowSceneSessionImpl::NotifySetUIContentComplete()
-{
-    if (WindowHelper::IsMainWindow(GetType())) { // main window
-        SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag() == false) { // sub window
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr) {
-            static_cast<WindowSceneSessionImpl*>(mainWindow.GetRefPtr())->SetUIContentComplete();
-        }
-    }
 }
 } // namespace Rosen
 } // namespace OHOS
