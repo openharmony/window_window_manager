@@ -2341,6 +2341,21 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
+        auto isPC = systemConfig_.uiType_ == 'pc';
+        bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+        bool isFreeMultiWindowMode = systemConfig_.IsFreeMultiWindowMode();
+        bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "isPC: %{public}d, isDialog: %{public}d, isFreeMultiWindowMode：%{public}d, isSubWindow: %{public}d"，
+            isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
+        if (isPC || IsFreeMultiWindowMode} {
+            if ( isSubWindow|| isDialog) {
+                property_->SetDragEnabled(true);
+            } else {
+                property_->SetDragEnabled(false);
+            }
+        } else {
+            property_->SetDragEnabled(false);
+        }
     }
     NotifySessionInfoChange();
     if (property == nullptr) {
