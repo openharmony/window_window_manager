@@ -62,7 +62,7 @@ ohos_shared_library("libmodal_system_ui_extension_client") {
   part_name = "window_manager"
   subsystem_name = "window"
   defines = []
-  if (build_variant == "user"){
+  if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 }
