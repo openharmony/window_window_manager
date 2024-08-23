@@ -97,15 +97,17 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionSet_.insert(this);
-        InputTransferStation::GetInstance().AddInputWindow(this);
+        {
+            windowExtensionSessionSet_.insert(this);
+            InputTransferStation::GetInstance().AddInputWindow(this);
+        }
+        state_ = WindowState::STATE_CREATED;
+        isUIExtensionAbilityProcess_ = true;
+        property_->SetIsUIExtensionAbilityProcess(true);
+        AddSetUIContentTimeoutCheck();
     }
-    state_ = WindowState::STATE_CREATED;
-    isUIExtensionAbilityProcess_ = true;
-    property_->SetIsUIExtensionAbilityProcess(true);
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d success.",
         property_->GetWindowName().c_str(), GetPersistentId());
-    AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
 
