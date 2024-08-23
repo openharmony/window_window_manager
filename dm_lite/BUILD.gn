@@ -47,6 +47,7 @@ ohos_shared_library("libdm_lite") {
     "src/display_lite.cpp",
     "src/display_manager_adapter_lite.cpp",
     "src/display_manager_lite.cpp",
+    "src/screen_manager_lite.cpp",
   ]
 
   configs = [
