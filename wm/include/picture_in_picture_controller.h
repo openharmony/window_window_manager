@@ -96,6 +96,9 @@ public:
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
     napi_ref GetCustomNodeController();
+    napi_ref GetTypeNode() const;
+    void OnPictureInPictureStart();
+    bool IsTypeNodeEnabled() const;
 
     class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
     public:
@@ -146,7 +149,7 @@ private:
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
-    void UpdateXComponentPositionAndSize();
+    void UpdateWinRectByComponent();
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
