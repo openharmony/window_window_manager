@@ -2179,7 +2179,7 @@ void JsSceneSession::OnRaiseToTop()
 
     auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTop jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnRaiseToTop jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
@@ -2201,7 +2201,7 @@ void JsSceneSession::OnRaiseToTopForPointDown()
 
     auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
@@ -2310,7 +2310,7 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", topmost);
     auto task = [this, persistentId = persistentId_, topmost, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnSessionTopmostChange jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnSessionTopmostChange jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
