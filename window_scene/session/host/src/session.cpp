@@ -1723,7 +1723,7 @@ WSError Session::HandleSubWindowClick(int32_t action)
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
-        parentSession->NotifyClick();
+        parentSession->NotifyClick(!IsScbCoreEnabled());
     }
     return WSError::WS_OK;
 }
@@ -2094,11 +2094,11 @@ void Session::NotifySessionTouchableChange(bool touchable)
     }
 }
 
-void Session::NotifyClick()
+void Session::NotifyClick(bool requestFocus)
 {
-    WLOGFD("Notify click");
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u", requestFocus);
     if (clickFunc_) {
-        clickFunc_();
+        clickFunc_(requestFocus);
     }
 }
 
