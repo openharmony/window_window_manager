@@ -1735,7 +1735,8 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     ASSERT_EQ(height, 0);
     SystemBarProperty propertyHide;
     propertyHide.enable_ = false;
-    ASSERT_NE(WSErrorCode::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, propertyHide));
+    ASSERT_NE(WSErrorCode::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
+        propertyHide));
     ASSERT_EQ(height, 0);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
@@ -1757,7 +1758,8 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     sceneSession->property_ = property;
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 1);
-    ASSERT_NE(WSErrorCode::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, propertyHide));
+    ASSERT_NE(WSErrorCode::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
+        propertyHide));
     ASSERT_EQ(height, 1);
 }
 
