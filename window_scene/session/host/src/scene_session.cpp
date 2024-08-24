@@ -94,7 +94,7 @@ void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> prope
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
-    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    bool isSystemCalling = IsSystemSpecificSession();
     TLOGI(WmsLogTag::WMS_LAYOUT, "isSystemWindow: %{public}d, isDialog: %{public}d, "
         "isSubWindow: %{public}d, isSystemCalling: %{public}d", isSystemWindow, isDialog, isSubWindow,
         isSystemCalling);
