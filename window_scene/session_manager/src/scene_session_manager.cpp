@@ -2258,7 +2258,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
-        property->GetExtensionFlag() == true && SessionPermission::IsStartedByUIExtension()) {
+        property->GetExtensionFlag() && property->GetIsUIExtensionAbilityProcess() &&
+        SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         if (extensionParentSession == nullptr) {
             WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
