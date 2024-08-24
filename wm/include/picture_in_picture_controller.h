@@ -163,9 +163,9 @@ private:
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_ = nullptr;
-    std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_ = {};
-    std::vector<sptr<IPiPActionObserver>> pipActionObservers_ = {};
-    std::vector<sptr<IPiPControlObserver>> pipControlObservers_ = {};
+    std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;
+    std::vector<sptr<IPiPActionObserver>> pipActionObservers_;
+    std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;
@@ -177,7 +177,7 @@ private:
     std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
     napi_env env_ = nullptr;
-    std::mutex mutex_ = {};
+    std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
 };

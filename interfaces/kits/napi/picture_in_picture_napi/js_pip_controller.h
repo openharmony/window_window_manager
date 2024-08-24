@@ -68,8 +68,8 @@ private:
     void ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener);
 
     sptr<PictureInPictureController> pipController_ = nullptr;
-    std::map<std::string, ListenerType> listenerCodeMap_ = {};
-    std::unordered_map<std::string, std::set<sptr<JsPiPWindowListener>>> jsCbMap_ = {};
+    std::map<std::string, ListenerType> listenerCodeMap_;
+    std::unordered_map<std::string, std::set<sptr<JsPiPWindowListener>>> jsCbMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

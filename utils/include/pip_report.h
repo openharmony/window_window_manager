@@ -36,7 +36,7 @@ public:
 private:
     std::string GetPackageName() const;
     std::string packageName_ = "";
-    mutable std::mutex packageNameMutex_ = {};
+    mutable std::mutex packageNameMutex_;
 };
 } // namespace OHOS::Rosen
 
