@@ -84,13 +84,13 @@ SceneSession::~SceneSession()
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
-void SceneSession::InitSystemSessionEnableDrag(sptr<WindowSessionProperty> property)
+void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
 {
     auto defaultDragEnable = false;
     if (property) {
         defaultDragEnable = property->GetDragEnabled();
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "default enable drag: %{public}d", defaultDragEnable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "default dragEnable: %{public}d", defaultDragEnable);
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
@@ -102,7 +102,7 @@ void SceneSession::InitSystemSessionEnableDrag(sptr<WindowSessionProperty> prope
         if (isSubWindow || isDialog) {
             property->SetDragEnabled(defaultDragEnable);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "use the enableDrag value of the client");
+            TLOGI(WmsLogTag::WMS_LAYOUT, "use the dragEnable value of the client");
         }
     } else {
         property->SetDragEnabled(defaultDragEnable);
@@ -132,7 +132,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_OK;
         }
         if (property) {
-            session->InitSystemSessionEnableDrag(property);
+            session->InitSystemSessionDragEnable(property);
             TLOGI(WmsLogTag::WMS_LAYOUT, "set property enableDrag: %{public}d", property->GetDragEnabled());
             property->SetCollaboratorType(session->GetCollaboratorType());
         }

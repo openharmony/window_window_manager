@@ -459,7 +459,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
                 TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid SCB type: %{public}u", type);
                 return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             }
-            InitSystemSessionEnableDrag();
+            InitSystemSessionDragEnable();
         } else if (!WindowHelper::IsSubWindow(type)) {
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
@@ -483,7 +483,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
+void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
     auto isPC = windowSystemConfig_.uiType_ == "pc";
     bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
@@ -493,7 +493,7 @@ void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
         "isSubWindow: %{public}d", isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
     if (isPC || isFreeMultiWindowMode) {
         if (isSubWindow|| isDialog) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "use default enableDrag value.");
+            TLOGI(WmsLogTag::WMS_LAYOUT, "use default dragEnable value.");
         } else {
             property_->SetDragEnabled(false);
         }
