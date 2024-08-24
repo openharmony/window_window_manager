@@ -102,7 +102,7 @@ void SceneSession::InitSystemSessionEnableDrag(sptr<WindowSessionProperty> prope
         if (isSubWindow || isDialog) {
             property->SetDragEnabled(defaultDragEnable);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "use client enableDrag");
+            TLOGI(WmsLogTag::WMS_LAYOUT, "use the enableDrag value of the client");
         }
     } else {
         property->SetDragEnabled(defaultDragEnable);
