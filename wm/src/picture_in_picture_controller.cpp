@@ -130,7 +130,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     windowOption->SetWindowRect(windowRect_);
     windowOption->SetKeepScreenOn(true);
     windowOption->SetTouchable(false);
-    WMError errCode;
+    WMError errCode = WMError::WM_OK;
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
     pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
@@ -553,7 +553,7 @@ void PictureInPictureController::WindowLifeCycleListener::AfterDestroyed()
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 {
-    std::string value;
+    std::string value = "true";
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
