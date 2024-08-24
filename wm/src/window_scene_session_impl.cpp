@@ -493,7 +493,7 @@ void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
         "isSubWindow: %{public}d", isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
     if (isPC || isFreeMultiWindowMode) {
         if (isSubWindow|| isDialog) {
-            property_->SetDragEnabled(true);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "use default enable drag value.");
         } else {
             property_->SetDragEnabled(false);
         }
