@@ -152,6 +152,7 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     foldScreenController_ = new (std::nothrow) FoldScreenController(displayInfoMutex_, screenPowerTaskScheduler_);
     if (!foldScreenController_) {
         TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
+        return;
     }
     foldScreenController_->SetOnBootAnimation(true);
     auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
@@ -554,6 +555,7 @@ void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
     if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
         TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
         ScreenCastConnection::GetInstance().CastDisconnectExtension();
+        return;
     }
     MessageParcel data;
     MessageParcel reply;
