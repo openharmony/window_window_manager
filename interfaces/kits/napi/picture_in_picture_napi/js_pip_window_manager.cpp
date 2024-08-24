@@ -20,7 +20,6 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "window.h"
-#include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
 #include <algorithm>
 
@@ -217,9 +216,65 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnCreatePipController(env, info) : nullptr;
 }
 
+std::unique_ptr<NapiAsyncTask> JsPipWindowManager::CreateEmptyAsyncTask(
+    napi_env env, napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
+}
+
+napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
+{
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get(), pipOption]() {
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
+                WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
+            return;
+        }
+        sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
+        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
+        if (context == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
+                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
+            return;
+        }
+        sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
+        if (mainWindow == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
+                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
+            return;
+        }
+        sptr<PictureInPictureController> pipController =
+            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
+        task->Resolve(env, CreateJsPipControllerObject(env, pipController));
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    } else {
+        napiAsyncTask.release();
+    }
+    return result;
+}
+
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "OnCreatePipController called");
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
     std::lock_guard<std::mutex> lock(mutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -239,34 +294,20 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
-    napi_value callback = argc > 1 ? (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr) : nullptr;
-    NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (!PictureInPictureManager::IsSupportPiP()) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
-            return;
+    if (argc > 1) {
+        napi_value typeNode = argv[1];
+        napi_ref typeNodeRef = nullptr;
+        if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
+            TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
+            pipOption.SetTypeNodeEnabled(true);
+            napi_create_reference(env, typeNode, 1, &typeNodeRef);
+            pipOption.SetTypeNodeRef(typeNodeRef);
+        } else {
+            pipOption.SetTypeNodeEnabled(false);
+            pipOption.SetTypeNodeRef(nullptr);
         }
-        sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
-        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
-        if (context == nullptr) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
-            return;
-        }
-        sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
-        if (mainWindow == nullptr) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
-            return;
-        }
-        sptr<PictureInPictureController> pipController =
-            new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
-        task.Resolve(env, CreateJsPipControllerObject(env, pipController));
-    };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipWindowManager::OnCreatePipController", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
-    return result;
+    }
+    return NapiSendTask(env, pipOption);
 }
 
 napi_value JsPipWindowManagerInit(napi_env env, napi_value exportObj)
