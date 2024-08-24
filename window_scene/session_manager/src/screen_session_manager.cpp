@@ -4462,6 +4462,15 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             rsInterface_.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        if (foldStatus == FoldStatus::FOLDED) {
+            auto property = screenSession->GetScreenProperty();
+            densityDpi_ = property.GetDensity();
+            SetVirtualPixelRatio(GetDefaultScreenId(), subDensityDpi_);
+        } else {
+            SetVirtualPixelRatio(GetDefaultScreenId(), densityDpi_);
+        }
+    }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     if (agents.empty()) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged agents is empty");
