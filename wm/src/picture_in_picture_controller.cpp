@@ -730,7 +730,7 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
     TLOGI(WmsLogTag::WMS_PIP, "called");
     if (IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "skip as nodeController enabled");
-        return;
+        return WMError::WM_OK;
     }
     pipXComponentController_ = xComponentController;
     if (window_ == nullptr) {
