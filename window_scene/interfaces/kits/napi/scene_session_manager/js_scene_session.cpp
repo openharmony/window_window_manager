@@ -969,8 +969,8 @@ void JsSceneSession::ProcessSessionTouchableChangeRegister()
 
 void JsSceneSession::ProcessClickRegister()
 {
-    NotifyClickFunc func = [this]() {
-        this->OnClick();
+    NotifyClickFunc func = [this](bool requestFocus) {
+        this->OnClick(requestFocus);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2318,10 +2318,10 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
     taskScheduler_->PostMainThreadTask(task, "OnSessionTopmostChange: state " + std::to_string(topmost));
 }
 
-void JsSceneSession::OnClick()
+void JsSceneSession::OnClick(bool requestFocus)
 {
-    WLOGFD("[NAPI]OnClick");
-    auto task = [this, persistentId = persistentId_, env = env_] {
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] id: %{public}d, requestFocus: %{public}u", persistentId_, requestFocus);
+    auto task = [this, persistentId = persistentId_, requestFocus, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnClick jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
@@ -2332,10 +2332,11 @@ void JsSceneSession::OnClick()
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        napi_value jsRequestFocusObj = CreateJsValue(env, requestFocus);
+        napi_value argv[] = {jsRequestFocusObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnClick");
+    taskScheduler_->PostMainThreadTask(task, "OnClick: requestFocus" + std::to_string(requestFocus));
 }
 
 void JsSceneSession::OnContextTransparent()
