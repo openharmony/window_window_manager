@@ -553,7 +553,7 @@ void PictureInPictureController::WindowLifeCycleListener::AfterDestroyed()
 
 void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
 {
-    std::string value = "";
+    std::string value = "true";
     ErrCode ret = getSettingsAutoStartStatus(KEY, value);
     TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
     if (ret != ERR_OK) {
