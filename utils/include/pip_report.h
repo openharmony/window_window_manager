@@ -35,8 +35,8 @@ public:
     void ReportPiPRestore();
 private:
     std::string GetPackageName() const;
-    std::string packageName_;
-    mutable std::mutex packageNameMutex_;
+    std::string packageName_ = "";
+    mutable std::mutex packageNameMutex_ = {};
 };
 } // namespace OHOS::Rosen
 

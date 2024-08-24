@@ -56,10 +56,10 @@ private:
     std::string navigationId_ = "";
     uint32_t contentWidth_ = 0;
     uint32_t contentHeight_ = 0;
-    std::vector<PiPControlStatusInfo> pipControlStatusInfoList_;
-    std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
-    std::shared_ptr<XComponentController> xComponentController_;
-    std::vector<std::uint32_t> controlGroup_;
+    std::vector<PiPControlStatusInfo> pipControlStatusInfoList_ = {};
+    std::vector<PiPControlEnableInfo> pipControlEnableInfoList_ = {};
+    std::vector<std::uint32_t> controlGroup_ = {};
+    std::shared_ptr<XComponentController> xComponentController_ = nullptr;
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;

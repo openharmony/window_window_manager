@@ -34,7 +34,7 @@ private:
     napi_value OnIsPipEnabled(napi_env env, napi_callback_info info);
     napi_value OnCreatePipController(napi_env env, napi_callback_info info);
     napi_value NapiSendTask(napi_env env, PipOption& pipOption);
-    static std::mutex mutex_;
+    static std::mutex mutex_ = {};
 };
 }
 }
