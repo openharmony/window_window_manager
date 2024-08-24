@@ -441,17 +441,20 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGFE("write physical size error");
                 break;
             }
+            WLOGFE("write display mode size=%{public}d", static_cast<int32_t>(infoSize));
             for (const auto &physicalItem : physicalInfos) {
                 writeRet = reply.WriteUint32(static_cast<uint32_t>(physicalItem.foldDisplayMode_));
                 if (!writeRet) {
                     WLOGFE("write display mode error");
                     break;
                 }
+                WLOGFE("write physical width %{public}d", physicalItem.physicalWidth_);                
                 writeRet = reply.WriteUint32(physicalItem.physicalWidth_);
                 if (!writeRet) {
                     WLOGFE("write physical width error");
                     break;
                 }
+                WLOGFE("write physical height %{public}d", physicalItem.physicalHeight_);
                 writeRet = reply.WriteUint32(physicalItem.physicalHeight_);
                 if (!writeRet) {
                     WLOGFE("write physical height error");
