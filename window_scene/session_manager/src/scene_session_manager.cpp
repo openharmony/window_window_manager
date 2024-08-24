@@ -2420,8 +2420,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP ||
-        type == WindowType::WINDOW_TYPE_TOAST) {
+    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
         return true;
     }
