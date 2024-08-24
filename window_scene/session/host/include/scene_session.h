@@ -392,10 +392,12 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
-    bool GetPcScenePanel() {
+    bool GetPcScenePanel()
+    {
         return isPcScenePanel_;
     }
-    void SetPcScenePanel(bool isPcScenePanel) {
+    void SetPcScenePanel(bool isPcScenePanel)
+    {
         isPcScenePanel_ = isPcScenePanel;
     }
 

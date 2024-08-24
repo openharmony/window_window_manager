@@ -10228,6 +10228,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             oss << ",";
         }
     }
+    oss << "[";
     TLOGI(WmsLogTag::WMS_SCB, "RefreshPcZOrderList Complete:%{public}d", oss.str().c_str());
 }
 } // namespace OHOS::Rosen
