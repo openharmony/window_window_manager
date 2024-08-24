@@ -2982,7 +2982,7 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     std::vector<int32_t> perisistendIds;
-    if (!ConvertInt32ArrayFromJs(env, argv[1], perisistendIds)){
+    if (!ConvertInt32ArrayFromJs(env, argv[1], perisistendIds)) {
         TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert perisistendIds to %{public}d", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
