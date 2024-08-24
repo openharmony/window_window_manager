@@ -640,15 +640,15 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
  */
 HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTest | Level2)
 {
-    SessionInfo info
-    info.abilityName_ = "HandleSpecificSystemBarProperty"
-    info.bundleName_ = "HandleSpecificSystemBarProperty"
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr)
-    ASSERT_NE(nullptr, sceneSession)
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty()
-    ASSERT_NE(nullptr, property)
-    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR
-    sceneSession->HandleSpecificSystemBarProperty(type, property)
+    SessionInfo info;
+    info.abilityName_ = "HandleSpecificSystemBarProperty";
+    info.bundleName_ = "HandleSpecificSystemBarProperty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
 }
 
 /**
