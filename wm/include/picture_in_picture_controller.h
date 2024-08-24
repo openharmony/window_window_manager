@@ -111,7 +111,7 @@ public:
     private:
         void DelayReset();
 
-        WindowMode mode_ = WINDOW_MODE_UNDEFINED;
+        WindowMode mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
         bool isValid_ = true;
         std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     };
@@ -148,7 +148,7 @@ private:
     };
 
 private:
-    static sptr<IRemoteObject> remoteObj_ = nullptr;
+    static sptr<IRemoteObject> remoteObj_;
     static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
     uint32_t GetPipPriority(uint32_t pipTemplateType);
     WMError CreatePictureInPictureWindow(StartPipType startType);

@@ -54,18 +54,18 @@ public:
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     static void AutoStartPipWindow(std::string navigationId);
     static void DoDestroy();
-    static std::shared_ptr<NativeReference> innerCallbackRef_ = nullptr;
+    static std::shared_ptr<NativeReference> innerCallbackRef_;
 private:
     // controller in use
-    static sptr<PictureInPictureController> activeController_ = nullptr;
-    static wptr<PictureInPictureController> autoStartController_ = nullptr;
+    static sptr<PictureInPictureController> activeController_;
+    static wptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
-    static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_ = {};
+    static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
-    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_ = {};
-    static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_ = nullptr;
-    static std::shared_mutex controllerMapMutex_ = {};
-    static std::mutex mutex_ = {};
+    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
+    static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
+    static std::shared_mutex controllerMapMutex_;
+    static std::mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
