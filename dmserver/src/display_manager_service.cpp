@@ -813,6 +813,8 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
         defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
         defaultResolution.physicalWidth_ = displayInfo->GetPhysicalWidth();
         defaultResolution.physicalHeight_ = displayInfo->GetPhysicalHeight();
+        TLOGE(WmsLogTag::DMS, "default display width = %{public}d", displayInfo->GetPhysicalWidth());
+        TLOGE(WmsLogTag::DMS, "default display height = %{public}d", displayInfo->GetPhysicalHeight());
         allDisplayPhysicalResolution_.emplace_back(defaultResolution);
     }
     return allDisplayPhysicalResolution_;
