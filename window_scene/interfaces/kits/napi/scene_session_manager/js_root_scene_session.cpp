@@ -23,6 +23,7 @@
 #include "js_scene_utils.h"
 #include "singleton_container.h"
 #include "dms_reporter.h"
+#include "common/include/session_permission.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -322,7 +323,8 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isCalledRightlyByCallerId = info.callerToken_ == callerSession->GetAbilityToken();
+        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
+          info.bundleName_ == "" && SessionPermission::IsSystemAppCall(info.callingTokenId_));
         TLOGI(WmsLogTag::WMS_SCB,
             "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
