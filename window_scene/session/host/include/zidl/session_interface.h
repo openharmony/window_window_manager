@@ -44,7 +44,15 @@ public:
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
 
-    // scene session
+     /**
+     * @brief Receive session event from application.
+     *
+     * This function provides the ability for pplications to move window.\n
+     * This interface will take effect after touch down event.\n
+     *
+     * @param event Indicates the {@link SessionEvent}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
      /**
@@ -58,20 +66,76 @@ public:
      */
     virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
+
+    /**
+     * @brief on layout full screen change.
+     *
+     * @param isLayoutFullScreen Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
+
+    /**
+     * @brief raise to app top.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
+
+    /**
+     * @brief update session rect.
+     *
+     * @param rect Indicates the {@link WSRect}
+     * @param reason Indicates the {@link SizeChangeReason}
+     * @param isGlobal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdateSessionRect(
         const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
+
+    /**
+     * @brief set global max mode.
+     *
+     * @param mode Indicates the {@link MaximizeMode}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
+
+    /**
+     * @brief get global max mode.
+     *
+     * @param mode Indicates the {@link MaximizeMode}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
+
+    /**
+     * @brief set aspect ratio.
+     *
+     * @param ratio Indicates the {@link float}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
+
+    /**
+     * @brief raise above target.
+     *
+     * @param subWindowId Indicates the {@link int32_t}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
+
+    /**
+     * @brief raise app main window to top.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
@@ -138,6 +202,13 @@ public:
     }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
+
+    /**
+     * @brief register update rect changeLister.
+     *
+     * @param isRegister Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
     {
         return WSError::WS_OK;
