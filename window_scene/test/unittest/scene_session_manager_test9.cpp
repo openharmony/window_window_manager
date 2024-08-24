@@ -595,6 +595,11 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
     ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
 }
 
+/**
+ * @tc.name: RefreshPcZorder
+ * @tc.desc: RefreshPcZorder
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level3){
     vector<int32_t> persistentIds;
     SessionInfo info1, info2, info3;
@@ -608,35 +613,35 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     sptr<SceneSession> session1 = new (std::nothrow)SceneSession(info1, nullptr);
     ASSERT_NE(session1, nullptr);
     persistentIds.push_back(session1->GetPersistentId());
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    ssm_->sceneSessionMap_.insert({session1->GetPersistentId(), session1});
     sptr<SceneSession> session2 = new (std::nothrow)SceneSession(info2, nullptr);
     ASSERT_NE(session2, nullptr);
     persistentIds.push_back(session2->GetPersistentId());
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId, sceneSession2});
+    ssm_->sceneSessionMap_.insert({session2->GetPersistentId(), session2});
     sptr<SceneSession> session3 = new (std::nothrow)SceneSession(info3, nullptr);
     ASSERT_NE(session3, nullptr);
     persistentIds.push_back(999);
     session3->SetZOrder(404);
-    ssm_->sceneSessionMap_.insert({session3->GetPersistentId, session3});
-    ssm_->RefreshPcZorder(startZOrder, persistentIds);
+    ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
+    ssm_->RefreshPcZOrderList(startZOrder, persistentIds);
     auto start = std::chrono::system_clock::now();
-    // Due to SetZOrder being asynchronous, spin lock is added. 
+    // Due to SetZOrder being asynchronous, spin lock is added.
     // The spin lock itself is set with a timeout escape time of 3 seconds
-    while(true) {
-        bool isFinished = Session1->GetZOrder() != 0 &&  Session2->GetZOrder() != 0;
-        if(isFinished) {
+    while (true) {
+        bool isFinished = session1->GetZOrder() != 0 && session2->GetZOrder() != 0;
+        if (isFinished) {
             break;
         }
-        auto now = std::chrono::system_clock:now;
-        auto elapsed = std::chrono:duration_cast<std::chrono:seconds>(now - start);
+        auto now = std::chrono::system_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
         if (elapsed >= 3) {
             break;
         }
-        std::this_thread::sleep_for(std:chrono:milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     ASSERT_EQ(session1->GetZOrder(), 100);
-    ASSERT_EQ(session1->GetZOrder(), 101);
-    ASSERT_EQ(session1->GetZOrder(), 404);
+    ASSERT_EQ(session2->GetZOrder(), 101);
+    ASSERT_EQ(session3->GetZOrder(), 404);
 }
 }
 } // namespace Rosen
