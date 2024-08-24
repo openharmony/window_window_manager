@@ -433,7 +433,7 @@ private:
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    void InitSystemSessionEnableDrag(sptr<WindowSessionProperty> property);
+    void InitSystemSessionDragEnable(sptr<WindowSessionProperty> property);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 
