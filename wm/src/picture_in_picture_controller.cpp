@@ -130,7 +130,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     windowOption->SetWindowRect(windowRect_);
     windowOption->SetKeepScreenOn(true);
     windowOption->SetTouchable(false);
-    WMError errCode = WM_OK;
+    WMError errCode = WMError::WM_OK;
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
     pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
