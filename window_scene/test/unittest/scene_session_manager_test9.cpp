@@ -633,9 +633,9 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest |Level3
         }
         std::this_thread::sleep_for(std:chrono:milliseconds(100));
     }
-    ASSERT_EQ(session1->GetZOrder(),100);
-    ASSERT_EQ(session1->GetZOrder(),101);
-    ASSERT_EQ(session1->GetZOrder(),404);
+    ASSERT_EQ(session1->GetZOrder(), 100);
+    ASSERT_EQ(session1->GetZOrder(), 101);
+    ASSERT_EQ(session1->GetZOrder(), 404);
 }
 }
 } // namespace Rosen
