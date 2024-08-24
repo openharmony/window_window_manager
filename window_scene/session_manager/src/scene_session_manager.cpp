@@ -4305,7 +4305,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             }
             if (reason == FocusChangeReason::MOVE_UP) {
                 auto session = GetSceneSession(persistentId);
-                if (session) {
+                if (session && !session->IsFocused()) {
                     PostProcessFocusState state = { true, true, reason };
                     session->SetPostProcessFocusState(state);
                 }
@@ -4316,7 +4316,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             }
             if (RequestSessionFocus(persistentId, byForeground, reason) != WSError::WS_OK) {
                 auto session = GetSceneSession(persistentId);
-                if (session) {
+                if (session && !session->IsFocused()) {
                     PostProcessFocusState state = { true, true, reason };
                     session->SetPostProcessFocusState(state);
                 }
@@ -8721,6 +8721,7 @@ void SceneSessionManager::PostProcessProperty()
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             ProcessSubSessionForeground(session);
         }
+        session->SetPostProcessProperty(false);
     }
 
     // update avoid area
