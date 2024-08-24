@@ -344,6 +344,22 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
     systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 0;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 1930;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 1930;
+    systemSession_->RectCheck(curWidth, curHeight);
 }
 
 /**

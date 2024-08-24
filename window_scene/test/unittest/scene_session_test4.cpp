@@ -632,6 +632,50 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     EXPECT_EQ(WMError::WM_DO_NOTHING, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
 }
+
+/**
+ * @tc.name: HandleSpecificSystemBarProperty
+ * @tc.desc: HandleSpecificSystemBarProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSpecificSystemBarProperty";
+    info.bundleName_ = "HandleSpecificSystemBarProperty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+}
+
+/**
+ * @tc.name: SetWindowFlags1
+ * @tc.desc: SetWindowFlags1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowFlags1";
+    info.bundleName_ = "SetWindowFlags1";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sptr<WindowSessionProperty> sessionProperty = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, sessionProperty);
+    sceneSession->SetWindowFlags(property);
+    sceneSession->property_ = sessionProperty;
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
+    sceneSession->property_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    sceneSession->SetWindowFlags(property);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
+    sceneSession->property_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
+    sceneSession->SetWindowFlags(property);
+}
 }
 }
 }
