@@ -10198,4 +10198,36 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
 
     return WMError::WM_OK;
 }
+
+void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>& persistentIds)
+{
+    idListMap_.erase(startZOrder);
+    idListMap_.insert({startZOrder, persistentId});
+    std::ostringstream oss;
+    oss << "[";
+    for(size_t i = 0; i < persistentIds.size(); i++){
+        int32_t persistentId = persistentId[i];
+        oss << persistentId;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_SCB, "sceneScene is nullptr persistentId = %{public}d", persistentId);
+            if(i < persistentIds.size() - 1){
+                oss << ",";
+            }
+            continue;
+        }
+        if (!sceneSession->GetPcScenePanel()){
+            sceneSession->SetPcScenePanel(true);
+        }
+        unint newZOrder = i + startZOrder;
+        if(SceneSession->GetZOrder()!=newZOrder){
+            sceneSession->SetZOrder(newZOrder);
+            TLOGI(WmsLogTag::WMS_SCB, "SetZOrder persistentId:%{public}d", persistentId);
+        }
+        if(i < persistentIds.size() - 1){
+            oss << ",";
+        }
+    }
+    TLOGI(WmsLogTag::WMS_SCB, "RefreshPcZOrderList Complete:%{public}d", persistentId);
+}
 } // namespace OHOS::Rosen
