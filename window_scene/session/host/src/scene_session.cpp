@@ -95,18 +95,18 @@ void SceneSession::InitSystemSessionEnableDrag(sptr<WindowSessionProperty> prope
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
     bool isSystemCalling = SessionPermission::IsSystemCalling();
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isSystemWindow: %{public}d, isDialog: %{public}d, "
-            "isSubWindow: %{public}d, isSystemCalling: %{public}d", isSystemWindow, isDialog, isSubWindow,
-            isSystemCalling);
-        if (isSystemCalling || isSystemWindow) {
-            if (isSubWindow || isDialog) {
-                property->SetDragEnabled(defaultDragEnable);
-            } else {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "use client enableDrag");
-            }
-        } else {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSubWindow: %{public}d, isSystemCalling: %{public}d", isSystemWindow, isDialog, isSubWindow,
+        isSystemCalling);
+    if (isSystemCalling || isSystemWindow) {
+        if (isSubWindow || isDialog) {
             property->SetDragEnabled(defaultDragEnable);
+        } else {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "use client enableDrag");
         }
+    } else {
+        property->SetDragEnabled(defaultDragEnable);
+    }
 }
 
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
