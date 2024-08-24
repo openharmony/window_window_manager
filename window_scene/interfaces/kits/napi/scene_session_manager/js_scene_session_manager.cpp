@@ -185,7 +185,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
         JsSceneSessionManager::UpdateAppHookDisplayInfo);
     BindNativeFunction(env, exportObj, "refreshPcZOrder", moduleName,
-        JsSceneSessionManager::UpdateAppHookDisplayInfo);
+        JsSceneSessionManager::RefreshPcZOrder);
     return NapiGetUndefined(env);
 }
 
