@@ -458,6 +458,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                     break;
                 }
             }
+            break;
         }
         default:
             WLOGFW("unknown transaction code");
