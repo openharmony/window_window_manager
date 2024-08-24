@@ -893,7 +893,7 @@ WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool sho
          property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS")) {
             extensionWindowFlags_.hideNonSecureWindowsFlag = true;
-            TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property to false permission denied in %{public}s UIExtension.",
+            TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied in %{public}s UIExtension.",
                 property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
@@ -1172,7 +1172,7 @@ void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadC
 
 void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadContent) const
 {
-    TLOGW(WmsLogTag::WMS_UIEXT, "Modal UIExtension may be covered, persistentId=%{public}d", GetPersistentId());
+    TLOGW(WmsLogTag::WMS_UIEXT, "Id=%{public}d", GetPersistentId());
     std::ostringstream oss;
     oss << "Modal UIExtension may be covered uid: " << getuid();
     oss << ", windowName: " << property_->GetWindowName();
