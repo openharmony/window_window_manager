@@ -95,9 +95,9 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     AddExtensionWindowStageToSCB();
     WMError ret = Connect();
     if (ret != WMError::WM_OK) {
-        TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s %{public}d connect fail.",
-            property_->GetWindowName().c_str(), GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
+        TLOGE(WmsLogTag::WMS_LIFE, "name:%{public}s %{public}d connect fail. ret:%{public}d",
+            property_->GetWindowName().c_str(), GetPersistentId(), ret);
+        return ret;
     }
     MakeSubOrDialogWindowDragableAndMoveble();
     {
