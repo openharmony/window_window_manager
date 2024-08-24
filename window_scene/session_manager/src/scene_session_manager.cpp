@@ -10206,8 +10206,8 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
     std::ostringstream oss;
     oss << "[";
     for(size_t i = 0; i < persistentIds.size(); i++){
-        int32_t persistentId = persistentId[i];
-        oss << persistentIds;
+        int32_t persistentId = persistentIds[i];
+        oss << persistentId;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_SCB, "sceneScene is nullptr persistentId = %{public}d", persistentId);
@@ -10229,6 +10229,6 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
         }
     }
     oss << "[";
-    TLOGI(WmsLogTag::WMS_SCB, "RefreshPcZOrderList Complete:%{public}d", oss.str().c_str());
+    TLOGI(WmsLogTag::WMS_SCB, "RefreshPcZOrderList Complete:%{public}s", oss.str().c_str());
 }
 } // namespace OHOS::Rosen
