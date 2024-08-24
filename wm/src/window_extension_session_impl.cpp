@@ -94,20 +94,23 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
     AddExtensionWindowStageToSCB();
     WMError ret = Connect();
-    if (ret == WMError::WM_OK) {
-        MakeSubOrDialogWindowDragableAndMoveble();
-        {
-            std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-            windowExtensionSessionSet_.insert(this);
-        }
-        InputTransferStation::GetInstance().AddInputWindow(this);
-        state_ = WindowState::STATE_CREATED;
-        isUIExtensionAbilityProcess_ = true;
-        property_->SetIsUIExtensionAbilityProcess(true);
-        AddSetUIContentTimeoutCheck();
+    if (ret != WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s %{public}d connect fail.",
+            property_->GetWindowName().c_str(), GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
     }
+    MakeSubOrDialogWindowDragableAndMoveble();
+    {
+        std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+        windowExtensionSessionSet_.insert(this);
+    }
+    InputTransferStation::GetInstance().AddInputWindow(this);
+    state_ = WindowState::STATE_CREATED;
+    isUIExtensionAbilityProcess_ = true;
+    property_->SetIsUIExtensionAbilityProcess(true);
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d success.",
         property_->GetWindowName().c_str(), GetPersistentId());
+    AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
 
