@@ -10220,7 +10220,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             sceneSession->SetPcScenePanel(true);
         }
         unint newZOrder = i + startZOrder;
-        if(SceneSession->GetZOrder()!=newZOrder){
+        if(sceneSession->GetZOrder()!=newZOrder){
             sceneSession->SetZOrder(newZOrder);
             TLOGI(WmsLogTag::WMS_SCB, "SetZOrder persistentId:%{public}d", persistentId);
         }
