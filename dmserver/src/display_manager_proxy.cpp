@@ -1790,7 +1790,9 @@ std::vector<DisplayPhysicalResolution> DisplayManagerProxy::GetAllDisplayPhysica
     std::vector<DisplayPhysicalResolution> allPhysicalSize;
     int32_t displayInfoSize = 0;
     bool readRet = reply.ReadInt32(displayInfoSize);
+    TLOGE(WmsLogTag::DMS, "SendRequest displayInfoSize=%{public}d", displayInfoSize);
     if (!readRet || displayInfoSize <= 0) {
+        TLOGE(WmsLogTag::DMS, "read failed");
         return std::vector<DisplayPhysicalResolution> {};
     }
     for (int32_t i = 0; i < displayInfoSize; i++) {
