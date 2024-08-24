@@ -594,6 +594,48 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
     property->SetPersistentId(0);
     ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
 }
+
+HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest |Level3){
+    vector<int32_t> persistentIds;
+    SessionInfo info1, info2, info3;
+    info1.abilityName_ = "RefreshPcZorder1";
+    info1.bundleName_ = "RefreshPcZorder1";
+    info2.abilityName_ = "RefreshPcZorder2";
+    info2.bundleName_ = "RefreshPcZorder2";
+    info3.abilityName_ = "RefreshPcZorder3";
+    info3.bundleName_ = "RefreshPcZorder3";
+    uint32_t startZOrder = 100;
+    sptr<SceneSession> session1 = new (std::nothrow)SceneSession(info1);
+    EXPECT_NE(session1, nullptr);
+    persistentIds.push_back(session1->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    sptr<SceneSession> session2 = new (std::nothrow)SceneSession(info2);
+    EXPECT_NE(session2, nullptr);
+    persistentIds.push_back(session2->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId, sceneSession2});
+    sptr<SceneSession> session3 = new (std::nothrow)SceneSession(info3);
+    EXPECT_NE(session3, nullptr);
+    persistentIds.push_back(999);
+    session3->SetZOrder(404);
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId, sceneSession3});
+    ssm_->RefreshPcZorder(startZOrder, persistentIds);
+    auto start = std::chrono::system_clock::now();
+    while(true){
+        bool isFinished = Session1->GetZOrder != 0 &&  Session2->GetZOrder != 0;
+        if(isFinished){
+            break;
+        }
+        auto now = std::chrono::system_clock:now;
+        auto elapsed = std::chrono:duration_cast<std::chrono:seconds>(now - start);
+        if (elapsed >= 3){
+            break;
+        }
+        std::this_thread::sleep_for(std:chrono:milliseconds(100));
+    }
+    ASSERT_EQ(session1->GetZOrder(),100);
+    ASSERT_EQ(session1->GetZOrder(),101);
+    ASSERT_EQ(session1->GetZOrder(),404);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
