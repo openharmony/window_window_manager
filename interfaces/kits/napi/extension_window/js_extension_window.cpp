@@ -894,7 +894,9 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
                 return;
             }
-            JsExtensionWindow::ProcessAfterCreateSubWindow(extWindow, window);
+            if (!subWindow->IsTopmost()) {
+                extWindow->NotifyModalUIExtensionMayBeCovered(false);
+            }
             task.Resolve(env, CreateJsWindowObject(env, window));
             TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Create sub window %{public}s end", windowName.c_str());
         };
@@ -949,13 +951,6 @@ bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject,
     option.SetSubWindowDecorEnable(decorEnabled);
     option.SetParentId(hostWindowId_);
     return true;
-}
-
-void JsExtensionWindow::ProcessAfterCreateSubWindow(sptr<Rosen::Window> extWindow, sptr<Rosen::Window> subWindow)
-{
-    if (!subWindow->IsTopmost()) {
-        extWindow->NotifyModalUIExtensionMayBeCovered(false);
-    }
 }
 }  // namespace Rosen
 }  // namespace OHOS
