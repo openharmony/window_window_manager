@@ -295,33 +295,33 @@ HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
  */
 HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
 {
-    ASSERT_NE(subSession_, nullptr)
-    SessionInfo info
-    info.abilityName_ = "testRectCheck"
-    info.moduleName_ = "testRectCheck"
-    info.bundleName_ = "testRectCheck"
-    sptr<Session> session = new (std::nothrow) Session(info)
-    EXPECT_NE(nullptr, session)
-    subSession_->parentSession_ = session
-    uint32_t curWidth = 100
-    uint32_t curHeight = 200
-    subSession_->RectCheck(curWidth, curHeight)
+    ASSERT_NE(subSession_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testRectCheck";
+    info.moduleName_ = "testRectCheck";
+    info.bundleName_ = "testRectCheck";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+    subSession_->parentSession_ = session;
+    uint32_t curWidth = 100;
+    uint32_t curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
 
-    curWidth = 300
-    curHeight = 200
-    subSession_->RectCheck(curWidth, curHeight)
+    curWidth = 300;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
 
-    curWidth = 1930
-    curHeight = 200
-    subSession_->RectCheck(curWidth, curHeight)
+    curWidth = 1930;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
 
-    curWidth = 330
-    curHeight = 200
-    subSession_->RectCheck(curWidth, curHeight)
+    curWidth = 330;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
 
-    curWidth = 330
-    curHeight = 1930
-    subSession_->RectCheck(curWidth, curHeight)
+    curWidth = 330;
+    curHeight = 1930;
+    subSession_->RectCheck(curWidth, curHeight);
 }
 }
 }
