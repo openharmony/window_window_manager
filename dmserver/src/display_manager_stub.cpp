@@ -445,7 +445,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 if (!writeRet) {
                     WLOGFE("write display mode error");
                     break;
-                }                
+                }
                 writeRet = reply.WriteUint32(physicalItem.physicalWidth_);
                 if (!writeRet) {
                     WLOGFE("write physical width error");
