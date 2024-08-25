@@ -369,6 +369,13 @@ enum class ScreenCombination : uint32_t {
     SCREEN_EXPAND,
     SCREEN_MIRROR,
     SCREEN_UNIQUE,
+    SCREEN_EXTAND,
+    SCREEN_MAIN,
+};
+
+enum class MultiScreenMode : uint32_t {
+    SCREEN_MIRROR = 0,
+    SCREEN_EXTAND = 1,
 };
 
 struct Point {
