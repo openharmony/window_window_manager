@@ -802,7 +802,6 @@ void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
 
 std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysicalResolution()
 {
-    TLOGI(WmsLogTag::DMS, "zhangyoukangservice");
     if (allDisplayPhysicalResolution_.empty()) {
         sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
         if (displayInfo == nullptr) {
@@ -813,10 +812,6 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
         defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
         defaultResolution.physicalWidth_ = displayInfo->GetWidth();
         defaultResolution.physicalHeight_ = displayInfo->GetHeight();
-        TLOGE(WmsLogTag::DMS, "default display phy width = %{public}d", displayInfo->GetPhysicalWidth());
-        TLOGE(WmsLogTag::DMS, "default display phy height = %{public}d", displayInfo->GetPhysicalHeight());
-        TLOGE(WmsLogTag::DMS, "default display width = %{public}d", displayInfo->GetWidth());
-        TLOGE(WmsLogTag::DMS, "default display height = %{public}d", displayInfo->GetHeight());
         allDisplayPhysicalResolution_.emplace_back(defaultResolution);
     }
     return allDisplayPhysicalResolution_;
