@@ -433,7 +433,6 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
-            TLOGI(WmsLogTag::DMS, "zhangyoukangstub");
             auto physicalInfos = GetAllDisplayPhysicalResolution();
             size_t infoSize = physicalInfos.size();
             bool writeRet = reply.WriteInt32(static_cast<int32_t>(infoSize));
@@ -441,7 +440,6 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGFE("write physical size error");
                 break;
             }
-            WLOGFE("write display mode size=%{public}d", static_cast<int32_t>(infoSize));
             for (const auto &physicalItem : physicalInfos) {
                 writeRet = reply.WriteUint32(static_cast<uint32_t>(physicalItem.foldDisplayMode_));
                 if (!writeRet) {
@@ -454,7 +452,6 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                     WLOGFE("write physical width error");
                     break;
                 }
-                WLOGFE("write physical height %{public}d", physicalItem.physicalHeight_);
                 writeRet = reply.WriteUint32(physicalItem.physicalHeight_);
                 if (!writeRet) {
                     WLOGFE("write physical height error");
