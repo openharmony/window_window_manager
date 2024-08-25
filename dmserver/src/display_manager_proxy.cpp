@@ -1769,7 +1769,6 @@ DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& scree
 
 std::vector<DisplayPhysicalResolution> DisplayManagerProxy::GetAllDisplayPhysicalResolution()
 {
-    TLOGI(WmsLogTag::DMS, "zhangyoukangproxy");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::DMS, "remote is nullptr");
@@ -1790,7 +1789,6 @@ std::vector<DisplayPhysicalResolution> DisplayManagerProxy::GetAllDisplayPhysica
     std::vector<DisplayPhysicalResolution> allPhysicalSize;
     int32_t displayInfoSize = 0;
     bool readRet = reply.ReadInt32(displayInfoSize);
-    TLOGE(WmsLogTag::DMS, "SendRequest displayInfoSize=%{public}d", displayInfoSize);
     if (!readRet || displayInfoSize <= 0) {
         TLOGE(WmsLogTag::DMS, "read failed");
         return std::vector<DisplayPhysicalResolution> {};
