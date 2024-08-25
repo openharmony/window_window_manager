@@ -157,7 +157,6 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest
     WSError res = slController->AddSessionListener(listener);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
 
-    slController->Init();
     listener = new MyMissionListener();
     EXPECT_NE(nullptr, listener);
     res = slController->AddSessionListener(listener);
@@ -182,7 +181,6 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
     slController->NotifySessionLabelUpdated(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController->Init();
     listener = new MyMissionListener();
     slController->DelSessionListener(listener);
     EXPECT_NE(nullptr, listener);
@@ -202,7 +200,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTe
     slController->NotifySessionCreated(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController->Init();
     slController->NotifySessionCreated(persistentId);
     EXPECT_EQ(persistentId, 1);
 }
@@ -221,7 +218,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | Small
     slController->NotifySessionDestroyed(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    slController->Init();
     slController->NotifySessionDestroyed(persistentId);
     EXPECT_EQ(1, persistentId);
 }
@@ -248,8 +244,6 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTes
     std::list<int32_t> sessions;
     sessions.push_front(1);
     slController->HandleUnInstallApp(sessions);
-    slController->Init();
-    slController->HandleUnInstallApp(sessions);
     EXPECT_NE(0, sessions.size());
     int32_t persistentId = 1;
     slController->NotifySessionLabelUpdated(persistentId);
@@ -269,10 +263,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function |
     persistentId = 1;
     slController->NotifySessionSnapshotChanged(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(persistentId, 1);
 }
 
 /**
@@ -288,10 +278,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | Sm
     persistentId = 1;
     slController->NotifySessionMovedToFront(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(1, persistentId);
 }
 
 /**
@@ -307,10 +293,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTe
     persistentId = 1;
     slController->NotifySessionFocused(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(persistentId, 1);
 }
 
 /**
@@ -326,10 +308,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
     persistentId = 1;
     slController->NotifySessionUnfocused(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(1, persistentId);
 }
 
 /**
@@ -345,10 +323,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTes
     persistentId = 1;
     slController->NotifySessionClosed(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(1, persistentId);
 }
 
 /**
@@ -364,10 +338,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | Sm
     persistentId = 1;
     slController->NotifySessionLabelUpdated(persistentId);
     ASSERT_EQ(persistentId, 1);
-
-    slController->Init();
-    slController->NotifySessionSnapshotChanged(persistentId);
-    EXPECT_EQ(1, persistentId);
 }
 
 /**
@@ -415,9 +385,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
     slController->NotifySessionIconChanged(persistentId, icon);
     ASSERT_EQ(persistentId, 1);
 
-    slController->Init();
     slController->NotifySessionIconChanged(persistentId, icon);
-    EXPECT_NE(nullptr, slController->taskScheduler_);
     EXPECT_EQ(1, persistentId);
 }
 
@@ -429,11 +397,10 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
 HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 start";
-    EXPECT_EQ(nullptr,  slController->listenerDeathRecipient_);
-    slController->Init();
+    EXPECT_EQ(nullptr, slController->listenerDeathRecipient_);
     sptr<ISessionListener> listener = new MyMissionListener();
     slController->AddSessionListener(listener);
-    EXPECT_NE(nullptr,  slController->listenerDeathRecipient_);
+    EXPECT_NE(nullptr, slController->listenerDeathRecipient_);
 
     if (SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy()) {
         sptr<IRemoteObject> remote;

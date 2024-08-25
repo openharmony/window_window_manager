@@ -124,7 +124,7 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
 
         // post timeout task for a new vsync
         vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
-        auto task = [weakThis = std::weak_ptr<VsyncStation>(shared_from_this())] {
+        auto task = [weakThis = weak_from_this()] {
             if (auto sp = weakThis.lock()) {
                 sp->OnVsyncTimeOut();
             }
@@ -133,7 +133,7 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
     }
 
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
-    auto task = [weakThis = std::weak_ptr<VsyncStation>(shared_from_this())]
+    auto task = [weakThis = weak_from_this()]
         (int64_t timestamp, int64_t frameCount, void* client) {
         if (auto sp = weakThis.lock()) {
             sp->VsyncCallbackInner(timestamp, frameCount);
