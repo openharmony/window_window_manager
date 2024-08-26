@@ -91,6 +91,7 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -108,6 +109,8 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
+    WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
+    void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -118,6 +121,8 @@ private:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    bool modalUIExtensionMayBeCovered_ { false };
+    bool modalUIExtensionSelfLoadContent_ { false };
     int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen

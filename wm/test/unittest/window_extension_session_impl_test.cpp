@@ -1472,6 +1472,63 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
     ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: CheckHideNonSecureWindowsPermission
+ * @tc.desc: CheckHideNonSecureWindowsPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_OK);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->modalUIExtensionMayBeCovered_ = true;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: NotifyModalUIExtensionMayBeCovered
+ * @tc.desc: NotifyModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: ReportModalUIExtensionMayBeCovered
+ * @tc.desc: ReportModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    window_->ReportModalUIExtensionMayBeCovered(true);
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
