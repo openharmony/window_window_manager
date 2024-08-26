@@ -188,7 +188,7 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
     ASSERT_NE(statusBarEnabledCallbackFunc_, nullptr);
     ssm_->SetStatusBarEnabledChangeListener(nullptr);
 
-    WMError result00 = ssm_->SetGestureNavigaionEnabled(true);
+    WMError result00 = ssm_->SetGestureNavigationEnabled(true);
     ASSERT_EQ(result00, WMError::WM_OK);
 
     ssm_->SetStatusBarEnabledChangeListener(statusBarEnabledCallbackFunc_);
@@ -203,7 +203,7 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
     ASSERT_EQ(statusBarEnabled_, false);
 
     ssm_->SetStatusBarEnabledChangeListener(nullptr);
-    ssm_->SetGestureNavigaionEnabled(true);
+    ssm_->SetGestureNavigationEnabled(true);
 }
 
 /**
@@ -1760,7 +1760,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
 {
     ASSERT_NE(nullptr, ssm_);
     {
-        std::unique_lock<std::shared_mutex> lock(ssm_->SceneSessionMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
         ssm_->sceneSessionMap_.clear();
     }
     int32_t persistentId = 100;
