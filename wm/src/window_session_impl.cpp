@@ -777,7 +777,7 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 
 bool WindowSessionImpl::IsFocused() const
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_);
+    TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_.load());
     return isFocused_;
 }
 
