@@ -43,9 +43,9 @@ public:
 
     /**
      * @brief update the windiw range in the rect
-     * @param rect: the update range
-     * @param reason: the update reason
-     * @param rsTransaction: the handle of animation synchronization
+     * @param rect the update range
+     * @param reason the update reason
+     * @param rsTransaction the handle of animation synchronization
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -54,6 +54,12 @@ public:
     virtual WSError UpdateOrientation() = 0;
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
+
+    /**
+     * @brief update the focus
+     * @param isFocused set isfocused
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
 
@@ -82,6 +88,11 @@ public:
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
+
+    /**
+     * @brief Notify transform
+     * @param transform transform to change
+     */
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
 
