@@ -564,13 +564,16 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
+    if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
+        windowSizeChanged_ = true;
+    }
     if (reason == SizeChangeReason::DRAG_END) {
         property_->SetRequestRect(wmRect);
     }
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
-        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), wmReason, rsTransaction != nullptr,
-        GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
+        ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
+        rsTransaction != nullptr, GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
@@ -1073,35 +1076,29 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window != nullptr && window->surfaceNode_ != nullptr) {
-            bool setCallBackEnable = true;
-            if (window->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "Notify buffer available after layout, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MAIN,
-                    "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
-                // false: Make the function callable
-                window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            }
-        }
-    });
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        return;
+    }
     uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto window = weakThis.promote();
         if (window == nullptr) {
             return;
         }
-        bool setCallBackEnable = true;
-        if (window->enableFrameLayoutFinishCb_.compare_exchange_strong(setCallBackEnable, false)) {
-            auto hostSession = window->GetHostSession();
-            if (hostSession) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "NotifyFrameLayoutFinish, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MULTI_WINDOW,
-                    "NotifyFrameLayoutFinish, windowId: %{public}u", window->GetWindowId());
-                hostSession->NotifyFrameLayoutFinishFromApp();
+        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
+            auto windowRect = window->GetRect();
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            TLOGI(WmsLogTag::WMS_LAYOUT,
+                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            WSRect rect = { windowRect.posX_, windowRect.posY_,
+                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
+            if (auto session = window->GetHostSession()) {
+                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
             }
+            window->windowSizeChanged_ = false;
+            window->enableFrameLayoutFinishCb_ = false;
         }
     });
 }

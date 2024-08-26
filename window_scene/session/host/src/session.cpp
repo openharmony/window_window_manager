@@ -363,6 +363,16 @@ void Session::NotifyDisconnect()
     }
 }
 
+void Session::NotifyLayoutFinished()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
 void Session::NotifyExtensionDied()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -1085,6 +1095,7 @@ WSError Session::Disconnect(bool isFromClient)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    bufferAvailable_ = false;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1878,7 +1889,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
+    if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         scenePersistence_->SetHasSnapshot(false);
         return nullptr;
     }
@@ -1921,6 +1932,7 @@ void Session::SaveSnapshot(bool useFfrt)
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        session->lastLayoutRect_ = session->layoutRect_;
         session->snapshot_ = session->Snapshot(runInFfrt);
         if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
@@ -2458,17 +2470,14 @@ WSRect Session::GetSessionGlobalRect() const
     return winRect_;
 }
 
-void Session::SetSessionLastRect(const WSRect& rect)
+WSRect Session::GetLastLayoutRect() const
 {
-    if (lastWinRect_ == rect) {
-        return;
-    }
-    lastWinRect_ = rect;
+    return lastLayoutRect_;
 }
 
-WSRect Session::GetSessionLastRect() const
+WSRect Session::GetLayoutRect() const
 {
-    return lastWinRect_;
+    return layoutRect_;
 }
 
 void Session::SetSessionRequestRect(const WSRect& rect)
