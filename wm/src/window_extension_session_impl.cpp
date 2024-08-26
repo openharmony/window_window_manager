@@ -25,6 +25,7 @@
 #include "parameters.h"
 #include "anr_handler.h"
 #include "hitrace_meter.h"
+#include "perform_reporter.h"
 #include "session_permission.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -491,6 +492,8 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
+    NotifyModalUIExtensionMayBeCovered(true);
+
     UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (focusState_ != std::nullopt) {
@@ -769,18 +772,34 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
     return vpr;
 }
 
-WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
+WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool shouldHide)
 {
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
     if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
-        extensionWindowFlags_.hideNonSecureWindowsFlag = true;
-        TLOGE(WmsLogTag::WMS_UIEXT, "Setting this property to false is not allowed in %{public}s UIExtension.",
-            property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        if (!SessionPermission::VerifyCallingPermission("ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS")) {
+            extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+            TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied in %{public}s UIExtension.",
+                property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ? "modal" : "constrained embedded");
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        if (modalUIExtensionMayBeCovered_) {
+            ReportModalUIExtensionMayBeCovered(modalUIExtensionSelfLoadContent_);
+        }
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, shouldHide: %{public}u", GetPersistentId(), shouldHide);
+    WMError checkRet = CheckHideNonSecureWindowsPermission(shouldHide);
+    if (checkRet != WMError::WM_OK) {
+        return checkRet;
+    }
+
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = shouldHide;
         return WMError::WM_OK;
@@ -802,6 +821,7 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 
 WMError WindowExtensionSessionImpl::SetWaterMarkFlag(bool isEnable)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isEnable: %{public}u", GetPersistentId(), isEnable);
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.waterMarkFlag = isEnable;
         return WMError::WM_OK;
@@ -1008,6 +1028,38 @@ bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
     SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "GetFreeMultiWindowEnableState = %{public}u", enable);
     return enable;
+}
+
+void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
+{
+    if (property_->GetUIExtensionUsage() != UIExtensionUsage::MODAL &&
+        property_->GetUIExtensionUsage() != UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        return;
+    }
+
+    modalUIExtensionMayBeCovered_ = true;
+    if (byLoadContent) {
+        modalUIExtensionSelfLoadContent_ = true;
+    }
+    if (extensionWindowFlags_.hideNonSecureWindowsFlag) {
+        return;
+    }
+    ReportModalUIExtensionMayBeCovered(byLoadContent);
+}
+
+void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadContent) const
+{
+    TLOGW(WmsLogTag::WMS_UIEXT, "Id=%{public}d", GetPersistentId());
+    std::ostringstream oss;
+    oss << "Modal UIExtension may be covered uid: " << getuid();
+    oss << ", windowName: " << property_->GetWindowName();
+    if (context_) {
+        oss << ", bundleName: " << context_->GetBundleName();
+    }
+    auto type = byLoadContent ? WindowDFXHelperType::WINDOW_MODAL_UIEXTENSION_UICONTENT_CHECK :
+        WindowDFXHelperType::WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK;
+    SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(static_cast<int32_t>(type), getpid(),
+        oss.str());
 }
 } // namespace Rosen
 } // namespace OHOS
