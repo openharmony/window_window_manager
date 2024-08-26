@@ -398,7 +398,7 @@ struct ExpandOption {
     uint32_t startY_;
 };
 
-struct ExtendOption {
+struct MultiScreenPositionOptions {
     ScreenId screenId_;
     uint32_t startX_;
     uint32_t startY_;

@@ -2687,8 +2687,8 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return makeResult;
 }
 
-DMError ScreenSessionManager::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode screenMode)
+DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
     TLOGI(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",Mode:%{public}u",
         mainScreenId, secondaryScreenId, screenMode);
@@ -2697,9 +2697,9 @@ DMError ScreenSessionManager::MultiScreenModeSwitch(ScreenId mainScreenId, Scree
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    if (screenMode == ScreenSourceMode::SCREEN_MIRROR) {
+    if (screenMode == MultiScreenMode::SCREEN_MIRROR) {
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "mirror");
-    } else if (screenMode == ScreenSourceMode::SCREEN_EXTEND) {
+    } else if (screenMode == MultiScreenMode::SCREEN_EXTAND) {
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "extand");
     } else {
         TLOGE(WmsLogTag::DMS, "operate mode error");
@@ -2708,19 +2708,19 @@ DMError ScreenSessionManager::MultiScreenModeSwitch(ScreenId mainScreenId, Scree
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     TLOGI(WmsLogTag::DMS,
         "mID:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sID:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        firstScreenOption.screenId_, firstScreenOption.startX_, firstScreenOption.startY_,
+        mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    sptr<ScreenSession> firstScreenSession = GetScreenSession(firstScreenOption.screenId_);
+    sptr<ScreenSession> firstScreenSession = GetScreenSession(mainScreenOptions.screenId_);
     if (!firstScreenSession) {
         TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
@@ -2732,7 +2732,7 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(ExtendOption firstS
         return DMError::DM_ERROR_NULLPTR;
     }
     ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
-    firstProperty.SetStartPosition(firstScreenOption.startX_, firstScreenOption.startY_);
+    firstProperty.SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
     secondProperty.SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     return DMError::DM_OK;
 }
