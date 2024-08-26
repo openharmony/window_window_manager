@@ -18,6 +18,7 @@
 
 #include <ability_manager_client.h>
 #include <algorithm>
+#include <climits>
 #include <hitrace_meter.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
@@ -61,6 +62,16 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
+
+bool CheckIfRectElementIsTooLarge(const WSRect& rect)
+{
+    int32_t largeNumber = static_cast<int32_t>(SHRT_MAX);
+    if (rect.posX_ >= largeNumber || rect.posY_ >= largeNumber ||
+        rect.width_ >= largeNumber || rect.height_ >= largeNumber) {
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
@@ -908,20 +919,33 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
         newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
+    WSRect newRect = rect;
+    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
+        (systemConfig_.uiType_ == "phone" ||
+         (systemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
+        auto parentSession = GetParentSession();
+        if (parentSession) {
+            auto parentRect = parentSession->GetSessionRect();
+            if (!CheckIfRectElementIsTooLarge(parentRect)) {
+                newRect.posX_ -= parentRect.posX_;
+                newRect.posY_ -= parentRect.posY_;
+            }
+        }
+    }
     Session::RectCheckProcess();
-    auto task = [weakThis = wptr(this), rect, reason]() {
+    auto task = [weakThis = wptr(this), newRect, reason]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->UpdateSessionRectInner(rect, reason);
+        session->UpdateSessionRectInner(newRect, reason);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));

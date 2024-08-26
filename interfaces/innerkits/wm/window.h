@@ -823,7 +823,7 @@ public:
      * @param y
      * @return WMError
      */
-    virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
      * @brief move the window to (x, y)
      *
