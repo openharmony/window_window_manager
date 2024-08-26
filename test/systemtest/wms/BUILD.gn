@@ -49,7 +49,7 @@ group("systemtest") {
     ":wms_window_visibility_info_test",
     ":wms_window_water_mark_test",
   ]
-  if (!scene_board_enabled) {
+  if (!window_manager_use_sceneboard) {
     deps += [ ":wms_window_move_drag_test" ]
   }
 }
