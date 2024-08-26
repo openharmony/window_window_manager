@@ -627,8 +627,8 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 void PictureInPictureController::LocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
+    if (mainWindow_ == nullptr || window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindow or window is nullptr");
         return;
     }
     window_->SetTransparent(true);
