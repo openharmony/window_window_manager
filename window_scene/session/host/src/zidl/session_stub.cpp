@@ -675,9 +675,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 {
     WLOGFD("HandleSendPointerEvenForMoveDrag!");
     auto pointerEvent = MMI::PointerEvent::Create();
+    if (!pointerEvent) {
+        TLOGE(WmsLogTag::WMS_EVENT, "create pointer event failed");
+        return ERR_INVALID_DATA;
+    }
     if (!pointerEvent->ReadFromParcel(data)) {
-        WLOGFE("Read pointer event failed");
-        return -1;
+        TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
