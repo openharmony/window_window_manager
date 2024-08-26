@@ -36,7 +36,6 @@ SessionManagerService::~SessionManagerService()
 
 SessionManagerService* SessionManagerService::GetInstance()
 {
-    WLOGFI("new SessionManagerService");
     static sptr<SessionManagerService> sessionManagerService = new SessionManagerService();
     return sessionManagerService.GetRefPtr();
 }
