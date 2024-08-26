@@ -204,7 +204,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
