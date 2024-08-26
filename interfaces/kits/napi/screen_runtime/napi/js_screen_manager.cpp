@@ -694,7 +694,7 @@ static int32_t GetExpandOptionFromJs(napi_env env, napi_value optionObject, Expa
     uint32_t screenId;
     uint32_t startX;
     uint32_t startY;
-    napi_get_named_property(env, optionObject, "id", &screedIdValue);
+    napi_get_named_property(env, optionObject, "screenId", &screedIdValue);
     napi_get_named_property(env, optionObject, "startX", &startXValue);
     napi_get_named_property(env, optionObject, "startY", &startYValue);
     if (!ConvertFromJsValue(env, screedIdValue, screenId)) {
@@ -722,7 +722,7 @@ static int32_t GetMultiScreenPositionOptionsFromJs(napi_env env, napi_value opti
     uint32_t screenId;
     uint32_t startX;
     uint32_t startY;
-    napi_get_named_property(env, optionObject, "screenId", &screedIdValue);
+    napi_get_named_property(env, optionObject, "id", &screedIdValue);
     napi_get_named_property(env, optionObject, "startX", &startXValue);
     napi_get_named_property(env, optionObject, "startY", &startYValue);
     if (!ConvertFromJsValue(env, screedIdValue, screenId)) {
