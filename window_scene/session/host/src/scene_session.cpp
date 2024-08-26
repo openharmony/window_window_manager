@@ -4289,9 +4289,9 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            static_cast<int32_t>(screenWidth) : rect.width_;
-        newWinRect.height_ = rect.height_;
+        newWinRect.width_ = static_cast<int32_t>((gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
+            screenWidth : rect.width_);
+        newWinRect.height_ = static_cast<int32_t>(rect.height_);
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newWinRect.posY_ = static_cast<int32_t>(screenHeight) - rect.height_;
         newRequestRect= newWinRect;
