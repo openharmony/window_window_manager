@@ -103,10 +103,10 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
-    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode) override;
-    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-        ExtendOption secondScreenOption) override;
+    virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode) override;
+    virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
@@ -282,7 +282,7 @@ public:
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
-        const std::string& secondaryScreenMode);
+        const std::string& screenMode);
 
 protected:
     ScreenSessionManager();
