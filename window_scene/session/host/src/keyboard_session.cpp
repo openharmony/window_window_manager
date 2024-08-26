@@ -67,6 +67,10 @@ SessionGravity KeyboardSession::GetKeyboardGravity() const
 
 WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
@@ -76,10 +80,11 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, show keyboard failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-
         session->UseFocusIdIfCallingSessionIdInvalid();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
+        session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
+        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         return session->SceneSession::Foreground(property);
     };
     PostTask(task, "Show");
@@ -190,34 +195,24 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    auto task = [weakThis = wptr(this), gravity, percent]() -> WSError {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
+        GetPersistentId(), gravity, percent);
+    if (sessionChangeCallback_ && sessionChangeCallback_->onKeyboardGravityChange_) {
+        sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        sessionProperty->SetKeyboardSessionGravity(gravity, percent);
+    }
+    RelayoutKeyBoard();
+    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        SetWindowAnimationFlag(false);
+        if (IsSessionForeground()) {
+            RestoreCallingSession();
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
-            session->GetPersistentId(), gravity, percent);
-
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onKeyboardGravityChange_) {
-            session->sessionChangeCallback_->onKeyboardGravityChange_(gravity);
-        }
-        auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty) {
-            sessionProperty->SetKeyboardSessionGravity(gravity, percent);
-        }
-        session->RelayoutKeyBoard();
-        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-            session->SetWindowAnimationFlag(false);
-            if (session->IsSessionForeground()) {
-                session->RestoreCallingSession();
-            }
-        } else {
-            session->SetWindowAnimationFlag(true);
-        }
-        return WSError::WS_OK;
-    };
-    PostTask(task, "SetKeyboardSessionGravity");
+    } else {
+        SetWindowAnimationFlag(true);
+    }
     return WSError::WS_OK;
 }
 
@@ -251,17 +246,23 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        sessionProperty->SetKeyboardLayoutParams(params);
+        session->MoveAndResizeKeyboard(params, sessionProperty, false);
+        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
-            "PortraitPanelRect: %{public}s", session->GetPersistentId(), static_cast<uint32_t>(params.gravity_),
-            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
-            params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
-        auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty) {
-            sessionProperty->SetKeyboardLayoutParams(params);
-        }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onAdjustKeyboardLayout_) {
-            session->sessionChangeCallback_->onAdjustKeyboardLayout_(params);
+            "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
+            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
+            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
+            params.PortraitPanelRect_.ToString().c_str(), session->GetSessionRequestRect().ToString().c_str());
+        if (session->adjustKeyboardLayoutFunc_) {
+            session->adjustKeyboardLayoutFunc_(params);
         }
         return WSError::WS_OK;
     };
@@ -499,18 +500,12 @@ void KeyboardSession::RelayoutKeyBoard()
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t percent = 0;
     sessionProperty->GetSessionGravity(gravity, percent);
-    auto displayId = sessionProperty->GetDisplayId();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d, displayId: %{public}" PRIu64"",
-        gravity, percent, displayId);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d", gravity, percent);
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
-        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
-    } else {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null, get screenWidth and screenHeight failed");
+    if (!GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight)) {
+        return;
     }
 
     auto requestRect = sessionProperty->GetRequestRect();
@@ -526,7 +521,6 @@ void KeyboardSession::RelayoutKeyBoard()
     sessionProperty->SetRequestRect(requestRect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s", GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
-    UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()

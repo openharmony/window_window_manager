@@ -606,19 +606,22 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
-static bool IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
+bool SceneSession::IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
 {
     static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
     bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
     bool isDualDevice = FoldScreenStateInternel::IsDualDisplayFoldDevice();
-    const auto& screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(
-        sessionProperty->GetDisplayId());
-    Rotation rotation = (screenSession != nullptr) ? screenSession->GetRotation() : Rotation::ROTATION_0;
-    bool isLandscape = (rotation == Rotation::ROTATION_90) || (rotation == Rotation::ROTATION_270);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
+        return false;
+    }
+    bool isLandscape = screenWidth > screenHeight ? true : false;
     bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
     TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
-        "isDualDevice:%{public}d, rotation:%{public}d, isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable,
-        isFolded, isDualDevice, rotation, result);
+        "isDualDevice:%{public}d, isLandscape:%{public}d, screenWidth:%{public}u, screenHeight:%{public}u, "
+        "isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable, isFolded, isDualDevice, isLandscape,
+        screenWidth, screenHeight, result);
     return result;
 }
 
@@ -640,9 +643,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             return;
         }
         static bool isPhone = systemConfig_.uiType_ == "phone";
-        if (IsKeyboardNeedLeftOffset(isPhone, sessionProperty)) {
-            keyboardSession->winRect_.posX_ += panelSession->winRect_.posX_;
-        } else {
+        if (!IsKeyboardNeedLeftOffset(isPhone, sessionProperty) || panelSession->winRect_.posX_ != 0) {
             keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
         }
     }
@@ -727,10 +728,50 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
     return WSError::WS_OK;
 }
 
-bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWinRect, WSRect& newRequestRect)
+bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
+    uint32_t& screenWidth, uint32_t& screenHeight)
+{
+    const auto& screenSession = sessionProperty == nullptr ? nullptr :
+        ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId());
+    if (screenSession != nullptr) {
+        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    } else {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "sessionProperty or screenSession is nullptr, use defaultDisplayInfo");
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+            screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is null, get screenWidthAndHeight failed");
+            return false;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+    return true;
+}
+
+bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
+    uint32_t& screenWidth, uint32_t& screenHeight)
+{
+    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplayInfo != nullptr) {
+        screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+        screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is null, get screenWidthAndHeight failed");
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+    return true;
+}
+
+bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
 {
     SessionGravity gravity;
     uint32_t percent = 0;
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
@@ -739,29 +780,25 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplayInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is nullptr");
+        if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
             return false;
         }
-
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            defaultDisplayInfo->GetWidth() : rect.width_;
+            static_cast<int32_t>(screenWidth) : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
         newWinRect.height_ =
             (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0)
-                ? static_cast<int32_t>(static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u)
-                : rect.height_;
+                ? static_cast<int32_t>(screenHeight * percent / 100u) : rect.height_;
         newRequestRect.height_ = newWinRect.height_;
-        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : newRequestRect.posX_;
+        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
-        newWinRect.posY_ = defaultDisplayInfo->GetHeight() - static_cast<int32_t>(newWinRect.height_);
+        newWinRect.posY_ = static_cast<int32_t>(screenHeight) - newWinRect.height_;
         newRequestRect.posY_ = newWinRect.posY_;
         TLOGI(WmsLogTag::WMS_KEYBOARD, "rect: %{public}s, newRequestRect: %{public}s, newWinRect: %{public}s",
             rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return true;
     }
-    WLOGFD("There is no need to update input rect");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "There is no need to update input rect");
     return false;
 }
 
@@ -785,6 +822,33 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
         return WSError::WS_OK;
     };
     PostTask(task, "SetSessionRectChangeCallback");
+}
+
+void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "session or keyboardLayoutFunc is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->adjustKeyboardLayoutFunc_ = func;
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "property is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
+        session->adjustKeyboardLayoutFunc_(params);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify adjust keyboard layout when register, keyboardId: %{public}d, "
+            "gravity: %{public}u, LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+            "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", session->GetPersistentId(),
+            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
+            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
+            params.PortraitPanelRect_.ToString().c_str());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetAdjustKeyboardLayoutCallback");
 }
 
 void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func)
@@ -4201,11 +4265,43 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
-            session->sessionChangeCallback_->onAdjustKeyboardLayout_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
+}
+
+void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
+    const sptr<WindowSessionProperty>& sessionProperty, bool isShow)
+{
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    bool ret = (isShow) ? GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight) :
+        GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed, isShow: %{public}d", isShow);
+        return;
+    }
+    bool isLandscape = screenWidth > screenHeight ? true : false;
+    Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
+    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
+        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
+            static_cast<int32_t>(screenWidth) : rect.width_;
+        newWinRect.height_ = rect.height_;
+        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
+        newWinRect.posY_ = static_cast<int32_t>(screenHeight) - rect.height_;
+        newRequestRect= newWinRect;
+    } else if (rect.width_ > 0 && rect.height_ > 0) {
+        newWinRect = SessionHelper::TransferToWSRect(rect);
+        newRequestRect = newWinRect;
+    }
+    SetSessionRequestRect(newRequestRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, gravity: %{public}d, rect: %{public}s, newRequestRect: %{public}s"
+        ", isLandscape: %{public}d, screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(), gravity,
+        rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
 } // namespace OHOS::Rosen

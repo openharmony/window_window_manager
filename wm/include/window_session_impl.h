@@ -435,6 +435,7 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
+    std::atomic<bool> isUiContentDestructing_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
