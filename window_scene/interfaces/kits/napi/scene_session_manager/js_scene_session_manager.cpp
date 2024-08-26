@@ -902,7 +902,7 @@ napi_value JsSceneSessionManager::IsScbCoreEnabled(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRefreshPcZOrder(env, info) : nullptr;
 }
@@ -2969,21 +2969,21 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
     napi_value argv[4];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     uint32_t startZOrder;
     if (!ConvertFromJsValue(env, argv[0], startZOrder)) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert startZOrder to %{public}d", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert startZOrder to %{public}d", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::vector<int32_t> perisistendIds;
     if (!ConvertInt32ArrayFromJs(env, argv[1], perisistendIds)) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert perisistendIds to %{public}d", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert perisistendIds to %{public}d", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
