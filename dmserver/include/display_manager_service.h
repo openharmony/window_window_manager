@@ -114,6 +114,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
 private:
     DisplayManagerService();
@@ -137,6 +138,7 @@ private:
     sptr<DisplayDumper> displayDumper_;
     AtomicMap<ScreenId, uint32_t> accessTokenIdMaps_;
     bool isAutoRotationOpen_;
+    std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
 };
 } // namespace OHOS::Rosen
 
