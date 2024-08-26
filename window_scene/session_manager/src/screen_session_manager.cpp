@@ -5030,4 +5030,36 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
     }
     return allDisplayPhysicalResolution_;
 }
+
+DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
+        !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_CALLING;
+    }
+
+    std::vector<uint64_t> surfaceNodeIds;
+    if (!windowIdList.empty()) {
+        MockSessionManagerService::GetInstance().GetProcessSurfaceNodeIdByPersistentId(
+            pid, windowIdList, surfaceNodeIds);
+    }
+    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+    auto ret = rsInterface_.SetVirtualScreenSecurityExemptionList(rsId, surfaceNodeIds);
+
+    std::ostringstream oss;
+    oss << "screenId:" << screenId << ", rsID: " << rsId << ", pid: " << pid
+        << ", winListSize:[ ";
+    for (auto val : windowIdList) {
+        oss << val << " ";
+    }
+    oss << "]" << ", surfaceListSize:[ ";
+    for (auto val : surfaceNodeIds) {
+        oss << val << " ";
+    }
+    oss << "]" << ", ret: " << ret;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    return ret == 0 ? DMError::DM_OK : DMError::DM_ERROR_UNKNOWN;
+}
 } // namespace OHOS::Rosen
