@@ -94,7 +94,7 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> scnSession = new SceneSession(info, specificCallback);
     sptr<AAFwk::SessionInfo> scnSessionInfo = new AAFwk::SessionInfo();
     bool needRemoveSession = true;
     bool isForceClean = true;
@@ -107,7 +107,6 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
     isForceClean = false;
     sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
     ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
 }
 

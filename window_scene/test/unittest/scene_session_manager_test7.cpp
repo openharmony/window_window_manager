@@ -852,8 +852,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
@@ -864,8 +862,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
     sceneSession->sessionInfo_.isSystem_ = true;
-    ssm_->NotifySessionMovedToFront(persistentId);
-    ssm_->listenerController_ = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
 
@@ -1131,8 +1127,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront01, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = true;
@@ -1155,8 +1149,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront02, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
@@ -1179,8 +1171,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront03, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
@@ -1199,8 +1189,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront04, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.isSystem_ = true;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
@@ -1219,7 +1207,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront05, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
 
