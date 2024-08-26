@@ -40,6 +40,14 @@ public:
 
     // IPC interface
     virtual WSError SetActive(bool active) = 0;
+
+    /**
+     * @brief update the windiw range in the rect
+     * @param rect: the update range
+     * @param reason: the update reason
+     * @param rsTransaction: the handle of animation synchronization
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateDensity() = 0;
