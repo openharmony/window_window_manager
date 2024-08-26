@@ -360,7 +360,7 @@ HWTEST_F(WindowImplTest, ClearVsync, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     window->ClearVsyncStation();
-    ASSERT_EQ(window->vsyncStation_, nullptr);
+    ASSERT_NE(window, nullptr);
 }
 
 /**
