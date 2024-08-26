@@ -627,7 +627,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 void PictureInPictureController::LocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (mainWindow_ == nullptr) {
+    if (mainWindow_ == nullptr || window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "main window is nullptr");
         return;
     }
