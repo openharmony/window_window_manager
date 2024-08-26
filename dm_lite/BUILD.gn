@@ -77,7 +77,7 @@ ohos_shared_library("libdm_lite") {
 
 group("test") {
   testonly = true
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     deps = [ "test:test" ]
   } else {
     deps = []

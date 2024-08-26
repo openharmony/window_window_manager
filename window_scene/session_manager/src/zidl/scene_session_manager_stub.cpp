@@ -432,7 +432,7 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
     WLOGFI("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         WLOGFI("listener is nullptr");
         return ERR_NONE;
     }
