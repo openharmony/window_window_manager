@@ -1638,7 +1638,6 @@ HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallT
 HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    WSError ret;
     ssm_->PendingSessionToForeground(nullptr);
 
     SessionInfo info;
@@ -1678,7 +1677,6 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    WSError ret;
     AppExecFwk::ElementName element;
     ssm_->GetFocusSessionElement(element);
 
@@ -1808,7 +1806,6 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
 HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    WMError ret;
     SessionSnapshot snapshot;
     ssm_->GetSessionSnapshotById(100, snapshot);
 }
