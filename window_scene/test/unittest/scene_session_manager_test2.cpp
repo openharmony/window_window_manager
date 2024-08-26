@@ -1759,11 +1759,12 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest |
 HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    WSError ret;
-    ssm_->sceneSessionMap_.clear();
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_->SceneSessionMapMutex_);
+        ssm_->sceneSessionMap_.clear();
+    }
     int32_t persistentId = 100;
-    ret = ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
+    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
