@@ -194,6 +194,15 @@ public:
         const std::string& strId);
     WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
+
+    /**
+     * @brief request focus status
+     * @param persistentId window ID
+     * @param isFocused is Focused
+     * @param byForeground byForeground
+     * @param reason focus change reason
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
@@ -210,6 +219,11 @@ public:
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
+
+    /**
+     * @brief get gocus window info
+     * @param focusInfo focus Info
+     */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
     void NotifySessionMovedToFront(int32_t persistentId);
@@ -221,6 +235,12 @@ public:
     void InitWithRenderServiceAdded();
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
+
+    /**
+     * @brief get focus session token
+     * @param token  the object of token
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -318,6 +338,13 @@ public:
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
+
+    /**
+     * @brief shift App window focus
+     * @param sourcePersistentId  source persistent Id
+     * @param targetPersistentId  target persistent Id
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
