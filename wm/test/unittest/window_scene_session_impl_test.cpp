@@ -1707,6 +1707,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("GetStatusBarHeight");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 }
