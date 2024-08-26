@@ -600,7 +600,7 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
  * @tc.desc: RefreshPcZorder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level3){
+HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level3) {
     vector<int32_t> persistentIds;
     SessionInfo info1, info2, info3;
     info1.abilityName_ = "RefreshPcZorder1";
