@@ -583,7 +583,7 @@ private:
     bool isMinimizedByUserSwitch_ { false };
 
     // pc scene panel is used to determine whether the freshPcZOrder method is used to process the layer
-    bool isPcScenePanel_ {false};
+    bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
