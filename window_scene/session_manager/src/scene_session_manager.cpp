@@ -10205,7 +10205,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
     idListMap_.insert({startZOrder, persistentIds});
     std::ostringstream oss;
     oss << "[";
-    for(size_t i = 0; i < persistentIds.size(); i++){
+    for(size_t i = 0; i < persistentIds.size(); i++) {
         int32_t persistentId = persistentIds[i];
         oss << persistentId;
         auto sceneSession = GetSceneSession(persistentId);
@@ -10216,7 +10216,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             }
             continue;
         }
-        if (!sceneSession->GetPcScenePanel()){
+        if (!sceneSession->GetPcScenePanel()) {
             sceneSession->SetPcScenePanel(true);
         }
         uint32_t newZOrder = i + startZOrder;
@@ -10224,7 +10224,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             sceneSession->SetZOrder(newZOrder);
             TLOGI(WmsLogTag::WMS_LAYOUT, "SetZOrder persistentId:%{public}d", persistentId);
         }
-        if(i < persistentIds.size() - 1){
+        if(i < persistentIds.size() - 1) {
             oss << ",";
         }
     }
