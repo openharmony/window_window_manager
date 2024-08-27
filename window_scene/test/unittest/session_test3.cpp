@@ -28,6 +28,8 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
+#include "session/screen/include/screen_session.h"
+#include "screen_session_manager/include/screen_session_manager_client"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
@@ -1014,7 +1016,7 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     session_->RectCheckProcess();
 
-    WsRect rect = {0, 0, 0, 0};
+    WSRect rect = {0, 0, 0, 0};
     session_->winRect_ = rect;
     session_->RectCheckProcess();
 
