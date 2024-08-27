@@ -29,8 +29,6 @@ class ExtensionSession;
 class ExtensionSessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
-    ExtensionSessionManager();
-    ~ExtensionSessionManager();
     /**
      * @brief create extension session
      *
@@ -64,6 +62,9 @@ public:
         const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
 
 private:
+    ExtensionSessionManager();
+    ~ExtensionSessionManager() = default;
+
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
     float GetSystemDensity(uint64_t displayId);
 
