@@ -215,6 +215,8 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     if (paramFlag >= 0) {
         std::string requestReason = paramFlag == 0 ? REQUEST_REASON_PLUGOUT : REQUEST_REASON_PLUGIN;
         want.SetParam(REQUEST_REASON, requestReason);
+        TLOGI(WmsLogTag::DMS, "add want param. paramFlag=%{public}d, requestReason=%{public}s",
+            paramFlag, requestReason.c_str());
     }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
         ScreenSessionAbilityConnectionStub());
