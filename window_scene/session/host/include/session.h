@@ -84,16 +84,17 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
-    virtual void OnActivation() = 0;
-    virtual void OnConnect() = 0;
-    virtual void OnForeground() = 0;
-    virtual void OnBackground() = 0;
-    virtual void OnDisconnect() = 0;
-    virtual void OnExtensionDied() = 0;
-    virtual void OnExtensionTimeout(int32_t errorCode) = 0;
-    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevel) = 0;
+    virtual void OnActivation() {}
+    virtual void OnConnect() {}
+    virtual void OnForeground() {}
+    virtual void OnBackground() {}
+    virtual void OnDisconnect() {}
+    virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnExtensionDied() {}
+    virtual void OnExtensionTimeout(int32_t errorCode) {}
+    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        int64_t uiExtensionIdLevel) {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -140,11 +141,15 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
+    /*
+     * Callbacks for ILifecycleListener
+     */
     void NotifyActivation();
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDisconnect();
+    void NotifyLayoutFinished();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -199,8 +204,8 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
-    void SetSessionLastRect(const WSRect& rect);
-    WSRect GetSessionLastRect() const;
+    WSRect GetLastLayoutRect() const;
+    WSRect GetLayoutRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -508,7 +513,8 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
-    WSRect lastWinRect_;
+    WSRect lastLayoutRect_; // rect saved when go background
+    WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
     WSRectF bounds_;
     Rotation rotation_;

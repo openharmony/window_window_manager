@@ -303,15 +303,18 @@ WSError SceneSession::Background(bool isFromClient)
     return BackgroundTask(true);
 }
 
-WSError SceneSession::NotifyFrameLayoutFinishFromApp()
+WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
-    auto task = [weakThis = wptr(this)]() {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
+    auto task = [weakThis = wptr(this), notifyListener, rect]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->frameLayoutFinishFunc_) {
+        session->layoutRect_ = rect;
+        session->NotifyLayoutFinished();
+        if (notifyListener && session->frameLayoutFinishFunc_) {
             TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d", session->GetPersistentId());
             session->frameLayoutFinishFunc_();
         }
