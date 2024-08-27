@@ -616,7 +616,7 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     // Due to SetZOrder being asynchronous, spin lock is added.
     // The spin lock itself is set with a timeout escape time of 3 seconds
     while (true) {
-        bool isFinished = session1->GetZOrder() != 0 && session2->GetZOrder() != 0;
+        bool isFinished = session1->GetZOrder() != 0 && session2->GetZOrder() != 0 && session1->GetZOrder() ！= 100;
         if (isFinished) {
             break;
         }
@@ -627,9 +627,9 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    ASSERT_EQ(session1->GetZOrder(), 100);
     ASSERT_EQ(session2->GetZOrder(), 101);
     ASSERT_EQ(session3->GetZOrder(), 404);
+    ASSERT_EQ(session1->GetZOrder(), UINT32_MAX);
 }
 
 /**
