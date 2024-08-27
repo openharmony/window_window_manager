@@ -225,6 +225,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else if (property_->GetExtensionFlag() == true) {
         property_->SetParentPersistentId(property_->GetParentId());
+        property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
@@ -459,7 +460,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
                 TLOGI(WmsLogTag::WMS_SYSTEM, "Invalid SCB type: %{public}u", type);
                 return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             }
-            InitSystemSessionEnableDrag();
+            InitSystemSessionDragEnable();
         } else if (!WindowHelper::IsSubWindow(type)) {
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
@@ -483,9 +484,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::InitSystemSessionEnableDrag()
+void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "false");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: windId: %{public}d init dragEnable false",
+        property_->GetPersistentId());
     property_->SetDragEnabled(false);
 }
 
@@ -2090,7 +2092,8 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+          property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -2127,7 +2130,8 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+          property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -2323,7 +2327,10 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode)) {
+    bool isCompatibleModeInPcSetFloatingWindowMode =
+            property_->GetCompatibleModeInPc() && (mode == WindowMode::WINDOW_MODE_FLOATING);
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode) ||
+          isCompatibleModeInPcSetFloatingWindowMode)) {
         TLOGE(WmsLogTag::DEFAULT, "window %{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;

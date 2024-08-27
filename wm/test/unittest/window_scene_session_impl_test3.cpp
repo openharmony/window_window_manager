@@ -1650,15 +1650,15 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitSystemSessionEnableDrag
- * @tc.desc: InitSystemSessionEnableDrag Test
+ * @tc.name: InitSystemSessionDragEnable
+ * @tc.desc: InitSystemSessionDragEnable Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("InitSystemSessionEnableDrag");
+    option->SetWindowName("InitSystemSessionDragEnable");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
@@ -1670,7 +1670,7 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | Sm
     ASSERT_NE(nullptr, session);
 
     window->hostSession_ = session;
-    window->InitSystemSessionEnableDrag();
+    window->InitSystemSessionDragEnable();
 }
 }
 } // namespace Rosen

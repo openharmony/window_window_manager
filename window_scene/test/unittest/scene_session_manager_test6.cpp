@@ -253,13 +253,15 @@ HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, Function | SmallT
     sceneSession2->property_->SetWindowName("visibility2");
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
     visibilityChangeInfos.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession1->GetRSVisible(), true);
     ASSERT_EQ(sceneSession2->GetRSVisible(), true);
     sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession1->SetRSVisible(false);
     sceneSession2->SetRSVisible(false);
-    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession1->GetRSVisible(), true);
     ASSERT_EQ(sceneSession2->GetRSVisible(), false);
 }
@@ -300,14 +302,16 @@ HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange02, Function | SmallT
     sceneSession2->property_->SetWindowName("visibility2");
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
     visibilityChangeInfos.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(3, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     sceneSession1->SetRSVisible(true);
-    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession2->GetRSVisible(), true);
     sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession1->SetRSVisible(false);
     sceneSession2->SetRSVisible(false);
     sceneSession1->SetSessionState(SessionState::STATE_BACKGROUND);
-    ssm_->DealwithVisibilityChange(visibilityChangeInfos);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession2->GetRSVisible(), false);
 }
 

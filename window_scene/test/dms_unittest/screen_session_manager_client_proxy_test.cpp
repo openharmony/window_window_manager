@@ -69,7 +69,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, Functio
     std::string name;
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
 }
 
 /**

@@ -32,6 +32,7 @@ public:
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
+    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

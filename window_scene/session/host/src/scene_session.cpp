@@ -84,6 +84,27 @@ SceneSession::~SceneSession()
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
+void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
+{
+    auto defaultDragEnable = false;
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        defaultDragEnable = sessionProperty->GetDragEnabled();
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, default dragEnable: %{public}d",
+        GetPersistentId(), defaultDragEnable);
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
+    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
+    bool isSystemCalling = IsSystemSpecificSession();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow,
+        isDialog, isSubWindow, isSystemCalling);
+    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
+        property->SetDragEnabled(defaultDragEnable);
+    }
+}
+
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -107,6 +128,8 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_OK;
         }
         if (property) {
+            session->InitSystemSessionDragEnable(property);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "set property enableDrag: %{public}d", property->GetDragEnabled());
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
         auto ret = session->Session::ConnectInner(
