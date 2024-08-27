@@ -758,7 +758,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
             return;
         }
-        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
+        static bool isPhone = systemConfig_.isPhoneWindow_;
         if (!IsKeyboardNeedLeftOffset(isPhone, sessionProperty) || panelSession->winRect_.posX_ != 0) {
             keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
         }
@@ -1067,8 +1067,8 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     }
     WSRect newRect = rect;
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
-         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.isPhoneWindow_ ||
+         (systemConfig_.isPadWindow_ && !IsFreeMultiWindowMode()))) {
         auto parentSession = GetParentSession();
         if (parentSession) {
             auto parentRect = parentSession->GetSessionRect();
@@ -1294,8 +1294,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
-         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode())) &&
+        (systemConfig_.isPhoneWindow_ ||
+         (systemConfig_.isPadWindow_ && !IsFreeMultiWindowMode())) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1343,8 +1343,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
-         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.isPhoneWindow_ ||
+         (systemConfig_.isPadWindow_ && !IsFreeMultiWindowMode()))) {
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1447,14 +1447,12 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     }
     WindowMode mode = GetWindowMode();
     WindowType winType = GetWindowType();
-    std::string uiType = systemConfig_.uiType_;
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
             return false;
         }
 
-        if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            uiType == UI_TYPE_PHONE || uiType == UI_TYPE_PAD) {
+        if (mode != WindowMode::WINDOW_MODE_FLOATING || systemConfig_.isPhoneWindow_ || systemConfig_.isPadWindow_) {
             return true;
         }
     }
@@ -1829,7 +1827,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
             || isDragEnabledSystemWindow) {
-            auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+            auto isPC = systemConfig_.isPcWindow_;
             if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
@@ -4477,7 +4475,7 @@ bool SceneSession::IsImmersiveType() const
 
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
-    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = systemConfig_.isPcWindow_;
     auto property = GetSessionProperty();
     bool isPcAppInPad = false;
     if (property != nullptr) {

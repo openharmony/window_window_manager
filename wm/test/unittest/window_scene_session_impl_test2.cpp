@@ -1740,10 +1740,10 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.uiType_ = "phone";
+    window->windowSystemConfig_.isPcWindow_ = false;
     WMError res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.isPcWindow_ = true;
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_OK);
 }

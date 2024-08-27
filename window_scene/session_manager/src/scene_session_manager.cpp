@@ -115,6 +115,9 @@ const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
+const std::string MULTI_WINDOW_UI_TYPE_PHONE = "HandsetSmartWindow";
+const std::string MULTI_WINDOW_UI_TYPE_PC = "FreeFormMultiWindow";
+const std::string MULTI_WINDOW_UI_TYPE_PAD = "TabletSmartWindow";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
@@ -320,7 +323,13 @@ void SceneSessionManager::LoadWindowParameter()
 {
     std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
     systemConfig_.multiWindowUIType_ = multiWindowUIType;
+    systemConfig_.isPhoneWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PHONE;
+    systemConfig_.isPcWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PC;
+    systemConfig_.isPadWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PAD;
     appWindowSceneConfig_.multiWindowUIType_ = multiWindowUIType;
+    appWindowSceneConfig_.isPhoneWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PHONE;
+    appWindowSceneConfig_.isPcWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PC;
+    appWindowSceneConfig_.isPadWindow_ = multiWindowUIType == MULTI_WINDOW_UI_TYPE_PAD;
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -402,11 +411,6 @@ void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigIt
     WindowSceneConfig::ConfigItem item = config["systemUIStatusBar"];
     if (item.IsMap()) {
         ConfigSystemUIStatusBar(item);
-    }
-    item = config["uiType"];
-    if (item.IsString()) {
-        systemConfig_.uiType_ = item.stringValue_;
-        appWindowSceneConfig_.uiType_ = item.stringValue_;
     }
     item = config["backgroundScreenLock"].GetProp("enable");
     if (item.IsBool()) {
@@ -1376,7 +1380,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
             .screenId_ = static_cast<uint64_t>(displayId),
             .isRotable_ = true,
         };
-        static bool is2in1 = systemConfig_.uiType_ == UI_TYPE_PC;
+        static bool is2in1 = systemConfig_.isPcWindow_;
         if (is2in1) {
             panelInfo.sceneType_ = SceneType::INPUT_SCENE;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
@@ -1446,6 +1450,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
         });
+        if (sceneSession->moveDragController_) {
+            sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.isPcWindow_);
+        }
     }
     return sceneSession;
 }
@@ -9820,7 +9827,7 @@ WMError SceneSessionManager::GetWindowStyleType(WindowStyleType& windowStyleType
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = systemConfig_.isPcWindow_;
     if (isPC) {
         windowStyleType = WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW;
         return WMError::WM_OK;

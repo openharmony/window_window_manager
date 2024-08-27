@@ -174,7 +174,9 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "phone";
+    systemConfig.isPhoneWindow_ = true;
+    systemConfig.isPcWindow_ = false;
+    systemConfig.isPadWindow_ = false;
 
     ASSERT_TRUE(subSession_ != nullptr);
     auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
@@ -190,7 +192,9 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig.isPhoneWindow_ = false;
+    systemConfig.isPcWindow_ = true;
+    systemConfig.isPadWindow_ = false;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -207,7 +211,9 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig.isPhoneWindow_ = false;
+    systemConfig.isPcWindow_ = true;
+    systemConfig.isPadWindow_ = false;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -225,7 +231,9 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig.isPhoneWindow_ = false;
+    systemConfig.isPcWindow_ = true;
+    systemConfig.isPadWindow_ = false;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -244,7 +252,9 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig.isPhoneWindow_ = false;
+    systemConfig.isPcWindow_ = true;
+    systemConfig.isPadWindow_ = false;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);

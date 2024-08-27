@@ -158,10 +158,14 @@ HWTEST_F(WindowSessionImplTest4, SetTopmost, Function | SmallTest | Level2)
     option->SetWindowName("SetTopmost");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    window->windowSystemConfig_.uiType_ = "phone";
+    window->windowSystemConfig_.isPhoneWindow_ = true;
+    window->windowSystemConfig_.isPcWindow_ = false;
+    window->windowSystemConfig_.isPadWindow_ = false;
     WMError res = window->SetTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.isPhoneWindow_ = false;
+    window->windowSystemConfig_.isPcWindow_ = true;
+    window->windowSystemConfig_.isPadWindow_ = false;
     res = window->SetTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 
@@ -884,10 +888,14 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest |
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.uiType_ = "phone";
+    window->windowSystemConfig_.isPhoneWindow_ = true;
+    window->windowSystemConfig_.isPcWindow_ = false;
+    window->windowSystemConfig_.isPadWindow_ = false;
     WMError res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.isPhoneWindow_ = false;
+    window->windowSystemConfig_.isPcWindow_ = true;
+    window->windowSystemConfig_.isPadWindow_ = false;
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible03 end";

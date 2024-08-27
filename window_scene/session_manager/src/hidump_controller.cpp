@@ -366,7 +366,7 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         << systemConfig.keyboardAnimationConfig_.durationIn_ << " "
         << systemConfig.keyboardAnimationConfig_.durationOut_ << "]|"
         << systemConfig.maxFloatingWindowSize_ << "|"
-        << systemConfig.uiType_ << "|"
+        << systemConfig.multiWindowUIType_ << "|"
         << std::endl
         << systemConfig.miniWidthOfMainWindow_ << "|"
         << systemConfig.miniHeightOfMainWindow_ << "|"
