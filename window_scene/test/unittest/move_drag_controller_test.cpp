@@ -192,31 +192,31 @@ HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, Function | SmallTest | L
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     auto tempPointerEvent = pointerEvent;
     pointerEvent = nullptr;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     pointerEvent = tempPointerEvent;
     auto tempSurfaceNode = surfaceNode;
     surfaceNode = nullptr;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     surfaceNode = tempSurfaceNode;
     moveDragController->type_ = AreaType::UNDEFINED;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     moveDragController->type_ = AreaType::RIGHT;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode, true);
+    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     ASSERT_EQ(0, res);
 }
 

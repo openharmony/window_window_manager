@@ -29,6 +29,7 @@
 #include "session_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -241,11 +242,12 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 }
 
 void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isPc)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
     }
+    bool isPc = uiType_ == UI_TYPE_PC;
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         bool isNeedFlush = false;
@@ -850,6 +852,11 @@ void MoveDragController::OnLostFocus()
         }
         ProcessSessionRectChange(SizeChangeReason::DRAG_END);
     }
+}
+
+void MoveDragController::SetUIType(str::string uiType)
+{
+    uiType_ = uiType;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
