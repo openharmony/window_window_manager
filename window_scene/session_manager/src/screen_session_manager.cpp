@@ -1945,23 +1945,23 @@ DMError ScreenSessionManager::SetScreenRotationLockedFromJs(bool isLocked)
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType)
 {
-    DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "update screen rotation property permission denied!");
         return;
     }
-
-    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
-        // Rs is used to mark the start of the rotation animation
-        TLOGI(WmsLogTag::DMS, "EnableCacheForRotation");
-        RSInterfaces::GetInstance().EnableCacheForRotation();
-    } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
-        // Rs is used to mark the end of the rotation animation
-        TLOGI(WmsLogTag::DMS, "DisableCacheForRotation");
-        RSInterfaces::GetInstance().DisableCacheForRotation();
-        return;
+    {
+        DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
+        if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
+            // Rs is used to mark the start of the rotation animation
+            TLOGI(WmsLogTag::DMS, "EnableCacheForRotation");
+            RSInterfaces::GetInstance().EnableCacheForRotation();
+        } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+            // Rs is used to mark the end of the rotation animation
+            TLOGI(WmsLogTag::DMS, "DisableCacheForRotation");
+            RSInterfaces::GetInstance().DisableCacheForRotation();
+            return;
+        }
     }
-
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen %{public}" PRIu64"",
