@@ -19,6 +19,7 @@
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -58,7 +59,8 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
     if (NearEqual(degree, DIRECTION270)) {
         rotation = MMI::DIRECTION270;
     }
-    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
+    if ((displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) ||
+        (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         switch (rotation) {
             case MMI::DIRECTION0:
                 rotation = MMI::DIRECTION90;
@@ -160,7 +162,9 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     bool isRotate = sceneSession->GetSessionInfo().isRotable_;
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
-        static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL) {
+        static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
+        (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
         transform = transform.Translate(translate);

@@ -246,6 +246,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
 }
 
 /**
+ * @tc.name: SetAndGetIsUIExtensionAbilityProcess
+ * @tc.desc: SetIsUIExtensionAbilityProcess and GetIsUIExtensionAbilityProcess test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetIsUIExtensionAbilityProcess(true);
+    EXPECT_EQ(true, property->GetIsUIExtensionAbilityProcess());
+    property->SetIsUIExtensionAbilityProcess(false);
+    EXPECT_EQ(false, property->GetIsUIExtensionAbilityProcess());
+}
+
+/**
  * @tc.name: AddWindowFlag
  * @tc.desc: AddWindowFlag test
  * @tc.type: FUNC

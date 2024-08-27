@@ -1471,7 +1471,10 @@ HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Leve
     ASSERT_NE(session, nullptr);
     window->property_->SetPersistentId(123);
     window->property_->SetExtensionFlag(true);
+    window->property_->SetIsUIExtensionAbilityProcess(true);
     window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetIsUIExtensionAbilityProcess(false);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
     window->property_->SetExtensionFlag(false);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
@@ -1495,7 +1498,10 @@ HWTEST_F(WindowSceneSessionImplTest, DestoryInner02, Function | SmallTest | Leve
     ASSERT_NE(session, nullptr);
     window->property_->SetPersistentId(134);
     window->property_->SetExtensionFlag(true);
+    window->property_->SetIsUIExtensionAbilityProcess(true);
     window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetIsUIExtensionAbilityProcess(false);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
     window->property_->SetExtensionFlag(false);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
@@ -1701,6 +1707,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("GetStatusBarHeight");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 }

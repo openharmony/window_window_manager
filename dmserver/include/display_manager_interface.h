@@ -240,13 +240,13 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
-    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode)
+    virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-        ExtendOption secondScreenOption)
+    virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
