@@ -24,7 +24,7 @@ ScreenCastConnection &ScreenCastConnection::GetInstance()
     return screenCastConnection;
 }
 
-bool ScreenCastConnection::CastConnectExtension()
+bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
 {
     if (bundleName_.empty() || abilityName_.empty()) {
         TLOGE(WmsLogTag::DMS, "screen cast bundleName or abilityName is empty");
@@ -41,7 +41,7 @@ bool ScreenCastConnection::CastConnectExtension()
         TLOGE(WmsLogTag::DMS, "connection is nullptr");
         return false;
     }
-    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_);
+    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, paramFlag);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
         return false;
