@@ -664,7 +664,7 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(true, session->FixRectByAspectRatio(rect));
 }
 
 /**

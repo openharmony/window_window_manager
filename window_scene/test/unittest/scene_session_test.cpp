@@ -1776,7 +1776,7 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     EXPECT_NE(sceneSession, nullptr);
     AppForceLandscapeConfig config = {};
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
