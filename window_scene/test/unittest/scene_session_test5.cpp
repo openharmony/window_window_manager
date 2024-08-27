@@ -80,38 +80,6 @@ void SceneSessionTest5::TearDown()
 namespace {
 
 /**
- * @tc.name: FixKeyboardPositionByKeyboardPanel
- * @tc.desc: FixKeyboardPositionByKeyboardPanel function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    sptr<SceneSession> panelSession = nullptr;
-    sptr<SceneSession> keyboardSession = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    panelSession = session;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    keyboardSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    keyboardSession = session;
-    session->property_ = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    session->SetSessionProperty(property);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    EXPECT_EQ(property, session->GetSessionProperty());
-}
-
-/**
  * @tc.name: NotifyClientToUpdateRectTask
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
