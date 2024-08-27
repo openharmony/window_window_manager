@@ -637,7 +637,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
  * @tc.name: HandleSpecificSystemBarProperty
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
- */
+*/
 HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTest | Level2)
 {
     SessionInfo info;
@@ -655,7 +655,7 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTes
  * @tc.name: SetWindowFlags1
  * @tc.desc: SetWindowFlags1
  * @tc.type: FUNC
- */
+*/
 HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
 {
     SessionInfo info;
