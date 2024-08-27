@@ -289,6 +289,7 @@ bool WindowManagerService::Init()
         if (WindowManagerConfig::GetConfig().IsMap()) {
             WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
         }
+        LoadWindowParameter();
         ConfigureWindowManagerService();
         StartingWindow::SetAnimationConfig(WindowNodeContainer::GetAnimationConfigRef());
     }
@@ -315,6 +316,23 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
         return static_cast<int>(windowDumper_->Dump(fd, args));
     };
     return PostSyncTask(task, "Dump");
+}
+
+void WindowManagerService::LoadWindowParameter()
+{
+    std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    systemConfig_.multiWindowUIType_ = multiWindowUIType;
+    systemConfig_.isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
+    systemConfig_.isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
+    systemConfig_.isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
+    StartingWindow::multiWindowUIType_ = multiWindowUIType;
+    StartingWindow::isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
+    StartingWindow::isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
+    StartingWindow::isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
+    WindowNodeContainer::multiWindowUIType_ = multiWindowUIType;
+    WindowNodeContainer::isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
+    WindowNodeContainer::isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
+    WindowNodeContainer::isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
 }
 
 void WindowManagerService::ConfigureWindowManagerService()
@@ -423,12 +441,6 @@ void WindowManagerService::ConfigureWindowManagerService()
             numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
             maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
-    }
-    item = config["uiType"];
-    if (item.IsString()) {
-        systemConfig_.uiType_ = item.stringValue_;
-        StartingWindow::uiType_ = item.stringValue_;
-        WindowNodeContainer::uiType_ = item.stringValue_;
     }
     item = config["supportTypeFloatWindow"].GetProp("enable");
     if (item.IsBool()) {

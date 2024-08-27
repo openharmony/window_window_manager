@@ -1537,7 +1537,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover01, Function | SmallTest | Level2)
     option->SetWindowName("Recover");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-
     windowSceneSessionImpl->hostSession_ = nullptr;
     auto ret = windowSceneSessionImpl->Recover(1);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
@@ -1548,14 +1547,14 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover01, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->windowSystemConfig_.uiType_ = "phone";
+    windowSceneSessionImpl->windowSystemConfig_.isPhoneWindow_ = true;
     ret = windowSceneSessionImpl->Recover(1);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = true;
     ret = windowSceneSessionImpl->Recover(1);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    windowSceneSessionImpl->windowSystemConfig_.uiType_ = "pc";
+    windowSceneSessionImpl->windowSystemConfig_.isPcWindow_ = true;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);

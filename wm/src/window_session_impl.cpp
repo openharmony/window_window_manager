@@ -212,7 +212,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = windowSystemConfig_.isPcWindow_;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
@@ -962,7 +962,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = windowSystemConfig_.isPcWindow_;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
@@ -1073,6 +1073,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.isPcWindow_) {
+        return;
+    }
     uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto window = weakThis.promote();
         if (window != nullptr && window->surfaceNode_ != nullptr) {
@@ -1350,7 +1353,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", topmost);
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = windowSystemConfig_.isPcWindow_;
     if (!isPC) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2206,7 +2209,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = windowSystemConfig_.isPcWindow_;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     if (!(isPC || IsFreeMultiWindowMode() || isPcAppInPad)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3377,8 +3380,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == UI_TYPE_PHONE ||
-                 (windowSystemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.isPhoneWindow_ ||
+                 (windowSystemConfig_.isPadWindow_ && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;

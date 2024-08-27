@@ -1471,7 +1471,9 @@ HWTEST_F(WindowSessionTest2, SetShowRecent003, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig.isPhoneWindow_ = true;
+    session_->systemConfig.isPcWindow_ = false;
+    session_->systemConfig.isPadWindow_ = false;
     ssm_->SetScreenLocked(false);
 
     session_->property_ = new WindowSessionProperty();
@@ -1914,7 +1916,9 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig.isPhoneWindow_ = true;
+    session_->systemConfig.isPcWindow_ = false;
+    session_->systemConfig.isPadWindow_ = false;
     ssm_->SetScreenLocked(true);
     bool ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
@@ -1927,7 +1931,9 @@ HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level
 
     ssm_->SetScreenLocked(false);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    session_->systemConfig_.uiType_ = "pc";
+    session_->systemConfig.isPhoneWindow_ = false;
+    session_->systemConfig.isPcWindow_ = true;
+    session_->systemConfig.isPadWindow_ = false;
     ret = session_->IsSupportDetectWindow(false);
     ASSERT_EQ(ret, false);
 }
