@@ -183,8 +183,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = sptr<WindowSessionProperty>::MakeSptr();
     }
-    bool isFromClient = data.ReadBool();
-    const WSError errCode = Foreground(property, isFromClient);
+    const WSError errCode = Foreground(property, true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -192,8 +191,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    bool isFromClient = data.ReadBool();
-    const WSError errCode = Background(isFromClient);
+    const WSError errCode = Background(true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -201,8 +199,7 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
-    bool isFromClient = data.ReadBool();
-    WSError errCode = Disconnect(isFromClient);
+    WSError errCode = Disconnect(true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
