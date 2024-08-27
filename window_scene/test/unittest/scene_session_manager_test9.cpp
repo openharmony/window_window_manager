@@ -631,6 +631,7 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     ASSERT_EQ(session3->GetZOrder(), 404);
 }
 
+/**
  * @tc.name: GetSessionRSVisible
  * @tc.desc: GetSessionRSVisible
  * @tc.type: FUNC
