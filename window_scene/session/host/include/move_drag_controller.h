@@ -23,6 +23,7 @@
 #include "property/rs_properties_def.h"
 #include "window.h"
 #include "ws_common_inner.h"
+#include "ws_common.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -65,8 +66,9 @@ public:
     int32_t GetOriginalPointerPosY();
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isPc);
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
+    void SetUIType(str::string uiType);
 
 private:
     struct MoveDragProperty {
@@ -145,6 +147,7 @@ private:
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
+    std::string uiType_ = UI_TYPE_PC;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
