@@ -357,23 +357,6 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     return true;
 }
 
-static bool IsCallingSessionSplitMode(const sptr<SceneSession>& callingSession)
-{
-    auto windowType = callingSession->GetWindowType();
-    bool isCallingSessionSplit = false;
-    if (WindowHelper::IsMainWindow(windowType)) {
-        if (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    } else if (WindowHelper::IsSubWindow(windowType) || WindowHelper::IsDialogWindow(windowType)) {
-        if (callingSession->GetParentSession() != nullptr &&
-            callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    }
-    return isCallingSessionSplit;
-}
-
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -398,9 +381,8 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
         oriPosYBeforeRaisedBykeyboard == 0) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No overlap area, keyboardRect: %{public}s, callingRect: %{public}s",
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
-        if (!IsCallingSessionSplitMode(callingSession)) {
-            return;
-        }
+        NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, keyboardPanelRect, rsTransaction);
+        return;
     }
 
     WSRect newRect = callingSessionRect;
