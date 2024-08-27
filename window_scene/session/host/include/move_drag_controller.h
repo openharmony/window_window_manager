@@ -23,7 +23,6 @@
 #include "property/rs_properties_def.h"
 #include "window.h"
 #include "ws_common_inner.h"
-#include "ws_common.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -147,7 +146,7 @@ private:
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
-    std::string uiType_ = UI_TYPE_PC;
+    std::string uiType_ = "";
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
