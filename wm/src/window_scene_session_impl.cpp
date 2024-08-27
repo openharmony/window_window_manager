@@ -485,21 +485,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
-    auto isPC = windowSystemConfig_.uiType_ == "pc";
-    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
-    bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
-    bool isSubWindow = WindowHelper::IsSubWindow(property_->GetWindowType());
-    TLOGI(WmsLogTag::WMS_LAYOUT, "isPC: %{public}d, isDialog: %{public}d, isFreeMultiWindowMode: %{public}d, "
-        "isSubWindow: %{public}d", isPC, isDialog, isFreeMultiWindowMode, isSubWindow);
-    if (isPC || isFreeMultiWindowMode) {
-        if (isSubWindow|| isDialog) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "use default dragEnable value.");
-        } else {
-            property_->SetDragEnabled(false);
-        }
-    } else {
-        property_->SetDragEnabled(false);
-    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: windId: %{public}d init dragEnable false",
+        property_->GetPersistentId());
+    property_->SetDragEnabled(false);
 }
 
 void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()

@@ -87,24 +87,20 @@ SceneSession::~SceneSession()
 void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
 {
     auto defaultDragEnable = false;
-    if (property) {
-        defaultDragEnable = property->GetDragEnabled();
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        defaultDragEnable = sessionProperty->GetDragEnabled();
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "default dragEnable: %{public}d", defaultDragEnable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, default dragEnable: %{public}d",
+        GetPersistentId(), defaultDragEnable);
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
     bool isSystemCalling = IsSystemSpecificSession();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "isSystemWindow: %{public}d, isDialog: %{public}d, "
-        "isSubWindow: %{public}d, isSystemCalling: %{public}d", isSystemWindow, isDialog, isSubWindow,
-        isSystemCalling);
-    if (isSystemCalling && isSystemWindow) {
-        if (isSubWindow || isDialog) {
-            property->SetDragEnabled(defaultDragEnable);
-        } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "use the dragEnable value of the client");
-        }
-    } else {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow,
+        isDialog, isSubWindow, isSystemCalling);
+    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
         property->SetDragEnabled(defaultDragEnable);
     }
 }
