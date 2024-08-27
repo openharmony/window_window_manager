@@ -589,6 +589,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
+
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
