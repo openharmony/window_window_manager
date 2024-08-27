@@ -241,7 +241,7 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 }
 
 void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, isPC bool)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isPc)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
