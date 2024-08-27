@@ -611,6 +611,7 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     session3->SetZOrder(404);
     ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
     ssm_->RefreshPcZOrderList(startZOrder, persistentIds);
+    ssm_->RefreshPcZOrderList(UINT32_MAX, persistentIds);
     auto start = std::chrono::system_clock::now();
     // Due to SetZOrder being asynchronous, spin lock is added.
     // The spin lock itself is set with a timeout escape time of 3 seconds
