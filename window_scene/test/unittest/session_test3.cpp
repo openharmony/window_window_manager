@@ -1014,7 +1014,8 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     session_->RectCheckProcess();
 
-    session_->winRect_.height_ = 0;
+    WsRect rect = {0, 0, 0, 0};
+    session_->winRect_ = rect;
     session_->RectCheckProcess();
 
     session_->winRect_.height_ = 200;
