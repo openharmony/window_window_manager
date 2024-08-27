@@ -2407,15 +2407,15 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
-        WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        TLOGI(WmsLogTag::DEFAULT, "Can not set show when locked, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
-        WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
+        TLOGI(WmsLogTag::DEFAULT, "Can not set handwritting, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !SessionPermission::IsSystemCalling()) {
-        WLOGI("Can not add window flag WINDOW_FLAG_FORBID_SPLIT_MOVE");
+        TLOGI(WmsLogTag::DEFAULT, "Can not set forbid split move, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
