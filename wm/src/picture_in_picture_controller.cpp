@@ -217,10 +217,6 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
-    StartPipType type = startType;
-    if (IsTypeNodeEnabled() && startType != StartPipType::AUTO_START) {
-        type = StartPipType::AUTO_START;
-    }
     curState_ = PiPWindowState::STATE_STARTING;
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
@@ -238,7 +234,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             UpdateWinRectByComponent();
             UpdateContentSize(windowRect_.width_, windowRect_.height_);
             PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), this);
-            WMError err = ShowPictureInPictureWindow(type);
+            WMError err = ShowPictureInPictureWindow(startType);
             if (err != WMError::WM_OK) {
                 curState_ = PiPWindowState::STATE_UNDEFINED;
             } else {
@@ -249,7 +245,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         // otherwise, stop the previous one
         PictureInPictureManager::DoClose(true, true);
     }
-    return StartPictureInPictureInner(type);
+    return StartPictureInPictureInner(startType);
 }
 
 WMError PictureInPictureController::StartPictureInPictureInner(StartPipType startType)
@@ -262,16 +258,20 @@ WMError PictureInPictureController::StartPictureInPictureInner(StartPipType star
             pipOption_->GetPipTemplate(), FAILED, "Create pip window failed");
         return errCode;
     }
-    errCode = ShowPictureInPictureWindow(startType);
+    StartPipType type = startType;
+    if (IsTypeNodeEnabled() && startType != StartPipType::AUTO_START) {
+        type = StartPipType::AUTO_START;
+    }
+    errCode = ShowPictureInPictureWindow(type);
     if (errCode != WMError::WM_OK) {
         curState_ = PiPWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_PIP, "Show pip window failed, err: %{public}u", errCode);
-        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(type),
             pipOption_->GetPipTemplate(), FAILED, "Show pip window failed");
         return errCode;
     }
     curState_ = PiPWindowState::STATE_STARTED;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(type),
         pipOption_->GetPipTemplate(), PIP_SUCCESS, "start pip success");
     return WMError::WM_OK;
 }
@@ -299,9 +299,6 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
     curState_ = PiPWindowState::STATE_STOPPING;
-    for (auto& listener : pipLifeCycleListeners_) {
-        listener->OnPreparePictureInPictureStop();
-    }
     return res;
 }
 
@@ -324,9 +321,9 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
     }
     if (curState_ != PiPWindowState::STATE_STOPPING) {
         curState_ = PiPWindowState::STATE_STOPPING;
-        for (auto& listener : pipLifeCycleListeners_) {
-            listener->OnPreparePictureInPictureStop();
-        }
+    }
+    for (auto& listener : pipLifeCycleListeners_) {
+        listener->OnPreparePictureInPictureStop();
     }
     if (!destroyWindow) {
         ResetExtController();
@@ -458,7 +455,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
     } else {
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
         if (IsTypeNodeEnabled()) {
-            TLOGE(WmsLogTag::WMS_PIP, "typeNode enabled");
+            TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
             return;
         }
         if (!pipOption_) {
@@ -731,6 +728,10 @@ void PictureInPictureController::ResetExtController()
 WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (IsTypeNodeEnabled()) {
+        TLOGI(WmsLogTag::WMS_PIP, "skip as nodeController enabled");
+        return WMError::WM_OK;
+    }
     pipXComponentController_ = xComponentController;
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when set XComponentController");
