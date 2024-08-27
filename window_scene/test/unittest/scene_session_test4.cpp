@@ -571,6 +571,11 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction2, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
 
     property->SetSystemCalling(true);
+    sceneSession->property_ = property;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+
+    sceneSession->property_ = nullptr;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
 }
@@ -589,7 +594,11 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
+    sceneSession->property_ = property;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
+    sceneSession->property_ = nullptr;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
@@ -598,10 +607,11 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
     property->SetSystemCalling(true);
+    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
     
-    sceneSession->property_ = property;
+    sceneSession->property_ = nullptr;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
@@ -610,13 +620,18 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
     property->SetSystemCalling(true);
-    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
     sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
+    sceneSession->property_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS));
+
+    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS));
 
