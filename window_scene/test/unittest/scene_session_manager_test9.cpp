@@ -581,6 +581,36 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
     property->SetPersistentId(0);
     ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
 }
+
+/**
+ * @tc.name: GetSessionRSVisible
+ * @tc.desc: GetSessionRSVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, GetSessionRSVisible, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "GetSessionRSVisible";
+    sessionInfo.moduleName_ = "moduleTest";
+    uint64_t windowId = 10;
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession01->persistentId_ = windowId;
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    struct RSSurfaceNodeConfig config;
+    sceneSession02->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, sceneSession02->surfaceNode_);
+    sceneSession02->surfaceNode_->id_ = 0;
+    sceneSession02->persistentId_ = windowId;
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession02));
+
+    bool actual = ssm_->GetSessionRSVisible(sceneSession01, currVisibleData);
+    EXPECT_EQ(actual, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
