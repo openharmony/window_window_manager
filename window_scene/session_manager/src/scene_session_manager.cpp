@@ -10184,25 +10184,21 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
     for (size_t i = 0; i < persistentIds.size(); i++) {
         int32_t persistentId = persistentIds[i];
         oss << persistentId;
+        if(i < persistentIds.size() - 1) {
+            oss << ",";
+        }
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "sceneScene is nullptr persistentId = %{public}d", persistentId);
-            if(i < persistentIds.size() - 1) {
-                oss << ",";
-            }
             continue;
         }
-        if (!sceneSession->GetPcScenePanel()) {
-            sceneSession->SetPcScenePanel(true);
+        sceneSession->SetPcScenePanel(true);
+        if (i > UINT32_MAX - startZOrder) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "newStartZOrder overflow,stop refresh");
+            break;
         }
         uint32_t newZOrder = i + startZOrder;
-        if (sceneSession->GetZOrder() != newZOrder) {
-            sceneSession->SetZOrder(newZOrder);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "SetZOrder persistentId:%{public}d", persistentId);
-        }
-        if (i < persistentIds.size() - 1) {
-            oss << ",";
-        }
+        sceneSession->SetZOrder(newZOrder);
     }
     oss << "]";
     TLOGI(WmsLogTag::WMS_LAYOUT, "Complete:%{public}s", oss.str().c_str());
