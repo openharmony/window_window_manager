@@ -465,7 +465,6 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionRectChangeCallback(func);
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->SetSessionLastRect(rec);
     session->SetSessionRectChangeCallback(func);
     rec.width_ = 0;
     session->SetSessionRectChangeCallback(func);

@@ -302,8 +302,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
 {
-    WSError errCode = NotifyFrameLayoutFinishFromApp();
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    bool notifyListener = data.ReadBool();
+    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadInt32(), data.ReadInt32() };
+    NotifyFrameLayoutFinishFromApp(notifyListener, rect);
     return ERR_NONE;
 }
 
