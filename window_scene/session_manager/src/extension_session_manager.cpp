@@ -30,12 +30,9 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Extens
 const std::string EXTENSION_SESSION_MANAGER_THREAD = "OS_ExtensionSessionManager";
 } // namespace
 
-ExtensionSessionManager::ExtensionSessionManager(void){
+ExtensionSessionManager::ExtensionSessionManager()
+{
     taskScheduler_ = std::make_shared<TaskScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
-}
-
-ExtensionSessionManager::~ExtensionSessionManager(void){
-    taskScheduler_ = nullptr;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
