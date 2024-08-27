@@ -2976,14 +2976,14 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
     }
     uint32_t startZOrder;
     if (!ConvertFromJsValue(env, argv[0], startZOrder)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert startZOrder to %{public}d", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert startZOrder to %{public}d", startZOrder);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::vector<int32_t> perisistendIds;
     if (!ConvertInt32ArrayFromJs(env, argv[1], perisistendIds)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert perisistendIds to %{public}d", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert perisistendIds");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
