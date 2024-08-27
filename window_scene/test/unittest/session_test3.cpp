@@ -1001,9 +1001,9 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
 
     session_->property_->displayId_ = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
-    ASSERT_NE（screenSession, nullptr);
+    ASSERT_NE(screenSession, nullptr);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    ASSERT_NE（&screenProperty, nullptr);
+    ASSERT_NE(&screenProperty, nullptr);
     screenSession->screenId_ = 0;
     screenSession->SetVirtualPixelRatio(0.0f);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
