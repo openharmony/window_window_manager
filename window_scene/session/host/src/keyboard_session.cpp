@@ -152,6 +152,15 @@ WSError KeyboardSession::Disconnect(bool isFromClient)
     return WSError::WS_OK;
 }
 
+bool KeyboardSession::CheckKeyboardRectValid()
+{
+    if (winRect_.posY_ == 0 && GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboard winRect_.posY_ is 0 invalid");
+        return false;
+    }
+    return true;
+}
+
 WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
@@ -161,6 +170,10 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
             TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (!session->CheckKeyboardRectValid()) {
+            return WSError::WS_DO_NOTHING;
+        }
+
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret != WSError::WS_OK) {
             return ret;

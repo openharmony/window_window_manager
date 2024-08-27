@@ -722,54 +722,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
-bool SceneSession::IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
-{
-    static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-    bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
-    bool isDualDevice = FoldScreenStateInternel::IsDualDisplayFoldDevice();
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
-        return false;
-    }
-    bool isLandscape = screenWidth > screenHeight ? true : false;
-    bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
-        "isDualDevice:%{public}d, isLandscape:%{public}d, screenWidth:%{public}u, screenHeight:%{public}u, "
-        "isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable, isFolded, isDualDevice, isLandscape,
-        screenWidth, screenHeight, result);
-    return result;
-}
-
-void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession,
-    sptr<SceneSession> keyboardSession)
-{
-    if (panelSession == nullptr || keyboardSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard or panel session is null");
-        return;
-    }
-
-    SessionGravity gravity = keyboardSession->GetKeyboardGravity();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
-    } else {
-        auto sessionProperty = keyboardSession->GetSessionProperty();
-        if (sessionProperty == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
-            return;
-        }
-        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
-        if (!IsKeyboardNeedLeftOffset(isPhone, sessionProperty) || panelSession->winRect_.posX_ != 0) {
-            keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
-        }
-    }
-    keyboardSession->winRect_.posY_ = panelSession->winRect_.posY_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "panelId:%{public}d, keyboardId:%{public}d, panelRect:%{public}s, "
-        "keyboardRect:%{public}s, gravity:%{public}d", panelSession->GetPersistentId(),
-        keyboardSession->GetPersistentId(), panelSession->winRect_.ToString().c_str(),
-        keyboardSession->winRect_.ToString().c_str(), gravity);
-}
-
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
@@ -785,18 +737,6 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
-
-    if (isKeyboardPanelEnabled_) {
-        sptr<SceneSession> self(this);
-        if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
-            const auto& keyboardSession = GetKeyboardSession();
-            FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
-            return ret;
-        }
-        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            FixKeyboardPositionByKeyboardPanel(GetKeyboardPanelSession(), self);
-        }
-    }
 
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize

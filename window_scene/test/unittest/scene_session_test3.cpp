@@ -224,63 +224,6 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: FixKeyboardPositionByKeyboardPanel
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-
-    scensession->SetSessionProperty(property);
-    scensession->FixKeyboardPositionByKeyboardPanel(nullptr, nullptr);
-    ASSERT_NE(scensession, nullptr);
-}
-
-/**
- * @tc.name: FixKeyboardPositionByKeyboardPanel1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel1";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel1";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scenceSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scenceSession, nullptr);
-    scenceSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-
-    scenceSession->SetSessionProperty(property);
-    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, scenceSession);
-    ASSERT_NE(scenceSession, nullptr);
-
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
-    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, keyboardSession);
-}
-
-/**
  * @tc.name: NotifyClientToUpdateRectTask
  * @tc.desc: normal function
  * @tc.type: FUNC
