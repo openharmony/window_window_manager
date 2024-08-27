@@ -854,7 +854,7 @@ void MoveDragController::OnLostFocus()
     }
 }
 
-void MoveDragController::SetUIType(str::string uiType)
+void MoveDragController::SetUIType(const std::string& uiType)
 {
     uiType_ = uiType;
 }

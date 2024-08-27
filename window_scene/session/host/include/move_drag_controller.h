@@ -68,7 +68,7 @@ public:
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
-    void SetUIType(str::string uiType);
+    void SetUIType(const std::string& uiType);
 
 private:
     struct MoveDragProperty {
