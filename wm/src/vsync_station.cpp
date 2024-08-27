@@ -64,7 +64,6 @@ void VsyncStation::Destroy()
     std::lock_guard<std::mutex> lock(mutex_);
     destroyed_ = true;
     receiver_.reset();
-    frameRateLinker_.reset();
 }
 
 bool VsyncStation::IsVsyncReceiverCreated()
@@ -188,58 +187,34 @@ void VsyncStation::OnVsyncTimeOut()
     hasRequestedVsync_ = false;
 }
 
-std::shared_ptr<RSFrameRateLinker> VsyncStation::GetFrameRateLinker()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (destroyed_) {
-        TLOGW(WmsLogTag::WMS_MAIN, "VsyncStation has been destroyed");
-        return nullptr;
-    }
-    return frameRateLinker_;
-}
-
 FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
 {
-    if (auto frameRateLinker = GetFrameRateLinker()) {
-        return frameRateLinker->GetId();
-    }
-    return 0;
+    return frameRateLinker_->GetId();
 }
 
 void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    if (auto frameRateLinker = GetFrameRateLinker()) {
-        if (frameRateLinker->IsEnable()) {
-            TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker->GetId());
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
-            frameRateLinker->UpdateFrameRateRange(range, animatorExpectedFrameRate);
-        }
+    if (frameRateLinker_->IsEnable()) {
+        TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker_->GetId());
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
+        frameRateLinker_->UpdateFrameRateRange(range, animatorExpectedFrameRate);
     }
 }
 
 void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
 {
-    if (auto frameRateLinker = GetFrameRateLinker()) {
-        if (!enabled) {
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
-            TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
-                range.preferred_, frameRateLinker->GetId());
-            frameRateLinker->UpdateFrameRateRange(range);
-            frameRateLinker->UpdateFrameRateRangeImme(range);
-        }
-        frameRateLinker->SetEnable(enabled);
+    if (!enabled) {
+        FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
+        TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
+            range.preferred_, frameRateLinker_->GetId());
+        frameRateLinker_->UpdateFrameRateRange(range);
+        frameRateLinker_->UpdateFrameRateRangeImme(range);
     }
+    frameRateLinker_->SetEnable(enabled);
 }
 
 void VsyncStation::SetDisplaySoloistFrameRateLinkerEnable(bool enabled)
 {
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (destroyed_) {
-            TLOGW(WmsLogTag::WMS_MAIN, "VsyncStation has been destroyed");
-            return;
-        }
-    }
     RSDisplaySoloistManager& soloistManager = RSDisplaySoloistManager::GetInstance();
     soloistManager.SetMainFrameRateLinkerEnable(enabled);
 }
