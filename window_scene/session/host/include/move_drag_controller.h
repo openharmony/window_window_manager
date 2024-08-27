@@ -65,7 +65,7 @@ public:
     int32_t GetOriginalPointerPosY();
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, isPC bool);
     void OnLostFocus();
 
 private:
