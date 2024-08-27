@@ -107,6 +107,8 @@ public:
 
     WindowType GetWindowType() const { return windowType_; }
 
+    WindowVisibilityState GetWindowVisibilityState() const { return visibilityState_; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
