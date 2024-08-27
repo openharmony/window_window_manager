@@ -2130,6 +2130,8 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
                 rect.width_ = compatibleInPcLandscapeWidth;
                 rect.height_ = compatibleInPcLandscapeHeight;
             }
+            rect.posX_ = windowRect.posX_;
+            rect.posY_ = windowRect.posY_;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
         }
