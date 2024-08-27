@@ -241,17 +241,24 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 }
 
 void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, isPC bool)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        bool isNeedFlush = false;
+        if (isStartDrag_ && isPC) {
+            surfaceNode->MarkUifirstNode(false);
+            isNeedFlush = true;
+        }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransaction::FlushImplicitTransaction();
+        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;
@@ -259,6 +266,9 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        if (!isStartDrag_ && isPC) {
+            surfaceNode->MarkUifirstNode(true);
+        }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
