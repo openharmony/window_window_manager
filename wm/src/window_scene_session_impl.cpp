@@ -46,6 +46,7 @@
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
 #include "pattern_detach_callback.h"
+#include "picture_in_picture_manager.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
 
@@ -319,6 +320,11 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
             TLOGE(WmsLogTag::WMS_RECOVER, "parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }
+    }
+    if (WindowHelper::IsPipWindow(type)) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "pipWindow");
+        PictureInPictureManager::DoClose(true, true);
+        return WMError::WM_OK;
     }
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
