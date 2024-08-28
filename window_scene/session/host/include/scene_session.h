@@ -577,8 +577,8 @@ private:
     bool isMinimizedByUserSwitch_ { false };
 
     /*
-    * Window ZOrder: PC
-    */
+     * Window ZOrder: PC
+     */
     bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
