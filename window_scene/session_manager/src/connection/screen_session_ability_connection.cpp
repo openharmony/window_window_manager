@@ -200,7 +200,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
 }
 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
-    const std::string &bundleName, const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &paramMap)
+    const std::string &bundleName, const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &params)
 {
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
@@ -209,7 +209,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     }
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    for (auto param : paramMap) {
+    for (auto param : params) {
         std::string paramKey = param.first;
         std::string paramValue = param.second;
         if (!paramKey.empty() && !paramValue.empty()) {
