@@ -10193,7 +10193,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             }
             sceneSession->SetPcScenePanel(true);
             if (i > UINT32_MAX - startZOrder) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow,stop refresh");
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
                 break;
             }
             sceneSession->SetZOrder(i + startZOrder);
