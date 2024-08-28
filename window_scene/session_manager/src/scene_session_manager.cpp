@@ -1444,6 +1444,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
         });
+        if (sceneSession->moveDragController_) {
+            sceneSession->moveDragController_->SetUIType(systemConfig_.uiType_);
+        }
     }
     return sceneSession;
 }
