@@ -516,7 +516,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr.");
-        return WSError::WS_ERROR_NULLPTR;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (focusState_ != std::nullopt) {
         focusState_.value() ? uiContent->Focus() : uiContent->UnFocus();
