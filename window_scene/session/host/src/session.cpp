@@ -363,6 +363,16 @@ void Session::NotifyDisconnect()
     }
 }
 
+void Session::NotifyLayoutFinished()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
 void Session::NotifyExtensionDied()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -1085,6 +1095,7 @@ WSError Session::Disconnect(bool isFromClient)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    bufferAvailable_ = false;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1878,7 +1889,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    if (!surfaceNode_ || (!surfaceNode_->IsBufferAvailable() && !bufferAvailable_)) {
+    if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
         scenePersistence_->SetHasSnapshot(false);
         return nullptr;
     }
@@ -1921,6 +1932,7 @@ void Session::SaveSnapshot(bool useFfrt)
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        session->lastLayoutRect_ = session->layoutRect_;
         session->snapshot_ = session->Snapshot(runInFfrt);
         if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
@@ -2338,6 +2350,7 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "set property dragEnable: %{public}d", property->GetDragEnabled());
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
@@ -2458,17 +2471,14 @@ WSRect Session::GetSessionGlobalRect() const
     return winRect_;
 }
 
-void Session::SetSessionLastRect(const WSRect& rect)
+WSRect Session::GetLastLayoutRect() const
 {
-    if (lastWinRect_ == rect) {
-        return;
-    }
-    lastWinRect_ = rect;
+    return lastLayoutRect_;
 }
 
-WSRect Session::GetSessionLastRect() const
+WSRect Session::GetLayoutRect() const
 {
-    return lastWinRect_;
+    return layoutRect_;
 }
 
 void Session::SetSessionRequestRect(const WSRect& rect)
@@ -2713,9 +2723,7 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = systemConfig_.isPcWindow_;
-    bool isPhone = systemConfig_.isPhoneWindow_;
-    if (!isPc && !isPhone) {
+    if (!systemConfig_.IsPcWindow() && !systemConfig_.IsPhoneWindow()) {
         TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
     }
@@ -2728,7 +2736,7 @@ bool Session::IsSupportDetectWindow(bool isAttach)
         return false;
     }
     // Only detecting cold start scenarios on PC
-    if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
+    if (systemConfig_.IsPcWindow() && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
         TLOGI(WmsLogTag::WMS_LIFE, "pc only support cold start, id:%{public}d", persistentId_);
         RemoveWindowDetectTask();
         return false;

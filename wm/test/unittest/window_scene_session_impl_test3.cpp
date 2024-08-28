@@ -1547,14 +1547,14 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover01, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->windowSystemConfig_.isPhoneWindow_ = true;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = windowSceneSessionImpl->Recover(1);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = true;
     ret = windowSceneSessionImpl->Recover(1);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    windowSceneSessionImpl->windowSystemConfig_.isPcWindow_ = true;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1649,15 +1649,15 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitSystemSessionEnableDrag
- * @tc.desc: InitSystemSessionEnableDrag Test
+ * @tc.name: InitSystemSessionDragEnable
+ * @tc.desc: InitSystemSessionDragEnable Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("InitSystemSessionEnableDrag");
+    option->SetWindowName("InitSystemSessionDragEnable");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
@@ -1669,7 +1669,7 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | Sm
     ASSERT_NE(nullptr, session);
 
     window->hostSession_ = session;
-    window->InitSystemSessionEnableDrag();
+    window->InitSystemSessionDragEnable();
 }
 }
 } // namespace Rosen

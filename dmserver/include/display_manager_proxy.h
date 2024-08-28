@@ -99,6 +99,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };

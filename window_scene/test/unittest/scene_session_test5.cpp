@@ -80,38 +80,6 @@ void SceneSessionTest5::TearDown()
 namespace {
 
 /**
- * @tc.name: FixKeyboardPositionByKeyboardPanel
- * @tc.desc: FixKeyboardPositionByKeyboardPanel function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    sptr<SceneSession> panelSession = nullptr;
-    sptr<SceneSession> keyboardSession = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    panelSession = session;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    keyboardSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    keyboardSession = session;
-    session->property_ = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    session->SetSessionProperty(property);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    EXPECT_EQ(property, session->GetSessionProperty());
-}
-
-/**
  * @tc.name: NotifyClientToUpdateRectTask
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
@@ -186,8 +154,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
 
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     SystemSessionConfig systemConfig;
-    systemConfig.isPhoneWindow_ = false;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     session->SetSystemConfig(systemConfig);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -195,8 +162,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     session->specificCallback_->onGetSceneSessionVectorByType_ = nullptr;
     session->GetSystemAvoidArea(rect, avoidArea);
 
-    systemConfig.isPhoneWindow_ = true;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
@@ -238,9 +204,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
 
-    systemConfig.isPhoneWindow_ = true;
-    systemConfig.isPcWindow_ = false;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
@@ -389,16 +353,12 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
 
     pointerEvent->SetPointerAction(5);
     session->property_->SetDragEnabled(true);
-    systemConfig.isPhoneWindow_ = true;
-    systemConfig.isPcWindow_ = false;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     systemConfig.freeMultiWindowSupport_ = false;
     session->moveDragController_->isStartDrag_ = true;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
 
-    systemConfig.isPhoneWindow_ = false;
-    systemConfig.isPcWindow_ = true;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
     session->ClearDialogVector();
 }
@@ -473,7 +433,6 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionRectChangeCallback(func);
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->SetSessionLastRect(rec);
     session->SetSessionRectChangeCallback(func);
     rec.width_ = 0;
     session->SetSessionRectChangeCallback(func);
@@ -627,9 +586,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea02, Function | SmallTest | Level2)
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
 
     SystemSessionConfig systemConfig;
-    systemConfig.isPhoneWindow_ = true;
-    systemConfig.isPcWindow_ = false;
-    systemConfig.isPadWindow_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     session->SetSystemConfig(systemConfig);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     session->GetSessionProperty()->SetDisplayId(1664);

@@ -167,7 +167,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDefaultDisplayOrientat
         TLOGE(WmsLogTag::DMS, "[DMNDK] get default display info null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
-    *displayOrientation = static_cast<NativeDisplayManager_Orientation>(displayInfo->GetOrientation());
+    *displayOrientation = static_cast<NativeDisplayManager_Orientation>(displayInfo->GetDisplayOrientation());
     return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
 }
 

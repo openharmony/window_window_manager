@@ -103,10 +103,7 @@ struct SystemConfig : public Parcelable {
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
-    std::string multiWindowUIType_;
-    bool isPhoneWindow_ = false;
-    bool isPcWindow_ = false;
-    bool isPadWindow_ = false;
+    WindowUIType windowUIType_ = WindowUIType::PHONE_WINDOW;
     bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
@@ -121,19 +118,7 @@ struct SystemConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteString(multiWindowUIType_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isPhoneWindow_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isPcWindow_)) {
-            return false;
-        }
-        
-        if (!parcel.WriteBool(isPadWindow_)) {
+        if (!parcel.WriteUint8(static_cast<uint8_t>(windowUIType_))) {
             return false;
         }
 
@@ -157,12 +142,24 @@ struct SystemConfig : public Parcelable {
             return nullptr;
         }
         config->keyboardAnimationConfig_ = *keyboardConfig;
-        config->multiWindowUIType_ = parcel.ReadString();
-        config->isPhoneWindow_ = parcel.ReadBool();
-        config->isPcWindow_ = parcel.ReadBool();
-        config->isPadWindow_ = parcel.ReadBool();
+        config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
+    }
+
+    bool IsPhoneWindow() const
+    {
+        return windowUIType_ == WindowUIType::PHONE_WINDOW;
+    }
+
+    bool IsPcWindow() const
+    {
+        return windowUIType_ == WindowUIType::PC_WINDOW;
+    }
+
+    bool IsPadWindow() const
+    {
+        return windowUIType_ == WindowUIType::PAD_WINDOW;
     }
 };
 

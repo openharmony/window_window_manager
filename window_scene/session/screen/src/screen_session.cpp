@@ -247,6 +247,36 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
     return DMError::DM_OK;
 }
 
+void ScreenSession::SetIsExtand(bool isExtend)
+{
+    isExtended_ = isExtend;
+}
+
+bool ScreenSession::GetIsExtand() const
+{
+    return isExtended_;
+}
+
+void ScreenSession::SetIsInternal(bool isInternal)
+{
+    isInternal_ = isInternal;
+}
+
+bool ScreenSession::GetIsInternal() const
+{
+    return isInternal_;
+}
+
+void ScreenSession::SetIsCurrentInUse(bool isInUse)
+{
+    isInUse_ = isInUse;
+}
+
+bool ScreenSession::GetIsCurrentInUse() const
+{
+    return isInUse_;
+}
+
 std::string ScreenSession::GetName()
 {
     return name_;
@@ -430,6 +460,13 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
         listener->OnSensorRotationChange(sensorRotation, screenId_);
+    }
+}
+
+void ScreenSession::ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnScreenExtandChange(mainScreenId, extandScreenId);
     }
 }
 
@@ -669,7 +706,7 @@ void ScreenSession::DestroyScreenScene()
         WLOGFI("destroyScreenSceneCallback_  is nullptr");
         return;
     }
-    destroyScreenSceneCallback_ ();
+    destroyScreenSceneCallback_();
 }
 
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
@@ -789,6 +826,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     }
     info->SetScreenId(screenId_);
     info->SetName(name_);
+    info->SetIsExtand(GetIsExtand());
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();

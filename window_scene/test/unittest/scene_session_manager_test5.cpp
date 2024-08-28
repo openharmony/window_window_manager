@@ -537,9 +537,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallT
     sptr<SceneSession> currSession = nullptr;
     ssm_->NotifyFocusStatusByMission(scensession, currSession);
     ASSERT_EQ(false, ssm_->MissionChanged(scensession, currSession));
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(scensession, nullptr);
     ssm_->NotifyFocusStatusByMission(scensession, currSession);
