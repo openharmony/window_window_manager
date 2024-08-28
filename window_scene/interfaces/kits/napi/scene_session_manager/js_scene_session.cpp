@@ -1947,7 +1947,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
-        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+        if (jsSceneSessionObj == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
@@ -1981,7 +1981,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
-        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+        if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
