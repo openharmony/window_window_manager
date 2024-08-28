@@ -108,29 +108,25 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTe
     SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    WMError res = sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("UpdateSessionPropertyByAction end");
 }
