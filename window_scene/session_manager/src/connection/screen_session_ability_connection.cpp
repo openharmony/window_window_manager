@@ -30,9 +30,6 @@ constexpr int32_t RES_SUCCESS = 0;
 constexpr uint32_t SEND_MESSAGE_SYNC_OUT_TIME = 800; // ms
 constexpr uint32_t TRANS_RELEASE_BLOCK = 0;
 constexpr uint32_t TRANS_FAILED_FOR_PRIVACY = 1;
-const std::string REQUEST_REASON = "requestReason";
-const std::string REQUEST_REASON_PLUGIN = "onPlugIn";
-const std::string REQUEST_REASON_PLUGOUT = "onPlugOut";
 
 void ScreenSessionAbilityConnectionStub::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element,
@@ -199,11 +196,11 @@ void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     const std::string &bundleName, const std::string &abilityName)
 {
-    return ScreenSessionConnectExtension(bundleName, abilityName, -1);
+    return ScreenSessionConnectExtension(bundleName, abilityName, {});
 }
 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
-    const std::string &bundleName, const std::string &abilityName, const int32_t &paramFlag)
+    const std::string &bundleName, const std::string &abilityName, std::map<std::string, std::string> &paramMap)
 {
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
@@ -212,9 +209,14 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     }
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    if (paramFlag >= 0) {
-        std::string requestReason = paramFlag == 0 ? REQUEST_REASON_PLUGOUT : REQUEST_REASON_PLUGIN;
-        want.SetParam(REQUEST_REASON, requestReason);
+    for (auto param : paramMap) {
+        std::string paramKey = param.first;
+        std::string paramValue = param.second;
+        if (!paramKey.empty() && !paramValue.empty()) {
+            want.SetParam(paramKey, paramValue);
+            TLOGI(WmsLogTag::DMS, "add want param. paramKey=%{public}s, paramValue=%{public}s",
+                paramKey.c_str(), requestReason.c_str());
+        }
     }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
         ScreenSessionAbilityConnectionStub());
