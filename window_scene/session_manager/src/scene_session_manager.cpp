@@ -10177,7 +10177,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
 
 void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>& persistentIds)
 {
-    auto task = [weakThis = wptr(this)] {
+    auto task = [this, startZOrder, persistentIds]() {
         std::ostringstream oss;
         oss << "[";
         for (size_t i = 0; i < persistentIds.size(); i++) {
@@ -10200,7 +10200,8 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
         }
         oss << "]";
         TLOGI(WmsLogTag::WMS_LAYOUT, "Complete:%{public}s", oss.str().c_str());
+        return WSError::WS_OK;
     };
-    PostTask(task, "RefreshPcZOrderList");
+    taskScheduler_->PostSyncTask(task, "RefreshPcZOrderList");
 }
 } // namespace OHOS::Rosen
