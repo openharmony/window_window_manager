@@ -18,6 +18,12 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+
+static const std::map<int32_t, map<std::string, std::string>> PARAM_FLAG_MAP = {
+    {0, {"requestReason", "onPlugOut"}},
+    {1, {"requestReason", "onPlugIn"}}
+}
+
 ScreenCastConnection &ScreenCastConnection::GetInstance()
 {
     static ScreenCastConnection screenCastConnection;
@@ -41,7 +47,11 @@ bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
         TLOGE(WmsLogTag::DMS, "connection is nullptr");
         return false;
     }
-    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, paramFlag);
+    std::map<std::string, std::string> paramMap;
+    if (PARAM_FLAG_MAP.find(paramFlag) != PARAM_FLAG_MAP.end()) {
+        paramMap = PARAM_FLAG_MAP[paramFlag];
+    }
+    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, paramMap);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
         return false;
