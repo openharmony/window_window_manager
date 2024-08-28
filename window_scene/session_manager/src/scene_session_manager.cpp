@@ -10177,30 +10177,30 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
 
 void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>& persistentIds)
 {
-    idListMap_.erase(startZOrder);
-    idListMap_.insert({startZOrder, persistentIds});
-    std::ostringstream oss;
-    oss << "[";
-    for (size_t i = 0; i < persistentIds.size(); i++) {
-        int32_t persistentId = persistentIds[i];
-        oss << persistentId;
-        if(i < persistentIds.size() - 1) {
-            oss << ",";
+    auto task = [weakThis = wptr(this)] {
+        std::ostringstream oss;
+        oss << "[";
+        for (size_t i = 0; i < persistentIds.size(); i++) {
+            int32_t persistentId = persistentIds[i];
+            oss << persistentId;
+            if (i < persistentIds.size() - 1) {
+                oss << ",";
+            }
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
+                continue;
+            }
+            sceneSession->SetPcScenePanel(true);
+            if (i > UINT32_MAX - startZOrder) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow,stop refresh");
+                break;
+            }
+            sceneSession->SetZOrder(i + startZOrder);
         }
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "sceneScene is nullptr persistentId = %{public}d", persistentId);
-            continue;
-        }
-        sceneSession->SetPcScenePanel(true);
-        if (i > UINT32_MAX - startZOrder) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "newStartZOrder overflow,stop refresh");
-            break;
-        }
-        uint32_t newZOrder = i + startZOrder;
-        sceneSession->SetZOrder(newZOrder);
-    }
-    oss << "]";
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Complete:%{public}s", oss.str().c_str());
+        oss << "]";
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Complete:%{public}s", oss.str().c_str());
+    };
+    PostTask(task, "RefreshPcZOrderList");
 }
 } // namespace OHOS::Rosen

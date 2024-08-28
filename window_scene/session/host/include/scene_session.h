@@ -392,10 +392,7 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
-    void SetPcScenePanel(bool isPcScenePanel)
-    {
-        isPcScenePanel_ = isPcScenePanel;
-    }
+    void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel };
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -579,7 +576,9 @@ private:
     // Multi User
     bool isMinimizedByUserSwitch_ { false };
 
-    // pc scene panel is used to determine whether the freshPcZOrder method is used to process the layer
+    /*
+    * Window ZOrder: PC
+    */
     bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
