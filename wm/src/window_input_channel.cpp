@@ -124,7 +124,8 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) &&
+    if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG ||
+         WindowHelper::IsModalSubWindow(window_->GetType(), window_->GetWindowFlags())) &&
         (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId()) &&
         action != MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         if (isPointDown && isValidPointItem) {
@@ -132,20 +133,6 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         }
         pointerEvent->MarkProcessed();
         return;
-    }
-
-    if (WindowHelper::IsModalSubWindow(window_->GetType(), window_->GetWindowFlags()) && isValidPointItem) {
-        bool outsideWindow = !WindowHelper::IsPointInTargetRectWithBound(pointerItem.GetDisplayX(),
-            pointerItem.GetDisplayY(), window_->GetRect());
-        bool needIntercept = isPointDown || action == MMI::PointerEvent::POINTER_ACTION_MOVE;
-        if (outsideWindow && needIntercept) {
-            if (isPointDown) {
-                window_->NotifyTouchDialogTarget(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-            }
-            
-            pointerEvent->MarkProcessed();
-            return;
-        }
     }
     TLOGD(WmsLogTag::WMS_EVENT, "Dispatch move event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), action);
