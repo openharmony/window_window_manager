@@ -84,7 +84,7 @@ public:
 
     bool ScreenSessionConnectExtension(const std::string &bundleName, const std::string &abilityName);
     bool ScreenSessionConnectExtension(const std::string &bundleName, const std::string &abilityName,
-        std::map<std::string, std::string> &paramMap);
+        const std::vector<std::pair<std::string, std::string>> &paramMap);
     void ScreenSessionDisconnectExtension();
     int32_t SendMessage(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageBlock(const int32_t &transCode, MessageParcel &data, MessageParcel &reply);

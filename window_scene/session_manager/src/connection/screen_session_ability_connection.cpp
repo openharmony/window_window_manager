@@ -200,7 +200,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
 }
 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
-    const std::string &bundleName, const std::string &abilityName, std::map<std::string, std::string> &paramMap)
+    const std::string &bundleName, const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &paramMap)
 {
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
