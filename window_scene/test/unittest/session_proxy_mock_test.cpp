@@ -94,6 +94,45 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent03 end");
 }
+
+/**
+ * @tc.name: UpdateSessionPropertyByAction
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+{
+    WLOGI("UpdateSessionPropertyByAction begin");
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::setWriteUint32ErrorFlag(true);
+    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    MockMessageParcel::setWriteBoolErrorFlag(true);
+    WSError res = sessionProxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::setWriteBoolErrorFlag(true);
+    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+    WLOGI("UpdateSessionPropertyByAction end");
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
