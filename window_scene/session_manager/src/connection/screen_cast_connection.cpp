@@ -47,14 +47,14 @@ bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
         TLOGE(WmsLogTag::DMS, "connection is nullptr");
         return false;
     }
-    std::vector<std::pair<std::string, std::string>> paramMap;
+    std::vector<std::pair<std::string, std::string>> params;
     auto iter = PARAM_FLAG_MAP.find(paramFlag);
     if (iter != PARAM_FLAG_MAP.end()) {
         TLOGE(WmsLogTag::DMS, "The paramFlag does not exist!");
         return false;
     }
-    paramMap.insert(iter->second);
-    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, paramMap);
+    params.insert(iter->second);
+    bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, params);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
         return false;
