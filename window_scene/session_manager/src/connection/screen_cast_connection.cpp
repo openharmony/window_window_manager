@@ -49,7 +49,7 @@ bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
     }
     std::vector<std::pair<std::string, std::string>> params;
     auto iter = PARAM_FLAG_MAP.find(paramFlag);
-    if (iter != PARAM_FLAG_MAP.end()) {
+    if (iter == PARAM_FLAG_MAP.end()) {
         TLOGE(WmsLogTag::DMS, "The paramFlag does not exist!");
         return false;
     }
