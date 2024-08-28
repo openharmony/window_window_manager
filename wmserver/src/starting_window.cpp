@@ -56,10 +56,7 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS
 std::recursive_mutex StartingWindow::mutex_;
 WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 bool StartingWindow::transAnimateEnable_ = true;
-std::string StartingWindow::multiWindowUIType_ = "";
-bool StartingWindow::isPhoneWindow_ = false;
-bool StartingWindow::isPcWindow_ = false;
-bool StartingWindow::isPadWindow_ = false;
+WindowUIType StartingWindow::windowUIType_ = WindowUIType::PHONE_WINDOW;
 AnimationConfig StartingWindow::animationConfig_;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
@@ -317,8 +314,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 
 bool StartingWindow::IsWindowFollowParent(WindowType type)
 {
-    auto isPhone = isPhoneWindow_;
-    if (!isPhone) {
+    if (windowUIType_ != WindowUIType::PHONE_WINDOW) {
         return false;
     }
     return WindowHelper::IsWindowFollowParent(type);

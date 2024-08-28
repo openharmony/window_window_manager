@@ -430,10 +430,7 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
-    std::string multiWindowUIType_;
-    bool isPhoneWindow_ = false;
-    bool isPcWindow_ = false;
-    bool isPadWindow_ = false;
+    WindowUIType windowUIType_ = WindowUIType::PHONE_WINDOW;
     bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
@@ -468,16 +465,7 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
-        if (!parcel.WriteString(multiWindowUIType_)) {
-            return false;
-        }
-        if (!parcel.WriteBool(isPhoneWindow_)) {
-            return false;
-        }
-        if (!parcel.WriteBool(isPcWindow_)) {
-            return false;
-        }
-        if (!parcel.WriteBool(isPadWindow_)) {
+        if (!parcel.WriteUint8(static_cast<uint8_t>(windowUIType_))) {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
@@ -516,10 +504,7 @@ struct SystemSessionConfig : public Parcelable {
             return nullptr;
         }
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
-        config->multiWindowUIType_ = parcel.ReadString();
-        config->isPhoneWindow_ = parcel.ReadBool();
-        config->isPcWindow_ = parcel.ReadBool();
-        config->isPadWindow_ = parcel.ReadBool();
+        config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
@@ -527,6 +512,21 @@ struct SystemSessionConfig : public Parcelable {
     bool IsFreeMultiWindowMode() const
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
+    }
+        
+    bool IsPhoneWindow() const
+    {
+        return windowUIType_ == WindowUIType::PHONE_WINDOW;
+    }
+
+    bool IsPcWindow() const
+    {
+        return windowUIType_ == WindowUIType::PC_WINDOW;
+    }
+
+    bool IsPadWindow() const
+    {
+        return windowUIType_ == WindowUIType::PAD_WINDOW;
     }
 };
 } // namespace Rosen

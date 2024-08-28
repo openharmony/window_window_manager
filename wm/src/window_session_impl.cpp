@@ -212,9 +212,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    auto isPC = windowSystemConfig_.isPcWindow_;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -564,13 +563,16 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
+    if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
+        windowSizeChanged_ = true;
+    }
     if (reason == SizeChangeReason::DRAG_END) {
         property_->SetRequestRect(wmRect);
     }
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
-        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), wmReason, rsTransaction != nullptr,
-        GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
+        ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
+        rsTransaction != nullptr, GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
@@ -962,7 +964,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = windowSystemConfig_.isPcWindow_;
+    auto isPC = windowSystemConfig_.IsPcWindow();
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
@@ -1073,38 +1075,29 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.isPcWindow_) {
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.IsPcWindow()) {
         return;
     }
-    uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window != nullptr && window->surfaceNode_ != nullptr) {
-            bool setCallBackEnable = true;
-            if (window->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "Notify buffer available after layout, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MAIN,
-                    "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
-                // false: Make the function callable
-                window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            }
-        }
-    });
     uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto window = weakThis.promote();
         if (window == nullptr) {
             return;
         }
-        bool setCallBackEnable = true;
-        if (window->enableFrameLayoutFinishCb_.compare_exchange_strong(setCallBackEnable, false)) {
-            auto hostSession = window->GetHostSession();
-            if (hostSession) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "NotifyFrameLayoutFinish, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MULTI_WINDOW,
-                    "NotifyFrameLayoutFinish, windowId: %{public}u", window->GetWindowId());
-                hostSession->NotifyFrameLayoutFinishFromApp();
+        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
+            auto windowRect = window->GetRect();
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            TLOGI(WmsLogTag::WMS_LAYOUT,
+                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            WSRect rect = { windowRect.posX_, windowRect.posY_,
+                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
+            if (auto session = window->GetHostSession()) {
+                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
             }
+            window->windowSizeChanged_ = false;
+            window->enableFrameLayoutFinishCb_ = false;
         }
     });
 }
@@ -1353,8 +1346,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", topmost);
-    auto isPC = windowSystemConfig_.isPcWindow_;
-    if (!isPC) {
+    if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
@@ -2209,9 +2201,8 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = windowSystemConfig_.isPcWindow_;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(isPC || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -2245,8 +2236,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (needNotifyListeners && !isPcAppInPad) {
+    if (needNotifyListeners) {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
@@ -3380,8 +3370,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.isPhoneWindow_ ||
-                 (windowSystemConfig_.isPadWindow_ && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.IsPhoneWindow() ||
+                 (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;

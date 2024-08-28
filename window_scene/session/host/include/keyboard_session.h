@@ -75,6 +75,7 @@ private:
     std::string GetSessionScreenName();
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
         bool isShow);
+    bool CheckKeyboardRectValid();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

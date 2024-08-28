@@ -320,19 +320,19 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void WindowManagerService::LoadWindowParameter()
 {
-    std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
-    systemConfig_.multiWindowUIType_ = multiWindowUIType;
-    systemConfig_.isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
-    systemConfig_.isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
-    systemConfig_.isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
-    StartingWindow::multiWindowUIType_ = multiWindowUIType;
-    StartingWindow::isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
-    StartingWindow::isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
-    StartingWindow::isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
-    WindowNodeContainer::multiWindowUIType_ = multiWindowUIType;
-    WindowNodeContainer::isPhoneWindow_ = multiWindowUIType == "HandsetSmartWindow";
-    WindowNodeContainer::isPcWindow_ = multiWindowUIType == "FreeFormMultiWindow";
-    WindowNodeContainer::isPadWindow_ = multiWindowUIType == "TabletSmartWindow";
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    if (multiWindowUIType == "HandsetSmartWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PHONE_WINDOW;
+    } else if (multiWindowUIType == "FreeFormMultiWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PC_WINDOW;
+    } else if (multiWindowUIType == "TabletSmartWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PAD_WINDOW;
+    } else {
+        WLOGFE("unknown multiWindowUIType:%{public}s.", multiWindowUIType.c_str());
+    }
 }
 
 void WindowManagerService::ConfigureWindowManagerService()

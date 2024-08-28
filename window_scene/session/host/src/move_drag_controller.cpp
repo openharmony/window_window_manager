@@ -29,6 +29,7 @@
 #include "session_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -248,6 +249,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        bool isNeedFlush = false;
         if (isStartDrag_ && isPcWindow_) {
             surfaceNode->MarkUifirstNode(false);
             isNeedFlush = true;
@@ -256,6 +258,8 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransaction::FlushImplicitTransaction();
+        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;

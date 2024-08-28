@@ -163,7 +163,7 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = systemConfig_.isPcWindow_;
+    auto isPC = systemConfig_.IsPcWindow();
     if (isPC && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {

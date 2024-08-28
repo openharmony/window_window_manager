@@ -44,10 +44,7 @@ public:
     static void SetDefaultWindowMode(WindowMode defaultMode);
     static void SetAnimationConfig(AnimationConfig config);
     static bool transAnimateEnable_;
-    static std::string multiWindowUIType_;
-    static bool isPhoneWindow_;
-    static bool isPcWindow_;
-    static bool isPadWindow_;
+    static WindowUIType windowUIType_;
     
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);

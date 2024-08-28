@@ -459,20 +459,20 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
 }
 
-DMError ScreenManagerAdapter::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenManagerAdapter::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MultiScreenModeSwitch(mainScreenId, secondaryScreenId, secondaryScreenMode);
+    return displayManagerServiceProxy_->SetMultiScreenMode(mainScreenId, secondaryScreenId, screenMode);
 }
 
-DMError ScreenManagerAdapter::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenManagerAdapter::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->SetMultiScreenRelativePosition(firstScreenOption, secondScreenOption);
+    return displayManagerServiceProxy_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
 }
 
 DMError ScreenManagerAdapter::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)

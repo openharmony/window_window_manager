@@ -110,14 +110,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    std::string surfaceNodeName;
-    if (auto bundleName = option->GetBundleName(); bundleName != "") {
-        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
-    } else {
-        surfaceNodeName = property_->GetWindowName();
-    }
-    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
-    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -175,8 +168,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = windowSystemConfig_.isPhoneWindow_;
-    if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
+    if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
     return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);

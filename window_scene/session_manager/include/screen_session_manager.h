@@ -103,10 +103,10 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
-    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode) override;
-    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-        ExtendOption secondScreenOption) override;
+    virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode) override;
+    virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
@@ -278,6 +278,12 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
+    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override;
+    void SetDefaultScreenId(ScreenId defaultId);
+    sptr<IScreenSessionManagerClient> GetClientProxy();
+    void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
+        const std::string& screenMode);
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -309,6 +315,7 @@ private:
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
     void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
+    void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
 
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
@@ -409,6 +416,7 @@ private:
     bool isScreenShot_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
+    uint32_t currentExpandScreenCount_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;

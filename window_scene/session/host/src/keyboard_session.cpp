@@ -113,7 +113,7 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
-        if (session->systemConfig_.isPcWindow_ || session->GetSessionScreenName() == "HiCar" ||
+        if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
             session->GetSessionScreenName() == "SuperLauncher") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             session->RestoreCallingSession();
@@ -152,6 +152,15 @@ WSError KeyboardSession::Disconnect(bool isFromClient)
     return WSError::WS_OK;
 }
 
+bool KeyboardSession::CheckKeyboardRectValid()
+{
+    if (winRect_.posY_ == 0 && GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboard winRect_.posY_ is 0 invalid");
+        return false;
+    }
+    return true;
+}
+
 WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
@@ -161,6 +170,10 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
             TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (!session->CheckKeyboardRectValid()) {
+            return WSError::WS_DO_NOTHING;
+        }
+
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -370,29 +383,12 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     if (isCallingSessionFloating && isMainOrParentFloating &&
-        (systemConfig_.isPhoneWindow_ || (systemConfig_.isPadWindow_ && !isFreeMultiWindowMode))) {
+        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
     }
 
     return true;
-}
-
-static bool IsCallingSessionSplitMode(const sptr<SceneSession>& callingSession)
-{
-    auto windowType = callingSession->GetWindowType();
-    bool isCallingSessionSplit = false;
-    if (WindowHelper::IsMainWindow(windowType)) {
-        if (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    } else if (WindowHelper::IsSubWindow(windowType) || WindowHelper::IsDialogWindow(windowType)) {
-        if (callingSession->GetParentSession() != nullptr &&
-            callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    }
-    return isCallingSessionSplit;
 }
 
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
@@ -423,9 +419,8 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
         oriPosYBeforeRaisedByKeyboard == 0) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No overlap area, keyboardRect: %{public}s, callingRect: %{public}s",
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
-        if (!IsCallingSessionSplitMode(callingSession)) {
-            return;
-        }
+        NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, keyboardPanelRect, rsTransaction);
+        return;
     }
 
     WSRect newRect = callingSessionRect;
