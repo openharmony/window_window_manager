@@ -263,8 +263,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_->SetNavigationId("");
-    pipControl->pipOption_->SetTypeNodeEnabled(true);
-    startType = StartPipType::USER_START;
     PictureInPictureManager::SetActiveController(pipControl);
     ASSERT_TRUE(PictureInPictureManager::IsAttachedToSameWindow(100));
 }
@@ -276,13 +274,13 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
  */
 HWTEST_F(PictureInPictureControllerTest, StartPictureInPictureInner, Function | SmallTest | Level2)
 {
-    StartPipType startType = StartPipType::AUTO_START;
+    StartPipType startType = StartPipType::USER_START;
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_NE(WMError::WM_OK, pipControl->StartPictureInPictureInner(startType));
 }
 
@@ -823,7 +821,9 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->window_ = mw;
