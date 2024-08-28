@@ -2965,8 +2965,8 @@ napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_info info)
 {
-    size_t argc = 2;
-    napi_value argv[2];
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -2976,19 +2976,19 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
     }
     uint32_t startZOrder;
     if (!ConvertFromJsValue(env, argv[0], startZOrder)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert startZOrder to %{public}d", startZOrder);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert start Z order to %{public}d", startZOrder);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    std::vector<int32_t> perisistendIds;
-    if (!ConvertInt32ArrayFromJs(env, argv[1], perisistendIds)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert perisistendIds");
+    std::vector<int32_t> persistentIds;
+    if (!ConvertInt32ArrayFromJs(env, argv[1], persistentIds)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert persistentIds");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, perisistendIds);
+    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, persistentIds);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

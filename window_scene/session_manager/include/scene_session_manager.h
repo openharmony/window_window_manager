@@ -781,7 +781,6 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
-    std::map<int32_t, std::vector<int32_t>> idListMap_;
 };
 } // namespace OHOS::Rosen
 
