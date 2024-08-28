@@ -22,7 +22,7 @@ namespace OHOS::Rosen {
 static const std::map<int32_t, map<std::string, std::string>> PARAM_FLAG_MAP = {
     {0, {"requestReason", "onPlugOut"}},
     {1, {"requestReason", "onPlugIn"}}
-}
+};
 
 ScreenCastConnection &ScreenCastConnection::GetInstance()
 {
