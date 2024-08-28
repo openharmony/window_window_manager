@@ -53,7 +53,7 @@ bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
         TLOGE(WmsLogTag::DMS, "The paramFlag does not exist!");
         return false;
     }
-    params.insert(iter->second);
+    params.push_back(iter->second);
     bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, params);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
