@@ -106,28 +106,29 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTe
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 
-    MockMessageParcel::setWriteUint32ErrorFlag(true);
-    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    MockMessageParcel::setWriteBoolErrorFlag(true);
-    WSError res = sessionProxy->UpdateSessionPropertyByAction(property,
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    WMError res = sessionProxy->UpdateSessionPropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 
-    MockMessageParcel::setWriteBoolErrorFlag(true);
-    WSError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    WMError res = sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
