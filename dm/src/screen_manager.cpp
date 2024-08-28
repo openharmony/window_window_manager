@@ -551,7 +551,7 @@ ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
 {
     //  After the process creating the virtual screen is killed, DMS needs to delete the virtual screen
-    std::lock_guard agentLock(virtualScreenAgentMutex_);
+    std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
     if (virtualScreenAgent_ == nullptr) {
         virtualScreenAgent_ = new DisplayManagerAgentDefault();
     }
@@ -706,7 +706,7 @@ void ScreenManager::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");
     {
-        std::lock_guard agentLock(virtualScreenAgentMutex_);
+        std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
         virtualScreenAgent_ = nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
