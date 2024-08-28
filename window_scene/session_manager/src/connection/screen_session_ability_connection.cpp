@@ -215,7 +215,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::st
         if (!paramKey.empty() && !paramValue.empty()) {
             want.SetParam(paramKey, paramValue);
             TLOGI(WmsLogTag::DMS, "add want param. paramKey=%{public}s, paramValue=%{public}s",
-                paramKey.c_str(), requestReason.c_str());
+                paramKey.c_str(), paramValue.c_str());
         }
     }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
