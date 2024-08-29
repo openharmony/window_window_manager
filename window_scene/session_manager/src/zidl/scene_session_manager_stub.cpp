@@ -228,9 +228,13 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)){
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_INVALID_DATA;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
@@ -265,9 +269,13 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)){
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_INVALID_DATA;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");

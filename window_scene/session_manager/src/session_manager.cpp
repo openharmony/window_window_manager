@@ -44,14 +44,20 @@ public:
         switch (msgId) {
             case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
                 auto sessionManagerService = data.ReadRemoteObject();
+                // Even if sessionManagerService is null, the recovery process is still required.
                 OnSessionManagerServiceRecover(sessionManagerService);
                 break;
             }
             case SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED: {
-                int32_t userId = data.ReadInt32();
-                int32_t screenId = data.ReadInt32();
-                bool isConnected = data.ReadBool();
+                int32_t userId = INVALID_USER_ID;
+                int32_t screenId = DEFAULT_SCREEN_ID;
+                bool isConnected = false;
+                if (!data.ReadInt32(userId) || !data.ReadInt32(screenId) || !data.ReadBool(isConnected)) {
+                    TLOGE(WmsLogTag::WMS_MULTI_USER, "Read data failed!");
+                    break;
+                }
                 if (isConnected) {
+                    // Even if data.ReadRemoteObject() is null, the WMS connection still needs to be notified.
                     OnWMSConnectionChanged(userId, screenId, isConnected, data.ReadRemoteObject());
                 } else {
                     OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
@@ -121,7 +127,7 @@ void SessionManager::OnWMSConnectionChanged(
             currentScreenId_ = screenId;
         }
     }
-    if (isConnected && lastUserId > INVALID_UID && lastUserId != userId) {
+    if (isConnected && lastUserId > INVALID_USER_ID && lastUserId != userId) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
         OnUserSwitch(sessionManagerService);
