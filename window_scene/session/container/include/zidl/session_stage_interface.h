@@ -42,7 +42,7 @@ public:
     virtual WSError SetActive(bool active) = 0;
 
     /**
-     * @brief update the windiw range in the rect
+     * @brief update the window range in the rect
      * @param rect the update range
      * @param reason the update reason
      * @param rsTransaction the handle of animation synchronization
