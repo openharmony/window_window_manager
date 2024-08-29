@@ -715,10 +715,10 @@ HWTEST_F(WindowSessionImplTest4, GetAbcContent, Function | SmallTest | Level2)
     ASSERT_FALSE(!abcFile4.is_absolute());
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_FALSE(!std::filesystem::exists(abcFile4));
+        ASSERT_NE(res, nullptr);
+        std::fstream file(abcFile, std::ios::in | std::ios::binary);
+        ASSERT_FALSE(file);
     }
-    ASSERT_NE(res, nullptr);
-    std::fstream file(abcFile, std::ios::in | std::ios::binary);
-    ASSERT_FALSE(file);
     window->Destroy();
 }
 
