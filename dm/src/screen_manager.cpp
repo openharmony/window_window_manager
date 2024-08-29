@@ -27,8 +27,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
-    const static uint32_t MAX_SCREEN_SIZE = 32;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
+const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
 public:
@@ -482,24 +482,24 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
-DMError ScreenManager::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
-    WLOGFI("mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",secondaryScreenMode:%{public}u",
-        mainScreenId, secondaryScreenId, secondaryScreenMode);
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenModeSwitch(mainScreenId,
-        secondaryScreenId, secondaryScreenMode);
+    WLOGFI("mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",screenMode:%{public}u",
+        mainScreenId, secondaryScreenId, screenMode);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenMode(mainScreenId,
+        secondaryScreenId, screenMode);
     return ret;
 }
 
-DMError ScreenManager::MultiScreenRelativePosition(ExtendOption mainScreenOption,
-    ExtendOption secondaryScreenOption)
+DMError ScreenManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     WLOGFI("mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        mainScreenOption.screenId_, mainScreenOption.startX_, mainScreenOption.startY_,
-        secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenRelativePosition(mainScreenOption,
-        secondaryScreenOption);
+        mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
+        secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(mainScreenOptions,
+        secondScreenOption);
     return ret;
 }
 

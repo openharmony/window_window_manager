@@ -134,15 +134,15 @@ WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
 void SetAnchorAndScale(int32_t x, int32_t y, float scale){};
 void SetAnchorOffset(int32_t deltaX, int32_t deltaY){};
 void OffWindowZoom(){};
-WmErrorCode RaiseToAppTop(uint32_t windowId)
+WMError RaiseToAppTop(uint32_t windowId)
 {
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 };
 std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override
 {
     return nullptr;
 }
-WMError SetGestureNavigaionEnabled(bool enable) override
+WMError SetGestureNavigationEnabled(bool enable) override
 {
     return WMError::WM_OK;
 }

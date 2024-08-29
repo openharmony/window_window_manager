@@ -45,6 +45,7 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "systemUIStatusBar", CreateSystemUIStatusBarValue(env,
         config.systemUIStatusBarConfig_));
     napi_set_named_property(env, objValue, "uiType", CreateJsValue(env, config.uiType_));
+    napi_set_named_property(env, objValue, "multiWindowUIType", CreateJsValue(env, config.multiWindowUIType_));
     napi_set_named_property(env, objValue, "backgroundScreenLock", CreateJsValue(env, config.backgroundScreenLock_));
     napi_set_named_property(env, objValue, "rotationMode", CreateJsValue(env, config.rotationMode_));
     napi_set_named_property(env, objValue, "desktopStatusBarConfig",

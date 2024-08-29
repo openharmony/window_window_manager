@@ -76,7 +76,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest3::ssm_ = nullptr;
 
 bool SceneSessionManagerTest3::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -84,7 +85,7 @@ void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
+void ProcessStatusBarEnabledChangeFuncTest(bool enable, const std::string& bundleName)
 {
 }
 
@@ -1420,22 +1421,22 @@ HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, Function | SmallTest | 
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled02
- * @tc.desc: SceneSesionManager set gesture navigaion enable
+ * @tc.name: SetGestureNavigationEnabled02
+ * @tc.desc: SceneSesionManager set gesture navigation enable
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest3, SetGestureNavigaionEnabled02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, Function | SmallTest | Level3)
 {
     bool enable = true;
-    WMError result01 = ssm_->SetGestureNavigaionEnabled(enable);
+    WMError result01 = ssm_->SetGestureNavigationEnabled(enable);
     EXPECT_EQ(result01, WMError::WM_OK);
     ProcessGestureNavigationEnabledChangeFunc funcGesture_ = SceneSessionManagerTest3::callbackFunc_;
     ssm_->SetGestureNavigationEnabledChangeListener(funcGesture_);
-    WMError result02 = ssm_->SetGestureNavigaionEnabled(enable);
+    WMError result02 = ssm_->SetGestureNavigationEnabled(enable);
     EXPECT_EQ(result02, WMError::WM_OK);
     ProcessStatusBarEnabledChangeFunc funcStatus_ = ProcessStatusBarEnabledChangeFuncTest;
     ssm_->SetStatusBarEnabledChangeListener(funcStatus_);
-    WMError result03 = ssm_->SetGestureNavigaionEnabled(enable);
+    WMError result03 = ssm_->SetGestureNavigationEnabled(enable);
     ASSERT_EQ(result03, WMError::WM_OK);
 }
 

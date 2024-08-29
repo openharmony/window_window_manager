@@ -29,6 +29,7 @@
 #include "session_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -76,6 +77,11 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
+void MoveDragController::SetMovable(bool isMovable)
+{
+    isMovable_ = isMovable;
+}
+
 void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback)
 {
     pidChangeCallback_ = callback;
@@ -90,6 +96,11 @@ bool MoveDragController::GetStartMoveFlag() const
 bool MoveDragController::GetStartDragFlag() const
 {
     return isStartDrag_;
+}
+
+bool MoveDragController::GetMovable() const
+{
+    return isMovable_;
 }
 
 WSRect MoveDragController::GetTargetRect() const
@@ -236,12 +247,20 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
     }
+    bool isPC = uiType_ == UI_TYPE_PC;
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        bool isNeedFlush = false;
+        if (isStartDrag_ && isPC) {
+            surfaceNode->MarkUifirstNode(false);
+            isNeedFlush = true;
+        }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransaction::FlushImplicitTransaction();
+        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;
@@ -249,6 +268,9 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        if (!isStartDrag_ && isPC) {
+            surfaceNode->MarkUifirstNode(true);
+        }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
@@ -676,65 +698,6 @@ void MoveDragController::CalculateStartRectExceptHotZone(float vpr, const WSRect
         static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * vpr);
 }
 
-void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect)
-{
-    if (pointerEvent == nullptr) {
-        WLOGFE("pointerEvent is nullptr");
-        return;
-    }
-    int32_t action = pointerEvent->GetPointerAction();
-    int32_t sourceType = pointerEvent->GetSourceType();
-    if (!(sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        (action == MMI::PointerEvent::POINTER_ACTION_MOVE ||
-         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN))) {
-        WLOGFD("Not mouse type or not down/move/up event");
-        return;
-    }
-
-    if (mouseStyleID_ != MMI::MOUSE_ICON::DEFAULT && isStartDrag_ &&
-        action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        return;
-    }
-
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        WLOGFE("Get pointeritem failed, PointerId:%{public}d", pointerEvent->GetPointerId());
-        pointerEvent->MarkProcessed();
-        return;
-    }
-
-    int32_t mousePointX = pointerItem.GetDisplayX();
-    int32_t mousePointY = pointerItem.GetDisplayY();
-    uint32_t oriStyleID = mouseStyleID_;
-    uint32_t newStyleID = 0;
-
-    float vpr = GetVirtualPixelRatio();
-    CalculateStartRectExceptHotZone(vpr, winRect);
-    if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType, winRect)) {
-        UpdateDragType(mousePointX, mousePointY);
-        newStyleID = STYLEID_MAP.at(dragType_);
-    } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-        newStyleID = MMI::MOUSE_ICON::DEFAULT;
-    }
-
-    TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}d, Mouse posX:%{private}u, posY:%{private}u, Pointer action:%{public}u, "
-        "winRect posX:%{public}u, posY:%{public}u, W:%{public}u, H:%{public}u, "
-        "newStyle:%{public}u, oldStyle:%{public}u",
-        persistentId_, mousePointX, mousePointY, action, winRect.posX_,
-        winRect.posY_, winRect.width_, winRect.height_, newStyleID, oriStyleID);
-    if (oriStyleID != newStyleID) {
-        MMI::PointerStyle pointerStyle;
-        pointerStyle.id = static_cast<int32_t>(newStyleID);
-        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(0, pointerStyle);
-        if (res != 0) {
-            WLOGFE("set pointer style failed, res is %{public}u", res);
-            return;
-        }
-        mouseStyleID_ = newStyleID;
-    }
-}
-
 WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -889,6 +852,11 @@ void MoveDragController::OnLostFocus()
         }
         ProcessSessionRectChange(SizeChangeReason::DRAG_END);
     }
+}
+
+void MoveDragController::SetUIType(const std::string& uiType)
+{
+    uiType_ = uiType;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)

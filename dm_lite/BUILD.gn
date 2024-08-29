@@ -68,11 +68,16 @@ ohos_shared_library("libdm_lite") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 group("test") {
   testonly = true
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     deps = [ "test:test" ]
   } else {
     deps = []

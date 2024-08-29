@@ -97,6 +97,19 @@ enum class WindowType : uint32_t {
 };
 
 /**
+ * @struct HookInfo.
+ *
+ * @brief hook diaplayinfo deepending on the window size.
+ */
+struct HookInfo {
+    uint32_t width_;
+    uint32_t height_;
+    float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
+};
+
+/**
  * @brief Enumerates mode of window.
  */
 enum class WindowMode : uint32_t {
@@ -352,6 +365,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     UPDATE_DPI_SYNC,
     END,
 };
@@ -495,6 +509,8 @@ namespace {
     constexpr int32_t SYSTEM_USERID = 0;
     constexpr int32_t BASE_USER_RANGE = 200000;
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
+    constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+    constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

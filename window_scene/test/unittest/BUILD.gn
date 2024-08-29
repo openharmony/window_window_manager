@@ -44,6 +44,7 @@ group("unittest") {
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
     ":ws_scene_session_dirty_manager_test",
+    ":ws_scene_session_dirty_manager_test2",
     ":ws_scene_session_lifecycle_test",
     ":ws_scene_session_manager_lifecycle_test",
     ":ws_scene_session_manager_lifecycle_test2",
@@ -54,6 +55,7 @@ group("unittest") {
     ":ws_scene_session_manager_stub_lifecycle_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
+    ":ws_scene_session_manager_test10",
     ":ws_scene_session_manager_test2",
     ":ws_scene_session_manager_test3",
     ":ws_scene_session_manager_test4",
@@ -753,6 +755,26 @@ ohos_unittest("ws_scene_session_manager_test9") {
   ]
 }
 
+ohos_unittest("ws_scene_session_manager_test10") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test10.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
@@ -884,6 +906,29 @@ ohos_unittest("ws_scene_session_dirty_manager_test") {
     "ability_runtime:ability_context_native",
     "ability_runtime:app_manager",
     "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+  ]
+}
+
+ohos_unittest("ws_scene_session_dirty_manager_test2") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_dirty_manager_test2.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:mission_info",
+    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

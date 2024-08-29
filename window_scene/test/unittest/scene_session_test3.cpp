@@ -207,77 +207,20 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason);
+    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->winRect_ = rect;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->reason_ = SizeChangeReason::DRAG_END;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     WSRect rect2({0, 0, 0, 0});
-    result = scensession->UpdateRect(rect2, reason);
+    result = scensession->UpdateRect(rect2, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: FixKeyboardPositionByKeyboardPanel
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-
-    scensession->SetSessionProperty(property);
-    scensession->FixKeyboardPositionByKeyboardPanel(nullptr, nullptr);
-    ASSERT_NE(scensession, nullptr);
-}
-
-/**
- * @tc.name: FixKeyboardPositionByKeyboardPanel1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel1";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel1";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scenceSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scenceSession, nullptr);
-    scenceSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-
-    scenceSession->SetSessionProperty(property);
-    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, scenceSession);
-    ASSERT_NE(scenceSession, nullptr);
-
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
-    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, keyboardSession);
 }
 
 /**
@@ -303,21 +246,21 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
 
     sceneSession->SetSessionProperty(property);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    auto result = sceneSession->NotifyClientToUpdateRectTask(nullptr);
+    auto result = sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(nullptr));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(nullptr));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     std::shared_ptr<RSTransaction> rs;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask(rs));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
 }
 
 /**
@@ -358,40 +301,6 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     sceneSession1->sessionChangeCallback_->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
     result = scensession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: HandlePointerStyle1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, HandlePointerStyle1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandlePointerStyle1";
-    info.bundleName_ = "HandlePointerStyle1";
-    info.windowType_ = 1;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent), WSError::WS_ERROR_NULLPTR);
-
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    property->SetPersistentId(11);
-    scensession->property_ = property;
-
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
-    pointerEvent_->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    ASSERT_NE(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_OK);
 }
 
 /**

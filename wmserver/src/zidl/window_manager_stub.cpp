@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerStub"};
 }
 
 int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -299,7 +299,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
             uint32_t windowId = data.ReadUint32();
-            WmErrorCode errCode = RaiseToAppTop(windowId);
+            WMError errCode = RaiseToAppTop(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
@@ -311,7 +311,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED: {
             bool enable = data.ReadBool();
-            WMError errCode = SetGestureNavigaionEnabled(enable);
+            WMError errCode = SetGestureNavigationEnabled(enable);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

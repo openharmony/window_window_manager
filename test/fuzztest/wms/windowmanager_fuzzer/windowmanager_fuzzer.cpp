@@ -24,7 +24,7 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
+constexpr size_t DATA_MIN_SIZE = 2;
 }
 
 template<class T>
@@ -103,7 +103,7 @@ bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t
     windowManager.UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     bool enable;
     startPos += GetObject<bool>(enable, data + startPos, size - startPos);
-    windowManager.SetGestureNavigaionEnabled(enable);
+    windowManager.SetGestureNavigationEnabled(enable);
 
     DisplayId displayId;
     SystemBarRegionTints tints;
@@ -145,7 +145,7 @@ void CheckVisibilityInfo(WindowManager& windowManager, const uint8_t* data, size
     windowManager.GetVisibilityWindowInfo(visibilitynfos);
     windowManager.UpdateWindowVisibilityInfo(visibilitynfos);
     bool enable = false;
-    windowManager.SetGestureNavigaionEnabled(enable);
+    windowManager.SetGestureNavigationEnabled(enable);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

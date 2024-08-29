@@ -255,7 +255,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect, Function | SmallTest | L
     ASSERT_NE(mockSessionStage, nullptr);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->sessionStage_ = mockSessionStage;
-    auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
+    auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect01, Function | SmallTest |
     ASSERT_NE(mockSessionStage, nullptr);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->sessionStage_ = mockSessionStage;
-    auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
+    auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect02, Function | SmallTest |
     EXPECT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     keyboardSession->SetSessionProperty(windowSessionProperty);
-    auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
+    auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -1381,7 +1381,6 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
     resultId = keyboardSession->GetCallingSessionId();
     ASSERT_EQ(resultId, 100);
 }
-
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,12 @@
 
 #include <mutex>
 
-#include <refbase.h>
-#include <iremote_object.h>
-
 #include "window.h"
 #include "window_option.h"
 #include "wm_common.h"
 
 namespace OHOS::AppExecFwk {
-    class Configuration;
+class Configuration;
 }
 
 namespace OHOS {
@@ -166,24 +163,18 @@ public:
 
 public:
     static const DisplayId DEFAULT_DISPLAY_ID = 0;
-    static const std::string MAIN_WINDOW_ID;
 
 private:
-    /**
-     * @param context the context of a main window
-     * @return the name of main window
-     */
-    std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;
+    void OnLastStrongRef(const void *) override;
 
 private:
     mutable std::mutex mainWindowMutex_;
     sptr<Window> mainWindow_ = nullptr;
     // Above guarded by mainWindowMutex_
 
-    static inline std::atomic<uint32_t> count { 0 };
-    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
-    std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
+    uint32_t mainWindowId_ = 0;
 };
+
 } // namespace Rosen
 } // namespace OHOS
 #endif // INTERFACES_INNERKITS_WINDOW_SCENE_H

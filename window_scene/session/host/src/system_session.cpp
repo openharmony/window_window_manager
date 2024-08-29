@@ -152,37 +152,6 @@ WSError SystemSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError SystemSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
-    int32_t pid, int32_t uid)
-{
-    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        WindowState windowState = property->GetWindowState();
-        WindowType type = property->GetWindowType();
-        if (windowState == WindowState::STATE_SHOWN) {
-            session->isActive_ = true;
-            if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-                session->UpdateSessionState(SessionState::STATE_ACTIVE);
-            } else {
-                session->UpdateSessionState(SessionState::STATE_FOREGROUND);
-            }
-        } else {
-            session->isActive_ = false;
-            session->UpdateSessionState(SessionState::STATE_BACKGROUND);
-        }
-        return WSError::WS_OK;
-    });
-}
-
 WSError SystemSession::Disconnect(bool isFromClient)
 {
     auto task = [weakThis = wptr(this), isFromClient]() {
@@ -277,15 +246,16 @@ WSError SystemSession::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
+WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
+    std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction]() {
+    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -346,7 +316,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&

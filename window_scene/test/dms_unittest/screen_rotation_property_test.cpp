@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
 class ScreenRotationPropertyTest : public testing::Test {
@@ -67,6 +67,8 @@ HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTes
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_PORTRAIT);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_LANDSCAPE);
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    ASSERT_EQ(screenSession, nullptr);
 }
 
 /**

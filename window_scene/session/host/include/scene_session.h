@@ -21,18 +21,18 @@
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
-    class RunningLock;
+class RunningLock;
 }
 
 namespace OHOS::Rosen {
 namespace PARAM_KEY {
-    const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
-    const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
-    const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
+const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
+const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 namespace {
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =
@@ -142,6 +142,7 @@ public:
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
     WSError Background(bool isFromClient = false) override;
     virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
@@ -155,6 +156,12 @@ public:
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
+    bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
+        uint32_t& screenWidth, uint32_t& screenHeight);
+    bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
+        uint32_t& screenWidth, uint32_t& screenHeight);
+    void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
+        uint32_t screenHeight);
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -166,8 +173,8 @@ public:
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
@@ -175,7 +182,8 @@ public:
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
 
@@ -200,8 +208,10 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -210,10 +220,12 @@ public:
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
+    void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void SetRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
+    void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
@@ -241,6 +253,7 @@ public:
     std::string GetUpdatedIconPath() const;
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
+    int32_t GetMainSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
@@ -251,6 +264,7 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+    sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover
     bool IsRecovered() const { return isRecovered_; }
@@ -292,6 +306,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
     void ClearSpecificSessionCbMap();
@@ -349,7 +364,7 @@ public:
     bool HasModalUIExtension();
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
-    Vector2f GetPosition(bool useUIExtension);
+    Vector2f GetSessionGlobalPosition(bool useUIExtension);
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
@@ -359,7 +374,6 @@ public:
     {
         return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
     }
-    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty);
 
     // WMSPipeline-related: only accessed on SSM thread
     uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
@@ -374,17 +388,18 @@ public:
     bool IsPcOrPadEnableActivation() const;
 
     /*
-     * User Switch
+     * Multi User
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
+    void UnregisterSessionChangeListeners() override;
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
-    WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
+    WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
 
     std::string GetRectInfo(const WSRect& rect)
@@ -398,8 +413,8 @@ protected:
     bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
-    bool UpdateRectInner(const WSRect& rect, SizeChangeReason reason);
-    bool NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason reason);
+    bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
+    bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
     virtual void NotifyClientToUpdateAvoidArea();
@@ -407,7 +422,6 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
@@ -420,9 +434,9 @@ private:
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
+    void InitSystemSessionDragEnable(sptr<WindowSessionProperty> property);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
-    WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -443,71 +457,69 @@ private:
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
+    bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
-    void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateKeepScreenOn(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateTouchable(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateSetBrightness(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdatePrivacyMode(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateOtherProps(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateStatusProps(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateNavigationProps(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateNavigationIndicatorProps(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateFlags(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateMode(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateAnimationFlag(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowLimits(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateTextfieldAvoidInfo(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowMask(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
-    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession);
-    void SetWindowFlags(const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property);
-    void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+        WSPropertyChangeAction action);
+    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
+    void SetWindowFlags(const sptr<WindowSessionProperty>& property);
+    void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
 
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyForceSplitFunc forceSplitFunc_;
@@ -547,6 +559,9 @@ private:
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
+    bool isScreenAngleMismatch_ = false;
+    uint32_t targetScreenWidth_ = 0;
+    uint32_t targetScreenHeight_ = 0;
 
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
@@ -555,7 +570,7 @@ private:
     // Session recover
     bool isRecovered_ = false;
 
-    // User switch
+    // Multi User
     bool isMinimizedByUserSwitch_ { false };
 };
 } // namespace OHOS::Rosen

@@ -58,7 +58,7 @@ using NotifyRequestFocusStatusNotifyManagerFunc =
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
-using NotifyClickFunc = std::function<void()>;
+using NotifyClickFunc = std::function<void(bool requestFocus)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
@@ -80,19 +80,21 @@ using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t pers
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
+using NotifyFrameLayoutFinishFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
-    virtual void OnActivation() = 0;
-    virtual void OnConnect() = 0;
-    virtual void OnForeground() = 0;
-    virtual void OnBackground() = 0;
-    virtual void OnDisconnect() = 0;
-    virtual void OnExtensionDied() = 0;
-    virtual void OnExtensionTimeout(int32_t errorCode) = 0;
-    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevel) = 0;
+    virtual void OnActivation() {}
+    virtual void OnConnect() {}
+    virtual void OnForeground() {}
+    virtual void OnBackground() {}
+    virtual void OnDisconnect() {}
+    virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnExtensionDied() {}
+    virtual void OnExtensionTimeout(int32_t errorCode) {}
+    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        int64_t uiExtensionIdLevel) {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -135,15 +137,19 @@ public:
     WSError Hide() override;
     WSError DrawingCompleted() override;
     void ResetSessionConnectState();
-    
+
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
+    /*
+     * Callbacks for ILifecycleListener
+     */
     void NotifyActivation();
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDisconnect();
+    void NotifyLayoutFinished();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -153,7 +159,8 @@ public:
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
+    virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false);
@@ -166,7 +173,7 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -193,17 +200,18 @@ public:
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
+    WSRect GetSessionGlobalRect() const;
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
-    void SetSessionLastRect(const WSRect& rect);
-    WSRect GetSessionLastRect() const;
+    WSRect GetLastLayoutRect() const;
+    WSRect GetLayoutRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
     WSError UpdateOrientation();
 
@@ -241,7 +249,7 @@ public:
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
-    void UnregisterSessionChangeListeners();
+    virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
@@ -259,6 +267,7 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
+    sptr<Session> GetMainSession();
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
@@ -277,7 +286,7 @@ public:
     void SetClickListener(const NotifyClickFunc& func);
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
-    void NotifyClick();
+    void NotifyClick(bool requestFocus = true);
     void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
@@ -289,6 +298,8 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
+    WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
+        int32_t landscapeWidth, int32_t landscapeHeight);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -359,6 +370,7 @@ public:
     bool GetSCBKeepKeyboardFlag() const;
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
+    void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -501,7 +513,9 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
-    WSRect lastWinRect_;
+    WSRect lastLayoutRect_; // rect saved when go background
+    WSRect layoutRect_; // rect of root view
+    WSRect globalRect_; // globalRect include translate
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -541,6 +555,7 @@ protected:
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
+    NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;

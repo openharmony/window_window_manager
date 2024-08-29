@@ -79,9 +79,9 @@ public:
     virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale);
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
     virtual void OffWindowZoom();
-    virtual WmErrorCode RaiseToAppTop(uint32_t windowId);
+    virtual WMError RaiseToAppTop(uint32_t windowId);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId);
-    virtual WMError SetGestureNavigaionEnabled(bool enable);
+    virtual WMError SetGestureNavigationEnabled(bool enable);
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event);
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info);
     virtual WMError DumpSessionAll(std::vector<std::string>& infos);

@@ -26,8 +26,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerStub"};
-    const static uint32_t MAX_SCREEN_SIZE = 32;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerStub"};
+const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 
 int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -430,6 +430,33 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             DMError ret = MakeUniqueScreen(uniqueScreenIds);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
+            auto physicalInfos = GetAllDisplayPhysicalResolution();
+            size_t infoSize = physicalInfos.size();
+            bool writeRet = reply.WriteInt32(static_cast<int32_t>(infoSize));
+            if (!writeRet) {
+                WLOGFE("write physical size error");
+                break;
+            }
+            for (const auto &physicalItem : physicalInfos) {
+                writeRet = reply.WriteUint32(static_cast<uint32_t>(physicalItem.foldDisplayMode_));
+                if (!writeRet) {
+                    WLOGFE("write display mode error");
+                    break;
+                }
+                writeRet = reply.WriteUint32(physicalItem.physicalWidth_);
+                if (!writeRet) {
+                    WLOGFE("write physical width error");
+                    break;
+                }
+                writeRet = reply.WriteUint32(physicalItem.physicalHeight_);
+                if (!writeRet) {
+                    WLOGFE("write physical height error");
+                    break;
+                }
+            }
             break;
         }
         default:

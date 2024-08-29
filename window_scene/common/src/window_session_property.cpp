@@ -360,6 +360,7 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+/** @note @window.hierarchy */
 void WindowSessionProperty::SetTopmost(bool topmost)
 {
     topmost_ = topmost;
@@ -898,6 +899,35 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetCompatibleWindowSizeInPc(int32_t portraitWidth,
+    int32_t portraitHeight, int32_t landscapeWidth, int32_t landscapeHeight)
+{
+    compatibleInPcPortraitWidth_ = portraitWidth;
+    compatibleInPcPortraitHeight_ = portraitHeight;
+    compatibleInPcLandscapeWidth_ = landscapeWidth;
+    compatibleInPcLandscapeHeight_ = landscapeHeight;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcPortraitWidth() const
+{
+    return compatibleInPcPortraitWidth_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcPortraitHeight() const
+{
+    return compatibleInPcPortraitHeight_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcLandscapeWidth() const
+{
+    return compatibleInPcLandscapeWidth_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
+{
+    return compatibleInPcLandscapeHeight_;
+}
+
 void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
 {
     isAppSupportPhoneInPc_ = isSupportPhone;
@@ -918,6 +948,16 @@ bool WindowSessionProperty::GetIsPcAppInPad() const
     return isPcAppInPad_;
 }
 
+void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
+{
+    subWindowLevel_ = subWindowLevel;
+}
+
+uint32_t WindowSessionProperty::GetSubWindowLevel() const
+{
+    return subWindowLevel_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -930,22 +970,26 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 
 bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
 {
-    if (layoutCallback_ == nullptr) {
-        return false;
-    }
-    if (!parcel.WriteObject(layoutCallback_->AsObject())) {
-        return false;
+    if (!layoutCallback_) {
+        if (!parcel.WriteBool(false)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteBool(true) ||
+            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(layoutCallback_->AsObject())) {
+            return false;
+        }
     }
     return true;
 }
 
 void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
 {
-    auto readObject = parcel.ReadObject<IRemoteObject>();
-    sptr<IFutureCallback> callback = nullptr;
-    if (readObject != nullptr) {
-        callback = iface_cast<IFutureCallback>(readObject);
+    if (!parcel.ReadBool()) {
+        return;
     }
+    sptr<IFutureCallback> callback =
+        iface_cast<IFutureCallback>((static_cast<MessageParcel*>(&parcel))->ReadRemoteObject());
     if (callback != nullptr) {
         property->SetLayoutCallback(callback);
     }
@@ -982,11 +1026,15 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
+        parcel.WriteInt32(realParentId_) &&
         parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteBool(isUIExtensionAbilityProcess_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
+        parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) &&
@@ -1046,7 +1094,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
+    property->SetRealParentId(parcel.ReadInt32());
     property->SetExtensionFlag(parcel.ReadBool());
+    property->SetIsUIExtensionAbilityProcess(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
@@ -1056,6 +1106,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
+                                          parcel.ReadInt32(), parcel.ReadInt32());
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
@@ -1415,6 +1467,16 @@ void WindowSessionProperty::SetIsLayoutFullScreen(bool isLayoutFullScreen)
     isLayoutFullScreen_ = isLayoutFullScreen;
 }
 
+void WindowSessionProperty::SetRealParentId(int32_t realParentId)
+{
+    realParentId_ = realParentId;
+}
+
+int32_t WindowSessionProperty::GetRealParentId() const
+{
+    return realParentId_;
+}
+
 void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 {
     isExtensionFlag_ = isExtensionFlag;
@@ -1423,6 +1485,16 @@ void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
 bool WindowSessionProperty::GetExtensionFlag() const
 {
     return isExtensionFlag_;
+}
+
+void WindowSessionProperty::SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
+{
+    isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionAbilityProcess() const
+{
+    return isUIExtensionAbilityProcess_;
 }
 
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)

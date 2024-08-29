@@ -32,7 +32,7 @@ constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
 class ScreenSessionAbilityConnectionTest : public testing::Test {
@@ -227,6 +227,32 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension, Func
     const std::string bundleName = "com.ohos.sceneboard";
     const std::string abilityName = "com.ohos.sceneboard.systemdialog";
     want.SetElementName(bundleName, abilityName);
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
+        want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
+    IPCSkeleton::SetCallingIdentity(identity);
+    ASSERT_EQ(resConnect, ERR_OK);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
+}
+
+/**
+ * @tc.name: ScreenSessionConnectExtension02
+ * @tc.desc: ScreenSessionConnectExtension02 func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension02, Function | SmallTest | Level1)
+{
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    AAFwk::Want want;
+    const std::string bundleName = "com.ohos.sceneboard";
+    const std::string abilityName = "com.ohos.sceneboard.systemdialog";
+    want.SetElementName(bundleName, abilityName);
+    std::string paramKey = "requestReason";
+    std::string paramValue = "onPlugIn";
+    want.SetParam(paramKey, paramValue);
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnectionStub, nullptr, DEFAULT_VALUE);

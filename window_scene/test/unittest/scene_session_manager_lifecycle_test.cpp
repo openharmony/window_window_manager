@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerLifecycleTest : public testing::Test {
 public:
@@ -425,10 +425,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ASSERT_NE(nullptr, scnSessionInfo);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, listenerController);
-    ssm_->listenerController_ = listenerController;
     ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);

@@ -348,7 +348,7 @@ int32_t FFiOHOSWindowSetGestureNavigationEnabled(bool enable)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowSetGestureNavigationEnabled start");
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<WindowManager>().SetGestureNavigaionEnabled(enable));
+        SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowSetGestureNavigationEnabled error %{public}d", ret);
         return static_cast<int32_t>(ret);
@@ -785,6 +785,18 @@ int32_t FfiOHOSOffKeyboardHeightChange(int64_t id)
     }
     int32_t ret = instance->UnregisterWindowCallback("keyboardHeightChange", (-1));
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OffKeyboardHeightChange success");
+    return ret;
+}
+
+int32_t FfiOHOSOnWindowEvent(int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OnWindowEvent start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->OnRegisterWindowCallback("windowEvent", callbackId);
+    TLOGI(WmsLogTag::WMS_DIALOG, "[Window] OnWindowEvent success");
     return ret;
 }
 

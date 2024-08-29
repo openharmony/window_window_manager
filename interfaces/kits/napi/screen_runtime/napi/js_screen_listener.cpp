@@ -19,14 +19,39 @@
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 #include "js_screen.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenListener"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenListener"};
 }
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
+
+JsScreenListener::JsScreenListener(napi_env env) : env_(env)
+{
+    TLOGI(WmsLogTag::DMS, "Constructor execution");
+    napi_add_env_cleanup_hook(env_, CleanEnv, this);
+}
+
+JsScreenListener::~JsScreenListener()
+{
+    TLOGI(WmsLogTag::DMS, "Destructor execution");
+    napi_remove_env_cleanup_hook(env_, CleanEnv, this);
+    env_ = nullptr;
+}
+
+void JsScreenListener::CleanEnv(void* obj)
+{
+    JsScreenListener* thisObj = reinterpret_cast<JsScreenListener*>(obj);
+    if (!thisObj) {
+        TLOGE(WmsLogTag::DMS, "obj is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "env_ is invalid, set to nullptr");
+    thisObj->env_ = nullptr;
+}
 
 void JsScreenListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {

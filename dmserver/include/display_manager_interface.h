@@ -104,6 +104,7 @@ public:
         TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
         TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
         TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
@@ -111,6 +112,7 @@ public:
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN,
         TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS,
+        TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS,
         TRANS_ID_SET_CLIENT = 2500,
         TRANS_ID_GET_SCREEN_PROPERTY,
         TRANS_ID_GET_DISPLAY_NODE,
@@ -150,7 +152,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
-    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo) {};
+    virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
@@ -238,13 +240,13 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
-    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode)
+    virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption)
+    virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -277,9 +279,13 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
+
+    virtual DMError SetFoldStatusLockedFromJs(bool locked) { return DMError::DM_OK; }
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 

@@ -26,19 +26,19 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string ACTION_CLOSE = "close";
-    const std::string ACTION_PRE_RESTORE = "pre_restore";
-    const std::string ACTION_RESTORE = "restore";
-    const std::string ACTION_DESTROY = "destroy";
-    const std::string ACTION_LOCATE_SOURCE = "locate_source";
+const std::string ACTION_CLOSE = "close";
+const std::string ACTION_PRE_RESTORE = "pre_restore";
+const std::string ACTION_RESTORE = "restore";
+const std::string ACTION_DESTROY = "destroy";
+const std::string ACTION_LOCATE_SOURCE = "locate_source";
 
-    const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
-        {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
-        {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
-        {ACTION_RESTORE, PictureInPictureManager::DoRestore},
-        {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
-        {ACTION_DESTROY, PictureInPictureManager::DoDestroy}
-    };
+const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
+    {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
+    {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
+    {ACTION_RESTORE, PictureInPictureManager::DoRestore},
+    {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
+    {ACTION_DESTROY, PictureInPictureManager::DoDestroy}
+};
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
@@ -48,6 +48,7 @@ std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::win
 sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 std::shared_mutex PictureInPictureManager::controllerMapMutex_;
 std::mutex PictureInPictureManager::mutex_;
+std::shared_ptr<NativeReference> PictureInPictureManager::innerCallbackRef_ = nullptr;
 
 PictureInPictureManager::PictureInPictureManager()
 {
@@ -282,8 +283,8 @@ void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
         return;
     }
-    if (navigationId == "") {
-        TLOGI(WmsLogTag::WMS_PIP, "No use navigationId for auto start");
+    if (navigationId == "" || autoStartController_->IsTypeNodeEnabled()) {
+        TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
         autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
         return;
     }

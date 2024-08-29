@@ -230,7 +230,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     systemSession_->sessionStage_ = mockSessionStage;
-    auto ret = systemSession_->NotifyClientToUpdateRect(nullptr);
+    auto ret = systemSession_->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -343,6 +343,22 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
     systemSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 0;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 1930;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 0;
+    systemSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 1930;
     systemSession_->RectCheck(curWidth, curHeight);
 }
 
@@ -766,12 +782,12 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | L
 
     sysSession->dirtyFlags_ = 0;
     sysSession->reason_ = SizeChangeReason::MAXIMIZE;
-    sysSession->NotifyClientToUpdateRect(nullptr);
+    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
 
     sysSession->reason_ = SizeChangeReason::DRAG;
-    sysSession->NotifyClientToUpdateRect(nullptr);
+    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(sysSession->reason_, SizeChangeReason::DRAG);
 }
@@ -796,13 +812,13 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | L
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
     sysSession->specificCallback_ = specificCallback;
-    sysSession->NotifyClientToUpdateRect(nullptr);
+    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     EXPECT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
 
     sysSession->reason_ = SizeChangeReason::MAXIMIZE;
     sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
-    sysSession->NotifyClientToUpdateRect(nullptr);
+    sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
 }

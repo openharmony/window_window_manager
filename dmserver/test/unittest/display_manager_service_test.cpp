@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 class DisplayManagerServiceTest : public testing::Test {
 public:
@@ -556,6 +556,102 @@ HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | Sma
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     DMError ret = dms_->RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetOrientation
+ * @tc.desc: DMS SetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetOrientation, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    Orientation orientation = Orientation::VERTICAL;
+    auto ret = dms_->SetOrientation(screenId, orientation);
+    ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
+
+    orientation = Orientation::SENSOR_VERTICAL;
+    ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetDisplaySnapshot
+ * @tc.desc: DMS GetDisplaySnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | Level3)
+{
+    DisplayId displayId = -1;
+    DmErrorCode* errorCode = nullptr;
+    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode);
+    ASSERT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay
+ * @tc.desc: DMS AddSurfaceNodeToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, Function | SmallTest | Level3)
+{
+    DisplayId displayId = 1;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    bool onTop = true;
+    auto ret = dms_->AddSurfaceNodeToDisplay(displayId, surfaceNode, onTop);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetAllScreenInfos
+ * @tc.desc: DMS GetAllScreenInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllScreenInfos, Function | SmallTest | Level3)
+{
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    auto ret =dms_->GetAllScreenInfos(screenInfos);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: MakeExpand
+ * @tc.desc: DMS MakeExpand
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, MakeExpand01, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> expandScreenIds{1};
+    std::vector<Point> startPoints(1);
+    ScreenId screenGroupId = 3;
+    auto ret = dms_->MakeExpand(expandScreenIds, startPoints, screenGroupId);
+    ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: MakeExpand
+ * @tc.desc: DMS MakeExpand
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, MakeExpand02, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> expandScreenIds{1, 2, 3, 4, 5};
+    std::vector<Point> startPoints(1);
+    ScreenId screenGroupId = 3;
+    auto ret = dms_->MakeExpand(expandScreenIds, startPoints, screenGroupId);
+    ASSERT_NE(ret, DMError::DM_ERROR_NOT_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: StopExpand
+ * @tc.desc: DMS StopExpand
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, StopExpand, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> expandScreenIds{0, 1, 2, 3, 4, 5};
+    auto ret = dms_->StopExpand(expandScreenIds);
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 }
 } // namespace Rosen

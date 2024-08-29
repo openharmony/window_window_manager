@@ -228,6 +228,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetScaleY(property_.GetScaleY());
     displayInfo->SetPivotX(property_.GetPivotX());
     displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
     return displayInfo;
 }
 
@@ -243,6 +245,36 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
         rsId_, static_cast<uint32_t>(colorGamuts.size()));
 
     return DMError::DM_OK;
+}
+
+void ScreenSession::SetIsExtand(bool isExtend)
+{
+    isExtended_ = isExtend;
+}
+
+bool ScreenSession::GetIsExtand() const
+{
+    return isExtended_;
+}
+
+void ScreenSession::SetIsInternal(bool isInternal)
+{
+    isInternal_ = isInternal;
+}
+
+bool ScreenSession::GetIsInternal() const
+{
+    return isInternal_;
+}
+
+void ScreenSession::SetIsCurrentInUse(bool isInUse)
+{
+    isInUse_ = isInUse;
+}
+
+bool ScreenSession::GetIsCurrentInUse() const
+{
+    return isInUse_;
 }
 
 std::string ScreenSession::GetName()
@@ -280,15 +312,15 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
-void ScreenSession::SetScreenScale(const float scaleX, const float scaleY, const float pivotX, const float pivotY)
+void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
+                                   float translateY)
 {
     property_.SetScaleX(scaleX);
     property_.SetScaleY(scaleY);
     property_.SetPivotX(pivotX);
     property_.SetPivotY(pivotY);
-    if (updateScreenPivotCallback_ != nullptr) {
-        updateScreenPivotCallback_(pivotX, pivotY);
-    }
+    property_.SetTranslateX(translateX);
+    property_.SetTranslateY(translateY);
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
@@ -431,6 +463,13 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
+void ScreenSession::ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnScreenExtandChange(mainScreenId, extandScreenId);
+    }
+}
+
 void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
     Rotation rotationAfter = CalcRotation(orientation, foldDisplayMode);
@@ -470,9 +509,9 @@ void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> u
     updateToInputManagerCallback_ = updateToInputManagerCallback;
 }
 
-void ScreenSession::SetUpdateScreenPivotCallback(std::function<void(float, float)> updateScreenPivotCallback)
+void ScreenSession::SetUpdateScreenPivotCallback(std::function<void(float, float)>&& updateScreenPivotCallback)
 {
-    updateScreenPivotCallback_ = updateScreenPivotCallback;
+    updateScreenPivotCallback_ = std::move(updateScreenPivotCallback);
 }
 
 VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
@@ -667,7 +706,7 @@ void ScreenSession::DestroyScreenScene()
         WLOGFI("destroyScreenSceneCallback_  is nullptr");
         return;
     }
-    destroyScreenSceneCallback_ ();
+    destroyScreenSceneCallback_();
 }
 
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
@@ -787,6 +826,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     }
     info->SetScreenId(screenId_);
     info->SetName(name_);
+    info->SetIsExtand(GetIsExtand());
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
