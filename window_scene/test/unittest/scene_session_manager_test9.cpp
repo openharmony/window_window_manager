@@ -606,7 +606,7 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     SessionInfo info3;
     info3.abilityName_ = "RefreshPcZorder3";
     info3.bundleName_ = "RefreshPcZorder3";
-    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr)
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     ASSERT_NE(session3, nullptr);
     persistentIds.push_back(999);
     session3->SetZOrder(404);
