@@ -619,8 +619,8 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     // Due to RefreshPcZOrderList being asynchronous, spin lock is added.
     // The spin lock itself is set with a timeout escape time of 3 seconds
     while (true) {
-        if ((session1->GetZOrder() != 0 && session2->GetZOrder() != 0 && session1->GetZOrder() != 100)
-        || std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count() >= 3) {
+        if ((session1->GetZOrder() != 0 && session2->GetZOrder() != 0 && session1->GetZOrder() != 100) ||
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count() >= 3) {
             break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
