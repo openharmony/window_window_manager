@@ -608,9 +608,9 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     info3.bundleName_ = "RefreshPcZorder3";
     sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     ASSERT_NE(session3, nullptr);
-    persistentIds.push_back(999);
     session3->SetZOrder(404);
     ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
+    persistentIds.push_back(999);
     uint32_t startZOrder = 100;
     ssm_->RefreshPcZOrderList(startZOrder, std::move(persistentIds));
     ssm_->RefreshPcZOrderList(UINT32_MAX, std::move(persistentIds));
