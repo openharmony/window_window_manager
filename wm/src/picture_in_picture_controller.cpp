@@ -75,10 +75,6 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
-    if (mainWindow_ != nullptr) {
-        mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr();
-        mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
-    }
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbilityManager return nullptr");
@@ -119,6 +115,8 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     }
     TLOGI(WmsLogTag::WMS_PIP, "mainWindow:%{public}u, mainWindowState:%{public}u",
         mainWindowId_, mainWindow_->GetWindowState());
+    mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr();
+    mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
