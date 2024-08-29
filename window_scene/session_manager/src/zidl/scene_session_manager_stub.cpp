@@ -229,9 +229,9 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
         return ERR_INVALID_DATA;
     }
     bool hasProperty = false;
-    if (!data.ReadBool(hasProperty)){
+    if (!data.ReadBool(hasProperty)) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
-        return ERR_INVALID_DATA;
+        return ERR_TRANSACTION_FAILED;
     }
     sptr<WindowSessionProperty> property = nullptr;
     if (hasProperty) {
@@ -270,9 +270,9 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
         return ERR_INVALID_DATA;
     }
     bool hasProperty = false;
-    if (!data.ReadBool(hasProperty)){
+    if (!data.ReadBool(hasProperty)) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
-        return ERR_INVALID_DATA;
+        return ERR_TRANSACTION_FAILED;
     }
     sptr<WindowSessionProperty> property = nullptr;
     if (hasProperty) {

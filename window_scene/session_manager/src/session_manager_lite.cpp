@@ -53,7 +53,7 @@ public:
                 bool isConnected = false;
                 if (!data.ReadInt32(userId) || !data.ReadInt32(screenId) || !data.ReadBool(isConnected)) {
                     TLOGE(WmsLogTag::WMS_MULTI_USER, "Read data failed in lite!");
-                    break;
+                    return ERR_TRANSACTION_FAILED;
                 }
                 if (isConnected) {
                     // Even if data.ReadRemoteObject() is null, the WMS connection still needs to be notified.
