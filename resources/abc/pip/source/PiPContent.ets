@@ -54,6 +54,7 @@ export struct PiPContent {
     this.nodeController = pip.getCustomUIController();
     this.xComponent = pip.getTypeNode();
     if (this.xComponent === null || this.xComponent === undefined) {
+      console.error(TAG, `xComponent node is null`);
       return;
     }
     let type: string = this.xComponent.getNodeType();
