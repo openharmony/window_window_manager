@@ -29,6 +29,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapterLite"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapterLite)
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapterLite)
 
 
 #define INIT_PROXY_CHECK_RETURN(ret) \
@@ -157,6 +158,94 @@ sptr<CutoutInfo> DisplayManagerAdapterLite::GetCutoutInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetCutoutInfo(displayId);
 }
 
+/*
+ * used by powermgr
+ */
+bool DisplayManagerAdapterLite::WakeUpBegin(PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->WakeUpBegin(reason);
+}
+
+bool DisplayManagerAdapterLite::WakeUpEnd()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->WakeUpEnd();
+}
+
+bool DisplayManagerAdapterLite::SuspendBegin(PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SuspendBegin(reason);
+}
+
+bool DisplayManagerAdapterLite::SuspendEnd()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SuspendEnd();
+}
+
+bool DisplayManagerAdapterLite::SetDisplayState(DisplayState state)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SetDisplayState(state);
+}
+
+DisplayState DisplayManagerAdapterLite::GetDisplayState(DisplayId displayId)
+{
+    INIT_PROXY_CHECK_RETURN(DisplayState::UNKNOWN);
+
+    return displayManagerServiceProxy_->GetDisplayState(displayId);
+}
+
+bool DisplayManagerAdapterLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SetScreenBrightness(screenId, level);
+}
+
+uint32_t DisplayManagerAdapterLite::GetScreenBrightness(uint64_t screenId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->GetScreenBrightness(screenId);
+}
+
+std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds()
+{
+    WLOGFD("DisplayManagerAdapter::GetAllDisplayIds enter");
+    INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
+
+    return displayManagerServiceProxy_->GetAllDisplayIds();
+}
+
+bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SetSpecifiedScreenPower(screenId, state, reason);
+}
+
+bool ScreenManagerAdapterLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
+}
+
+ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
+    return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
+}
 
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)
 {
