@@ -35,42 +35,80 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
     }
     ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
     switch (msgId) {
-        case ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
+        case ScreenManagerLiteMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT:
             HandleRegisterDisplayManagerAgent(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
+        case ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT:
             HandleUnRegisterDisplayManagerAgent(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE:
             HandleGetFoldDisplayMode(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE:
             HandleSetFoldDisplayMode(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE: {
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE:
             HandleIsFoldable(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS: {
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS:
             HandleGetFoldStatus(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO: {
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO:
             HandleGetDefaultDisplayInfo(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_BY_ID:
             HandleGetDisplayById(data, reply);
             break;
-        }
-        case ScreenManagerLiteMessage::TRANS_ID_GET_CUTOUT_INFO: {
+        case ScreenManagerLiteMessage::TRANS_ID_GET_CUTOUT_INFO:
             HandleGetCutoutInfo(data, reply);
             break;
-        }
+        default:
+            return RemoteRequest(code, data, reply, option);
+    }
+    return 0;
+}
+
+int ScreenSessionManagerLiteStub::RemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
+    switch (msgId) {
+        case ScreenManagerLiteMessage::TRANS_ID_WAKE_UP_BEGIN:
+            HandleWakeUpBegin(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_WAKE_UP_END:
+            HandleWakeUpEnd(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SUSPEND_BEGIN:
+            HandleSuspendBegin(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SUSPEND_END:
+            HandleSuspendEnd(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER:
+            HandleSetSpecifiedScreenPower(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL:
+            HandleSetScreenPowerForAll(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_GET_SCREEN_POWER:
+            HandleGetScreenPower(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SET_DISPLAY_STATE:
+            HandleSetDisplayState(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_GET_DISPLAY_STATE:
+            HandleGetDisplayState(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_GET_ALL_DISPLAYIDS:
+            HandleGetAllDisplayIds(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_SET_SCREEN_BRIGHTNESS:
+            HandleSetScreenBrightness(data, reply);
+            break;
+        case ScreenManagerLiteMessage::TRANS_ID_GET_SCREEN_BRIGHTNESS:
+            HandleGetScreenBrightness(data, reply);
+            break;
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -159,4 +197,109 @@ int ScreenSessionManagerLiteStub::HandleGetCutoutInfo(MessageParcel &data, Messa
     reply.WriteParcelable(cutoutInfo);
     return ERR_NONE;
 }
+/*
+ * used by powermgr
+ */
+int ScreenSessionManagerLiteStub::HandleWakeUpBegin(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleWakeUpBegin!");
+    PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    reply.WriteBool(WakeUpBegin(reason));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleWakeUpEnd(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleWakeUpEnd!");
+    reply.WriteBool(WakeUpEnd());
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSuspendBegin(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSuspendBegin!");
+    PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    reply.WriteBool(SuspendBegin(reason));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSuspendEnd(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSuspendEnd!");
+    reply.WriteBool(SuspendEnd());
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSetSpecifiedScreenPower(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSetSpecifiedScreenPower!");
+    ScreenId screenId = static_cast<ScreenId>(data.ReadUint32());
+    ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+    PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    reply.WriteBool(SetSpecifiedScreenPower(screenId, state, reason));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSetScreenPowerForAll(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSetScreenPowerForAll!");
+    ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+    PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+    reply.WriteBool(SetScreenPowerForAll(state, reason));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetScreenPower(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetScreenPower!");
+    ScreenId dmsScreenId;
+    if (!data.ReadUint64(dmsScreenId)) {
+        WLOGFE("fail to read dmsScreenId.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSetDisplayState(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSetDisplayState!");
+    DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+    reply.WriteBool(SetDisplayState(state));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetDisplayState(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetDisplayState!");
+    DisplayState state = GetDisplayState(data.ReadUint64());
+    reply.WriteUint32(static_cast<uint32_t>(state));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSetScreenBrightness(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSetScreenBrightness!");
+    uint64_t screenId = data.ReadUint64();
+    uint32_t level = data.ReadUint64();
+    reply.WriteBool(SetScreenBrightness(screenId, level));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetScreenBrightness(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetScreenBrightness!");
+    uint64_t screenId = data.ReadUint64();
+    reply.WriteUint32(GetScreenBrightness(screenId));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleGetAllDisplayIds(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleGetAllDisplayIds!");
+    std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+    reply.WriteUInt64Vector(allDisplayIds);
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen
