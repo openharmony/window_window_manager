@@ -835,7 +835,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayEvent, Function | SmallTest | Le
     DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
     ssm->NotifyDisplayEvent(event);
     ASSERT_EQ(ssm->keyguardDrawnDone_, true);
-    
+
     event = DisplayEvent::SCREEN_LOCK_SUSPEND;
     ssm->NotifyDisplayEvent(event);
     ASSERT_EQ(ssm->gotScreenOffNotify_, true);
@@ -2144,7 +2144,7 @@ HWTEST_F(ScreenSessionManagerTest, ScreenCastConnection, Function | SmallTest | 
     EXPECT_EQ(ScreenCastConnection::GetInstance().GetBundleName(), "");
     EXPECT_EQ(ScreenCastConnection::GetInstance().GetAbilityName(), "");
 
-    EXPECT_EQ(ScreenCastConnection::GetInstance().CastConnectExtension(), false);
+    EXPECT_EQ(ScreenCastConnection::GetInstance().CastConnectExtension(1), false);
 
     ScreenCastConnection::GetInstance().SetBundleName(castBundleName);
     ScreenCastConnection::GetInstance().SetAbilityName(castAbilityName);
@@ -2334,7 +2334,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTe
     statusParam = "-y";     // STATUS_EXPAND
     ret = ssm->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, 0);
-    
+
     statusParam = "-coor";     // ARG_FOLD_DISPLAY_COOR
     ret = ssm->NotifyFoldStatusChanged(statusParam);
 
