@@ -10177,7 +10177,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
 
 void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>&& persistentIds)
 {
-    auto task = [this, startZOrder, persistentIds = std::move[persistentIds]] {
+    auto task = [this, startZOrder, persistentIds = std::move(persistentIds)] {
         std::ostringstream oss;
         oss << "[";
         for (size_t i = 0; i < persistentIds.size(); i++) {
