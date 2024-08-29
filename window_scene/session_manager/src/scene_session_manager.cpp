@@ -10175,7 +10175,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>&& persistentIds)
+void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds)
 {
     auto task = [this, startZOrder, persistentIds = std::move(persistentIds)] {
         std::ostringstream oss;
@@ -10191,11 +10191,11 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
                 TLOGE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
                 continue;
             }
-            sceneSession->SetPcScenePanel(true);
             if (i > UINT32_MAX - startZOrder) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
                 break;
             }
+            sceneSession->SetPcScenePanel(true);
             sceneSession->SetZOrder(i + startZOrder);
         }
         oss << "]";
