@@ -3100,7 +3100,11 @@ void Session::SetIsStarting(bool isStarting)
 
 void Session::ResetDirtyFlags()
 {
-    dirtyFlags_ = 0;
+    if (!isVisible) {
+        dirtyFlags_ &= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+    } else {
+        dirtyFlags_ = 0;
+    }
 }
 
 void Session::SetUIStateDirty(bool dirty)
