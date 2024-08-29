@@ -952,7 +952,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
 }
 
-void Session::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
+void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
 {
     auto defaultDragEnable = false;
     auto sessionProperty = GetSessionProperty();
