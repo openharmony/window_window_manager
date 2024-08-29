@@ -1362,6 +1362,8 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     if (WindowHelper::IsMainWindow(GetType())) {
         SetUIContentComplete();
     }
+
+    surfaceNode_ = nullptr;
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
 }
