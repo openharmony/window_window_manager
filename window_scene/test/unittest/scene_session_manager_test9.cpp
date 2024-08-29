@@ -588,7 +588,7 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level3) {
-    vector<int32_t> persistentIds;
+    std::vector<int32_t> persistentIds;
     SessionInfo info1;
     info1.abilityName_ = "RefreshPcZorder1";
     info1.bundleName_ = "RefreshPcZorder1";
