@@ -413,7 +413,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     sceneSession->property_->focusable_ = true;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->focusedSessionId_ = 2;
-    ssm_->RequestSessionFocus(0, true, reason);   
+    ssm_->RequestSessionFocus(1, true, reason);   
 }
 
 /**
@@ -495,9 +495,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
     sceneSession->persistentId_ = 1;
     focusedSession->persistentId_ = 2;
     focusedSession->property_->parentPersistentId_ = 1;
+    ssm_->focusedSessionId_ = 2
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
-    ssm_->RequestSessionUnfocus(0, reason);
+    ssm_->RequestSessionUnfocus(1, reason);
     ssm_->sceneSessionMap_.clear();
 }
 
