@@ -87,10 +87,17 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
     switch (msgId) {
         case WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC: {
-            int32_t keyEventId = data.ReadInt32();
-            bool isPreImeEvent = data.ReadBool();
-            bool isConsumed = data.ReadBool();
-            WSError retCode = static_cast<WSError>(data.ReadInt32());
+            int32_t keyEventId = 0;
+            bool isPreImeEvent = false;
+            bool isConsumed = false;
+            int32_t intRetCode = 0;
+
+            if (!data.ReadInt32(keyEventId) || !data.ReadBool(isPreImeEvent) || !data.ReadBool(isConsumed) ||
+                !data.ReadInt32(intRetCode)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "Read keyEvent info failed");
+                return ERR_TRANSACTION_FAILED;
+            }
+            WSError retCode = static_cast<WSError>(intRetCode);
             OnTransferKeyEventForConsumed(keyEventId, isPreImeEvent, isConsumed, retCode);
             break;
         }
