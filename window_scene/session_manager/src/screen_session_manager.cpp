@@ -155,9 +155,16 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         return;
     }
     foldScreenController_->SetOnBootAnimation(true);
-    auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
-    oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << "  ret value: " << ret;
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
+            static_cast<ScreenRotation>(g_screenRotationOffSet));
+        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+    } else {
+        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
+            static_cast<ScreenRotation>(g_screenRotationOffSet));
+        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+    }
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
     FoldScreenPowerInit();
