@@ -107,8 +107,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_OK;
         }
         if (property) {
-            session->InitSystemSessionDragEnable(property);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "set property enableDrag: %{public}d", property->GetDragEnabled());
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
         auto ret = session->Session::ConnectInner(
