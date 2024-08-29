@@ -5400,7 +5400,7 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
         return false;
     }
 
-    return rsInterface_.SetVirtualScreenStatus(screenId, screenStatus);
+    return rsInterface_.SetVirtualScreenStatus(rsScreenId, screenStatus);
 }
 
 DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
