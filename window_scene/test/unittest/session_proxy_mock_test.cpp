@@ -102,7 +102,6 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
  */
 HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
 {
-    WLOGI("UpdateSessionPropertyByAction begin");
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
@@ -138,7 +137,6 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTe
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
-    WLOGI("UpdateSessionPropertyByAction end");
 }
 } // namespace
 } // namespace Rosen
