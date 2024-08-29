@@ -600,12 +600,20 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     property->SetSystemCalling(true);
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
+    
+    sceneSession->property_ = property;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
     property->SetSystemCalling(false);
     EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
     property->SetSystemCalling(true);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+
+    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
@@ -634,10 +642,52 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
 }
 
 /**
+ * @tc.name: ProcessUpdatePropertyByAction4
+ * @tc.desc: ProcessUpdatePropertyByAction4 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction4, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction4";
+    info.bundleName_ = "ProcessUpdatePropertyByAction4";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetSystemCalling(true);
+    sceneSession->property_ = property;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS));
+
+    sceneSession->property_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE));
+
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS));
+}
+
+/**
  * @tc.name: HandleSpecificSystemBarProperty
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTest | Level2)
 {
     SessionInfo info;
@@ -649,13 +699,32 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTes
     ASSERT_NE(nullptr, property);
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->isDisplayStatusBarTemporarily_.store(true);
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->specificCallback_ = nullptr;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(nullptr, specificCallback);
+    sceneSession->specificCallback_ = specificCallback;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    UpdateAvoidAreaCallback onUpdateAvoidArea;
+    sceneSession->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
 }
 
 /**
  * @tc.name: SetWindowFlags1
  * @tc.desc: SetWindowFlags1
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
 {
     SessionInfo info;
