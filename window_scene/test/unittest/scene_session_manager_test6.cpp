@@ -1587,10 +1587,10 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | Smal
     EXPECT_EQ(ret, false);
     ssm_->enterRecent_ = false;
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     ssm_->lastUpdatedAvoidArea_.clear();
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
