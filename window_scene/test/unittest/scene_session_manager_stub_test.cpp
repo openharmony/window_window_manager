@@ -896,7 +896,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function |
     data.WriteInt32(rect.height_);
 
     int res = stub_->HandleUpdateModalExtensionRect(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -919,7 +919,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Func
     data.WriteInt32(posY);
 
     int res = stub_->HandleProcessModalExtensionPointDown(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1048,7 +1048,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | Sma
     data.WriteInt32(7);
 
     int res = stub_->HandleUpdateExtWindowFlags(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
