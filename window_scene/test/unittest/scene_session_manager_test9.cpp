@@ -592,28 +592,28 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level
     SessionInfo info1;
     info1.abilityName_ = "RefreshPcZorder1";
     info1.bundleName_ = "RefreshPcZorder1";
-    sptr<SceneSession> session1 = (std::nothrow)SceneSession(info1, nullptr);
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(session1, nullptr);
     persistentIds.push_back(session1->GetPersistentId());
     ssm_->sceneSessionMap_.insert({session1->GetPersistentId(), session1});
     SessionInfo info2;
     info2.abilityName_ = "RefreshPcZorder2";
     info2.bundleName_ = "RefreshPcZorder2";
-    sptr<SceneSession> session2 = (std::nothrow)SceneSession(info2, nullptr);
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_NE(session2, nullptr);
     persistentIds.push_back(session2->GetPersistentId());
     ssm_->sceneSessionMap_.insert({session2->GetPersistentId(), session2});
     SessionInfo info3;
     info3.abilityName_ = "RefreshPcZorder3";
     info3.bundleName_ = "RefreshPcZorder3";
-    sptr<SceneSession> session3 = (std::nothrow)SceneSession(info3, nullptr);
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr)
     ASSERT_NE(session3, nullptr);
     persistentIds.push_back(999);
     session3->SetZOrder(404);
     ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
     uint32_t startZOrder = 100;
-    ssm_->RefreshPcZOrderList(startZOrder, std::move[persistentIds]);
-    ssm_->RefreshPcZOrderList(UINT32_MAX, std::move[persistentIds]);
+    ssm_->RefreshPcZOrderList(startZOrder, std::move(persistentIds));
+    ssm_->RefreshPcZOrderList(UINT32_MAX, std::move(persistentIds));
     auto start = std::chrono::system_clock::now();
     // Due to RefreshPcZOrderList being asynchronous, spin lock is added.
     // The spin lock itself is set with a timeout escape time of 3 seconds

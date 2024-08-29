@@ -2988,7 +2988,7 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, std::move[persistentIds]);
+    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, std::move(persistentIds));
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
