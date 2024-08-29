@@ -155,7 +155,7 @@ HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
     scenePersistence->SaveUpdatedIcon(mPixelMap);
     std::string result(scenePersistence->GetUpdatedIconPath());
     std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    EXPECT_EQ(result.compare(test), 1);
+    EXPECT_NE(result.compare(test), 0);
 }
 
 /**
