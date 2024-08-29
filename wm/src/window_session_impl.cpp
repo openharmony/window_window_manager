@@ -966,15 +966,20 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("display is null!");
-        return;
+    sptr<DisplayInfo> displayInfo;
+    if (info == nullptr) {
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("display is null!");
+            return;
+        }
+        displayInfo = display->GetDisplayInfo();
+    } else {
+        displayInfo = info;
     }
-    auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null!");
         return;
@@ -2788,7 +2793,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }
