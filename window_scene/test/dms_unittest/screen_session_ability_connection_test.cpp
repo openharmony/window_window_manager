@@ -250,7 +250,9 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension02, Fu
     const std::string bundleName = "com.ohos.sceneboard";
     const std::string abilityName = "com.ohos.sceneboard.systemdialog";
     want.SetElementName(bundleName, abilityName);
-    want.SetParam("requestReason", "onPlugIn");
+    std::string paramKey = "requestReason";
+    std::string paramValue = "onPlugIn";
+    want.SetParam(paramKey, paramValue);
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resConnect = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
         want, abilityConnectionStub, nullptr, DEFAULT_VALUE);
