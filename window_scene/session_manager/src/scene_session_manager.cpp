@@ -10175,9 +10175,9 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>& persistentIds)
+void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::vector<int32_t>&& persistentIds)
 {
-    auto task = [this, startZOrder, persistentIds]() {
+    auto task = [this, startZOrder, persistentIds = std::move[persistentIds]] {
         std::ostringstream oss;
         oss << "[";
         for (size_t i = 0; i < persistentIds.size(); i++) {
@@ -10199,9 +10199,9 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, const std::v
             sceneSession->SetZOrder(i + startZOrder);
         }
         oss << "]";
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Complete:%{public}s", oss.str().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
         return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task, "RefreshPcZOrderList");
+    taskScheduler_->PostTask(task, "RefreshPcZOrderList");
 }
 } // namespace OHOS::Rosen

@@ -2965,8 +2965,8 @@ napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback
 
 napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO];
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -2988,7 +2988,7 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, persistentIds);
+    SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, std::move[persistentIds]);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
