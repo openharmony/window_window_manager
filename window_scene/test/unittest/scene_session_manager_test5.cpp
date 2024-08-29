@@ -413,7 +413,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     sceneSession->property_->focusable_ = true;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->focusedSessionId_ = 2;
-    ssm_->RequestSessionFocus(1, true, reason);   
+    ssm_->RequestSessionFocus(1, true, reason);
 }
 
 /**
@@ -490,12 +490,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
 
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    sceneSession->property_ = property;
-    ASSERT_NE(sceneSession->property_, nullptr);
+    focusedSession->property_ = property;
+    ASSERT_NE(focusedSession->property_, nullptr);
     sceneSession->persistentId_ = 1;
     focusedSession->persistentId_ = 2;
     focusedSession->property_->parentPersistentId_ = 1;
-    ssm_->focusedSessionId_ = 2
+    ssm_->focusedSessionId_ = 2;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
     ssm_->RequestSessionUnfocus(1, reason);
