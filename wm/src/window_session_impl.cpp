@@ -889,14 +889,19 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info)
 {
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("display is null!");
-        return;
+    sptr<DisplayInfo> displayInfo;
+    if (info == nullptr) {
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("display is null!");
+            return;
+        }
+        displayInfo = display->GetDisplayInfo();
+    } else {
+        displayInfo = info;
     }
-    auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null!");
         return;
