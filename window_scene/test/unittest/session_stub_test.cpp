@@ -581,6 +581,38 @@ HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function |
     auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: HandleUpdatePropertyByAction01
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleUpdatePropertyByAction(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyByAction02
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(false);
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleUpdatePropertyByAction(data, reply);
+    ASSERT_EQ(0, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

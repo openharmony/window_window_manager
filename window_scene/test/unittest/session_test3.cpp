@@ -28,6 +28,8 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
+#include "session/screen/include/screen_session.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
@@ -982,6 +984,61 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess, Function | SmallTest | Level2)
     session_->property_ = nullptr;
     session_->RectCheckProcess();
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
+}
+
+/**
+ * @tc.name: RectCheckProcess01
+ * @tc.desc: RectCheckProcess01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_INACTIVE;
+    session_->isVisible_ = false;
+    session_->property_ = nullptr;
+    session_->RectCheckProcess();
+
+    session_->state_ = SessionState::STATE_ACTIVE;
+    session_->isVisible_ = true;
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session_->RectCheckProcess();
+
+    session_->property_->displayId_ = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    ASSERT_NE(&screenProperty, nullptr);
+    screenSession->screenId_ = 0;
+    screenSession->SetVirtualPixelRatio(0.0f);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
+    session_->RectCheckProcess();
+
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    screenSession->SetVirtualPixelRatio(1.0f);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
+    session_->RectCheckProcess();
+
+    WSRect rect = {0, 0, 0, 0};
+    session_->winRect_ = rect;
+    session_->RectCheckProcess();
+
+    session_->winRect_.height_ = 200;
+    session_->RectCheckProcess();
+
+    session_->aspectRatio_ = 0.0f;
+    session_->RectCheckProcess();
+
+    session_->aspectRatio_ = 0.5f;
+    session_->RectCheckProcess();
+
+    session_->winRect_.width_ = 200;
+    session_->RectCheckProcess();
+
+    session_->aspectRatio_ = 1.0f;
+    session_->RectCheckProcess();
+
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
