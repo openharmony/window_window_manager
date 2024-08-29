@@ -699,6 +699,25 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTes
     ASSERT_NE(nullptr, property);
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->isDisplayStatusBarTemporarily_.store(true);
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->specificCallback_ = nullptr;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(nullptr, specificCallback);
+    sceneSession->specificCallback_ = specificCallback;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    sceneSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
+
+    UpdateAvoidAreaCallback onUpdateAvoidArea;
+    sceneSession->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
+    sceneSession->HandleSpecificSystemBarProperty(type, property);
 }
 
 /**
