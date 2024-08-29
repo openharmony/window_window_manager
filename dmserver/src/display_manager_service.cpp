@@ -33,8 +33,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
-    const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
+const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
@@ -798,5 +798,22 @@ sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
 void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
 {
     DisplayManagerAgentController::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysicalResolution()
+{
+    if (allDisplayPhysicalResolution_.empty()) {
+        sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "default display null");
+            return allDisplayPhysicalResolution_;
+        }
+        DisplayPhysicalResolution defaultResolution;
+        defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        defaultResolution.physicalWidth_ = displayInfo->GetWidth();
+        defaultResolution.physicalHeight_ = displayInfo->GetHeight();
+        allDisplayPhysicalResolution_.emplace_back(defaultResolution);
+    }
+    return allDisplayPhysicalResolution_;
 }
 } // namespace OHOS::Rosen

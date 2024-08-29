@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 
 class SingleDisplayFoldPolicyTest : public testing::Test {
@@ -174,35 +174,6 @@ HWTEST_F(SingleDisplayFoldPolicyTest, RecoverWhenBootAnimationExit, Function | S
 
     policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
     policy.RecoverWhenBootAnimationExit();
-    EXPECT_FALSE(policy.onBootAnimation_);
-}
-
-/**
- * @tc.name: TriggerScreenDisplayModeUpdate
- * @tc.desc: test function : TriggerScreenDisplayModeUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplayFoldPolicyTest, TriggerScreenDisplayModeUpdate, Function | SmallTest | Level3)
-{
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    
-    
-    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::SUB;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::FULL;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    EXPECT_FALSE(policy.onBootAnimation_);
-
-    displayMode = FoldDisplayMode::MAIN;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 

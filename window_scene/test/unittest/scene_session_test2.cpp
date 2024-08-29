@@ -269,54 +269,6 @@ HWTEST_F(SceneSessionTest2, HandleEnterWinwdowArea2, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: HandlePointerStyle
- * @tc.desc: HandlePointerStyle
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, HandlePointerStyle, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent), WSError::WS_ERROR_NULLPTR);
-
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    property->SetPersistentId(11);
-    scensession->property_ = property;
-
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_DO_NOTHING);
-
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_DO_NOTHING);
-
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_DO_NOTHING);
-
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_DO_NOTHING);
-
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_DO_NOTHING);
-}
-
-/**
  * @tc.name: TransferPointerEvent
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
@@ -472,6 +424,47 @@ HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetMainSessionId
+ * @tc.desc: GetMainSessionId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetMainSessionId, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetMainSessionId";
+    info.moduleName_ = "GetMainSessionId";
+    info.bundleName_ = "GetMainSessionId";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(session, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetPersistentId(0);
+    session->SetSessionProperty(property);
+
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(subSession, nullptr);
+    subSession->SetParentSession(session);
+    sptr<WindowSessionProperty> subProperty = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(subProperty, nullptr);
+    subProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subProperty->SetPersistentId(1);
+    subSession->SetSessionProperty(subProperty);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetParentSession(subSession);
+    sptr<WindowSessionProperty> sceneProperty = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(sceneProperty, nullptr);
+    sceneProperty->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneProperty->SetPersistentId(2);
+    sceneSession->SetSessionProperty(sceneProperty);
+    auto result = sceneSession->GetMainSessionId();
+    ASSERT_EQ(result, 0);
+}
+
+/**
  * @tc.name: GetSessionSnapshotFilePath
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -574,7 +567,7 @@ HWTEST_F(SceneSessionTest2, NotifyClientToUpdateRect01, Function | SmallTest | L
     ASSERT_NE(mockSessionStage, nullptr);
     scensession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     scensession->sessionStage_ = mockSessionStage;
-    auto ret = scensession->NotifyClientToUpdateRect(nullptr);
+    auto ret = scensession->NotifyClientToUpdateRect("SceneSessionTest2", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -1628,25 +1621,6 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
         return rect;
     };
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
-}
-
-/**
- * @tc.name: HandlePointerStyle01
- * @tc.desc:  * @tc.name: HandlePointerStyle
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, HandlePointerStyle01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandlePointerStyle";
-    info.bundleName_ = "HandlePointerStyle";
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    OHOS::Rosen::DisplayManager displayManager;
-    MMI::PointerEvent::PointerItem pointerItem;
 }
 
 /**

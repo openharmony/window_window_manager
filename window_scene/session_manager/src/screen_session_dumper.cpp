@@ -25,6 +25,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+constexpr int DUMPER_PARAM_1 = 1;
+constexpr int DUMPER_PARAM_2 = 2;
+constexpr int DUMPER_PARAM_COUNT_3 = 3;
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -49,7 +52,7 @@ ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16strin
 {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cv;
     std::string info;
-    for (auto& u16str: args) {
+    for (auto& u16str : args) {
         std::string arg = cv.to_bytes(u16str);
         params_.emplace_back(arg);
         info += arg;
@@ -64,7 +67,7 @@ void ScreenSessionDumper::OutputDumpInfo()
         return;
     }
 
-    static_cast<void>(signal(SIGPIPE, SIG_IGN)); // ignore SIGPIPE crash
+    static_cast<void>(signal(SIGPIPE, SIG_IGN));  // ignore SIGPIPE crash
     int ret = dprintf(fd_, "%s\n", dumpInfo_.c_str());
     if (ret < 0) {
         TLOGE(WmsLogTag::DMS, "dprintf error. ret: %{public}d", ret);
@@ -82,7 +85,7 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     const std::string STATUS_EXPAND = "-y";
     const std::string STATUS_FOLD = "-p";
     const std::string ARG_DUMP_FOLD_STATUS = "-f";
-    if (params_.empty() || params_[0] == ARG_DUMP_HELP) { //help command
+    if (params_.empty() || params_[0] == ARG_DUMP_HELP) {  // help command
         ShowHelpInfo();
     }
 
@@ -90,9 +93,16 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         TLOGE(WmsLogTag::DMS, "dump permission denied!");
         return;
     }
-    if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
+    if (params_.size() == DUMPER_PARAM_COUNT_3) {
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+            params_[0].c_str(), params_[DUMPER_PARAM_1].c_str(), params_[DUMPER_PARAM_2].c_str());
+        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_1],
+            params_[DUMPER_PARAM_2]);
+        return;
+    }
+    if (!params_.empty() && params_[0] == ARG_DUMP_ALL) {  // dump all info command
         ShowAllScreenInfo();
-    } else if (!params_.empty() && params_[0] == ARG_DUMP_FOLD_STATUS) { // dump fold status command
+    } else if (!params_.empty() && params_[0] == ARG_DUMP_FOLD_STATUS) {  // dump fold status command
         DumpFoldStatus();
     } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
         params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
@@ -228,6 +238,8 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
         << static_cast<int32_t>(screenSession->GetRotation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenRequestedOrientation: "
         << static_cast<int32_t>(screenSession->GetScreenRequestedOrientation()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isExtand: "
+        << static_cast<int32_t>(screenSession->GetIsExtand()) << std::endl;
     dumpInfo_.append(oss.str());
 }
 

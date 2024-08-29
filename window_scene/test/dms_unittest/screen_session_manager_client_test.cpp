@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
@@ -122,7 +122,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, Function |
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_NE(screenSession, nullptr);
 }
@@ -140,7 +140,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, Function |
     ScreenEvent screenEvent = ScreenEvent::DISCONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_EQ(screenSession, nullptr);
 }
@@ -973,8 +973,11 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallT
     const float scaleY = 1.0f;
     const float pivotX = 0.5f;
     const float pivotY = 0.5f;
+    const float translateX = 0.0f;
+    const float translateY = 0.0f;
     ScreenId defaultScreenId = screenSessionManagerClient_->GetDefaultScreenId();
-    screenSessionManagerClient_->UpdateDisplayScale(defaultScreenId, scaleX, scaleY, pivotX, pivotY);
+    screenSessionManagerClient_->UpdateDisplayScale(defaultScreenId, scaleX, scaleY, pivotX, pivotY, translateX,
+                                                    translateY);
 }
 
 /**
@@ -989,8 +992,11 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallT
     const float scaleY = 1.0f;
     const float pivotX = 0.5f;
     const float pivotY = 0.5f;
+    const float translateX = 0.0f;
+    const float translateY = 0.0f;
     uint64_t fakeScreenId = 100;
-    screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY);
+    screenSessionManagerClient_->UpdateDisplayScale(fakeScreenId, scaleX, scaleY, pivotX, pivotY, translateX,
+                                                    translateY);
 }
 
 /**

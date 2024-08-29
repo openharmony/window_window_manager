@@ -38,6 +38,7 @@ private:
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOrientation(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionViewportConfig(MessageParcel& data, MessageParcel& reply);
     int HandleBackEventInner(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);

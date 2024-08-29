@@ -216,6 +216,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: SetAndGetRealParentId
+ * @tc.desc: SetRealParentId and GetRealParentId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetRealParentId, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetRealParentId(1919);
+    EXPECT_EQ(1919, property->GetRealParentId());
+    property->SetRealParentId(810);
+    EXPECT_EQ(810, property->GetRealParentId());
+}
+
+/**
  * @tc.name: SetAndGetUIExtensionUsage
  * @tc.desc: SetUIExtensionUsage and GetUIExtensionUsage test
  * @tc.type: FUNC
@@ -228,6 +243,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
     EXPECT_EQ(UIExtensionUsage::MODAL, property->GetUIExtensionUsage());
     property->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
     EXPECT_EQ(UIExtensionUsage::EMBEDDED, property->GetUIExtensionUsage());
+}
+
+/**
+ * @tc.name: SetAndGetIsUIExtensionAbilityProcess
+ * @tc.desc: SetIsUIExtensionAbilityProcess and GetIsUIExtensionAbilityProcess test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetIsUIExtensionAbilityProcess(true);
+    EXPECT_EQ(true, property->GetIsUIExtensionAbilityProcess());
+    property->SetIsUIExtensionAbilityProcess(false);
+    EXPECT_EQ(false, property->GetIsUIExtensionAbilityProcess());
 }
 
 /**
@@ -1030,6 +1060,32 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetSubWindowLevel
+ * @tc.desc: SetSubWindowLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    uint32_t level = 4;
+    property->SetSubWindowLevel(level);
+    ASSERT_EQ(level, property->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: GetSubWindowLevel
+ * @tc.desc: GetSubWindowLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);;
+    ASSERT_EQ(1, property->GetSubWindowLevel());
+}
+
+/**
  * @tc.name: MarshallingFutureCallback
  * @tc.desc: MarshallingFutureCallback
  * @tc.type: FUNC
@@ -1037,14 +1093,12 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Leve
 HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
-    Parcel parcel = Parcel();
+    MessageParcel parcel;
     property->SetLayoutCallback(nullptr);
-    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    ASSERT_EQ(false, property->MarshallingFutureCallback(parcel));
+    property->SetLayoutCallback(layoutCallback);
+    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
 }
 
 /**
@@ -1055,16 +1109,23 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallT
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingFutureCallback, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
-    Parcel parcel = Parcel();
+    MessageParcel parcelFalse;
+    parcelFalse.WriteBool(false);
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    windowSessionProperty.UnmarshallingFutureCallback(parcelFalse, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
     ASSERT_NE(nullptr, layoutCallback);
-    parcel.WriteObject(layoutCallback->AsObject());
-    windowSessionProperty.UnmarshallingFutureCallback(parcel, property);
+    MessageParcel parcelTrue;
+    parcelTrue.WriteBool(true);
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrue, property);
+    ASSERT_EQ(nullptr, property->GetLayoutCallback());
+
+    MessageParcel parcelTrueWithObject;
+    parcelTrueWithObject.WriteBool(true);
+    parcelTrueWithObject.WriteObject(layoutCallback->AsObject());
+    windowSessionProperty.UnmarshallingFutureCallback(parcelTrueWithObject, property);
     ASSERT_NE(nullptr, property->GetLayoutCallback());
 }
 } // namespace

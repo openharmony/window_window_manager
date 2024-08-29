@@ -1872,6 +1872,42 @@ HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetMainSession
+ * @tc.desc: GetMainSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
+{
+    EXPECT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "getMainSession";
+    info.moduleName_ = "getMainSession";
+    info.bundleName_ = "getMainSession";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(session->property_, nullptr);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_NE(session, session->GetMainSession());
+
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(subSession, nullptr);
+    subSession->SetParentSession(session);
+    subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(subSession->property_, nullptr);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_NE(session, subSession->GetMainSession());
+
+    sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(subSubSession, nullptr);
+    subSubSession->SetParentSession(subSession);
+    subSubSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(subSubSession->property_, nullptr);
+    subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(session, subSubSession->GetMainSession());
+}
+
+/**
  * @tc.name: IsSupportDetectWindow
  * @tc.desc: IsSupportDetectWindow Test
  * @tc.type: FUNC
@@ -1960,7 +1996,9 @@ HWTEST_F(WindowSessionTest2, CreateWindowStateDetectTask, Function | SmallTest |
  */
 HWTEST_F(WindowSessionTest2, SetOffset01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
     session_->SetOffset(0, 0);
+    ASSERT_EQ(session_->GetOffsetX(), 0);
 }
 }
 } // namespace Rosen

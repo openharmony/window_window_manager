@@ -758,7 +758,6 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
     ASSERT_NE(window, nullptr);
 
     int32_t nullWindowTestId = 1001;
-    int32_t nullPropertyId = 1002;
     int32_t displayId = 1003;
     int32_t cameraId = 1004;
     
@@ -768,15 +767,6 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
         std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
             "nullWindow",
             std::pair<int32_t, sptr<WindowSessionImpl>>(nullWindowTestId, nullptr)
-        )
-    );
-    auto nullPropertyWindow = GetTestWindowImpl("nullPropertyWindow");
-    ASSERT_NE(nullPropertyWindow, nullptr);
-    nullPropertyWindow->property_ = nullptr;
-    window->windowSessionMap_.insert(
-        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "nullPropertyWindow",
-            std::pair<int32_t, sptr<WindowSessionImpl>>(nullPropertyId, nullPropertyWindow)
         )
     );
 
@@ -803,7 +793,6 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
     );
     ASSERT_EQ(window->WindowSessionCreateCheck(), WMError::WM_ERROR_REPEAT_OPERATION);
     window->Destroy();
-    nullPropertyWindow->Destroy();
     displayWindow->Destroy();
     cameraWindow->Destroy();
 }
@@ -909,20 +898,6 @@ HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest |
     
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     window->SetRequestedOrientation(Orientation::BEGIN);
-    window->Destroy();
-}
-
-/**
- * @tc.name: GetRequestedOrientation
- * @tc.desc: GetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, GetRequestedOrientation, Function | SmallTest | Level2)
-{
-    auto window = GetTestWindowImpl("GetRequestedOrientation");
-    ASSERT_NE(window, nullptr);
-    window->property_ = nullptr;
-    ASSERT_EQ(window->GetRequestedOrientation(), Orientation::UNSPECIFIED);
     window->Destroy();
 }
 

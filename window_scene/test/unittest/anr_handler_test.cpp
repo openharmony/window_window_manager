@@ -113,6 +113,7 @@ HWTEST_F(AnrHandlerTest, OnWindowDestroyed, Function | SmallTest | Level1)
 HWTEST_F(AnrHandlerTest, PostTask, Function | SmallTest | Level1)
 {
     auto eventHandler = anrHandler_.eventHandler_;
+    usleep(WAIT_SYNC_IN_NS);
     anrHandler_.eventHandler_ = nullptr;
     auto task = []() {
         return;
@@ -184,6 +185,7 @@ HWTEST_F(AnrHandlerTest, SendEvent, Function | SmallTest | Level1)
     ASSERT_EQ(anrHandler_.anrHandlerState_.sendStatus.size(), 1);
 
     auto eventHandler = anrHandler_.eventHandler_;
+    usleep(WAIT_SYNC_IN_NS);
     anrHandler_.eventHandler_ = nullptr;
     anrHandler_.SendEvent(0, 0);
     anrHandler_.eventHandler_ = eventHandler;

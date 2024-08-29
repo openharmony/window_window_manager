@@ -61,10 +61,10 @@ group("unittest") {
     ":wm_window_stub_test",
     ":wm_window_test",
   ]
-  if (!scene_board_enabled) {
+  if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
   }
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     deps += [ ":wm_window_manager_lite_test" ]
   }
 }
@@ -75,7 +75,10 @@ ohos_unittest("wm_window_manager_test") {
   include_dirs = [ "${window_base_path}/wm/src" ]
   sources = [ "window_manager_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",

@@ -48,7 +48,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest7::ssm_ = nullptr;
 
 bool SceneSessionManagerTest7::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest7::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest7::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -851,8 +852,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
@@ -863,8 +862,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
     sceneSession->sessionInfo_.isSystem_ = true;
-    ssm_->NotifySessionMovedToFront(persistentId);
-    ssm_->listenerController_ = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
 
@@ -1056,6 +1053,185 @@ HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | Sma
     ssm_->lastVisibleData_.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
     ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidArea(persistentId);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea01
+ * @tc.desc: UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea01, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidArea(persistentId);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateAvoidArea01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ssm_->UpdateAvoidArea(persistentId);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea02
+ * @tc.desc: UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea02, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 0;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidArea(persistentId);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateAvoidArea02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ssm_->UpdateAvoidArea(persistentId);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront01
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront01, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "NotifySessionMovedToFront01";
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
+    sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = true;
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront02
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront02, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "NotifySessionMovedToFront02";
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
+    sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront03
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront03, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "NotifySessionMovedToFront03";
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    sceneSession->sessionInfo_.abilityInfo = nullptr;
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront04
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront04, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "NotifySessionMovedToFront04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: NotifySessionMovedToFront05
+ * @tc.desc: NotifySessionMovedToFront
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront05, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 1;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "NotifySessionMovedToFront05";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifySessionMovedToFront(persistentId);
+}
+
+/**
+ * @tc.name: UpdateNormalSessionAvoidArea02
+ * @tc.desc: UpdateNormalSessionAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "UpdateNormalSessionAvoidArea02";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->winRect_ = { 1, 1, 1, 1 };
+    int32_t persistentId = 1;
+    bool needUpdate = true;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->avoidAreaListenerSessionSet_.clear();
+    ssm_->avoidAreaListenerSessionSet_.insert(persistentId);
+    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
 }
 }
 } // namespace Rosen

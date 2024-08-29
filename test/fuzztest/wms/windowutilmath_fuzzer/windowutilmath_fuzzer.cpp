@@ -28,7 +28,7 @@ using namespace OHOS::Rosen::TransformHelper;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
+constexpr size_t DATA_MIN_SIZE = 2;
 }
 
 template<class T>

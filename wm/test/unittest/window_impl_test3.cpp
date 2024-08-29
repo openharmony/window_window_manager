@@ -136,7 +136,6 @@ HWTEST_F(WindowImplTest3, RegisterAnimationTransitionController, Function | Smal
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     EXPECT_CALL(*content, SetNextFrameLayoutCallback(_));
     window->RegisterAnimationTransitionController(listener);
-    window->property_ = new WindowProperty();
     EXPECT_CALL(*content, SetNextFrameLayoutCallback(_));
     window->RegisterAnimationTransitionController(listener);
     window->property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
@@ -739,19 +738,19 @@ HWTEST_F(WindowImplTest3, RaiseToAppTop, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     option->parentId_ = INVALID_WINDOW_ID;
     sptr<WindowImpl> window = new WindowImpl(option);
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, window->RaiseToAppTop());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->RaiseToAppTop());
 
     window->property_->parentId_ = 100000;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->RaiseToAppTop());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->RaiseToAppTop());
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, window->RaiseToAppTop());
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->RaiseToAppTop());
 
     window->state_ = WindowState::STATE_SHOWN;
-    EXPECT_CALL(m->Mock(), RaiseToAppTop(_)).Times(1).WillOnce(Return(WmErrorCode::WM_OK));
-    ASSERT_EQ(WmErrorCode::WM_OK, window->RaiseToAppTop());
+    EXPECT_CALL(m->Mock(), RaiseToAppTop(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->RaiseToAppTop());
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());

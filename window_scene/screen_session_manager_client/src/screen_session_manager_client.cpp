@@ -100,7 +100,7 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
 }
 
 void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name)
+    ScreenId rsId, const std::string& name, bool isExtand)
 {
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
         screenId, static_cast<int>(screenEvent), rsId, name.c_str());
@@ -121,6 +121,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
         }
+        screenSession->SetIsExtand(isExtand);
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenConnected(screenSession);
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
@@ -145,6 +146,16 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.erase(screenId);
         }
     }
+}
+void ScreenSessionManagerClient::OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    auto screenSession = GetScreenSession(mainScreenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("mainScreenId=%{public}" PRIu64" extandScreenId=%{public}" PRIu64, mainScreenId, extandScreenId);
+    screenSession->ScreenExtandChange(mainScreenId, extandScreenId);
 }
 
 sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screenId) const
@@ -502,7 +513,7 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
     screenSession->SetScreenSceneDpi(virtualPixelRatio);
 }
 
-void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, DMHookInfo hookInfo)
+void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
@@ -518,15 +529,30 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     }
 }
 
-void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
-    const float pivotX, const float pivotY)
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY,
+                                                    float translateX, float translateY)
 {
     auto session = GetScreenSession(id);
     if (session == nullptr) {
         TLOGE(WmsLogTag::DMS, "session is null");
         return;
     }
-
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    auto displayNode = session->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+          translateX, translateY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetTranslateX(translateX);
+    displayNode->SetTranslateY(translateY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
 } // namespace OHOS::Rosen

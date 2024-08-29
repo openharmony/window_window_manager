@@ -48,8 +48,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
-    const std::string PARAM_DUMP_HELP = "-h";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+const std::string PARAM_DUMP_HELP = "-h";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -97,11 +97,7 @@ int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    property_ = new (std::nothrow) WindowProperty();
-    if (property_ == nullptr) {
-        WLOGFE("Property is null");
-        return;
-    }
+    property_ = sptr<WindowProperty>::MakeSptr();
     InitWindowProperty(option);
 
     windowTag_ = option->GetWindowTag();
@@ -114,14 +110,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    std::string surfaceNodeName;
-    if (auto bundleName = option->GetBundleName(); bundleName != "") {
-        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
-    } else {
-        surfaceNodeName = property_->GetWindowName();
-    }
-    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
-    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -179,7 +168,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = windowSystemConfig_.uiType_ == "phone";
+    auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
     if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
@@ -1214,7 +1203,7 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
-    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+    if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden
@@ -1726,7 +1715,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
@@ -2024,22 +2013,23 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());
@@ -3277,7 +3267,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
         return;
     }
 
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         vsyncStation_->RequestVsync(vsyncCallback);
     }
 }
@@ -3285,7 +3275,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
 int64_t WindowImpl::GetVSyncPeriod()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         return vsyncStation_->GetVSyncPeriod();
     }
     return 0;

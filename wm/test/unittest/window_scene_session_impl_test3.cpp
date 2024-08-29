@@ -205,10 +205,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Destroy, Function | SmallTest | Level2)
     option->SetWindowName("Destroy");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->property_ = nullptr;
-    auto ret = windowSceneSessionImpl->Destroy(true, true);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -308,10 +304,6 @@ HWTEST_F(WindowSceneSessionImplTest3, AdjustKeyboardLayout, Function | SmallTest
     auto ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -380,9 +372,6 @@ HWTEST_F(WindowSceneSessionImplTest3, NotifyPrepareClosePiPWindow, Function | Sm
 
     auto ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
     EXPECT_EQ(WmErrorCode::WM_OK, ret1);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
-    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, ret1);
 }
 
 /**
@@ -485,9 +474,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetAspectRatio01, Function | SmallTest | L
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -535,7 +521,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
     auto ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(6);
@@ -544,7 +530,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -587,9 +573,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | L
     rects.push_back(rect);
     auto ret = windowSceneSessionImpl->SetTouchHotAreas(rects);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->SetTouchHotAreas(rects);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -616,9 +599,6 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowLimits, Function | SmallTest | Le
     auto ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
@@ -746,6 +726,34 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateFloatingWindowSizeBySizeLimits, Func
 }
 
 /**
+ * @tc.name: UpdateFloatingWindowSizeBySizeLimits01
+ * @tc.desc: UpdateFloatingWindowSizeBySizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, UpdateFloatingWindowSizeBySizeLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("UpdateFloatingWindowSizeBySizeLimits01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    uint32_t maxWidth = 32;
+    WindowLimits windowLimits = {1, 1, 1, 1, 0.0f, 2.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
+    windowSceneSessionImpl->UpdateFloatingWindowSizeBySizeLimits(maxWidth, maxWidth);
+    WindowLimits windowLimits1 = {1, 2, 2, 2, 0.0f, 0.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits1);
+    windowSceneSessionImpl->UpdateFloatingWindowSizeBySizeLimits(maxWidth, maxWidth);
+    WindowLimits windowLimits2 = {1, 2, 2, 2, 0.0f, 2.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits2);
+    windowSceneSessionImpl->UpdateFloatingWindowSizeBySizeLimits(maxWidth, maxWidth);
+}
+
+/**
  * @tc.name: IsDecorEnable
  * @tc.desc: IsDecorEnable
  * @tc.type: FUNC
@@ -818,9 +826,6 @@ HWTEST_F(WindowSceneSessionImplTest3, RecoverAndReconnectSceneSession, Function 
     auto ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     windowSceneSessionImpl->isFocused_ = true;
-    ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->property_ = nullptr;
     ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
@@ -1252,9 +1257,6 @@ HWTEST_F(WindowSceneSessionImplTest3, GetSystemBarProperties, Function | SmallTe
 
     auto ret = windowSceneSessionImpl->GetSystemBarProperties(properties);
     EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->GetSystemBarProperties(properties);
-    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1287,9 +1289,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Hide, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->Hide(2, false, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->Hide(2, false, false);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1319,9 +1318,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsSessionMainWindow, Function | SmallTest 
     windowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->IsSessionMainWindow(1);
     EXPECT_EQ(false, ret);
-    ret = windowSceneSessionImpl->IsSessionMainWindow(0);
-    EXPECT_EQ(false, ret);
-    windowSession->property_ = nullptr;
     ret = windowSceneSessionImpl->IsSessionMainWindow(0);
     EXPECT_EQ(false, ret);
     windowSession = nullptr;
@@ -1363,9 +1359,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Show, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
     ret = windowSceneSessionImpl->Maximize();
     EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->Show(2, true);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ret = windowSceneSessionImpl->Minimize();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
@@ -1657,15 +1650,15 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitSystemSessionEnableDrag
- * @tc.desc: InitSystemSessionEnableDrag Test
+ * @tc.name: InitSystemSessionDragEnable
+ * @tc.desc: InitSystemSessionDragEnable Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("InitSystemSessionEnableDrag");
+    option->SetWindowName("InitSystemSessionDragEnable");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
@@ -1677,7 +1670,7 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionEnableDrag, Function | Sm
     ASSERT_NE(nullptr, session);
 
     window->hostSession_ = session;
-    window->InitSystemSessionEnableDrag();
+    window->InitSystemSessionDragEnable();
 }
 }
 } // namespace Rosen

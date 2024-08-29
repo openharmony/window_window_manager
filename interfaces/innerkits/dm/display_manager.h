@@ -561,6 +561,14 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
+     * @brief Change the display mode of the foldable device from js.
+     *
+     * @param mode target display mode to change.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+
+    /**
      * @brief Set display scale.
      *
      * @param screenId screenId used in DisplayManager.
@@ -577,6 +585,14 @@ public:
      * @param mode locked fold status is locked.
      */
     void SetFoldStatusLocked(bool locked);
+
+    /**
+     * @brief Locked fold status from js.
+     *
+     * @param locked locked fold status is locked.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetFoldStatusLockedFromJs(bool locked);
 
     /**
      * @brief Get the fold crease region in the current display mode.

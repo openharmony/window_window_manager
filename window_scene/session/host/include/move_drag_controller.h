@@ -48,6 +48,8 @@ public:
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
     bool HasPointDown();
+    void SetMovable(bool movable);
+    bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
@@ -57,7 +59,6 @@ public:
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
-    void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
     void CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating);
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
@@ -66,6 +67,7 @@ public:
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
+    void SetUIType(const std::string& uiType);
 
 private:
     struct MoveDragProperty {
@@ -129,6 +131,7 @@ private:
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
+    bool isMovable_ = true;
     bool isDecorEnable_ = true;
     bool hasPointDown_ = false;
     float aspectRatio_ = 0.0f;
@@ -143,6 +146,7 @@ private:
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
+    std::string uiType_ = "";
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,

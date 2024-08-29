@@ -120,7 +120,7 @@ ohos_shared_library("sms") {
     "input:libmmi-client",
     "input:libmmi-napi",
   ]
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     deps += [ "${window_base_path}/window_scene/session_manager_service:session_manager_service" ]
   }
   if (is_standard_system) {
@@ -133,7 +133,7 @@ ohos_shared_library("sms") {
   subsystem_name = "window"
 }
 
-if (scene_board_enabled) {
+if (window_manager_use_sceneboard) {
   group("libwms") {
     deps = [ "../etc:wms_etc" ]
   }
@@ -276,7 +276,7 @@ if (scene_board_enabled) {
 
 group("test") {
   testonly = true
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     deps = []
   } else {
     deps = [ "test:test" ]

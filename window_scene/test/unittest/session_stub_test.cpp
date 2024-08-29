@@ -146,6 +146,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteBool(true);
+    data.WriteInt32(1);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
     ASSERT_EQ(0, res);
@@ -154,7 +155,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(0, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED), data, reply, option);
-    ASSERT_EQ(5, res);
+    ASSERT_EQ(0, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED), data, reply, option);
     ASSERT_EQ(5, res);
@@ -178,7 +179,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(0, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT), data, reply, option);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(22, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA), data, reply, option);
     ASSERT_EQ(22, res);
@@ -187,7 +188,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(0, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT), data, reply, option);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(5, res);
 }
 
 /**
@@ -227,7 +228,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW), data, reply, option);
     ASSERT_EQ(0, res);
-    ASSERT_EQ(22, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION), data, reply, option);
     ASSERT_EQ(22, res);
@@ -311,7 +311,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
     ASSERT_EQ(0, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(5, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE), data, reply, option);
     ASSERT_EQ(0, res);
@@ -371,6 +371,8 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(0, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
+    ASSERT_EQ(0, res);
+    res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(0, res);
 }
 

@@ -27,7 +27,7 @@ class SessionInfo;
 namespace OHOS::Rosen {
 class ExtensionSession;
 class ExtensionSessionManager {
-WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
+WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
     /**
      * @brief create extension session
@@ -62,8 +62,11 @@ public:
         const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
 
 private:
-    void Init();
+    ExtensionSessionManager();
+    ~ExtensionSessionManager() = default;
+
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
+    float GetSystemDensity(uint64_t displayId);
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::map<int32_t, sptr<ExtensionSession>> extensionSessionMap_;

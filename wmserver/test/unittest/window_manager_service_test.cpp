@@ -812,11 +812,11 @@ HWTEST_F(WindowManagerServiceTest, GetVisibilityWindowInfo, Function | SmallTest
 HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
-    WmErrorCode res = wms->RaiseToAppTop(windowId);
+    WMError res = wms->RaiseToAppTop(windowId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WmErrorCode::WM_OK, res);
+        ASSERT_EQ(WMError::WM_OK, res);
     } else {
-        ASSERT_NE(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+        ASSERT_NE(WMError::WM_DO_NOTHING, res);
     }
 }
 
@@ -922,15 +922,15 @@ HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled
- * @tc.desc: SetGestureNavigaionEnabled test
+ * @tc.name: SetGestureNavigationEnabled
+ * @tc.desc: SetGestureNavigationEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
 {
     bool enable = false;
     ASSERT_TRUE(wms != nullptr);
-    WMError res = wms->SetGestureNavigaionEnabled(enable);
+    WMError res = wms->SetGestureNavigationEnabled(enable);
     ASSERT_EQ(WMError::WM_OK, res);
 }
 

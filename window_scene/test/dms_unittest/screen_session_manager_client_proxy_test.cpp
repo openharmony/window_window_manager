@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSessionManagerClientProxyTest : public testing::Test {
 public:
@@ -69,7 +69,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, Functio
     std::string name;
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
 }
 
 /**

@@ -1081,11 +1081,11 @@ WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObjec
     return ret;
 }
 
-WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
+WMError WindowManager::SetGestureNavigationEnabled(bool enable) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigaionEnabled(enable);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigationEnabled(enable);
     if (ret != WMError::WM_OK) {
-        WLOGFE("set gesture navigaion enabled failed");
+        WLOGFE("set gesture navigation enabled failed");
     }
     return ret;
 }

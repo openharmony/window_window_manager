@@ -51,51 +51,8 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: ReportPiPStartWindow
- * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
-{
-    int32_t source = 0;
-    std::string errorReason = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    source = 1;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-}
-
-/**
- * @tc.name: ReportPiPActionEvent
- * @tc.desc: ReportPiPActionEvent
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
-{
-    std::string actionEvent = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
-    actionEvent = "nextVideo";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
-}
-
-/**
- * @tc.name: ReportPiPRatio
- * @tc.desc: ReportPiPRatio/ReportPiPRestore
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPRatio, Function | SmallTest | Level2)
-{
-    int result = 0;
-    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(100, 120);
-    ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
-}
-
-
-/**
  * @tc.name: PiPWindowState
- * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo
+ * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo/ReportPiPStartWindow/ReportPiPStopWindow/ReportPiPActionEvent
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
@@ -106,6 +63,17 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
     ASSERT_EQ(1, static_cast<int>(PictureInPictureManager::windowToControllerMap_.size()));
     PictureInPictureManager::RemovePipControllerInfo(100);
     ASSERT_EQ(0, static_cast<int>(PictureInPictureManager::windowToControllerMap_.size()));
+    int32_t source = 0;
+    std::string errorReason = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    source = 1;
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    std::string actionEvent = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
+    actionEvent = "nextVideo";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
 }
 
 /**
@@ -376,6 +344,9 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::autoStartController_ = pipController;
     ASSERT_EQ(navId, "");
+    option->SetTypeNodeEnabled(true);
+    PictureInPictureManager::AutoStartPipWindow(navId);
+    option->SetTypeNodeEnabled(false);
     PictureInPictureManager::AutoStartPipWindow(navId);
     ASSERT_EQ(result, 0);
     navId = "NavId";

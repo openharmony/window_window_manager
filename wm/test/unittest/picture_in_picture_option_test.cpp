@@ -163,6 +163,32 @@ HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Leve
     option->SetNodeControllerRef(nullptr);
     ASSERT_EQ(option->GetNodeControllerRef(), nullptr);
 }
+
+/**
+ * @tc.name: TypeNodeRef
+ * @tc.desc: SetTypeNodeRef/GetTypeNodeRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->SetTypeNodeRef(nullptr);
+    ASSERT_EQ(option->GetTypeNodeRef(), nullptr);
+}
+
+/**
+ * @tc.name: TypeNodeEnabled
+ * @tc.desc: SetTypeNodeEnabled/IsTypeNodeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->SetTypeNodeEnabled(true);
+    ASSERT_TRUE(option->IsTypeNodeEnabled());
+    option->SetTypeNodeEnabled(false);
+    ASSERT_TRUE(!option->IsTypeNodeEnabled());
+}
 }
 }
 }

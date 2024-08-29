@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
 }
 
 
@@ -1023,32 +1023,33 @@ void WindowManagerProxy::OffWindowZoom()
     }
 }
 
-WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
+/** @note @window.hierarchy */
+WMError WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write anchor delatX failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
     if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
-    return WmErrorCode::WM_OK;
+    return WMError::WM_OK;
 }
 
 std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowId)
@@ -1094,7 +1095,7 @@ WMError WindowManagerProxy::GetSnapshotByWindowId(int32_t persistentId, std::sha
     return WMError::WM_OK;
 }
 
-WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
+WMError WindowManagerProxy::SetGestureNavigationEnabled(bool enable)
 {
     MessageParcel data;
     MessageParcel reply;

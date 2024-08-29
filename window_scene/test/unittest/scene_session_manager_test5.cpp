@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <regex>
 #include <bundle_mgr_interface.h>
+#include <bundle_mgr_proxy.h>
 #include <bundlemgr/launcher_service.h>
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
@@ -60,7 +61,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest5::ssm_ = nullptr;
 bool SceneSessionManagerTest5::gestureNavigationEnabled_ = true;
 
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest5::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest5::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -282,25 +284,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate);
     delete sceneSessionManager;
-}
-
-/**
- * @tc.name: UpdatePropertyRaiseEnabled
- * @tc.desc: UpdatePropertyRaiseEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, UpdatePropertyRaiseEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(property, nullptr);
-    auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
-    ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
 }
 
 /**
@@ -554,9 +537,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallT
     sptr<SceneSession> currSession = nullptr;
     ssm_->NotifyFocusStatusByMission(scensession, currSession);
     ASSERT_EQ(false, ssm_->MissionChanged(scensession, currSession));
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(scensession, nullptr);
     ssm_->NotifyFocusStatusByMission(scensession, currSession);
@@ -1193,6 +1173,74 @@ HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: GetBatchAbilityInfos01
+ * @tc.desc: GetBatchAbilityInfos01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto bundleMgr = ssm_->bundleMgr_;
+    ssm_->bundleMgr_ = nullptr;
+    int32_t userId = 100;
+    std::vector<std::string> bundleNames = { "test1", "test2" };
+    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
+    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+ 
+/**
+ * @tc.name: GetBatchAbilityInfos02
+ * @tc.desc: GetBatchAbilityInfos02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
+    int32_t userId = 100;
+    std::vector<std::string> bundleNames = {};
+    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
+    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: GetBatchAbilityInfos03
+ * @tc.desc: GetBatchAbilityInfos03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
+    int32_t userId = 100;
+    std::vector<std::string> bundleNames = { "" };
+    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
+    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: GetBatchAbilityInfos04
+ * @tc.desc: GetBatchAbilityInfos04
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
+    int32_t userId = 100;
+    std::vector<std::string> bundleNames = { "test1", "test2" };
+    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
+    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
  * @tc.name: FindMainWindowWithToken
  * @tc.desc: SceneSesionManager find main window with token
  * @tc.type: FUNC
@@ -1211,6 +1259,72 @@ HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTe
     ssm_->FindMainWindowWithToken(targetToken);
     sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->FindMainWindowWithToken(targetToken);
+}
+
+/**
+ * @tc.name: RequestSceneSessionBackground
+ * @tc.desc: RequestSceneSessionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<Session> session = new (std::nothrow) Session(info);
+    ASSERT_NE(session, nullptr);
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionInfoPersistentId(0);
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+}
+
+/**
+ * @tc.name: DestroyToastSession
+ * @tc.desc: DestroyToastSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, DestroyToastSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->DestroyToastSession(sceneSession);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->DestroyToastSession(sceneSession);
+}
+
+/**
+ * @tc.name: CheckModalSubWindowPermission
+ * @tc.desc: CheckModalSubWindowPermission
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetWindowFlags(123);
+    property->SetTopmost(true);
+    ssm_->CheckModalSubWindowPermission(property);
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ssm_->CheckModalSubWindowPermission(property);
 }
 }
 } // namespace Rosen

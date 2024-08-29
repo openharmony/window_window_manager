@@ -35,11 +35,11 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-    const std::string SETTING_COLUMN_VALUE = "VALUE";
-    const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
-        "settingsdata/SETTINGSDATA?Proxy=true";
-    constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
+const std::string SETTING_COLUMN_VALUE = "VALUE";
+const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
+    "settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 }
 class MockWindow : public Window {
 public:
@@ -96,10 +96,11 @@ namespace {
  */
 HWTEST_F(PictureInPictureControllerTest, GetPipPriority, Function | SmallTest | Level2)
 {
-    sptr<PipOption> option = new (std::nothrow) PipOption();
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     uint32_t pipTypeTemplate = 5;
     uint32_t testValue = 0;
     ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
@@ -240,6 +241,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow, Function 
     std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
     ASSERT_NE(nullptr, xComponentController);
     pipControl->pipOption_->SetXComponentController(nullptr);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
     pipControl->pipOption_->SetXComponentController(xComponentController);
@@ -284,7 +286,6 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StartPictureInPicture(startType));
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->mainWindow_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
@@ -314,13 +315,13 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture, Function | Small
  */
 HWTEST_F(PictureInPictureControllerTest, StartPictureInPictureInner, Function | SmallTest | Level2)
 {
-    StartPipType startType = StartPipType::AUTO_START;
+    StartPipType startType = StartPipType::USER_START;
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_NE(WMError::WM_OK, pipControl->StartPictureInPictureInner(startType));
 }
 
@@ -404,6 +405,10 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->SetAutoStartEnabled(enable);
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_ = option;
@@ -489,7 +494,10 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     pipControl->UpdateContentSize(width, height);
     pipControl->window_ = mw;
 
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
     pipControl->mainWindowXComponentController_ = xComponentController;
+    pipControl->UpdateContentSize(width, height);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->windowRect_ = {0, 0, 0, 0};
     pipControl->IsContentSizeChanged(0, 0, 0, 0);
     pipControl->UpdateContentSize(width, height);
@@ -702,11 +710,11 @@ HWTEST_F(PictureInPictureControllerTest, RestorePictureInPictureWindow, Function
 }
 
 /**
- * @tc.name: UpdateXComponentPositionAndSize
- * @tc.desc: UpdateXComponentPositionAndSize
+ * @tc.name: UpdateWinRectByComponent
+ * @tc.desc: UpdateWinRectByComponent
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureControllerTest, UpdateWinRectByComponent, Function | SmallTest | Level2)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -716,21 +724,26 @@ HWTEST_F(PictureInPictureControllerTest, UpdateXComponentPositionAndSize, Functi
     ASSERT_NE(nullptr, xComponentController);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->UpdateWinRectByComponent();
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->UpdateWinRectByComponent();
+
     pipControl->mainWindowXComponentController_ = nullptr;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->mainWindowXComponentController_ = xComponentController;
 
     pipControl->windowRect_.width_ = 0;
     pipControl->windowRect_.height_ = 10;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 0;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 0;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 10;
-    pipControl->UpdateXComponentPositionAndSize();
+    pipControl->UpdateWinRectByComponent();
 }
 
 /**
@@ -793,7 +806,12 @@ HWTEST_F(PictureInPictureControllerTest, ResetExtController, Function | SmallTes
     std::shared_ptr<MockXComponentController> xComponentController1 = std::make_shared<MockXComponentController>();
     ASSERT_NE(nullptr, xComponentController1);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    
+
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->ResetExtController();
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->ResetExtController();
+
     pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->ResetExtController();
@@ -813,6 +831,59 @@ HWTEST_F(PictureInPictureControllerTest, ResetExtController, Function | SmallTes
 }
 
 /**
+ * @tc.name: OnPictureInPictureStart
+ * @tc.desc: OnPictureInPictureStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, OnPictureInPictureStart, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    pipControl->OnPictureInPictureStart();
+}
+
+/**
+ * @tc.name: IsTypeNodeEnabled
+ * @tc.desc: IsTypeNodeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, IsTypeNodeEnabled, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    ASSERT_TRUE(pipControl->IsTypeNodeEnabled());
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    ASSERT_TRUE(!pipControl->IsTypeNodeEnabled());
+    pipControl->pipOption_ = nullptr;
+    ASSERT_TRUE(!pipControl->IsTypeNodeEnabled());
+}
+
+/**
+ * @tc.name: GetTypeNode
+ * @tc.desc: GetTypeNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetTypeNode, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    pipControl->pipOption_->SetTypeNodeRef(nullptr);
+    ASSERT_EQ(nullptr, pipControl->GetTypeNode());
+    pipControl->pipOption_ = nullptr;
+    ASSERT_EQ(nullptr, pipControl->GetTypeNode());
+}
+
+/**
  * @tc.name: SetXComponentController
  * @tc.desc: SetXComponentController
  * @tc.type: FUNC
@@ -827,7 +898,9 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->window_ = mw;
@@ -861,7 +934,12 @@ HWTEST_F(PictureInPictureControllerTest, UpdatePiPSourceRect, Function | SmallTe
     std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
     ASSERT_NE(nullptr, xComponentController);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    
+
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->UpdatePiPSourceRect();
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->UpdatePiPSourceRect();
+
     pipControl->mainWindowXComponentController_ = nullptr;
     pipControl->window_ = mw;
     pipControl->UpdatePiPSourceRect();
@@ -908,7 +986,13 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("navId");
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->mainWindow_ = nullptr;
+    pipControl->window_ = window;
+    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
+    pipControl->pipOption_->SetNavigationId("");
+    pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
     EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
@@ -923,6 +1007,8 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
+    auto mw1 = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw1);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
@@ -931,9 +1017,17 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     pipControl->mainWindow_ = nullptr;
     pipControl->LocateSource();
     pipControl->mainWindow_ = mw;
+    pipControl->window_ = nullptr;
     pipControl->LocateSource();
+    pipControl->mainWindow_ = nullptr;
+    pipControl->LocateSource();
+    pipControl->window_ = mw;
+    pipControl->mainWindow_ = mw1;
 
     pipControl->pipOption_->SetNavigationId("");
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->LocateSource();
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
     pipControl->LocateSource();
 }
 
