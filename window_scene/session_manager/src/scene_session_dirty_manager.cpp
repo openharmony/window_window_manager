@@ -187,8 +187,10 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
-    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
+    bool isMidScene = sceneSession->GetIsMidScene();
+    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    if (isAppMainWindowOrPip && !isMidScene) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
