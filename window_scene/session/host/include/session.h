@@ -333,6 +333,12 @@ public:
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
+    /*
+     * Multi Window
+     */
+    void SetIsMidScene(bool isMidScene);
+    bool GetIsMidScene() const;
+
     bool IsSessionValid() const;
     bool IsActive() const;
     bool IsSystemActive() const;
@@ -649,6 +655,11 @@ private:
     bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
+    /*
+     * Multi Window
+     */
+    bool isMidScene_ = false;
 
     WSRect preRect_;
     int32_t callingPid_ = -1;
