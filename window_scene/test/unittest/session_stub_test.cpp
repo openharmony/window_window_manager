@@ -425,19 +425,86 @@ HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | Small
 }
 
 /**
- * @tc.name: HandleUpdatePiPRect004
+ * @tc.name: HandleUpdatePiPRect001
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
-    auto res = session_->HandleUpdatePiPRect(data, reply);
-    ASSERT_EQ(0, res);
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteUint32(width);
+    data.WriteUint32(height);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    posY = 10;
+    data.WriteInt32(posY);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    posY = 0;
+    width = 10;
+    data.WriteUint32(width);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    height = 10;
+    width = 0;
+    data.WriteUint32(height);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    height = 0;
+    posX = 10;
+    data.WriteInt32(posX);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+
+    posY = 10;
+    data.WriteInt32(posY);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    posY = 0;
+    width = 10;
+    data.WriteUint32(width);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    height = 10;
+    width = 0;
+    data.WriteUint32(height);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    posX = 0;
+    posY = 10;
+    data.WriteInt32(posY);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    height = 0;
+    width = 10;
+    data.WriteUint32(width);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+    height = 10;
+    posY = 0;
+    data.WriteUint32(height);
+    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdatePiPRect002
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t posX = 10;
+    int32_t posY = 10;
+    uint32_t width = 10;
+    uint32_t height = 10;
+    int32_t reason = static_cast<int32_t>(SizeChangeReason::MAXIMIZE);
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteUint32(width);
+    data.WriteUint32(height);
+    data.WriteInt32(reason);
+    ASSERT_EQ(0, session_->HandleUpdatePiPRect(data, reply));
 }
 
 /**
