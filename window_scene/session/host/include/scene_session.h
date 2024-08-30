@@ -270,7 +270,6 @@ public:
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
-    bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsTurnScreenOn() const;
@@ -393,6 +392,7 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
+    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
