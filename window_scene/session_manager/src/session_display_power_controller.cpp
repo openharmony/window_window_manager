@@ -27,20 +27,25 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
     return true;
 }
 
+static void SetDisplayStateToOn(DisplayState& state)
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayState_ = state;
+    }
+    if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+            EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        ScreenSessionManager::GetInstance().BlockScreenOnByCV();
+    }
+}
+
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
     switch (state) {
         case DisplayState::ON: {
-            {
-                std::lock_guard<std::recursive_mutex> lock(mutex_);
-                displayState_ = state;
-            }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
-                ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-                    EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-                ScreenSessionManager::GetInstance().BlockScreenOnByCV();
-            }
+            SetDisplayStateToOn(state);
             break;
         }
         case DisplayState::OFF: {
