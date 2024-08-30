@@ -318,7 +318,11 @@ int SessionStub::HandleDrawingCompleted(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t eventId = data.ReadUint32();
+    uint32_t eventId = 0;
+    if(!data.ReadUint32(eventId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        return ERR_INVALID_DATA;
+    }
     WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -449,15 +453,35 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdateSessionRect!");
-    auto posX = data.ReadInt32();
-    auto posY = data.ReadInt32();
-    auto width = data.ReadUint32();
-    auto height = data.ReadUint32();
+    uint32_t posX = 0;
+    uint32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if(!data.ReadUint32(posX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read posX failed");
+        return ERR_INVALID_DATA;
+    }
+    if(!data.ReadUint32(posY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read posY failed");
+        return ERR_INVALID_DATA;
+    }
+    if(!data.ReadUint32(width)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read width failed");
+        return ERR_INVALID_DATA;
+    }
+    if(!data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read height failed");
+        return ERR_INVALID_DATA;
+    }
     WSRect rect = {posX, posY, width, height};
     WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    auto isGlobal = data.ReadBool();
+    bool isGlobal = false;
+    if(!data.ReadBool(isGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -474,7 +498,11 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RaiseAboveTarget!");
-    auto subWindowId = data.ReadInt32();
+    uint32_t subWindowId = 0;
+    if(!data.ReadUint32(subWindowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read subWindowId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RaiseAboveTarget(subWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -517,7 +545,11 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
-    auto mode = data.ReadUint32();
+    uint32_t mode = 0;
+    if(!data.ReadUint32(mode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read mode failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -554,7 +586,11 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetAspectRatio!");
-    float ratio = data.ReadFloat();
+    float ratio = 0;
+    if(!data.ReadFloat(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ratio failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetAspectRatio(ratio);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
