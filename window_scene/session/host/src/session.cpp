@@ -3158,7 +3158,7 @@ bool Session::IsScbCoreEnabled()
     return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
 }
 
-bool Session::IsVisible()
+bool Session::IsVisible() const
 {
     return isVisible_;
 }
