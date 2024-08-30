@@ -711,7 +711,7 @@ int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParce
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "Read failed!");
         return ERR_INVALID_DATA;
-    }   
+    }
 }
 
 int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply)
