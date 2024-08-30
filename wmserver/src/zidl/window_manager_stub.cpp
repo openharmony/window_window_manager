@@ -81,7 +81,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_REQUEST_FOCUS: {
             uint32_t windowId = 0;
-            if(!data.ReadUint32(windowId)) {
+            if( !data.ReadUint32(windowId)) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "read focus failed");
                 return ERR_INVALID_DATA;
             }
@@ -139,7 +139,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID: {
             uint32_t mainWinId = 0;
-            if(!data.ReadUint32(mainWinId)) {
+            if( !data.ReadUint32(mainWinId)) {
                 TLOGE(WmsLogTag::DEFAULT, "read mainWinId failed");
                 return ERR_INVALID_DATA;
             }
@@ -162,7 +162,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
             uint32_t layoutMode = 0;
-            if(!data.ReadUint32(layoutMode)) {
+            if( !data.ReadUint32(layoutMode)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read layoutMode failed");
                 return ERR_INVALID_DATA;
             }
@@ -242,7 +242,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE: {
             DisplayId displayId = 0;
-            if(!data.ReadUint64(displayId)) {
+            if( !data.ReadUint64(displayId)) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "read displayId failed");
                 return ERR_INVALID_DATA;
             }
@@ -328,7 +328,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
             uint32_t windowId = 0;
-            if(!data.ReadUint32(windowId)) {
+            if( !data.ReadUint32(windowId)) {
                 TLOGE(WmsLogTag::DEFAULT, "read windowId failed");
                 return ERR_INVALID_DATA;
             }
@@ -394,7 +394,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE: {
             uint32_t maxMode = 0;
-            if(!data.ReadUint32(maxMode)) {
+            if( !data.ReadUint32(maxMode)) {
                 TLOGE(WmsLogTag::DEFAULT, "read maxMode failed");
                 return ERR_INVALID_DATA;
             }
