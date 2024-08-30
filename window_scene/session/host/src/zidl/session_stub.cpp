@@ -672,8 +672,8 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     uint32_t width = 0;
     uint32_t height = 0;
     int32_t reasonId = 0;
-    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) ||
-        !data.ReadInt32(height) || !data.ReadInt32(reasonId)) {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) ||
+        !data.ReadUint32(height) || !data.ReadInt32(reasonId)) {
         TLOGE(WmsLogTag::WMS_PIP, "read posX or posY or width or height or reasonId error");
         return ERR_INVALID_DATA;
     }
