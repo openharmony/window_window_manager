@@ -41,7 +41,12 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 WLOGFE("FocusChangeInfo is null");
                 return ERR_INVALID_DATA;
             }
-            bool focused = data.ReadBool();
+            bool focused = false;
+            if(data.ReadBool(focused)) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "read focused failed");
+                return ERR_INVALID_DATA;
+            }
+            
             UpdateFocusChangeInfo(info, focused);
             break;
         }
