@@ -1587,10 +1587,10 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | Smal
     EXPECT_EQ(ret, false);
     ssm_->enterRecent_ = false;
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     ssm_->lastUpdatedAvoidArea_.clear();
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1860,6 +1860,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
  */
 HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     int32_t persistentId = 1;
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;

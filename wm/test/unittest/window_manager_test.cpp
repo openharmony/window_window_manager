@@ -1296,6 +1296,8 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
  */
 HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
 {
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
     WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
 }
 
@@ -1332,6 +1334,8 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
 {
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
     ASSERT_NE(info, nullptr);
 

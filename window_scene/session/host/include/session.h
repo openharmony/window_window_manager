@@ -58,7 +58,7 @@ using NotifyRequestFocusStatusNotifyManagerFunc =
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
-using NotifyClickFunc = std::function<void()>;
+using NotifyClickFunc = std::function<void(bool requestFocus)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
@@ -286,7 +286,7 @@ public:
     void SetClickListener(const NotifyClickFunc& func);
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
-    void NotifyClick();
+    void NotifyClick(bool requestFocus = true);
     void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
@@ -590,7 +590,6 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     WSError HandleSubWindowClick(int32_t action);
-    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -601,6 +600,13 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+
+    /*
+     * Window Property
+     */
+    void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
+    void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
