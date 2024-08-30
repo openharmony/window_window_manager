@@ -1192,7 +1192,7 @@ void JsSceneSession::NotifyFrameLayoutFinish()
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
         return;
     }
-    auto task = [this, persistentId = persistentId_, env = env_]() {
+    auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
