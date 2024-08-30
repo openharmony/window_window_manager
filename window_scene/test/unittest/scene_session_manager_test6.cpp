@@ -82,7 +82,6 @@ void SceneSessionManagerTest6::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-
 void SceneSessionManagerTest6::SetUp()
 {
     ssm_->sceneSessionMap_.clear();
