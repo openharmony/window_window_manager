@@ -737,8 +737,19 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
 int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
-    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
-    uint32_t percent = data.ReadUint32();
+    uint32_t gravityValue = 0;
+    if (!data.ReadUint32(gravityValue) ||
+        gravityValue < static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_FLOAT) ||
+        gravityValue > static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Gravity read failed, gravityValue: %{public}d", gravityValue);
+        return ERR_INVALID_DATA;
+    }
+    SessionGravity gravity = static_cast<SessionGravity>(gravityValue);
+    uint32_t percent = 0;
+    if (!data.ReadUint32(percent)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Percent read failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = SetKeyboardSessionGravity(gravity, percent);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -747,8 +758,11 @@ int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessagePar
 int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetCallingSessionId!");
-    uint32_t callingSessionId = data.ReadUint32();
-
+    uint32_t callingSessionId = INVALID_WINDOW_ID;
+    if (!data.ReadUint32(callingSessionId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "callingSessionId read failed.");
+        return ERR_INVALID_DATA;
+    }
     SetCallingSessionId(callingSessionId);
     reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
     return ERR_NONE;
