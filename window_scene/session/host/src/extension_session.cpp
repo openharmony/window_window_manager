@@ -91,7 +91,6 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
             bool isPreImeEvent = false;
             bool isConsumed = false;
             int32_t intRetCode = 0;
-
             if (!data.ReadInt32(keyEventId) || !data.ReadBool(isPreImeEvent) || !data.ReadBool(isConsumed) ||
                 !data.ReadInt32(intRetCode)) {
                 TLOGE(WmsLogTag::WMS_EVENT, "Read keyEvent info failed");
