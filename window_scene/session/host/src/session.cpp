@@ -3075,6 +3075,28 @@ bool Session::IsSystemInput()
     return sessionInfo_.sceneType_ == SceneType::INPUT_SCENE;
 }
 
+void Session::SetIsMidScene(bool isMidScene)
+{
+    auto task = [weakThis = wptr(this), isMidScene] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            return;
+        }
+        if (session->isMidScene_ != isMidScene) {
+            TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isMidScene:%{public}d",
+                session->GetPersistentId(), isMidScene);
+            session->isMidScene_ = isMidScene;
+        }
+    };
+    PostTask(task, "SetIsMidScene");
+}
+
+bool Session::GetIsMidScene() const
+{
+    return isMidScene_;
+}
+
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
 {
     auto property = GetSessionProperty();
