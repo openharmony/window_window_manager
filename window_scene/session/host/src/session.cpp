@@ -962,7 +962,7 @@ void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& pro
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
-    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    bool isSystemCalling = property->GetSystemCalling();
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
         "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
         defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
