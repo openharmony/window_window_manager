@@ -63,6 +63,8 @@ public:
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_GET_CUTOUT_INFO,
+        TRANS_ID_SET_SCREEN_BRIGHTNESS,
+        TRANS_ID_GET_SCREEN_BRIGHTNESS,
     };
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -77,6 +79,21 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
+    /*
+     * used by powermgr
+     */
+    virtual bool WakeUpBegin(PowerStateChangeReason reason) { return false; }
+    virtual bool WakeUpEnd() { return false; }
+    virtual bool SuspendBegin(PowerStateChangeReason reason) { return false; }
+    virtual bool SuspendEnd() { return false; }
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) { return false; }
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) { return false; }
+    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) { return ScreenPowerState::INVALID_STATE; }
+    virtual bool SetDisplayState(DisplayState state) { return false; }
+    virtual DisplayState GetDisplayState(DisplayId displayId) { return DisplayState::UNKNOWN; }
+    virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) { return false; }
+    virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
+    virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
 };
 } // namespace Rosen
 } // namespace OHOS

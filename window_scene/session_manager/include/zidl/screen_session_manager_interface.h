@@ -101,10 +101,10 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
-    virtual DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode) override { return DMError::DM_OK; }
-    virtual DMError SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-        ExtendOption secondScreenOption) override { return DMError::DM_OK; }
+    virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode) override { return DMError::DM_OK; }
+    virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption) override { return DMError::DM_OK; }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override { return DMError::DM_OK; }

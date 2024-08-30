@@ -122,7 +122,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, Function |
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_NE(screenSession, nullptr);
 }
@@ -140,7 +140,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, Function |
     ScreenEvent screenEvent = ScreenEvent::DISCONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_EQ(screenSession, nullptr);
 }

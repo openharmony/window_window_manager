@@ -429,7 +429,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenConnectionChanged, Fu
     data.WriteUint64(rsId);
     std::string name;
     data.WriteString(name);
-
+    data.WriteBool(false);
     int ret = screenSessionManagerClientStub_->HandleOnScreenConnectionChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }

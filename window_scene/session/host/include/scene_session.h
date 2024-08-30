@@ -208,7 +208,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    WSError NotifyFrameLayoutFinishFromApp() override;
+    WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
@@ -264,6 +264,7 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+    sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover
     bool IsRecovered() const { return isRecovered_; }
@@ -392,6 +393,7 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
+    void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -421,7 +423,6 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
@@ -453,14 +454,12 @@ private:
     WSError RaiseAppMainWindowToTop() override;
     void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
-    void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -573,6 +572,11 @@ private:
 
     // Multi User
     bool isMinimizedByUserSwitch_ { false };
+
+    /*
+     * Window ZOrder: PC
+     */
+    bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

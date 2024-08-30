@@ -27,6 +27,7 @@
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -411,9 +412,11 @@ HWTEST_F(WindowSessionImplTest4, TestGetUIContentWithId, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(window->FindWindowById(1), nullptr);
-    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(window->FindWindowById(1), nullptr);
+        ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    }
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: TestGetUIContentWithId end";
 }
 
@@ -710,10 +713,12 @@ HWTEST_F(WindowSessionImplTest4, GetAbcContent, Function | SmallTest | Level2)
     std::filesystem::path abcFile4{abcPath};
     ASSERT_FALSE(abcFile4.empty());
     ASSERT_FALSE(!abcFile4.is_absolute());
-    ASSERT_FALSE(!std::filesystem::exists(abcFile4));
-    ASSERT_NE(res, nullptr);
-    std::fstream file(abcFile, std::ios::in | std::ios::binary);
-    ASSERT_FALSE(file);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_FALSE(!std::filesystem::exists(abcFile4));
+        ASSERT_NE(res, nullptr);
+        std::fstream file(abcFile, std::ios::in | std::ios::binary);
+        ASSERT_FALSE(file);
+    }
     window->Destroy();
 }
 

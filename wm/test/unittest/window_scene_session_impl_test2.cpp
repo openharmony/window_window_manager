@@ -1464,7 +1464,11 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     // case1: only set maximize()
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    window->windowSystemConfig_.uiType_ = "phone";
     auto ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    window->windowSystemConfig_.uiType_ = "pc";
+    ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 

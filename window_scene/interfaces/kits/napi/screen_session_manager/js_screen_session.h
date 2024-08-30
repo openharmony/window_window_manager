@@ -56,6 +56,7 @@ private:
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnScreenDensityChange();
+    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

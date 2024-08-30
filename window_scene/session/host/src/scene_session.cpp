@@ -280,15 +280,18 @@ WSError SceneSession::Background(bool isFromClient)
     return BackgroundTask(true);
 }
 
-WSError SceneSession::NotifyFrameLayoutFinishFromApp()
+WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
-    auto task = [weakThis = wptr(this)]() {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
+    auto task = [weakThis = wptr(this), notifyListener, rect]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->frameLayoutFinishFunc_) {
+        session->layoutRect_ = rect;
+        session->NotifyLayoutFinished();
+        if (notifyListener && session->frameLayoutFinishFunc_) {
             TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d", session->GetPersistentId());
             session->frameLayoutFinishFunc_();
         }
@@ -450,7 +453,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->lastSafeRect);
-                session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, nullptr);
+                session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
@@ -722,54 +725,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return WSError::WS_OK;
 }
 
-bool SceneSession::IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty)
-{
-    static bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-    bool isFolded = ScreenSessionManagerClient::GetInstance().GetFoldStatus() == OHOS::Rosen::FoldStatus::FOLDED;
-    bool isDualDevice = FoldScreenStateInternel::IsDualDisplayFoldDevice();
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
-        return false;
-    }
-    bool isLandscape = screenWidth > screenHeight ? true : false;
-    bool result = isPhone && (!isFoldable || isFolded || isDualDevice) && isLandscape;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "isPhone:%{public}d, isFoldable:%{public}d, isFolded:%{public}d, "
-        "isDualDevice:%{public}d, isLandscape:%{public}d, screenWidth:%{public}u, screenHeight:%{public}u, "
-        "isKeyboardNeedLeftOffset:%{public}d", isPhone, isFoldable, isFolded, isDualDevice, isLandscape,
-        screenWidth, screenHeight, result);
-    return result;
-}
-
-void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession,
-    sptr<SceneSession> keyboardSession)
-{
-    if (panelSession == nullptr || keyboardSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard or panel session is null");
-        return;
-    }
-
-    SessionGravity gravity = keyboardSession->GetKeyboardGravity();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
-    } else {
-        auto sessionProperty = keyboardSession->GetSessionProperty();
-        if (sessionProperty == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
-            return;
-        }
-        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
-        if (!IsKeyboardNeedLeftOffset(isPhone, sessionProperty) || panelSession->winRect_.posX_ != 0) {
-            keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
-        }
-    }
-    keyboardSession->winRect_.posY_ = panelSession->winRect_.posY_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "panelId:%{public}d, keyboardId:%{public}d, panelRect:%{public}s, "
-        "keyboardRect:%{public}s, gravity:%{public}d", panelSession->GetPersistentId(),
-        keyboardSession->GetPersistentId(), panelSession->winRect_.ToString().c_str(),
-        keyboardSession->winRect_.ToString().c_str(), gravity);
-}
-
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
@@ -785,18 +740,6 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
-
-    if (isKeyboardPanelEnabled_) {
-        sptr<SceneSession> self(this);
-        if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
-            const auto& keyboardSession = GetKeyboardSession();
-            FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
-            return ret;
-        }
-        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            FixKeyboardPositionByKeyboardPanel(GetKeyboardPanelSession(), self);
-        }
-    }
 
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
@@ -921,8 +864,6 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 {
     SessionGravity gravity;
     uint32_t percent = 0;
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
@@ -931,6 +872,8 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        uint32_t screenWidth = 0;
+        uint32_t screenHeight = 0;
         if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
             return false;
         }
@@ -2109,7 +2052,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     if (reason != SizeChangeReason::MOVE) {
         if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
             (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
-             rect.width_ == windowLimits.minWidth_)) {
+             rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
             SetSurfaceBounds(rect);
@@ -2130,6 +2073,8 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
                 rect.width_ = compatibleInPcLandscapeWidth;
                 rect.height_ = compatibleInPcLandscapeHeight;
             }
+            rect.posX_ = windowRect.posX_;
+            rect.posY_ = windowRect.posY_;
             SetSurfaceBounds(rect);
             UpdateSizeChangeReason(reason);
         }
@@ -2172,7 +2117,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
-    if (isCompatibleModeInPc) {
+    if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
         SetSurfaceBounds(rect);
@@ -4299,14 +4244,20 @@ bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSession
 uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
 {
     bool lastVisible = IsVisible();
-    dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
     dirtyFlags_ |= UpdateInteractiveInner(uiParam.interactive_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::INTERACTIVE) : 0;
+    if (!GetForegroundInteractiveStatus()) {
+        // keep ui state in recent
+        return dirtyFlags_;
+    }
+    dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
     dirtyFlags_ |= UpdateRectInner(uiParam, reason_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::RECT) : 0;
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
-    dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
+    if (!isPcScenePanel_) {
+        dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
+    }
     if (!lastVisible && IsVisible() && !isFocused_ && !postProcessFocusState_.enabled_ &&
         GetForegroundInteractiveStatus()) {
         postProcessFocusState_.enabled_ = true;
