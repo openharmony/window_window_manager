@@ -994,6 +994,9 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     callingPid_ = pid;
     callingUid_ = uid;
     bufferAvailable_ = true;
+    auto windowRect = property->GetWindowRect();
+    layoutRect_ = { windowRect.posX_, windowRect.posY_,
+        static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
     UpdateSessionState(SessionState::STATE_CONNECT);
     return WSError::WS_OK;
 }
