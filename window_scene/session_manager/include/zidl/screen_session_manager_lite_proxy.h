@@ -42,6 +42,21 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    /*
+     * used by powermgr
+     */
+    virtual bool WakeUpBegin(PowerStateChangeReason reason) override;
+    virtual bool WakeUpEnd() override;
+    virtual bool SuspendBegin(PowerStateChangeReason reason) override;
+    virtual bool SuspendEnd() override;
+    virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    virtual bool SetDisplayState(DisplayState state) override;
+    virtual DisplayState GetDisplayState(DisplayId displayId) override;
+    virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
+    virtual uint32_t GetScreenBrightness(uint64_t screenId) override;
+    virtual std::vector<DisplayId> GetAllDisplayIds() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerLiteProxy> delegator_;
 };

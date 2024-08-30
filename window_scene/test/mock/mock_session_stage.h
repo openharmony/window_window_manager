@@ -31,6 +31,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
+    MOCK_METHOD1(UpdateSessionViewportConfig, WSError(const SessionViewportConfig& config));
     MOCK_METHOD0(HandleBackEvent, WSError(void));
     MOCK_METHOD0(NotifyDestroy, WSError(void));
     MOCK_METHOD1(UpdateFocus, WSError(bool isFocused));

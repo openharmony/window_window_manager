@@ -152,6 +152,15 @@ WSError KeyboardSession::Disconnect(bool isFromClient)
     return WSError::WS_OK;
 }
 
+bool KeyboardSession::CheckKeyboardRectValid()
+{
+    if (winRect_.posY_ == 0 && GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboard winRect_.posY_ is 0 invalid");
+        return false;
+    }
+    return true;
+}
+
 WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
@@ -161,6 +170,10 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
             TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (!session->CheckKeyboardRectValid()) {
+            return WSError::WS_DO_NOTHING;
+        }
+
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -378,23 +391,6 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     return true;
 }
 
-static bool IsCallingSessionSplitMode(const sptr<SceneSession>& callingSession)
-{
-    auto windowType = callingSession->GetWindowType();
-    bool isCallingSessionSplit = false;
-    if (WindowHelper::IsMainWindow(windowType)) {
-        if (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    } else if (WindowHelper::IsSubWindow(windowType) || WindowHelper::IsDialogWindow(windowType)) {
-        if (callingSession->GetParentSession() != nullptr &&
-            callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            isCallingSessionSplit = true;
-        }
-    }
-    return isCallingSessionSplit;
-}
-
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -423,9 +419,8 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
         oriPosYBeforeRaisedByKeyboard == 0) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No overlap area, keyboardRect: %{public}s, callingRect: %{public}s",
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
-        if (!IsCallingSessionSplitMode(callingSession)) {
-            return;
-        }
+        NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, keyboardPanelRect, rsTransaction);
+        return;
     }
 
     WSRect newRect = callingSessionRect;
@@ -644,9 +639,9 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            static_cast<int32_t>(screenWidth) : rect.width_;
-        newWinRect.height_ = rect.height_;
+        newWinRect.width_ = static_cast<int32_t>((gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
+            screenWidth : rect.width_);
+        newWinRect.height_ = static_cast<int32_t>(rect.height_);
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newWinRect.posY_ = static_cast<int32_t>(screenHeight) - rect.height_;
         newRequestRect= newWinRect;

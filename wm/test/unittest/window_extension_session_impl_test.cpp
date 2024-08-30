@@ -1086,6 +1086,86 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
 }
 
 /**
+ * @tc.name: UpdateSessionViewportConfig1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetDisplayId(0);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+
+    SessionViewportConfig config;
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.isDensityFollowHost_ = true;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 2.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 1;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+
+    config.isDensityFollowHost_ = false;
+    window_->lastDensity_ = 0.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig2
+ * @tc.desc: invalid density
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = true;
+    config.density_ = -1.0f;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig3
+ * @tc.desc: handler_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionViewportConfig config;
+    window_->handler_ = nullptr;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange
+ * @tc.desc: NotifyDisplayInfoChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionViewportConfig config;
+    window_->NotifyDisplayInfoChange(config);
+}
+
+/**
  * @tc.name: NotifyAccessibilityChildTreeRegister01
  * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
@@ -1832,6 +1912,63 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
+}
+
+/**
+ * @tc.name: CheckHideNonSecureWindowsPermission
+ * @tc.desc: CheckHideNonSecureWindowsPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_OK);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->modalUIExtensionMayBeCovered_ = true;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: NotifyModalUIExtensionMayBeCovered
+ * @tc.desc: NotifyModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: ReportModalUIExtensionMayBeCovered
+ * @tc.desc: ReportModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    window_->ReportModalUIExtensionMayBeCovered(true);
+    window_->NotifyModalUIExtensionMayBeCovered(false);
 }
 }
 } // namespace Rosen

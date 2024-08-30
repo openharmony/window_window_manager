@@ -28,6 +28,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -60,15 +61,17 @@ class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
-    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
-    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    virtual bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
-    // inherits from window
+
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "");
+        const sptr<Rosen::ISession>& iSession,
+        const std::string& identityToken = "") { return WMError::WM_OK; }
+
+    /*
+     * inherits from window
+     */
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
@@ -115,7 +118,13 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
-    // inherits from session stage
+    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
+    bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+
+    /*
+     * inherits from session stage
+     */
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -131,7 +140,7 @@ public:
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
-
+    bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool notifyInputMethod = true) override;
@@ -246,11 +255,6 @@ public:
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
-    /*
-     * UIExtension
-     */
-    void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) override;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -273,7 +277,8 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);
@@ -286,6 +291,8 @@ protected:
     void RegisterFrameLayoutCallback();
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
+    sptr<WindowSessionImpl> FindMainWindowWithContext();
+    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -308,12 +315,14 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
+    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
+    // protect windowExtensionSessionSet_
+    static std::shared_mutex windowExtensionSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
-    std::atomic_bool enableFrameLayoutFinishCb_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -328,23 +337,17 @@ protected:
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
-    std::atomic_bool enableSetBufferAvailableCallback_ = false;
     bool IsFreeMultiWindowMode() const
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
 
     /*
-     * UIExtension
-     */
-    wptr<Window> parentExtensionWindow_ = nullptr;
-
-    /*
      * DFX
      */
     void SetUIContentComplete();
     void AddSetUIContentTimeoutCheck();
-    virtual void NotifySetUIContentComplete() {}
+    void NotifySetUIContentComplete();
     std::atomic_bool setUIContentCompleted_ { false };
     enum TimeoutErrorCode : int32_t {
         SET_UICONTENT_TIMEOUT = 1000
@@ -465,9 +468,6 @@ private:
 
     std::atomic<int32_t> lastInteractionEventId_ { 0 };
 
-    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
-    bool postTaskDone_ = false;
-    int16_t rotationAnimationCount_ { 0 };
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
@@ -478,7 +478,15 @@ private:
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
-    std::atomic<bool> isUiContentDestructing_ = false;
+
+    /*
+     * Window Layout
+     */
+    std::atomic_bool windowSizeChanged_ = true;
+    std::atomic_bool enableFrameLayoutFinishCb_ = false;
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    bool postTaskDone_ = false;
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

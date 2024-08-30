@@ -16,16 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 
-#include <mutex>
-#include <shared_mutex>
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "wm_single_instance.h"
-
 
 namespace OHOS::Rosen {
 
 class SceneSessionManagerLite : public SceneSessionManagerLiteStub {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManagerLite)
+WM_DECLARE_SINGLE_INSTANCE(SceneSessionManagerLite)
 public:
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
@@ -71,10 +68,6 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
-
-protected:
-    SceneSessionManagerLite() = default;
-    virtual ~SceneSessionManagerLite() = default;
 };
 } // namespace OHOS::Rosen
 

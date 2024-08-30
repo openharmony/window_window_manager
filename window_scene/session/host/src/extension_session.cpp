@@ -87,10 +87,16 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
     switch (msgId) {
         case WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC: {
-            int32_t keyEventId = data.ReadInt32();
-            bool isPreImeEvent = data.ReadBool();
-            bool isConsumed = data.ReadBool();
-            WSError retCode = static_cast<WSError>(data.ReadInt32());
+            int32_t keyEventId = 0;
+            bool isPreImeEvent = false;
+            bool isConsumed = false;
+            int32_t intRetCode = 0;
+            if (!data.ReadInt32(keyEventId) || !data.ReadBool(isPreImeEvent) || !data.ReadBool(isConsumed) ||
+                !data.ReadInt32(intRetCode)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "Read keyEvent info failed");
+                return ERR_TRANSACTION_FAILED;
+            }
+            WSError retCode = static_cast<WSError>(intRetCode);
             OnTransferKeyEventForConsumed(keyEventId, isPreImeEvent, isConsumed, retCode);
             break;
         }
@@ -270,6 +276,22 @@ WSError ExtensionSession::NotifyDensityFollowHost(bool isFollowHost, float densi
     }
 
     return sessionStage_->NotifyDensityFollowHost(isFollowHost, densityValue);
+}
+
+WSError ExtensionSession::UpdateSessionViewportConfig(const SessionViewportConfig& config)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session is invalid");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "winId: %{public}d, isDensityFollowHost_:%{public}d, "
+        "displayId:%{public}" PRIu64", density:%{public}f, orientation:%{public}d.",
+        GetPersistentId(), config.isDensityFollowHost_, config.displayId_, config.density_, config.orientation_);
+    return sessionStage_->UpdateSessionViewportConfig(config);
 }
 
 void ExtensionSession::TriggerBindModalUIExtension()

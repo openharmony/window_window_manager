@@ -139,7 +139,7 @@ HWTEST_F(PatternDetachCallbackTest, OnRemoteRequest01, Function | SmallTest | Le
     uint32_t code = static_cast<uint32_t>(
         IPatternDetachCallback::PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH);
     int res = patternDetachCallback_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_INVALID_STATE);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
 }
 
 }

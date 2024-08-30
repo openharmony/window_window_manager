@@ -105,6 +105,10 @@ ohos_shared_library("libdms") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 group("test") {

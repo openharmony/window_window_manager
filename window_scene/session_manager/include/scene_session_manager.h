@@ -43,6 +43,7 @@
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
 #include "screen_fold_data.h"
+#include "unordered_map"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -180,7 +181,7 @@ public:
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
     void GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
-    WMError SetGestureNavigaionEnabled(bool enable) override;
+    WMError SetGestureNavigationEnabled(bool enable) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -312,7 +313,8 @@ public:
     void UnregisterCreateSubSessionListener(int32_t persistentId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
-    void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos);
+    void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
+    const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
@@ -376,6 +378,7 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
+    void RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds);
 
 protected:
     SceneSessionManager();
@@ -424,7 +427,10 @@ private:
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
     void UpdateSubWindowVisibility(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
-        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    bool GetSessionRSVisible(const sptr<Session>& session,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     void PostProcessFocus();
     void PostProcessProperty();
@@ -541,10 +547,6 @@ private:
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
-    WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
-                                      const sptr<SceneSession>& sceneSession);
-    WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
-                                       const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
@@ -763,6 +765,26 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+    struct SessionInfoList {
+        int32_t uid_;
+        std::string bundleName_;
+        std::string abilityName_;
+        std::string moduleName_;
+        bool operator==(const SessionInfoList& list) const
+        {
+            return this->uid_ == list.uid_ && this->bundleName_ == list.bundleName_ &&
+                this->abilityName_ == list.abilityName_ && this->moduleName_ == list.moduleName_;
+        }
+        friend struct SessionHasher;
+    };
+    struct SessionHasher {
+        size_t operator()(const SessionInfoList& sessionInfo) const
+        {
+            return std::hash<int32_t>()(sessionInfo.uid_) + std::hash<std::string>()(sessionInfo.bundleName_) +
+                std::hash<std::string>()(sessionInfo.abilityName_) + std::hash<std::string>()(sessionInfo.moduleName_);
+        }
+    };
+    std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
 };
 } // namespace OHOS::Rosen
 

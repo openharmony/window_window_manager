@@ -287,25 +287,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
 }
 
 /**
- * @tc.name: UpdatePropertyRaiseEnabled
- * @tc.desc: UpdatePropertyRaiseEnabled
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest5, UpdatePropertyRaiseEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(property, nullptr);
-    auto result = ssm_->UpdatePropertyRaiseEnabled(property, sceneSession);
-    ssm_->UpdatePropertyDragEnabled(property, sceneSession);
-    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
-}
-
-/**
  * @tc.name: HandleSpecificSystemBarProperty
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
@@ -422,6 +403,16 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     ssm_->RequestSessionFocus(0, true, reason);
     ssm_->RequestSessionFocus(100, true, reason);
+
+    sceneSession->property_ = property;
+    ASSERT_NE(sceneSession->property_, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    sceneSession->focusedOnShow_ = true;
+    sceneSession->property_->focusable_ = true;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->RequestSessionFocus(1, true, reason);
 }
 
 /**
@@ -495,6 +486,19 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
     ASSERT_NE(sceneSession, nullptr);
     FocusChangeReason reason = FocusChangeReason::MOVE_UP;
     ssm_->RequestSessionUnfocus(0, reason);
+
+    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(focusedSession, nullptr);
+    focusedSession->property_ = property;
+    ASSERT_NE(focusedSession->property_, nullptr);
+    sceneSession->persistentId_ = 1;
+    focusedSession->persistentId_ = 2;
+    focusedSession->property_->parentPersistentId_ = 1;
+    ssm_->focusedSessionId_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
+    ssm_->RequestSessionUnfocus(1, reason);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
@@ -556,9 +560,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallT
     sptr<SceneSession> currSession = nullptr;
     ssm_->NotifyFocusStatusByMission(scensession, currSession);
     ASSERT_EQ(false, ssm_->MissionChanged(scensession, currSession));
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(scensession, nullptr);
     ssm_->NotifyFocusStatusByMission(scensession, currSession);

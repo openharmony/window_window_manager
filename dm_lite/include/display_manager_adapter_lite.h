@@ -53,14 +53,41 @@ class DisplayManagerAdapterLite : public BaseAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapterLite);
 public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
+    virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual bool IsFoldable();
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    /*
+     * used by powermgr
+     */
+    virtual bool WakeUpBegin(PowerStateChangeReason reason);
+    virtual bool WakeUpEnd();
+    virtual bool SuspendBegin(PowerStateChangeReason reason);
+    virtual bool SuspendEnd();
+    virtual bool SetDisplayState(DisplayState state);
+    virtual DisplayState GetDisplayState(DisplayId displayId);
+    virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level);
+    virtual uint32_t GetScreenBrightness(uint64_t screenId);
 private:
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
 };
+
+class ScreenManagerAdapterLite : public BaseAdapterLite {
+WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapterLite);
+public:
+    /*
+     * used by powermgr
+     */
+    virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
+    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
+private:
+    static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
+};
+
+
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_LITE_H
