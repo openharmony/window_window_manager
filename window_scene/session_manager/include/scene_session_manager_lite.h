@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 
-#include <mutex>
-#include <shared_mutex>
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "wm_single_instance.h"
 
