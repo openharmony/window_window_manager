@@ -112,9 +112,21 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
+
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
+            if (windowProperty == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
             sptr<MoveDragProperty> moveDragProperty = data.ReadStrongParcelable<MoveDragProperty>();
+            if (moveDragProperty == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
             NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
             break;
         }
@@ -212,8 +224,20 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
+            if (from == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-            bool isFromClient = data.ReadBool();
+            if (to == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
+            bool isFromClient;
+            if (!data.ReadBool()){
+                return ERR_INVALID_DATA;
+            }
+
             WMError errCode = NotifyWindowTransition(from, to, isFromClient);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -267,8 +291,16 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE: {
-            uint32_t windowId = data.ReadUint32();
-            bool isAdd = data.ReadBool();
+            uint32_t windowId;
+            if (!data.ReadUint32()) {
+                return ERR_INVALID_DATA;
+            }
+
+            bool isAdd;
+            if (!data.ReadBool()) {
+                return ERR_INVALID_DATA;
+            }
+
             WMError errCode = UpdateRsTree(windowId, isAdd);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -336,7 +368,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT: {
             std::vector<std::string> info;
-            data.ReadStringVector(&info);
+            if (!data.ReadStringVector(&info)) {
+                return ERR_INVALID_DATA;
+            }
+
             NotifyDumpInfoResult(info);
             break;
         }
