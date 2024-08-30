@@ -458,7 +458,6 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
     posX = 10;
     data.WriteInt32(posX);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-
     posY = 10;
     data.WriteInt32(posY);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
