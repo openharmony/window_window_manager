@@ -419,6 +419,8 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << ", " << screenProperty.GetYDpi() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "Offset<X, Y>: " << screenProperty.GetOffsetX()
         << ", " << screenProperty.GetOffsetY() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "StartPosition<X, Y>: " << screenProperty.GetStartX()
+        << ", " << screenProperty.GetStartY() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "Bounds<L,T,W,H>: "
         << screenProperty.GetBounds().rect_.GetLeft() << ", "
         << screenProperty.GetBounds().rect_.GetTop() << ", "
