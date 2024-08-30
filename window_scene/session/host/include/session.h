@@ -453,7 +453,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
-    bool IsVisible();
+    bool IsVisible() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
