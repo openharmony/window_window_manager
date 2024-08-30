@@ -66,7 +66,7 @@ public:
     WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
-    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
@@ -180,7 +180,6 @@ protected:
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
@@ -193,11 +192,6 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
-
-    /*
-     * DFX
-     */
-    void NotifySetUIContentComplete() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -222,7 +216,8 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    void NotifyDisplayInfoChange();
+    void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Window Immersive
@@ -234,10 +229,14 @@ private:
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
-    uint32_t getAvoidAreaCnt_ = 0;
+    std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayoutOnShow(WindowType type);
-    void InitSystemSessionEnableDrag();
+    void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Property.
+     */
+    void InitSystemSessionDragEnable();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

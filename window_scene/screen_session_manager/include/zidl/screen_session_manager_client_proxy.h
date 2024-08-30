@@ -29,13 +29,14 @@ public:
 
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name) override;
+        ScreenId rsId, const std::string& name, bool isExtand) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
+    void OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;

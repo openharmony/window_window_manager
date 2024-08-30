@@ -18,6 +18,7 @@
 #include "window_manager.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 #include "scene_session_manager.h"
 
 #include "window_manager.cpp"
@@ -756,7 +757,11 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2
 {
     sptr<IRemoteObject> remoteObj;
     WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
-    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+        return;
+    }
+    ASSERT_EQ(res, WMError::WM_OK);
 }
 
 /**
@@ -1299,6 +1304,8 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
  */
 HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
 {
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
     WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
 }
 
@@ -1335,9 +1342,16 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
 {
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+    sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
+    ASSERT_NE(info, nullptr);
+
     std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.push_back(info);
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
+    infos.clear();
     infos.push_back(nullptr);
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 }

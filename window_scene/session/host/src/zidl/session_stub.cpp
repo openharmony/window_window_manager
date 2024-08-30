@@ -302,8 +302,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
 {
-    WSError errCode = NotifyFrameLayoutFinishFromApp();
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    bool notifyListener = data.ReadBool();
+    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadInt32(), data.ReadInt32() };
+    NotifyFrameLayoutFinishFromApp(notifyListener, rect);
     return ERR_NONE;
 }
 
@@ -456,7 +457,8 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    WSError errCode = UpdateSessionRect(rect, reason);
+    auto isGlobal = data.ReadBool();
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -711,9 +713,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 {
     WLOGFD("HandleSendPointerEvenForMoveDrag!");
     auto pointerEvent = MMI::PointerEvent::Create();
+    if (!pointerEvent) {
+        TLOGE(WmsLogTag::WMS_EVENT, "create pointer event failed");
+        return ERR_INVALID_DATA;
+    }
     if (!pointerEvent->ReadFromParcel(data)) {
-        WLOGFE("Read pointer event failed");
-        return -1;
+        TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

@@ -80,38 +80,6 @@ void SceneSessionTest5::TearDown()
 namespace {
 
 /**
- * @tc.name: FixKeyboardPositionByKeyboardPanel
- * @tc.desc: FixKeyboardPositionByKeyboardPanel function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, FixKeyboardPositionByKeyboardPanel, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "FixKeyboardPositionByKeyboardPanel";
-    info.bundleName_ = "FixKeyboardPositionByKeyboardPanel";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    sptr<SceneSession> panelSession = nullptr;
-    sptr<SceneSession> keyboardSession = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    panelSession = session;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    keyboardSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    keyboardSession = session;
-    session->property_ = nullptr;
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    session->SetSessionProperty(property);
-    session->FixKeyboardPositionByKeyboardPanel(panelSession, keyboardSession);
-    EXPECT_EQ(property, session->GetSessionProperty());
-}
-
-/**
  * @tc.name: NotifyClientToUpdateRectTask
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
@@ -465,7 +433,6 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionRectChangeCallback(func);
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->SetSessionLastRect(rec);
     session->SetSessionRectChangeCallback(func);
     rec.width_ = 0;
     session->SetSessionRectChangeCallback(func);
@@ -664,7 +631,7 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(true, session->FixRectByAspectRatio(rect));
 }
 
 /**
@@ -1280,10 +1247,6 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    SessionInfo info_;
-    info_.abilityName_ = "ProcessUpdatePropertyByAction_";
-    info_.bundleName_ = "ProcessUpdatePropertyByAction_";
-
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
@@ -1330,10 +1293,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
-
-    SessionInfo info_;
-    info_.abilityName_ = "ProcessUpdatePropertyByAction_";
-    info_.bundleName_ = "ProcessUpdatePropertyByAction_";
 
     auto res = session->HandleActionUpdateTurnScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);

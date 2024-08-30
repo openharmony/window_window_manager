@@ -80,7 +80,6 @@ using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScr
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
-
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -143,6 +142,7 @@ public:
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
     WSError Background(bool isFromClient = false) override;
     virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
@@ -174,7 +174,7 @@ public:
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
@@ -208,7 +208,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    WSError NotifyFrameLayoutFinishFromApp() override;
+    WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
@@ -264,12 +264,12 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+    sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
-    bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsTurnScreenOn() const;
@@ -393,6 +393,7 @@ public:
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+    void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -422,7 +423,6 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
@@ -454,14 +454,12 @@ private:
     WSError RaiseAppMainWindowToTop() override;
     void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool IsKeyboardNeedLeftOffset(bool isPhone, const sptr<WindowSessionProperty>& sessionProperty);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
-    void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -574,6 +572,11 @@ private:
 
     // Multi User
     bool isMinimizedByUserSwitch_ { false };
+
+    /*
+     * Window ZOrder: PC
+     */
+    bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

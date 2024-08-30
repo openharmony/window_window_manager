@@ -973,7 +973,7 @@ WMError WindowManager::RegisterWindowPidVisibilityChangedListener(
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowPidVisibilityListenerAgent_ == nullptr) {
-        pImpl_->windowPidVisibilityListenerAgent_ = new WindowManagerAgent();
+        pImpl_->windowPidVisibilityListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
@@ -1156,11 +1156,11 @@ WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObjec
     return ret;
 }
 
-WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
+WMError WindowManager::SetGestureNavigationEnabled(bool enable) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigaionEnabled(enable);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigationEnabled(enable);
     if (ret != WMError::WM_OK) {
-        WLOGFE("set gesture navigaion enabled failed");
+        WLOGFE("set gesture navigation enabled failed");
     }
     return ret;
 }
