@@ -234,7 +234,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             }
 
             bool isFromClient;
-            if (!data.ReadBool()){
+            if (!data.ReadBool()) {
                 return ERR_INVALID_DATA;
             }
 
