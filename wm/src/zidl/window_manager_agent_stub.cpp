@@ -42,7 +42,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 return ERR_INVALID_DATA;
             }
             bool focused = false;
-            if(!data.ReadBool(focused)) {
+             if( !data.ReadBool(focused)) {
                 TLOGE(WmsLogTag::WMS_FOCUS, "read focused failed");
                 return ERR_INVALID_DATA;
             }
