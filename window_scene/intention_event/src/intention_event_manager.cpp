@@ -105,63 +105,6 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     return true;
 }
 
-void IntentionEventManager::InputEventListener::RegisterWindowChanged()
-{}
-
-void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
-{
-    auto task = [this]() {
-        std::lock_guard<std::mutex> guard(mouseEventMutex_);
-        if ((g_lastMouseEvent == nullptr) ||
-            (g_lastMouseEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
-            g_lastMouseEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_BUTTON_UP)) {
-            return;
-        }
-        auto enterSession = SceneSession::GetEnterWindow().promote();
-        if (enterSession == nullptr) {
-            WLOGFE("Enter session is null, do not reissuing enter leave events");
-            return;
-        }
-        if (g_lastLeaveWindowId == enterSession->GetPersistentId()) {
-            WLOGFI("g_lastLeaveWindowId:%{public}d equal enterSession id", g_lastLeaveWindowId);
-            return;
-        }
-
-        WLOGFD("Reissue enter leave, persistentId:%{public}d", enterSession->GetPersistentId());
-        auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        if (leavePointerEvent != nullptr) {
-            leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-        }
-        WSError ret = enterSession->TransferPointerEvent(leavePointerEvent);
-        if (ret != WSError::WS_OK && leavePointerEvent != nullptr) {
-            leavePointerEvent->MarkProcessed();
-        }
-        g_lastLeaveWindowId = enterSession->GetPersistentId();
-
-        auto enterPointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        if (enterPointerEvent == nullptr) {
-            WLOGFE("The enter pointer event is nullptr");
-            return;
-        }
-        enterPointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-        if (uiContent_ == nullptr) {
-            WLOGFE("ProcessEnterLeaveEventAsync uiContent_ is null");
-            return;
-        }
-        if (!(uiContent_->ProcessPointerEvent(enterPointerEvent))) {
-            WLOGFE("The UI content consumes pointer event failed");
-            enterPointerEvent->MarkProcessed();
-        }
-    };
-    auto eventHandler = weakEventConsumer_.lock();
-    if (eventHandler == nullptr) {
-        WLOGFE("ProcessEnterLeaveEventAsync eventHandler is null");
-        return;
-    }
-    eventHandler->PostTask(std::move(task), "wms:ProcessEventLeaveEventAsync",
-        DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-}
-
 void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {

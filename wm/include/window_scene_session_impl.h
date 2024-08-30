@@ -216,7 +216,8 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    void NotifyDisplayInfoChange();
+    void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Window Immersive
@@ -231,6 +232,7 @@ private:
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type);
+    void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
     /*
      * Window Property.
