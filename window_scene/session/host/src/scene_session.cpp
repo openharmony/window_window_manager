@@ -2345,6 +2345,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         int32_t persistentId = session->GetPersistentId();
         WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        if (session->visibilityChangedDetectFunc_) {
+            session->visibilityChangedDetectFunc_(session->GetCallingPid(), session->isVisible_, visible);
+        }
         session->isVisible_ = visible;
         if (session->specificCallback_ == nullptr) {
             WLOGFW("specific callback is null.");
@@ -2368,11 +2371,6 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         }
     };
     PostTask(task, "UpdateNativeVisibility");
-}
-
-bool SceneSession::IsVisible() const
-{
-    return isVisible_;
 }
 
 void SceneSession::UpdateRotationAvoidArea()
@@ -4284,6 +4282,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
+    }
     isVisible_ = visibility;
     return true;
 }
@@ -4479,5 +4480,10 @@ void SceneSession::UnregisterSessionChangeListeners()
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
+}
+
+void SceneSession::SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func)
+{
+    visibilityChangedDetectFunc_ = func;
 }
 } // namespace OHOS::Rosen

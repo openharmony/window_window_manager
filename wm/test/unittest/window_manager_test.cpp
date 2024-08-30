@@ -132,6 +132,14 @@ public:
     }
 };
 
+class TestWindowPidVisibilityChangedListener : public IWindowPidVisibilityChangedListener {
+public:
+    void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
+    {
+        TLOGI(WmsLogTag::DMS, "TestWindowPidVisibilityChangedListener");
+    }
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1365,6 +1373,51 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTes
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
     WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+}
+
+/**
+ * @tc.name: RegisterWindowPidVisibilityChangedListener
+ * @tc.desc: check RegisterWindowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowPidVisibilityChangedListener, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IWindowPidVisibilityChangedListener> listener = new (std::nothrow) TestWindowPidVisibilityChangedListener();
+    ASSERT_NE(nullptr, listener);
+    ret = WindowManager::GetInstance().RegisterWindowPidVisibilityChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().RegisterWindowPidVisibilityChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterWindowPidVisibilityChangedListener
+ * @tc.desc: check UnregisterWindowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowPidVisibilityChangedListener, Function | SmallTest | Level2)
+{
+    WMError ret;
+    sptr<IWindowPidVisibilityChangedListener> listener = new (std::nothrow) TestWindowPidVisibilityChangedListener();
+    ret = WindowManager::GetInstance().UnregisterWindowPidVisibilityChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    ret = WindowManager::GetInstance().UnregisterWindowPidVisibilityChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyWindowPidVisibilityChanged
+ * @tc.desc: NotifyWindowPidVisibilityChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTest | Level2)
+{
+    sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
+    WindowManager::GetInstance().NotifyWindowPidVisibilityChanged(info);
+    ASSERT_NE(info, nullptr);
 }
 }
 } // namespace Rosen
