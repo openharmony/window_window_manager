@@ -157,6 +157,34 @@ HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSystemFocusable
+ * @tc.desc: SetSystemFocusable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetSystemFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(session_->GetSystemFocusable(), true);
+    bool systemFocusable = false;
+    session_->SetSystemFocusable(systemFocusable);
+    ASSERT_EQ(session_->GetSystemFocusable(), systemFocusable);
+}
+
+/**
+ * @tc.name: CheckFocusable
+ * @tc.desc: CheckFocusable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, CheckFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(session_->CheckFocusable(), true);
+    session_->SetSystemFocusable(false);
+    ASSERT_EQ(session_->GetSystemFocusable(), false);
+}
+
+/**
  * @tc.name: SetTouchable03
  * @tc.desc: IsSessionValid() and touchable return true
  * @tc.type: FUNC
