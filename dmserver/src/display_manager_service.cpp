@@ -491,7 +491,6 @@ bool DisplayManagerService::TryToCancelScreenOff()
     WLOGFE("[UL_POWER]DMS not support TryToCancelScreenOff");
     return false;
 }
-}
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
