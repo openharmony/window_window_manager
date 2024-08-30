@@ -82,6 +82,7 @@ void SceneSessionManagerTest6::TearDownTestCase()
     ssm_ = nullptr;
 }
 
+
 void SceneSessionManagerTest6::SetUp()
 {
     ssm_->sceneSessionMap_.clear();
@@ -1860,6 +1861,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
  */
 HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     int32_t persistentId = 1;
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
