@@ -130,7 +130,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
-
+1234
     subSession_->SetParentSession(subSession_);
     subSession_->SetSessionState(SessionState::STATE_CONNECT);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
