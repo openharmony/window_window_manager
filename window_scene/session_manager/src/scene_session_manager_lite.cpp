@@ -21,7 +21,11 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLite" };
 } // namespace
 
-WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManagerLite)
+SceneSessionManagerLite& SceneSessionManagerLite::GetInstance()
+{
+    static sptr<SceneSessionManagerLite> instance(new SceneSessionManagerLite());
+    return *instance;
+}
 
 WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
