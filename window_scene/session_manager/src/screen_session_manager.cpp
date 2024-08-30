@@ -1523,7 +1523,7 @@ bool ScreenSessionManager::TryToCancelScreenOff()
     }
     if (gotScreenOffNotify_ == false && needScreenOffNotify_ == true) {
         std::unique_lock <std::mutex> lock(screenOffMutex_);
-        SessionDisplayPowerController->canceledSuspend_ = true;
+        sessionDisplayPowerController_->canceledSuspend_ = true;
         screenOffCV_.notify_all();
         needScreenOffNotify_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]cancel wait and notify cancel screenoff");
