@@ -40,6 +40,11 @@ public:
     DisplayState GetDisplayState(DisplayId displayId);
     void NotifyDisplayEvent(DisplayEvent event);
 
+    bool needCancelNotify_ { false };
+    bool canceledSuspend_ { false };
+    bool canCancelSuspendNotify_ { false };
+    std::mutex notifyMutex_;
+
 private:
     void WaitScreenOffNotify(DisplayState& state);
     DisplayState displayState_ { DisplayState::UNKNOWN };
