@@ -491,7 +491,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: windId: %{public}d init dragEnable false",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
         property_->GetPersistentId());
     property_->SetDragEnabled(false);
 }
