@@ -157,6 +157,87 @@ public:
      * @return Default display object.
      */
     sptr<DisplayLite> GetDisplayById(DisplayId displayId);
+
+    /*
+     * used by powermgr
+     */
+    /**
+     * @brief Begin to wake up screen.
+     *
+     * @param reason Reason for power state change.
+     * @return True means begin success, false means begin failed.
+     */
+    bool WakeUpBegin(PowerStateChangeReason reason);
+
+    /**
+     * @brief Wake up screen end.
+     *
+     * @return True means end success, false means end failed.
+     */
+    bool WakeUpEnd();
+
+    /**
+     * @brief Begin to suspend the screen.
+     *
+     * @param reason Reason for power state change.
+     * @return True means begin success, false means begin failed.
+     */
+    bool SuspendBegin(PowerStateChangeReason reason);
+
+    /**
+     * @brief Suspend screen end.
+     *
+     * @return True means suspend screen end success.
+     * @return False means suspend screen end failed.
+     */
+    bool SuspendEnd();
+
+    /**
+     * @brief Set the Display State object
+     *
+     * @param state State of display.
+     * @param callback Callback for display state.
+     * @return True means set success, false means set failed.
+     */
+    bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
+
+    /**
+     * @brief Get the state of the target display.
+     *
+     * @param displayId Display id.
+     * @return State of display.
+     */
+    DisplayState GetDisplayState(DisplayId displayId);
+    
+    /**
+     * @brief Set the brightness level of the target screen.
+     *
+     * @param screenId Target screen.
+     * @param level Brightness level.
+     */
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level);
+
+    /**
+     * @brief Get the brightness level of the target screen.
+     *
+     * @param screenId Screen id.
+     * @return Brightness value of screen.
+     */
+    uint32_t GetScreenBrightness(uint64_t screenId) const;
+
+    /**
+     * @brief Obtain the id of the default display.
+     *
+     * @return Default display id.
+     */
+    DisplayId GetDefaultDisplayId();
+
+    /**
+     * @brief Get IDs of all displays.
+     *
+     * @return All display IDs.
+     */
+    std::vector<DisplayId> GetAllDisplayIds();
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

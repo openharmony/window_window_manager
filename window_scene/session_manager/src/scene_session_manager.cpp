@@ -2310,9 +2310,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        newSession->SetIsSystemSpecificSession(isSystemCalling);
+        property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
+        newSession->SetIsSystemSpecificSession(isSystemCalling);
         systemConfig = systemConfig_;
         if (property) {
             persistentId = property->GetPersistentId();
@@ -3878,7 +3879,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = GetSceneSession(session->GetParentPersistentId());
+        const auto& parentSceneSession = session->GetParentSession();
         if (parentSceneSession == nullptr) {
             WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
@@ -6852,15 +6853,12 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         taskScheduler_->PostAsyncTask(task, "WindowChangeFunc:id:" + std::to_string(persistentId));
         return;
     }
-    auto exportTask = [this]() {
-        NotifyAllAccessibilityInfo();
-    };
-    taskScheduler_->AddExportTask("NotifyAllAccessibilityInfo", exportTask);
     auto task = [this, weakSceneSession, type]() {
-        auto scnSession = weakSceneSession.promote();
-        if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
-            scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            WindowChangedFunc_(scnSession->GetPersistentId(), type);
+        auto sceneSession = weakSceneSession.promote();
+        NotifyAllAccessibilityInfo();
+        if (WindowChangedFunc_ != nullptr && sceneSession != nullptr &&
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            WindowChangedFunc_(sceneSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
@@ -10177,5 +10175,35 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     }
 
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds)
+{
+    auto task = [this, startZOrder, persistentIds = std::move(persistentIds)] {
+        std::ostringstream oss;
+        oss << "[";
+        for (size_t i = 0; i < persistentIds.size(); i++) {
+            int32_t persistentId = persistentIds[i];
+            oss << persistentId;
+            if (i < persistentIds.size() - 1) {
+                oss << ",";
+            }
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
+                continue;
+            }
+            if (i > UINT32_MAX - startZOrder) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
+                break;
+            }
+            sceneSession->SetPcScenePanel(true);
+            sceneSession->SetZOrder(i + startZOrder);
+        }
+        oss << "]";
+        TLOGI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostTask(task, "RefreshPcZOrderList");
 }
 } // namespace OHOS::Rosen

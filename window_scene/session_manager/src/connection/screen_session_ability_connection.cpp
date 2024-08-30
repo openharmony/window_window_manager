@@ -196,6 +196,12 @@ void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     const std::string &bundleName, const std::string &abilityName)
 {
+    return ScreenSessionConnectExtension(bundleName, abilityName, {});
+}
+
+bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::string &bundleName,
+    const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &params)
+{
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "screen session ability extension is already connected");
@@ -203,6 +209,15 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     }
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
+    for (auto param : params) {
+        std::string paramKey = param.first;
+        std::string paramValue = param.second;
+        if (!paramKey.empty() && !paramValue.empty()) {
+            want.SetParam(paramKey, paramValue);
+            TLOGI(WmsLogTag::DMS, "add want param. paramKey=%{public}s, paramValue=%{public}s",
+                paramKey.c_str(), paramValue.c_str());
+        }
+    }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
         ScreenSessionAbilityConnectionStub());
     if (abilityConnectionStub_ == nullptr) {

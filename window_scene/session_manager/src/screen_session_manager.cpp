@@ -94,6 +94,9 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 static const int32_t AUTO_ROTATE_OFF = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
+static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -155,9 +158,16 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         return;
     }
     foldScreenController_->SetOnBootAnimation(true);
-    auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL, static_cast<ScreenRotation>(g_screenRotationOffSet));
     std::ostringstream oss;
-    oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << "  ret value: " << ret;
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
+            static_cast<ScreenRotation>(g_screenRotationOffSet));
+        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+    } else {
+        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
+            static_cast<ScreenRotation>(g_screenRotationOffSet));
+        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+    }
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
     FoldScreenPowerInit();
@@ -548,7 +558,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
-    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+    if (!ScreenCastConnection::GetInstance().CastConnectExtension(static_cast<int32_t>(isPlugIn))) {
         TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
         return;
     }
@@ -1447,11 +1457,15 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
+    if (!sessionDisplayPowerController_) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]sessionDisplayPowerController_ is null");
+        return false;
+    }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState enter");
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]no screen info");
-        return false;
+        return sessionDisplayPowerController_->SetDisplayState(state);
     }
 
     for (auto screenId : screenIds) {
@@ -1884,7 +1898,10 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
         return ScreenPowerState::INVALID_STATE;
     }
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
-    TLOGI(WmsLogTag::DMS, "GetScreenPower:%{public}u, screenId:%{public}" PRIu64".", state, screenId);
+    std::ostringstream oss;
+    oss << "GetScreenPower state:" << static_cast<uint32_t>(state) << " screenId:" << static_cast<uint64_t>(screenId);
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    screenEventTracker_.RecordEvent(oss.str());
     return state;
 }
 
@@ -2130,6 +2147,27 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoByDisplayId(DisplayId displa
     return GetScreenInfoById(displayInfo->GetScreenId());
 }
 
+int ScreenSessionManager::NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    if (screenSessionMap_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
+        return NOTIFY_EVENT_FOR_DUAL_FAILED;
+    }
+    // The on/off screen will send a notification based on the number of screens.
+    // The dual display device just notify the current screen usage
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
+        auto iter = screenSessionMap_.find(currentScreenId);
+        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+            iter->second->PowerStatusChange(event, status, reason);
+        }
+        return NOTIFY_EVENT_FOR_DUAL_SUCESS;
+    }
+    return NO_NEED_NOTIFY_EVENT_FOR_DUAL;
+}
+
 bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
@@ -2142,38 +2180,26 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
     }
-
-    {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        if (screenSessionMap_.empty()) {
-            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
-            return false;
-        }
-        // The on/off screen will send a notification based on the number of screens.
-        // The dual display device just notify the current screen usage
-        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-            ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
-            auto iter = screenSessionMap_.find(currentScreenId);
-            if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-                iter->second->PowerStatusChange(event, status, reason);
-            }
-            return true;
-        }
+    auto ret = NotifyPowerEventForDualDisplay(event, status, reason);
+    if (ret == NOTIFY_EVENT_FOR_DUAL_FAILED) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]NotifyPowerEventForDualDisplay ret false");
+        return false;
+    } else if (ret == NOTIFY_EVENT_FOR_DUAL_SUCESS) {
+        TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyPowerEventForDualDisplay ret sucess");
+        return true;
     }
-
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]no screenID");
         return false;
     }
-    for (auto screenId : screenIds) {
-        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-        if (screenSession == nullptr) {
-            TLOGW(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
-            continue;
-        }
-        screenSession->PowerStatusChange(event, status, reason);
+    auto screenId = screenIds[0];
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+        return false;
     }
+    screenSession->PowerStatusChange(event, status, reason);
     return true;
 }
 
@@ -4417,7 +4443,7 @@ bool ScreenSessionManager::IsFoldable()
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         return false;
     }
-    
+
     if (!g_foldScreenFlag) {
         return false;
     }
@@ -4757,7 +4783,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         << " clientName: " << SysCapUtil::GetClientName();
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    
+
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     SetClientInner();
@@ -5393,7 +5419,7 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
         return false;
     }
 
-    return rsInterface_.SetVirtualScreenStatus(screenId, screenStatus);
+    return rsInterface_.SetVirtualScreenStatus(rsScreenId, screenStatus);
 }
 
 DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
