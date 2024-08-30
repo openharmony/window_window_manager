@@ -469,7 +469,8 @@ HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
+    data.WriteInt32(10);
+    data.WriteInt32(20);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleProcessPointDownSession(data, reply);
     ASSERT_EQ(ERR_NONE, res);
