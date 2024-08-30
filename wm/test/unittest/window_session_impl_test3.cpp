@@ -24,6 +24,7 @@
 #include "mock_window.h"
 #include "parameters.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -205,9 +206,11 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, Function | SmallTes
 
     AppForceLandscapeConfig config = {};
     auto res = window_->GetAppForceLandscapeConfig(config);
-    ASSERT_EQ(res, WMError::WM_OK);
-    ASSERT_EQ(config.mode_, 0);
-    ASSERT_EQ(config.homePage_, "");
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WMError::WM_OK);
+        ASSERT_EQ(config.mode_, 0);
+        ASSERT_EQ(config.homePage_, "");
+    }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
 }

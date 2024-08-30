@@ -232,6 +232,10 @@ private:
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Property.
+     */
     void InitSystemSessionDragEnable();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

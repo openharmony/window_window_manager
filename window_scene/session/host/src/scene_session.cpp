@@ -83,25 +83,6 @@ SceneSession::~SceneSession()
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
-void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
-{
-    auto defaultDragEnable = false;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        defaultDragEnable = sessionProperty->GetDragEnabled();
-    }
-    auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
-    bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
-    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
-    bool isSystemCalling = IsSystemSpecificSession();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
-        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
-        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
-    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
-        property->SetDragEnabled(defaultDragEnable);
-    }
-}
-
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -125,8 +106,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_OK;
         }
         if (property) {
-            session->InitSystemSessionDragEnable(property);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "set property enableDrag: %{public}d", property->GetDragEnabled());
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
         auto ret = session->Session::ConnectInner(
@@ -884,8 +863,6 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 {
     SessionGravity gravity;
     uint32_t percent = 0;
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
@@ -894,6 +871,8 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        uint32_t screenWidth = 0;
+        uint32_t screenHeight = 0;
         if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
             return false;
         }

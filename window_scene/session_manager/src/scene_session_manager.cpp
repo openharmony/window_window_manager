@@ -2308,9 +2308,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        newSession->SetIsSystemSpecificSession(isSystemCalling);
+        property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
+        newSession->SetIsSystemSpecificSession(isSystemCalling);
         systemConfig = systemConfig_;
         if (property) {
             persistentId = property->GetPersistentId();
@@ -6850,15 +6851,12 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         taskScheduler_->PostAsyncTask(task, "WindowChangeFunc:id:" + std::to_string(persistentId));
         return;
     }
-    auto exportTask = [this]() {
-        NotifyAllAccessibilityInfo();
-    };
-    taskScheduler_->AddExportTask("NotifyAllAccessibilityInfo", exportTask);
     auto task = [this, weakSceneSession, type]() {
-        auto scnSession = weakSceneSession.promote();
-        if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
-            scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            WindowChangedFunc_(scnSession->GetPersistentId(), type);
+        auto sceneSession = weakSceneSession.promote();
+        NotifyAllAccessibilityInfo();
+        if (WindowChangedFunc_ != nullptr && sceneSession != nullptr &&
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            WindowChangedFunc_(sceneSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
