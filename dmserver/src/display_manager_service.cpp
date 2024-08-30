@@ -486,6 +486,13 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
     return displayPowerController_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerService::TryToCancelScreenOff()
+{
+    WLOGFE("[UL_POWER]DMS not support TryToCancelScreenOff");
+    return false;
+}
+}
+
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {

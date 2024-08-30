@@ -945,6 +945,30 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId
     return static_cast<ScreenPowerState>(reply.ReadUint32());
 }
 
+bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("[UL_POWER]TryToCancelScreenOff remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]TryToCancelScreenOff: WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]TryToCancelScreenOff: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
                                                         const sptr<IRemoteObject>& displayManagerAgent)
 {
