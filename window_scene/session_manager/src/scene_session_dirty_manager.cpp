@@ -37,30 +37,10 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
-} //namespace
 
-static bool operator==(const MMI::Rect left, const MMI::Rect right)
+void AdjustMMIRotationFromDisplayMode(MMI::Direction& rotation, MMI::DisplayMode displayMode)
 {
-    return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
-}
-
-MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
-{
-    MMI::Direction rotation = MMI::DIRECTION0;
-    if (NearEqual(degree, DIRECTION0)) {
-        rotation = MMI::DIRECTION0;
-    }
-    if (NearEqual(degree, DIRECTION90)) {
-        rotation = MMI::DIRECTION90;
-    }
-    if (NearEqual(degree, DIRECTION180)) {
-        rotation = MMI::DIRECTION180;
-    }
-    if (NearEqual(degree, DIRECTION270)) {
-        rotation = MMI::DIRECTION270;
-    }
-    if ((displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) ||
-        (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
         switch (rotation) {
             case MMI::DIRECTION0:
                 rotation = MMI::DIRECTION90;
@@ -78,7 +58,46 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
                 rotation = MMI::DIRECTION0;
                 break;
         }
+    } else if (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        switch (rotation) {
+            case MMI::DIRECTION0:
+                rotation = MMI::DIRECTION270;
+                break;
+            case MMI::DIRECTION90:
+                rotation = MMI::DIRECTION0;
+                break;
+            case MMI::DIRECTION180:
+                rotation = MMI::DIRECTION90;
+                break;
+            case MMI::DIRECTION270:
+                rotation = MMI::DIRECTION180;
+                break;
+            default:
+                rotation = MMI::DIRECTION0;
+                break;
+        }
     }
+}
+} // namespace
+
+static bool operator==(const MMI::Rect left, const MMI::Rect right)
+{
+    return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
+}
+
+MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
+{
+    MMI::Direction rotation = MMI::DIRECTION0;
+    if (NearEqual(degree, DIRECTION0)) {
+        rotation = MMI::DIRECTION0;
+    } else if (NearEqual(degree, DIRECTION90)) {
+        rotation = MMI::DIRECTION90;
+    } else if (NearEqual(degree, DIRECTION180)) {
+        rotation = MMI::DIRECTION180;
+    } else if (NearEqual(degree, DIRECTION270)) {
+        rotation = MMI::DIRECTION270;
+    }
+    AdjustMMIRotationFromDisplayMode(rotation, displayMode);
     return rotation;
 }
 
