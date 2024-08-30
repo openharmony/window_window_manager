@@ -206,6 +206,8 @@ public:
     UIExtensionUsage GetUIExtensionUsage() const;
     void SetExtensionFlag(bool isExtensionFlag);
     bool GetExtensionFlag() const;
+    void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
+    bool GetIsUIExtensionAbilityProcess() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -343,6 +345,7 @@ private:
     int32_t realParentId_ = INVALID_SESSION_ID;
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     bool isExtensionFlag_ = false;
+    bool isUIExtensionAbilityProcess_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

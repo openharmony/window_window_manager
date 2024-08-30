@@ -26,7 +26,7 @@ class ScreenCastConnection {
 public:
     static ScreenCastConnection &GetInstance();
 
-    bool CastConnectExtension();
+    bool CastConnectExtension(const int32_t &paramFlag);
     void CastDisconnectExtension();
     void SetBundleName(const std::string &bundleName);
     void SetAbilityName(const std::string &abilityName);

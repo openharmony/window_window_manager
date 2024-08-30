@@ -327,29 +327,18 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSessionLastRect
- * @tc.desc: check func SetSessionLastRect
+ * @tc.name: GetLayoutRect
+ * @tc.desc: check func GetLayoutRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetSessionLastRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetLayoutRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->lastWinRect_);
-}
-
-/**
- * @tc.name: GetSessionLastRect
- * @tc.desc: check func GetSessionLastRect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetSessionLastRect, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionLastRect());
+    session_->layoutRect_ = rect;
+    session_->lastLayoutRect_ = session_->layoutRect_;
+    ASSERT_EQ(rect, session_->GetLayoutRect());
+    ASSERT_EQ(rect, session_->GetLastLayoutRect());
 }
 
 /**
@@ -1286,7 +1275,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 
@@ -1314,7 +1303,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_NE(beforeTaskNum - 1, GetTaskCount());
+    ASSERT_EQ(beforeTaskNum - 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
     session_->handler_->RemoveTask(taskName);
@@ -1339,7 +1328,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 
-    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 
@@ -1363,7 +1352,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Lev
     session_->SetDetectTaskInfo(detectTaskInfo);
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
 
-    ASSERT_NE(beforeTaskNum + 1, GetTaskCount());
+    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
     ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 
@@ -1573,18 +1562,6 @@ HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | 
     WSRect rect = {0, 0, 0, 0};
     session_->SetSessionRequestRect(rect);
     ASSERT_EQ(session_->property_, nullptr);
-}
-
-/**
- * @tc.name: SetSessionLastRect01
- * @tc.desc: SetSessionLastRect test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetSessionLastRect01, Function | SmallTest | Level2)
-{
-    WSRect rect = session_->GetSessionLastRect();
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->lastWinRect_);
 }
 
 /**

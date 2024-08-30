@@ -1187,8 +1187,8 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenSessionManagerProxy::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1205,7 +1205,7 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUint64(static_cast<uint64_t>(secondaryScreenId)) &&
-        data.WriteUint32(static_cast<uint32_t>(secondaryScreenMode));
+        data.WriteUint32(static_cast<uint32_t>(screenMode));
     if (!res) {
         WLOGFE("data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1219,8 +1219,8 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1235,8 +1235,8 @@ DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(ExtendOption f
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    bool res = data.WriteUint64(firstScreenOption.screenId_) &&
-        data.WriteUint32(firstScreenOption.startX_) && data.WriteUint32(firstScreenOption.startY_) &&
+    bool res = data.WriteUint64(mainScreenOptions.screenId_) &&
+        data.WriteUint32(mainScreenOptions.startX_) && data.WriteUint32(mainScreenOptions.startY_) &&
         data.WriteUint64(secondScreenOption.screenId_) &&
         data.WriteUint32(secondScreenOption.startX_) && data.WriteUint32(secondScreenOption.startY_);
     if (!res) {

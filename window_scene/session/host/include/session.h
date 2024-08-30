@@ -58,7 +58,7 @@ using NotifyRequestFocusStatusNotifyManagerFunc =
 using NotifyBackPressedFunc = std::function<void(const bool needMoveToBackground)>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
-using NotifyClickFunc = std::function<void()>;
+using NotifyClickFunc = std::function<void(bool requestFocus)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
@@ -84,16 +84,17 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
-    virtual void OnActivation() = 0;
-    virtual void OnConnect() = 0;
-    virtual void OnForeground() = 0;
-    virtual void OnBackground() = 0;
-    virtual void OnDisconnect() = 0;
-    virtual void OnExtensionDied() = 0;
-    virtual void OnExtensionTimeout(int32_t errorCode) = 0;
-    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevel) = 0;
+    virtual void OnActivation() {}
+    virtual void OnConnect() {}
+    virtual void OnForeground() {}
+    virtual void OnBackground() {}
+    virtual void OnDisconnect() {}
+    virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnExtensionDied() {}
+    virtual void OnExtensionTimeout(int32_t errorCode) {}
+    virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        int64_t uiExtensionIdLevel) {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -140,11 +141,15 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
+    /*
+     * Callbacks for ILifecycleListener
+     */
     void NotifyActivation();
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDisconnect();
+    void NotifyLayoutFinished();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -199,8 +204,8 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
-    void SetSessionLastRect(const WSRect& rect);
-    WSRect GetSessionLastRect() const;
+    WSRect GetLastLayoutRect() const;
+    WSRect GetLayoutRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -281,7 +286,7 @@ public:
     void SetClickListener(const NotifyClickFunc& func);
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
-    void NotifyClick();
+    void NotifyClick(bool requestFocus = true);
     void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
@@ -508,7 +513,8 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
-    WSRect lastWinRect_;
+    WSRect lastLayoutRect_; // rect saved when go background
+    WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
     WSRectF bounds_;
     Rotation rotation_;
@@ -584,7 +590,6 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     WSError HandleSubWindowClick(int32_t action);
-    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -595,6 +600,13 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+
+    /*
+     * Window Property
+     */
+    void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
+    void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>

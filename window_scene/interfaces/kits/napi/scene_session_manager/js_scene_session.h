@@ -244,7 +244,7 @@ private:
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
-    void OnClick();
+    void OnClick(bool requestFocus);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);

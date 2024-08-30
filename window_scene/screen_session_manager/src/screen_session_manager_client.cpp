@@ -100,7 +100,7 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
 }
 
 void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name)
+    ScreenId rsId, const std::string& name, bool isExtand)
 {
     WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
         screenId, static_cast<int>(screenEvent), rsId, name.c_str());
@@ -121,6 +121,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
         }
+        screenSession->SetIsExtand(isExtand);
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenConnected(screenSession);
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
@@ -145,6 +146,16 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.erase(screenId);
         }
     }
+}
+void ScreenSessionManagerClient::OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    auto screenSession = GetScreenSession(mainScreenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("mainScreenId=%{public}" PRIu64" extandScreenId=%{public}" PRIu64, mainScreenId, extandScreenId);
+    screenSession->ScreenExtandChange(mainScreenId, extandScreenId);
 }
 
 sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screenId) const
@@ -173,9 +184,16 @@ void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, E
     PowerStateChangeReason reason)
 {
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    for (auto screenSession:screenSessionMap_) {
-        (screenSession.second)->PowerStatusChange(event, status, reason);
+    if (screenSessionMap_.empty()) {
+        WLOGFE("[UL_POWER]screenSessionMap_ is nullptr");
+        return;
     }
+    auto screenSession = screenSessionMap_.begin()->second;
+    if (!screenSession) {
+        WLOGFE("[UL_POWER]screenSession is null");
+        return;
+    }
+    screenSession->PowerStatusChange(event, status, reason);
 }
 
 void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)
