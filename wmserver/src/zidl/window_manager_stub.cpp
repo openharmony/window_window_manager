@@ -94,8 +94,17 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            uint32_t windowType;
+            if (!data.ReadUint32(windowType)) {
+                return ERR_INVALID_DATA;
+            }
+
+            auto type = static_cast<WindowManagerAgentType>(windowType);
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            if (windowManagerAgentObject == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
@@ -103,8 +112,17 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            uint32_t windowType;
+            if (!data.ReadUint32(windowType)) {
+                return ERR_INVALID_DATA;
+            }
+
+            auto type = static_cast<WindowManagerAgentType>(windowType);
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            if (windowManagerAgentObject == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
@@ -131,13 +149,25 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
-            uint32_t windowId = data.ReadUint32();
-            bool isPointDown = data.ReadBool();
+            uint32_t windowId;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
+
+            bool isPointDown;
+            if (!data.ReadBool(isPointDown)) {
+                return ERR_INVALID_DATA;
+            }
+
             ProcessPointDown(windowId, isPointDown);
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
+
             ProcessPointUp(windowId);
             break;
         }
@@ -234,7 +264,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             }
 
             bool isFromClient;
-            if (!data.ReadBool()) {
+            if (!data.ReadBool(isFromClient)) {
                 return ERR_INVALID_DATA;
             }
 
@@ -292,12 +322,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE: {
             uint32_t windowId;
-            if (!data.ReadUint32()) {
+            if (!data.ReadUint32(windowId)) {
                 return ERR_INVALID_DATA;
             }
 
             bool isAdd;
-            if (!data.ReadBool()) {
+            if (!data.ReadBool(isAdd)) {
                 return ERR_INVALID_DATA;
             }
 
@@ -313,15 +343,35 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE : {
-            int32_t x = data.ReadInt32();
-            int32_t y = data.ReadInt32();
-            float scale = data.ReadFloat();
+            int32_t x;
+            if (!data.ReadInt32(x)) {
+                return ERR_INVALID_DATA;
+            }
+
+            int32_t y;
+            if (!data.ReadInt32(y)) {
+                return ERR_INVALID_DATA;
+            }
+
+            float scale;
+            if (!data.ReadFloat(scale)) {
+                return ERR_INVALID_DATA;
+            }
+
             SetAnchorAndScale(x, y, scale);
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET: {
-            int32_t deltaX = data.ReadInt32();
-            int32_t deltaY = data.ReadInt32();
+            int32_t deltaX;
+            if (!data.ReadInt32(deltaX)) {
+                return ERR_INVALID_DATA;
+            }
+
+            int32_t deltaY;
+            if (!data.ReadInt32(deltaY)) {
+                return ERR_INVALID_DATA;
+            }
+
             SetAnchorOffset(deltaX, deltaY);
             break;
         }

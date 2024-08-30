@@ -90,8 +90,14 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
         }
         case WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT: {
             PointInfo point;
-            point.x = data.ReadInt32();
-            point.y = data.ReadInt32();
+            if (!data.ReadInt32(point.x)) {
+                return ERR_INVALID_DATA;
+            }
+
+            if (!data.ReadInt32(point.y)) {
+                return ERR_INVALID_DATA;
+            }
+
             DragEvent event = static_cast<DragEvent>(data.ReadUint32());
             UpdateWindowDragInfo(point, event);
             break;
