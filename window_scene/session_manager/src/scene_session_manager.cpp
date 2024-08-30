@@ -5966,6 +5966,39 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
     return taskScheduler_->PostSyncTask(task, "GetSessionInfos");
 }
 
+WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d", pid);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (pid < 0) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto task = [this, pid, &windowStates]() {
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
+        for (const auto& elem : sceneSessionMapCopy) {
+            auto sceneSession = elem.second;
+            if (sceneSession != nullptr && sceneSession->GetCallingPid() == pid &&
+                WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                MainWindowState windowState;
+                windowState.state_ = static_cast<int32_t>(sceneSession->GetSessionState());
+                windowState.isVisible_ = sceneSession->GetRSVisible();
+                windowState.isForegroundInteractive_ = sceneSession->GetForegroundInteractiveStatus();
+                windowState.isPcOrPadEnableActivation_ = sceneSession->IsPcOrPadEnableActivation();
+                windowStates.emplace_back(windowState);
+            }
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetMainWindowStatesByPid");
+}
+
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                                                std::vector<SessionInfoBean>& sessionInfos)
 {

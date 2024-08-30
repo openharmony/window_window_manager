@@ -79,6 +79,7 @@ public:
         TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW,
         TRANS_ID_CLOSE_TARGET_PIP_WINDOW,
         TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO,
+        TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -93,6 +94,7 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
