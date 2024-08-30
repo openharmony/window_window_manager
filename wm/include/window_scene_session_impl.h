@@ -231,7 +231,6 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayoutOnShow(WindowType type);
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
     /*
