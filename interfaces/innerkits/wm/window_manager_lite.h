@@ -228,6 +228,14 @@ public:
      */
     WMError TerminateSessionByPersistentId(int32_t persistentId);
 
+    /**
+     * @brief Close target float window.
+     *
+     * @param bundleName the target float window need to be closed.
+     * @return WM_OK means Close success, others means Close failed.
+     */
+    WMError CloseTargetFloatWindow(const std::string& bundleName);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();

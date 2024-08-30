@@ -37,6 +37,7 @@ public:
     MOCK_METHOD2(ClearMainSessions, WMError(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds));
     MOCK_METHOD1(TerminateSessionByPersistentId, WMError(int32_t persistentId));
+    MOCK_METHOD(WMError, CloseTargetFloatWindow, (const std::string& bundleName));
 };
 }
 } // namespace OHOS

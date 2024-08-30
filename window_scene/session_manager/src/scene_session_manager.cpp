@@ -10205,4 +10205,26 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
     };
     taskScheduler_->PostTask(task, "RefreshPcZOrderList");
 }
+
+void SceneSessionManager::SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    closeTargetFloatWindowFunc_ = func;
+}
+
+WMError SceneSessionManager::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, bundleName] {
+        if (closeTargetFloatWindowFunc_) {
+            TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "bundleName:%{public}s", bundleName.c_str());
+            closeTargetFloatWindowFunc_(bundleName);
+        }
+    };
+    taskScheduler_->PostTask(task, "CloseTargetFloatWindow");
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen

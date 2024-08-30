@@ -744,5 +744,14 @@ WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
     }
     return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
 }
+
+WMError WindowManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "bundleName is empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().CloseTargetFloatWindow(bundleName);
+}
 } // namespace Rosen
 } // namespace OHOS
