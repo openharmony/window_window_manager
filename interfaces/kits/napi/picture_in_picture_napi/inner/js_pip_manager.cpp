@@ -27,6 +27,13 @@ namespace {
     constexpr int32_t NUMBER_TWO = 2;
 }
 
+napi_value GetType(napi_env env, napi_value value)
+{
+    napi_valuetype res = napi_undefined;
+    napi_typeof(env, value, &res);
+    return res;
+}
+
 napi_value NapiGetUndefined(napi_env env)
 {
     napi_value result = nullptr;
@@ -179,6 +186,30 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
     return NapiGetUndefined(env);
 }
 
+napi_value JsPipManager::ResetNodeType(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnResetNodeType(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnResetNodeType(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < NUMBER_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        return NapiGetUndefined(env);
+    }
+    napi_value typeNode = argv[0];
+    if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
+        TLOGI(WmsLogTag::WMS_PIP, "reset to DEFAULT");
+        XComponentController::SetSurfaceCallbackMode(env, typeNode, SurfaceCallbackMode::DEFAULT);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
@@ -250,6 +281,7 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
     BindNativeFunction(env, exportObj, "setTypeNodeEnabled", moduleName, JsPipManager::SetTypeNodeEnabled);
+    BindNativeFunction(env, exportObj, "resetNodeType", moduleName, JsPipManager::ResetNodeType);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen

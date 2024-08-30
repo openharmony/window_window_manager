@@ -63,6 +63,9 @@ export struct PiPContent {
       return;
     }
     this.useNode = true;
+    if (this.xComponent.getParent() === null || this.xComponent.getParent() === undefined) {
+      pip.resetNodeType(this.xComponent);
+    }
     pip.setTypeNodeEnabled();
     this.mXCNodeController = new XCNodeController(this.xComponent);
     console.info(TAG, 'use Node Controller');
