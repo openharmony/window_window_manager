@@ -47,7 +47,7 @@ public:
 
 private:
     void WaitScreenOffNotify(DisplayState& state);
-    static void SetDisplayStateToOn(DisplayState& state);
+    void SetDisplayStateToOn(DisplayState& state);
     DisplayState displayState_ { DisplayState::UNKNOWN };
     std::recursive_mutex& mutex_;
     SessionDisplayStateChangeListener displayStateChangeListener_;

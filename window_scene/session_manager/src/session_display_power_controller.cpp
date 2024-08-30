@@ -27,7 +27,7 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
     return true;
 }
 
-static void SessionDisplayPowerController::SetDisplayStateToOn(DisplayState& state)
+void SessionDisplayPowerController::SetDisplayStateToOn(DisplayState& state)
 {
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
