@@ -244,7 +244,10 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
     }
     std::vector<MainWindowState> windowStates;
     WSError errCode = GetMainWindowStatesByPid(pid, windowStates);
-    reply.WriteInt32(windowStates.size());
+    if (!reply.WriteInt32(windowStates.size())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write windowStates size fail");
+        return ERR_INVALID_DATA;
+    }
     for (auto& it : windowStates) {
         if (!reply.WriteParcelable(&it)) {
             TLOGE(WmsLogTag::WMS_LIFE, "write windowState fail");

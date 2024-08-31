@@ -285,6 +285,11 @@ WSError SceneSessionManagerLiteProxy::GetSessionInfos(const std::string& deviceI
 WSError SceneSessionManagerLiteProxy::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "run");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is nullptr");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -296,7 +301,7 @@ WSError SceneSessionManagerLiteProxy::GetMainWindowStatesByPid(int32_t pid, std:
         TLOGE(WmsLogTag::WMS_LIFE, "write pid failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
