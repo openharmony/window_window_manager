@@ -511,7 +511,7 @@ struct MainWindowInfo : public Parcelable {
  * @brief main window state info.
  */
 struct MainWindowState : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    bool Marshalling(Parcel &parcel) const override
     {
         if (!parcel.WriteInt32(state_)) {
             return false;
@@ -530,23 +530,14 @@ struct MainWindowState : public Parcelable {
 
     static MainWindowState* Unmarshalling(Parcel& parcel)
     {
-        MainWindowState* mainWindowState = new (std::nothrow)MainWindowState();
+        MainWindowState* mainWindowState = new MainWindowState();
         if (!mainWindowState) {
             return nullptr;
         }
-        if (!parcel.ReadInt32(mainWindowState->state_)) {
-            delete mainWindowState;
-            return nullptr;
-        }
-        if (!parcel.ReadBool(mainWindowState->isVisible_)) {
-            delete mainWindowState;
-            return nullptr;
-        }
-        if (!parcel.ReadBool(mainWindowState->isForegroundInteractive_)) {
-            delete mainWindowState;
-            return nullptr;
-        }
-        if (!parcel.ReadBool(mainWindowState->isPcOrPadEnableActivation_)) {
+        if (!parcel.ReadInt32(mainWindowState->state_) ||
+            !parcel.ReadBool(mainWindowState->isVisible_) ||
+            !parcel.ReadBool(mainWindowState->isForegroundInteractive_) ||
+            !parcel.ReadBool(mainWindowState->isPcOrPadEnableActivation_)) {
             delete mainWindowState;
             return nullptr;
         }
