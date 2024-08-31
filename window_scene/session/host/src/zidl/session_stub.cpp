@@ -323,7 +323,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
-    WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -452,7 +452,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateSessionRect!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In HandleUpdateSessionRect!");
     uint32_t posX = 0;
     uint32_t posY = 0;
     uint32_t width = 0;
@@ -474,9 +474,14 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         return ERR_INVALID_DATA;
     }
     WSRect rect = {posX, posY, width, height};
-    WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "HandleUpdateSessionRect rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
-    const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
+    uint32_t changeReason = 0;
+    if (!data.ReadUint32(changeReason)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
+        return ERR_INVALID_DATA;
+    }
+    const SizeChangeReason& reason = static_cast<SizeChangeReason>(changeReason);
     bool isGlobal = false;
     if (!data.ReadBool(isGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
@@ -497,7 +502,7 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("RaiseAboveTarget!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In RaiseAboveTarget!");
     uint32_t subWindowId = 0;
     if (!data.ReadUint32(subWindowId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read subWindowId failed");
@@ -544,7 +549,7 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleSetGlobalMaximizeMode!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In HandleSetGlobalMaximizeMode!");
     uint32_t mode = 0;
     if (!data.ReadUint32(mode)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read mode failed");
@@ -585,8 +590,8 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleSetAspectRatio!");
-    float ratio = 0;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In HandleSetAspectRatio!");
+    float ratio = 0.0f;
     if (!data.ReadFloat(ratio)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read ratio failed");
         return ERR_INVALID_DATA;
