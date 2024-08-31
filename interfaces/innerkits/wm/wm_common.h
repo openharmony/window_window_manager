@@ -316,7 +316,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
     WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_END = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_END = 1 << 8,
 };
 
 /**
