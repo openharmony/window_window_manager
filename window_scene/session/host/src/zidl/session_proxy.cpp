@@ -819,6 +819,43 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
     return *area;
 }
 
+std::map<AvoidAreaType, AvoidArea> SessionProxy::GetAllAvoidAreas()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return avoidAreas;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return avoidAreas;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return avoidAreas;
+    }
+    uint32_t size = reply.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = reply.ReadUint32();
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+            type > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+            WLOGFE("Read type failed");
+            return avoidAreas;
+        }
+        sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            return avoidAreas;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
+    return avoidAreas;
+}
+
 WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
 {
     MessageParcel data;
