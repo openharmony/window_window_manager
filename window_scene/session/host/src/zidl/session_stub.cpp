@@ -762,7 +762,11 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
-    int32_t height = data.ReadInt32();
+    int32_t height = 0;
+    if (!data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        return ERR_INVALID_DATA;
+    }
     SetCustomDecorHeight(height);
     return ERR_NONE;
 }
