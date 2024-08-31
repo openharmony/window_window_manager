@@ -41,8 +41,7 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 WLOGFE("Read rect info failed");
                 return ERR_TRANSACTION_FAILED;
             }
-            Rect rect {posX, posY, width, height};
-            SetBounds(rect);
+            SetBounds({ posX, posY, width, height });
             break;
         }
         case TRANS_ID_HIDE_WINDOW: {
