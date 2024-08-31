@@ -668,9 +668,33 @@ int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageP
 int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "HandleUpdatePiPRect!");
-    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
-    auto reason = static_cast<SizeChangeReason>(data.ReadInt32());
-    WSError errCode = UpdatePiPRect(rect, reason);
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int32_t reason = 0;
+    if (!data.ReadInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posX error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posY error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(width)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read width error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read height error");
+        return ERR_INVALID_DATA;
+    }
+    Rect rect = {posX, posY, width, height};
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read reason error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
