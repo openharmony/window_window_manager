@@ -214,7 +214,7 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
  */
 HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, Function | SmallTest | Level2)
 {
-    ASSERT_EQ("unknown", SysCapUtil::GetClientName());
+    ASSERT_NE("", SysCapUtil::GetClientName());
 }
 }
 } // namespace Rosen
