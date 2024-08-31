@@ -248,8 +248,8 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
         TLOGE(WmsLogTag::WMS_LIFE, "write windowStates size fail");
         return ERR_INVALID_DATA;
     }
-    for (auto& it : windowStates) {
-        if (!reply.WriteParcelable(&it)) {
+    for (auto& state : windowStates) {
+        if (!reply.WriteParcelable(&state)) {
             TLOGE(WmsLogTag::WMS_LIFE, "write windowState fail");
             return ERR_INVALID_DATA;
         }

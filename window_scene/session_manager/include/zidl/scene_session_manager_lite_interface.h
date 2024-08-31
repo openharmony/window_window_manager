@@ -94,7 +94,6 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
-    virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
@@ -114,6 +113,15 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    /**
+     * @brief Obtains main window state list by pid
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pid Target pid
+     * @param windowStates Window state list
+     */
+    virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
