@@ -35,6 +35,7 @@ struct AbilityInfo;
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
+const std::string UI_TYPE_PC = "pc";
 
 enum class WSError : int32_t {
     WS_OK = 0,
