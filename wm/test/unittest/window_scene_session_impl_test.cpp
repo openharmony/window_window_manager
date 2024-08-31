@@ -762,7 +762,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     // show with null session
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Hide(2, false, false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
