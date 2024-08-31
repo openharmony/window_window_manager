@@ -345,8 +345,7 @@ ohos_unittest("ws_screen_session_manager_client_proxy_test") {
 ohos_unittest("ws_screen_session_manager_client_stub_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${window_base_path}/window_scene/screen_session_manager_client/include/zidl" ]
+  include_dirs = [ "${window_base_path}/window_scene/screen_session_manager_client/include/zidl" ]
 
   sources = [ "screen_session_manager_client_stub_test.cpp" ]
 
