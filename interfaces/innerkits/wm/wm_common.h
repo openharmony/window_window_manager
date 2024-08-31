@@ -535,15 +535,19 @@ struct MainWindowState : public Parcelable {
             return nullptr;
         }
         if (!parcel.ReadInt32(mainWindowState->state_)) {
+            delete mainWindowState;
             return nullptr;
         }
         if (!parcel.ReadBool(mainWindowState->isVisible_)) {
+            delete mainWindowState;
             return nullptr;
         }
         if (!parcel.ReadBool(mainWindowState->isForegroundInteractive_)) {
+            delete mainWindowState;
             return nullptr;
         }
         if (!parcel.ReadBool(mainWindowState->isPcOrPadEnableActivation_)) {
+            delete mainWindowState;
             return nullptr;
         }
         return mainWindowState;
