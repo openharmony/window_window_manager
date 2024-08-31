@@ -1366,4 +1366,9 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
     }
     return pixelMap;
 }
+
+void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
+{
+    property_.SetStartPosition(startX, startY);
+}
 } // namespace OHOS::Rosen

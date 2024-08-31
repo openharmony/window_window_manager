@@ -2751,15 +2751,13 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty firstProperty = firstScreenSession->GetScreenProperty();
     sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
     if (!secondScreenSession) {
         TLOGE(WmsLogTag::DMS, "secondScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
-    firstProperty.SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
-    secondProperty.SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+    firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
+    secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     return DMError::DM_OK;
 }
 
