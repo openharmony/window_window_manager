@@ -1476,9 +1476,8 @@ void WindowImpl::DestroySubWindow()
 
 void WindowImpl::ClearVsyncStation()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ != nullptr) {
-        vsyncStation_.reset();
+        vsyncStation_->Destroy();
     }
 }
 
@@ -3261,12 +3260,6 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 
 void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (state_ == WindowState::STATE_DESTROYED) {
-        WLOGFE("[WM] Receive Vsync Request failed, window is destroyed");
-        return;
-    }
-
     if (vsyncStation_ != nullptr) {
         vsyncStation_->RequestVsync(vsyncCallback);
     }
@@ -3274,7 +3267,6 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
 
 int64_t WindowImpl::GetVSyncPeriod()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ != nullptr) {
         return vsyncStation_->GetVSyncPeriod();
     }
