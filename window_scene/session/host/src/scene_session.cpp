@@ -1112,6 +1112,11 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ &&
+        specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
+        SetIsDisplayStatusBarTemporarily(false);
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
@@ -3415,14 +3420,6 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<W
 {
     auto systemBarProperties = property->GetSystemBarProperty();
     if (auto iter = systemBarProperties.find(type); iter != systemBarProperties.end()) {
-        if (GetIsDisplayStatusBarTemporarily() && specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
-            SetIsDisplayStatusBarTemporarily(false);
-            if (Session::IsScbCoreEnabled()) {
-                dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-            } else {
-                specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-            }
-        }
         SetSystemBarProperty(iter->first, iter->second);
         TLOGD(WmsLogTag::WMS_IMMS, "%{public}d, enable: %{public}d",
             static_cast<int32_t>(iter->first), iter->second.enable_);
