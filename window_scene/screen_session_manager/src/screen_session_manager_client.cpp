@@ -184,9 +184,16 @@ void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, E
     PowerStateChangeReason reason)
 {
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    for (auto screenSession:screenSessionMap_) {
-        (screenSession.second)->PowerStatusChange(event, status, reason);
+    if (screenSessionMap_.empty()) {
+        WLOGFE("[UL_POWER]screenSessionMap_ is nullptr");
+        return;
     }
+    auto screenSession = screenSessionMap_.begin()->second;
+    if (!screenSession) {
+        WLOGFE("[UL_POWER]screenSession is null");
+        return;
+    }
+    screenSession->PowerStatusChange(event, status, reason);
 }
 
 void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, float sensorRotation)

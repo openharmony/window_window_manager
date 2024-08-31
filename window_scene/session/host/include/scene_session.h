@@ -270,7 +270,6 @@ public:
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
-    bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsTurnScreenOn() const;
@@ -393,6 +392,8 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
+    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+    void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -434,7 +435,6 @@ private:
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    void InitSystemSessionDragEnable(sptr<WindowSessionProperty> property);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 
@@ -572,6 +572,11 @@ private:
 
     // Multi User
     bool isMinimizedByUserSwitch_ { false };
+
+    /*
+     * Window ZOrder: PC
+     */
+    bool isPcScenePanel_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

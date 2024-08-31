@@ -1187,17 +1187,17 @@ void JsSceneSession::ProcessFrameLayoutFinishRegister()
 void JsSceneSession::NotifyFrameLayoutFinish()
 {
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]NotifyFrameLayoutFinish");
-    std::shared_ptr<NativeReference> jsCallBack = GetJSCallback(NEXT_FRAME_LAYOUT_FINISH_CB);
-    if (jsCallBack == nullptr) {
-        return;
-    }
-
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
         return;
     }
-    auto task = [jsCallBack, env = env_]() {
+    auto task = [this, persistentId = persistentId_, env = env_] {
+        if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = this->GetJSCallback(NEXT_FRAME_LAYOUT_FINISH_CB);
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
             return;
@@ -2013,7 +2013,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
-        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+        if (jsSceneSessionObj == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
@@ -2053,7 +2053,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
-        if (jsSceneSessionObj == nullptr || !jsCallBack) {
+        if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }

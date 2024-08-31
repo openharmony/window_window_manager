@@ -165,7 +165,7 @@ void VsyncStation::RemoveCallback()
 void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "OnVsyncCallback %{public}" PRId64 ":%{public}" PRId64, timestamp, frameCount);
+        "OnVsyncCallback %" PRId64 ":%" PRId64, timestamp, frameCount);
     Callbacks vsyncCallbacks;
     {
         std::lock_guard<std::mutex> lock(mutex_);
