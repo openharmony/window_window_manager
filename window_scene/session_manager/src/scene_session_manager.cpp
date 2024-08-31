@@ -64,6 +64,7 @@
 #include "res_type.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
+#include "window_pid_visibility_info.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -1540,6 +1541,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
     RegisterSessionExceptionFunc(sceneSession);
+    RegisterVisibilityChangedDetectFunc(sceneSession);
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
@@ -3792,6 +3794,59 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     };
     sceneSession->SetSessionExceptionListener(sessionExceptionFunc, false);
     TLOGD(WmsLogTag::WMS_LIFE, "success, id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return;
+    }
+    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
+        if (isVisible == newIsVisible || pid == -1) {
+            return;
+        }
+        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+        windowPidVisibilityInfo->pid_ = pid;
+        int32_t count = 0;
+        int32_t beforeCount = 0;
+        {
+            std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
+            if (visibleWindowCountMap_.find(pid) != visibleWindowCountMap_.end()) {
+                beforeCount = visibleWindowCountMap_[pid];
+            } else {
+                visibleWindowCountMap_[pid] = 0;
+            }
+            visibleWindowCountMap_[pid] = newIsVisible ? visibleWindowCountMap_[pid] + 1 :
+                visibleWindowCountMap_[pid] - 1;
+            count = visibleWindowCountMap_[pid];
+        }
+        if (beforeCount > 0 && count == 0) {
+            TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to invisibility.", pid);
+            windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::INVISIBILITY_STATE;
+            SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+        } else if (beforeCount == 0 && count == 1) {
+            TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
+            windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
+            SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+        } else if (count < 0) {
+            TLOGE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
+            RecoveryVisibilityPidCount(pid);
+        }
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(func);
+}
+
+void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    visibleWindowCountMap_[pid] = 0;
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetCallingPid() == pid && session->IsVisible()) {
+            visibleWindowCountMap_[pid]++;
+        }
+    }
 }
 
 void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)
@@ -6621,7 +6676,8 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE) {
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY) {
         if (!SessionPermission::IsSACalling()) {
             TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
             return WMError::WM_ERROR_INVALID_PERMISSION;
