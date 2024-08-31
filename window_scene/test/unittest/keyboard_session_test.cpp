@@ -1171,7 +1171,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
-
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     auto callingOriPosY = 0;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1212,6 +1212,7 @@ HWTEST_F(KeyboardSessionTest, IsCallingSessionSplitMode01, Function | SmallTest 
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
 
     auto callingParentSession = GetSceneSession("callingParentSession", "callingParentSession");
     ASSERT_NE(callingSession, nullptr);
@@ -1262,10 +1263,11 @@ HWTEST_F(KeyboardSessionTest, CloseKeyBoardSyncTransaction3, Function | SmallTes
 
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     // isKeyBoardSyncTransactionOpen_ is true
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA), keyboardSession->dirtyFlags_);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
 
 /**
