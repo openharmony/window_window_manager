@@ -69,6 +69,8 @@ public:
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
     WMError CloseTargetFloatWindow(const std::string& bundleName) override;
+    WMError CloseTargetPiPWindow(const std::string& bundleName) override;
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
 };
 } // namespace OHOS::Rosen
 
