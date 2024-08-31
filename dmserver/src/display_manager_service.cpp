@@ -810,8 +810,8 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
         }
         DisplayPhysicalResolution defaultResolution;
         defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
-        defaultResolution.physicalWidth_ = displayInfo->GetWidth();
-        defaultResolution.physicalHeight_ = displayInfo->GetHeight();
+        defaultResolution.physicalWidth_ = static_cast<uint32_t>(displayInfo->GetWidth());
+        defaultResolution.physicalHeight_ = static_cast<uint32_t>(displayInfo->GetHeight());
         allDisplayPhysicalResolution_.emplace_back(defaultResolution);
     }
     return allDisplayPhysicalResolution_;

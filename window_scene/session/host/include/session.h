@@ -81,6 +81,8 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
+using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
+    const bool newIsVisible)>;
 
 class ILifecycleListener {
 public:
@@ -451,6 +453,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    bool IsVisible() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -556,6 +559,8 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -590,7 +595,6 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     WSError HandleSubWindowClick(int32_t action);
-    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -601,6 +605,13 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+
+    /*
+     * Window Property
+     */
+    void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
+    void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>

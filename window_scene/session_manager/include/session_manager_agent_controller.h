@@ -23,6 +23,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
+#include "window_pid_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +47,7 @@ public:
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
 
 private:
     SessionManagerAgentController()

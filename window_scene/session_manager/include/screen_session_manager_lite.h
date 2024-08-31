@@ -47,6 +47,21 @@ public:
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    /*
+     * used by powermgr
+     */
+    bool WakeUpBegin(PowerStateChangeReason reason) override;
+    bool WakeUpEnd() override;
+    bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool SuspendEnd() override;
+    bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    bool SetDisplayState(DisplayState state) override;
+    DisplayState GetDisplayState(DisplayId displayId) override;
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
+    uint32_t GetScreenBrightness(uint64_t screenId) override;
+    std::vector<DisplayId> GetAllDisplayIds() override;
 protected:
     ScreenSessionManagerLite() = default;
     virtual ~ScreenSessionManagerLite();
