@@ -614,7 +614,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     return {windowInfo, pixelMap};
 }
 
-void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback)
+void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
 {
     flushWindowInfoCallback_ = std::move(callback);
 }
