@@ -673,8 +673,20 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     uint32_t width = 0;
     uint32_t height = 0;
     int32_t reason = 0;
-    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
-        TLOGE(WmsLogTag::WMS_PIP, "read pipRect error");
+    if (!data.ReadInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posX error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posY error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(width)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read width error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read height error");
         return ERR_INVALID_DATA;
     }
     Rect rect = {posX, posY, width, height};
