@@ -49,6 +49,7 @@ namespace {
     constexpr size_t INDEX_TWO = 2;
     constexpr double MIN_GRAY_SCALE = 0.0;
     constexpr double MAX_GRAY_SCALE = 1.0;
+    constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -6035,28 +6036,33 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
-bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value argv)
+bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value jsObject)
 {
-    if (env == nullptr || argv == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr or argv is nullptr");
+    if (env == nullptr || jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr or jsObject is nullptr");
         return false;
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr");
         return false;
     }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
     WindowLimits windowLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Get windowLimits failed");
-        return false;
-    }
-    uint32_t size = 0;
-    napi_get_array_length(env, argv, &size);
-    if (size == 0 || static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
-            size, windowLimits.vpRatio_, windowLimits.maxWidth_);
-        return false;
+    if (ret == WmErrorCode::WM_OK) {
+        if (size == 0 ||
+            static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
+                size, windowLimits.vpRatio_, windowLimits.maxWidth_);
+            return false;
+        }
+    } else {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Get windowLimits failed, error code is %{public}d", ret);
+        if (size == 0 || size > DEFAULT_WINDOW_MAX_WIDTH) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u", size);
+            return false;
+        }
     }
     return true;
 }
