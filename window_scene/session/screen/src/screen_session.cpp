@@ -199,11 +199,13 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    RRect bounds = property_.GetBounds();
+    RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
-    displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
-    displayInfo->SetPhysicalWidth(property_.GetPhyBounds().rect_.GetWidth());
-    displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
