@@ -48,6 +48,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 
 private:
     SessionManagerAgentController()

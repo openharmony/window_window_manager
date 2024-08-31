@@ -52,5 +52,10 @@ void WindowManagerAgentLite::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManagerLite>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgentLite::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    SingletonContainer::Get<WindowManagerLite>().UpdatePiPWindowStateChanged(bundleName, isForeground);
+}
+
 } // namespace Rosen
 } // namespace OHOS

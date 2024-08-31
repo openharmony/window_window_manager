@@ -49,6 +49,8 @@ public:
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId) = 0;
     virtual WMError CloseTargetFloatWindow(const std::string& bundleName) = 0;
+    virtual WMError CloseTargetPiPWindow(const std::string& bundleName) = 0;
+    virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName) = 0;
 };
 }
 }
