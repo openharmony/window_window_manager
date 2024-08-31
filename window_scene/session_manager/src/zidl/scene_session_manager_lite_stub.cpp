@@ -112,6 +112,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
             return HandleTerminateSessionByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW):
+            return HandleCloseTargetFloatWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -582,6 +584,13 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessagePar
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName = data.ReadString();
+    CloseTargetFloatWindow(bundleName);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -240,4 +240,9 @@ WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persiste
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
+
+WMError SceneSessionManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetFloatWindow(bundleName);
+}
 } // namespace OHOS::Rosen

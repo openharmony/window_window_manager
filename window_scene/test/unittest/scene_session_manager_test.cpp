@@ -1637,6 +1637,18 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
     ASSERT_EQ(config.mode_, 0);
     ASSERT_EQ(config.homePage_, "");
 }
+
+/**
+ * @tc.name: CloseTargetFloatWindow
+ * @tc.desc: SceneSesionManager CloseTargetFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloseTargetFloatWindow, Function | SmallTest | Level3)
+{
+    std::string bundleName = "testClose";
+    auto result = ssm_->CloseTargetFloatWindow(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

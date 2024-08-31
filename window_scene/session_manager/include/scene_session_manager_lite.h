@@ -68,6 +68,7 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
+    WMError CloseTargetFloatWindow(const std::string& bundleName) override;
 };
 } // namespace OHOS::Rosen
 

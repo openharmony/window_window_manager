@@ -902,5 +902,20 @@ HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
     WindowManagerLite::GetInstance().OnRemoteDied();
     ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
 }
+
+/**
+ * @tc.name: CloseTargetFloatWindow
+ * @tc.desc: check CloseTargetFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, CloseTargetFloatWindow, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::string bundleName = "test";
+    EXPECT_CALL(m->Mock(), CloseTargetFloatWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+
+    auto errorCode = WindowManagerLite::GetInstance().CloseTargetFloatWindow(bundleName);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
 }
 }
