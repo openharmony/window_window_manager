@@ -5969,21 +5969,16 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
 WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d", pid);
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get all mainWindow states failed, only support SA calling.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     if (pid < 0) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto task = [this, pid, &windowStates]() {
-        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
-        {
-            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            sceneSessionMapCopy = sceneSessionMap_;
-        }
-        for (const auto& elem : sceneSessionMapCopy) {
-            auto sceneSession = elem.second;
+    auto task = [this, pid, &windowStates] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession != nullptr && sceneSession->GetCallingPid() == pid &&
                 WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 MainWindowState windowState;

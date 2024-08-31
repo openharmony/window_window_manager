@@ -511,7 +511,7 @@ struct MainWindowInfo : public Parcelable {
  * @brief main window state info.
  */
 struct MainWindowState : public Parcelable {
-    bool Marshalling(Parcel &parcel) const override
+    bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(state_)) {
             return false;
