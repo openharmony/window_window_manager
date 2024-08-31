@@ -128,11 +128,17 @@ HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
  */
 HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
 {
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "TransferKeyEvent04";
+    sessionInfo.moduleName_ = "TransferKeyEvent04";
+    sessionInfo.bundleName_ = "TransferKeyEvent04";
+    sptr<SubSession> session = new SubSession(sessionInfo, specificCallback);
+    ASSERT_NE(session, nullptr);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    subSession_->SetParentSession(subSession_);
-    subSession_->SetSessionState(SessionState::STATE_CONNECT);
+    subSession_->SetParentSession(session);
+    subSession_->SetSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
 }
 
