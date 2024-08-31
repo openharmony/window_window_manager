@@ -279,11 +279,12 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         napi_value typeNode = argv[1];
         napi_ref typeNodeRef = nullptr;
         if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
-            TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
             pipOption.SetTypeNodeEnabled(true);
-            XComponentController::SetSurfaceCallbackTypeMode(env, typeNode, SurfaceCallbackMode::PIP);
+            XComponentControllerErrorCode ret =
+                XComponentController::SetSurfaceCallbackTypeMode(env, typeNode, SurfaceCallbackMode::PIP);
             napi_create_reference(env, typeNode, 1, &typeNodeRef);
             pipOption.SetTypeNodeRef(typeNodeRef);
+            TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled， ret: %{public}u", static_cast<uint32_t>(ret));
         } else {
             pipOption.SetTypeNodeEnabled(false);
             pipOption.SetTypeNodeRef(nullptr);
