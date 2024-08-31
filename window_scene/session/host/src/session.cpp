@@ -629,6 +629,9 @@ void Session::SetCallingPid(int32_t id)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, callingPid:%{public}u", persistentId_, id);
     callingPid_ = id;
+    if (isVisible_) {
+        visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
+    }
 }
 
 void Session::SetCallingUid(int32_t id)
@@ -903,7 +906,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     abilityToken_ = token;
     systemConfig = systemConfig_;
     InitSessionPropertyWhenConnect(property);
-    callingPid_ = pid;
+    SetCallingPid(pid);
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
@@ -991,7 +994,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     abilityToken_ = token;
     SetSessionProperty(property);
     persistentId_ = property->GetPersistentId();
-    callingPid_ = pid;
+    SetCallingPid(pid);
     callingUid_ = uid;
     bufferAvailable_ = true;
     auto windowRect = property->GetWindowRect();
@@ -1127,6 +1130,9 @@ WSError Session::Disconnect(bool isFromClient)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
+    }
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
@@ -3148,5 +3154,10 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 bool Session::IsScbCoreEnabled()
 {
     return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+}
+
+bool Session::IsVisible() const
+{
+    return isVisible_;
 }
 } // namespace OHOS::Rosen

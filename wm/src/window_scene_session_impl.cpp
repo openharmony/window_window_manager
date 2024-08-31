@@ -306,7 +306,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     sptr<ISessionStage> iSessionStage(this);
     sptr<WindowEventChannel> channel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IWindowEventChannel> eventChannel(channel);
-    sptr<Rosen::ISession> session;
+    sptr<Rosen::ISession> session = nullptr;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     if (token) {
         property_->SetTokenState(true);
@@ -371,7 +371,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel(new WindowEventChannel(iSessionStage));
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
-    sptr<Rosen::ISession> session;
+    sptr<Rosen::ISession> session = nullptr;
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
     if (session == nullptr) {
@@ -2027,8 +2027,8 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     }
     // The device is not supported
     if (!windowSystemConfig_.IsPcWindow() && !IsFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_OK;
     }
     if (property_->GetCompatibleModeInPc()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");

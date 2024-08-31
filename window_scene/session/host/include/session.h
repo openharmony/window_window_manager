@@ -81,6 +81,8 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
+using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
+    const bool newIsVisible)>;
 
 class ILifecycleListener {
 public:
@@ -451,6 +453,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    bool IsVisible() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -556,6 +559,8 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
