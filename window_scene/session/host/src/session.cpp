@@ -2752,9 +2752,7 @@ bool Session::IsStateMatch(bool isAttach) const
 
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
-    bool isPc = systemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
-    if (!isPc && !isPhone) {
+    if (!systemConfig_.IsPcWindow() && !systemConfig_.IsPhoneWindow()) {
         TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
     }
@@ -2767,7 +2765,7 @@ bool Session::IsSupportDetectWindow(bool isAttach)
         return false;
     }
     // Only detecting cold start scenarios on PC
-    if (isPc && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
+    if (systemConfig_.IsPcWindow() && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
         TLOGI(WmsLogTag::WMS_LIFE, "pc only support cold start, id:%{public}d", persistentId_);
         RemoveWindowDetectTask();
         return false;

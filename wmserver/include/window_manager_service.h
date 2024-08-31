@@ -167,6 +167,7 @@ private:
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
     bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
+    void LoadWindowParameter();
     void ConfigureWindowManagerService();
     void PostVoidSyncTask(Task task, const std::string& taskName = "WMSTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
