@@ -32,17 +32,16 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     WLOGFD("code is %{public}u", code);
     switch (code) {
         case TRANS_ID_SETBOUNDS: {
-            int32_t rectPoint1 = 0;
-            int32_t rectPoint2 = 0;
-            int32_t rectPoint3 = 0;
-            int32_t rectPoint4 = 0;
-            if (!data.ReadInt32(rectPoint1) || !data.ReadInt32(rectPoint2) ||
-                !data.ReadInt32(rectPoint3) || !data.ReadInt32(rectPoint4)) {
+            int32_t rectX = 0;
+            int32_t rectY = 0;
+            int32_t rectW = 0;
+            int32_t rectH = 0;
+            if (!data.ReadInt32(rectX) || !data.ReadInt32(rectY) ||
+                !data.ReadInt32(rectW) || !data.ReadInt32(rectH)) {
                 WLOGFE("Read rect info failed");
                 return ERR_TRANSACTION_FAILED;
             }
-            Rect rect {rectPoint1, rectPoint2,
-                rectPoint3, rectPoint4};
+            Rect rect {rectX, rectY, rectW, rectH};
             SetBounds(rect);
             break;
         }
