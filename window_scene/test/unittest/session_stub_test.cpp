@@ -434,53 +434,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    uint32_t posX = -10;
-    uint32_t posY = -10;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    data.WriteInt32(posX);
-    data.WriteInt32(posY);
+    float width = 0.55;
+    float height = 0.55;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
     data.WriteUint32(width);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
     data.WriteUint32(height);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posY = 10;
-    data.WriteInt32(posY);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posY = -10;
-    width = 10;
-    data.WriteUint32(width);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    height = 10;
-    width = 0;
-    data.WriteUint32(height);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    height = 0;
-    posX = -10;
-    data.WriteInt32(posX);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-}
-
-/**
- * @tc.name: HandleUpdatePiPRect002
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t posX = 10;
-    int32_t posY = 10;
-    uint32_t width = 10;
-    uint32_t height = 10;
-    int32_t reason = static_cast<int32_t>(SizeChangeReason::MAXIMIZE);
-    data.WriteInt32(posX);
-    data.WriteInt32(posY);
-    data.WriteUint32(width);
-    data.WriteUint32(height);
-    data.WriteInt32(reason);
-    ASSERT_EQ(0, session_->HandleUpdatePiPRect(data, reply));
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(40);
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPRect(data, reply));
 }
 
 /**
