@@ -723,6 +723,43 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
     return *area;
 }
 
+WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t size = reply.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = reply.ReadUint32();
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+            type > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+            WLOGFE("Read type failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
+    uint32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
 {
     MessageParcel data;
