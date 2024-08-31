@@ -881,7 +881,8 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
+    const std::map<AvoidAreaType, AvoidArea> avoidAreas)
 {
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
@@ -917,7 +918,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFW("uiContent is null!");
         return;
     }
-    uiContent->UpdateViewportConfig(config, reason, rsTransaction);
+    uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
@@ -2731,6 +2732,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }

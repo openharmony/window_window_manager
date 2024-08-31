@@ -7746,6 +7746,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
     auto task = [this, isVisible, barArea, displayId]() {
         bool isNeedUpdate = false;
+        bool isNeedNotify = isAINavigationBarVisible_ != isVisible;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
             isNeedUpdate = isAINavigationBarVisible_ != isVisible ||
@@ -7761,7 +7762,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
-        if (isNeedUpdate) {
+        if (isNeedNotify) {
             WLOGFI("NotifyAINavigationBar: enter: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {

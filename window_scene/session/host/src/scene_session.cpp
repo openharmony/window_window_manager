@@ -1568,6 +1568,18 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
     return PostSyncTask(task, "GetAvoidAreaByType");
 }
 
+std::map<AvoidAreaType, AvoidArea> SceneSession::GetAllAvoidAreas()
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+        auto type = static_cast<AvoidAreaType>(avoidType);
+        avoidAreas[type] = GetAvoidAreaByType(type);
+    }
+    return avoidAreas;
+}
+
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (!sessionStage_) {
