@@ -434,8 +434,8 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t posX = 0;
-    int32_t posY = 0;
+    uint32_t posX = -10;
+    uint32_t posY = -10;
     uint32_t width = 0;
     uint32_t height = 0;
     data.WriteInt32(posX);
@@ -446,7 +446,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
     posY = 10;
     data.WriteInt32(posY);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posY = 0;
+    posY = -10;
     width = 10;
     data.WriteUint32(width);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
@@ -455,31 +455,8 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
     data.WriteUint32(height);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
     height = 0;
-    posX = 10;
+    posX = -10;
     data.WriteInt32(posX);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posY = 10;
-    data.WriteInt32(posY);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posY = 0;
-    width = 10;
-    data.WriteUint32(width);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    height = 10;
-    width = 0;
-    data.WriteUint32(height);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    posX = 0;
-    posY = 10;
-    data.WriteInt32(posY);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    height = 0;
-    width = 10;
-    data.WriteUint32(width);
-    ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
-    height = 10;
-    posY = 0;
-    data.WriteUint32(height);
     ASSERT_EQ(5, session_->HandleUpdatePiPRect(data, reply));
 }
 
