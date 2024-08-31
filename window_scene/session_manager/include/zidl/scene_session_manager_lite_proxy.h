@@ -71,6 +71,8 @@ public:
     WMError GetWindowStyleType(WindowStyleType& windowModeType) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
     WMError CloseTargetFloatWindow(const std::string& bundleName) override;
+    WMError CloseTargetPiPWindow(const std::string& bundleName) override;
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
 
 private:
     template<typename T>

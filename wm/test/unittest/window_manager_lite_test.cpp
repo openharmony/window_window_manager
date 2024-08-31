@@ -71,6 +71,11 @@ public:
     }
 };
 
+class TestPiPStateChangedListener : public IPiPStateChangedListener {
+public:
+    void OnPiPStateChanged(const std::string& bundleName, bool isForeground) override {}
+};
+
 class WindowManagerLiteTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -916,6 +921,128 @@ HWTEST_F(WindowManagerLiteTest, CloseTargetFloatWindow, Function | SmallTest | L
 
     auto errorCode = WindowManagerLite::GetInstance().CloseTargetFloatWindow(bundleName);
     ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: RegisterPiPStateChangedListener
+ * @tc.desc: check RegisterPiPStateChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->pipStateChangedListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->pipStateChangedListeners_;
+    windowManager.pImpl_->pipStateChangedListenerAgent_ = nullptr;
+    windowManager.pImpl_->pipStateChangedListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(nullptr));
+
+    sptr<IPiPStateChangedListener> listener = new TestPiPStateChangedListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterPiPStateChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterPiPStateChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+
+    windowManager.pImpl_->pipStateChangedListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->pipStateChangedListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterPiPStateChangedListener
+ * @tc.desc: check UnregisterPiPStateChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UnregisterPiPStateChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->pipStateChangedListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->pipStateChangedListeners_;
+    windowManager.pImpl_->pipStateChangedListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    windowManager.pImpl_->pipStateChangedListeners_.clear();
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterPiPStateChangedListener(nullptr));
+
+    sptr<IPiPStateChangedListener> listener1 = new TestPiPStateChangedListener();
+    sptr<IPiPStateChangedListener> listener2 = new TestPiPStateChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterPiPStateChangedListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterPiPStateChangedListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterPiPStateChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->pipStateChangedListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterPiPStateChangedListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterPiPStateChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->pipStateChangedListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->pipStateChangedListenerAgent_);
+
+    windowManager.pImpl_->pipStateChangedListeners_.push_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterPiPStateChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->pipStateChangedListeners_.size());
+    windowManager.pImpl_->pipStateChangedListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->pipStateChangedListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: CloseTargetPiPWindow
+ * @tc.desc: check CloseTargetPiPWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, CloseTargetPiPWindow, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::string bundleName = "test";
+    EXPECT_CALL(m->Mock(), CloseTargetPiPWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+
+    auto errorCode = WindowManagerLite::GetInstance().CloseTargetPiPWindow(bundleName);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo01
+ * @tc.desc: check GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo01, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+
+    std::string bundleName;
+    auto errorCode = WindowManagerLite::GetInstance().GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+    ASSERT_EQ("", bundleName);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo02
+ * @tc.desc: check GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::string testBundleName = "test";
+    bool testState = true;
+    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(testBundleName),
+        Return(WMError::WM_OK)));
+
+    std::string bundleName;
+    auto errorCode = WindowManagerLite::GetInstance().GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(WMError::WM_OK, errorCode);
+    ASSERT_EQ(testBundleName, bundleName);
 }
 }
 }

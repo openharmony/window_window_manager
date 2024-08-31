@@ -1649,6 +1649,59 @@ HWTEST_F(SceneSessionManagerTest, CloseTargetFloatWindow, Function | SmallTest |
     auto result = ssm_->CloseTargetFloatWindow(bundleName);
     ASSERT_EQ(result, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: CloseTargetPiPWindow
+ * @tc.desc: SceneSesionManager CloseTargetPiPWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloseTargetPiPWindow, Function | SmallTest | Level3)
+{
+    std::string bundleName = "CloseTargetPiPWindow";
+    auto result = ssm_->CloseTargetPiPWindow(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo01
+ * @tc.desc: SceneSesionManager GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo01, Function | SmallTest | Level3)
+{
+    std::string bundleName;
+    auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ("", bundleName);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo02
+ * @tc.desc: SceneSesionManager GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    std::string bundleName;
+    auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(info1.abilityName_, bundleName);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
