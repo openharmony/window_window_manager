@@ -36,6 +36,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_PIP,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
@@ -56,6 +57,7 @@ public:
         TRANS_ID_UPDATE_WINDOW_MODE_TYPE,
         TRANS_ID_UPDATE_WINDOW_STYLE_TYPE,
         TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY,
+        TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -73,6 +75,7 @@ public:
     virtual void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWindowStyleChange(WindowStyleType type) = 0;
     virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
+    virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

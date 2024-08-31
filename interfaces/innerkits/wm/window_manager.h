@@ -392,6 +392,22 @@ public:
 };
 
 /**
+ * @class IPiPStateChangedListener
+ *
+ * @brief Listener to observe PiP State changed.
+ */
+class IPiPStateChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when PiP State changed.
+     *
+     * @param bundleName the name of the bundle in PiP state changed.
+     * @param isForeground the state of the bundle in PiP State.
+     */
+    virtual void OnPiPStateChanged(const std::string& bundleName, bool isForeground) = 0;
+};
+
+/**
  * @class WindowManager
  *
  * @brief WindowManager used to manage window.

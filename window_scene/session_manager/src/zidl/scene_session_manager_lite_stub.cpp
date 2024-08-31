@@ -114,6 +114,10 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleTerminateSessionByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW):
             return HandleCloseTargetFloatWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_PIP_WINDOW):
+            return HandleCloseTargetPiPWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO):
+            return HandleGetCurrentPiPWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -591,6 +595,29 @@ int SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(MessageParcel& dat
 {
     std::string bundleName = data.ReadString();
     CloseTargetFloatWindow(bundleName);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCloseTargetPiPWindow(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName = data.ReadString();
+    WMError errCode = CloseTargetPiPWindow(bundleName);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    WMError errCode = GetCurrentPiPWindowInfo(bundleName);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteString(bundleName)) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

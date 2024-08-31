@@ -412,6 +412,33 @@ void WindowManagerAgentProxy::NotifyWindowPidVisibilityChanged(const sptr<Window
     }
 }
 
+void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write bundleName failed");
+        return;
+    }
+    if (!data.WriteBool(isForeground)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write state failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

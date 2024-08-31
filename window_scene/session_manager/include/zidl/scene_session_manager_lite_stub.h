@@ -69,6 +69,8 @@ private:
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleCloseTargetFloatWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleCloseTargetPiPWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

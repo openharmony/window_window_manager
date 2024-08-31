@@ -77,6 +77,8 @@ public:
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID,
         TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW,
+        TRANS_ID_CLOSE_TARGET_PIP_WINDOW,
+        TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
