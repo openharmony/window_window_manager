@@ -113,8 +113,8 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
-        if (session->systemConfig_.uiType_ == UI_TYPE_PC || session->GetSessionScreenName() == "HiCar"
-            || session->GetSessionScreenName() == "SuperLauncher") {
+        if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
+            session->GetSessionScreenName() == "SuperLauncher") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             session->RestoreCallingSession();
             auto sessionProperty = session->GetSessionProperty();
@@ -383,7 +383,7 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     if (isCallingSessionFloating && isMainOrParentFloating &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE || (systemConfig_.uiType_ == UI_TYPE_PAD && !isFreeMultiWindowMode))) {
+        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
     }

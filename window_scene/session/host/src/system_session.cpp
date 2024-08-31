@@ -316,7 +316,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = systemConfig_.IsPcWindow();
     bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
