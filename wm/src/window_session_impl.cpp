@@ -823,7 +823,8 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -849,13 +850,25 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     config.SetOrientation(orientation);
     config.SetTransformHint(transformHint);
+    std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
+    if (reason == WindowSizeChangeReason::ROTATION) {
+        if (auto hostSession = GetHostSession()) {
+            hostSession->GetAllAvoidAreas(avoidAreasToUpdate);
+        }
+    } else {
+        avoidAreasToUpdate = avoidAreas;
+    }
+    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+    }
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
             WLOGFW("uiContent is null!");
             return;
         }
-        uiContent->UpdateViewportConfig(config, reason, rsTransaction);
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
@@ -2594,6 +2607,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }
