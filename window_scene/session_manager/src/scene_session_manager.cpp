@@ -7727,13 +7727,14 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
             TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
             return;
         }
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
-
         WindowType type = sceneSession->GetWindowType();
         if (sceneSession->IsImmersiveType()) {
             UpdateAvoidSessionAvoidArea(type, needUpdate);
         } else {
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+        }
+        if (needUpdate) {
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
         }
         return;
     };
