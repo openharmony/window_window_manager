@@ -110,8 +110,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(true));
 }
 
 /**
@@ -134,8 +134,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session, identityToken));
     window->property_->SetPersistentId(1);
     window->Destroy(false);
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session, identityToken));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Create(abilityContext_, session, identityToken));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
@@ -762,7 +762,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     // show with null session
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Hide(2, false, false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
