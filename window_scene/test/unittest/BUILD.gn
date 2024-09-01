@@ -1060,7 +1060,13 @@ ohos_unittest("ws_scene_session_converter_test") {
 ohos_unittest("ws_session_stage_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stage_proxy_test.cpp" ]
+  sources = [ 
+    "session_stage_proxy_test.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
 
   deps = [ ":ws_unittest_common" ]
 
