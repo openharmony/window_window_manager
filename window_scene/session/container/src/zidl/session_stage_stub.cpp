@@ -523,7 +523,7 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
 {
     TLOGD(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo!");
     std::vector<std::string> params;
-    if (!data.ReadStringVector(&info)) {
+    if (!data.ReadStringVector(&params)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read string vector");
         return ERR_INVALID_VALUE;
     }
@@ -535,5 +535,4 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
     }
     return ERR_NONE;
 }
-
 } // namespace OHOS::Rosen
