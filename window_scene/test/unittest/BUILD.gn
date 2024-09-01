@@ -1061,8 +1061,8 @@ ohos_unittest("ws_session_stage_proxy_test") {
   module_out_path = module_out_path
 
   sources = [ 
+    "../mock/mock_message_parcel.cpp",
     "session_stage_proxy_test.cpp",
-    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
   ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]

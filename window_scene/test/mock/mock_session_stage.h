@@ -67,7 +67,8 @@ public:
     MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
-    MOCK_METHOD2(NotifySessionFullScreen, WSError(const std::vector<std::string> params, std::vector<std::string>& info));
+    MOCK_METHOD2(NotifySessionFullScreen, WSError(const std::vector<std::string> params,
+        std::vector<std::string>& info));
 };
 } // namespace Rosen
 } // namespace OHOS
