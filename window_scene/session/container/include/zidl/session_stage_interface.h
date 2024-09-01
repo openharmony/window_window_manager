@@ -168,6 +168,11 @@ public:
     }
 
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
+
+    virtual WSError NotifyDumpInfo(const std::vector<std::string> params, std::vector<std::string>& info)
+     {
+         return WSError::WS_OK;
+     }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

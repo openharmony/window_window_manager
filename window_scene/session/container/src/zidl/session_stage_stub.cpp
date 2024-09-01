@@ -112,6 +112,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
+            return HandleNotifyDumpInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -516,4 +518,22 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo!");
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&info)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read string vector");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> info;
+    WSError errCode = NotifyDumpInfo(params, info);
+    if (!reply.WriteStringVector(info) || !reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo write info failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen
