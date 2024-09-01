@@ -1168,7 +1168,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio03, Function | SmallTe
 
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
-    ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
+    ASSERT_EQ(density, subWindow->GetVirtualPixelRatio(displayInfo));
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
