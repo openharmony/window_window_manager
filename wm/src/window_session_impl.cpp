@@ -918,7 +918,16 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFW("uiContent is null!");
         return;
     }
-    uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas);
+    std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
+    if (reason == WindowSizeChangeReason::ROTATION) {
+        auto hostSession = GetHostSession();
+        if (hostSession) {
+            avoidAreasToUpdate = hostSession->GetAllAvoidAreas();
+        }
+    } else {
+        avoidAreasToUpdate = avoidAreas;
+    }
+    uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
