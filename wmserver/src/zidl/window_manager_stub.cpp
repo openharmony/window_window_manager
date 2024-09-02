@@ -158,7 +158,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
-            auto action = static_cast<PropertyChangeAction>(data.ReadUint32());
+            uint32_t actionValue = 0;
+            if (!data.ReadUint32(actionValue)) {
+                TLOGE(WmsLogTag::DEFAULT, "read action error");
+                return ERR_INVALID_DATA;
+            }
+            auto action = static_cast<PropertyChangeAction>(actionValue);
             sptr<WindowProperty> windowProperty = new WindowProperty();
             windowProperty->Read(data, action);
             WMError errCode = UpdateProperty(windowProperty, action);
@@ -315,7 +320,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_SNAPSHOT: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::DEFAULT, "read windowId error");
+                return ERR_INVALID_DATA;
+            }
             std::shared_ptr<Media::PixelMap> pixelMap = GetSnapshot(windowId);
             reply.WriteParcelable(pixelMap.get());
             break;
