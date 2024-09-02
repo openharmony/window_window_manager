@@ -392,12 +392,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
 HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.bundleName_ = "RequestFocusStatus";
     info.abilityName_ = "RequestFocusStatus";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    info.bundleName_ = "RequestFocusStatus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 1;
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
 }
 
@@ -411,10 +411,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | 
     SessionInfo info;
     info.bundleName_ = "RequestFocusStatus01";
     info.abilityName_ = "com.ohos.sceneboard";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 1;
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
     ssm_->RequestFocusStatus(1, false, true, FocusChangeReason::DEFAULT);
 }
