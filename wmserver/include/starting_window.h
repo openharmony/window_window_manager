@@ -44,7 +44,7 @@ public:
     static void SetDefaultWindowMode(WindowMode defaultMode);
     static void SetAnimationConfig(AnimationConfig config);
     static bool transAnimateEnable_;
-    static WindowUIType windowUIType_;
+    static std::string uiType_;
     
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);

@@ -65,7 +65,7 @@ AnimationConfig WindowNodeContainer::animationConfig_;
 bool WindowNodeContainer::isFloatWindowAboveFullWindow_ = false;
 uint32_t WindowNodeContainer::maxMainFloatingWindowNumber_ = 100;
 bool WindowNodeContainer::isAnimateTransactionEnabled_ = false;
-WindowUIType WindowNodeContainer::windowUIType_ = WindowUIType::PHONE_WINDOW;
+std::string WindowNodeContainer::uiType_ = "";
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {
@@ -775,7 +775,8 @@ void WindowNodeContainer::CloseInputMethodSyncTransaction()
 
 bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
 {
-    if (windowUIType_ != WindowUIType::PHONE_WINDOW) {
+    auto isPhone = uiType_ == UI_TYPE_PHONE;
+    if (!isPhone) {
         return false;
     }
     return WindowHelper::IsWindowFollowParent(type);
