@@ -323,7 +323,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSessionEvent eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
