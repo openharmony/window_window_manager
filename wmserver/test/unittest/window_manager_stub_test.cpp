@@ -547,7 +547,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2
     data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
     data.WriteInt32(0);
     uint32_t code = static_cast<uint32_t>(
-    IWindowManager::WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID);
+        IWindowManager::WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
