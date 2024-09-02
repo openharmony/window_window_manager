@@ -87,10 +87,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
-            auto avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
+            uint32_t avoidAreaTypeId = data.ReadUint32();
+            if (avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+                avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+                return ERR_INVALID_DATA;
+            }
+            auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);
             AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
             reply.WriteParcelable(&avoidArea);
-
             break;
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
@@ -198,6 +202,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
             sptr<IRemoteObject> controllerObject = data.ReadRemoteObject();
+            if (controllerObject == nullptr) {
+                TLOGE(WmsLogTag::DEFAULT, "Read animation controller object failed");
+                return ERR_INVALID_DATA;
+            }
             sptr<RSIWindowAnimationController> controller = iface_cast<RSIWindowAnimationController>(controllerObject);
             WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -261,7 +269,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER: {
             uint32_t windowId = data.ReadUint32();
-            bool haveAvoidAreaListener = data.ReadBool();
+            bool haveAvoidAreaListener;
+            if (!data.ReadBool(haveAvoidAreaListener)) {
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = UpdateAvoidAreaListener(windowId, haveAvoidAreaListener);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -324,10 +335,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "Read failed!");
+                return ERR_INVALID_DATA;
+            }
             std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
             if (event == nullptr) {
-                WLOGFE("event is null");
+                TLOGE(WmsLogTag::WMS_EVENT, "event is null");
                 return ERR_INVALID_DATA;
             }
             event->ReadFromParcel(data);
@@ -342,7 +357,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS: {
             std::vector<uint32_t> missionIds;
-            data.ReadUInt32Vector(&missionIds);
+            if (!data.ReadUInt32Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DEFAULT, "Read animation target mission ids failed");
+                return ERR_INVALID_DATA;
+            }
             std::vector<sptr<RSWindowAnimationTarget>> targets;
             WMError errCode = GetWindowAnimationTargets(missionIds, targets);
             if (!MarshallingHelper::MarshallingVectorParcelableObj<RSWindowAnimationTarget>(reply, targets)) {

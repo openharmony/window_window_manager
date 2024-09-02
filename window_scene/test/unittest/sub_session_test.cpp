@@ -128,11 +128,17 @@ HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
  */
 HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
 {
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "TransferKeyEvent04";
+    sessionInfo.moduleName_ = "TransferKeyEvent04";
+    sessionInfo.bundleName_ = "TransferKeyEvent04";
+    sptr<SubSession> session = new SubSession(sessionInfo, specificCallback);
+    ASSERT_NE(session, nullptr);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    subSession_->SetParentSession(subSession_);
-    subSession_->SetSessionState(SessionState::STATE_CONNECT);
+    subSession_->SetParentSession(session);
+    subSession_->SetSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, subSession_->TransferKeyEvent(keyEvent));
 }
 
@@ -174,7 +180,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "phone";
+    systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
 
     ASSERT_TRUE(subSession_ != nullptr);
     auto result = subSession_->CheckPointerEventDispatch(pointerEvent);
@@ -190,7 +196,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -207,7 +213,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -225,7 +231,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -244,7 +250,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    systemConfig_.uiType_ = "pc";
+    systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -286,6 +292,42 @@ HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
 
     subSession_->SetParentSession(parentSession);
     ASSERT_FALSE(subSession_->IsVisibleForeground());
+}
+
+/**
+ * @tc.name: RectCheck
+ * @tc.desc: test function : RectCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
+{
+    ASSERT_NE(subSession_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testRectCheck";
+    info.moduleName_ = "testRectCheck";
+    info.bundleName_ = "testRectCheck";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+    subSession_->parentSession_ = session;
+    uint32_t curWidth = 100;
+    uint32_t curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 300;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 1930;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 200;
+    subSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 1930;
+    subSession_->RectCheck(curWidth, curHeight);
 }
 }
 }

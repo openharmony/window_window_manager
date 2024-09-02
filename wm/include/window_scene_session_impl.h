@@ -216,7 +216,8 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    void NotifyDisplayInfoChange();
+    void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Window Immersive
@@ -228,10 +229,14 @@ private:
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
-    uint32_t getAvoidAreaCnt_ = 0;
+    std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayoutOnShow(WindowType type);
-    void InitSystemSessionEnableDrag();
+    void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Property.
+     */
+    void InitSystemSessionDragEnable();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

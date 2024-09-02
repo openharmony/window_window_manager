@@ -29,7 +29,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplayListener"};
 }
 
-JsDisplayListener::JsDisplayListener(napi_env env) : env_(env)
+JsDisplayListener::JsDisplayListener(napi_env env) : env_(env), weakRef_(wptr<JsDisplayListener> (this))
 {
     WLOGFI("Constructor execution");
     napi_add_env_cleanup_hook(env_, CleanEnv, this);
@@ -131,11 +131,15 @@ void JsDisplayListener::OnCreate(DisplayId id)
         WLOGE("JsDisplayListener::OnCreate not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, id, env = env_]() {
+    auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCreate");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -160,11 +164,15 @@ void JsDisplayListener::OnDestroy(DisplayId id)
         WLOGE("JsDisplayListener::OnDestroy not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, id, env = env_]() {
+    auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDestroy");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -189,11 +197,15 @@ void JsDisplayListener::OnChange(DisplayId id)
         WLOGE("JsDisplayListener::OnChange not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, id, env = env_]() {
+    auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -218,11 +230,15 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         WLOGE("OnPrivateWindow not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, hasPrivate, env = env_]() {
+    auto napiTask = [self = weakRef_, hasPrivate, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnPrivateWindow");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, hasPrivate)};
-        CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -247,11 +263,15 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
         WLOGE("OnFoldStatusChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, foldStatus, env = env_] () {
+    auto napiTask = [self = weakRef_, foldStatus, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldStatusChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, foldStatus)};
-        CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -275,11 +295,15 @@ void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         WLOGE("OnFoldAngleChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, foldAngles, env = env_]() {
+    auto napiTask = [self = weakRef_, foldAngles, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldAngleChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateNativeArray(env, foldAngles)};
-        CallJsMethod(EVENT_FOLD_ANGLE_CHANGED, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_FOLD_ANGLE_CHANGED, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -303,11 +327,15 @@ void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
         WLOGE("OnCaptureStatusChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, isCapture, env = env_]() {
+    auto napiTask = [self = weakRef_, isCapture, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCaptureStatusChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, isCapture)};
-        CallJsMethod(EVENT_CAPTURE_STATUS_CHANGED, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_CAPTURE_STATUS_CHANGED, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -332,11 +360,15 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
         WLOGE("OnDisplayModeChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, displayMode, env = env_] () {
+    auto napiTask = [self = weakRef_, displayMode, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDisplayModeChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, displayMode)};
-        CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -361,11 +393,15 @@ void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
         WLOGE("OnAvailableAreaChanged not this event, return");
         return;
     }
-    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, listener, area, env = env_]() {
+    auto napiTask = [self = weakRef_, area, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnAvailableAreaChanged");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
         napi_value argv[] = {CreateJsRectObject(env, area)};
-        CallJsMethod(EVENT_AVAILABLE_AREA_CHANGED, argv, ArraySize(argv));
+        thisListener->CallJsMethod(EVENT_AVAILABLE_AREA_CHANGED, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {

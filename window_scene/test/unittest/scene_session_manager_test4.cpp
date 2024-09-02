@@ -951,19 +951,20 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTe
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     std::string visibilityInfo = "";
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     visibleState = WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION;
     ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
 
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -983,7 +984,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTe
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
     ssm_->UpdateSubWindowVisibility(sceneSession, visibleState, visibilityChangeInfo,
-                                    windowVisibilityInfos, visibilityInfo);
+                                    windowVisibilityInfos, visibilityInfo, currVisibleData);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
@@ -1402,10 +1403,6 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, sceneSession));
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
-    ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -1422,10 +1419,6 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.isSystem_ = false;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    ssm_->listenerController_ = nullptr;
     result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
@@ -1459,15 +1452,10 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc, Function | Small
     ASSERT_NE(sceneSession->surfaceNode_, nullptr);
     sceneSession->surfaceNode_->bufferAvailable_ = true;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionSnapshotFunc(sceneSession);
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
     sessionInfo.abilityInfo->excludeFromMissions = false;
-    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
-
-    ssm_->listenerController_ = nullptr;
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
     sessionInfo.abilityInfo = nullptr;

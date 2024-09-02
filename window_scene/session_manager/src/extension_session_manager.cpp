@@ -28,24 +28,14 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
 const std::string EXTENSION_SESSION_MANAGER_THREAD = "OS_ExtensionSessionManager";
-std::recursive_mutex g_instanceMutex;
 } // namespace
 
-ExtensionSessionManager& ExtensionSessionManager::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static ExtensionSessionManager* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new ExtensionSessionManager();
-        instance->Init();
-    }
-    return *instance;
-}
-
-void ExtensionSessionManager::Init()
+ExtensionSessionManager::ExtensionSessionManager()
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
 }
+
+WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
 sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
 {

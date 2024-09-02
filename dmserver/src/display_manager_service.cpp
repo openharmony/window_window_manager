@@ -486,6 +486,12 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
     return displayPowerController_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerService::TryToCancelScreenOff()
+{
+    WLOGFE("[UL_POWER]DMS not support TryToCancelScreenOff");
+    return false;
+}
+
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {
@@ -798,5 +804,22 @@ sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
 void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
 {
     DisplayManagerAgentController::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysicalResolution()
+{
+    if (allDisplayPhysicalResolution_.empty()) {
+        sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "default display null");
+            return allDisplayPhysicalResolution_;
+        }
+        DisplayPhysicalResolution defaultResolution;
+        defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        defaultResolution.physicalWidth_ = static_cast<uint32_t>(displayInfo->GetWidth());
+        defaultResolution.physicalHeight_ = static_cast<uint32_t>(displayInfo->GetHeight());
+        allDisplayPhysicalResolution_.emplace_back(defaultResolution);
+    }
+    return allDisplayPhysicalResolution_;
 }
 } // namespace OHOS::Rosen
