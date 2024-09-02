@@ -756,7 +756,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
 
 void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
-    WLOGFI("get focus Winow info lite proxy");
+    WLOGFD("get focus Winow info lite proxy");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
