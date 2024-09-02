@@ -393,11 +393,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE: {
-            uint32_t maxMode = 0;
-            if (!data.ReadUint32(maxMode)) {
-                TLOGE(WmsLogTag::DEFAULT, "read maxMode failed");
-                return ERR_INVALID_DATA;
-            }
+            MaximizeMode maximizeMode = static_cast<MaximizeMode>(data.ReadUint32());
             MaximizeMode maximizeMode = static_cast<MaximizeMode>(maxMode);
             SetMaximizeMode(maximizeMode);
             break;
