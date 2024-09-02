@@ -1632,14 +1632,16 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallT
     window->property_->SetModeSupportInfo(modeSupportInfo);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false };
+    window->windowTitleVisibleFlags_ = { false, false, false, false};
     bool hideMaximizeButton = false;
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    bool hideCloseButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
+    ASSERT_EQ(hideCloseButton, true);
 }
 
 /**
@@ -1658,14 +1660,16 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallT
     window->property_->SetModeSupportInfo(modeSupportInfo);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { true, true, true };
+    window->windowTitleVisibleFlags_ = { true, true, true, true};
     bool hideMaximizeButton = false;
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    bool hideCloseButton = false;
+    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, false);
     ASSERT_EQ(hideMinimizeButton, false);
     ASSERT_EQ(hideSplitButton, false);
+    ASSERT_EQ(hideCloseButton, false);
 }
 
 /**
@@ -1684,14 +1688,16 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallT
     window->property_->SetModeSupportInfo(modeSupportInfo);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false };
+    window->windowTitleVisibleFlags_ = { false, false, false, false};
     bool hideMaximizeButton = true;
     bool hideMinimizeButton = true;
     bool hideSplitButton = true;
-    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
+    bool hideCloseButton = true;
+    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
+    ASSERT_EQ(hideCloseButton, true);
 }
 
 /**
@@ -1707,7 +1713,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible01, Function | SmallT
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    window->SetTitleButtonVisible(false, false, false);
+    window->SetTitleButtonVisible(false, false, false, true);
 }
 
 /**
@@ -1723,7 +1729,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible02, Function | SmallT
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WMError res = window->SetTitleButtonVisible(false, false, false);
+    WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
@@ -1745,10 +1751,10 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WMError res = window->SetTitleButtonVisible(false, false, false);
+    WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    res = window->SetTitleButtonVisible(false, false, false);
+    res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
