@@ -985,7 +985,10 @@ ohos_unittest("ws_scene_session_manager_test3") {
 
   sources = [ "scene_session_manager_test3.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_base:configuration",
