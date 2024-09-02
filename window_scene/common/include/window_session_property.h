@@ -430,7 +430,7 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
-    WindowUIType windowUIType_ = WindowUIType::PHONE_WINDOW;
+    WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
