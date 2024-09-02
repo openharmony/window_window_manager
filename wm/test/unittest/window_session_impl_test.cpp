@@ -315,7 +315,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble01, Funct
         new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->MakeSubOrDialogWindowDragableAndMoveble();
     ASSERT_EQ(true, window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 end";
@@ -337,7 +337,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble02, Funct
         new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->MakeSubOrDialogWindowDragableAndMoveble();
     ASSERT_EQ(true, window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble02 end";
@@ -359,7 +359,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble03, Funct
         new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    window->windowSystemConfig_.uiType_ = "phone";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->MakeSubOrDialogWindowDragableAndMoveble();
     ASSERT_EQ(false, window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble03 end";

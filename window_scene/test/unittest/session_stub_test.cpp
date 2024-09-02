@@ -425,19 +425,38 @@ HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | Small
 }
 
 /**
- * @tc.name: HandleUpdatePiPRect004
+ * @tc.name: HandleUpdatePiPRect001
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPRect004, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
-    auto res = session_->HandleUpdatePiPRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
+    float width = 0.55;
+    float height = 0.55;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(width);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(height);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(40);
+    data.WriteInt32(-1);
+    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPRect(data, reply));
 }
 
 /**
@@ -469,7 +488,8 @@ HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
+    data.WriteInt32(10);
+    data.WriteInt32(20);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleProcessPointDownSession(data, reply);
     ASSERT_EQ(ERR_NONE, res);

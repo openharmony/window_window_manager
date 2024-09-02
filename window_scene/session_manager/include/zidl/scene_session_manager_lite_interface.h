@@ -76,6 +76,10 @@ public:
         TRANS_ID_UNREGISTER_COLLABORATOR,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID,
+        TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW,
+        TRANS_ID_CLOSE_TARGET_PIP_WINDOW,
+        TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO,
+        TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -109,6 +113,15 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    /**
+     * @brief Obtains main window state list by pid
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pid Target pid
+     * @param windowStates Window state list
+     */
+    virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

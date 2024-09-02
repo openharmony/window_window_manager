@@ -18,6 +18,7 @@
 #include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -191,8 +192,12 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
     usleep(WAIT_SYANC_US);
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window1->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetMode());
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetMode());
+    }
+    else {
+        ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetMode());
+    }
     window1->Destroy();
     window2->Destroy();
 }
