@@ -1104,18 +1104,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
     config.density_ = 1.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     window_->lastDensity_ = 1.0f;
     window_->lastOrientation_ = 0;
     config.density_ = 2.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     window_->lastDensity_ = 1.0f;
     window_->lastOrientation_ = 0;
     config.density_ = 1.0f;
     config.orientation_ = 1;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     config.isDensityFollowHost_ = false;
     window_->lastDensity_ = 0.0f;
@@ -1123,6 +1126,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
     config.density_ = 1.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1153,13 +1157,68 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function 
 }
 
 /**
- * @tc.name: NotifyDisplayInfoChange
- * @tc.desc: NotifyDisplayInfoChange Test
+ * @tc.name: UpdateSystemViewportConfig1
+ * @tc.desc: handler_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, window_);
+    window_->handler_ = nullptr;
+    window_->UpdateSystemViewportConfig();
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig2
+ * @tc.desc: Follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->isDensityFollowHost_ = true;
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig3
+ * @tc.desc: Do not follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->isDensityFollowHost_ = false;
+    window_->property_->SetDisplayId(0);
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    window_->context_ = abilityContext;
+    SessionViewportConfig config;
+    window_->NotifyDisplayInfoChange(config);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange2
+ * @tc.desc: context_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
     SessionViewportConfig config;
     window_->NotifyDisplayInfoChange(config);
 }
