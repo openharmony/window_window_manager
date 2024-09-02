@@ -198,7 +198,7 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     INIT_PROXY_CHECK_RETURN();
-    WLOGFI("use Foucus window info proxy");
+    WLOGFD("use Foucus window info proxy");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
