@@ -842,11 +842,10 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
     res = extensionSession_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_OK, res);
 
-    extensionSession_->state_ = nullptr;
+    extensionSession_->sessionStage_ = nullptr;
     res = extensionSession_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
-
 }
 }
 }
