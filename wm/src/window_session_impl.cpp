@@ -2834,7 +2834,7 @@ EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>>
 
 WSError WindowSessionImpl::NotifyTouchOutside()
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "window: name=%{public}s, id=%{public}u",
+    TLOGD(WmsLogTag::WMS_EVENT, "window: name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::recursive_mutex> lockListener(touchOutsideListenerMutex_);
     auto touchOutsideListeners = GetListeners<ITouchOutsideListener>();
@@ -3186,7 +3186,7 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
     bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
-    WLOGD("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    TLOGD(WmsLogTag::WMS_EVENT, "isKeyFN:%{public}d, isKeyboard:%{public}d", isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
@@ -3505,7 +3505,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);
+    TLOGD(WmsLogTag::WMS_EVENT, "WindowMode:%{public}d", mode);
     auto windowStatus = GetWindowStatusInner(mode);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();

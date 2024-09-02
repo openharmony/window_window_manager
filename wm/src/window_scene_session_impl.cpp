@@ -3043,7 +3043,7 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
         return result;
     }
     for (uint32_t i = 0; i < rects.size(); i++) {
-        WLOGFI("Set areas: %{public}u [x: %{public}d y:%{public}d w:%{public}u h:%{public}u]",
+        WLOGFD("Set areas: %{public}u [x: %{public}d y:%{public}d w:%{public}u h:%{public}u]",
             i, rects[i].posX_, rects[i].posY_, rects[i].width_, rects[i].height_);
     }
     return result;
