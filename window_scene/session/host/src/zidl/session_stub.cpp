@@ -581,7 +581,11 @@ int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParce
 int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleTransferAbilityResult!");
-    uint32_t resultCode = data.ReadUint32();
+    uint32_t resultCode = 0;
+    if (!data.ReadUint32(resultCode)) {
+        WLOGFE("Failed to read resultCode!");
+        return ERR_TRANSACTION_FAILED;
+    }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         WLOGFE("want is nullptr");
