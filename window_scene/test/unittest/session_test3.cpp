@@ -717,6 +717,24 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 }
 
 /**
+ * @tc.name: SetLeashWindowSurfaceNodeChangedListener
+ * @tc.desc: SetLeashWindowSurfaceNodeChangedListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetLeashWindowSurfaceNodeChangedListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int resultValue = 0;
+    NotifyLeashWindowSurfaceNodeChangedFunc func = [&resultValue]() {
+        resultValue = 1;
+    };
+    session_->SetLeashWindowSurfaceNodeChangedListener(func);
+    session_->SetLeashWinSurfaceNode(nullptr);
+    EXPECT_EQ(resultValue, 1);
+    session_->SetLeashWindowSurfaceNodeChangedListener(nullptr);
+}
+
+/**
  * @tc.name: NotifySessionFocusableChange
  * @tc.desc: NotifySessionFocusableChange Test
  * @tc.type: FUNC
