@@ -517,7 +517,11 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
-    auto mode = data.ReadUint32();
+    auto mode = 0;
+    if (!data.ReadUint32(mode)) {
+        return ERR_INVALID_DATA;
+    }
+
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
