@@ -124,8 +124,64 @@ HWTEST_F(AbstractScreenTest, RSTree, Function | SmallTest | Level3)
     absScreen_->UpdateRSTree(surfaceNode, false);
     absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    
+    absScreen_->UpdateRSTree(surfaceNode, false, false);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, false, false);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, true);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
     absScreen_->rsDisplayNode_ = nullptr;
 }
+
+
+/**
+ * @tc.name: InitRSDisplayNode
+ * @tc.desc: InitRSDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, InitRSDisplayNode, Function | SmallTest | Level3)
+{
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    
+    RSDisplayNodeConfig config_;
+    Point startPoint;
+    absScreen_->InitRSDisplayNode(config_, startPoint);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+}
+
+/**
+ * @tc.name: InitRSDefaultDisplayNode
+ * @tc.desc: InitRSDefaultDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, Function | SmallTest | Level3)
+{
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    
+    RSDisplayNodeConfig config_;
+    Point startPoint;
+    absScreen_->InitRSDefaultDisplayNode(config_, startPoint);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+}
+
+/**
+ * @tc.name: SetScreenColorGamut
+ * @tc.desc: SetScreenColorGamut
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, SetScreenColorGamut, Function | SmallTest | Level3)
+{
+    int32_t colorGamutIdx = 0;
+    auto result = absScreen_->SetScreenColorGamut(colorGamutIdx);
+    ASSERT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+}
+
 /**
  * @tc.name: ColorGamut
  * @tc.desc: Screen color gamut
@@ -216,6 +272,10 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, Function | SmallTest | Level3)
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_CONSTANT;
     DMError result = absScreen_->SetScreenGamutMap(gamutMap);
     EXPECT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
+    
+    gamutMap = static_cast<ScreenGamutMap>(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION) + 1);
+    result = absScreen_->SetScreenGamutMap(gamutMap);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -284,11 +344,11 @@ HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: GetRSDisplayNodeConfig
+ * @tc.name: GetRSDisplayNodeConfig01
  * @tc.desc: Get RSDisplay node config
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig01, Function | SmallTest | Level3)
 {
     sptr<AbstractScreen> absTest = nullptr;
     RSDisplayNodeConfig config_;
@@ -309,6 +369,52 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig, Function | SmallTest | Leve
     absScreenGroup_->mirrorScreenId_ = 10086;
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: GetRSDisplayNodeConfig01
+ * @tc.desc: Get RSDisplay node config
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig02, Function | SmallTest | Level3)
+{
+    sptr<AbstractScreen> absTest = absScreen_;
+    RSDisplayNodeConfig config_;
+
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
+    bool result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
+    EXPECT_EQ(true, result);
+
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
+    result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
+    EXPECT_EQ(true, result);
+
+    absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
+    absScreenGroup_->mirrorScreenId_ = 0;
+    result = absScreenGroup_->GetRSDisplayNodeConfig(absTest, config_);
+    EXPECT_EQ(true, result);
+    Point point_(159, 357);
+    absScreen_->startPoint_ = point_;
+    (absScreenGroup_->screenMap_).insert({10086, absScreen_});
+    absScreenGroup_->mirrorScreenId_ = 10086;
+    EXPECT_EQ(true, result);
+}
+
+/**
+ * @tc.name: GetChildPosition
+ * @tc.desc: GetChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, GetChildPosition, Function | SmallTest | Level3)
+{
+    ScreenId screenId = -1;
+    absScreenGroup_->GetChildPosition(screenId);
+    ASSERT_EQ(screenId, -1);
+
+    screenId = 1;
+    absScreenGroup_->GetChildPosition(screenId);
+    ASSERT_EQ(screenId, 1);
+}
+
 
 /**
  * @tc.name: AddChild01
@@ -590,35 +696,6 @@ HWTEST_F(AbstractScreenTest, AddChild03, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: GetSourceMode
- * @tc.desc: get source mode
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenTest, GetSourceMode01, Function | SmallTest | Level3)
-{
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
-    absScreen_->screenController_->dmsScreenGroupMap_.insert({10086, absScreenGroup_});
-    absScreen_->groupDmsId_ = 10086;
-    ScreenSourceMode result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MAIN);
-
-    absScreen_->screenController_->defaultRsScreenId_ = 144;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MIRROR);
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_EXTEND);
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-
-    sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
-    sptr<AbstractScreen> absScreenTest = new AbstractScreen(absScreenController, name_, 0, 0);
-    result = absScreenTest->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-}
-
-/**
  * @tc.name: CalcRotation
  * @tc.desc: Calc rotation
  * @tc.type: FUNC
@@ -662,6 +739,265 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, Function | SmallTest | Level
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
     ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: UpdateRSTree01
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree01, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    absScreen_->rsDisplayNode_ = nullptr;
+    bool isAdd = true;
+    bool needToUpdate = true;
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    ASSERT_EQ(nullptr, absScreen_->rsDisplayNode_);
+}
+
+/**
+ * @tc.name: UpdateRSTree02
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree02, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    bool isAdd = true;
+    bool needToUpdate = true;
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree03
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree03, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    bool isAdd = true;
+    bool needToUpdate = false;
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree04
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree04, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    bool isAdd = false;
+    bool needToUpdate = false;
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree05
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree05, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    bool isAdd = false;
+    bool needToUpdate = true;
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree06
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree06, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    bool isAdd = false;
+    bool needToUpdate = true;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree07
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree07, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    bool isAdd = true;
+    bool needToUpdate = false;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree08
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree08, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    bool isAdd = false;
+    bool needToUpdate = false;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateRSTree09
+ * @tc.desc: UpdateRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateRSTree09, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    bool isAdd = false;
+    bool needToUpdate = true;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateDisplayGroupRSTree01
+ * @tc.desc: UpdateDisplayGroupRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    NodeId parentNodeId = 0;
+    bool isAdd = true;
+
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    ASSERT_EQ(nullptr, absScreen_->rsDisplayNode_);
+}
+
+/**
+ * @tc.name: UpdateDisplayGroupRSTree02
+ * @tc.desc: UpdateDisplayGroupRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    NodeId parentNodeId = 0;
+    bool isAdd = true;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateDisplayGroupRSTree03
+ * @tc.desc: UpdateDisplayGroupRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    NodeId parentNodeId = 0;
+    bool isAdd = false;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateDisplayGroupRSTree04
+ * @tc.desc: UpdateDisplayGroupRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+    NodeId parentNodeId = 0;
+    bool isAdd = true;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->rsDisplayNode_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateDisplayGroupRSTree05
+ * @tc.desc: UpdateDisplayGroupRSTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree05, Function | SmallTest | Level3)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    NodeId parentNodeId = 0;
+    bool isAdd = false;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->rsDisplayNode_ = nullptr;
 }
 }
 } // namespace Rosen

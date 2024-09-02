@@ -133,7 +133,7 @@ public:
     bool HasMainFullScreenWindowShown();
     static bool GetAnimateTransactionEnabled();
     void SetWindowPairFrameGravity(DisplayId displayId, Gravity gravity);
-    static std::string uiType_;
+    static WindowUIType windowUIType_;
     
 private:
     friend class WindowRoot;

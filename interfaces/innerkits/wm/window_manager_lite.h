@@ -228,6 +228,46 @@ public:
      */
     WMError TerminateSessionByPersistentId(int32_t persistentId);
 
+    /**
+     * @brief Close target float window.
+     *
+     * @param bundleName the target float window need to be closed.
+     * @return WM_OK means Close success, others means Close failed.
+     */
+    WMError CloseTargetFloatWindow(const std::string& bundleName);
+
+    /**
+     * @brief Register listener for PiP window state changed.
+     *
+     * @param listener the PiP state changed listener.
+     * @return WM_OK means Register success, others means Register failed.
+     */
+    WMError RegisterPiPStateChangedListener(const sptr<IPiPStateChangedListener>& listener);
+
+    /**
+     * @brief Unregister listener for PiP window state changed.
+     *
+     * @param listener the PiP state changed listener.
+     * @return WM_OK means Unregister success, others means Unregister failed.
+     */
+    WMError UnregisterPiPStateChangedListener(const sptr<IPiPStateChangedListener>& listener);
+
+    /**
+     * @brief Close target PiP Window by bundleName.
+     *
+     * @param bundleName the target PiP Window need to be closed.
+     * @return WM_OK means Close success, others means Close failed.
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+
+    /**
+     * @brief Get current show PiP Window info.
+     *
+     * @param bundleName the current PiP window bundleName.
+     * @return WM_OK means Get success, others means Get failed.
+     */
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -245,6 +285,7 @@ private:
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) const;
     void UpdateWindowModeTypeInfo(WindowModeType type) const;
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) const;
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) const;
     void OnRemoteDied();
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     WMError NotifyWindowStyleChange(WindowStyleType type);

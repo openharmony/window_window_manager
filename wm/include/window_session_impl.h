@@ -28,6 +28,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -276,7 +277,8 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);
@@ -321,7 +323,6 @@ protected:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
-    std::atomic_bool enableFrameLayoutFinishCb_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -336,7 +337,6 @@ protected:
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
-    std::atomic_bool enableSetBufferAvailableCallback_ = false;
     bool IsFreeMultiWindowMode() const
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
@@ -468,9 +468,6 @@ private:
 
     std::atomic<int32_t> lastInteractionEventId_ { 0 };
 
-    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
-    bool postTaskDone_ = false;
-    int16_t rotationAnimationCount_ { 0 };
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
@@ -481,7 +478,15 @@ private:
     sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
-    std::atomic<bool> isUiContentDestructing_ = false;
+
+    /*
+     * Window Layout
+     */
+    std::atomic_bool windowSizeChanged_ = true;
+    std::atomic_bool enableFrameLayoutFinishCb_ = false;
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    bool postTaskDone_ = false;
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

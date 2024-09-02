@@ -212,9 +212,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -564,35 +563,24 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
+    if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
+        windowSizeChanged_ = true;
+    }
     if (reason == SizeChangeReason::DRAG_END) {
         property_->SetRequestRect(wmRect);
     }
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
-        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), wmReason, rsTransaction != nullptr,
-        GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
+        ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
+        rsTransaction != nullptr, GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
-    } else if (handler_ != nullptr) {
-        UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     } else {
-        if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
-            NotifySizeChange(wmRect, wmReason);
-            lastSizeChangeReason_ = wmReason;
-            postTaskDone_ = true;
-        }
-        handler_->PostTask([weak = wptr(this), wmReason, wmRect, rsTransaction]() {
-            auto window = weak.promote();
-            if (!window) {
-                return;
-            }
-            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-            window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
-        });
+        UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     }
 
     sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
@@ -627,7 +615,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0 && !window->isUiContentDestructing_) {
+            if (window->rotationAnimationCount_ == 0) {
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -649,6 +637,17 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+        NotifySizeChange(wmRect, wmReason);
+        lastSizeChangeReason_ = wmReason;
+        postTaskDone_ = true;
+    }
+    if (handler_ == nullptr) {
+        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        return;
+    }
+
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
@@ -660,28 +659,36 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
-            !window->postTaskDone_) {
-            window->NotifySizeChange(wmRect, wmReason);
-            window->lastSizeChangeReason_ = wmReason;
-        }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
-        window->postTaskDone_ = true;
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
 {
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        WLOGFW("uiContent is null!");
-        return;
+    auto task = [weak = wptr(this)] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null");
+            return;
+        }
+        std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+        if (uiContent == nullptr) {
+            WLOGFW("uiContent is null!");
+            return;
+        }
+        uiContent->NotifyRotationAnimationEnd();
+    };
+    if (handler_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "handler is null!");
+        task();
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyRotationAnimationEnd");
     }
-    uiContent->NotifyRotationAnimationEnd();
 }
 
 void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
@@ -873,18 +880,19 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info)
 {
-    if (rect.width_ == 0 || rect.height_ == 0) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
-        return;
+    sptr<DisplayInfo> displayInfo;
+    if (info == nullptr) {
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("display is null!");
+            return;
+        }
+        displayInfo = display->GetDisplayInfo();
+    } else {
+        displayInfo = info;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("display is null!");
-        return;
-    }
-    auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null!");
         return;
@@ -949,7 +957,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = windowSystemConfig_.IsPcWindow();
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
@@ -1050,47 +1058,39 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-        isUiContentDestructing_ = true;
         uiContent_ = std::move(uiContent);
         RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
-    isUiContentDestructing_ = false;
     return WMError::WM_OK;
 }
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    uiContent_->SetFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window != nullptr && window->surfaceNode_ != nullptr) {
-            bool setCallBackEnable = true;
-            if (window->enableSetBufferAvailableCallback_.compare_exchange_strong(setCallBackEnable, false)) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "Notify buffer available after layout, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MAIN,
-                    "Notify buffer available after layout, windowId: %{public}u", window->GetWindowId());
-                // false: Make the function callable
-                window->surfaceNode_->SetIsNotifyUIBufferAvailable(false);
-            }
-        }
-    });
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.IsPcWindow()) {
+        return;
+    }
     uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
         auto window = weakThis.promote();
         if (window == nullptr) {
             return;
         }
-        bool setCallBackEnable = true;
-        if (window->enableFrameLayoutFinishCb_.compare_exchange_strong(setCallBackEnable, false)) {
-            auto hostSession = window->GetHostSession();
-            if (hostSession) {
-                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "NotifyFrameLayoutFinish, windowId: %u", window->GetWindowId());
-                TLOGI(WmsLogTag::WMS_MULTI_WINDOW,
-                    "NotifyFrameLayoutFinish, windowId: %{public}u", window->GetWindowId());
-                hostSession->NotifyFrameLayoutFinishFromApp();
+        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
+            auto windowRect = window->GetRect();
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            TLOGI(WmsLogTag::WMS_LAYOUT,
+                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
+            WSRect rect = { windowRect.posX_, windowRect.posY_,
+                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
+            if (auto session = window->GetHostSession()) {
+                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
             }
+            window->windowSizeChanged_ = false;
+            window->enableFrameLayoutFinishCb_ = false;
         }
     });
 }
@@ -1339,8 +1339,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", topmost);
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!isPC) {
+    if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
@@ -2195,9 +2194,8 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(isPC || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -2231,8 +2229,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (needNotifyListeners && !isPcAppInPad) {
+    if (needNotifyListeners) {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
@@ -2339,14 +2336,12 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         }
         {
             std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-            isUiContentDestructing_ = true;
             if (uiContent_ != nullptr) {
                 uiContent_ = nullptr;
                 TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
                     GetPersistentId());
             }
         }
-        isUiContentDestructing_ = false;
     };
     if (handler_) {
         handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");
@@ -2828,7 +2823,7 @@ EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>>
 
 WSError WindowSessionImpl::NotifyTouchOutside()
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "window: name=%{public}s, id=%{public}u",
+    TLOGD(WmsLogTag::WMS_EVENT, "window: name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::recursive_mutex> lockListener(touchOutsideListenerMutex_);
     auto touchOutsideListeners = GetListeners<ITouchOutsideListener>();
@@ -2988,7 +2983,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             pointerEvent->MarkProcessed();
         }
     } else {
-        TLOGW(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerEvent not consumed, windowId: %{public}u", GetWindowId());
+        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            TLOGW(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerEvent not consumed, windowId:%{public}u", GetWindowId());
+        }
         pointerEvent->MarkProcessed();
     }
 }
@@ -3180,7 +3177,7 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
     bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
-    WLOGD("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    TLOGD(WmsLogTag::WMS_EVENT, "isKeyFN:%{public}d, isKeyboard:%{public}d", isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
@@ -3368,8 +3365,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == UI_TYPE_PHONE ||
-                 (windowSystemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.IsPhoneWindow() ||
+                 (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
@@ -3499,8 +3496,8 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);
     auto windowStatus = GetWindowStatusInner(mode);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "WindowMode: %{public}d, windowStatus: %{public}d", mode, windowStatus);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
     for (auto& listener : windowStatusChangeListeners) {

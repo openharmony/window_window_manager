@@ -16,6 +16,7 @@
 #include "session_manager/include/screen_session_manager_lite.h"
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
+#include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -155,6 +156,113 @@ sptr<CutoutInfo> ScreenSessionManagerLite::GetCutoutInfo(DisplayId displayId)
         return screenSessionManager_->GetCutoutInfo(displayId);
     }
     return nullptr;
+}
+
+/*
+ * used by powermgr
+ */
+bool ScreenSessionManagerLite::WakeUpBegin(PowerStateChangeReason reason)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->WakeUpBegin(reason);
+    }
+    return false;
+}
+
+bool ScreenSessionManagerLite::WakeUpEnd()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->WakeUpEnd();
+    }
+    return false;
+}
+
+bool ScreenSessionManagerLite::SuspendBegin(PowerStateChangeReason reason)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->SuspendBegin(reason);
+    }
+    return false;
+}
+
+bool ScreenSessionManagerLite::SuspendEnd()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->SuspendEnd();
+    }
+    return false;
+}
+
+bool ScreenSessionManagerLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->SetSpecifiedScreenPower(screenId, state, reason);
+    }
+    return false;
+}
+
+bool ScreenSessionManagerLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->SetScreenPowerForAll(state, reason);
+    }
+    return false;
+}
+
+ScreenPowerState ScreenSessionManagerLite::GetScreenPower(ScreenId dmsScreenId)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetScreenPower(dmsScreenId);
+    }
+    return ScreenPowerState::INVALID_STATE;
+}
+
+bool ScreenSessionManagerLite::SetDisplayState(DisplayState state)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->SetDisplayState(state);
+    }
+    return false;
+}
+
+DisplayState ScreenSessionManagerLite::GetDisplayState(DisplayId displayId)
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetDisplayState(displayId);
+    }
+    return DisplayState::UNKNOWN;
+}
+
+bool ScreenSessionManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
+{
+    ConnectToServer();
+    RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
+    return true;
+}
+
+uint32_t ScreenSessionManagerLite::GetScreenBrightness(uint64_t screenId)
+{
+    ConnectToServer();
+    return static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
+}
+
+std::vector<DisplayId> ScreenSessionManagerLite::GetAllDisplayIds()
+{
+    ConnectToServer();
+    if (screenSessionManager_) {
+        return screenSessionManager_->GetAllDisplayIds();
+    }
+    return std::vector<DisplayId>{};
 }
 
 void ScreenSessionManagerLite::Clear()
