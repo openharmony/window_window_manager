@@ -3507,7 +3507,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode:%{public}d", mode);
+    TLOGI(WmsLogTag::WMS_EVENT, "WindowMode: %{public}d", mode);
     auto windowStatus = GetWindowStatusInner(mode);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
