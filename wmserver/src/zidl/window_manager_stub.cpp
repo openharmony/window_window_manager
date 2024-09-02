@@ -99,7 +99,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
             uint32_t windowType = 0;
-            if (!data.ReadUint32(windowType)) {
+            if (!data.ReadUint32(windowType) || windowType >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_BUTT)) {
                 return ERR_INVALID_DATA;
             }
 
