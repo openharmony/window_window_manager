@@ -409,8 +409,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Le
 HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.bundleName_ = "RequestFocusStatus01";
-    info.abilityName_ = "com.ohos.sceneboard";
+    info.abilityName_ = "RequestFocusStatus01";
+    info.bundleName_ = "com.ohos.sceneboard";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 1;
