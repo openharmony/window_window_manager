@@ -425,7 +425,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, Function | SmallTest | L
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
 
-    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
+    sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     data.WriteParcelable(focusChangeInfo);
     data.WriteRemoteObject(focusChangeInfo->abilityToken_);
 

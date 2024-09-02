@@ -40,11 +40,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
     WindowMessage msgId = static_cast<WindowMessage>(code);
     switch (msgId) {
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT: {
-            uint32_t posX = 0;
-            uint32_t posY = 0;
+            int32_t posX = 0;
+            int32_t posY = 0;
             uint32_t width = 0;
             uint32_t height = 0;
-            if (!data.ReadUint32(posX) || !data.ReadUint32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+            if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
                 return ERR_INVALID_DATA;
             }
