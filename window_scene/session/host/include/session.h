@@ -632,7 +632,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
-    bool systemFocusable_ = true;
+    std::atomic_bool systemFocusable_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
