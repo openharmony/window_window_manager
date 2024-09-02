@@ -452,17 +452,17 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In HandleUpdateSessionRect!");
-    uint32_t posX = 0;
-    uint32_t posY = 0;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!data.ReadUint32(posX) || !data.ReadUint32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }
     WSRect rect = {posX, posY, width, height};
-    TLOGI(WmsLogTag::WMS_LAYOUT, "HandleUpdateSessionRect rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     uint32_t changeReason = 0;
     if (!data.ReadUint32(changeReason)) {
@@ -490,7 +490,7 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "In RaiseAboveTarget!");
+    TLOGD(WmsLogTag::DEFAULT, "In");
     uint32_t subWindowId = 0;
     if (!data.ReadUint32(subWindowId)) {
         TLOGE(WmsLogTag::DEFAULT, "read subWindowId failed");
@@ -574,7 +574,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In HandleSetAspectRatio!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     float ratio = 0.0f;
     if (!data.ReadFloat(ratio)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read ratio failed");
