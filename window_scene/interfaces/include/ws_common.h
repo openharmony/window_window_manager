@@ -356,6 +356,7 @@ struct SessionInfo {
     int32_t realParentId_ = INVALID_SESSION_ID;
     uint32_t uiExtensionUsage_ = 0;
     bool isAsyncModalBinding_ = false;
+    uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 };
 

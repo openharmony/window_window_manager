@@ -1910,6 +1910,18 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetParentWindowType
+ * @tc.desc: GetParentWindowType Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetParentWindowType, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->SetParentWindowType(WindowType::WINDOW_TYPE_TOAST);
+    EXPECT_EQ(window_->GetParentWindowType(), WindowType::WINDOW_TYPE_TOAST);
+}
+
+/**
  * @tc.name: CheckHideNonSecureWindowsPermission
  * @tc.desc: CheckHideNonSecureWindowsPermission Test
  * @tc.type: FUNC
