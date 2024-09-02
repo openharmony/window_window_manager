@@ -98,7 +98,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     auto currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
     int64_t duration = static_cast<int64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - mLastHallReportTime_).count());
-    TLOGI(WmsLogTag::DMS, "duration = %{public}ld", duration);
+    TLOGI(WmsLogTag::DMS, "duration = %{public}" PRIu64" ", duration);
     if (duration < MIN_HALL_REPORT_INTERVAL) {
         TLOGW(WmsLogTag::DMS, "duration < 100ms");
         std::this_thread::sleep_for(std::chrono::milliseconds(MIN_HALL_REPORT_INTERVAL - duration));
