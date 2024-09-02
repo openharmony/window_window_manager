@@ -289,6 +289,7 @@ bool WindowManagerService::Init()
         if (WindowManagerConfig::GetConfig().IsMap()) {
             WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
         }
+        LoadWindowParameter();
         ConfigureWindowManagerService();
         StartingWindow::SetAnimationConfig(WindowNodeContainer::GetAnimationConfigRef());
     }
@@ -315,6 +316,23 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
         return static_cast<int>(windowDumper_->Dump(fd, args));
     };
     return PostSyncTask(task, "Dump");
+}
+
+void WindowManagerService::LoadWindowParameter()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    if (multiWindowUIType == "HandsetSmartWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PHONE_WINDOW;
+    } else if (multiWindowUIType == "FreeFormMultiWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PC_WINDOW;
+    } else if (multiWindowUIType == "TabletSmartWindow") {
+        systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
+            WindowNodeContainer::windowUIType_ = WindowUIType::PAD_WINDOW;
+    } else {
+        WLOGFE("unknown multiWindowUIType:%{public}s.", multiWindowUIType.c_str());
+    }
 }
 
 void WindowManagerService::ConfigureWindowManagerService()
@@ -423,12 +441,6 @@ void WindowManagerService::ConfigureWindowManagerService()
             numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
             maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
-    }
-    item = config["uiType"];
-    if (item.IsString()) {
-        systemConfig_.uiType_ = item.stringValue_;
-        StartingWindow::uiType_ = item.stringValue_;
-        WindowNodeContainer::uiType_ = item.stringValue_;
     }
     item = config["supportTypeFloatWindow"].GetProp("enable");
     if (item.IsBool()) {

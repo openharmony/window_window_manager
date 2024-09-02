@@ -247,11 +247,10 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
     }
-    bool isPC = uiType_ == UI_TYPE_PC;
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         bool isNeedFlush = false;
-        if (isStartDrag_ && isPC) {
+        if (isStartDrag_ && isPcWindow_) {
             surfaceNode->MarkUifirstNode(false);
             isNeedFlush = true;
         }
@@ -268,7 +267,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-        if (!isStartDrag_ && isPC) {
+        if (!isStartDrag_ && isPcWindow_) {
             surfaceNode->MarkUifirstNode(true);
         }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
@@ -854,9 +853,9 @@ void MoveDragController::OnLostFocus()
     }
 }
 
-void MoveDragController::SetUIType(const std::string& uiType)
+void MoveDragController::SetIsPcWindow(bool isPcWindow)
 {
-    uiType_ = uiType;
+    isPcWindow_ = isPcWindow;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)

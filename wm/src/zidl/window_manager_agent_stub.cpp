@@ -153,6 +153,21 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyWindowStyleChange(type);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY: {
+            sptr<WindowPidVisibilityInfo> info = data.ReadParcelable<WindowPidVisibilityInfo>();
+            if (info == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "windowPidVisibilityInfo is null.");
+                return ERR_INVALID_DATA;
+            }
+            NotifyWindowPidVisibilityChanged(info);
+            break;
+        }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED: {
+            std::string bundleName = data.ReadString();
+            bool isForeground = data.ReadBool();
+            UpdatePiPWindowStateChanged(bundleName, isForeground);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
