@@ -35,6 +35,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
+    WINDOW_MANAGER_AGENT_TYPE_BUTT,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
