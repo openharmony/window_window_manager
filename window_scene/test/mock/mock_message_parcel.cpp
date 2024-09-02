@@ -220,7 +220,6 @@ bool Parcel::WriteStringVector(const std::vector<std::string>& val)
 
 bool Parcel::ReadStringVector(std::vector<std::string> *val)
 {
-    (void)val;
     if (g_setReadStringVectorErrorFlag) {
         return false;
     }
