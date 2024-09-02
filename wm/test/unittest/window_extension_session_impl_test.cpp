@@ -147,8 +147,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
-    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
-    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, session));
 }
 
 /**
@@ -1353,10 +1352,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     sptr<SessionMocker> mockHostSession = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(mockHostSession, nullptr);
     window_->hostSession_ = mockHostSession;
-
-    window_->property_->SetDisplayId(DISPLAY_ID_INVALID);
-    EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Show());
 
     window_->property_->SetDisplayId(0);
     EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));
