@@ -95,7 +95,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
             uint32_t windowType = 0;
-            if (!data.ReadUint32(windowType)) {
+            if (!data.ReadUint32(windowType) || windowType >= WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_BUTT) {
                 return ERR_INVALID_DATA;
             }
 
@@ -254,14 +254,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
-            if (from == nullptr) {
-                return ERR_INVALID_DATA;
-            }
-
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-            if (to == nullptr) {
-                return ERR_INVALID_DATA;
-            }
 
             bool isFromClient = false;
             if (!data.ReadBool(isFromClient)) {
