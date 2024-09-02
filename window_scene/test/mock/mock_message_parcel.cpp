@@ -104,11 +104,11 @@ void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
 {
     g_setReadInt64ErrorFlag = flag;
 }
-}
 
 void MockMessageParcel::SetReadStringVectorErrorFlag(bool flag)
 {
     g_setReadStringVectorErrorFlag = flag;
+}
 }
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
