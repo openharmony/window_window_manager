@@ -44,20 +44,8 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             uint32_t posY = 0;
             uint32_t width = 0;
             uint32_t height = 0;
-            if (!data.ReadUint32(posX)) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "read posX failed");
-                return ERR_INVALID_DATA;
-            }
-            if (!data.ReadUint32(posY)) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "read posY failed");
-                return ERR_INVALID_DATA;
-            }
-            if (!data.ReadUint32(width)) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "read width failed");
-                return ERR_INVALID_DATA;
-            }
-            if (!data.ReadUint32(height)) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "read height failed");
+            if (!data.ReadUint32(posX) || !data.ReadUint32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
                 return ERR_INVALID_DATA;
             }
             struct Rect rect { posX, posY, width, height };

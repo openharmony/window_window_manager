@@ -457,20 +457,8 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     uint32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!data.ReadUint32(posX)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read posX failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadUint32(posY)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read posY failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadUint32(width)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read width failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadUint32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read height failed");
+    if (!data.ReadUint32(posX) || !data.ReadUint32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }
     WSRect rect = {posX, posY, width, height};
@@ -502,10 +490,10 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In RaiseAboveTarget!");
+    TLOGD(WmsLogTag::DEFAULT, "In RaiseAboveTarget!");
     uint32_t subWindowId = 0;
     if (!data.ReadUint32(subWindowId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read subWindowId failed");
+        TLOGE(WmsLogTag::DEFAULT, "read subWindowId failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = RaiseAboveTarget(subWindowId);
