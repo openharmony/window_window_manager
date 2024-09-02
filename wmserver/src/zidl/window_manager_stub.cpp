@@ -140,7 +140,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID: {
             uint32_t mainWinId = 0;
             if (!data.ReadUint32(mainWinId)) {
-                TLOGE(WmsLogTag::DEFAULT, "read mainWinId failed");
+                TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
                 return ERR_INVALID_DATA;
             }
             uint32_t topWinId = data.ReadUint32();;
@@ -328,7 +328,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "read windowId failed");
+                TLOGE(WmsLogTag::WMS_HIERARCHY, "read windowId failed");
                 return ERR_INVALID_DATA;
             }
             WMError errCode = RaiseToAppTop(windowId);

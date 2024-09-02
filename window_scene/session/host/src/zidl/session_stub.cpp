@@ -490,10 +490,10 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "In");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "In");
     uint32_t subWindowId = 0;
     if (!data.ReadUint32(subWindowId)) {
-        TLOGE(WmsLogTag::DEFAULT, "read subWindowId failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read subWindowId failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = RaiseAboveTarget(subWindowId);
