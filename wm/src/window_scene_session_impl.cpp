@@ -1583,8 +1583,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
-    const uint32_t zero = 0u;
-    if (zero == width || zero == height) {
+    if (width == 0u || height == 0u) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
