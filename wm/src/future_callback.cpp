@@ -13,26 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_FUTURE_CALLBACK_PROXY_H
-#define OHOS_ROSEN_FUTURE_CALLBACK_PROXY_H
-
-#include "future_callback_interface.h"
-#include "interfaces/include/ws_common.h"
-#include "iremote_proxy.h"
+#include "future_callback.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-class FutureCallbackProxy : public IRemoteProxy<IFutureCallback> {
-public:
-    explicit FutureCallbackProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IFutureCallback>(impl) {}
 
-    ~FutureCallbackProxy() {}
+WSError FutureCallback::OnUpdateSessionRect(const WSRect& rect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:%{public}s", rect.ToString().c_str());
+    future_.SetValue(rect);
+    return WSError::WS_OK;
+}
 
-    WSError OnUpdateSessionRect(const WSRect& rect) override;
+WSRect FutureCallback::GetResult(long timeOut)
+{
+    return future_.GetResult(timeOut);
+}
 
-private:
-    static inline BrokerDelegator<FutureCallbackProxy> delegator_;
-};
+void FutureCallback::ResetLock()
+{
+    future_.ResetLock({});
+}
 } // namespace Rosen
 } // namespace OHOS
-#endif // OHOS_ROSEN_FUTURE_CALLBACK_PROXY_H

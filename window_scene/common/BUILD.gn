@@ -36,9 +36,6 @@ ohos_shared_library("window_scene_common") {
     debug = false
   }
   sources = [
-    "src/future_callback.cpp",
-    "src/future_callback_proxy.cpp",
-    "src/future_callback_stub.cpp",
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
     "src/window_session_property.cpp",
