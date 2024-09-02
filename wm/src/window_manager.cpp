@@ -1004,7 +1004,7 @@ WMError WindowManager::UnregisterWindowPidVisibilityChangedListener(
     auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
         pImpl_->windowPidVisibilityListeners_.end(), listener);
     if (iter == pImpl_->windowPidVisibilityListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::WMS_LIFE, "could not find this listener");
         return WMError::WM_OK;
     }
     pImpl_->windowPidVisibilityListeners_.erase(iter);
