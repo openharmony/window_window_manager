@@ -85,7 +85,12 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE: {
-            UpdateWindowState(static_cast<WindowState>(data.ReadUint32()));
+            uint32_t state = 0;
+            if (!data.ReadUint32(state)) {
+                TLOGE(WmsLogTag::DEFAULT, "read state error");
+                return ERR_INVALID_DATA;
+            }
+            UpdateWindowState(static_cast<WindowState>(state));
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT: {
@@ -97,7 +102,13 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID: {
-            UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
+            uint64_t from = 0;
+            uint64_t to = 0;
+            if (!data.ReadUint64(from) || !data.ReadUint64(to)) {
+                TLOGE(WmsLogTag::DEFAULT, "read display id error");
+                return ERR_INVALID_DATA;
+            }
+            UpdateDisplayId(from, to);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA: {
