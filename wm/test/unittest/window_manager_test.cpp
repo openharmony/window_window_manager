@@ -192,7 +192,11 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = windowManager.GetSnapshotByWindowId(windowId, pixelMap);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    }
 }
 
 /*

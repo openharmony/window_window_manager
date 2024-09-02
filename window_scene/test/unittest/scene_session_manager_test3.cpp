@@ -23,6 +23,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
+#include "scene_board_judgement.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_session_stage.h"
@@ -1409,7 +1410,11 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
     EXPECT_FALSE(result01);
     sceneSession->UpdateNativeVisibility(true);
     bool result02 = ssm_->IsSessionVisibleForeground(sceneSession);
-    EXPECT_FALSE(result02);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_FALSE(result02);
+    } else {
+        EXPECT_TRUE(result02);
+    }
 }
 
 /**
