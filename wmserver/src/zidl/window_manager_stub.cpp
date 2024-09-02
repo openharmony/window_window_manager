@@ -143,8 +143,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 TLOGE(WmsLogTag::DEFAULT, "read mainWinId failed");
                 return ERR_INVALID_DATA;
             }
-             = data.ReadUint32();
-            uint32_t topWinId;
+            uint32_t topWinId = data.ReadUint32();;
             WMError errCode = GetTopWindowId(mainWinId, topWinId);
             reply.WriteUint32(topWinId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
