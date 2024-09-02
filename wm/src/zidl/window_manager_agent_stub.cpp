@@ -51,7 +51,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
-            DisplayId displayId;
+            DisplayId displayId = 0;
             if (!data.ReadUint64(displayId)) {
                 return ERR_INVALID_DATA;
             }

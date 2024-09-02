@@ -94,7 +94,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            uint32_t windowType;
+            uint32_t windowType = 0;
             if (!data.ReadUint32(windowType)) {
                 return ERR_INVALID_DATA;
             }
@@ -112,7 +112,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            uint32_t windowType;
+            uint32_t windowType = 0;
             if (!data.ReadUint32(windowType)) {
                 return ERR_INVALID_DATA;
             }
@@ -130,7 +130,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
-            uint32_t windowId;
+            uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
                 return ERR_INVALID_DATA;
             }
@@ -149,12 +149,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
-            uint32_t windowId;
+            uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
                 return ERR_INVALID_DATA;
             }
 
-            bool isPointDown;
+            bool isPointDown = false;
             if (!data.ReadBool(isPointDown)) {
                 return ERR_INVALID_DATA;
             }
@@ -263,7 +263,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 return ERR_INVALID_DATA;
             }
 
-            bool isFromClient;
+            bool isFromClient = false;
             if (!data.ReadBool(isFromClient)) {
                 return ERR_INVALID_DATA;
             }
@@ -321,12 +321,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE: {
-            uint32_t windowId;
+            uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
                 return ERR_INVALID_DATA;
             }
 
-            bool isAdd;
+            bool isAdd = false;
             if (!data.ReadBool(isAdd)) {
                 return ERR_INVALID_DATA;
             }
@@ -343,17 +343,17 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE : {
-            int32_t x;
+            int32_t x = 0;
             if (!data.ReadInt32(x)) {
                 return ERR_INVALID_DATA;
             }
 
-            int32_t y;
+            int32_t y = 0;
             if (!data.ReadInt32(y)) {
                 return ERR_INVALID_DATA;
             }
 
-            float scale;
+            float scale = 0.0f;
             if (!data.ReadFloat(scale)) {
                 return ERR_INVALID_DATA;
             }
@@ -362,12 +362,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET: {
-            int32_t deltaX;
+            int32_t deltaX = 0;
             if (!data.ReadInt32(deltaX)) {
                 return ERR_INVALID_DATA;
             }
 
-            int32_t deltaY;
+            int32_t deltaY = 0;
             if (!data.ReadInt32(deltaY)) {
                 return ERR_INVALID_DATA;
             }
