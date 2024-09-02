@@ -299,7 +299,7 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
         }
     }
     dialogMap[mainSession->GetPersistentId()] = session;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
+    TLOGD(WmsLogTag::WMS_DIALOG, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
         session->GetPersistentId(), mainSession->GetPersistentId());
 }
 
