@@ -432,7 +432,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, Function | SmallTest | L
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 }
 }
