@@ -2213,6 +2213,13 @@ public:
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
     /**
      * @brief Notify modal UIExtension it may be covered
      *
