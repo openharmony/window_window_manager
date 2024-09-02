@@ -85,7 +85,7 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_MULTI_WINDOW, "WMSMultiWindow" },
     { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
     { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
-    { WmsLogTag::WMS_HIERARCHY, "WMS_Hierarchy" },
+    { WmsLogTag::WMS_HIERARCHY, "WMSHierarchy" },
 };
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
