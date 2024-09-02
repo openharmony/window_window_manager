@@ -517,7 +517,7 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
-    auto mode = 0;
+    uint32_t mode = 0;
     if (!data.ReadUint32(mode)) {
         return ERR_INVALID_DATA;
     }
