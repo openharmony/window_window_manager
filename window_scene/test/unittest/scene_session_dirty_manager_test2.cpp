@@ -127,7 +127,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
@@ -167,7 +167,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
     windowSessionProperty->SetTouchHotAreas(rects);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     std::vector<MMI::Rect> touchHotAreas;
