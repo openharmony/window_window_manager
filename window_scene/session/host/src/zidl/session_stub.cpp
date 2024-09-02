@@ -555,7 +555,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 
 int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleGetAllAvoidAreas!");
+    TLOGD(WmsLogTag::WMS_IMMS, "HandleGetAllAvoidAreas!");
     auto avoidAreas = GetAllAvoidAreas();
     reply.WriteUint32(avoidAreas.size());
     for (const auto [type, avoidArea]: avoidAreas) {
