@@ -397,8 +397,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
@@ -414,9 +416,11 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
     ssm_->RequestFocusStatus(1, false, true, FocusChangeReason::DEFAULT);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
