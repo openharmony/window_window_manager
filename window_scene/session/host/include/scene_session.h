@@ -80,6 +80,7 @@ using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScr
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
+using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -99,6 +100,7 @@ public:
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
+        PiPStateChangeCallback onPiPStateChange_;
     };
 
     // callback for notify SceneBoard
@@ -270,7 +272,6 @@ public:
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
-    bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsTurnScreenOn() const;
@@ -393,6 +394,7 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
+    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
@@ -435,7 +437,6 @@ private:
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    void InitSystemSessionDragEnable(sptr<WindowSessionProperty> property);
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 

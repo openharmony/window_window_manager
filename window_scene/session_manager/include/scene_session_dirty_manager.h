@@ -52,7 +52,7 @@ public:
         const WindowUpdateType& type, const bool startMoving = false);
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
         GetFullWindowInfoList();
-    void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
+    void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
 

@@ -94,6 +94,9 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 static const int32_t AUTO_ROTATE_OFF = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
+static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -1410,6 +1413,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
+    sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
@@ -1454,11 +1458,15 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
+    if (!sessionDisplayPowerController_) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]sessionDisplayPowerController_ is null");
+        return false;
+    }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState enter");
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]no screen info");
-        return false;
+        return sessionDisplayPowerController_->SetDisplayState(state);
     }
 
     for (auto screenId : screenIds) {
@@ -1495,9 +1503,36 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
         std::unique_lock<std::mutex> lock(screenOffMutex_);
         if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(screenOffDelay_)) == std::cv_status::timeout) {
             isScreenLockSuspend_ = false;
+            needScreenOffNotify_ = false;
             TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOffCV_ timeout, isScreenLockSuspend_ is false");
         }
     }
+}
+
+bool ScreenSessionManager::TryToCancelScreenOff()
+{
+    std::lock_guard<std::mutex> notifyLock(sessionDisplayPowerController_->notifyMutex_);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]about to cancel suspend, can:%{public}d, got:%{public}d, need:%{public}d",
+        sessionDisplayPowerController_->canCancelSuspendNotify_, gotScreenOffNotify_, needScreenOffNotify_);
+    if (sessionDisplayPowerController_->canCancelSuspendNotify_) {
+        sessionDisplayPowerController_->needCancelNotify_ = true;
+        TLOGI(WmsLogTag::DMS, "notify cancel screenoff");
+        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF_CANCELED,
+            EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        return true;
+    }
+    if (gotScreenOffNotify_ == false && needScreenOffNotify_ == true) {
+        std::unique_lock <std::mutex> lock(screenOffMutex_);
+        sessionDisplayPowerController_->canceledSuspend_ = true;
+        screenOffCV_.notify_all();
+        needScreenOffNotify_ = false;
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]cancel wait and notify cancel screenoff");
+        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF_CANCELED,
+            EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+            return true;
+    }
+    TLOGW(WmsLogTag::DMS, "[UL_POWER]failed to cancel suspend");
+    return false;
 }
 
 int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
@@ -1891,7 +1926,10 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
         return ScreenPowerState::INVALID_STATE;
     }
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
-    TLOGI(WmsLogTag::DMS, "GetScreenPower:%{public}u, screenId:%{public}" PRIu64".", state, screenId);
+    std::ostringstream oss;
+    oss << "GetScreenPower state:" << static_cast<uint32_t>(state) << " screenId:" << static_cast<uint64_t>(screenId);
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    screenEventTracker_.RecordEvent(oss.str());
     return state;
 }
 
@@ -2137,6 +2175,27 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoByDisplayId(DisplayId displa
     return GetScreenInfoById(displayInfo->GetScreenId());
 }
 
+int ScreenSessionManager::NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
+    PowerStateChangeReason reason)
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    if (screenSessionMap_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
+        return NOTIFY_EVENT_FOR_DUAL_FAILED;
+    }
+    // The on/off screen will send a notification based on the number of screens.
+    // The dual display device just notify the current screen usage
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
+        auto iter = screenSessionMap_.find(currentScreenId);
+        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+            iter->second->PowerStatusChange(event, status, reason);
+        }
+        return NOTIFY_EVENT_FOR_DUAL_SUCESS;
+    }
+    return NO_NEED_NOTIFY_EVENT_FOR_DUAL;
+}
+
 bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status,
     PowerStateChangeReason reason)
 {
@@ -2149,38 +2208,26 @@ bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
     }
-
-    {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        if (screenSessionMap_.empty()) {
-            TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap is empty");
-            return false;
-        }
-        // The on/off screen will send a notification based on the number of screens.
-        // The dual display device just notify the current screen usage
-        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-            ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
-            auto iter = screenSessionMap_.find(currentScreenId);
-            if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-                iter->second->PowerStatusChange(event, status, reason);
-            }
-            return true;
-        }
+    auto ret = NotifyPowerEventForDualDisplay(event, status, reason);
+    if (ret == NOTIFY_EVENT_FOR_DUAL_FAILED) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]NotifyPowerEventForDualDisplay ret false");
+        return false;
+    } else if (ret == NOTIFY_EVENT_FOR_DUAL_SUCESS) {
+        TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyPowerEventForDualDisplay ret sucess");
+        return true;
     }
-
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]no screenID");
         return false;
     }
-    for (auto screenId : screenIds) {
-        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-        if (screenSession == nullptr) {
-            TLOGW(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
-            continue;
-        }
-        screenSession->PowerStatusChange(event, status, reason);
+    auto screenId = screenIds[0];
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Cannot get ScreenSession, screenId: %{public}" PRIu64"", screenId);
+        return false;
     }
+    screenSession->PowerStatusChange(event, status, reason);
     return true;
 }
 
@@ -2732,15 +2779,13 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty firstProperty = firstScreenSession->GetScreenProperty();
     sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
     if (!secondScreenSession) {
         TLOGE(WmsLogTag::DMS, "secondScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
-    firstProperty.SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
-    secondProperty.SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+    firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
+    secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     return DMError::DM_OK;
 }
 

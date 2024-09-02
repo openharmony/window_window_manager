@@ -69,6 +69,7 @@ public:
     virtual bool SuspendEnd();
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
+    virtual bool TryToCancelScreenOff();
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
