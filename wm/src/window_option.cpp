@@ -269,6 +269,16 @@ bool WindowOption::GetOnlySupportSceneBoard() const
     return onlySupportSceneBoard_;
 }
 
+void WindowOption::SetParentWindowType(WindowType parentWindowType)
+{
+    parentWindowType_ = parentWindowType;
+}
+
+WindowType WindowOption::GetParentWindowType() const
+{
+    return parentWindowType_;
+}
+
 void WindowOption::SetExtensionTag(bool isExtensionTag)
 {
     isExtensionTag_ = isExtensionTag;

@@ -2118,6 +2118,13 @@ public:
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
     /**
      * @brief Notify modal UIExtension it may be covered
      *

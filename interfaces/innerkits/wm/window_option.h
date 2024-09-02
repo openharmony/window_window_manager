@@ -266,6 +266,13 @@ public:
     void SetWindowTopmost(bool isTopmost);
 
     /**
+     * @brief Set parent window type of UIExtension
+     *
+     * @param parentWindowType Parent window type of UIExtension
+     */
+    void SetParentWindowType(WindowType parentWindowType);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -447,6 +454,13 @@ public:
     */
     bool GetWindowTopmost() const;
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -474,11 +488,16 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool onlySupportSceneBoard_ = false;
-    bool isExtensionTag_ = false;
-    uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
+
+    /*
+     * UIExtension
+     */
+    uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
+    bool isExtensionTag_ = false;
+    WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 } // namespace Rosen
 } // namespace OHOS
