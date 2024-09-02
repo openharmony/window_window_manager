@@ -45,7 +45,8 @@ VsyncStation::~VsyncStation()
     }
 }
 
-void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
+__attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
+    const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
