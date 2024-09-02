@@ -758,7 +758,7 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
 
     property->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
 
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "phone";
     ASSERT_FALSE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -939,7 +939,7 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession01, Function | Small
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
     keyboardSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "phone";
     callingSession->systemConfig_.freeMultiWindowSupport_ = true;
     callingSession->systemConfig_.freeMultiWindowEnable_ = true;
     auto ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
@@ -948,10 +948,10 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession01, Function | Small
     ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
     EXPECT_EQ(ret, false);
     callingSession->systemConfig_.freeMultiWindowEnable_ = true;
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "pad";
     ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
     EXPECT_EQ(ret, true);
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "pc";
     callingSession->systemConfig_.freeMultiWindowEnable_ = false;
     ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
     EXPECT_EQ(ret, true);
@@ -1057,9 +1057,9 @@ HWTEST_F(KeyboardSessionTest, Hide01, Function | SmallTest | Level1)
     EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
     keyboardSession->state_ = SessionState::STATE_CONNECT;
     keyboardSession->isActive_ = true;
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "phone";
     EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
-    keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    keyboardSession->systemConfig_.uiType_ = "pc";
     keyboardSession->property_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();

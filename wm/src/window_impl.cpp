@@ -168,7 +168,8 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
+    auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
+    if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
     return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);

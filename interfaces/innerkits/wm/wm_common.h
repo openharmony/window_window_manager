@@ -272,15 +272,6 @@ enum class SystemBarSettingFlag : uint32_t {
 };
 
 /**
- * @brief Enumerates flag of multiWindowUIType.
- */
-enum class WindowUIType : uint8_t {
-    PHONE_WINDOW = 0,
-    PC_WINDOW,
-    PAD_WINDOW
-};
-
-/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {

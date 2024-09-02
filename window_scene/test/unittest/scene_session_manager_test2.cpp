@@ -792,6 +792,22 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, Function | SmallTest 
 }
 
 /**
+ * @tc.name: ConfigWindowSceneXml06
+ * @tc.desc: call uiType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml06, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<uiType>ut</uiType>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigWindowSceneXml();
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.uiType_, "ut");
+}
+
+/**
  * @tc.name: ConfigWindowSceneXml07
  * @tc.desc: call backgroundScreenLock
  * @tc.type: FUNC
