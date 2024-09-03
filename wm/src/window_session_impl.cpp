@@ -31,7 +31,6 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -197,8 +196,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    property_->SetLayoutCallback(layoutCallback);
+    layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -586,10 +584,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     }
 
-    sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-    if (layoutCallback) {
-        layoutCallback->OnUpdateSessionRect(rect);
-    }
+    layoutCallback_->OnUpdateSessionRect(rect);
 
     return WSError::WS_OK;
 }
