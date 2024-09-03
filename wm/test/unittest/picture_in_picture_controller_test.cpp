@@ -836,6 +836,8 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
+    auto mw1 = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw1);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
@@ -844,7 +846,12 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     pipControl->mainWindow_ = nullptr;
     pipControl->LocateSource();
     pipControl->mainWindow_ = mw;
+    pipControl->window_ = nullptr;
     pipControl->LocateSource();
+    pipControl->mainWindow_ = nullptr;
+    pipControl->LocateSource();
+    pipControl->window_ = mw;
+    pipControl->mainWindow_ = mw1;
 
     pipControl->pipOption_->SetNavigationId("");
     pipControl->LocateSource();
