@@ -886,7 +886,7 @@ HWTEST_F(WindowImplTest2, GetContentInfo, Function | SmallTest | Level3)
     ASSERT_EQ(std::string(""), window->GetContentInfo());
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, GetContentInfo(_)).Times(1).WillOnce(Return("info"));
+    EXPECT_CALL(*content, GetContentInfo()).Times(1).WillOnce(Return("info"));
     ASSERT_EQ(std::string("info"), window->GetContentInfo());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(*content, Destroy());
