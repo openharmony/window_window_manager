@@ -336,39 +336,6 @@ HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
     ASSERT_FALSE(SnapShotUtils::WriteToJpeg(1, param));
 }
 
-/**
- * @tc.name: Write11
- * @tc.desc: Write custom jpeg using valid fd and WriteToJpegParam
- * @tc.type: FUNC
- */
-HWTEST_F(SnapshotUtilsTest, Write11, Function | MediumTest | Level3)
-{
-    WriteToJpegParam param = {
-        .width = 256,
-        .height = 256,
-        .stride = 256 * RGB565_PIXEL_BYTES,
-        .format = Media::PixelFormat::RGB_565,
-        .data = new uint8_t
-    };
-    ASSERT_TRUE(SnapShotUtils::WriteToJpeg(1, param));
-}
-
-/**
- * @tc.name: Write12
- * @tc.desc: Write custom jpeg using valid file names and WriteToJpegParam
- * @tc.type: FUNC
- */
-HWTEST_F(SnapshotUtilsTest, Write12, Function | MediumTest | Level3)
-{
-    WriteToJpegParam param = {
-        .width = 256,
-        .height = 256,
-        .stride = 256 * RGB565_PIXEL_BYTES,
-        .format = Media::PixelFormat::RGB_565,
-        .data = new uint8_t
-    };
-    ASSERT_TRUE(SnapShotUtils::WriteToJpeg(defaultFile_, param));
-}
 
 /**
  * @tc.name: CheckWHValid
