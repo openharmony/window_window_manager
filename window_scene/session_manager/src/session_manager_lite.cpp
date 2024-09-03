@@ -462,9 +462,12 @@ void SessionManagerLite::OnFoundationDied()
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enter");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
+        isWMSConnected_ = false;
+    }
     isFoundationListenerRegistered_ = false;
     recoverListenerRegistered_ = false;
-    isWMSConnected_ = false;
     mockSessionManagerServiceProxy_ = nullptr;
     sessionManagerServiceProxy_ = nullptr;
     sceneSessionManagerLiteProxy_ = nullptr;
