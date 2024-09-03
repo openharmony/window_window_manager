@@ -1436,7 +1436,7 @@ DMError DisplayManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& sc
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
-    MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos);
+    static_cast<void>(MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos));
     return ret;
 }
 

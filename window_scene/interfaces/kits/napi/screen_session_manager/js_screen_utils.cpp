@@ -266,6 +266,7 @@ struct AsyncInfo {
 void NapiAsyncWork(napi_env env, std::function<void()> task)
 {
     napi_value resource = nullptr;
+    napi_status status = napi_ok;
     AsyncInfo* info = new (std::nothrow) AsyncInfo();
     if (info == nullptr) {
         TLOGE(WmsLogTag::DMS, "malloc asyncinfo failed");
@@ -273,8 +274,13 @@ void NapiAsyncWork(napi_env env, std::function<void()> task)
     }
     info->env = env;
     info->func = task;
-    napi_create_string_utf8(env, "DMSAsyncWork", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
+    status = napi_create_string_utf8(env, "DMSAsyncWork", NAPI_AUTO_LENGTH, &resource);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DMS, "napi_create_string_utf8 failed");
+        delete info;
+        return;
+    }
+    static_cast<void>(napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
     },
     [](napi_env env, napi_status status, void* data) {
         AsyncInfo* info = (AsyncInfo*)data;
@@ -285,8 +291,9 @@ void NapiAsyncWork(napi_env env, std::function<void()> task)
         info->func();
         napi_delete_async_work(env, info->work);
         delete info;
-    }, (void*)info, &info->work);
-    napi_queue_async_work(env, info->work);
+    }, (void*)info, &info->work));
+
+    static_cast<void>(napi_queue_async_work(env, info->work));
 }
 
 MainThreadScheduler::MainThreadScheduler(napi_env env)

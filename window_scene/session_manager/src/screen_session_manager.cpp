@@ -282,28 +282,44 @@ void ScreenSessionManager::OnStart()
     screenEventTracker_.RecordEvent("Dms onstart end.");
 }
 
+DMError ScreenSessionManager::CheckDisplayMangerAgentTypeAndPermission(
+    const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
+{
+    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
+        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
+        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "register or unregister display manager agent permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
     DmsXcollie dmsXcollie("DMS:RegisterDisplayManagerAgent", XCOLLIE_TIMEOUT_10S);
-    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
-        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
-        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    DMError ret;
+
+    ret = CheckDisplayMangerAgentTypeAndPermission(displayManagerAgent, type);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "call CheckDisplayMangerAgentTypeAndPermission fail!");
+        return ret;
     }
+
     if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
         || type >= DisplayManagerAgentType::DISPLAY_MANAGER_MAX_AGENT_TYPE) {
         TLOGE(WmsLogTag::DMS, "DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
-        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
-        return DMError::DM_ERROR_NULLPTR;
-    }
+
     TLOGD(WmsLogTag::DMS, "Register display listener type: %{public}u, clientName: %{public}s",
         type, SysCapUtil::GetClientName().c_str());
     return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
@@ -313,17 +329,12 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
     TLOGI(WmsLogTag::DMS, " called type: %{public}u", type);
-    if ((type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER ||
-        type == DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) &&
-        !SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return DMError::DM_ERROR_NOT_SYSTEM_APP;
-    }
-    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
-        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
-        return DMError::DM_ERROR_NULLPTR;
+    DMError ret;
+
+    ret = CheckDisplayMangerAgentTypeAndPermission(displayManagerAgent, type);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "UnregisterDisplayManagerAgent call CheckDisplayMangerAgentTypeAndPermission fail!");
+        return ret;
     }
 
     TLOGD(WmsLogTag::DMS, "UnRegister display listener type: %{public}u, clientName: %{public}s",
@@ -2258,6 +2269,10 @@ DMError ScreenSessionManager::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& s
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     std::vector<ScreenId> screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]no screen info");
+        return DMError::DM_OK;
+    }
     for (auto screenId : screenIds) {
         auto screenInfo = GetScreenInfoById(screenId);
         if (screenInfo == nullptr) {
