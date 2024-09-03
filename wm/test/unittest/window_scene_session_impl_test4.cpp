@@ -17,7 +17,7 @@
 #include <parameters.h>
 #include "ability_context_impl.h"
 #include "display_info.h"
-#include "common/include/future_callback.h"
+#include "future_callback.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
