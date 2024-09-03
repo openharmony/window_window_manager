@@ -729,14 +729,13 @@ int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParce
     TLOGD(WmsLogTag::WMS_EVENT, "called");
     int32_t posX = 0;
     int32_t posY = 0;
-    if (data.ReadInt32(posX) && data.ReadInt32(posY)) {
-        WSError errCode = ProcessPointDownSession(posX, posY);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
-        return ERR_NONE;
-    } else {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Read failed!");
         return ERR_INVALID_DATA;
     }
+    WSError errCode = ProcessPointDownSession(posX, posY);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply)
