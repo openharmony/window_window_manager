@@ -63,7 +63,7 @@ ohos_shared_library("scene_session_manager") {
     "src/anomaly_detection.cpp",
     "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
-    "src/publish/scene_event_publish.cpp",
+    "src/publish/scb_dump_subscriber.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
     "src/scene_session_converter.cpp",

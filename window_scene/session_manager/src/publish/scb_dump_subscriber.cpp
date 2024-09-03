@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "publish/scene_event_publish.h"
+#include "publish/scb_dump_subscriber.h"
 #include <sstream>
 
 #include "common_event_manager.h"
@@ -26,26 +26,26 @@ namespace OHOS::Rosen {
 static const std::string TIME_OUT("timeout");
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 
-void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData &data)
+void ScbDumpSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     std::ostringstream oss;
     oss << data.GetData() << std::endl;
-    s = oss.str();
+    dumpinfo_ = oss.str();
     valueReady_ = true;
     cv_.notify_all();
 }
 
-std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const &time)
+std::string ScbDumpSubscriber::GetDebugDumpInfo(std::chrono::milliseconds const &time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
-        return s;
+        return dumpinfo_;
     }
     return TIME_OUT; // 超时返回
 }
 
-WSError SceneEventPublish::Publish(std::string cmd)
+WSError ScbDumpSubscriber::Publish(std::string cmd)
 {
     valueReady_ = false;
     static const std::string scbDebugEventListenerName = "com.ohos.sceneboard.debug.event.listener";
@@ -70,7 +70,7 @@ WSError SceneEventPublish::Publish(std::string cmd)
     return WSError::WS_OK;
 }
 
-void SceneEventPublish::Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber)
+void ScbDumpSubscriber::Subscribe(std::shared_ptr<ScbDumpSubscriber>& scbSubscriber)
 {
     static const std::string scbDebugEventResponseName = "com.ohos.sceneboard.debug.event.response";
 
@@ -80,20 +80,20 @@ void SceneEventPublish::Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscri
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (scbSubscriber == nullptr) {
-        scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
+        scbSubscriber = std::make_shared<ScbDumpSubscriber>(subscribeInfo);
     }
 
     EventFwk::CommonEventManager::SubscribeCommonEvent(scbSubscriber);
 }
 
-void SceneEventPublish::UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber)
+void ScbDumpSubscriber::UnSubscribe(std::shared_ptr<ScbDumpSubscriber>& scbSubscriber)
 {
     if (scbSubscriber) {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(scbSubscriber);
     }
 }
 
-std::string SceneEventPublish::JoinCommands(const std::vector<std::string>& params, int size)
+std::string ScbDumpSubscriber::JoinCommands(const std::vector<std::string>& params, int size)
 {
     std::string cmd;
     for (int i = 1; i < size; i++) { // 从1开始，0为-b
