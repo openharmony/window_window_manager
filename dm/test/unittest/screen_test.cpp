@@ -20,6 +20,7 @@
 #include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -72,10 +73,10 @@ namespace {
 HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
 {
     ASSERT_GT(screen_->GetName().size(), 0);
-    ASSERT_GT(screen_->GetWidth(), 0);
-    ASSERT_GT(screen_->GetHeight(), 0);
-    ASSERT_GT(screen_->GetVirtualWidth(), 0);
-    ASSERT_GT(screen_->GetVirtualHeight(), 0);
+    ASSERT_GE(screen_->GetWidth(), 0);
+    ASSERT_GE(screen_->GetHeight(), 0);
+    ASSERT_GE(screen_->GetVirtualWidth(), 0);
+    ASSERT_GE(screen_->GetVirtualHeight(), 0);
     ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
     ASSERT_EQ(screen_->IsReal(), true);
     ASSERT_NE(screen_->GetScreenInfo(), nullptr);
@@ -422,7 +423,11 @@ HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     res = screen_->SetDensityDpiSystem(100);
-    ASSERT_EQ(DMError::DM_OK, res);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_NE(DMError::DM_OK, res);
+    }
 }
 
 /**

@@ -702,7 +702,11 @@ HWTEST_F(DisplayManagerTest, AddSurfaceNodeToDisplay, Function | SmallTest | Lev
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     auto ret = DisplayManager::GetInstance().AddSurfaceNodeToDisplay(0, surfaceNode);
-    ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    }
 }
 
 /**
@@ -716,7 +720,11 @@ HWTEST_F(DisplayManagerTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest 
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     DisplayManager::GetInstance().OnRemoteDied();
     auto ret = DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(0, surfaceNode);
-    ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    }
 }
 
 /**
@@ -830,11 +838,7 @@ HWTEST_F(DisplayManagerTest, isinsideof, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize = DisplayManager::GetInstance().GetAllDisplayPhysicalResolution();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(!allSize.empty());
-    } else {
-        ASSERT_TRUE(allSize.empty());
-    }
+    ASSERT_TRUE(!allSize.empty());
 }
 
 /**

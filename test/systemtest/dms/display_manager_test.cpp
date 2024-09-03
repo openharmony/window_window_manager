@@ -384,7 +384,7 @@ HWTEST_F(DisplayManagerTest, SetVirtualScreenSecurityExemption, Function | Small
     uint32_t pid = 0;
     std::vector<uint64_t> windowList;
     auto ret = DisplayManager::GetInstance().SetVirtualScreenSecurityExemption(id, pid, windowList);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    ASSERT_NE(DMError::DM_OK, ret); // not virtual screen for id 0
     sleep(2);
 }
 
