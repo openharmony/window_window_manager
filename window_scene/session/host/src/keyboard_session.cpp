@@ -212,6 +212,30 @@ void KeyboardSession::OnKeyboardPanelUpdated()
     UpdateKeyboardAvoidArea();
 }
 
+void KeyboardSession::OnCallingSessionUpdated()
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
+    if (!IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
+        return;
+    }
+    WSRect panelRect = { 0, 0, 0, 0 };
+    panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
+    sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
+    if (callingSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        return;
+    }
+    bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    if (!CheckIfNeedRaiseCallingSession(callingSession, isCallingSessionFloating)) {
+        return;
+    }
+    WSRect callingSessionRect = callingSession->GetSessionRect();
+    NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
+
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
+}
+
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
