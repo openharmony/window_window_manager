@@ -1195,7 +1195,7 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
         oss.str());
 }
 
-WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string> params,
+WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "NotifyDumpInfo, persistentId=%{public}d", GetPersistentId());
