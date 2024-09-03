@@ -26,9 +26,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr int DUMPER_PARAM_1 = 1;
-constexpr int DUMPER_PARAM_2 = 2;
-constexpr int DUMPER_PARAM_COUNT_3 = 3;
+constexpr int DUMPER_PARAM_INDEX_ONE = 1;
+constexpr int DUMPER_PARAM_INDEX_TWO = 2;
+constexpr int DUMPER_PARAM_INDEX_THREE = 3;
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
@@ -97,11 +97,11 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         TLOGE(WmsLogTag::DMS, "params is null");
         return;
     }
-    if (params_.size() == DUMPER_PARAM_COUNT_3) {
-        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,params[2] = %{public}s",
-            params_[0].c_str(), params_[DUMPER_PARAM_1].c_str(), params_[DUMPER_PARAM_2].c_str());
-        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_1],
-            params_[DUMPER_PARAM_2]);
+    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
+        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
+            params_[DUMPER_PARAM_INDEX_TWO]);
         return;
     }
     if (params_[0] == ARG_DUMP_HELP) {
@@ -286,8 +286,8 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
         << static_cast<int32_t>(screenSession->GetRotation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenRequestedOrientation: "
         << static_cast<int32_t>(screenSession->GetScreenRequestedOrientation()) << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "isExtand: "
-        << static_cast<int32_t>(screenSession->GetIsExtand()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isExtend: "
+        << static_cast<int32_t>(screenSession->GetIsExtend()) << std::endl;
     dumpInfo_.append(oss.str());
 }
 

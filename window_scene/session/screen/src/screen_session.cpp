@@ -249,12 +249,12 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
     return DMError::DM_OK;
 }
 
-void ScreenSession::SetIsExtand(bool isExtend)
+void ScreenSession::SetIsExtend(bool isExtend)
 {
     isExtended_ = isExtend;
 }
 
-bool ScreenSession::GetIsExtand() const
+bool ScreenSession::GetIsExtend() const
 {
     return isExtended_;
 }
@@ -465,10 +465,10 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnScreenExtandChange(mainScreenId, extandScreenId);
+        listener->OnScreenExtendChange(mainScreenId, extendScreenId);
     }
 }
 
@@ -828,7 +828,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     }
     info->SetScreenId(screenId_);
     info->SetName(name_);
-    info->SetIsExtand(GetIsExtand());
+    info->SetIsExtend(GetIsExtend());
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();

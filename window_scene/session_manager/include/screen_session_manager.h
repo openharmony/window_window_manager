@@ -279,11 +279,11 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
-    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override;
+    void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
-        const std::string& screenMode);
+        const std::string& secondaryScreenMode);
 
 protected:
     ScreenSessionManager();
