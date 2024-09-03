@@ -177,6 +177,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+        if (WindowHelper::IsSubWindow(GetType())) {
+            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+        }
     }
 }
 
