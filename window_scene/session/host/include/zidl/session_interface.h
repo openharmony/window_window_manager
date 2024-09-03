@@ -43,6 +43,7 @@ public:
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
+
     // scene session
     /**
      * @brief Receive session event from application.
@@ -55,7 +56,7 @@ public:
      */
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
-    /**
+     /**
      * @brief Receive session event from system application.
      *
      * This function provides the ability for system applications to move system window.\n
