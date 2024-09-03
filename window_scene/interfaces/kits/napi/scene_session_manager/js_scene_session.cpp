@@ -491,7 +491,6 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
 
 void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "[NAPI] gravity: %{public}u", gravity);
     auto task = [this, persistentId = persistentId_, gravity, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnKeyboardGravityChange jsSceneSession id:%{public}d has been destroyed",
@@ -506,7 +505,7 @@ void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
         napi_value gravityObj = CreateJsValue(env, gravity);
         napi_value argv[] = {gravityObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Napi call gravity success, gravity: %{public}u", gravity);
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Napi call gravity success, gravity: %{public}u", gravity);
     };
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
         std::to_string(static_cast<int>(gravity)));

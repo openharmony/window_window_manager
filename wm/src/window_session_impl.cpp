@@ -3577,7 +3577,7 @@ bool WindowSessionImpl::IsVerticalOrientation(Orientation orientation) const
 
 WMError WindowSessionImpl::GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3587,7 +3587,6 @@ WMError WindowSessionImpl::GetCallingWindowWindowStatus(WindowStatus& windowStat
 
 WMError WindowSessionImpl::GetCallingWindowRect(Rect& rect) const
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Get CallingWindow Rect");
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
