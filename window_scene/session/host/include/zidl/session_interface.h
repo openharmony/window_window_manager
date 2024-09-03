@@ -47,7 +47,7 @@ public:
      /**
      * @brief Receive session event from application.
      *
-     * This function provides the ability for pplications to move window.\n
+     * This function provides the ability for applications to move window.\n
      * This interface will take effect after touch down event.\n
      *
      * @param event Indicates the {@link SessionEvent}
@@ -68,7 +68,7 @@ public:
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**
-     * @brief on layout full screen change.
+     * @brief Callback for processing full-screen layout changes.
      *
      * @param isLayoutFullScreen Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -76,18 +76,18 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
-     * @brief raise to app top.
+     * @brief Raise the application subwindow to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
 
     /**
-     * @brief update session rect.
+     * @brief Update window size and position.
      *
-     * @param rect Indicates the {@link WSRect}
-     * @param reason Indicates the {@link SizeChangeReason}
-     * @param isGlobal Indicates the {@link bool}
+     * @param rect Indicates the {@link WSRect} structure containing required size and position.
+     * @param reason Indicates the {@link SizeChangeReason} reason.
+     * @param isGlobal Indicates the {@link bool}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
@@ -98,23 +98,23 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
 
     /**
-     * @brief set global max mode.
+     * @brief Sets the global maximization mode.
      *
-     * @param mode Indicates the {@link MaximizeMode}
+     * @param mode Indicates the {@link MaximizeMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
 
     /**
-     * @brief get global max mode.
+     * @brief Get global maximization mode.
      *
-     * @param mode Indicates the {@link MaximizeMode}
+     * @param mode Indicates the {@link MaximizeMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
 
     /**
-     * @brief set aspect ratio.
+     * @brief Sets the aspect ratio of window.
      *
      * @param ratio Indicates the {@link float}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -124,15 +124,15 @@ public:
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
 
     /**
-     * @brief raise above target.
+     * @brief Raise a subwindow above a target subwindow.
      *
-     * @param subWindowId Indicates the {@link int32_t}
+     * @param subWindowId Indicates the {@link int32_t} id of the target subwindow.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
 
     /**
-     * @brief raise app main window to top.
+     * @brief Raise the application main window to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
@@ -204,7 +204,7 @@ public:
         bool isShow) { return WSError::WS_OK; }
 
     /**
-     * @brief register update rect changeLister.
+     * @brief Instruct the application to update the listening flag for registering rect changes.
      *
      * @param isRegister Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
