@@ -2112,13 +2112,6 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
-     * @brief Get the height of status bar.
-     *
-     * @return the height of status bar.
-     */
-    virtual uint32_t GetStatusBarVectorHeight() { return 0; }
-
-    /**
      * @brief Get whether the free multi-window mode is enabled or not.
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
