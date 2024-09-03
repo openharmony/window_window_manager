@@ -55,7 +55,6 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             if (!data.ReadUint64(displayId)) {
                 return ERR_INVALID_DATA;
             }
-
             SystemBarRegionTints tints;
             bool res = MarshallingHelper::UnmarshallingVectorObj<SystemBarRegionTint>(data, tints,
                 [](Parcel& parcel, SystemBarRegionTint& tint) {
