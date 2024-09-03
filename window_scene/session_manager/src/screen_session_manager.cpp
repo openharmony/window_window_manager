@@ -4769,7 +4769,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
         return;
     }
-    if (g_foldScreenFlag) {
+    if (g_foldScreenFlag && !FoldScreenStateInternel.IsDualDisplayFoldDevice()) {
         auto foldStatus = GetFoldStatus();
         // fold device will be callback NotifyFoldToExpandCompletion to UpdateRotationAfterBoot
         if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
