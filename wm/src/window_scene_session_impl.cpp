@@ -1063,7 +1063,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         PreLayoutOnShow(type);
         // Add maintenance logs before the IPC process.
-        TLOGI(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
+        TLOGD(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
             property_->GetWindowName().c_str(), GetPersistentId());
         ret = static_cast<WMError>(hostSession->Show(property_));
     } else {
