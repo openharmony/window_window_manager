@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef WINDOW_MANAGER_MODAL_SYSTEM_UI_EXTENSION_H
 #define WINDOW_MANAGER_MODAL_SYSTEM_UI_EXTENSION_H
 
+#include <mutex>
 #include <string>
 #include <element_name.h>
 #include <ability_connect_callback_interface.h>
@@ -29,21 +30,24 @@ public:
     ~ModalSystemUiExtension();
 
     bool CreateModalUIExtension(const AAFwk::Want& want);
-    static std::string ToString(const AAFwk::WantParams& wantParams);
+    static std::string ToString(const AAFwk::WantParams& wantParams_);
 
 private:
     class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
-    public:
-        explicit DialogAbilityConnection(const AAFwk::Want& want) : want_(want) {}
-        virtual ~DialogAbilityConnection() = default;
+        public:
+            DialogAbilityConnection(const AAFwk::Want& want)
+            {
+                want_ = want;
+            }
+            virtual ~DialogAbilityConnection() = default;
 
-        void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
-            int resultCode) override;
-        void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
+            void OnAbilityConnectDone(const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject,
+                int resultCode) override;
+            void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
-    private:
-        AAFwk::Want want_;
-        bool SendWant(const sptr<IRemoteObject>& remoteObject);
+        private:
+            std::mutex mutex_;
+            AAFwk::Want want_;
     };
 
     sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_{ nullptr };
