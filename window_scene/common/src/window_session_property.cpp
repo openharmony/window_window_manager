@@ -898,6 +898,35 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetCompatibleWindowSizeInPc(int32_t portraitWidth,
+    int32_t portraitHeight, int32_t landscapeWidth, int32_t landscapeHeight)
+{
+    compatibleInPcPortraitWidth_ = portraitWidth;
+    compatibleInPcPortraitHeight_ = portraitHeight;
+    compatibleInPcLandscapeWidth_ = landscapeWidth;
+    compatibleInPcLandscapeHeight_ = landscapeHeight;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcPortraitWidth() const
+{
+    return compatibleInPcPortraitWidth_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcPortraitHeight() const
+{
+    return compatibleInPcPortraitHeight_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcLandscapeWidth() const
+{
+    return compatibleInPcLandscapeWidth_;
+}
+
+int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
+{
+    return compatibleInPcLandscapeHeight_;
+}
+
 void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
 {
     isPcAppInPad_ = isPcAppInPad;
@@ -991,6 +1020,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
+        parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) &&
         MarshallingFutureCallback(parcel);
@@ -1059,6 +1090,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
+                                          parcel.ReadInt32(), parcel.ReadInt32());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     UnmarshallingFutureCallback(parcel, property);
