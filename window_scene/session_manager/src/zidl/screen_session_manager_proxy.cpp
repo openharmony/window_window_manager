@@ -15,6 +15,10 @@
 
 #include "zidl/screen_session_manager_proxy.h"
 
+#include "common/rs_rect.h"
+#include "dm_common.h"
+#include "transaction/rs_marshalling_helper.h"
+
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {

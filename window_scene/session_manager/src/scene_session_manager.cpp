@@ -15,15 +15,45 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <cinttypes>
+#include <csignal>
+#include <cstdint>
+#include <iomanip>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <unistd.h>
+#include <chrono>
+
 #include <ability_context.h>
+#include <ability_info.h>
 #include <ability_manager_client.h>
+#include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include <ipc_skeleton.h>
+#include <iservice_registry.h>
 #include <hisysevent.h>
 #include <parameters.h>
+#include <pointer_event.h>
+#include <resource_manager.h>
+#include <running_lock.h>
+#include <session_info.h>
+#include <start_options.h>
+#include <system_ability_definition.h>
+#include <want.h>
 #include <hitrace_meter.h>
+#include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
+#include "app_mgr_client.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkRegion.h"
 #include "parameter.h"
 #include "publish/scene_event_publish.h"
 #include "screen_manager.h"
+#include "screen.h"
+#include "singleton.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_uiextension_data.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -39,29 +69,43 @@
 #endif
 #include "scene_system_ability_listener.h"
 
+#include "ability_start_setting.h"
 #include "anr_manager.h"
 #include "color_parser.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
+#include "image_source.h"
+#include "interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common_inner.h"
 #include "scene_input_manager.h"
 #include "session/host/include/main_session.h"
 #include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "session/host/include/sub_session.h"
+#include "session/host/include/system_session.h"
 #include "session_helper.h"
 #include "window_helper.h"
+#include "session/screen/include/screen_session.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "singleton_container.h"
+#include "window_manager_hilog.h"
+#include "wm_common.h"
+#include "wm_math.h"
 #include "xcollie/watchdog.h"
+#include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
 #include "distributed_client.h"
 #include "softbus_bus_center.h"
+#include "window_manager.h"
 #include "perform_reporter.h"
+#include "focus_change_info.h"
 #include "anr_manager.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "res_type.h"
+#include "window_visibility_info.h"
+#include "window_drawing_content_info.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
 

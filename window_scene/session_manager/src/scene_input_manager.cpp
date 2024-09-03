@@ -16,9 +16,14 @@
 #include "scene_input_manager.h"
 
 #include <hitrace_meter.h>
+#include "input_manager.h"
 #include "scene_session_dirty_manager.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
+#include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/screen_session_manager.h"
+#include "window_manager_hilog.h"
+#include "transaction/rs_uiextension_data.h"
 
 namespace OHOS {
 namespace Rosen {
