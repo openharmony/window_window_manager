@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
+#include "common/include/future_callback.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
@@ -603,8 +603,6 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     Rect request = { 100, 100, 100, 100 };
     subWindow->property_->SetRequestRect(request);
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    subWindow->property_->SetLayoutCallback(layoutCallback);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     subWindow->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
@@ -676,8 +674,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     Rect request = { 100, 100, 600, 600 };
     subWindow->property_->SetRequestRect(request);
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    subWindow->property_->SetLayoutCallback(layoutCallback);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     subWindow->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
