@@ -235,6 +235,7 @@ enum class ScreenChangeEvent : uint32_t {
     CHANGE_MODE,
     VIRTUAL_PIXEL_RATIO_CHANGED,
     SCREEN_SWITCH_CHANGE,
+    UNKNOWN,
 };
 
 /**
