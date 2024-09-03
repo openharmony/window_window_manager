@@ -1128,8 +1128,8 @@ napi_value InitMultiScreenMode(napi_env env)
 
     napi_set_named_property(env, objValue, "SCREEN_MIRROR",
         CreateJsValue(env, static_cast<uint32_t>(MultiScreenMode::SCREEN_MIRROR)));
-    napi_set_named_property(env, objValue, "SCREEN_EXTAND",
-        CreateJsValue(env, static_cast<uint32_t>(MultiScreenMode::SCREEN_EXTAND)));
+    napi_set_named_property(env, objValue, "SCREEN_EXTEND",
+        CreateJsValue(env, static_cast<uint32_t>(MultiScreenMode::SCREEN_EXTEND)));
     return objValue;
 }
 

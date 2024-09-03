@@ -54,10 +54,10 @@ private:
     DMError PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
 
     /* pc multi screen switch */
-    void DoFirstExtandChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
+    void DoFirstExtendChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
         const std::string& operateType);
 
-    void DoFirstMainChangeExtand(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+    void DoFirstMainChangeExtend(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
         sptr<ScreenSession> secondarySession);
 
     void DoFirstMainChangeMirror(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
@@ -65,15 +65,15 @@ private:
 
     void DoFirstMirrorChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
         const std::string& operateType);
-    void DoFirstMirrorChangeExtand(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+    void DoFirstMirrorChangeExtend(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
         sptr<ScreenSession> secondarySession);
     void DoFirstMirrorChangeMirror(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
         sptr<ScreenSession> secondarySession);
 
     void DoFirstMainChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
         const std::string& operateType);
-    void DoFirstExtandChangeExtand(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
-    void DoFirstExtandChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+    void DoFirstExtendChangeExtend(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+    void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H
