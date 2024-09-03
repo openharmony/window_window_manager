@@ -108,7 +108,7 @@ public:
     WSError TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background(bool isFromClient = false) override;
-    WSError NotifyDumpInfo(const std::vector<std::string> params, std::vector<std::string>& info);
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;

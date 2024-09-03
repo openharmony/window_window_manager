@@ -169,7 +169,7 @@ public:
 
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
 
-    virtual WSError NotifyDumpInfo(const std::vector<std::string> params, std::vector<std::string>& info)
+    virtual WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
     {
         return WSError::WS_OK;
     }

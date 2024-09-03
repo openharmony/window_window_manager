@@ -1159,11 +1159,12 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
-WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string> params, std::vector<std::string>& info)
+WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "remote is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     MessageParcel data;
     MessageParcel reply;

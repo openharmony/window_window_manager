@@ -469,7 +469,7 @@ WSError ExtensionSession::Background(bool isFromClient)
     return WSError::WS_OK;
 }
 
-WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string> params, std::vector<std::string>& info)
+WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
