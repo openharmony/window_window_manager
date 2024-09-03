@@ -1148,7 +1148,7 @@ void WindowImpl::UpdateTitleButtonVisibility()
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
-    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
 bool WindowImpl::IsAppMainOrSubOrFloatingWindow()

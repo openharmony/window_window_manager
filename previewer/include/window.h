@@ -314,8 +314,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
-        bool isCloseVisible)
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
