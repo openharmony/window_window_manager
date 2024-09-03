@@ -463,6 +463,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
+        if (event == SessionEvent::EVENT_DRAG) {
+            WSRect rect = session->moveDragController_->GetTargetRect();
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
+        }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
                 session->sessionEventParam_);
@@ -2122,6 +2126,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
+        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+            return;
+        }
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {

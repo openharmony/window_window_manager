@@ -406,6 +406,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
+    EVENT_DRAG,
 };
 
 enum class BrokerStates: uint32_t {
@@ -589,6 +590,8 @@ struct DeviceScreenConfig {
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
+    int32_t sessionWidth_ = 0;
+    int32_t sessionHeight_ = 0;
 };
 
 /**
