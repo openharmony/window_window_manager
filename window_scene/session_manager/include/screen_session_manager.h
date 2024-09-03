@@ -332,7 +332,8 @@ private:
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
-
+    DMError CheckDisplayMangerAgentTypeAndPermission(
+        const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
