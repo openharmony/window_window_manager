@@ -927,8 +927,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     } else {
         avoidAreasToUpdate = avoidAreas;
     }
-    for (const auto [type, avoidArea]: avoidAreasToUpdate) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid area type %{public}u area ${public}s",
+    for (auto& [type, avoidArea]: avoidAreasToUpdate) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid area type %{public}u area %{public}s",
             type, avoidArea.ToString().c_str());
     }
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
