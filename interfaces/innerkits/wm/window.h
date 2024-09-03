@@ -20,7 +20,6 @@
 #include <parcel.h>
 #include <iremote_object.h>
 
-#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
@@ -622,7 +621,7 @@ public:
      *
      * @return displayId of window.
      */
-    virtual uint64_t GetDisplayId() const { return DISPLAY_ID_INVALID; }
+    virtual uint64_t GetDisplayId() const { return INVALID_DISPLAY_ID; }
     /**
      * @brief Get flag of window.
      *
