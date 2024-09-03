@@ -80,7 +80,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_REQUEST_FOCUS: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "read focus failed");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = RequestFocus(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -167,8 +171,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID: {
-            uint32_t mainWinId = data.ReadUint32();
-            uint32_t topWinId;
+            uint32_t mainWinId = 0;
+            if (!data.ReadUint32(mainWinId)) {
+                TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t topWinId = 0;
             WMError errCode = GetTopWindowId(mainWinId, topWinId);
             reply.WriteUint32(topWinId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -185,7 +193,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
-            auto mode = static_cast<WindowLayoutMode>(data.ReadUint32());
+            uint32_t layoutMode = 0;
+            if (!data.ReadUint32(layoutMode)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read layoutMode failed");
+                return ERR_INVALID_DATA;
+            }
+            auto mode = static_cast<WindowLayoutMode>(layoutMode);
             WMError errCode = SetWindowLayoutMode(mode);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -263,7 +276,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE: {
-            DisplayId displayId = data.ReadUint64();
+            DisplayId displayId = 0;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "read displayId failed");
+                return ERR_INVALID_DATA;
+            }
             ModeChangeHotZones hotZones = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
             WMError errCode = GetModeChangeHotZones(displayId, hotZones);
             reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -364,7 +381,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_HIERARCHY, "read windowId failed");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = RaiseToAppTop(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
