@@ -61,7 +61,7 @@ SessionGravity KeyboardSession::GetKeyboardGravity() const
     if (sessionProperty) {
         sessionProperty->GetSessionGravity(gravity, percent);
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
     return gravity;
 }
 
@@ -205,7 +205,6 @@ void KeyboardSession::UpdateKeyboardAvoidArea()
 
 void KeyboardSession::OnKeyboardPanelUpdated()
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
     RaiseCallingSession(panelRect);
@@ -214,8 +213,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
-        GetPersistentId(), gravity, percent);
     if (sessionChangeCallback_ && sessionChangeCallback_->onKeyboardGravityChange_) {
         sessionChangeCallback_->onKeyboardGravityChange_(gravity);
     }
@@ -518,7 +515,6 @@ void KeyboardSession::RelayoutKeyBoard()
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t percent = 0;
     sessionProperty->GetSessionGravity(gravity, percent);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d", gravity, percent);
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
@@ -537,8 +533,8 @@ void KeyboardSession::RelayoutKeyBoard()
     }
     requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
     sessionProperty->SetRequestRect(requestRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s", GetPersistentId(),
-        SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, gravity: %{public}d", GetPersistentId(),
+        SessionHelper::TransferToWSRect(requestRect).ToString().c_str(), gravity);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()
@@ -627,8 +623,8 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
 {
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    auto newWinRect = winRect_;
-    auto newRequestRect = GetSessionRequestRect();
+    WSRect newWinRect = winRect_;
+    WSRect newRequestRect = GetSessionRequestRect();
     bool ret = (isShow) ? GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight) :
         GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!ret) {
@@ -636,18 +632,19 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         return;
     }
     bool isLandscape = screenWidth > screenHeight ? true : false;
-    Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    WSRect rect = isLandscape ? SessionHelper::TransferToWSRect(params.LandscapeKeyboardRect_) :
+        SessionHelper::TransferToWSRect(params.PortraitKeyboardRect_);
     SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        newWinRect.width_ = static_cast<int32_t>((gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            screenWidth : rect.width_);
-        newWinRect.height_ = static_cast<int32_t>(rect.height_);
+        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
+            static_cast<int32_t>(screenWidth) : rect.width_;
+        newWinRect.height_ = rect.height_;
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newWinRect.posY_ = static_cast<int32_t>(screenHeight) - rect.height_;
         newRequestRect= newWinRect;
     } else if (rect.width_ > 0 && rect.height_ > 0) {
-        newWinRect = SessionHelper::TransferToWSRect(rect);
-        newRequestRect = SessionHelper::TransferToWSRect(rect);
+        newWinRect = rect;
+        newRequestRect = newWinRect;
     }
     SetSessionRequestRect(newRequestRect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, gravity: %{public}d, rect: %{public}s, newRequestRect: %{public}s"
