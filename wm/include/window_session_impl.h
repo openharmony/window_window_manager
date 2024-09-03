@@ -279,7 +279,7 @@ protected:
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const sptr<DisplayInfo>& info = nullptr,
-        const std::map<AvoidAreaType, AvoidArea> avoidAreas = {});
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);

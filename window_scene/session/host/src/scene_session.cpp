@@ -19,6 +19,7 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <hitrace_meter.h>
+#include <type_traits>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -1568,16 +1569,15 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
     return PostSyncTask(task, "GetAvoidAreaByType");
 }
 
-std::map<AvoidAreaType, AvoidArea> SceneSession::GetAllAvoidAreas()
+WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+    using T = std::underlying_type_t<AvoidAreaType>;
+    for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_SYSTEM);
+         avoidType <= static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR); avoidType++) {
         auto type = static_cast<AvoidAreaType>(avoidType);
         avoidAreas[type] = GetAvoidAreaByType(type);
     }
-    return avoidAreas;
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
