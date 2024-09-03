@@ -94,7 +94,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest02, Function | SmallTest | L
 
 /**
  * @tc.name: OnRemoteRequest03
- * @tc.desc: test TRANS_ID_UPDATE_FOCUS success
+ * @tc.desc: test TRANS_ID_UPDATE_FOCUS failed
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
@@ -410,6 +410,29 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | L
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest20
+ * @tc.desc: test TRANS_ID_UPDATE_WINDOW_FOCUS error
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+
+    sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
+    data.WriteParcelable(focusChangeInfo);
+    data.WriteRemoteObject(focusChangeInfo->abilityToken_);
+
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 }
 }
