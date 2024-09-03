@@ -852,7 +852,7 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         }
         avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
     }
-    int32_t ret = reply.ReadUint32();
+    uint32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
 
