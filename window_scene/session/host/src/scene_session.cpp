@@ -4238,7 +4238,7 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
     bool lastVisible = IsVisible();
     dirtyFlags_ |= UpdateInteractiveInner(uiParam.interactive_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::INTERACTIVE) : 0;
-    if (!GetForegroundInteractiveStatus()) {
+    if (!uiParam.interactive_) {
         // keep ui state in recent
         return dirtyFlags_;
     }
@@ -4318,9 +4318,19 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip recent, id:%{public}d", GetPersistentId());
         return false;
     }
+    if (uiParam.rect_.IsInvalid()) {
+        TLOGW(WmsLogTag::WMS_PIPELINE, "id:%{public}d rect:%{public}s is invalid",
+            GetPersistentId(), uiParam.rect_.ToString().c_str());
+        return false;
+    }
     globalRect_ = uiParam.rect_;
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
+    if (!uiParam.needSync_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect not sync rectAfter:%{public}s preRect:%{public}s",
+            GetPersistentId(), rect.ToString().c_str(), winRect_.ToString().c_str());
+        return false;
+    }
     if (winRect_ == rect) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s!",
             GetPersistentId(), rect.ToString().c_str());

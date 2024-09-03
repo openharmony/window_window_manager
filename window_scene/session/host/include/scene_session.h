@@ -148,6 +148,7 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
     WSError Background(bool isFromClient = false) override;
     virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
