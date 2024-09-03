@@ -792,7 +792,7 @@ HWTEST_F(WindowImplTest2, SetWindowMode, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _, _));
+    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _));
     EXPECT_CALL(*content, UpdateWindowMode(_, _));
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
     window->uiContent_ = nullptr;
@@ -1151,7 +1151,7 @@ HWTEST_F(WindowImplTest2, UpdateTitleButtonVisibility, Function | SmallTest | Le
 
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _, _));
+    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _));
     window->UpdateTitleButtonVisibility();
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
