@@ -581,11 +581,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     }
 
-    if (layoutCallback_) {
-        layoutCallback_->OnUpdateSessionRect(rect);
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "layoutCallback is null");
-    }
+    layoutCallback_->OnUpdateSessionRect(rect);
 
     return WSError::WS_OK;
 }
