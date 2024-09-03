@@ -31,6 +31,7 @@ public:
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
 private:
+    int RemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleRegisterDisplayManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterDisplayManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleGetFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
@@ -40,6 +41,21 @@ private:
     int HandleGetDefaultDisplayInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayById(MessageParcel& data, MessageParcel& reply);
     int HandleGetCutoutInfo(MessageParcel& data, MessageParcel& reply);
+    /*
+     * used by powermgr
+     */
+    int HandleWakeUpBegin(MessageParcel& data, MessageParcel& reply);
+    int HandleWakeUpEnd(MessageParcel& data, MessageParcel& reply);
+    int HandleSuspendBegin(MessageParcel& data, MessageParcel& reply);
+    int HandleSuspendEnd(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSpecifiedScreenPower(MessageParcel& data, MessageParcel& reply);
+    int HandleSetScreenPowerForAll(MessageParcel& data, MessageParcel& reply);
+    int HandleGetScreenPower(MessageParcel& data, MessageParcel& reply);
+    int HandleSetDisplayState(MessageParcel& data, MessageParcel& reply);
+    int HandleGetDisplayState(MessageParcel& data, MessageParcel& reply);
+    int HandleSetScreenBrightness(MessageParcel& data, MessageParcel& reply);
+    int HandleGetScreenBrightness(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAllDisplayIds(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace Rosen
 } // namespace OHOS

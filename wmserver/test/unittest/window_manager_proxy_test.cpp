@@ -539,15 +539,15 @@ HWTEST_F(WindowManagerProxyTest, GetSnapshot, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled
+ * @tc.name: SetGestureNavigationEnabled
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
 {
     bool enable = true;
     MessageParcel reply;
-    WMError err = windowManagerProxy_->SetGestureNavigaionEnabled(enable);
+    WMError err = windowManagerProxy_->SetGestureNavigationEnabled(enable);
     EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
 }
 

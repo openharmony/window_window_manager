@@ -199,11 +199,13 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    RRect bounds = property_.GetBounds();
+    RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
-    displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
-    displayInfo->SetPhysicalWidth(property_.GetPhyBounds().rect_.GetWidth());
-    displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
@@ -228,6 +230,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetScaleY(property_.GetScaleY());
     displayInfo->SetPivotX(property_.GetPivotX());
     displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
     return displayInfo;
 }
 
@@ -243,6 +247,36 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
         rsId_, static_cast<uint32_t>(colorGamuts.size()));
 
     return DMError::DM_OK;
+}
+
+void ScreenSession::SetIsExtand(bool isExtend)
+{
+    isExtended_ = isExtend;
+}
+
+bool ScreenSession::GetIsExtand() const
+{
+    return isExtended_;
+}
+
+void ScreenSession::SetIsInternal(bool isInternal)
+{
+    isInternal_ = isInternal;
+}
+
+bool ScreenSession::GetIsInternal() const
+{
+    return isInternal_;
+}
+
+void ScreenSession::SetIsCurrentInUse(bool isInUse)
+{
+    isInUse_ = isInUse;
+}
+
+bool ScreenSession::GetIsCurrentInUse() const
+{
+    return isInUse_;
 }
 
 std::string ScreenSession::GetName()
@@ -280,12 +314,15 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
-void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY)
+void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
+                                   float translateY)
 {
     property_.SetScaleX(scaleX);
     property_.SetScaleY(scaleY);
     property_.SetPivotX(pivotX);
     property_.SetPivotY(pivotY);
+    property_.SetTranslateX(translateX);
+    property_.SetTranslateY(translateY);
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
@@ -425,6 +462,13 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
         listener->OnSensorRotationChange(sensorRotation, screenId_);
+    }
+}
+
+void ScreenSession::ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnScreenExtandChange(mainScreenId, extandScreenId);
     }
 }
 
@@ -664,7 +708,7 @@ void ScreenSession::DestroyScreenScene()
         WLOGFI("destroyScreenSceneCallback_  is nullptr");
         return;
     }
-    destroyScreenSceneCallback_ ();
+    destroyScreenSceneCallback_();
 }
 
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
@@ -784,6 +828,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     }
     info->SetScreenId(screenId_);
     info->SetName(name_);
+    info->SetIsExtand(GetIsExtand());
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
@@ -1322,5 +1367,10 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         WLOGFE("failed to get pixelMap, return nullptr");
     }
     return pixelMap;
+}
+
+void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
+{
+    property_.SetStartPosition(startX, startY);
 }
 } // namespace OHOS::Rosen

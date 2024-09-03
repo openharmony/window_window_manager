@@ -39,17 +39,18 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
     void RemoveCallback();
+    void Destroy();
 
     FrameRateLinkerId GetFrameRateLinkerId();
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
     void SetFrameRateLinkerEnable(bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
-
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiverLocked();
+    std::shared_ptr<RSFrameRateLinker> GetFrameRateLinker();
     void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
     void OnVsyncTimeOut();
 
@@ -57,11 +58,11 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     std::string vsyncTimeoutTaskName_;
 
-    std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
-
     std::mutex mutex_;
+    bool destroyed_ = false;
     bool hasRequestedVsync_ = false;
     std::shared_ptr<VSyncReceiver> receiver_ = nullptr;
+    std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
     // Above guarded by mutex_

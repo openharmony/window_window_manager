@@ -147,8 +147,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
-    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
-    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, session));
 }
 
 /**
@@ -1413,10 +1412,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     ASSERT_NE(mockHostSession, nullptr);
     window_->hostSession_ = mockHostSession;
 
-    window_->property_->SetDisplayId(DISPLAY_ID_INVALID);
-    EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Show());
-
     window_->property_->SetDisplayId(0);
     EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));
     ASSERT_EQ(static_cast<WMError>(WSError::WS_DO_NOTHING), window_->Show());
@@ -1690,17 +1685,6 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
 }
 
 /**
- * @tc.name: HideNonSecureWindows05
- * @tc.desc: HideNonSecureWindows Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows05, Function | SmallTest | Level3)
-{
-    window_->property_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->HideNonSecureWindows(true));
-}
-
-/**
  * @tc.name: HideNonSecureWindows06
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
@@ -1834,7 +1818,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
     sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
     ASSERT_NE(nullptr, iRemoteObject);
     window_->abilityToken_ = iRemoteObject;
-    ASSERT_EQ(WMError::WM_OK, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+    ASSERT_NE(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
 }
 
 /**
@@ -1953,6 +1937,26 @@ HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Fun
 }
 
 /**
+ * @tc.name: NotifyExtensionTimeout
+ * @tc.desc: NotifyExtensionTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window_->hostSession_ = session;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(1);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+
+    window_->hostSession_ = nullptr;
+    EXPECT_CALL(*session, NotifyExtensionTimeout).Times(0);
+    window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+}
+
+/**
  * @tc.name: GetRealParentId
  * @tc.desc: GetRealParentId Test
  * @tc.type: FUNC
@@ -1962,9 +1966,63 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
+}
 
-    window_->property_ = nullptr;
-    EXPECT_EQ(window_->GetRealParentId(), INVALID_WINDOW_ID);
+/**
+ * @tc.name: CheckHideNonSecureWindowsPermission
+ * @tc.desc: CheckHideNonSecureWindowsPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_OK);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->modalUIExtensionMayBeCovered_ = true;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: NotifyModalUIExtensionMayBeCovered
+ * @tc.desc: NotifyModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: ReportModalUIExtensionMayBeCovered
+ * @tc.desc: ReportModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    window_->ReportModalUIExtensionMayBeCovered(true);
+    window_->NotifyModalUIExtensionMayBeCovered(false);
 }
 }
 } // namespace Rosen

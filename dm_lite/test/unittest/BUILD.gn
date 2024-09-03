@@ -20,6 +20,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":dm_display_lite_power_unit_test",
     ":dm_display_lite_test",
     ":dm_display_manager_adapter_lite_test",
     ":dm_display_manager_lite_test",
@@ -63,6 +64,21 @@ ohos_unittest("dm_display_manager_lite_test") {
   include_dirs = [ "../../src" ]
 
   sources = [ "display_manager_lite_test.cpp" ]
+
+  deps = [ ":dm_unittest_common_lite" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("dm_display_lite_power_unit_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../../src" ]
+
+  sources = [ "display_lite_power_unit_test.cpp" ]
 
   deps = [ ":dm_unittest_common_lite" ]
 

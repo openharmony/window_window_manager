@@ -87,15 +87,27 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
-            auto avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
+            uint32_t avoidAreaTypeId = data.ReadUint32();
+            if (avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+                avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+                return ERR_INVALID_DATA;
+            }
+            auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);
             AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
             reply.WriteParcelable(&avoidArea);
-
             break;
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            uint32_t windowType = 0;
+            if (!data.ReadUint32(windowType) ||
+                windowType >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
+                return ERR_INVALID_DATA;
+            }
+            auto type = static_cast<WindowManagerAgentType>(windowType);
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            if (windowManagerAgentObject == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
@@ -103,8 +115,15 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            uint32_t windowType = 0;
+            if (!data.ReadUint32(windowType)) {
+                return ERR_INVALID_DATA;
+            }
+            auto type = static_cast<WindowManagerAgentType>(windowType);
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            if (windowManagerAgentObject == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
@@ -112,20 +131,38 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
+            if (windowProperty == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             sptr<MoveDragProperty> moveDragProperty = data.ReadStrongParcelable<MoveDragProperty>();
+            if (moveDragProperty == nullptr) {
+                return ERR_INVALID_DATA;
+            }
             NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
-            uint32_t windowId = data.ReadUint32();
-            bool isPointDown = data.ReadBool();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
+            bool isPointDown = false;
+            if (!data.ReadBool(isPointDown)) {
+                return ERR_INVALID_DATA;
+            }
             ProcessPointDown(windowId, isPointDown);
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
             ProcessPointUp(windowId);
             break;
         }
@@ -198,6 +235,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
             sptr<IRemoteObject> controllerObject = data.ReadRemoteObject();
+            if (controllerObject == nullptr) {
+                TLOGE(WmsLogTag::DEFAULT, "Read animation controller object failed");
+                return ERR_INVALID_DATA;
+            }
             sptr<RSIWindowAnimationController> controller = iface_cast<RSIWindowAnimationController>(controllerObject);
             WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -213,7 +254,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-            bool isFromClient = data.ReadBool();
+            bool isFromClient = false;
+            if (!data.ReadBool(isFromClient)) {
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = NotifyWindowTransition(from, to, isFromClient);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -261,14 +305,23 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER: {
             uint32_t windowId = data.ReadUint32();
-            bool haveAvoidAreaListener = data.ReadBool();
+            bool haveAvoidAreaListener;
+            if (!data.ReadBool(haveAvoidAreaListener)) {
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = UpdateAvoidAreaListener(windowId, haveAvoidAreaListener);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE: {
-            uint32_t windowId = data.ReadUint32();
-            bool isAdd = data.ReadBool();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
+            bool isAdd = false;
+            if (!data.ReadBool(isAdd)) {
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = UpdateRsTree(windowId, isAdd);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -281,15 +334,24 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE : {
-            int32_t x = data.ReadInt32();
-            int32_t y = data.ReadInt32();
-            float scale = data.ReadFloat();
+            int32_t x = 0;
+            int32_t y = 0;
+            if (!data.ReadInt32(x) || !data.ReadInt32(y)) {
+                return ERR_INVALID_DATA;
+            }
+            float scale = 0.0f;
+            if (!data.ReadFloat(scale)) {
+                return ERR_INVALID_DATA;
+            }
             SetAnchorAndScale(x, y, scale);
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET: {
-            int32_t deltaX = data.ReadInt32();
-            int32_t deltaY = data.ReadInt32();
+            int32_t deltaX = 0;
+            int32_t deltaY = 0;
+            if (!data.ReadInt32(deltaX) || !data.ReadInt32(deltaY)) {
+                return ERR_INVALID_DATA;
+            }
             SetAnchorOffset(deltaX, deltaY);
             break;
         }
@@ -311,7 +373,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED: {
             bool enable = data.ReadBool();
-            WMError errCode = SetGestureNavigaionEnabled(enable);
+            WMError errCode = SetGestureNavigationEnabled(enable);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
@@ -324,10 +386,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "Read failed!");
+                return ERR_INVALID_DATA;
+            }
             std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
             if (event == nullptr) {
-                WLOGFE("event is null");
+                TLOGE(WmsLogTag::WMS_EVENT, "event is null");
                 return ERR_INVALID_DATA;
             }
             event->ReadFromParcel(data);
@@ -336,13 +402,18 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT: {
             std::vector<std::string> info;
-            data.ReadStringVector(&info);
+            if (!data.ReadStringVector(&info)) {
+                return ERR_INVALID_DATA;
+            }
             NotifyDumpInfoResult(info);
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS: {
             std::vector<uint32_t> missionIds;
-            data.ReadUInt32Vector(&missionIds);
+            if (!data.ReadUInt32Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DEFAULT, "Read animation target mission ids failed");
+                return ERR_INVALID_DATA;
+            }
             std::vector<sptr<RSWindowAnimationTarget>> targets;
             WMError errCode = GetWindowAnimationTargets(missionIds, targets);
             if (!MarshallingHelper::MarshallingVectorParcelableObj<RSWindowAnimationTarget>(reply, targets)) {
@@ -353,7 +424,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE: {
-            MaximizeMode maximizeMode = static_cast<MaximizeMode>(data.ReadUint32());
+            uint32_t modeId = 0;
+            if (!data.ReadUint32(modeId)) {
+                return ERR_INVALID_DATA;
+            }
+            MaximizeMode maximizeMode = static_cast<MaximizeMode>(modeId);
             SetMaximizeMode(maximizeMode);
             break;
         }

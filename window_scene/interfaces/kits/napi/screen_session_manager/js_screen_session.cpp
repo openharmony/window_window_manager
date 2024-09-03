@@ -36,6 +36,7 @@ const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
+const std::string ON_SCREEN_EXTAND_CHANGE = "screenExtandChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -55,6 +56,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetScreenId())));
     napi_set_named_property(env, objValue, "name",
         CreateJsValue(env, static_cast<std::string>(screenSession->GetName())));
+    napi_set_named_property(env, objValue, "isExtand", CreateJsValue(env, screenSession->GetIsExtand()));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
@@ -569,6 +571,8 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
+        } else {
+            WLOGFI("OnPowerStatusChange: Sucess to SendEvent.");
         }
     } else {
         WLOGFE("OnPowerStatusChange: env is nullptr");
@@ -606,6 +610,41 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
         }
     } else {
         WLOGFE("OnScreenRotationLockedChange: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+{
+    const std::string callbackType = ON_SCREEN_EXTAND_CHANGE;
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFW("Callback is unregistered!");
+        return;
+    }
+    auto jsCallbackRef = mCallback_[callbackType];
+    wptr<ScreenSession> screenSessionWeak(screenSession_);
+    auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, extandScreenId, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenDensityChange");
+        if (jsCallbackRef == nullptr) {
+            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            WLOGFE("Call js callback failed, method is null!");
+            return;
+        }
+        napi_value mainId = CreateJsValue(env, static_cast<int64_t>(mainScreenId));
+        napi_value extandId = CreateJsValue(env, static_cast<int64_t>(extandScreenId));
+        napi_value argv[] = { mainId, extandId };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnScreenExtandChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnScreenExtandChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen
