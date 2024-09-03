@@ -430,8 +430,7 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
-    std::string uiType_;
-    std::string multiWindowUIType_;
+    WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
@@ -466,10 +465,7 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
-        if (!parcel.WriteString(uiType_)) {
-            return false;
-        }
-        if (!parcel.WriteString(multiWindowUIType_)) {
+        if (!parcel.WriteUint8(static_cast<uint8_t>(windowUIType_))) {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
@@ -508,8 +504,7 @@ struct SystemSessionConfig : public Parcelable {
             return nullptr;
         }
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
-        config->uiType_ = parcel.ReadString();
-        config->multiWindowUIType_ = parcel.ReadString();
+        config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
@@ -517,6 +512,21 @@ struct SystemSessionConfig : public Parcelable {
     bool IsFreeMultiWindowMode() const
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
+    }
+        
+    bool IsPhoneWindow() const
+    {
+        return windowUIType_ == WindowUIType::PHONE_WINDOW;
+    }
+
+    bool IsPcWindow() const
+    {
+        return windowUIType_ == WindowUIType::PC_WINDOW;
+    }
+
+    bool IsPadWindow() const
+    {
+        return windowUIType_ == WindowUIType::PAD_WINDOW;
     }
 };
 } // namespace Rosen

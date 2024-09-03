@@ -293,6 +293,14 @@ public:
     DisplayState GetDisplayState(DisplayId displayId);
 
     /**
+     * @brief Try to cancel screenoff action before display power off.
+     *
+     * @return True means cancel screenoff action success.
+     * @return False means cancel screenoff action failed.
+     */
+    bool TryToCancelScreenOff();
+
+    /**
      * @brief Set the brightness level of the target screen.
      *
      * @param screenId Target screen.

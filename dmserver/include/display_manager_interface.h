@@ -53,6 +53,7 @@ public:
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_GET_ALL_DISPLAYIDS,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
+        TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF,
         TRANS_ID_SET_FREEZE_EVENT,
         TRANS_ID_SCREEN_BASE = 1000,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
@@ -231,6 +232,7 @@ public:
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
+    virtual bool TryToCancelScreenOff() = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
