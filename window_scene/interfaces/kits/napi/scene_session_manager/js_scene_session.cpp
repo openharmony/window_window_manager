@@ -1212,7 +1212,7 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
-    sptr<JsSceneSession>(static_cast<JsSceneSession*>(data))->DecStrongRef(nullptr);
+    static_cast<JsSceneSession*>(data)->DecStrongRef(nullptr);
 }
 
 napi_value JsSceneSession::RegisterCallback(napi_env env, napi_callback_info info)
