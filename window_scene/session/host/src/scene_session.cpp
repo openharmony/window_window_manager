@@ -4058,7 +4058,7 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
-int32_t SceneSession::GetStatusBarHeight()
+int32_t SceneSession::GetStatusBarVectorHeight()
 {
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||

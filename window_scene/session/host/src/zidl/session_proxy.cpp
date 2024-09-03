@@ -1294,7 +1294,7 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return static_cast<WMError>(ret);
 }
 
-int32_t SessionProxy::GetStatusBarHeight()
+int32_t SessionProxy::GetStatusBarVectorHeight()
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1304,7 +1304,7 @@ int32_t SessionProxy::GetStatusBarHeight()
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return height;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_VECTOR_HEIGHT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return height;

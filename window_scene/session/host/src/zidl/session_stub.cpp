@@ -145,8 +145,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
-            return HandleGetStatusBarHeight(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_VECTOR_HEIGHT):
+            return HandleGetStatusBarVectorHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         default:
@@ -770,9 +770,9 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleGetStatusBarVectorHeight(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t height = GetStatusBarHeight();
+    int32_t height = GetStatusBarVectorHeight();
     TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
     reply.WriteInt32(height);
     return ERR_NONE;

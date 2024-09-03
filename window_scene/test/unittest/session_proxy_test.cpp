@@ -380,18 +380,18 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: GetStatusBarHeight
+ * @tc.name: GetStatusBarVectorHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, GetStatusBarVectorHeight, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    int32_t res = sProxy->GetStatusBarHeight();
+    int32_t res = sProxy->GetStatusBarVectorHeight();
     ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarVectorHeight end";
 }
 
 /**
