@@ -320,7 +320,7 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void WindowManagerService::LoadWindowParameter()
 {
-    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
     if (multiWindowUIType == "HandsetSmartWindow") {
         systemConfig_.windowUIType_ = StartingWindow::windowUIType_ =
             WindowNodeContainer::windowUIType_ = WindowUIType::PHONE_WINDOW;
