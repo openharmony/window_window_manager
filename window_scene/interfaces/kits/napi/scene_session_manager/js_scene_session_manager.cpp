@@ -60,6 +60,7 @@ const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
+const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -72,6 +73,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
         ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+    {CLOSE_TARGET_FLOAT_WINDOW_CB, ListenerFunctionType::CLOSE_TARGET_FLOAT_WINDOW_CB},
 };
 } // namespace
 
@@ -1005,6 +1007,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
             ProcessGestureNavigationEnabledChangeListener();
+            break;
+        case ListenerFunctionType::CLOSE_TARGET_FLOAT_WINDOW_CB:
+            ProcessCloseTargetFloatWindow();
             break;
         default:
             break;
@@ -2990,5 +2995,29 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
     }
     SceneSessionManager::GetInstance().RefreshPcZOrderList(startZOrder, std::move(persistentIds));
     return NapiGetUndefined(env);
+}
+
+void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleName)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]in");
+    auto task = [this, bundleName, jsCallBack = GetJSCallback(CLOSE_TARGET_FLOAT_WINDOW_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsBundleNameObj = CreateJsValue(env, bundleName);
+        napi_value argv[] = {jsBundleNameObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnCloseTargetFloatWindow bundleName:" + bundleName);
+}
+
+void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
+{
+    ProcessCloseTargetFloatWindowFunc func = [this](const std::string& bundleName) {
+        TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessCloseTargetFloatWindow. bundleName:%{public}s", bundleName.c_str());
+        this->OnCloseTargetFloatWindow(bundleName);
+    };
+    SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);
 }
 } // namespace OHOS::Rosen

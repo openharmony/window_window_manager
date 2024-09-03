@@ -34,6 +34,7 @@ WindowPidVisibilityInfo* WindowPidVisibilityInfo::Unmarshalling(Parcel& parcel)
     uint32_t visibilityState = 0;
     bool res = parcel.ReadInt32(windowPidVisibilityInfo->pid_) && parcel.ReadUint32(visibilityState);
     if (!res) {
+        delete windowPidVisibilityInfo;
         return nullptr;
     }
     windowPidVisibilityInfo->visibilityState_ = static_cast<WindowPidVisibilityState>(visibilityState);

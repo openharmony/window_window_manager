@@ -353,6 +353,13 @@ DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerAdapter::TryToCancelScreenOff()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->TryToCancelScreenOff();
+}
+
 void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 {
     INIT_PROXY_CHECK_RETURN();

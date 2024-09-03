@@ -251,6 +251,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
+    BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
@@ -924,7 +925,7 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
     if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "sessionchangeCallback is nullptr");
         return;
     }
     sessionchangeCallback->onSessionTopmostChange_ = [this](bool topmost) {
@@ -932,11 +933,11 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     sessionchangeCallback->onSessionTopmostChange_(session->IsTopmost());
-    TLOGD(WmsLogTag::WMS_LAYOUT, "ProcessSessionTopmostChangeRegister success");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "ProcessSessionTopmostChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
@@ -1266,6 +1267,13 @@ napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetSystemFocusable(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSystemFocusable(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]SetSystemSceneBlockingFocus");
@@ -1336,6 +1344,13 @@ napi_value JsSceneSession::SetFloatingScale(napi_env env, napi_callback_info inf
     WLOGI("[NAPI]SetFloatingScale");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFloatingScale(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetIsMidScene(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetIsMidScene(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSCBKeepKeyboard(napi_env env, napi_callback_info info)
@@ -1828,6 +1843,34 @@ napi_value JsSceneSession::OnSetFocusable(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetSystemFocusable(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::WMS_FOCUS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool systemFocusable = false;
+    if (!ConvertFromJsValue(env, argv[0], systemFocusable)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[NAPI]Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetSystemFocusable(systemFocusable);
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] end");
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -2171,7 +2214,7 @@ void JsSceneSession::OnRaiseToTop()
 
     auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTop jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnRaiseToTop jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
@@ -2193,7 +2236,7 @@ void JsSceneSession::OnRaiseToTopForPointDown()
 
     auto task = [this, persistentId = persistentId_, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnRaiseToTopForPointDown jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
@@ -2299,16 +2342,16 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
 /** @note @window.hierarchy */
 void JsSceneSession::OnSessionTopmostChange(bool topmost)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]State: %{public}u", topmost);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", topmost);
     auto task = [this, persistentId = persistentId_, topmost, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnSessionTopmostChange jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "OnSessionTopmostChange jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
         auto jsCallBack = this->GetJSCallback(SESSION_TOP_MOST_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsSessionTouchableObj = CreateJsValue(env, topmost);
@@ -2999,6 +3042,35 @@ napi_value JsSceneSession::OnSetFloatingScale(napi_env env, napi_callback_info i
         return NapiGetUndefined(env);
     }
     session->SetFloatingScale(static_cast<float_t>(floatingScale));
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetIsMidScene(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isMidScene = false;
+    if (!ConvertFromJsValue(env, argv[0], isMidScene)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]Failed to convert parameter to isMidScene");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetIsMidScene(isMidScene);
     return NapiGetUndefined(env);
 }
 

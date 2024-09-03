@@ -98,6 +98,7 @@ using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
+using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -228,6 +229,7 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates);
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) override;
@@ -367,6 +369,12 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
+     * Mutil Window
+     */
+    void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
+    WMError CloseTargetFloatWindow(const std::string& bundleName);
+
+    /*
      * Fold Screen Status Change Report
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
@@ -379,6 +387,12 @@ public:
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     void RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds);
+
+    /*
+     * PiP Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
 protected:
     SceneSessionManager();
@@ -559,6 +573,7 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 
     /*
      * Multi User
@@ -605,6 +620,8 @@ private:
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
+    ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
