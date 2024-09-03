@@ -108,7 +108,7 @@ public:
     private:
         void DelayReset();
 
-        WindowMode mode_;
+        WindowMode mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
         bool isValid_ = true;
         std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     };
@@ -134,8 +134,8 @@ public:
         void BackgroundFailed(int32_t type) override;
     private:
         std::string navigationId_ = "";
-        sptr<Window> window_;
-        sptr<PiPMainWindowListenerImpl> windowListener_;
+        sptr<Window> window_ = nullptr;
+        sptr<PiPMainWindowListenerImpl> windowListener_ = nullptr;
     };
 
 private:
@@ -159,21 +159,21 @@ private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     wptr<PictureInPictureController> weakRef_ = nullptr;
-    sptr<PipOption> pipOption_;
+    sptr<PipOption> pipOption_ = nullptr;
     std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;
     std::vector<sptr<IPiPActionObserver>> pipActionObservers_;
     std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
-    sptr<Window> window_;
-    sptr<Window> mainWindow_;
-    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_;
-    uint32_t mainWindowId_;
+    sptr<Window> window_ = nullptr;
+    sptr<Window> mainWindow_ = nullptr;
+    sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;
+    uint32_t mainWindowId_ = 0;
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
     PiPWindowState curState_ = PiPWindowState::STATE_UNDEFINED;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
-    std::shared_ptr<XComponentController> pipXComponentController_;
-    std::shared_ptr<XComponentController> mainWindowXComponentController_;
-    napi_env env_;
+    std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
+    std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
+    napi_env env_ = nullptr;
     std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
