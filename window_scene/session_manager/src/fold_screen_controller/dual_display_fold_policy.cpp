@@ -123,7 +123,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
-        globalDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
     }
 }
 
@@ -393,7 +393,7 @@ void DualDisplayFoldPolicy::ExitCoordination()
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, REMOVE_DISPLAY_NODE);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     currentDisplayMode_ = displayMode;
-    globalDisplayMode_ = displayMode;
+    lastDisplayMode_ = displayMode;
     TLOGI(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d", displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }

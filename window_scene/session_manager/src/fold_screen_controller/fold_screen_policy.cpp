@@ -37,19 +37,19 @@ void FoldScreenPolicy::UpdateForPhyScreenPropertyChange() {}
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
 {
     std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-    return globalDisplayMode_;
+    return lastDisplayMode_;
 }
 
 FoldStatus FoldScreenPolicy::GetFoldStatus()
 {
-    return globalFoldStatus_;
+    return lastFoldStatus_;
 }
 
 void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
-    globalFoldStatus_ = foldStatus;
+    lastFoldStatus_ = foldStatus;
 }
 
 void FoldScreenPolicy::ClearState()
