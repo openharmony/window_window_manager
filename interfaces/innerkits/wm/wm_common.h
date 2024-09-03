@@ -277,7 +277,8 @@ enum class SystemBarSettingFlag : uint32_t {
 enum class WindowUIType : uint8_t {
     PHONE_WINDOW = 0,
     PC_WINDOW,
-    PAD_WINDOW
+    PAD_WINDOW,
+    INVALID_WINDOW
 };
 
 /**
