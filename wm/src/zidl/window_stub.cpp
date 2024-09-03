@@ -119,21 +119,33 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             } else {
                 UpdateOccupiedAreaChangeInfo(info);
             }
-
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
             if (info == nullptr) {
-                WLOGFE("OccupiedAreaChangeInfo is null");
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo is null");
                 return ERR_INVALID_DATA;
             }
-            struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-            bool hasRSTransaction = data.ReadBool();
+            int32_t posX = 0;
+            int32_t posY = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            if (!data.ReadInt32(posX) || !data.ReadInt32(posY) ||
+                !data.ReadUint32(width) || !data.ReadUint32(height)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Rect value read failed.");
+                return ERR_INVALID_DATA;
+            }
+            struct Rect rect { posX, posY, width, height };
+            bool hasRSTransaction = false;
+            if (!data.ReadBool(hasRSTransaction)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "hasRSTransaction value read failed.");
+                return ERR_INVALID_DATA;
+            }
             if (hasRSTransaction) {
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
                 if (!rsTransaction) {
-                    WLOGFE("RSTransaction unMarsh failed");
+                    TLOGE(WmsLogTag::WMS_KEYBOARD, "RSTransaction unMarsh failed");
                     return ERR_INVALID_DATA;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
@@ -141,7 +153,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             } else {
                 UpdateOccupiedAreaAndRect(info, rect);
             }
-
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS: {
