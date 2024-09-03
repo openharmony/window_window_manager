@@ -46,7 +46,6 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 TLOGE(WmsLogTag::WMS_FOCUS, "read focused failed");
                 return ERR_INVALID_DATA;
             }
-            
             UpdateFocusChangeInfo(info, focused);
             break;
         }
