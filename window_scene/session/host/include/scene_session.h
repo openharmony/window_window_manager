@@ -218,6 +218,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
+    void SetIsStatusBarVisible(bool isVisible) { isStatusBarVisible_ = isVisible; }
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
@@ -523,6 +524,7 @@ private:
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
+    bool isStatusBarVisible_ = true;
 
     // Session recover
     bool isRecovered_ = false;
