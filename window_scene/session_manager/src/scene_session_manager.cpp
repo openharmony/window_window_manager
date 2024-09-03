@@ -882,6 +882,12 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation()
         return;
     }
 
+    appWindowSceneConfig_.keyboardAnimationIn_.curveType_ = CURVETYPE;
+    appWindowSceneConfig_.keyboardAnimationIn_.ctrlX1_ = CTRLX1;
+    appWindowSceneConfig_.keyboardAnimationIn_.ctrlY1_ = CTRLY1;
+    appWindowSceneConfig_.keyboardAnimationIn_.ctrlX2_ = CTRLX2;
+    appWindowSceneConfig_.keyboardAnimationIn_.ctrlY2_ = CTRLY2;
+    appWindowSceneConfig_.keyboardAnimationOut_ = appWindowSceneConfig_.keyboardAnimationIn_;
     systemConfig_.keyboardAnimationConfig_.curveType_ = CURVETYPE;
     std::vector<float> keyboardCurveParams = {CTRLX1, CTRLY1, CTRLX2, CTRLY2};
     systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
