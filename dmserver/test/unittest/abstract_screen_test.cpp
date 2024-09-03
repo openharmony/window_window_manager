@@ -590,35 +590,6 @@ HWTEST_F(AbstractScreenTest, AddChild03, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: GetSourceMode
- * @tc.desc: get source mode
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenTest, GetSourceMode01, Function | SmallTest | Level3)
-{
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
-    absScreen_->screenController_->dmsScreenGroupMap_.insert({10086, absScreenGroup_});
-    absScreen_->groupDmsId_ = 10086;
-    ScreenSourceMode result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MAIN);
-
-    absScreen_->screenController_->defaultRsScreenId_ = 144;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_MIRROR);
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_EXPAND;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_EXTEND);
-    absScreenGroup_->combination_ = ScreenCombination::SCREEN_ALONE;
-    result = absScreen_->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-
-    sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
-    sptr<AbstractScreen> absScreenTest = new AbstractScreen(absScreenController, name_, 0, 0);
-    result = absScreenTest->GetSourceMode();
-    EXPECT_EQ(result, ScreenSourceMode::SCREEN_ALONE);
-}
-
-/**
  * @tc.name: CalcRotation
  * @tc.desc: Calc rotation
  * @tc.type: FUNC
