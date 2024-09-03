@@ -948,17 +948,6 @@ bool CheckCallingPermission(std::string permission)
     return true;
 }
 
-bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType)
-{
-    if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(apiWindowType)) != 0) {
-        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowType));
-        if (WindowHelper::IsSystemWindow(windowType)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
 {
     napi_value global;
