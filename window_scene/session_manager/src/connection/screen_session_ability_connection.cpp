@@ -235,7 +235,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::st
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility result: %{public}d", ret);
+    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility succeed");
     // set current callingIdentity back
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
