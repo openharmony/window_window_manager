@@ -248,4 +248,9 @@ void SCBSystemSession::NotifyClientToUpdateAvoidArea()
         keyboardPanelRectUpdateCallback_();
     }
 }
+
+void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
+{
+    isNeedSyncGlobalPos_ = needSync;
+}
 } // namespace OHOS::Rosen

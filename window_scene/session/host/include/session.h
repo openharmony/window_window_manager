@@ -465,6 +465,7 @@ public:
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
     bool IsVisible() const;
+    virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -512,6 +513,22 @@ protected:
         };
         handler_->PostSyncTask(std::move(syncTask), name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
+    }
+
+    void PostVoidSyncTask(Task&& task, const std::string& name = "sessionTask")
+    {
+        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+            StartTraceForSyncTask(name);
+            task();
+            FinishTraceForSyncTask();
+            return;
+        }
+        auto syncTask = [&task, name]() {
+            StartTraceForSyncTask(name);
+            task();
+            FinishTraceForSyncTask();
+        };
+        handler_->PostSyncTask(std::move(syncTask), name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
