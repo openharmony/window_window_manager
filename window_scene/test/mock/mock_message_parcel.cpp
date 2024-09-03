@@ -218,11 +218,12 @@ bool Parcel::WriteStringVector(const std::vector<std::string>& val)
 }
 #endif
 
-bool Parcel::ReadStringVector(std::vector<std::string> *val)
+bool Parcel::ReadStringVector(std::vector<std::string>* val)
 {
     if (g_setReadStringVectorErrorFlag) {
         return false;
     }
     return true;
+
 }
 } // namespace OHOS
