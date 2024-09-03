@@ -136,6 +136,7 @@ public:
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
     void NotifyDisplayCreate(sptr<DisplayInfo> displayInfo);
     void NotifyDisplayDestroy(DisplayId displayId);
+    void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
 
     std::vector<ScreenId> GetAllScreenIds() const;
@@ -248,6 +249,7 @@ public:
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
+    void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
