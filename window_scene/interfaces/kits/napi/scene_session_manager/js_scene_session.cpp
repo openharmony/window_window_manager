@@ -2519,7 +2519,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [weak = wptr(This), sessionInfo] {
+    auto task = [weak = wptr(this), sessionInfo] {
         auto sharedThis = weak.promote();
         if (sharedThis == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
