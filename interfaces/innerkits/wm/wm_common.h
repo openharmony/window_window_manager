@@ -417,7 +417,7 @@ enum class WindowGravity : uint32_t {
 /**
  * @brief Enumerates window setuicontent type.
  */
-enum class WindowSetUIContentType : uint32_t {
+enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
     DISTRIBUTE,
     BY_NAME,

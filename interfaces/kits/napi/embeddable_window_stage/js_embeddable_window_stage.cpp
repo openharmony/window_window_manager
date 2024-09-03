@@ -175,7 +175,7 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
 {
     sptr<Window> windowImpl = windowExtensionSessionImpl_;
     if (windowImpl == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]windowImpl is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]windowImpl is null.");
         return NapiGetUndefined(env);
     }
     size_t argc = 4;
@@ -277,6 +277,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
+    return;
 }
 
 napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName)
