@@ -2011,6 +2011,12 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    // The device is not supported
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!isPC && !IsFreeMultiWindowMode()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_OK;
+    }
     if (property_ == nullptr || property_->GetCompatibleModeInPc()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
