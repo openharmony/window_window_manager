@@ -57,9 +57,11 @@ public:
      * @permission Make sure the caller has system permission.
      */
     virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
-    virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
+    virtual WSError UpdateSessionRect(
+        const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
@@ -86,7 +88,10 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyFrameLayoutFinishFromApp() {return WSError::WS_OK; }
+    virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
+    {
+        return WSError::WS_OK;
+    }
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}

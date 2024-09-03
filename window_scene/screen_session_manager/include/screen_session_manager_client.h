@@ -83,7 +83,8 @@ public:
 
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
 
-    void UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY);
+    void UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
+                            float translateY);
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
@@ -92,7 +93,7 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name) override;
+        ScreenId rsId, const std::string& name, bool isExtand) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -100,6 +101,7 @@ private:
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
+    void OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
 

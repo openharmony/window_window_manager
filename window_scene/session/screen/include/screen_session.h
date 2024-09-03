@@ -48,6 +48,7 @@ public:
     virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
+    virtual void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -120,7 +121,7 @@ public:
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
 
-    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX, float translateY);
 
     std::string GetName();
     ScreenId GetScreenId();
@@ -184,6 +185,18 @@ public:
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
+    void SetIsExtand(bool isExtend);
+    bool GetIsExtand() const;
+    void SetIsInternal(bool isInternal);
+    bool GetIsInternal() const;
+    void SetIsCurrentInUse(bool isInUse);
+    bool GetIsCurrentInUse() const;
+
+    bool isPrimary_ { false };
+    bool isInternal_ { false };
+    bool isExtended_ { false };
+    bool isInUse_ { false };
+
     NodeId nodeId_ {};
 
     int32_t activeIdx_ { 0 };
@@ -203,6 +216,7 @@ public:
     void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
+    void ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId);
     DMRect GetAvailableArea();
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
@@ -214,6 +228,7 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
+    void SetStartPosition(uint32_t startX, uint32_t startY);
 
 private:
     ScreenProperty property_;

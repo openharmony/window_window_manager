@@ -25,19 +25,21 @@ namespace OHOS {
 namespace Rosen {
 class JsScreenListener : public ScreenManager::IScreenListener {
 public:
-    explicit JsScreenListener(napi_env env) : env_(env) {}
-    ~JsScreenListener() override = default;
+    explicit JsScreenListener(napi_env env);
+    ~JsScreenListener() override;
     void AddCallback(const std::string& type, napi_value jsListenerObject);
     void RemoveAllCallback();
     void RemoveCallback(napi_env env, const std::string& type, napi_value jsListenerObject);
     void OnConnect(ScreenId id) override;
     void OnDisconnect(ScreenId id) override;
     void OnChange(ScreenId id) override;
+    static void CleanEnv(void* obj);
 
 private:
     void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);
     napi_env env_ = nullptr;
     std::mutex mtx_;
+    wptr<JsScreenListener> weakRef_  = nullptr;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
     napi_value CreateScreenIdArray(napi_env env, const std::vector<ScreenId>& data);
 };

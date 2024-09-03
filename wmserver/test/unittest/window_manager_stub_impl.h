@@ -142,7 +142,7 @@ std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override
 {
     return nullptr;
 }
-WMError SetGestureNavigaionEnabled(bool enable) override
+WMError SetGestureNavigationEnabled(bool enable) override
 {
     return WMError::WM_OK;
 }

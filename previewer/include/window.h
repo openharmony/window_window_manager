@@ -166,7 +166,7 @@ public:
     virtual WMError Destroy() = 0;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
-    virtual WMError MoveTo(int32_t x, int32_t y) = 0;
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
     virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
@@ -324,6 +324,10 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener)
     {
@@ -368,6 +372,8 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
 };
 }

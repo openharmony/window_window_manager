@@ -117,21 +117,21 @@ public:
      *
      * @param mainScreenId Main screen id.
      * @param secondaryScreenId secondary screen id.
-     * @param secondaryScreenMode Screen Combination Mode.
+     * @param screenMode Screen Combination Mode.
      * @return DM_OK means make mirror success, others means make mirror failed.
      */
-    DMError MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-        ScreenSourceMode secondaryScreenMode);
+    DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode);
 
      /**
      * @brief Set Screen Relative Position
      *
-     * @param mainScreenOption Main screen id and position.
-     * @param secondaryScreenOption secondary screen id and position.
+     * @param mainScreenOptions Main screen id and position.
+     * @param secondScreenOption secondary screen id and position.
      * @return DM_OK means make mirror success, others means make mirror failed.
      */
-    DMError MultiScreenRelativePosition(ExtendOption mainScreenOption,
-        ExtendOption secondaryScreenOption);
+    DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption);
 
     /**
     * @brief Make screens as unique-screen.

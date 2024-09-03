@@ -73,6 +73,8 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, ScaleY, scaleY, 1.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, PivotX, pivotX, 0.5f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, PivotY, pivotY, 0.5f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, TranslateX, translateX, 0.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, TranslateY, translateY, 0.0f);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

@@ -32,6 +32,7 @@ public:
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
+    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -2153,11 +2154,15 @@ HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
     float scaleY = 1.0f;
     float pivotX = 0.5f;
     float pivotY = 0.5f;
-    session.SetScreenScale(scaleX, scaleY, pivotX, pivotY);
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+    session.SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     EXPECT_EQ(session.property_.GetScaleX(), scaleX);
     EXPECT_EQ(session.property_.GetScaleY(), scaleY);
     EXPECT_EQ(session.property_.GetPivotX(), pivotX);
     EXPECT_EQ(session.property_.GetPivotY(), pivotY);
+    EXPECT_EQ(session.property_.GetTranslateX(), translateX);
+    EXPECT_EQ(session.property_.GetTranslateY(), translateY);
 }
 } // namespace
 } // namespace Rosen

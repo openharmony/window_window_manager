@@ -29,6 +29,30 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScre
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
 
+JsScreenListener::JsScreenListener(napi_env env) : env_(env), weakRef_(wptr<JsScreenListener> (this))
+{
+    TLOGI(WmsLogTag::DMS, "Constructor execution");
+    napi_add_env_cleanup_hook(env_, CleanEnv, this);
+}
+
+JsScreenListener::~JsScreenListener()
+{
+    TLOGI(WmsLogTag::DMS, "Destructor execution");
+    napi_remove_env_cleanup_hook(env_, CleanEnv, this);
+    env_ = nullptr;
+}
+
+void JsScreenListener::CleanEnv(void* obj)
+{
+    JsScreenListener* thisObj = reinterpret_cast<JsScreenListener*>(obj);
+    if (!thisObj) {
+        TLOGE(WmsLogTag::DMS, "obj is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "env_ is invalid, set to nullptr");
+    thisObj->env_ = nullptr;
+}
+
 void JsScreenListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
     WLOGI("JsScreenListener::AddCallback is called");
@@ -103,11 +127,15 @@ void JsScreenListener::OnConnect(ScreenId id)
         WLOGE("JsScreenListener::OnConnect not this event, return");
         return;
     }
-    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, id] () {
+    auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnConnect");
-        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
+        thisListener->CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -132,11 +160,15 @@ void JsScreenListener::OnDisconnect(ScreenId id)
         WLOGE("JsScreenListener::OnDisconnect not this event, return");
         return;
     }
-    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, id] () {
+    auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnDisconnect");
-        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
+        thisListener->CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {
@@ -161,11 +193,15 @@ void JsScreenListener::OnChange(ScreenId id)
         WLOGE("JsScreenListener::OnChange not this event, return");
         return;
     }
-    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
-    auto napiTask = [this, id] () {
+    auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnChange");
-        napi_value argv[] = {CreateJsValue(env_, static_cast<uint32_t>(id))};
-        CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("[NAPI]this listener or env is nullptr");
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
+        thisListener->CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
     };
 
     if (env_ != nullptr) {

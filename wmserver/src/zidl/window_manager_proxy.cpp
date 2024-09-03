@@ -1031,23 +1031,23 @@ WMError WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write anchor delatX failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;
 }
@@ -1095,7 +1095,7 @@ WMError WindowManagerProxy::GetSnapshotByWindowId(int32_t persistentId, std::sha
     return WMError::WM_OK;
 }
 
-WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
+WMError WindowManagerProxy::SetGestureNavigationEnabled(bool enable)
 {
     MessageParcel data;
     MessageParcel reply;

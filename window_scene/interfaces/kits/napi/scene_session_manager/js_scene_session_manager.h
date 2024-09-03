@@ -39,6 +39,7 @@ enum class ListenerFunctionType : uint32_t {
     CALLING_WINDOW_ID_CHANGE_CB,
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+    CLOSE_TARGET_FLOAT_WINDOW_CB,
 };
 
 class JsSceneSessionManager final {
@@ -103,6 +104,7 @@ public:
     static napi_value GetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
+    static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -159,6 +161,7 @@ private:
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
+    napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
 
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
@@ -183,6 +186,8 @@ private:
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
+    void OnCloseTargetFloatWindow(const std::string& bundleName);
+    void ProcessCloseTargetFloatWindow();
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;

@@ -29,6 +29,7 @@
 #include <pointer_event.h>
 #include "ui/rs_surface_node.h"
 #include "session/container/include/window_event_channel.h"
+#include "window_event_channel_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -887,6 +888,52 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
     WSError res =
             sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    property->windowState_ = WindowState::STATE_SHOWN;
+    sessionStage = new SessionStageMocker();
+    eventChannel = new TestWindowEventChannel();
+    res = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ReconnectInner
+ * @tc.desc: ReconnectInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "ReconnectInner";
+    info.abilityName_ = "ReconnectInner1";
+    info.windowType_ = 1;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = nullptr;
+    WSError res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    property = new WindowSessionProperty();
+    property->windowState_ = WindowState::STATE_INITIAL;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
+
+    property->windowState_ = WindowState::STATE_CREATED;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    property->windowState_ = WindowState::STATE_SHOWN;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    property->windowState_ = WindowState::STATE_HIDDEN;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    property->windowState_ = WindowState::STATE_DESTROYED;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
