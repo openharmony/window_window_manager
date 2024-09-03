@@ -364,15 +364,19 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
         return WMError::WM_ERROR_NULLPTR;
     }
     bool isWMSAlreadyConnected = false;
+    int32_t userId = INVALID_USER_ID;
+    int32_t screenId = DEFAULT_SCREEN_ID;
     {
         // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
         isWMSAlreadyConnected = isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID);
+        userId = currentWMSUserId_;
+        screenId = currentScreenId_;
     }
     if (isWMSAlreadyConnected) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify immediately");
-        OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, true, true);
+        OnWMSConnectionChangedCallback(userId, screenId, true, true);
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
