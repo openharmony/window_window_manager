@@ -26,6 +26,7 @@ public:
     WSError OnUpdateSessionRect(const WSRect& rect);
     WSRect GetResult(long timeOut);
     void ResetLock();
+    
 private:
     RunnableFuture<WSRect> future_{};
 };

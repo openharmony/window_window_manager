@@ -1413,7 +1413,7 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = MoveTo(x, y);
-    if (state_ == WindowState::STATE_SHOWN && layoutCallback_) {
+    if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
@@ -1587,7 +1587,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = Resize(width, height);
-    if (state_ == WindowState::STATE_SHOWN && layoutCallback_) {
+    if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
