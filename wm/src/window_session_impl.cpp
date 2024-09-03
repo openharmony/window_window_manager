@@ -692,7 +692,7 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
 }
 
 void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
-    bool& hideSplitButton)
+    bool& hideSplitButton, bool& hideCloseButton)
 {
     if (!isPC) {
         return;
@@ -709,6 +709,10 @@ void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButto
         TLOGW(WmsLogTag::WMS_LAYOUT, "isSplitVisible param INVALID");
     }
     hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible);
+    if (hideCloseButton > !windowTitleVisibleFlags_.isCloseVisible) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "isCloseVisible param INVALID");
+    }
+    hideCloseButton = hideCloseButton || (!windowTitleVisibleFlags_.isCloseVisible);
 }
 
 void WindowSessionImpl::UpdateDensity()
@@ -964,7 +968,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
-        uiContent->HideWindowTitleButton(true, true, true);
+        uiContent->HideWindowTitleButton(true, true, true, false);
         return;
     }
     auto modeSupportInfo = property_->GetModeSupportInfo();
@@ -975,13 +979,15 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
          GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     bool hideMinimizeButton = false;
-    GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]:[%{public}d, %{public}d, %{public}d]",
-        hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+    bool hideCloseButton = false;
+    GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
+        "[%{public}d, %{public}d, %{public}d, %{public}d]",
+            hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (property_->GetCompatibleModeInPc()) {
-        uiContent->HideWindowTitleButton(true, false, hideMinimizeButton);
+        uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
     } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
 }
 
@@ -2186,7 +2192,8 @@ void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventC
     inputEventConsumer_ = inputEventConsumer;
 }
 
-WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+    bool isCloseVisible)
 {
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -2198,7 +2205,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
+    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
 }
