@@ -1879,9 +1879,11 @@ public:
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
      * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
      * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @param isCloseVisible Display close button if true, or hide close button if false.
      * @return Errorcode of window.
      */
-    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
