@@ -2541,7 +2541,7 @@ HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
     SystemBarProperty prop;
     ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorVisible(true));
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true, true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true));
     auto var = 5;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorHeight(var));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorHeight(var));
@@ -2636,21 +2636,21 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
 {
     sptr<Window> window = new (std::nothrow) Window();
     ASSERT_NE(window, nullptr);
-    WMError res = window->SetTitleButtonVisible(true, true, true, true);
+    WMError res = window->SetTitleButtonVisible(true, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, true, true, true);
+    res = window->SetTitleButtonVisible(false, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, false, true, true);
+    res = window->SetTitleButtonVisible(true, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, true, false, true);
+    res = window->SetTitleButtonVisible(true, true, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, false, true, true);
+    res = window->SetTitleButtonVisible(false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, true, false, true);
+    res = window->SetTitleButtonVisible(false, true, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, false, false, true);
+    res = window->SetTitleButtonVisible(true, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, false, false, true);
+    res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 

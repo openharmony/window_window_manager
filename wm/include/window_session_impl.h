@@ -55,7 +55,6 @@ struct WindowTitleVisibleFlags {
     bool isMaximizeVisible = true;
     bool isMinimizeVisible = true;
     bool isSplitVisible = true;
-    bool isCloseVisible = true;
 };
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
@@ -177,8 +176,7 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
-    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
-        bool isCloseVisible) override;
+    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
@@ -424,8 +422,7 @@ private:
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
-        bool& hideCloseButton);
+    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     void SetFrameLayoutCallbackEnable(bool enable);
