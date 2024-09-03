@@ -2051,7 +2051,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
 
-    NotifyAndPublishEvent(displayInfo, screenId);
+    NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
