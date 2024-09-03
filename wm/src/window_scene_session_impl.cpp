@@ -24,7 +24,6 @@
 #include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
