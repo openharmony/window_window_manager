@@ -65,7 +65,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
             break;
         }
         default : {
-            TLOGE(WmsLogTag::DMS, "INVALID invalid screen session config.");
+            TLOGE(WmsLogTag::DMS, "invalid screen session config.");
             break;
         }
     }
@@ -1006,7 +1006,7 @@ DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
         WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}u",
+    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}d",
         rsId_, modeIdx);
     return DMError::DM_OK;
 }
@@ -1046,7 +1046,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
     }
     if (colorSpace < 0 || static_cast<int32_t>(colorSpace) >= static_cast<int32_t>(colorSpaces.size())) {
         WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64 " colorSpace %{public}d invalid.",
-            rsId_, colorSpace);
+            rsId_, static_cast<int32_t>(colorSpace));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     auto ret = RSInterfaces::GetInstance().SetScreenColorSpace(rsId_, colorSpace);
@@ -1055,7 +1055,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
-        rsId_, colorSpace);
+        rsId_, static_cast<uint32_t>(colorSpace));
     return DMError::DM_OK;
 }
 

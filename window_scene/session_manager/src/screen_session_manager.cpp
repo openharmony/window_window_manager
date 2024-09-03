@@ -1060,6 +1060,7 @@ DMError ScreenSessionManager::GetScreenColorGamut(ScreenId screenId, ScreenColor
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenColorGamut: Get ScreenSession failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return screenSession->GetScreenColorGamut(colorGamut);
@@ -1080,6 +1081,7 @@ DMError ScreenSessionManager::SetScreenColorGamut(ScreenId screenId, int32_t col
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "SetScreenColorGamut: Get ScreenSession failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return screenSession->SetScreenColorGamut(colorGamutIdx);
@@ -1094,6 +1096,7 @@ DMError ScreenSessionManager::GetScreenGamutMap(ScreenId screenId, ScreenGamutMa
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenGamutMap: Get ScreenSession failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return screenSession->GetScreenGamutMap(gamutMap);
@@ -1114,6 +1117,7 @@ DMError ScreenSessionManager::SetScreenGamutMap(ScreenId screenId, ScreenGamutMa
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "SetScreenGamutMap: Get ScreenSession failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return screenSession->SetScreenGamutMap(gamutMap);
@@ -1133,6 +1137,7 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "SetScreenColorTransform: Get ScreenSession failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return screenSession->SetScreenColorTransform();
