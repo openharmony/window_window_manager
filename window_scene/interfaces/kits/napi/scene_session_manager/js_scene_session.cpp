@@ -206,8 +206,9 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         return NapiGetUndefined(env);
     }
 
-    std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(env, session);
-    napi_wrap(env, objValue, jsSceneSession.release(), JsSceneSession::Finalizer, nullptr, nullptr);
+    sptr<JsSceneSession> jsSceneSession = sptr<JsSceneSession>::MakeSptr(env, session);
+    jsSceneSession->IncStrongRef(nullptr);
+    napi_wrap(env, objValue, jsSceneSession.GetRefPtr(), JsSceneSession::Finalizer, nullptr, nullptr);
     napi_set_named_property(env, objValue, "persistentId",
         CreateJsValue(env, static_cast<int32_t>(session->GetPersistentId())));
     napi_set_named_property(env, objValue, "parentId",
@@ -892,7 +893,6 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "begin");
-    auto weak = weak_from_this();
     NotifyPendingSessionToBackgroundForDelegatorFunc func = [this](const SessionInfo& info) {
         this->PendingSessionToBackgroundForDelegator(info);
     };
@@ -1212,7 +1212,7 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
-    std::unique_ptr<JsSceneSession>(static_cast<JsSceneSession*>(data));
+    sptr<JsSceneSession>(static_cast<JsSceneSession*>(data))->DecStrongRef(nullptr);
 }
 
 napi_value JsSceneSession::RegisterCallback(napi_env env, napi_callback_info info)
@@ -2519,8 +2519,13 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [this, sessionInfo]() {
-        PendingSessionActivationInner(sessionInfo);
+    auto task = [weak = wptr(This), sessionInfo] {
+        auto sharedThis = weak.promote();
+        if (sharedThis == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
+            return;
+        }
+        sharedThis->PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
     if (info.fullScreenStart_) {
