@@ -1185,7 +1185,12 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string> params,
         TLOGE(WmsLogTag::DEFAULT, "Read string vector failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read int32 failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 
 } // namespace OHOS::Rosen
