@@ -207,6 +207,7 @@ enum class DisplayPowerEvent : uint32_t {
     DESKTOP_READY,
     DOZE,
     DOZE_SUSPEND,
+    DISPLAY_OFF_CANCELED,
 };
 
 /**
@@ -369,6 +370,13 @@ enum class ScreenCombination : uint32_t {
     SCREEN_EXPAND,
     SCREEN_MIRROR,
     SCREEN_UNIQUE,
+    SCREEN_EXTAND,
+    SCREEN_MAIN,
+};
+
+enum class MultiScreenMode : uint32_t {
+    SCREEN_MIRROR = 0,
+    SCREEN_EXTAND = 1,
 };
 
 struct Point {
@@ -391,7 +399,7 @@ struct ExpandOption {
     uint32_t startY_;
 };
 
-struct ExtendOption {
+struct MultiScreenPositionOptions {
     ScreenId screenId_;
     uint32_t startX_;
     uint32_t startY_;

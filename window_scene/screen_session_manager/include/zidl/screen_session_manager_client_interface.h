@@ -43,11 +43,12 @@ public:
         TRANS_ID_ON_SWITCH_USER_CMD,
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM,
         TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE,
+        TRANS_ID_ON_SCREEN_EXTAND_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
     virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name) = 0;
+        ScreenId rsId, const std::string& name, bool isExtand) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -55,6 +56,7 @@ public:
     virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
+    virtual void OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId) = 0;
 
     virtual void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;

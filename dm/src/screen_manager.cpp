@@ -69,6 +69,7 @@ private:
     std::set<sptr<IScreenGroupListener>> screenGroupListeners_;
     std::set<sptr<IVirtualScreenGroupListener>> virtualScreenGroupListeners_;
     sptr<IDisplayManagerAgent> virtualScreenAgent_ = nullptr;
+    std::mutex virtualScreenAgentMutex_;
 };
 
 class ScreenManager::Impl::ScreenManagerListener : public DisplayManagerAgentDefault {
@@ -482,23 +483,23 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
-DMError ScreenManager::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
-    WLOGFI("mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",secondaryScreenMode:%{public}u",
-        mainScreenId, secondaryScreenId, secondaryScreenMode);
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MultiScreenModeSwitch(mainScreenId,
-        secondaryScreenId, secondaryScreenMode);
+    WLOGFI("mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",screenMode:%{public}u",
+        mainScreenId, secondaryScreenId, screenMode);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenMode(mainScreenId,
+        secondaryScreenId, screenMode);
     return ret;
 }
 
-DMError ScreenManager::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     WLOGFI("mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
-        firstScreenOption.screenId_, firstScreenOption.startX_, firstScreenOption.startY_,
+        mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(firstScreenOption,
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(mainScreenOptions,
         secondScreenOption);
     return ret;
 }
@@ -550,6 +551,7 @@ ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
 {
     //  After the process creating the virtual screen is killed, DMS needs to delete the virtual screen
+    std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
     if (virtualScreenAgent_ == nullptr) {
         virtualScreenAgent_ = new DisplayManagerAgentDefault();
     }
@@ -703,9 +705,12 @@ bool ScreenManager::Impl::isAllListenersRemoved() const
 void ScreenManager::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");
+    {
+        std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
+        virtualScreenAgent_ = nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
-    virtualScreenAgent_ = nullptr;
 }
 
 void ScreenManager::OnRemoteDied()

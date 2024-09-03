@@ -19,23 +19,17 @@
 #include <mutex>
 #include <vector>
 #include <list>
-#include "cpp/mutex.h"
 
-#include "common/include/task_scheduler.h"
 #include "mission_listener_interface.h"
-#include "window_manager_hilog.h"
 #include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
 using ISessionListener = AAFwk::IMissionListener;
 class SessionListenerController : public std::enable_shared_from_this<SessionListenerController> {
-    public:
-    SessionListenerController();
-
-    ~SessionListenerController();
-
-    void Init();
+public:
+    SessionListenerController() = default;
+    ~SessionListenerController() = default;
 
     WSError AddSessionListener(const sptr<ISessionListener>& listener);
 
@@ -65,22 +59,26 @@ private:
     void OnListenerDied(const wptr<IRemoteObject>& remote);
 
     template<typename F, typename... Args>
-    void CallListeners(F func, Args&& ... args);
+    void CallListeners(F func, Args&&... args);
 
     class ListenerDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         using ListenerDiedHandler = std::function<void(const wptr<IRemoteObject>&)>;
-        explicit ListenerDeathRecipient(ListenerDiedHandler handler);
+        explicit ListenerDeathRecipient(ListenerDiedHandler handler) : diedHandler_(std::move(handler)) {}
         ~ListenerDeathRecipient() = default;
-        void OnRemoteDied(const wptr<IRemoteObject>& remote) final;
+        void OnRemoteDied(const wptr<IRemoteObject>& remote) final
+        {
+            if (diedHandler_) {
+                diedHandler_(remote);
+            }
+        }
 
     private:
         ListenerDiedHandler diedHandler_;
     };
 
 private:
-    ffrt::mutex listenerLock_;
-    std::shared_ptr<TaskScheduler> taskScheduler_;
+    std::mutex listenerLock_;
     std::vector<sptr<ISessionListener>> sessionListeners_;
     sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
 };

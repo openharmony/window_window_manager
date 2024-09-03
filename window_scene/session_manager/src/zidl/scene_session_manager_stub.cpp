@@ -228,9 +228,13 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
@@ -265,9 +269,13 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
@@ -346,7 +354,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
 
 int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetFocusSessionInfo!");
+    WLOGFD("run HandleGetFocusSessionInfo!");
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo);
     reply.WriteParcelable(&focusInfo);
@@ -432,7 +440,7 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
     WLOGFI("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         WLOGFI("listener is nullptr");
         return ERR_NONE;
     }
@@ -594,7 +602,7 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& da
 {
     WLOGFI("run HandleSetGestureNavigationEnabled!");
     bool enable = data.ReadBool();
-    const WMError &ret = SetGestureNavigaionEnabled(enable);
+    const WMError &ret = SetGestureNavigationEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

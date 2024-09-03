@@ -135,6 +135,7 @@ napi_value AsyncProcess(napi_env env,
     napi_value resourceName = nullptr;
     if (!NAPICall(env, napi_create_string_latin1(env, funcname.c_str(), NAPI_AUTO_LENGTH, &resourceName))) {
         delete info;
+        napi_delete_reference(env, callbackRef);
         return nullptr;
     }
 
@@ -147,16 +148,19 @@ napi_value AsyncProcess(napi_env env,
 
     if (result == nullptr) {
         delete info;
+        napi_delete_reference(env, callbackRef);
         return nullptr;
     }
 
     if (!NAPICall(env, napi_create_async_work(env, nullptr, resourceName, AsyncFunc<ParamT>,
         CompleteFunc<ParamT>, reinterpret_cast<void *>(info), &info->asyncWork))) {
         delete info;
+        napi_delete_reference(env, callbackRef);
         return nullptr;
     }
     if (!NAPICall(env, napi_queue_async_work(env, info->asyncWork))) {
         delete info;
+        napi_delete_reference(env, callbackRef);
         return nullptr;
     }
 

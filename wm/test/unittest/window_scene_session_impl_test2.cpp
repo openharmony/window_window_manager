@@ -717,11 +717,18 @@ HWTEST_F(WindowSceneSessionImplTest2, DisableAppWindowDecor02, Function | SmallT
  */
 HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("RaiseAboveTarget01");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, windowSceneSession->RaiseAboveTarget(0));
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(6);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetParentPersistentId(0);
+    auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 }
 
 /**
@@ -835,7 +842,7 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
     ASSERT_NE(nullptr, windowSceneSession);
     sptr<IRemoteObject> targetToken;
     WMError ret = windowSceneSession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1161,7 +1168,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio03, Function | SmallTe
 
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
-    ASSERT_EQ(defautDensity, subWindow->GetVirtualPixelRatio(displayInfo));
+    ASSERT_EQ(density, subWindow->GetVirtualPixelRatio(displayInfo));
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
@@ -1457,7 +1464,11 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     // case1: only set maximize()
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     auto ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
@@ -1588,25 +1599,6 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess02, F
 }
 
 /**
- * @tc.name: SyncDestroyAndDisconnectSpecificSession
- * @tc.desc: SyncDestroyAndDisconnectSpecificSession test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, SyncDestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
-{
-    sptr option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SyncDestroyAndDisconnectSpecificSession");
-    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    WMError ret = window->SyncDestroyAndDisconnectSpecificSession(100);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
-}
-
-/**
  * @tc.name: GetTitleButtonVisible01
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
@@ -1733,10 +1725,10 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.uiType_ = "phone";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     WMError res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    window->windowSystemConfig_.uiType_ = "pc";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = window->SetTitleButtonVisible(false, false, false);
     ASSERT_EQ(res, WMError::WM_OK);
 }

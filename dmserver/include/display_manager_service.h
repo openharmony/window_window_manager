@@ -90,6 +90,7 @@ public:
         std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop = true) override;
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    bool TryToCancelScreenOff() override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
 
@@ -114,6 +115,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
+    std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
 private:
     DisplayManagerService();
@@ -137,6 +139,7 @@ private:
     sptr<DisplayDumper> displayDumper_;
     AtomicMap<ScreenId, uint32_t> accessTokenIdMaps_;
     bool isAutoRotationOpen_;
+    std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
 };
 } // namespace OHOS::Rosen
 

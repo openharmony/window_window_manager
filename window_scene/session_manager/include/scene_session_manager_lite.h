@@ -16,16 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_LITE_H
 
-#include <mutex>
-#include <shared_mutex>
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "wm_single_instance.h"
-
 
 namespace OHOS::Rosen {
 
 class SceneSessionManagerLite : public SceneSessionManagerLiteStub {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManagerLite)
+WM_DECLARE_SINGLE_INSTANCE(SceneSessionManagerLite)
 public:
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
@@ -38,6 +35,7 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) override;
@@ -71,10 +69,9 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
-
-protected:
-    SceneSessionManagerLite() = default;
-    virtual ~SceneSessionManagerLite() = default;
+    WMError CloseTargetFloatWindow(const std::string& bundleName) override;
+    WMError CloseTargetPiPWindow(const std::string& bundleName) override;
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
 };
 } // namespace OHOS::Rosen
 

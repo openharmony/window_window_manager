@@ -54,6 +54,8 @@ private:
     void DumpScreenPropertyById(ScreenId id);
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
+    void SetMotionSensorvalue(std::string input);
+    void SetRotationLockedvalue(std::string input);
 
 private:
     int fd_;
