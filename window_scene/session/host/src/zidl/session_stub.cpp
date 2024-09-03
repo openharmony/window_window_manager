@@ -469,7 +469,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
         return ERR_INVALID_DATA;
     }
-    const SizeChangeReason& reason = static_cast<SizeChangeReason>(changeReason);
+    SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
     bool isGlobal = false;
     if (!data.ReadBool(isGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");

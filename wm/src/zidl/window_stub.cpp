@@ -48,7 +48,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
                 return ERR_INVALID_DATA;
             }
-            struct Rect rect { posX, posY, width, height };
+            Rect rect { posX, posY, width, height };
             bool decoStatus = false;
             if (!data.ReadBool(decoStatus)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read decoStatus failed");
