@@ -94,6 +94,7 @@
           "fwk_group": [
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
+            "//foundation/window/window_manager/dm:libdm_ndk",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",

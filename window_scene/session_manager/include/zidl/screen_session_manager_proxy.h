@@ -167,7 +167,8 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
-
+    DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+        std::vector<uint64_t>& windowIdList) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

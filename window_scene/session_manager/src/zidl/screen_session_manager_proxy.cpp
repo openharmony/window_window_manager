@@ -2724,6 +2724,42 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
         return;
     }
 }
+DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("proxy for freeze: failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteUint32(pid)) {
+        WLOGFE("write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    
+    if (!data.WriteUInt64Vector(windowIdList)) {
+        WLOGFE("write date: failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("send request: failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 
 std::vector<DisplayPhysicalResolution> ScreenSessionManagerProxy::GetAllDisplayPhysicalResolution()
 {

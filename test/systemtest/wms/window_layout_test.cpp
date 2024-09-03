@@ -38,6 +38,7 @@ public:
     static inline float virtualPixelRatio_ = 0.0;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
+    static constexpr uint32_t WAIT_SYANC_S = 1; // second;
     static void InitAvoidArea();
 };
 
@@ -116,6 +117,10 @@ void WindowLayoutTest::SetUp()
 
 void WindowLayoutTest::TearDown()
 {
+    for (auto window: activeWindows_) {
+        window->Destroy();
+    }
+    sleep(WAIT_SYANC_S);
 }
 
 namespace {

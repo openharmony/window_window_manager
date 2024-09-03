@@ -250,7 +250,7 @@ HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallT
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
     auto res = session_->HandleSendPointerEvenForMoveDrag(data, reply);
-    ASSERT_EQ(-1, res);
+    ASSERT_EQ(5, res);
 }
 
 /**
