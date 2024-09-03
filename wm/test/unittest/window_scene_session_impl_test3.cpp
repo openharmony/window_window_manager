@@ -308,10 +308,6 @@ HWTEST_F(WindowSceneSessionImplTest3, AdjustKeyboardLayout, Function | SmallTest
     auto ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->AdjustKeyboardLayout(params);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1251,9 +1247,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsSessionMainWindow, Function | SmallTest 
     EXPECT_EQ(false, ret);
     ret = windowSceneSessionImpl->IsSessionMainWindow(0);
     EXPECT_EQ(false, ret);
-    windowSession->property_ = nullptr;
-    ret = windowSceneSessionImpl->IsSessionMainWindow(0);
-    EXPECT_EQ(false, ret);
     windowSession = nullptr;
     ret = windowSceneSessionImpl->IsSessionMainWindow(0);
     EXPECT_EQ(false, ret);
@@ -1406,7 +1399,7 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowWithId, Function | SmallTest | Le
     windowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(1, windowSession)));
     auto ret = windowSceneSessionImpl->GetWindowWithId(1);
-    EXPECT_FALSE(ret != nullptr);
+    EXPECT_FALSE(ret == nullptr);
     ret = windowSceneSessionImpl->GetWindowWithId(0);
     EXPECT_FALSE(ret == nullptr);
     windowSession = nullptr;

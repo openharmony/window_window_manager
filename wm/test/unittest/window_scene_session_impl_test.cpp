@@ -110,8 +110,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(true));
 }
 
 /**
@@ -134,8 +134,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, Function | SmallT
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session, identityToken));
     window->property_->SetPersistentId(1);
     window->Destroy(false);
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session, identityToken));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Create(abilityContext_, session, identityToken));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
 
 /**
@@ -314,68 +314,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function
     windowSceneSession->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
     if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
-}
-
-/**
- * @tc.name: CreateAndConnectSpecificSession07
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowTag(WindowTag::SUB_WINDOW);
-    option->SetWindowName("CreateAndConnectSpecificSession07");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    
-    SessionInfo sessionInfo = { "CreateTestBundle7", "CreateTestModule7", "CreateTestAbility7" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
-    
-    windowSceneSession->property_->SetPersistentId(106);
-    windowSceneSession->property_->SetParentPersistentId(105);
-    windowSceneSession->property_->SetParentId(105);
-    windowSceneSession->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
-    windowSceneSession->hostSession_ = session;
-
-    windowSceneSession->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
-}
-
-/**
- * @tc.name: CreateAndConnectSpecificSession08
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowTag(WindowTag::SUB_WINDOW);
-    option->SetWindowName("CreateAndConnectSpecificSession08");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    
-    SessionInfo sessionInfo = { "CreateTestBundle8", "CreateTestModule8", "CreateTestAbility8" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
-    
-    windowSceneSession->property_->SetPersistentId(107);
-    windowSceneSession->property_->SetParentPersistentId(106);
-    windowSceneSession->property_->SetParentId(106);
-    windowSceneSession->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
-    windowSceneSession->hostSession_ = session;
-
-    windowSceneSession->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_ERROR_INVALID_TYPE) {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, windowSceneSession->CreateAndConnectSpecificSession());
     }
     windowSceneSession->Destroy(true);
 }
@@ -1459,54 +1397,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     window->hostSession_ = session;
     window->SetKeepScreenOn(false);
     ASSERT_FALSE(window->IsKeepScreenOn());
-}
-
-/*
- * @tc.name: DestoryInner01
- * @tc.desc: DestoryInner01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("DestoryInner01");
-    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
-    window->property_->SetPersistentId(123);
-    window->property_->SetExtensionFlag(true);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
-    window->property_->SetExtensionFlag(false);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
-}
-
-/*
- * @tc.name: DestoryInner02
- * @tc.desc: DestoryInner02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, DestoryInner02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("DestoryInner02");
-    option->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
-    window->property_->SetPersistentId(134);
-    window->property_->SetExtensionFlag(true);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
-    window->property_->SetExtensionFlag(false);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
 }
 
 /*

@@ -282,6 +282,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
+        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
+        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
     }
@@ -420,16 +424,17 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateSessionRect!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     auto posX = data.ReadInt32();
     auto posY = data.ReadInt32();
     auto width = data.ReadUint32();
     auto height = data.ReadUint32();
     WSRect rect = {posX, posY, width, height};
-    WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
-        width, height);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
+        posX, posY, width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    const WSError& errCode = UpdateSessionRect(rect, reason);
+    bool isGlobal = data.ReadBool();
+    const WSError& errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -675,9 +680,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 {
     WLOGFD("HandleSendPointerEvenForMoveDrag!");
     auto pointerEvent = MMI::PointerEvent::Create();
+    if (!pointerEvent) {
+        TLOGE(WmsLogTag::WMS_EVENT, "create pointer event failed");
+        return ERR_INVALID_DATA;
+    }
     if (!pointerEvent->ReadFromParcel(data)) {
-        WLOGFE("Read pointer event failed");
-        return -1;
+        TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

@@ -341,7 +341,7 @@ ColorSpace WindowSessionImpl::GetColorSpace()
 
 WMError WindowSessionImpl::WindowSessionCreateCheck()
 {
-    if (!property_ || vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+    if (!property_ || vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& name = property_->GetWindowName();
@@ -563,7 +563,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
-    } else if (handler_ != nullptr && rsTransaction != nullptr) {
+    } else if (handler_ != nullptr) {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
@@ -604,7 +604,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 return;
             }
             window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
+            if (window->rotationAnimationCount_ == 0 && !window->isUiContentDestructing_) {
                 window->NotifyRotationAnimationEnd();
             }
         });
@@ -632,19 +632,12 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
-        if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
-            rsTransaction->Begin();
-        }
         if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
             !window->postTaskDone_) {
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        if (rsTransaction) {
-            rsTransaction->Commit();
-        }
         window->postTaskDone_ = true;
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
@@ -761,7 +754,7 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 
 bool WindowSessionImpl::IsFocused() const
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_);
+    TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_.load());
     return isFocused_;
 }
 
@@ -820,10 +813,6 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if (rect.width_ == 0 || rect.height_ == 0) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
-        return;
-    }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("display is null!");
@@ -952,12 +941,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             uiContent->Destroy();
         }
     }
-    std::unique_ptr<Ace::UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else {
-        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-    }
+    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -986,11 +971,13 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     // make uiContent available after Initialize/Restore
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+        isUiContentDestructing_ = true;
         uiContent_ = std::move(uiContent);
         RegisterFrameLayoutCallback();
         WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
+    isUiContentDestructing_ = false;
     return WMError::WM_OK;
 }
 
@@ -2199,12 +2186,16 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
                 uiContent->Destroy();
             }
         }
-        std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
-        if (uiContent_ != nullptr) {
-            uiContent_ = nullptr;
-            TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
-                GetPersistentId());
+        {
+            std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+            isUiContentDestructing_ = true;
+            if (uiContent_ != nullptr) {
+                uiContent_ = nullptr;
+                TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
+                    GetPersistentId());
+            }
         }
+        isUiContentDestructing_ = false;
     };
     if (handler_) {
         handler_->PostSyncTask(task, "wms:NotifyBeforeDestroy");

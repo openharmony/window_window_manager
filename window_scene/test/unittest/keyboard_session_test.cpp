@@ -581,11 +581,11 @@ HWTEST_F(KeyboardSessionTest, AdjustKeyboardLayout, Function | SmallTest | Level
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         new (std::nothrow) SceneSession::SessionChangeCallback();
     EXPECT_NE(sessionChangeCallback, nullptr);
-    sessionChangeCallback->onAdjustKeyboardLayout_ = nullptr;
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
     keyboardSession->RegisterSessionChangeCallback(sessionChangeCallback);
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
-    sessionChangeCallback->onAdjustKeyboardLayout_ = [](const KeyboardLayoutParams& params){};
+    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     WLOGFI("AdjustKeyboardLayout end!");

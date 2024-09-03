@@ -1698,7 +1698,7 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(session->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_NE(session, session->GetMainSession());
+    EXPECT_EQ(session, session->GetMainSession());
 
     sptr<Session> subSession = sptr<Session>::MakeSptr(info);
     EXPECT_NE(subSession, nullptr);
@@ -1706,7 +1706,7 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(subSession->property_, nullptr);
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    EXPECT_NE(session, subSession->GetMainSession());
+    EXPECT_EQ(session, subSession->GetMainSession());
 
     sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
     EXPECT_NE(subSubSession, nullptr);

@@ -20,7 +20,6 @@
 #include <parcel.h>
 #include <iremote_object.h>
 
-#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
@@ -622,7 +621,7 @@ public:
      *
      * @return displayId of window.
      */
-    virtual uint64_t GetDisplayId() const { return DISPLAY_ID_INVALID; }
+    virtual uint64_t GetDisplayId() const { return INVALID_DISPLAY_ID; }
     /**
      * @brief Get flag of window.
      *
@@ -823,7 +822,7 @@ public:
      * @param y
      * @return WMError
      */
-    virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
      * @brief move the window to (x, y)
      *
@@ -2140,6 +2139,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
+     * @brief Notify modal UIExtension it may be covered
+     *
+     * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
+     */
+    virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 };
 }
 }

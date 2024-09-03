@@ -1165,7 +1165,7 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
-    if (vsyncStation_ == nullptr || !(vsyncStation_->IsResourceEnough())) {
+    if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden
@@ -1677,7 +1677,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);

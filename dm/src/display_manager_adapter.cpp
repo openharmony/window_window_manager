@@ -435,8 +435,9 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFD("BaseAdapter destory!");
+    WLOGFI("BaseAdapter destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    Clear();
     displayManagerServiceProxy_ = nullptr;
 }
 
@@ -789,5 +790,12 @@ std::vector<DisplayPhysicalResolution> DisplayManagerAdapter::GetAllDisplayPhysi
 {
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayPhysicalResolution>{});
     return displayManagerServiceProxy_->GetAllDisplayPhysicalResolution();
+}
+
+DMError DisplayManagerAdapter::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
+    std::vector<uint64_t>& windowIdList)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
 }
 } // namespace OHOS::Rosen

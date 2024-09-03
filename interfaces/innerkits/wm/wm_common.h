@@ -363,6 +363,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_SHOW,
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
+    PIP_RESTORE,
     UPDATE_DPI_SYNC,
     END,
 };
@@ -496,6 +497,7 @@ namespace {
     constexpr int32_t SYSTEM_USERID = 0;
     constexpr int32_t BASE_USER_RANGE = 200000;
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
+    constexpr uint64_t INVALID_DISPLAY_ID = -1ULL;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

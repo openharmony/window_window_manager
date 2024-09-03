@@ -1338,7 +1338,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
@@ -1374,7 +1374,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, isMoveToGlobal);
     return static_cast<WMError>(ret);
 }
 
@@ -2011,6 +2011,12 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    // The device is not supported
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!isPC && !IsFreeMultiWindowMode()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_OK;
+    }
     if (property_ == nullptr || property_->GetCompatibleModeInPc()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2365,11 +2371,15 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
-        WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        TLOGI(WmsLogTag::DEFAULT, "Can not set show when locked, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (flag == WindowFlag::WINDOW_FLAG_HANDWRITING && !SessionPermission::IsSystemCalling()) {
-        WLOGI("Can not add window flag WINDOW_FLAG_HANDWRITING");
+        TLOGI(WmsLogTag::DEFAULT, "Can not set handwritting, PersistentId: %{public}u", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !SessionPermission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::DEFAULT, "Can not set forbid split move, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
@@ -3655,6 +3665,38 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange()
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
 }
 
+WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams& params)
+{
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display != nullptr) {
+        displayWidth = display->GetWidth();
+        displayHeight = display->GetHeight();
+    } else {
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            displayWidth = defaultDisplayInfo->GetWidth();
+            displayHeight = defaultDisplayInfo->GetHeight();
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "display is null, name: %{public}s, id: %{public}d",
+                property_->GetWindowName().c_str(), GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+    }
+    bool isLandscape = displayWidth > displayHeight ? true : false;
+    Rect newRect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
+    property_->SetRequestRect(newRect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, newRect: %{public}s, isLandscape: %{public}d, "
+        "displayWidth: %{public}d, displayHeight: %{public}d", GetPersistentId(), newRect.ToString().c_str(),
+        isLandscape, displayWidth, displayHeight);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
@@ -3662,11 +3704,18 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
         static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
         params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
         params.PortraitPanelRect_.ToString().c_str());
-    if (property_ != nullptr) {
-        property_->SetKeyboardLayoutParams(params);
+    if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is null");
+        return WMError::WM_ERROR_NULLPTR;
     }
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
+    property_->SetKeyboardLayoutParams(params);
+    property_->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+    auto ret = MoveAndResizeKeyboard(params);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize failed");
+        return ret;
+    }
+    if (auto hostSession = GetHostSession()) {
         return static_cast<WMError>(hostSession->AdjustKeyboardLayout(params));
     }
     return WMError::WM_OK;
