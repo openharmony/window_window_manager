@@ -2119,13 +2119,6 @@ public:
     virtual uint32_t GetStatusBarHeight() { return 0; }
 
     /**
-     * @brief Get whether the free multi-window mode is enabled or not.
-     *
-     * @return true means the free multi-window mode is enabled, and false means the opposite.
-     */
-    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-
-    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
