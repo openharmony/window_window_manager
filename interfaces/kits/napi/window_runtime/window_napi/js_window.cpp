@@ -47,8 +47,6 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
-constexpr size_t INDEX_THREE = 3;
-constexpr size_t FOUR_PARAMES_SIZE = 4;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
@@ -6090,7 +6088,7 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) { // 3: params num
+    if (argc != 3) { // 3: params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6109,26 +6107,20 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool isCloseVisible = true;
-    if (argc >= FOUR_PARAMES_SIZE && (!ConvertFromJsValue(env, argv[INDEX_THREE], isCloseVisible))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isCloseVisible");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible,
-        isCloseVisible);
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT,
-        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d, %{public}d]",
+        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d]",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible,
-        isSplitVisible, isCloseVisible);
+        isSplitVisible);
     return NapiGetUndefined(env);
 }
 
