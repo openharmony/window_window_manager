@@ -179,6 +179,7 @@ public:
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
+    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     virtual Orientation GetRequestedOrientation() override;
 
     int32_t GetParentId() const;
