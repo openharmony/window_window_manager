@@ -921,13 +921,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
     if (reason == WindowSizeChangeReason::ROTATION) {
         if (auto hostSession = GetHostSession()) {
-            avoidAreasToUpdate = hostSession->GetAllAvoidAreas();
+            hostSession->GetAllAvoidAreas(avoidAreasToUpdate);
         }
     } else {
         avoidAreasToUpdate = avoidAreas;
     }
-    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {.
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid area type %{public}u area %{public}s",
+    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
             type, avoidArea.ToString().c_str());
     }
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);

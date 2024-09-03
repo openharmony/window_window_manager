@@ -185,6 +185,7 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
 
