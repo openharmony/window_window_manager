@@ -206,6 +206,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+        if (WindowHelper::IsSubWindow(GetType())) {
+            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+        }
     }
 }
 
