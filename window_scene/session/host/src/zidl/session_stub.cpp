@@ -852,7 +852,12 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
-    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    uint32_t actionValue = 0;
+    if (!data.ReadUint32(actionValue)) {
+        TLOGE(WmsLogTag::DEFAULT, "read action error");
+        return ERR_INVALID_DATA;
+    }
+    auto action = static_cast<WSPropertyChangeAction>(actionValue);
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
