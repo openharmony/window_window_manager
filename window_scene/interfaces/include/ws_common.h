@@ -648,6 +648,7 @@ struct SessionUIParam {
     float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {
