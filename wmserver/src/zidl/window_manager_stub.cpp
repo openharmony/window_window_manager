@@ -254,7 +254,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-
             bool isFromClient = false;
             if (!data.ReadBool(isFromClient)) {
                 return ERR_INVALID_DATA;
