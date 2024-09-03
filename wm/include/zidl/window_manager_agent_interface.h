@@ -37,6 +37,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
     WINDOW_MANAGER_AGENT_TYPE_PIP,
+    WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
