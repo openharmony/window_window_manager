@@ -19,6 +19,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "mock_session_manager_service_interface.h"
 #include "session_manager_service_recover_interface.h"
 #include "scene_session_manager_lite_proxy.h"
 #include "window_manager_hilog.h"
