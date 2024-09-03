@@ -126,22 +126,6 @@ namespace {
     }
 
     /**
-     * @tc.name: RegisterSettingCastObserver02
-     * @tc.desc: RegisterSettingCastObserver
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver02, Function | SmallTest | Level3)
-    {
-        auto func = [] (const std::string&) {
-            TLOGI(WmsLogTag::DMS, "UT test");
-        };
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        screenSettingHelper.castObserver_ = nullptr;
-        screenSettingHelper.RegisterSettingCastObserver(func);
-        ASSERT_EQ(screenSettingHelper.castObserver_, nullptr);
-    }
-
-    /**
      * @tc.name: UnregisterSettingCastObserver
      * @tc.desc: UnregisterSettingCastObserver
      * @tc.type: FUNC

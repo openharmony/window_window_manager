@@ -115,7 +115,7 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError RaiseToAppTop(uint32_t windowId) override;
     std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override;
-    WMError SetGestureNavigaionEnabled(bool enable) override;
+    WMError SetGestureNavigationEnabled(bool enable) override;
     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
@@ -167,6 +167,7 @@ private:
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
     bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
+    void LoadWindowParameter();
     void ConfigureWindowManagerService();
     void PostVoidSyncTask(Task task, const std::string& taskName = "WMSTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>

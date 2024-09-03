@@ -91,4 +91,8 @@ ohos_shared_library("scenesessionmanager_napi") {
   relative_install_dir = "module"
   part_name = "window_manager"
   subsystem_name = "window"
+
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }

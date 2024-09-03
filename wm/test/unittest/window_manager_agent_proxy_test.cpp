@@ -380,6 +380,32 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallT
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: NotifyWindowPidVisibilityChanged
+ * @tc.desc: test NotifyWindowPidVisibilityChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, Function | SmallTest | Level2)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    ASSERT_TRUE(impl != nullptr);
+
+    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
+    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+
+    sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

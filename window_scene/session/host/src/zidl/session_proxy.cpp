@@ -609,7 +609,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
@@ -630,6 +630,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("Write SessionSizeChangeReason failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isGlobal)) {
+        WLOGFE("Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -671,13 +676,24 @@ WSError SessionProxy::RaiseToAppTop()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifyFrameLayoutFinishFromApp()
+WSError SessionProxy::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(notifyListener)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write notifyListener failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -692,8 +708,7 @@ WSError SessionProxy::NotifyFrameLayoutFinishFromApp()
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 /** @note @window.hierarchy */

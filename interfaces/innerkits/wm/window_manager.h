@@ -28,6 +28,7 @@
 #include "window_visibility_info.h"
 #include "window_drawing_content_info.h"
 #include "window.h"
+#include "window_pid_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -189,6 +190,21 @@ public:
      * @param styleType
      */
     virtual void OnWindowStyleUpdate(WindowStyleType styleType) = 0;
+};
+
+/**
+ * @class IWindowPidVisibilityChangedListener
+ *
+ * @brief Listener to observe window visibility that in same pid.
+ */
+class IWindowPidVisibilityChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window style changed.
+     *
+     * @param info
+     */
+    virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
 };
 
 /**
@@ -373,6 +389,22 @@ public:
      */
     virtual void OnDisplayInfoChange(const sptr<IRemoteObject>& token,
         DisplayId displayId, float density, DisplayOrientation orientation) = 0;
+};
+
+/**
+ * @class IPiPStateChangedListener
+ *
+ * @brief Listener to observe PiP State changed.
+ */
+class IPiPStateChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when PiP State changed.
+     *
+     * @param bundleName the name of the bundle in PiP state changed.
+     * @param isForeground the state of the bundle in PiP State.
+     */
+    virtual void OnPiPStateChanged(const std::string& bundleName, bool isForeground) = 0;
 };
 
 /**
@@ -562,6 +594,24 @@ public:
      */
     WMError UnregisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
         const sptr<IDisplayInfoChangedListener>& listener);
+    
+    /**
+     * @brief Register window in same pid visibility changed listener.
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param listener IWindowPidVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
+
+    /**
+     * @brief Unregister window in same pid visibility changed listener.
+     *
+     * @param listener IWindowPidVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
 
     /**
      * @brief notify display information change.
@@ -618,12 +668,12 @@ public:
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     /**
-     * @brief Set gesture navigaion enabled.
+     * @brief Set gesture navigation enabled.
      *
      * @param enable True means set gesture on, false means set gesture off.
      * @return WM_OK means set success, others means set failed.
      */
-    WMError SetGestureNavigaionEnabled(bool enable) const;
+    WMError SetGestureNavigationEnabled(bool enable) const;
 
     /**
      * @brief Get focus window.
@@ -758,6 +808,7 @@ private:
     void NotifyGestureNavigationEnabledResult(bool enable) const;
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
 };
 } // namespace Rosen
 } // namespace OHOS

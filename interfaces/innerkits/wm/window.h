@@ -838,7 +838,7 @@ public:
      * @param y
      * @return WMError
      */
-    virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
      * @brief move the window to (x, y)
      *
@@ -1854,6 +1854,18 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
@@ -2200,11 +2212,11 @@ public:
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
-     * @brief Set the parent window of sub window created by UIExtension
+     * @brief Notify host that UIExtension timeout
      *
-     * @param parent window
+     * @param errorCode error code when UIExtension timeout
      */
-    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
     /*
      * @brief Get the real parent id of UIExtension
@@ -2212,6 +2224,13 @@ public:
      * @return Real parent id of UIExtension
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
+
+    /**
+     * @brief Notify modal UIExtension it may be covered
+     *
+     * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
+     */
+    virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 };
 }
 }

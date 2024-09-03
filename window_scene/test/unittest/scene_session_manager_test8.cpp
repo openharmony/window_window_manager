@@ -164,13 +164,15 @@ HWTEST_F(SceneSessionManagerTest8, WindowLayerInfoChangeCallback, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange, Function | SmallTest | Level3)
 {
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
-    ssm_->DealwithVisibilityChange(currVisibleData);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
 
+    visibilityChangeInfo.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    ssm_->DealwithVisibilityChange(currVisibleData);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
 
-    currVisibleData.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    visibilityChangeInfo.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
 
     SessionInfo sessionInfo;
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_END);
@@ -188,7 +190,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange, Function | SmallTes
     sceneSession1->surfaceNode_ = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 2);
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession1->GetWindowType());
     ssm_->sceneSessionMap_.emplace(2, sceneSession);
-    ssm_->DealwithVisibilityChange(currVisibleData);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
 }
 
 /**
@@ -198,8 +200,11 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange1, Function | SmallTest | Level3)
 {
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
-    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfo.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfo.push_back(std::make_pair(1,
+        WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
     currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
 
     SessionInfo sessionInfo;
@@ -219,7 +224,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange1, Function | SmallTe
     sceneSession1->surfaceNode_ = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 1);
     sceneSession1->SetParentSession(sceneSession1);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->DealwithVisibilityChange(currVisibleData);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
 }
 
 /**
@@ -412,6 +417,7 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
     std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfo;
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     std::string visibilityInfo = "";
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
     sceneSession->persistentId_ = 1998;
     sceneSession->SetCallingUid(1998);
     SessionState state = SessionState::STATE_CONNECT;
@@ -440,7 +446,7 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
     EXPECT_EQ(1998, sceneSession2->GetParentSession()->GetWindowId());
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
     ssm_->UpdateSubWindowVisibility(sceneSession,
-        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo);
+        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
 }
 
 /**

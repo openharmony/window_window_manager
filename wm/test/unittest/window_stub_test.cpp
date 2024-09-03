@@ -75,7 +75,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 }
 
 /**
@@ -149,7 +149,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -234,7 +234,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -268,7 +268,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
     uint32_t code = 0;
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 
     IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
     EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
@@ -423,7 +423,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, 5);
 }
 
 /**
@@ -441,7 +441,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -495,7 +495,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -513,7 +513,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -675,7 +675,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest31, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -729,7 +729,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest34, Function | SmallTest | Level2)
     
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_CONSUME_KEY_EVENT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**

@@ -159,16 +159,16 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
 
 WSError MainSession::SetTopmost(bool topmost)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "SetTopmost id: %{public}d, topmost: %{public}d", GetPersistentId(), topmost);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost id: %{public}d, topmost: %{public}d", GetPersistentId(), topmost);
     auto task = [weakThis = wptr(this), topmost]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
             return;
         }
         auto property = session->GetSessionProperty();
         if (property) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Notify session topmost change, id: %{public}d, topmost: %{public}u",
+            TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session topmost change, id: %{public}d, topmost: %{public}u",
                 session->GetPersistentId(), topmost);
             property->SetTopmost(topmost);
             if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionTopmostChange_) {

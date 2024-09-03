@@ -86,6 +86,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
             WLOGFE("Failed to convert rect to jsObject");
+            napi_close_handle_scope(eng, scope);
             return;
         }
         napi_set_named_property(eng, objValue, "width", CreateJsValue(eng, rect.width_));

@@ -124,6 +124,24 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: HandleUpdateSessionViewportConfig
+ * @tc.desc: test function : HandleUpdateSessionViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(false);
+    data.WriteFloat(1.0f);
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteUint32(0);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateSessionViewportConfig(data, reply));
+}
+
+/**
  * @tc.name: HandleUpdateDensity
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC

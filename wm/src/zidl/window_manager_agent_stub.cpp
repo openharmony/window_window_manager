@@ -51,7 +51,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
-            DisplayId displayId = data.ReadUint64();
+            DisplayId displayId = 0;
+            if (!data.ReadUint64(displayId)) {
+                return ERR_INVALID_DATA;
+            }
             SystemBarRegionTints tints;
             bool res = MarshallingHelper::UnmarshallingVectorObj<SystemBarRegionTint>(data, tints,
                 [](Parcel& parcel, SystemBarRegionTint& tint) {
@@ -147,6 +150,21 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE: {
             WindowStyleType type = static_cast<WindowStyleType>(data.ReadUint8());
             NotifyWindowStyleChange(type);
+            break;
+        }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY: {
+            sptr<WindowPidVisibilityInfo> info = data.ReadParcelable<WindowPidVisibilityInfo>();
+            if (info == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "windowPidVisibilityInfo is null.");
+                return ERR_INVALID_DATA;
+            }
+            NotifyWindowPidVisibilityChanged(info);
+            break;
+        }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED: {
+            std::string bundleName = data.ReadString();
+            bool isForeground = data.ReadBool();
+            UpdatePiPWindowStateChanged(bundleName, isForeground);
             break;
         }
         default:
