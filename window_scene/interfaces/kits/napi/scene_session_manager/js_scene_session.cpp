@@ -2116,7 +2116,7 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         return;
     }
 
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state: %{public}d", session->GetPersistentId(), state);
     auto task = [this, persistentId = persistentId_, state, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionStateChange jsSceneSession id:%{public}d has been destroyed",
