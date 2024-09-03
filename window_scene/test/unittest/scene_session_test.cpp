@@ -1574,24 +1574,24 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetStatusBarHeight
+ * @tc.name: GetStatusBarVectorHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest, GetStatusBarVectorHeight, Function | SmallTest | Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "GetStatusBarHeight";
-    info.bundleName_ = "GetStatusBarHeight";
+    info.abilityName_ = "GetStatusBarVectorHeight";
+    info.bundleName_ = "GetStatusBarVectorHeight";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    int32_t height = sceneSession->GetStatusBarHeight();
+    int32_t height = sceneSession->GetStatusBarVectorHeight();
     ASSERT_EQ(height, 0);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
-    height = sceneSession->GetStatusBarHeight();
+    height = sceneSession->GetStatusBarVectorHeight();
     ASSERT_EQ(height, 0);
     WSRect rect({0, 0, 0, 1});
     sceneSession->winRect_ = rect;
@@ -1605,7 +1605,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     sceneSession->property_ = property;
-    height = sceneSession->GetStatusBarHeight();
+    height = sceneSession->GetStatusBarVectorHeight();
     ASSERT_EQ(height, 1);
 }
 
