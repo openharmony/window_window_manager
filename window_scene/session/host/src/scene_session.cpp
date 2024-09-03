@@ -1575,7 +1575,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
 WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto task = [weakThis = wptr(this), &avoidAreas]() {
+    auto task = [weakThis = wptr(this), &avoidAreas] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
