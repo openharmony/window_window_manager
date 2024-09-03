@@ -329,6 +329,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET: {
             uint32_t windowId = data.ReadUint32();
             sptr<IRemoteObject> targetToken = data.ReadRemoteObject();
+            if (targetToken == nullptr) {
+                TLOGE(WmsLogTag::WMS_DIALOG, "Read targetToken object failed!");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = BindDialogTarget(windowId, targetToken);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -378,9 +382,25 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_SET_WINDOW_GRAVITY: {
-            uint32_t windowId = data.ReadUint32();
-            WindowGravity gravity = static_cast<WindowGravity>(data.ReadUint32());
-            uint32_t percent = data.ReadUint32();
+            uint32_t windowId = INVALID_WINDOW_ID;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Read windowId failed.");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t gravityValue = 0;
+            if (!data.ReadUint32(gravityValue) ||
+                gravityValue < static_cast<uint32_t>(WindowGravity::WINDOW_GRAVITY_FLOAT) ||
+                gravityValue > static_cast<uint32_t>(WindowGravity::WINDOW_GRAVITY_BOTTOM)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Window gravity value read failed, gravityValue: %{public}d",
+                    gravityValue);
+                return ERR_INVALID_DATA;
+            }
+            WindowGravity gravity = static_cast<WindowGravity>(gravityValue);
+            uint32_t percent = 0;
+            if (!data.ReadUint32(percent)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Percent read failed.");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = SetWindowGravity(windowId, gravity, percent);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
