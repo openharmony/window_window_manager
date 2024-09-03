@@ -555,7 +555,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 
 int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "HandleGetAllAvoidAreas!");
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     WMError errCode = GetAllAvoidAreas(avoidAreas);
     reply.WriteUint32(avoidAreas.size());
