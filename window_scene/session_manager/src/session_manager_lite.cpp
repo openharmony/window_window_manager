@@ -473,11 +473,11 @@ void FoundationDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrD
 void SessionManagerLite::OnFoundationDied()
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enter");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     {
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = false;
     }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     isFoundationListenerRegistered_ = false;
     recoverListenerRegistered_ = false;
     mockSessionManagerServiceProxy_ = nullptr;
