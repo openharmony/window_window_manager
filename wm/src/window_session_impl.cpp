@@ -882,7 +882,7 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
-    const std::map<AvoidAreaType, AvoidArea> avoidAreas)
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
@@ -920,14 +920,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     }
     std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
     if (reason == WindowSizeChangeReason::ROTATION) {
-        auto hostSession = GetHostSession();
-        if (hostSession) {
+        if (auto hostSession = GetHostSession()) {
             avoidAreasToUpdate = hostSession->GetAllAvoidAreas();
         }
     } else {
         avoidAreasToUpdate = avoidAreas;
     }
-    for (auto& [type, avoidArea]: avoidAreasToUpdate) {
+    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {.
         TLOGD(WmsLogTag::WMS_IMMS, "avoid area type %{public}u area %{public}s",
             type, avoidArea.ToString().c_str());
     }
