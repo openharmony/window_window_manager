@@ -47,7 +47,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, LastParentId, lastParent, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ParentId, parent, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsScreenGroup, isScreenGroup, false);
-    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsExtand, isExtand, false);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsExtend, isExtend, false);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenSourceMode, SourceMode, sourceMode, ScreenSourceMode::SCREEN_ALONE);
