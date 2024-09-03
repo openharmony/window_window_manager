@@ -7701,7 +7701,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     bool needUpdate = true;
     if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
         iter != lastUpdatedAvoidArea_[persistentId].end()) {
-        needUpdate = (iter->second != avoidArea) && !enterRecent_.load();
+        needUpdate = iter->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
             TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d type %{public}d empty avoid area",
@@ -7858,6 +7858,22 @@ void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateOccupiedAreaIfNeed:PID:" + std::to_string(persistentId));
     return;
+}
+
+WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}u, persistentId %{public}u",
+        isVisible, persistentId);
+    auto task = [this, persistentId, isVisible] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "scene session is nullptr");
+            return WSError::WS_DO_NOTHING;
+        }
+        sceneSession->SetIsStatusBarVisible(isVisible);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "NotifyStatusBarShowStatus");
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
