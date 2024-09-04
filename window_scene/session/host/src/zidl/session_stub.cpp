@@ -907,20 +907,20 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
 int SessionStub::HandleNotifyExtensionEventSync(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t notifyEvent;
-	if (!data.ReadUint32(notifyEvent)) {
-		return ERR_TRANSACTION_FAILED;
-	}
-	NotifyExtensionEventAsync(notifyEvent);
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventSync(notifyEvent);
     return ERR_NONE;
 }
 
 int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t notifyEvent;
-	if (!data.ReadUint32(notifyEvent)) {
-		return ERR_TRANSACTION_FAILED;
-	}
-	NotifyExtensionEventAsync(notifyEvent);
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

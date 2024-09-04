@@ -58,7 +58,7 @@ using NotifySyncOnFunc = std::function<void()>;
 using NotifyAsyncOnFunc = std::function<void()>;
 using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
 using NotifyBindModalFunc = std::function<void()>;
-using NotifyExtensionEventFunc = std::function<void>(uint32_t notifyEvent);
+using NotifyExtensionEventFunc = std::function<void(uint32_t notifyEvent)>;
 class ExtensionSession : public Session {
 public:
     struct ExtensionSessionEventCallback : public RefBase {

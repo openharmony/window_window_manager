@@ -2033,13 +2033,13 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
 HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventSync, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_->property_);
-	window_->NotifyExtensionEventSync(0);
-	
-	SessionInfo sessionInfo;
-	window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
-	ASSERT_NE(nullptr, window_->hostSession_);
+    window_->NotifyExtensionEventSync(0);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
-	window_->NotifyExtensionEventSync(0);
+    window_->NotifyExtensionEventSync(0);
 }
 
 /**
@@ -2049,15 +2049,14 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventSync, Function | Sm
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
 {
-	window_->NotifyExtensionEventAsync(0);
-	
-	SessionInfo sessionInfo;
-	window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
-	ASSERT_NE(nullptr, window_->hostSession_);
-	ASSERT_NE(nullptr, window_->property_);
-	
+    ASSERT_NE(nullptr, window_->property_);
+    window_->NotifyExtensionEventAsync(0);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
-	window_->NotifyExtensionEventAsync(0);
+    window_->NotifyExtensionEventAsync(0);
 }
 }
 } // namespace Rosen

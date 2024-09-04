@@ -447,44 +447,50 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
 
 /**
  * @tc.name: NotifyExtensionEventSync
- * @tc.desc: NotifyExtensionEventSync function
+ * @tc.desc: NotifyExtensionEventSync test
  * @tc.type: FUNC
  */
 HWTEST_F(SessionProxyTest, NotifyExtensionEventSync, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-	ASSERT_NE(nullptr, iRemoteObjectMocker);
-	SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-	ASSERT_NE(nullptr, sProxy);
+    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(nullptr);
     sProxy->NotifyExtensionEventSync(0);
-	
-	MockMessageParcel::SetWriteUint32ErrorFlag(true);
-	sProxy->NotifyExtensionEventSync(0);
-	
-	MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-	sProxy->NotifyExtensionEventSync(0);
-	MockMessageParcel::ClearAllErrorFlag();
+
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObjectMocker);
+    sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, sProxy);
+    sProxy->NotifyExtensionEventSync(0);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    sProxy->NotifyExtensionEventSync(0);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyExtensionEventSync(0);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
  * @tc.name: NotifyExtensionEventAsync
- * @tc.desc: NotifyExtensionEventAsync function
+ * @tc.desc: NotifyExtensionEventAsync test
  * @tc.type: FUNC
  */
 HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-	ASSERT_NE(nullptr, iRemoteObjectMocker);
-	SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-	ASSERT_NE(nullptr, sProxy);
+    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(nullptr);
     sProxy->NotifyExtensionEventAsync(0);
-	
-	MockMessageParcel::SetWriteUint32ErrorFlag(true);
-	sProxy->NotifyExtensionEventAsync(0);
-	
-	MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-	sProxy->NotifyExtensionEventAsync(0);
-	MockMessageParcel::ClearAllErrorFlag();
+
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, iRemoteObjectMocker);
+    sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, sProxy);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+    
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen

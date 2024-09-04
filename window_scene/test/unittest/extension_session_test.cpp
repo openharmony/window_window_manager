@@ -830,25 +830,25 @@ HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
  */
 HWTEST_F(ExtensionSessionTest, NotifyExtensionEvent, Function | SmallTest | Level1)
 {
-	ASSERT_NE(nullptr, extSessionEventCallback_);
+    ASSERT_NE(nullptr, extSessionEventCallback_);
     MockFunction<void(uint32_t)> mockNotifyExtensionEventFunc;
-    extSessionEventCallback_->notifyExtensionEventFunc = mockNotifyExtensionEventFunc.AsStdFunction();
+    extSessionEventCallback_->notifyExtensionEventFunc_ = mockNotifyExtensionEventFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(2);
+    EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(2);
     extensionSession_->NotifyExtensionEventSync(0);
-	extensionSession_->NotifyExtensionEventAsync(0);
-    
-    extSessionEventCallback_->notifyExtensionEventFunc = nullptr;
+    extensionSession_->NotifyExtensionEventAsync(0);
+
+    extSessionEventCallback_->notifyExtensionEventFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
-	extensionSession_->NotifyExtensionEventSync(0);
-	extensionSession_->NotifyExtensionEventAsync(0);
+    EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(0);
+    extensionSession_->NotifyExtensionEventSync(0);
+    extensionSession_->NotifyExtensionEventAsync(0);
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(0);
     extensionSession_->NotifyExtensionEventSync(0);
-	extensionSession_->NotifyExtensionEventAsync(0);
+    extensionSession_->NotifyExtensionEventAsync(0);
 }
 }
 }
