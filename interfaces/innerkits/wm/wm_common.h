@@ -266,7 +266,8 @@ enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
+    FOLLOW_SETTING = 1 << 2
 };
 
 /**
