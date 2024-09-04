@@ -295,7 +295,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info, const Rect& windowRect,
         std::vector<Rect>& touchableAreas);
     void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, std::string name);
+        std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window,
+        const std::string& name);
     bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         napi_env env, napi_callback_info info, sptr<Window>& window);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
