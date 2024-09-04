@@ -308,6 +308,16 @@ void WindowOption::SetDialogDecorEnable(bool decorEnable)
     dialogDecorEnable_ = decorEnable;
 }
 
+void WindowOption::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+}
+
+bool WindowOption::GetIsUIExtensionSubWindowFlag() const
+{
+    return isUIExtensionSubWindowFlag_;
+}
+
 bool WindowOption::GetDialogDecorEnable() const
 {
     return dialogDecorEnable_;

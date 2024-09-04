@@ -1408,6 +1408,16 @@ bool WindowSessionProperty::GetExtensionFlag() const
     return isExtensionFlag_;
 }
 
+void WindowSessionProperty::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionSubWindowFlag() const
+{
+    return isUIExtensionSubWindowFlag_;
+}
+
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
 {
     uiExtensionUsage_ = uiExtensionUsage;
