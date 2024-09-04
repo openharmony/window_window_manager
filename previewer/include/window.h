@@ -375,20 +375,22 @@ public:
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
-    
+
     /**
      * @brief Notify extension synchronously
      *
      * @param notifyEvent event type
+     * @return * void
      */
-    virtual void NotifyExtensionEventSync(uint32_t notifyEvent) {};
-	
-	/**
+    virtual void NotifyExtensionEventSync(uint32_t notifyEvent) {}
+
+    /**
      * @brief Notify extension asynchronously
      *
      * @param notifyEvent event type
+     * @return * void
      */
-    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 };
 }
 }

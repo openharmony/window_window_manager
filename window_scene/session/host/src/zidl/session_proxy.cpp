@@ -1670,7 +1670,7 @@ WSError SessionProxy::SetDialogSessionBackGestureEnabled(bool isEnabled)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifyExtensionEventSync(uint32_t notifyEvent)
+void SessionProxy::NotifyExtensionEventSync(uint32_t notifyEvent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1696,7 +1696,7 @@ WSError SessionProxy::NotifyExtensionEventSync(uint32_t notifyEvent)
     }
 }
 
-WSError SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
+void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
     MessageParcel data;
     MessageParcel reply;

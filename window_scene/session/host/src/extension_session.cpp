@@ -471,21 +471,17 @@ WSError ExtensionSession::Background(bool isFromClient)
 
 void ExtensionSession::NotifyExtensionEventSync(uint32_t notifyEvent)
 {
-    
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event synchronously, persistentId: %{public}d, notifyEvent: %{public}d",
-		GetPersistentId(), notifyEvent);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event synchronously, notifyEvent: %{public}d", notifyEvent);
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
-        avoidArea = extSessionEventCallback_->notifyExtensionEventFunc_(type);
+        extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
     }
 }
 
 void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, persistentId: %{public}d, notifyEvent: %{public}d",
-		GetPersistentId(), notifyEvent);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, notifyEvent: %{public}d", notifyEvent);
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
-        avoidArea = extSessionEventCallback_->notifyExtensionEventFunc_(type);
+        extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
     }
 }
 } // namespace OHOS::Rosen
