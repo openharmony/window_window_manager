@@ -989,11 +989,7 @@ HWTEST_F(DisplayManagerTest, isinsideof, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize = DisplayManager::GetInstance().GetAllDisplayPhysicalResolution();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(!allSize.empty());
-    } else {
-        ASSERT_TRUE(allSize.empty());
-    }
+    ASSERT_TRUE(!allSize.empty());
 }
 
 /**
