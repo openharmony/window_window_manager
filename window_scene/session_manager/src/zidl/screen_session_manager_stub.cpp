@@ -573,15 +573,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
-            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            auto scaleX = data.ReadFloat();
-            auto scaleY = data.ReadFloat();
-            auto pivotX = data.ReadFloat();
-            auto pivotY = data.ReadFloat();
-            SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
             FoldDisplayMode displayMode = GetFoldDisplayMode();
             reply.WriteUint32(static_cast<uint32_t>(displayMode));

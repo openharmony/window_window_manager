@@ -84,7 +84,6 @@ public:
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
-    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();

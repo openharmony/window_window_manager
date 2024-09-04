@@ -601,14 +601,6 @@ DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mo
     return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
 }
 
-void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,
-    float scaleX, float scaleY, float pivotX, float pivotY)
-{
-    INIT_PROXY_CHECK_RETURN();
-
-    return displayManagerServiceProxy_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
-}
-
 void DisplayManagerAdapter::SetFoldStatusLocked(bool locked)
 {
     INIT_PROXY_CHECK_RETURN();

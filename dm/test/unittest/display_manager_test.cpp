@@ -975,25 +975,6 @@ HWTEST_F(DisplayManagerTest, OnRemoteDied, Function | SmallTest | Level1)
     DisplayManager::GetInstance().OnRemoteDied();
     ASSERT_EQ(g_dmIsDestroyed, true);
 }
-
-/**
- * @tc.name: SetDisplayScale
- * @tc.desc: SetDisplayScale test
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, SetDisplayScale, Function | SmallTest | Level1)
-{
-    DisplayManager& displayManager = DisplayManager::GetInstance();
-    ASSERT_NE(displayManager.pImpl_, nullptr);
-    const float scaleX = 1.0f;
-    const float scaleY = 1.0f;
-    const float pivotX = 0.5f;
-    const float pivotY = 0.5f;
-    sptr<Display> display = displayManager.GetDefaultDisplay();
-    ASSERT_NE(display, nullptr);
-    ScreenId screenId = display->GetScreenId();
-    displayManager.SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
