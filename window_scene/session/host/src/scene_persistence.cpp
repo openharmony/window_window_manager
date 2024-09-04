@@ -76,10 +76,12 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
     if (snapshotFfrtHelper_ == nullptr) {
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
+    persistentId_ = persistentId;
 }
 
 ScenePersistence::~ScenePersistence()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed, persistentId: %{public}s", persistentId_);
     remove(snapshotPath_.c_str());
 }
 
