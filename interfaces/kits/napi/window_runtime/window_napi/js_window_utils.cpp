@@ -869,7 +869,7 @@ void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& prope
     std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, sptr<Window>& window)
 {
     for (auto type : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
-        auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        auto property = window->GetSystemBarPropertyByType(type);
         properties[type] = property;
         propertyFlags[type] = SystemBarPropertyFlag();
 
