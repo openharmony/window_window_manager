@@ -56,6 +56,7 @@ public:
 private:
     static std::string snapshotDirectory_;
     std::string bundleName_;
+    uint32_t persistentId_;
     std::string snapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
     bool hasSnapshot_ = false;
@@ -67,7 +68,6 @@ private:
     std::atomic<bool> isSavingSnapshot_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
-    uint32_t persistentId_;
 };
 } // namespace OHOS::Rosen
 
