@@ -1669,6 +1669,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             appIndex, sessionInfo.appIndex_);
     }
     if (!hasAppIndex && sessionInfo.appIndex_ > 0) {
+        TLOGI(WmsLogTag::WMS_LIFE, "want.appIndex is null, set want.appIndex:%{public}d", sessionInfo.appIndex_);
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, sessionInfo.appIndex_);
     }
     auto sessionProperty = scnSession->GetSessionProperty();
