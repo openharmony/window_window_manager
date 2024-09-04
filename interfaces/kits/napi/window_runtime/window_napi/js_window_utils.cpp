@@ -722,6 +722,34 @@ WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
     return errCode;
 }
 
+void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, std::string name)
+{
+    if (name.compare("status") == 0) {
+        auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_;
+        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_;
+    } else if (name.compare("navigation") == 0) {
+        auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_;
+    } else if (name.compare("navigationIndicator") == 0) {
+        auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_;
+        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ =
+            newSystemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_;
+    }
+    return;
+}
+
 bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
                           napi_env env, napi_callback_info info, sptr<Window>& window)
 {
@@ -855,6 +883,45 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
         propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     }
     return true;
+}
+
+void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags, std::map<WindowType, SystemBarProperty>& newProperties, 
+    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, sptr<Window>& window)
+{
+    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
+        newProperties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_;
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =
+        newProperties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_;
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ =
+        newProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
+        newPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =
+        newPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_;
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag =
+        newPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimationFlag;
+
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        newProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_;
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =
+        newProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_;
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ =
+        newProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_;
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        newPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_;
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =
+        newPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_;
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag =
+        newPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimationFlag;
+    return;
 }
 
 bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
