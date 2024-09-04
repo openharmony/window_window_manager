@@ -59,6 +59,15 @@ public:
     virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
+
++    /**
++     * @brief Raise a sub-window to app top.
++     *
++     * This function provides the ability for system applications to raise sub-window.
++     *
++     * @return Returns WSError::WS_OK if called success, otherwise failed.
++     * @permission Make sure the caller has system permission.
++     */
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
@@ -70,7 +79,26 @@ public:
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
+    
+    /**
+     * @brief Raise a sub-window above another sub-window created by same main window.
+     *
+     * This function provides the ability for system applications to raise sub-window.
+     *
+     * @param subWindowId the id of target sub-window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
+    
+    /**
+     * @brief Raise main window to app top.
+     *
+     * This function provides the ability for system applications to raise main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
