@@ -500,6 +500,7 @@ private:
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(const int32_t persistentId);
+    void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
