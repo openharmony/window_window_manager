@@ -3809,7 +3809,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = GetSceneSession(session->GetParentPersistentId());
+        const auto& parentSceneSession = session->GetParentSession();
         if (parentSceneSession == nullptr) {
             WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
