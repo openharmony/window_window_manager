@@ -30,7 +30,7 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence(const std::string& bundleName, const int32_t& persistentId);
+    ScenePersistence(const std::string& bundleName, int32_t persistentId);
     virtual ~ScenePersistence();
 
     static bool CreateSnapshotDir(const std::string& directory);
@@ -56,7 +56,7 @@ public:
 private:
     static std::string snapshotDirectory_;
     std::string bundleName_;
-    uint32_t persistentId_;
+    int32_t persistentId_;
     std::string snapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
     bool hasSnapshot_ = false;
