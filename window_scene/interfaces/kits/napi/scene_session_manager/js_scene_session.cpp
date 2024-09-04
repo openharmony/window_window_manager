@@ -2520,12 +2520,12 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weak = wptr(this), sessionInfo] {
-        auto sharedThis = weak.promote();
-        if (sharedThis == nullptr) {
+        auto jsSceneSession = weak.promote();
+        if (jsSceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
             return;
         }
-        sharedThis->PendingSessionActivationInner(sessionInfo);
+        jsSceneSession->PendingSessionActivationInner(sessionInfo);
     };
     sceneSession->PostLifeCycleTask(task, "PendingSessionActivation", LifeCycleTaskType::START);
     if (info.fullScreenStart_) {
