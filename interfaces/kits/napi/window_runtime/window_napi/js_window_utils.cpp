@@ -727,7 +727,7 @@ void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
 {
     auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
                 (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-                (name.compare("navigationIndicator") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
 
     auto property = window->GetSystemBarPropertyByType(type);
     systemBarProperties[type] = property;
@@ -764,15 +764,12 @@ bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
         }
     }
     if (name.compare("status") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
         systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableAnimation;
     } else if (name.compare("navigation") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableAnimation;
     } else if (name.compare("navigationIndicator") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
         systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ = enableAnimation;
     }
