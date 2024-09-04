@@ -255,11 +255,6 @@ const SessionInfo& WindowSessionProperty::GetSessionInfo() const
     return sessionInfo_;
 }
 
-SessionInfo& WindowSessionProperty::EditSessionInfo()
-{
-    return sessionInfo_;
-}
-
 sptr<IFutureCallback> WindowSessionProperty::GetLayoutCallback() const
 {
     return layoutCallback_;
@@ -837,57 +832,6 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     }
 }
 
-bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
-{
-    if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
-        !parcel.WriteString(sessionInfo_.abilityName_) ||
-        !parcel.WriteInt32(static_cast<int32_t>(sessionInfo_.continueState))) {
-        return false;
-    }
-    const auto& want = sessionInfo_.want;
-    bool hasWant = want != nullptr;
-    if (!parcel.WriteBool(hasWant)) {
-        return false;
-    }
-    if (hasWant && !parcel.WriteParcelable(want.get())) {
-        return false;
-    }
-    return true;
-}
-
-bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property)
-{
-    std::string bundleName;
-    std::string moduleName;
-    std::string abilityName;
-    if (!parcel.ReadString(bundleName) || !parcel.ReadString(moduleName) || !parcel.ReadString(abilityName)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read String!");
-        return false;
-    }
-    SessionInfo info = { bundleName, moduleName, abilityName };
-    int32_t continueState;
-    if (!parcel.ReadInt32(continueState)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read continueState!");
-        return false;
-    }
-    info.continueState = static_cast<ContinueState>(continueState);
-    bool hasWant;
-    if (!parcel.ReadBool(hasWant)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read hasWant!");
-        return false;
-    }
-    if (hasWant) {
-        std::shared_ptr<AAFwk::Want> want(parcel.ReadParcelable<AAFwk::Want>());
-        if (want == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "Failed to read want!");
-            return false;
-        }
-        info.want = want;
-    }
-    property->SetSessionInfo(info);
-    return true;
-}
-
 void WindowSessionProperty::SetCompatibleModeInPc(bool compatibleModeInPc)
 {
     compatibleModeInPc_ = compatibleModeInPc;
@@ -997,7 +941,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
-        MarshallingSessionInfo(parcel) &&
+        parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
+        parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -1049,10 +994,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSnapshotSkip(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
-    if (!UnmarshallingSessionInfo(parcel, property)) {
-        delete property;
-        return nullptr;
-    }
+    SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
+    property->SetSessionInfo(info);
     property->SetParentPersistentId(parcel.ReadInt32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
