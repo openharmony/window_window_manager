@@ -310,6 +310,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
+    return;
 }
 
 napi_value JsExtensionWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info)
@@ -622,7 +623,7 @@ napi_value JsExtensionWindow::OnLoadContent(napi_env env, napi_callback_info inf
         napi_create_reference(env, storage, 1, &result);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
     }
-
+    
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
     NapiAsyncTask::CompleteCallback complete =
         [extwin = extensionWindow_, contentStorage, contextUrl, parentToken, isLoadedByName](
