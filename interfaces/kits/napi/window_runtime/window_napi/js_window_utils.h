@@ -280,8 +280,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
         SystemBarProperty>& newProperties, std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
         sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
-        sptr<Window>& window);
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
