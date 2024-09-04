@@ -568,7 +568,7 @@ private:
     bool isScreenAngleMismatch_ = false;
     uint32_t targetScreenWidth_ = 0;
     uint32_t targetScreenHeight_ = 0;
-    std::atomic_bool isStatusBarVisible_ { true };
+    bool isStatusBarVisible_ = true;
 
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;

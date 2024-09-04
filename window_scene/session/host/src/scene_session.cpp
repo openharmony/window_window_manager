@@ -1265,7 +1265,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
-    if (!isStatusBarVisible_.load()) {
+    if (!isStatusBarVisible_) {
         TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
         return;
     }
@@ -3429,7 +3429,7 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<W
 
 void SceneSession::SetIsStatusBarVisible(const bool isVisible)
 {
-    isStatusBarVisible_.store(isVisible);
+    isStatusBarVisible_ = isVisible;
 }
 
 void SceneSession::SetWindowFlags(const sptr<WindowSessionProperty>& property)
