@@ -726,7 +726,7 @@ void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
     std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, const std::string& name)
 {
     auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR;
+                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
                 (name.compare("navigationIndicator") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
 
     auto property = window->GetSystemBarPropertyByType(type);
