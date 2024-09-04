@@ -178,6 +178,15 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
 
     /**
+     * @brief Set canvas auto rotate
+     *
+     * @param screenId Screen id.
+     * @param canvasRotation auto rotate
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
+
+    /**
      * @brief Resize virtual screen
      *
      * @param screenId the id of virtual screen to be resized.
@@ -186,15 +195,6 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
-
-    /**
-     * @brief Set buffer auto rotate
-     *
-     * @param screenId Screen id.
-     * @param bufferRotation auto rotate
-     * @return DM_OK means set success, others means set failed.
-     */
-    DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
 
     /**
      * @brief Set virtual screen scale mode

@@ -71,9 +71,9 @@ public:
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value GetCutoutInfo(napi_env env, napi_callback_info info);
     static napi_value HasImmersiveWindow(napi_env env, napi_callback_info info);
+    static napi_value GetAvailableArea(napi_env env, napi_callback_info info);
     static napi_value GetSupportedColorSpaces(napi_env env, napi_callback_info info);
     static napi_value GetSupportedHDRFormats(napi_env env, napi_callback_info info);
-    static napi_value GetAvailableArea(napi_env env, napi_callback_info info);
     static napi_value RegisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info);
 
@@ -81,9 +81,9 @@ private:
     sptr<Display> display_ = nullptr;
     napi_value OnGetCutoutInfo(napi_env env, napi_callback_info info);
     napi_value OnHasImmersiveWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetAvailableArea(napi_env env, napi_callback_info info);
     napi_value OnGetSupportedColorSpaces(napi_env env, napi_callback_info info);
     napi_value OnGetSupportedHDRFormats(napi_env env, napi_callback_info info);
-    napi_value OnGetAvailableArea(napi_env env, napi_callback_info info);
     napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,

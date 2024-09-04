@@ -25,7 +25,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteProxy" };
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteProxy"};
 }
 
 DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
@@ -34,9 +34,8 @@ DMError ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    WLOGFD("ScreenSessionManagerLiteProxy::RegisterDisplayManagerAgent");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("RegisterDisplayManagerAgent WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
@@ -69,9 +68,8 @@ DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    WLOGFD("ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("UnregisterDisplayManagerAgent WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
@@ -90,8 +88,8 @@ DMError ScreenSessionManagerLiteProxy::UnregisterDisplayManagerAgent(
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
-        data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        ScreenManagerLiteMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT), data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -247,4 +245,5 @@ sptr<CutoutInfo> ScreenSessionManagerLiteProxy::GetCutoutInfo(DisplayId displayI
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
     return info;
 }
+
 } // namespace OHOS::Rosen
