@@ -298,7 +298,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window,
         const std::string& name);
     bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        napi_env env, napi_callback_info info, sptr<Window>& window);
+        napi_env env, napi_callback_info info);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
