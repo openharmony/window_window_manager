@@ -67,6 +67,7 @@ private:
     std::atomic<bool> isSavingSnapshot_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
+    uint32_t persistentId_;
 };
 } // namespace OHOS::Rosen
 
