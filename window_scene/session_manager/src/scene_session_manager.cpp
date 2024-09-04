@@ -542,10 +542,27 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
+            !WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
             continue;
         }
         sceneSession->SwitchFreeMultiWindow(enable);
+    }
+
+    if (!remoteExtSessionMap_.empty()) {
+        for (auto item = remoteExtSessionMap_.begin(); item != remoteExtSessionMap_.end(); ++item) {
+            if ((item->first == nullptr) ||(item->second == nullptr)) {
+                continue;
+            }
+            int32_t persistentId = INVALID_SESSION_ID;
+            int32_t parentId = INVALID_SESSION_ID;
+            if (!GetExtensionWindowIds(item->second, persistentId, parentId)) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
+                return WSError::WS_ERROR_INVALID_WINDOW;
+            }
+            sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(item->first);
+            sessionStage->SwitchFreeMultiWindow(enable);
+        }
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
