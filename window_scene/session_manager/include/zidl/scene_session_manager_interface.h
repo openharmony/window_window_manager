@@ -168,6 +168,16 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
+    
+    /**
+     * @brief get top window information by id of main window.
+     *
+     * This function provides the ability for system applications to get window information.
+     *
+     * @param mainWinId the id of target main window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override { return WMError::WM_OK; }
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override {}
@@ -221,6 +231,16 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
+    
+    /**
+     * @brief Raise a window to screen top by id of window.
+     *
+     * This function provides the ability for system applications to raise window.
+     *
+     * @param persistentId the id of target window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     WSError RaiseWindowToTop(int32_t persistentId) override { return WSError::WS_OK; }
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override
     {
