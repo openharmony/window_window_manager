@@ -829,7 +829,7 @@ napi_value JsSceneSessionManager::NotifySwitchingUser(napi_env env, napi_callbac
 
 napi_value JsSceneSessionManager::NotifyStatusBarShowStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyStatusBarShowStatus(env, info) : nullptr;
 }
