@@ -1663,13 +1663,12 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             sessionInfo.moduleName_);
     }
     int appIndex = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
-    bool hasParameter = abilitySessionInfo->want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY);
-    if (hasParameter && sessionInfo.appIndex_ != appIndex) {
+    bool hasAppIndex = abilitySessionInfo->want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY);
+    if (hasAppIndex && sessionInfo.appIndex_ != appIndex) {
         TLOGW(WmsLogTag::WMS_LIFE, "appIndex not match want.appIndex:%{public}d, sessionInfo.appIndex_:%{public}d",
             appIndex, sessionInfo.appIndex_);
-            appIndex, sessionInfo.appIndex_);
     }
-    if (!hasParameter && sessionInfo.appIndex_ > 0) {
+    if (!hasAppIndex && sessionInfo.appIndex_ > 0) {
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, sessionInfo.appIndex_);
     }
     auto sessionProperty = scnSession->GetSessionProperty();
