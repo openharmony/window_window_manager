@@ -2612,7 +2612,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (err == WmErrorCode::WM_OK && (argc < 1 || // 1: params num
-        !GetSpecificBarStatus(jsSystemBarProperties, env, info, windowToken_))) {
+        !GetSpecificBarStatus(jsSystemBarProperties, env, info))) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid param or argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
