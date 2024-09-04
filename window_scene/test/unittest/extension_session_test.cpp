@@ -823,6 +823,33 @@ HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 }
 
+/**
+ * @tc.name: NotifyExtensionEvent
+ * @tc.desc: test function : NotifyExtensionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyExtensionEvent, Function | SmallTest | Level1)
+{
+	ASSERT_NE(nullptr, extSessionEventCallback_);
+    MockFunction<void(uint32_t)> mockNotifyExtensionEventFunc;
+    extSessionEventCallback_->notifyExtensionEventFunc = mockNotifyExtensionEventFunc.AsStdFunction();
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(2);
+    extensionSession_->NotifyExtensionEventSync(0);
+	extensionSession_->NotifyExtensionEventAsync(0);
+    
+    extSessionEventCallback_->notifyExtensionEventFunc = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+	extensionSession_->NotifyExtensionEventSync(0);
+	extensionSession_->NotifyExtensionEventAsync(0);
+
+    extSessionEventCallback_ = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    extensionSession_->NotifyExtensionEventSync(0);
+	extensionSession_->NotifyExtensionEventAsync(0);
+}
 }
 }
 }

@@ -324,6 +324,12 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
         reply,
         option);
     ASSERT_EQ(ERR_NONE, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_SYNC), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**

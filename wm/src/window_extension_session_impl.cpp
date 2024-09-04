@@ -1194,5 +1194,29 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
     SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(static_cast<int32_t>(type), getpid(),
         oss.str());
 }
+
+WMError WindowExtensionSessionImpl::NotifyExtensionEventSync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "notify extension synchronously, notifyEvent:%{public}d", notifyEvent);
+    if (IsWindowSessionInvalid()) {
+		TLOGI(WmsLogTag::WMS_UIEXT, "Window session invalid.");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->NotifyExtensionEventSync(notifyEvent);
+}
+
+WMError WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "notify extension asynchronously, notifyEvent:%{public}d", notifyEvent);
+    if (IsWindowSessionInvalid()) {
+		TLOGI(WmsLogTag::WMS_UIEXT, "Window session invalid.");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->NotifyExtensionEventAsync(notifyEvent);
+}
 } // namespace Rosen
 } // namespace OHOS

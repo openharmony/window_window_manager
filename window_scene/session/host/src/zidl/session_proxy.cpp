@@ -1669,4 +1669,56 @@ WSError SessionProxy::SetDialogSessionBackGestureEnabled(bool isEnabled)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+WSError SessionProxy::NotifyExtensionEventSync(uint32_t notifyEvent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(notifyEvent)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Write notifyEvent failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_SYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
+        return;
+    }
+}
+
+WSError SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(notifyEvent)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Write notifyEvent failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
