@@ -3053,9 +3053,6 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (sceneSession->IsTurnScreenOn()) {
             TLOGI(WmsLogTag::DEFAULT, "turn screen on");
-            if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-                isDeviceWakeupByApplication_.store(true);
-            }
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
         // set ipc identity to raw
