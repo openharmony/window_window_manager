@@ -941,16 +941,16 @@ HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | Smal
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(listener));
-    ASSERT_EQ(nullptr, windowManager.pImpl_->windowStyleListenerAgent_);
+    ASSERT_EQ(nullptr, windowManager.pImpl_->pipStateChangedListenerAgent_);
 
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterPiPStateChangedListener(listener));
-    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+    ASSERT_EQ(1, windowManager.pImpl_->pipStateChangedListeners_.size());
 
     // to check that the same listner can not be registered twice
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterPiPStateChangedListener(listener));
-    ASSERT_EQ(1, windowManager.pImpl_->windowStyleListeners_.size());
+    ASSERT_EQ(1, windowManager.pImpl_->pipStateChangedListeners_.size());
 
     windowManager.pImpl_->pipStateChangedListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->pipStateChangedListeners_ = oldListeners;
