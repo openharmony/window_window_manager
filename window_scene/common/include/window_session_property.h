@@ -104,7 +104,6 @@ public:
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
     sptr<IFutureCallback> GetLayoutCallback() const;
-    SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
@@ -169,8 +168,6 @@ public:
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
-    bool MarshallingSessionInfo(Parcel& parcel) const;
-    static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingFutureCallback(Parcel& parcel) const;
     static void UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property);
 
