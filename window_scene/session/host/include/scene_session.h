@@ -357,7 +357,7 @@ public:
     int32_t GetStatusBarHeight() override;
     bool IsFreeMultiWindowMode() const
     {
-        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+        return systemConfig_.IsFreeMultiWindowMode();
     }
 
     // WMSPipeline-related: only accessed on SSM thread
