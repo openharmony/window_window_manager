@@ -1672,6 +1672,16 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
     }
+    int appIndex = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    bool hasAppIndex = abilitySessionInfo->want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY);
+    if (hasAppIndex && sessionInfo.appIndex_ != appIndex) {
+        TLOGW(WmsLogTag::WMS_LIFE, "appIndex not match want.appIndex:%{public}d, sessionInfo.appIndex_:%{public}d",
+            appIndex, sessionInfo.appIndex_);
+    }
+    if (!hasAppIndex && sessionInfo.appIndex_ > 0) {
+        TLOGI(WmsLogTag::WMS_LIFE, "want.appIndex is null, set want.appIndex:%{public}d", sessionInfo.appIndex_);
+        abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, sessionInfo.appIndex_);
+    }
     auto sessionProperty = scnSession->GetSessionProperty();
     if (sessionProperty) {
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
@@ -1836,11 +1846,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "id %{public}d want-ability: %{public}s, bundle: %{public}s, "
-        "module: %{public}s, uri: %{public}s.", persistentId,
+        "module: %{public}s, uri: %{public}s, appIndex: %{public}d.", persistentId,
         scnSessionInfo->want.GetElement().GetAbilityName().c_str(),
         scnSessionInfo->want.GetElement().GetBundleName().c_str(),
         scnSessionInfo->want.GetElement().GetModuleName().c_str(),
-        scnSessionInfo->want.GetElement().GetURI().c_str());
+        scnSessionInfo->want.GetElement().GetURI().c_str(),
+        scnSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     if (systemConfig_.backgroundswitch == false) {
