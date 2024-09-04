@@ -161,7 +161,7 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     std::ostringstream oss;
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
-            static_cast<ScreenRotation>(g_screenRotationOffSet));
+            static_cast<ScreenRotation>(ROTATION_90));
         oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
     } else {
         auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
