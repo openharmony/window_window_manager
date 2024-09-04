@@ -3427,11 +3427,6 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<W
     }
 }
 
-void SceneSession::SetIsStatusBarVisible(bool isVisible)
-{
-    isStatusBarVisible_ = isVisible;
-}
-
 void SceneSession::SetWindowFlags(const sptr<WindowSessionProperty>& property)
 {
     auto sessionProperty = GetSessionProperty();
