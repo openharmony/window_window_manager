@@ -269,7 +269,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
