@@ -468,4 +468,24 @@ WSError ExtensionSession::Background(bool isFromClient)
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
+
+void ExtensionSession::NotifyExtensionEventSync(uint32_t notifyEvent)
+{
+    
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event synchronously, persistentId: %{public}d, notifyEvent: %{public}d",
+		GetPersistentId(), notifyEvent);
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
+        avoidArea = extSessionEventCallback_->notifyExtensionEventFunc_(type);
+    }
+}
+
+void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, persistentId: %{public}d, notifyEvent: %{public}d",
+		GetPersistentId(), notifyEvent);
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
+        avoidArea = extSessionEventCallback_->notifyExtensionEventFunc_(type);
+    }
+}
 } // namespace OHOS::Rosen

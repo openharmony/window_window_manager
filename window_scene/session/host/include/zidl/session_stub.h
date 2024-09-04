@@ -86,6 +86,8 @@ private:
     int HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply);
     int HandleTriggerBindModalUIExtension(MessageParcel& data, MessageParcel& reply);
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyExtensionEventSync(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
