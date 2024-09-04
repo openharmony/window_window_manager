@@ -1868,6 +1868,20 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
 }
 
 /**
+ * @tc.name: SwitchFreeMultiWindow
+ * @tc.desc: SwitchFreeMultiWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    auto ret = window_->SwitchFreeMultiWindow(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    ret = window_->SwitchFreeMultiWindow(false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetFreeMultiWindowModeEnabledState
  * @tc.desc: GetFreeMultiWindowModeEnabledState Test
  * @tc.type: FUNC
