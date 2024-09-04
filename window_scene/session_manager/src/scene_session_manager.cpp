@@ -116,6 +116,7 @@ const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
+const std::string ARG_DUMP_DETAIL = "-c";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
@@ -4083,6 +4084,33 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
+    dumpInfo.append(oss.str());
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetAllSessionDumpDetailInfo(std::string& dumpInfo)
+{
+    std::ostringstream oss;
+    std::vector<sptr<SceneSession>> allSession;
+    std::vector<sptr<SceneSession>> backgroundSession;
+
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        if (curSession == nullptr) {
+            continue;
+        }
+        if (IsSessionVisibleForeground(curSession)) {
+            allSession.push_back(curSession);
+        } else {
+            backgroundSession.push_back(curSession);
+        }
+    }
+    allSession.insert(allSession.end(), backgroundSession.begin(), backgroundSession.end());
     HidumpController::GetInstance().GetAllSessionDumpDetailedInfo(oss, allSession, backgroundSession);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
@@ -4204,6 +4232,9 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     auto task = [this, params, &dumpInfo]() {
         if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
             return GetAllSessionDumpInfo(dumpInfo);
+        }
+        if (params.size() == 1 && params[0] == ARG_DUMP_DETAIL) { // 1: params num
+            return GetAllSessionDumpDetailInfo(dumpInfo);
         }
         if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
             return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
