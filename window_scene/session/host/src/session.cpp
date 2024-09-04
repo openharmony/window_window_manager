@@ -1141,6 +1141,13 @@ void Session::ResetSessionConnectState()
     SetCallingPid(-1);
 }
 
+void Session::ResetIsActive()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, isActive: %{public}u",
+        GetPersistentId(), IsActive());
+    isActive_ = false;
+}
+
 WSError Session::Disconnect(bool isFromClient)
 {
     auto state = GetSessionState();
