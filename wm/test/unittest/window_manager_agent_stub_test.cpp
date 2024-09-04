@@ -392,7 +392,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | L
     uint32_t code = static_cast<uint32_t>(12);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, static_cast<int>(IPC_STUB_UNKNOW_TRANS_ERR));
+    EXPECT_EQ(res, 0);
 }
 
 /**

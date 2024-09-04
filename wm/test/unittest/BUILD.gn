@@ -75,7 +75,10 @@ ohos_unittest("wm_window_manager_test") {
   include_dirs = [ "${window_base_path}/wm/src" ]
   sources = [ "window_manager_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -265,7 +268,10 @@ ohos_unittest("wm_window_session_impl_test3") {
 
   sources = [ "window_session_impl_test3.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -279,7 +285,10 @@ ohos_unittest("wm_window_session_impl_test4") {
 
   sources = [ "window_session_impl_test4.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",

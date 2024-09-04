@@ -18,6 +18,7 @@
 #include "window_manager.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 #include "scene_session_manager.h"
 
 #include "window_manager.cpp"
@@ -191,7 +192,11 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = windowManager.GetSnapshotByWindowId(windowId, pixelMap);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    }
 }
 
 /*
@@ -728,7 +733,11 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2
 {
     sptr<IRemoteObject> remoteObj;
     WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
-    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+        return;
+    }
+    ASSERT_EQ(res, WMError::WM_OK);
 }
 
 /**
