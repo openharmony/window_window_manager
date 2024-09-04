@@ -192,6 +192,7 @@ public:
     int32_t GetFocusedSessionId() const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WSError GetAllSessionDumpInfo(std::string& info);
+    WSError GetAllSessionDumpDetailInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
     WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
