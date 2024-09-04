@@ -530,6 +530,9 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
         return modalType;
     }
     auto windowType = property->GetWindowType();
+    if (WindowHelper::IsToastSubWindow(windowType, property->GetWindowFlags())) {
+        return SubWindowModalType::TYPE_TOAST;
+    }
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
