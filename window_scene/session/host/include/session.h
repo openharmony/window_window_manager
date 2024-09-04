@@ -464,7 +464,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
-    static bool SetScbCoreEnabled(bool enabled);
+    static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
 
 protected:
