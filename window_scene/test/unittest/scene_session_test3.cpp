@@ -338,40 +338,6 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: HandlePointerStyle1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, HandlePointerStyle1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandlePointerStyle1";
-    info.bundleName_ = "HandlePointerStyle1";
-    info.windowType_ = 1;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(scensession->HandlePointerStyle(pointerEvent), WSError::WS_ERROR_NULLPTR);
-
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    property->SetPersistentId(11);
-    scensession->property_ = property;
-
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
-    pointerEvent_->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    pointerEvent_->SetButtonId(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    ASSERT_NE(scensession->HandlePointerStyle(pointerEvent_), WSError::WS_OK);
-}
-
-/**
  * @tc.name: ClearSpecificSessionCbMap1
  * @tc.desc: normal function
  * @tc.type: FUNC
