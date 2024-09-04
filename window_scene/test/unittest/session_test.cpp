@@ -236,29 +236,18 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSessionLastRect
- * @tc.desc: check func SetSessionLastRect
+ * @tc.name: GetLayoutRect
+ * @tc.desc: check func GetLayoutRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetSessionLastRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetLayoutRect, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->lastWinRect_);
-}
-
-/**
- * @tc.name: GetSessionLastRect
- * @tc.desc: check func GetSessionLastRect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetSessionLastRect, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionLastRect());
+    session_->layoutRect_ = rect;
+    session_->lastLayoutRect_ = session_->layoutRect_;
+    ASSERT_EQ(rect, session_->GetLayoutRect());
+    ASSERT_EQ(rect, session_->GetLastLayoutRect());
 }
 
 /**

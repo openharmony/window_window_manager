@@ -1052,9 +1052,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         ret = WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (ret == WMError::WM_OK) {
-        if (state_ == WindowState::STATE_HIDDEN) {
-            enableSetBufferAvailableCallback_ = true;
-        }
         // update sub window state if this is main window
         if (WindowHelper::IsMainWindow(type)) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);

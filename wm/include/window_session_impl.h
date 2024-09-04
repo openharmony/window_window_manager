@@ -310,7 +310,6 @@ protected:
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
-    std::atomic_bool enableSetBufferAvailableCallback_ = false;
     bool IsFreeMultiWindowMode() const
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
@@ -382,6 +381,8 @@ private:
     void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    void SetFrameLayoutCallbackEnable(bool enable);
+    void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
@@ -422,9 +423,6 @@ private:
 
     std::atomic<int32_t> lastInteractionEventId_ { 0 };
 
-    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
-    bool postTaskDone_ = false;
-    int16_t rotationAnimationCount_ { 0 };
     bool isMainHandlerAvailable_ = true;
 
     std::string subWindowTitle_ = { "" };
@@ -434,6 +432,15 @@ private:
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
     std::atomic<bool> isUiContentDestructing_ = false;
+
+    /*
+     * Window Layout
+     */
+    std::atomic_bool windowSizeChanged_ = true;
+    std::atomic_bool enableFrameLayoutFinishCb_ = false;
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    bool postTaskDone_ = false;
+    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS
