@@ -652,6 +652,8 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Func
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(WindowEventChannelListener::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteBool(true);
     data.WriteBool(true);
     data.WriteInt32(0);
     uint32_t code = static_cast<uint32_t>(IWindowEventChannelListener::WindowEventChannelListenerMessage::
