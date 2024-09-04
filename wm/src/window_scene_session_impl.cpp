@@ -3220,12 +3220,6 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
-{
-    return windowSystemConfig_.freeMultiWindowEnable_ &&
-        windowSystemConfig_.freeMultiWindowSupport_;
-}
-
 WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
 {
     if (IsWindowSessionInvalid()) {

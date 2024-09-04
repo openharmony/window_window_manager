@@ -1019,13 +1019,6 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     }
     return false;
 }
-bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
-{
-    bool enable = false;
-    SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "GetFreeMultiWindowEnableState = %{public}u", enable);
-    return enable;
-}
 
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
 {
