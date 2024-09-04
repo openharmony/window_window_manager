@@ -210,7 +210,6 @@ napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnResizeWindowAsync(env, info) : nullptr;
 }
 
-/** @note @window.layout */
 napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
 {
     WLOGI("SetWindowType");
@@ -1690,7 +1689,6 @@ napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
     return result;
 }
 
-/** @note @window.layout */
 napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;

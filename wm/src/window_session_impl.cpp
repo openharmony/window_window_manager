@@ -610,7 +610,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
-/** @note @window.layout */
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
