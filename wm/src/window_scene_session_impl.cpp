@@ -393,7 +393,6 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     return static_cast<WMError>(ret);
 }
 
-/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateWindowState()
 {
     {
@@ -1438,7 +1437,6 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
     return static_cast<WMError>(ret);
 }
 
-/** @note @window.layout */
 void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr)
 {
     // Float camera window has a special limit:
