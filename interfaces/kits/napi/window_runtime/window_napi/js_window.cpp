@@ -2617,10 +2617,8 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [this, weakToken, jsSystemBarProperties, name, err]
+    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, name, err]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-        std::map<WindowType, SystemBarProperty> systemBarProperties;
-        GetSpecificBarStatus(systemBarProperties, jsSystemBarProperties, windowToken_, name);
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
@@ -2628,6 +2626,8 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
             task.Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
+        std::map<WindowType, SystemBarProperty> systemBarProperties;
+        GetSpecificBarStatus(systemBarProperties, jsSystemBarProperties, weakWindow, name);
         if (name.compare("status") == 0) {
             err = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSpecificBarProperty(
                 WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
@@ -2728,12 +2728,12 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::map<WindowType, SystemBarProperty> jsSystemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> jsSystemBarPropertyFlags;
     if (errCode == WMError::WM_OK) {
         napi_value nativeObj = argv[0];
         if (nativeObj == nullptr || !SetSystemBarPropertiesFromJs(env, nativeObj,
-            systemBarProperties, systemBarPropertyFlags, windowToken_)) {
+            jsSystemBarProperties, jsSystemBarPropertyFlags)) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
@@ -2747,6 +2747,10 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
                 return;
             }
+            std::map<WindowType, SystemBarProperty> systemBarProperties;
+            std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+            GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
+                jsSystemBarProperties, jsSystemBarPropertyFlags, weakWindow);            
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken);
             WMError ret = SetSystemBarPropertiesByFlags(
                 systemBarPropertyFlags, systemBarProperties, windowToken);
@@ -2781,7 +2785,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeObj = argv[0];
         if (nativeObj == nullptr || !SetSystemBarPropertiesFromJs(env, nativeObj,
-            jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken_)) {
+            jsSystemBarProperties, jsSystemBarPropertyFlags)) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
@@ -2791,13 +2795,8 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     }
 
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [this, weakToken, jsSystemBarProperties,
-                                                jsSystemBarPropertyFlags, errCode](
+    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, jsSystemBarPropertyFlags, errCode](
             napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            std::map<WindowType, SystemBarProperty> systemBarProperties;
-            std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-            GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
-                jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken_);
             auto weakWindow = weakToken.promote();
             errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
@@ -2805,6 +2804,10 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
                 return;
             }
+            std::map<WindowType, SystemBarProperty> systemBarProperties;
+            std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+            GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
+                jsSystemBarProperties, jsSystemBarPropertyFlags, weakWindow);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakWindow));
