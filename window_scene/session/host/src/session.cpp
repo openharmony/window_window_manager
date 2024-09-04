@@ -2125,7 +2125,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
@@ -2789,20 +2789,20 @@ bool Session::IsStateMatch(bool isAttach) const
 bool Session::IsSupportDetectWindow(bool isAttach)
 {
     if (!systemConfig_.IsPcWindow() && !systemConfig_.IsPhoneWindow()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "device type not support, id:%{public}d", persistentId_);
         return false;
     }
     if (isScreenLockedCallback_ && isScreenLockedCallback_()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "screen locked, id:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "screen locked, id:%{public}d", persistentId_);
         return false;
     }
     if (!SessionHelper::IsMainWindow(GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_LIFE, "only support main window, id:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "only support main window, id:%{public}d", persistentId_);
         return false;
     }
     // Only detecting cold start scenarios on PC
     if (systemConfig_.IsPcWindow() && (!isAttach || state_ != SessionState::STATE_DISCONNECT)) {
-        TLOGI(WmsLogTag::WMS_LIFE, "pc only support cold start, id:%{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LIFE, "pc only support cold start, id:%{public}d", persistentId_);
         RemoveWindowDetectTask();
         return false;
     }
