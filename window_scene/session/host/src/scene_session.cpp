@@ -2405,7 +2405,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property->SetPrivacyMode(isPrivacy);
     property->SetSystemPrivacyMode(isPrivacy);
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     surfaceNode_->SetSecurityLayer(isPrivacy);
@@ -2413,7 +2413,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSecurityLayer(isPrivacy);
     }
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
