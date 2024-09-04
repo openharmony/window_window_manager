@@ -557,15 +557,12 @@ std::shared_ptr<VsyncStation> MoveDragController::GetVsyncStationByWindowId(uint
         return nullptr;
     }
 
-    auto vsyncStation = std::make_shared<VsyncStation>(node->surfaceNode_->GetId());
+    auto vsyncStation = std::make_shared<VsyncStation>(node->surfaceNode_->GetId(), inputEventHandler_);
     if (vsyncStation == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Get vsync station failed, create vsyncStation is nullptr");
         return nullptr;
     }
 
-    vsyncStation->SetIsMainHandlerAvailable(false);
-    vsyncStation->SetVsyncEventHandler(inputEventHandler_);
-    
     {
         std::lock_guard<std::mutex> lock(mtx_);
         vsyncStationMap_.emplace(windowId, vsyncStation);

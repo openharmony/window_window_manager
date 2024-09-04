@@ -95,6 +95,8 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
+        int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
 
@@ -150,6 +152,10 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    int32_t GetCompatibleInPcPortraitWidth() const;
+    int32_t GetCompatibleInPcPortraitHeight() const;
+    int32_t GetCompatibleInPcLandscapeWidth() const;
+    int32_t GetCompatibleInPcLandscapeHeight() const;
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
 
@@ -312,6 +318,10 @@ private:
     static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
+    int32_t compatibleInPcPortraitWidth_ = 0;
+    int32_t compatibleInPcPortraitHeight_ = 0;
+    int32_t compatibleInPcLandscapeWidth_ = 0;
+    int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
 

@@ -239,6 +239,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetFullScreenStart(reply.ReadBool());
         property->SetCompatibleModeInPc(reply.ReadBool());
+        property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
+                                              reply.ReadInt32(), reply.ReadInt32());
         property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
     }

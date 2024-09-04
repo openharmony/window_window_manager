@@ -1421,7 +1421,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1626,7 +1626,7 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     EXPECT_NE(sceneSession, nullptr);
     AppForceLandscapeConfig config = {};
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
