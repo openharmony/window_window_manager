@@ -437,7 +437,6 @@ HWTEST_F(WindowOptionTest, SetParentWindowType, Function | SmallTest | Level3)
 }
 
 /**
->>>>>>> 23a9a062b (toast实现调整)
  * @tc.name: UIExtensionUsage
  * @tc.desc: UIExtensionUsage setter and getter test
  * @tc.type: FUNC
