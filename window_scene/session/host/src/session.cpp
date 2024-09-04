@@ -966,6 +966,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
     if (sessionProperty && property) {
+        property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         if (sessionProperty->GetCompatibleModeInPc()) {

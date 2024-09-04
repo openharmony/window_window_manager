@@ -1532,6 +1532,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty) {
+        sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
         sessionProperty->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
         TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
@@ -1610,6 +1611,10 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
                 TLOGI(WmsLogTag::WMS_MAIN, "Want updated, id:%{public}d", sessionInfo.persistentId_);
             } else {
                 UpdateCollaboratorSessionWant(session, sessionInfo.persistentId_);
+            }
+            auto sessionProperty = session->GetSessionProperty();
+            if (sessionProperty) {
+                sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
             }
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "Got session fail(%{public}d), id:%{public}d",
