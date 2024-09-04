@@ -4578,7 +4578,10 @@ void ScreenSessionManager::NotifyCaptureStatusChanged()
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyCaptureStatusChanged(isCapture);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER)) {
+            agent->NotifyCaptureStatusChanged(isCapture);
+        }
     }
 }
 
