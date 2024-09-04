@@ -723,18 +723,16 @@ WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
 }
 
 void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, std::string name)
+    std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, const std::string& name)
 {
     auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
                 (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR;
                 (name.compare("navigationIndicator") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
 
-    auto navProperty = window->GetSystemBarPropertyByType(type);
-    systemBarProperties[type] = statusProperty;
-    systemBarProperties[type].enable_ =
-        newSystemBarProperties[type].enable_;
-    systemBarProperties[type].enableAnimation_ =
-        newSystemBarProperties[type].enableAnimation_;
+    auto property = window->GetSystemBarPropertyByType(type);
+    systemBarProperties[type] = property;
+    systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
+    systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
 }
 
 bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
