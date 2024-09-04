@@ -278,6 +278,9 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags, std::map<WindowType, SystemBarProperty>& newProperties,
         std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, sptr<Window>& window);
+    void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags, std::map<WindowType, SystemBarProperty>& newProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
         sptr<Window>& window);
