@@ -115,11 +115,11 @@ namespace {
         DMRect emptyRect = {-15, -15, 8, 8};
         DMRect emptyRect_ = {21, 21, 3, 3};
         std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
-        sptr<DisplayInfo> displayInfo = new DisplayInfo();
-        displayInfo->SetWidth(35);
-        displayInfo->SetHeight(35);
+        ScreenProperty screenProperty;
+        auto screenBounds = RRect({ 0, 0, 35, 35 }, 0.0f, 0.0f);
+        screenProperty.SetBounds(screenBounds);
         ASSERT_TRUE(controller != nullptr);
-        controller->CheckBoundaryRects(boundaryRects, displayInfo);
+        controller->CheckBoundaryRects(boundaryRects, screenProperty);
     }
 
     /**
