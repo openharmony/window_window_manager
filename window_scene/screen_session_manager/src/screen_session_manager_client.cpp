@@ -517,16 +517,4 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
         displayChangeListener_->OnScreenFoldStatusChanged(screenFoldInfo);
     }
 }
-
-void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, const float scaleX, const float scaleY,
-    const float pivotX, const float pivotY)
-{
-    auto session = GetScreenSession(id);
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::DMS, "session is null");
-        return;
-    }
-
-    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY);
-}
 } // namespace OHOS::Rosen
