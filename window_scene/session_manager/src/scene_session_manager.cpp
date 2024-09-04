@@ -63,8 +63,6 @@
 #include "res_sched_client.h"
 #include "res_type.h"
 #include "anomaly_detection.h"
-#include "hidump_controller.h"
-
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
@@ -3941,7 +3939,6 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
-    HidumpController::GetInstance().GetAllSessionDumpDetailedInfo(oss, allSession, backgroundSession);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }

@@ -36,7 +36,6 @@ using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
 class WindowSessionProperty : public Parcelable {
 public:
-    friend class HidumpController;
     WindowSessionProperty() = default;
     ~WindowSessionProperty() = default;
     explicit WindowSessionProperty(const sptr<WindowSessionProperty>& property);

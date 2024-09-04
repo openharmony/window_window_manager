@@ -82,7 +82,6 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 class SceneSession : public Session {
 public:
-    friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
