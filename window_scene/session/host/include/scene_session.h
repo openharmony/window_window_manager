@@ -236,7 +236,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
-    void SetIsStatusBarVisible(const bool isVisible);
+    void SetIsStatusBarVisible(bool isVisible);
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);

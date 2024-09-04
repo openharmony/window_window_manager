@@ -3427,7 +3427,7 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<W
     }
 }
 
-void SceneSession::SetIsStatusBarVisible(const bool isVisible)
+void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
     isStatusBarVisible_ = isVisible;
 }
