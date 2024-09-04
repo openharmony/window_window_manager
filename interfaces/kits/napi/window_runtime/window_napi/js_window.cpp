@@ -2617,10 +2617,10 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, name, this, err]
+    NapiAsyncTask::CompleteCallback complete = [this, weakToken, jsSystemBarProperties, name, err]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         std::map<WindowType, SystemBarProperty> systemBarProperties;
-        GetSpecificBarStatus(systemBarProperties, jsSystemBarProperties, this->windowToken_, name);
+        GetSpecificBarStatus(systemBarProperties, jsSystemBarProperties, windowToken_, name);
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
@@ -2791,12 +2791,13 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     }
 
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, jsSystemBarPropertyFlags, this, errCode]
-        (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    NapiAsyncTask::CompleteCallback complete = [this, weakToken, jsSystemBarProperties,
+                                                jsSystemBarPropertyFlags, errCode](
+            napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             std::map<WindowType, SystemBarProperty> systemBarProperties;
             std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
             GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
-                jsSystemBarProperties, jsSystemBarPropertyFlags, this->windowToken_);
+                jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken_);
             auto weakWindow = weakToken.promote();
             errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
