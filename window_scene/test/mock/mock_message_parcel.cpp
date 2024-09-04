@@ -224,6 +224,5 @@ bool Parcel::ReadStringVector(std::vector<std::string>* val)
         return false;
     }
     return true;
-
 }
 } // namespace OHOS
