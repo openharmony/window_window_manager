@@ -106,7 +106,12 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc = [](const int32_t pid, const bool isVisible,
+        const bool newIsVisible)
+    {
+        return;
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(visibilityChangedDetectFunc);
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
