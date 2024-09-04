@@ -55,7 +55,6 @@ ohos_shared_library("window_native_kit") {
     debug = false
   }
   sources = [
-    "window_napi/js_extension_window_config.cpp",
     "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
     "window_napi/js_window_listener.cpp",

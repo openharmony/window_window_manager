@@ -749,31 +749,6 @@ enum class MaximizePresentation {
     EXIT_IMMERSIVE = 1,        // imersiveStateEnable will be set as false
     ENTER_IMMERSIVE = 2,        // imersiveStateEnable will be set as true
 };
-
-enum class ExtensionWindowAttribute : int32_t {
-    SYSTEM_WINDOW = 0,
-    SUB_WINDOW = 1,
-    UNKNOWN = 2
-};
-
-struct SystemWindowOptions {
-    int32_t windowType = -1;
-};
-
-struct SubWindowOptions {
-    std::string title;
-    bool decorEnabled = false;
-    bool isModal = false;
-    bool isTopmost = false;
-};
-
-struct ExtensionWindowConfig {
-    std::string windowName;
-    ExtensionWindowAttribute windowAttribute = ExtensionWindowAttribute::UNKNOWN;
-    Rect windowRect;
-    SubWindowOptions subWindowOptions;
-    SystemWindowOptions systemWindowOptions;
-};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
