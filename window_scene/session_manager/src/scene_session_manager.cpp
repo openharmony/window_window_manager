@@ -1903,6 +1903,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             scnSessionInfo->identityToken.c_str(), sessionInfo.bundleName_.c_str());
         scnSession->SetClientIdentityToken(scnSessionInfo->identityToken);
         scnSession->ResetSessionConnectState();
+        scnSession->ResetIsActive();
     }
     return WSError::WS_OK;
 }
