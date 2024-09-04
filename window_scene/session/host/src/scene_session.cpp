@@ -1266,6 +1266,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         return;
     }
     if (!isStatusBarVisible_.load()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector;
