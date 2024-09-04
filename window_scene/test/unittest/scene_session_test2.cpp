@@ -1944,6 +1944,32 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetSubWindowModalType
+ * @tc.desc: GetSubWindowModalType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType_Toast, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalType";
+    info.bundleName_ = "ModalType";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetSessionProperty(nullptr);
+    auto result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_UNDEFINED);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_TOAST);
+}
+
+/**
  * @tc.name: CheckGetAvoidAreaAvailable
  * @tc.desc: CheckGetAvoidAreaAvailable
  * @tc.type: FUNC

@@ -192,6 +192,7 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId);
 
 private:
     WMError DestroyInner(bool needNotifyServer);
