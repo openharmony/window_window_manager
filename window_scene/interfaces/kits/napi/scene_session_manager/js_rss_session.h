@@ -94,10 +94,11 @@ private:
     bool CheckCallbackParam(napi_env env, napi_callback_info info, int32_t &eventType, napi_value *jsCallback);
 
     static void ParseMutex(const std::string& mutexStr, const nlohmann::json& payload, std::string& detailStr);
+    static void ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName);
     static void CompleteCb(napi_env env, napi_status status, void* data);
 
     std::mutex jsCallbackMapLock_;
-    std::map<std::string, std::list<CallBackPair>> jsCallBackMap_;
+    std::map<int32_t, std::list<CallBackPair>> jsCallBackMap_;
 };
 #endif
 } // OHOS

@@ -14,12 +14,12 @@
  */
 
 
-#include "js_rss_ression.h"
+#include "js_rss_session.h"
 
 #include <functional>
 #include <js_runtime_utils.h>
 
-#include "js_napi_utils.h"
+#include "js_scene_utils.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -34,7 +34,6 @@ static constexpr size_t ARG_COUNT_ONE = 1;
 static constexpr size_t ARG_COUNT_TWO = 2;
 static constexpr int32_t INDENT = -1;
 
-using OnRssEventCb = std::function
 using OnRssEventCb = std::function<void(napi_env, napi_value, int32_t,
     std::unordered_map<std::string, std::string>)>;
 struct CallBackContext {
@@ -65,8 +64,8 @@ void RssEventListener::ThreadSafeCallBack(napi_env ThreadSafeEnv, napi_value js_
 {
     WLOGFI("RssEventListener ThreadSafeCallBack start");
     CallBackContext* callBackContext = reinterpret_cast<CallBackContext*>(data);
-    callBackContext->onSystemloadLevelCb(callBackContext->env,
-        callBackContext->callbackRef->GetNapiValue(), callBackContext->level);
+    callBackContext->eventCb(callBackContext->env,
+        callBackContext->callbackRef->GetNapiValue(), callBackContext->eventType, callBackContext->extInfo);
     delete callBackContext;
 }
 
@@ -136,7 +135,7 @@ napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload,
         WLOGFE("[NAPI]Reply not find result key!");
         return NapiGetUndefined(env);
     }
-    std::string result = reply["result"]..get<std::string>();
+    std::string result = reply["result"].get<std::string>();
     bool resultVal = result == std::to_string(ResType::HeavyLoadMutexAddReasons::HeavyLoadMutexStatusAddFailByMutex);
     SetMapValue(env, "result", resultVal, objValue);
 
@@ -145,7 +144,7 @@ napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload,
         SetMapValue(env, "details", detail, objValue);
     } else {
         std::string mutexStr = reply["mutex"].get<std::string>();
-        ParseMutex(mutexStr, payload, objValue);
+        ParseMutex(mutexStr, payload, detail);
         SetMapValue(env, "details", detail, objValue);
     }
     return objValue;
@@ -189,6 +188,27 @@ void RssSession::ParseMutex(const std::string& mutexStr, const nlohmann::json& p
         detail["reason"].push_back(tmp);
     }
     detailStr = detail.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+}
+
+void RssSession::ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName)
+{
+    nlohmann::json root = nlohmann::json::parse(mutexStr, nullptr, false);
+    if (root.is_discarded()) {
+        WLOGFE("[NAPI] Parse json data failed!");
+        return;
+    }
+
+    if (!root.is_array()) {
+        WLOGFE("[NAPI]Parse json data failed!");
+        return;
+    }
+
+    for (auto& item : root) {
+        if (item.contains("bundlename") && item["bundlename"].is_string()) {
+            bundleName = item["bundlename"].get<std::string>();
+            break;
+        }
+    }
 }
 
 void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
@@ -328,11 +348,12 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
     NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
     NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback, &callback));
 
-    std::string val = cbInfo->extInfo["selfFeature"];
-    SetMapValue(env, "appInfo", val, result);
+    std::string appInfo = cbInfo->extInfo["selfBundleName"];
+    SetMapValue(env, "appInfo", appInfo, result);
 
-    val = cbInfo->extInfo["mutex"];
-    SetMapValue(env, "reason", val, result);
+    std::string reason;
+    ParseCallbackMutex(cbInfo->extInfo["mutex"], reason);
+    SetMapValue(env, "reason", reason, result);
 
     // call js callback
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &result, &callResult));
