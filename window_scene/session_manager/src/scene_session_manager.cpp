@@ -7196,10 +7196,6 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
 
 sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject> &token)
 {
-    if (token == nullptr) {
-        TLOGW(WmsLogTag::DEFAULT, "token is nullptr");
-        return nullptr;
-    }
     sptr<SceneSession> session = nullptr;
     auto cmpFunc = [token](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
         if (pair.second == nullptr) {
