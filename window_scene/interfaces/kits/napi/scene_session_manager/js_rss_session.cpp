@@ -217,7 +217,6 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
     const std::unordered_map<std::string, std::string>& extraInfo)
 {
     WLOGFI("OnReceiveEvent asyncCallback.");
-    std::lock_guard<std::mutex> autoLock(jsCallbackMapLock_);
     if (jsCallBackMap_.find(eventType) == jsCallBackMap_.end()) {
         WLOGFE("OnReceiveEvent cb type has not register yet.");
         return;
@@ -275,7 +274,6 @@ napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info 
     napi_create_reference(env, jsCallback, 1, &tempRef);
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(reinterpret_cast<NativeReference*>(tempRef));
-    std::lock_guard<std::mutex> autoLock(jsCallbackMapLock_);
     if (jsCallBackMap_.find(eventType) == jsCallBackMap_.end()) {
         jsCallBackMap_[eventType] = std::list<CallBackPair>();
     }
@@ -315,7 +313,6 @@ napi_value RssSession::UnRegisterRssDataCallback(napi_env env, napi_callback_inf
         return NapiGetUndefined(env);
     }
 
-    std::lock_guard<std::mutex> autoLock(jsCallbackMapLock_);
     if (jsCallBackMap_.find(eventType) == jsCallBackMap_.end()) {
         WLOGFE("unRegister eventType has not registered");
         return NapiGetUndefined(env);
