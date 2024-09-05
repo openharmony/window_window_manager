@@ -204,16 +204,4 @@ bool MainSession::IsExitSplitOnBackground() const
 {
     return isExitSplitOnBackground_;
 }
-
-void MainSession::NotifyClientToUpdateInteractive(bool interactive)
-{
-    if (!sessionStage_) {
-        return;
-    }
-    const auto state = GetSessionState();
-    if (IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        WLOGFI("%{public}d", interactive);
-        sessionStage_->NotifyForegroundInteractiveStatus(interactive);
-    }
-}
 } // namespace OHOS::Rosen

@@ -38,7 +38,6 @@ public:
 
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
-    bool IsVisibleForeground() const override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 protected:

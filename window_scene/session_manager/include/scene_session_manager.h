@@ -95,7 +95,6 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
-using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
@@ -120,7 +119,6 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     friend class AnomalyDetection;
     bool IsSessionVisible(const sptr<SceneSession>& session);
-    bool IsSessionVisibleForeground(const sptr<SceneSession>& session);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
@@ -170,7 +168,6 @@ public:
     void SetSCBFocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
-    void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -191,8 +188,6 @@ public:
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
-    WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
-        FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
@@ -307,7 +302,6 @@ public:
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos);
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
-    void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -411,8 +405,6 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
 
-    void PostProcessFocus();
-    void PostProcessProperty();
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -478,7 +470,6 @@ private:
     int GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                               std::vector<SessionInfoBean> &sessionInfos);
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
-    WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
@@ -572,7 +563,6 @@ private:
     NotifySCBAfterUpdateFocusFunc notifySCBAfterUnfocusedFunc_;
     ProcessCallingSessionIdChangeFunc callingSessionIdChangeFunc_;
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
-    DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
@@ -629,7 +619,6 @@ private:
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
-    void ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
@@ -661,8 +650,6 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
     std::vector<uint64_t> skipSurfaceNodeIds_;
-
-    std::atomic_bool processingFlushUIParams_ { false };
 
     BrokerStates NotifyStartAbility(
         int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId = 0);
@@ -723,9 +710,6 @@ private:
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
-
-    std::condition_variable nextFlushCompletedCV_;
-    std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen

@@ -1157,9 +1157,6 @@ napi_value JsSceneSession::RegisterCallback(napi_env env, napi_callback_info inf
 
 napi_value JsSceneSession::UpdateNativeVisibility(napi_env env, napi_callback_info info)
 {
-    if (Session::IsScbCoreEnabled()) {
-        return nullptr;
-    }
     WLOGI("[NAPI]UpdateNativeVisibility");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUpdateNativeVisibility(env, info) : nullptr;
@@ -1230,9 +1227,6 @@ napi_value JsSceneSession::SetShowRecent(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetZOrder(napi_env env, napi_callback_info info)
 {
-    if (Session::IsScbCoreEnabled()) {
-        return nullptr;
-    }
     WLOGD("[NAPI]SetZOrder");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetZOrder(env, info) : nullptr;
@@ -1266,9 +1260,6 @@ napi_value JsSceneSession::SetSCBKeepKeyboard(napi_env env, napi_callback_info i
 
 napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info)
 {
-    if (Session::IsScbCoreEnabled()) {
-        return nullptr;
-    }
     WLOGI("[NAPI]SetOffset");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
@@ -3040,9 +3031,6 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetScale(napi_env env, napi_callback_info info)
 {
-    if (Session::IsScbCoreEnabled()) {
-        return nullptr;
-    }
     WLOGI("[NAPI]SetScale");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetScale(env, info) : nullptr;

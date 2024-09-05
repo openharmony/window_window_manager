@@ -197,7 +197,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect, Function | SmallTest | L
     EXPECT_NE(keyboardSession, nullptr);
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
-    keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    keyboardSession->isDirty_ = true;
     keyboardSession->sessionStage_ = mockSessionStage;
     auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);

@@ -728,17 +728,17 @@ HWTEST_F(WindowSessionTest, GetWindowId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetRSVisible01
- * @tc.desc: GetRSVisible, normal scene
+ * @tc.name: GetVisible01
+ * @tc.desc: GetVisible, normal scene
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetRSVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, GetVisible, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_OK, session_->SetRSVisible(false));
+    ASSERT_EQ(WSError::WS_OK, session_->SetVisible(false));
     session_->state_ = SessionState::STATE_CONNECT;
-    if (!session_->GetRSVisible()) {
-        ASSERT_EQ(false, session_->GetRSVisible());
+    if (!session_->GetVisible()) {
+        ASSERT_EQ(false, session_->GetVisible());
     }
 }
 
