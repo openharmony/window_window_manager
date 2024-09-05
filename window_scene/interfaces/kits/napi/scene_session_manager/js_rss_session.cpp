@@ -70,7 +70,7 @@ void RssEventListener::ThreadSafeCallBack(napi_env ThreadSafeEnv, napi_value js_
 }
 
 void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
-        std::unordered_map<std::string, std::string> extInfo)
+    std::unordered_map<std::string, std::string> extInfo)
 {
     if (napiEnv_ == nullptr || callbackRef_ == nullptr || eventCb_ == nullptr) {
         return;
