@@ -764,9 +764,9 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
         return false;
     }
 
-    std::vector<std::string> propNames;
     napi_value array = nullptr;
     napi_get_property_names(env, value, &array);
+    std::vector<std::string> propNames;
     if (!ParseArrayStringValue(env, array, propNames)) {
         WLOGFE("Failed to property names");
         return false;

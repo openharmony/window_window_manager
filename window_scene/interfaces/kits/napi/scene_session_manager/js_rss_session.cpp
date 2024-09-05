@@ -31,9 +31,9 @@ using namespace AbilityRuntime;
 using namespace ResourceSchedule;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRssSession" };
-static constexpr size_t ARG_COUNT_ONE = 1;
-static constexpr size_t ARG_COUNT_TWO = 2;
-static constexpr int32_t INDENT = -1;
+constexpr size_t ARG_COUNT_ONE = 1;
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr int32_t INDENT = -1;
 } // namespace
 
 using OnRssEventCb = std::function<void(napi_env, napi_value, int32_t,
@@ -44,7 +44,7 @@ struct CallBackContext {
     std::shared_ptr<NativeReference> callbackRef = nullptr;
     OnRssEventCb eventCb = nullptr;
     int32_t eventType = 0;
-    std::unordered_map<std::string, std::string> extInfo;
+    std::unordered_map<std::string, std::string> extraInfo;
 };
 
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -68,12 +68,12 @@ void RssEventListener::ThreadSafeCallBack(napi_env ThreadSafeEnv, napi_value js_
     WLOGFI("RssEventListener ThreadSafeCallBack start");
     CallBackContext* callBackContext = reinterpret_cast<CallBackContext*>(data);
     callBackContext->eventCb(callBackContext->env,
-        callBackContext->callbackRef->GetNapiValue(), callBackContext->eventType, callBackContext->extInfo);
+        callBackContext->callbackRef->GetNapiValue(), callBackContext->eventType, callBackContext->extraInfo);
     delete callBackContext;
 }
 
 void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
-    std::unordered_map<std::string, std::string> extInfo)
+    std::unordered_map<std::string, std::string> extraInfo)
 {
     if (napiEnv_ == nullptr || callbackRef_ == nullptr || eventCb_ == nullptr) {
         return;
@@ -82,7 +82,7 @@ void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     callBackContext->env = napiEnv_;
     callBackContext->callbackRef = callbackRef_;
     callBackContext->eventType = eventType;
-    callBackContext->extInfo = extInfo;
+    callBackContext->extraInfo = extraInfo;
     callBackContext->eventCb = eventCb_;
     napi_acquire_threadsafe_function(threadSafeFunction_);
     napi_call_threadsafe_function(threadSafeFunction_, callBackContext, napi_tsfn_blocking);
@@ -214,7 +214,7 @@ void RssSession::ParseCallbackMutex(const std::string& mutexStr, std::string& bu
 }
 
 void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
-    const std::unordered_map<std::string, std::string>& extInfo)
+    const std::unordered_map<std::string, std::string>& extraInfo)
 {
     WLOGFI("OnReceiveEvent asyncCallback.");
     std::lock_guard<std::mutex> autoLock(jsCallbackMapLock_);
@@ -240,7 +240,7 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
         WLOGFE("OnReceiveEvent cbInfo null.");
         return;
     }
-    cbInfo->extInfo = extInfo;
+    cbInfo->extraInfo = extraInfo;
     napi_value resourceName = nullptr;
     NAPI_CALL_RETURN_VOID(env,
         napi_create_string_latin1(env, "OnReceiveEvent", NAPI_AUTO_LENGTH, &resourceName));
@@ -290,8 +290,8 @@ napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info 
         }
     }
     auto rssDataCb = [](napi_env env, napi_value callbackObj, int32_t eventType,
-        std::unordered_map<std::string, std::string> extInfo) {
-        RssSession::GetInstance().OnReceiveEvent(env, callbackObj, eventType, extInfo);
+        std::unordered_map<std::string, std::string> extraInfo) {
+        RssSession::GetInstance().OnReceiveEvent(env, callbackObj, eventType, extraInfo);
     };
     sptr<RssEventListener> eventListener =
         new (std::nothrow) RssEventListener(env, jsCallback, rssDataCb);
@@ -350,11 +350,11 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
     NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
     NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback, &callback));
 
-    std::string appInfo = cbInfo->extInfo["selfBundleName"];
+    std::string appInfo = cbInfo->extraInfo["selfBundleName"];
     SetMapValue(env, "appInfo", appInfo, result);
 
     std::string reason;
-    ParseCallbackMutex(cbInfo->extInfo["mutex"], reason);
+    ParseCallbackMutex(cbInfo->extraInfo["mutex"], reason);
     SetMapValue(env, "reason", reason, result);
 
     // call js callback
