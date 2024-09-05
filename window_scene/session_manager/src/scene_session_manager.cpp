@@ -4399,9 +4399,6 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
             return WSError::WS_OK;
     }
     auto nextSession = GetNextFocusableSession(persistentId);
-    if (nextSession == nullptr) {
-        DumpAllSessionFocusableInfo(persistentId);
-    }
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
@@ -4568,35 +4565,6 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     return WSError::WS_OK;
 }
 
-bool SceneSessionManager::CheckParentSessionVisible(const sptr<SceneSession>& session)
-{
-    if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
-        session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
-        GetSceneSession(session->GetParentPersistentId()) &&
-        !IsSessionVisible(GetSceneSession(session->GetParentPersistentId()))) {
-        return false;
-    }
-    return true;
-}
-
-void SceneSessionManager::DumpAllSessionFocusableInfo(int32_t persistentId)
-{
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
-    auto func = [this](sptr<SceneSession> session) {
-        if (session == nullptr) {
-            return false;
-        }
-        bool parentVisible = CheckParentSessionVisible(session);
-        bool sessionVisible = IsSessionVisible(session);
-        TLOGI(WmsLogTag::WMS_FOCUS, "%{public}d, winType:%{public}d, hide:%{public}d, "
-            "focusable:%{public}d, visible:%{public}d, parentVisible:%{public}d",
-            session->GetPersistentId(), session->GetWindowType(), session->GetForceHideState(),
-            session->GetFocusable(), sessionVisible, parentVisible);
-        return false;
-    };
-    TraverseSessionTree(func, true);
-}
-
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "GetNextFocusableSession, id: %{public}d", persistentId);
@@ -4610,8 +4578,15 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
             TLOGD(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
+        bool parentVisible = true;
+        if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
+            session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+            GetSceneSession(session->GetParentPersistentId()) &&
+            !IsSessionVisibleForeground(GetSceneSession(session->GetParentPersistentId()))) {
+                parentVisible = false;
+        }
         if (previousFocusedSessionFound && session->GetFocusable() &&
-            IsSessionVisibleForeground(session) && CheckParentSessionVisible(session)) {
+            IsSessionVisibleForeground(session) && parentVisible) {
             ret = session;
             return true;
         }
