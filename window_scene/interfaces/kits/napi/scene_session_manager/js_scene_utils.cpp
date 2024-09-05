@@ -1298,7 +1298,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value SessionTypeInit(napi_env env)
 {
-    WLOGFD("in");
+    WLOGFD("SessionTypeInit");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");

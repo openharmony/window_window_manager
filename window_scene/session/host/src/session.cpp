@@ -909,7 +909,8 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetIsNeedUpdateWindowMode(true);
         property->SetWindowMode(sessionProperty->GetWindowMode());
     }
-    if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
+    if (SessionHelper::IsMainWindow(GetWindowType()) &&
+        GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
@@ -1272,7 +1273,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
             std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
             LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
         if (isCurrentTaskExpired) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
+            WLOGFE("[WMSLife] Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
                 currLifeCycleTask->name.c_str(), persistentId_);
             lifeCycleTaskQueue_.pop_front();
         }
@@ -1665,8 +1666,8 @@ void Session::PresentFocusIfPointDown()
 
 void Session::HandlePointDownDialog()
 {
-    auto dialogVec = GetDialogVector();
     sptr<Session> lastValidDialog = nullptr;
+    auto dialogVec = GetDialogVector();
     for (auto dialog : dialogVec) {
         if (dialog && (dialog->GetSessionState() == SessionState::STATE_FOREGROUND ||
             dialog->GetSessionState() == SessionState::STATE_ACTIVE)) {
@@ -2295,7 +2296,6 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     if (property == nullptr) {
         return WSError::WS_OK;
     }
-
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -2908,6 +2908,10 @@ WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
     if (!IsSessionValid()) {
         TLOGE(WmsLogTag::DEFAULT, "session %{public}d is invalid. Failed to get UIContentRemoteObj", GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->GetUIContentRemoteObj(uiContentRemoteObj);
 }
