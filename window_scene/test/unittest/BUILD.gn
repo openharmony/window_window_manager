@@ -278,7 +278,10 @@ ohos_unittest("ws_fold_screen_sensor_manager_test") {
 
   sources = [ "fold_screen_sensor_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -503,6 +506,7 @@ ohos_unittest("ws_screen_session_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -517,6 +521,7 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -701,7 +706,10 @@ ohos_unittest("ws_screen_scene_config_test") {
 
   sources = [ "screen_scene_config_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -733,7 +741,10 @@ ohos_unittest("ws_screen_session_manager_client_test") {
 
   sources = [ "screen_session_manager_client_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
@@ -764,7 +775,10 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
 
   sources = [ "screen_session_manager_stub_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -778,7 +792,10 @@ ohos_unittest("ws_screen_session_manager_proxy_test") {
 
   sources = [ "screen_session_manager_proxy_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -792,7 +809,10 @@ ohos_unittest("ws_screen_session_manager_test") {
 
   sources = [ "screen_session_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",

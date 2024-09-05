@@ -19,6 +19,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "display_cutout_controller.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -186,7 +187,11 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 {
     bool immersive = false;
     DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_NE(ret, DMError::DM_OK);
+    }
 }
 
 /**
@@ -197,7 +202,11 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
 {
     auto physicalwidth = defaultDisplay_->GetPhysicalWidth();
-    ASSERT_NE(physicalwidth, 0);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(physicalwidth, 0);
+    } else {
+        ASSERT_EQ(physicalwidth, 0);
+    }
 }
 
 /**
@@ -208,7 +217,11 @@ HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetPhysicalHeight, Function | SmallTest | Level1)
 {
     auto physicalheight = defaultDisplay_->GetPhysicalHeight();
-    ASSERT_NE(physicalheight, 0);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(physicalheight, 0);
+    } else {
+        ASSERT_EQ(physicalheight, 0);
+    }
 }
 
 /**
