@@ -774,11 +774,8 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> display
 
 WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool shouldHide)
 {
-    if (property_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
+         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS")) {
             extensionWindowFlags_.hideNonSecureWindowsFlag = true;
             TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied in %{public}s UIExtension.",
@@ -1021,13 +1018,6 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
-}
-bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
-{
-    bool enable = false;
-    SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "GetFreeMultiWindowEnableState = %{public}u", enable);
-    return enable;
 }
 
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)

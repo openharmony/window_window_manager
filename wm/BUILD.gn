@@ -252,6 +252,7 @@ ohos_shared_library("libwm") {
     "ability_base:zuri",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
     "ability_runtime:app_manager",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",

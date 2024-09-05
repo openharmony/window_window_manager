@@ -92,7 +92,6 @@ private:
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
-    int HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);

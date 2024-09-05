@@ -266,7 +266,8 @@ enum class SystemBarSettingFlag : uint32_t {
     DEFAULT_SETTING = 0,
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
-    ALL_SETTING = 0b11
+    ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
+    FOLLOW_SETTING = 1 << 2
 };
 
 /**
@@ -417,7 +418,7 @@ enum class WindowGravity : uint32_t {
 /**
  * @brief Enumerates window setuicontent type.
  */
-enum class WindowSetUIContentType : uint32_t {
+enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
     DISTRIBUTE,
     BY_NAME,
@@ -497,6 +498,7 @@ namespace {
     constexpr int32_t SYSTEM_USERID = 0;
     constexpr int32_t BASE_USER_RANGE = 200000;
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
+    constexpr uint64_t INVALID_DISPLAY_ID = -1ULL;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -1100,31 +1102,6 @@ enum ForceHideState : uint32_t {
     NOT_HIDDEN = 0,
     HIDDEN_WHEN_FOCUSED,
     HIDDEN_WHEN_UNFOCUSED
-};
-
-enum class ExtensionWindowAttribute : int32_t {
-    SYSTEM_WINDOW = 0,
-    SUB_WINDOW = 1,
-    UNKNOWN = 2
-};
-
-struct SystemWindowOptions {
-    int32_t windowType = -1;
-};
-
-struct SubWindowOptions {
-    std::string title;
-    bool decorEnabled = false;
-    bool isModal = false;
-    bool isTopmost = false;
-};
-
-struct ExtensionWindowConfig {
-    std::string windowName;
-    ExtensionWindowAttribute windowAttribute = ExtensionWindowAttribute::UNKNOWN;
-    Rect windowRect;
-    SubWindowOptions subWindowOptions;
-    SystemWindowOptions systemWindowOptions;
 };
 
 /**

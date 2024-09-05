@@ -28,6 +28,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
+    constexpr int32_t NUMBER_ZERO = 0;
     constexpr int32_t NUMBER_ONE = 1;
     constexpr int32_t NUMBER_TWO = 2;
     constexpr int32_t NUMBER_FOUR = 4;
@@ -283,7 +284,7 @@ napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_i
         return NapiThrowInvalidParam(env, "Invalid args count, 2 args is needed.");
     }
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
-    std::string errMsg;
+    std::string errMsg = "";
     if (!ConvertFromJsValue(env, argv[0], controlType)) {
         errMsg = "Failed to convert parameter to int";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
@@ -291,7 +292,7 @@ napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_i
     }
     bool enabled = true;
     if (!ConvertFromJsValue(env, argv[1], enabled)) {
-        errMsg = "Failed to convert parameter to int";
+        errMsg = "Failed to convert parameter to bool";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }
@@ -321,7 +322,7 @@ napi_value JsPipController::OnRegisterCallback(napi_env env, napi_callback_info 
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
-    std::string cbType;
+    std::string cbType = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to callbackType");
         return NapiThrowInvalidParam(env);
@@ -462,11 +463,11 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
     size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > NUMBER_TWO) {
+    if (argc == NUMBER_ZERO || argc > NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
-    std::string cbType;
+    std::string cbType = "";
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to string");
         return NapiThrowInvalidParam(env);
