@@ -8055,7 +8055,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
     }
     auto accessTokenIDEx = sessionInfo.callingTokenId_;
     if (collaborator != nullptr) {
-        containerStartAbilityTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        containerStartAbilityTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
 
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -8099,7 +8099,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
     if (collaborator != nullptr) {
         int32_t missionId = abilitySessionInfo->persistentId;
         std::string bundleName = sessionInfo.bundleName_;
-        int64_t timestamp = containerStartAbilityTime;
+        int64_t timestamp = containerStartAbilityTime_;
         WindowInfoReporter::GetInstance().ReportContainerStartBegin(missionId, bundleName, timestamp);
         WLOGFI("call NotifyMissionCreated");
         collaborator->NotifyMissionCreated(abilitySessionInfo);
