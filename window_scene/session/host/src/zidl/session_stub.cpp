@@ -523,7 +523,8 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     return ERR_NONE;
 }
 
-int SessionStub::CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo) {
+int SessionStub::CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
