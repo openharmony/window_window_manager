@@ -272,7 +272,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowStatesByPid, Function | SmallTest
     int32_t pid = 100;
     std::vector<MainWindowState> windowStates;
     WSError result = ssm_->GetMainWindowStatesByPid(pid, windowStates);
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
