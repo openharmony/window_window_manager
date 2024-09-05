@@ -1186,7 +1186,7 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
         TLOGE(WmsLogTag::DEFAULT, "Read string vector failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::DEFAULT, "Read int32 failed");
         return WSError::WS_ERROR_IPC_FAILED;
