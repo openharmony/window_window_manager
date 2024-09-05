@@ -188,6 +188,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest07, Function | SmallTest | Level2
 
     data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
     data.WriteUint32(1);
+    data.WriteBool(false);
 
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN);
 
