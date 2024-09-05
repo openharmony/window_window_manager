@@ -1265,7 +1265,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
-    if (isDisplayStatusBarTemporarily_.load()) {
+    if (!isStatusBarVisible_) {
+        TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector;
@@ -1274,9 +1275,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
-        if (!(statusBar->isVisible_)) {
-            continue;
-        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());

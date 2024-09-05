@@ -236,6 +236,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
+    void SetIsStatusBarVisible(bool isVisible) { isStatusBarVisible_ = isVisible; }
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
@@ -567,6 +568,7 @@ private:
     bool isScreenAngleMismatch_ = false;
     uint32_t targetScreenWidth_ = 0;
     uint32_t targetScreenHeight_ = 0;
+    bool isStatusBarVisible_ = true;
 
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
