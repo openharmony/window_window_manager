@@ -272,7 +272,8 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
 HWTEST_F(SceneSessionManagerTest8, PostProcessProperty, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.emplace(0, nullptr);
-    ssm_->PostProcessProperty();
+    ssm_->PostProcessProperty(static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
+    ssm_->PostProcessProperty(~static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
     ssm_->sceneSessionMap_.clear();
 
     SessionInfo sessionInfo;
