@@ -526,12 +526,6 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
-{
-    enable = systemConfig_.freeMultiWindowEnable_;
-    return WSError::WS_OK;
-}
-
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
@@ -3809,7 +3803,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = GetSceneSession(session->GetParentPersistentId());
+        const auto& parentSceneSession = session->GetParentSession();
         if (parentSceneSession == nullptr) {
             WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
@@ -8801,13 +8795,13 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
     auto task = [this, remoteExtSession]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession");
             return;
         }
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
         if (!GetExtensionWindowIds(iter->second, persistentId, parentId)) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
+            TLOGD(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
 
@@ -9014,8 +9008,8 @@ void SceneSessionManager::HideNonSecureFloatingWindows()
     for (const auto& [persistentId, session] : nonSystemFloatSceneSessionMap_) {
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
-                session->GetWindowName().c_str(), persistentId, shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
+                "shouldHide=%{public}u", session->GetWindowName().c_str(), persistentId, shouldHide);
         }
     }
 }
@@ -9041,8 +9035,8 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
 
         if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !session->IsSystemSpecificSession()) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
-                session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
+                "shouldHide=%{public}u", session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
         }
     }
 }

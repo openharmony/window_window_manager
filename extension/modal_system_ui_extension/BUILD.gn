@@ -51,7 +51,6 @@ ohos_shared_library("libmodal_system_ui_extension_client") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "c_utils:utils",
-    "ffrt:libffrt",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",

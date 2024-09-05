@@ -20,7 +20,6 @@
 #include <parcel.h>
 #include <iremote_object.h>
 
-#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
@@ -622,7 +621,7 @@ public:
      *
      * @return displayId of window.
      */
-    virtual uint64_t GetDisplayId() const { return DISPLAY_ID_INVALID; }
+    virtual uint64_t GetDisplayId() const { return INVALID_DISPLAY_ID; }
     /**
      * @brief Get flag of window.
      *
@@ -2119,20 +2118,19 @@ public:
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
 
     /**
+     * @brief Get the height of status bar.
+     *
+     * @return the height of status bar.
+     */
+    virtual uint32_t GetStatusBarHeight() { return 0; }
+
+    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
      * @return WMError.
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Set the ContinueState of window.
-     *
-     * @param continueState of the window.
-     * @return Errorcode of window.
-     */
-    virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
      * @brief Notify modal UIExtension it may be covered

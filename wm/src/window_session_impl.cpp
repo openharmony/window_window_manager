@@ -626,19 +626,19 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+        NotifySizeChange(wmRect, wmReason);
+        lastSizeChangeReason_ = wmReason;
+        postTaskDone_ = true;
+    }
+    
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
-        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_) ||
-            !window->postTaskDone_) {
-            window->NotifySizeChange(wmRect, wmReason);
-            window->lastSizeChangeReason_ = wmReason;
-        }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        window->postTaskDone_ = true;
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
 }
@@ -3478,20 +3478,6 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
         isForceSplit, homePage.c_str());
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
-}
-
-WMError WindowSessionImpl::SetContinueState(int32_t continueState)
-{
-    if (continueState > ContinueState::CONTINUESTATE_MAX || continueState < ContinueState::CONTINUESTATE_UNKNOWN) {
-        TLOGE(WmsLogTag::WMS_MAIN, "continueState is invalid: %{public}d", continueState);
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    if (property_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "property_ is nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
-    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
