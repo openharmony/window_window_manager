@@ -88,10 +88,8 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
             session->keyboardPanelRectUpdateCallback_();
         }
         // clear after use
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
+        session->reason_ = SizeChangeReason::UNDEFINED;
+        session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
