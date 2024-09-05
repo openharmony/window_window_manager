@@ -1342,7 +1342,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
     RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
         TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
         this->OnRootSceneBackEvent();
-    }
+    };
     SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
