@@ -759,13 +759,8 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
 
 bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
 {
-    if (value == nullptr) {
-        WLOGFE("value is nullptr");
-        return false;
-    }
-
-    if (!CheckTypeForNapiValue(env, value, napi_object)) {
-        WLOGFE("The type of value is not napi_object.");
+    if (value == nullptr || !CheckTypeForNapiValue(env, value, napi_object)) {
+        WLOGFE("The type of value is not napi_object or is nullptr.");
         return false;
     }
 
@@ -777,7 +772,7 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
         return false;
     }
 
-    for (const auto &propName : propNames) {
+    for (const auto& propName : propNames) {
         napi_value prop = nullptr;
         napi_get_named_property(env, value, propName.c_str(), &prop);
         if (prop == nullptr) {
@@ -793,7 +788,7 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
             WLOGFW("Failed to ConvertFromJsValue: %{public}s", propName.c_str());
             continue;
         }
-        payload[propName] = valName;
+        payload[propName] = std::move(valName);
     }
     return true;
 }

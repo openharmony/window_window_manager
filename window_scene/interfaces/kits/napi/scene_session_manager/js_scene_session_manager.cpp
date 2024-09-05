@@ -46,6 +46,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
+constexpr int DEFAULT_ARG_COUNT = 4;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_THREE = 3;
@@ -2722,8 +2723,8 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
 
 napi_value JsSceneSessionManager::OnGetRssData(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_INDEX_TWO) { // ReportData args must be greater than three
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
