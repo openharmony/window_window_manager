@@ -2750,7 +2750,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
             std::map<WindowType, SystemBarProperty> systemBarProperties;
             std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
             GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
-                jsSystemBarProperties, jsSystemBarPropertyFlags, weakWindow);
+                jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken);
             WMError ret = SetSystemBarPropertiesByFlags(
                 systemBarPropertyFlags, systemBarProperties, windowToken);
