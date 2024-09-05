@@ -2991,10 +2991,7 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
                       " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
         }
         TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
-<<<<<<< HEAD
     }
-=======
->>>>>>> e09df5fe4 (SCB重构回退)
     property->SetTouchHotAreas(touchHotAreas);
 }
 
