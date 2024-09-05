@@ -99,7 +99,7 @@ public:
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
 
     /**
-     * @brief Sets the global maximization mode.
+     * @brief Sets the global maximization mode of window.
      *
      * @param mode Indicates the {@link MaximizeMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -107,7 +107,7 @@ public:
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
 
     /**
-     * @brief Get global maximization mode.
+     * @brief Obtains the global maximization mode of window.
      *
      * @param mode Indicates the {@link MaximizeMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
