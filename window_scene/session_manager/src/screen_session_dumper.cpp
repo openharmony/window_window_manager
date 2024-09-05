@@ -16,6 +16,7 @@
 
 #include <csignal>
 #include <fstream>
+#include <transaction/rs_interfaces.h>
 
 #include "unique_fd.h"
 #include "screen_session_manager.h"
@@ -329,6 +330,10 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+    state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(id));
+    oss << std::left << std::setw(LINE_WIDTH) << "ScreenPowerState: "
+        << static_cast<int32_t>(state) << std::endl;
     std::vector<ScreenColorGamut> colorGamuts;
     DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
     if (ret == DMError::DM_OK && colorGamuts.size() > 0) {
