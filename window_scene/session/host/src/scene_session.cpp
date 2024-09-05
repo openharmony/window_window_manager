@@ -1690,6 +1690,21 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return WSError::WS_OK;
 }
 
+WSError SceneSession::GetStartMoveFlag(bool& isMoving)
+{
+    auto task = [weakThis = wptr(this), &isMoving]() {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        isMoving = session->moveDragController_->GetStartMoveFlag();
+        TLOGI(WmsLogTag::DEFAULT, "ismoving: %{public}u", static_cast<uint32_t>(ismoving);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "GetStartMoveFlag");
+}
+
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // notify touchOutside and touchDown event

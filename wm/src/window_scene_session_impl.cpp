@@ -2218,6 +2218,16 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
     }
 }
 
+WMError WindowSceneSessionImpl::GetStartMoveFlag()
+{
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d", GetPersistentId());
+    bool isMoving = false;
+    if (auto hostSession = GetHostSession()) {
+       hostSession->GetStartMoveFlag(isMoving);
+    }
+    return isMoving;
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("id: %{public}d", GetPersistentId());
