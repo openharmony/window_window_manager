@@ -1203,7 +1203,7 @@ void WindowExtensionSessionImpl::NotifyExtensionEventSync(uint32_t notifyEvent)
         return;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyExtensionEventSync(notifyEvent);
 }
 
@@ -1215,7 +1215,7 @@ void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
         return;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyExtensionEventAsync(notifyEvent);
 }
 } // namespace Rosen
