@@ -203,10 +203,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     auto info = property_->GetSessionInfo();
     if (abilityContext && abilityContext->GetAbilityInfo()) {
         info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
         info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
     } else if (context_) {
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
         info.bundleName_ = context_->GetBundleName();
     }
     property_->SetSessionInfo(info);
