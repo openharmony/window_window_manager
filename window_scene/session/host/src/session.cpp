@@ -156,13 +156,13 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
             rsTransaction->Commit();
         }
     }
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
     return leashWinSurfaceNode_;
 }
 
@@ -683,7 +683,7 @@ bool Session::IsSystemSession() const
 
 bool Session::IsTerminated() const
 {
-    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating_);
+    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating);
 }
 
 bool Session::IsSessionForeground() const
@@ -872,8 +872,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 {
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
-    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_) {
+        static_cast<uint32_t>(GetSessionState()), isTerminating, pid);
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
         TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
             GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -1314,7 +1314,7 @@ WSError Session::TerminateSessionNew(
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto task = [this, abilitySessionInfo, needStartCaller, isFromBroker]() {
-        isTerminating_ = true;
+        isTerminating = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1347,11 +1347,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isTerminating_) {
+    if (isTerminating) {
         TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    isTerminating_ = true;
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1411,7 +1411,7 @@ WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
     auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
+        isTerminating = true;
         SessionInfo info = GetSessionInfo();
         if (terminateSessionFuncNew_) {
             terminateSessionFuncNew_(info, needStartCaller, false);
