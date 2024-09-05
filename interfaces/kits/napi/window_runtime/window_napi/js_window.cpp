@@ -2795,8 +2795,8 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     }
 
     wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, jsSystemBarPropertyFlags, errCode](
-            napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    NapiAsyncTask::CompleteCallback complete = [weakToken, jsSystemBarProperties, jsSystemBarPropertyFlags, errCode]
+        (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             errCode = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : errCode;
             if (errCode != WmErrorCode::WM_OK) {
