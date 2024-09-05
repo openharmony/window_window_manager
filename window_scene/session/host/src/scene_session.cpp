@@ -4087,15 +4087,4 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         ", isLandscape: %{public}d, screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(), gravity,
         rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
-
-bool SceneSession::IsPcOrPadEnableActivation() const
-{
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
-    if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
-    }
-    return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
-}
 } // namespace OHOS::Rosen
