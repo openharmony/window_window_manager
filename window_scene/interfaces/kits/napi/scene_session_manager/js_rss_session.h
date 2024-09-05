@@ -58,11 +58,11 @@ public:
         explicit RssSessionCbInfo(napi_env env) : nativeEnv(env) {}
         ~RssSessionCbInfo() {}
 
-        napi_ref callback = nullptr;
-        napi_async_work asyncWork = nullptr;
-        napi_deferred deferred = nullptr;
-        napi_env nativeEnv = nullptr;
-        std::unordered_map<std::string, std::string> extraInfo;
+        napi_ref callback_ = nullptr;
+        napi_async_work asyncWork_ = nullptr;
+        napi_deferred deferred_ = nullptr;
+        napi_env nativeEnv_ = nullptr;
+        std::unordered_map<std::string, std::string> extraInfo_;
     };
 
     using CallBackPair = std::pair<std::unique_ptr<NativeReference>, sptr<RssEventListener>>;
