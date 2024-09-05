@@ -128,9 +128,16 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
 
 int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleSetSessionLabel!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run HandleSetSessionLabel!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    std::string label = data.ReadString();
+    if (token == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "Token is nullptr.");
+    }
+    std::string label = "";
+    if (!data.ReadString(label)) {
+        TLOGD(WmsLogTag::WMS_LIFE, "Read label failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetSessionLabel(token, label);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -299,14 +306,22 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(Message
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleTerminateSessionNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "run HandleTerminateSessionNew");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return ERR_INVALID_DATA;
     }
-    bool needStartCaller = data.ReadBool();
-    bool isFromBroker = data.ReadBool();
+    bool needStartCaller = false;
+    if (!data.ReadBool(needStartCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needStartCaller failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isFromBroker = false;
+    if (!data.ReadBool(isFromBroker)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromBroker failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
