@@ -42,7 +42,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     if (pointerEvent == nullptr) {
         return;
     }
-
+ 
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     TLOGD(WmsLogTag::WMS_EVENT, "point source:%{public}d", pointerEvent->GetSourceType());
     auto actionId = pointerEvent->GetPointerId();
@@ -50,7 +50,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     if (action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
         return;
     }
-
+ 
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
         TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{private}d,"
@@ -105,7 +105,8 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
 }
 
 void IntentionEventManager::InputEventListener::RegisterWindowChanged()
-{}
+{
+}
 
 void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
 {
@@ -369,7 +370,8 @@ bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
-    TLOGI(WmsLogTag::WMS_EVENT, "isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d isKeyFN:%{public}d, isKeyboard:%{public}d",
+        keyEvent->GetId(), isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard || isKeyBack);
 }
 
