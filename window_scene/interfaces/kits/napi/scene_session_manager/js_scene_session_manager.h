@@ -90,6 +90,7 @@ public:
     static napi_value GetRssData(napi_env env, napi_callback_info info);
     static napi_value RegisterRssData(napi_env env, napi_callback_info info);
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
+    static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
@@ -153,6 +154,7 @@ private:
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
@@ -169,6 +171,7 @@ private:
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
 
+    void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);

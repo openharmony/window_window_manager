@@ -1265,7 +1265,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
-    if (isDisplayStatusBarTemporarily_.load()) {
+    if (!isStatusBarVisible_) {
+        TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector;
@@ -1274,9 +1275,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
-        if (!(statusBar->isVisible_)) {
-            continue;
-        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
@@ -1534,8 +1532,6 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         if (!session->CheckGetAvoidAreaAvailable(type)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "check false, can not get avoid area. persistentId:%{public}d type:%{public}u",
-                session->GetPersistentId(), type);
             return {};
         }
 
@@ -2943,9 +2939,10 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
             SessionState sessionState = session->GetSessionState();
-            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, "
-                "isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
-                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
+            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, isFoundationCall:%{public}u, "
+                "canStartAbilityFromBackground:%{public}u, foregroundInteractiveStatus:%{public}u",
+                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground,
+                session->GetForegroundInteractiveStatus());
             bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
                 sessionState == SessionState::STATE_ACTIVE;
             if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
