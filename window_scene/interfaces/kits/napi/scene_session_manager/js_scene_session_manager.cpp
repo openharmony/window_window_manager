@@ -2214,6 +2214,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]persistentId: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
         "reason: %{public}d", persistentId, isFocused, byForeground, reason);
+
     SceneSessionManager::GetInstance().RequestFocusStatus(persistentId, isFocused, byForeground, reason);
     return NapiGetUndefined(env);
 }
