@@ -155,11 +155,6 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
     sessionInfo_ = info;
 }
 
-void WindowSessionProperty::SetLayoutCallback(const sptr<IFutureCallback>& callback)
-{
-    layoutCallback_ = callback;
-}
-
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
     windowRect_ = rect;
@@ -258,11 +253,6 @@ const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 SessionInfo& WindowSessionProperty::EditSessionInfo()
 {
     return sessionInfo_;
-}
-
-sptr<IFutureCallback> WindowSessionProperty::GetLayoutCallback() const
-{
-    return layoutCallback_;
 }
 
 Rect WindowSessionProperty::GetWindowRect() const
@@ -967,33 +957,6 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
     return isSupportDragInPcCompatibleMode_;
 }
 
-bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
-{
-    if (!layoutCallback_) {
-        if (!parcel.WriteBool(false)) {
-            return false;
-        }
-    } else {
-        if (!parcel.WriteBool(true) ||
-            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(layoutCallback_->AsObject())) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
-{
-    if (!parcel.ReadBool()) {
-        return;
-    }
-    sptr<IFutureCallback> callback =
-        iface_cast<IFutureCallback>((static_cast<MessageParcel*>(&parcel))->ReadRemoteObject());
-    if (callback != nullptr) {
-        property->SetLayoutCallback(callback);
-    }
-}
-
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -1036,8 +999,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) &&
-        MarshallingFutureCallback(parcel);
+        parcel.WriteBool(isPcAppInPad_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1110,7 +1072,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
-    UnmarshallingFutureCallback(parcel, property);
     return property;
 }
 
@@ -1158,7 +1119,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
-    layoutCallback_ = property->layoutCallback_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)

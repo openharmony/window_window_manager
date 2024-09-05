@@ -32,9 +32,16 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     WLOGFD("code is %{public}u", code);
     switch (code) {
         case TRANS_ID_SETBOUNDS: {
-            Rect rect {data.ReadInt32(), data.ReadInt32(),
-                data.ReadInt32(), data.ReadInt32()};
-            SetBounds(rect);
+            int32_t posX = 0;
+            int32_t posY = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            if (!data.ReadInt32(posX) || !data.ReadInt32(posY) ||
+                !data.ReadUint32(width) || !data.ReadUint32(height)) {
+                WLOGFE("Read rect info failed");
+                return ERR_TRANSACTION_FAILED;
+            }
+            SetBounds({ posX, posY, width, height });
             break;
         }
         case TRANS_ID_HIDE_WINDOW: {

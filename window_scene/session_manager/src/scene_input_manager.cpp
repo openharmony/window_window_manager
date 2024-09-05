@@ -211,8 +211,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
-            .x = screenProperty.GetOffsetX(),
-            .y = screenProperty.GetOffsetY(),
+            .x = screenProperty.GetStartX(),
+            .y = screenProperty.GetStartY(),
             .width = screenWidth,
             .height = screenHeight,
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,

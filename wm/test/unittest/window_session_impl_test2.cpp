@@ -111,25 +111,30 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, Function | SmallTest | L
     bool isMaximizeVisible = false;
     bool isMinimizeVisible = false;
     bool isSplitVisible = false;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    bool isCloseVisible = false;
+    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_FALSE(isSplitVisible);
 
     isPC = true;
     window->windowTitleVisibleFlags_.isSplitVisible = false;
     window->windowTitleVisibleFlags_.isMaximizeVisible = false;
     window->windowTitleVisibleFlags_.isMinimizeVisible = false;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    window->windowTitleVisibleFlags_.isCloseVisible = false;
+    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_TRUE(isSplitVisible);
     ASSERT_TRUE(isMaximizeVisible);
     ASSERT_TRUE(isMinimizeVisible);
+    ASSERT_TRUE(isCloseVisible);
 
     window->windowTitleVisibleFlags_.isSplitVisible = true;
     window->windowTitleVisibleFlags_.isMaximizeVisible = true;
     window->windowTitleVisibleFlags_.isMinimizeVisible = true;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    window->windowTitleVisibleFlags_.isCloseVisible = true;
+    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_TRUE(isSplitVisible);
     ASSERT_TRUE(isMaximizeVisible);
     ASSERT_TRUE(isMinimizeVisible);
+    ASSERT_TRUE(isCloseVisible);
 }
 
 /**

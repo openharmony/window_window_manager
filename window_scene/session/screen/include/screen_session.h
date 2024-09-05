@@ -48,7 +48,7 @@ public:
     virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
-    virtual void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) = 0;
+    virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -166,6 +166,7 @@ public:
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
@@ -185,8 +186,8 @@ public:
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
-    void SetIsExtand(bool isExtend);
-    bool GetIsExtand() const;
+    void SetIsExtend(bool isExtend);
+    bool GetIsExtend() const;
     void SetIsInternal(bool isInternal);
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
@@ -216,7 +217,7 @@ public:
     void SensorRotationChange(float sensorRotation);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
-    void ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId);
+    void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
     DMRect GetAvailableArea();
     void SetAvailableArea(DMRect area);
     bool UpdateAvailableArea(DMRect area);
@@ -228,6 +229,7 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
+    void SetStartPosition(uint32_t startX, uint32_t startY);
 
 private:
     ScreenProperty property_;

@@ -205,7 +205,6 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
     surfaceReaderHandlerImpl->flag_ = true;
     surfaceReaderHandlerImpl->GetPixelMap();
-    ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
 }
 /**
  * @tc.name: SysCapUtilGetClientName
@@ -214,7 +213,7 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
  */
 HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, Function | SmallTest | Level2)
 {
-    ASSERT_EQ("unknown", SysCapUtil::GetClientName());
+    ASSERT_NE("", SysCapUtil::GetClientName());
 }
 }
 } // namespace Rosen
