@@ -2733,7 +2733,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     if (errCode == WMError::WM_OK) {
         napi_value nativeObj = argv[0];
         if (nativeObj == nullptr || !SetSystemBarPropertiesFromJs(env, nativeObj,
-            jsSystemBarProperties, jsSystemBarPropertyFlags)) {
+            jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
@@ -2750,7 +2750,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
             std::map<WindowType, SystemBarProperty> systemBarProperties;
             std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
             GetSystemBarPropertiesFromJs(systemBarProperties, systemBarPropertyFlags,
-                jsSystemBarProperties, jsSystemBarPropertyFlags, weakWindow);            
+                jsSystemBarProperties, jsSystemBarPropertyFlags, weakWindow);
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken);
             WMError ret = SetSystemBarPropertiesByFlags(
                 systemBarPropertyFlags, systemBarProperties, windowToken);
@@ -2785,7 +2785,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeObj = argv[0];
         if (nativeObj == nullptr || !SetSystemBarPropertiesFromJs(env, nativeObj,
-            jsSystemBarProperties, jsSystemBarPropertyFlags)) {
+            jsSystemBarProperties, jsSystemBarPropertyFlags, windowToken_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
