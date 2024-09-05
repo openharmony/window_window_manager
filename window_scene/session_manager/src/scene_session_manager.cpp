@@ -1747,7 +1747,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             scnSession->SetExitSplitOnBackground(false);
         }
         scnSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
-        abilityInfoMap_.clear(); //clear cache after terminate
+        abilityInfoMap_.clear(); // clear cache after terminate
         return ret;
     };
     std::string taskName = "RequestSceneSessionActivation:PID:" +
@@ -7349,7 +7349,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
 #ifdef MEMMGR_WINDOW_ENABLE
     if (memMgrWindowInfos.size() != 0) {
         WLOGD("Notify memMgrWindowInfos changed start");
-        taskScheduler_ ->AddExportTask("notifyMemMgr", [memMgrWindowInfos]() {
+        taskScheduler_ ->AddExportTask("notifyMemMgr", [memMgrWindowInfos = std::move(memMgrWindowInfos)]() {
             Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
         });
     }
