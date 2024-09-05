@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "js_rss_session.h"
 
 #include <js_runtime_utils.h>
@@ -61,7 +60,8 @@ void RssEventListener::ThreadSafeCallBack(napi_env ThreadSafeEnv, napi_value js_
     WLOGFI("start");
     CallBackContext* callBackContext = reinterpret_cast<CallBackContext*>(data);
     callBackContext->eventCb(callBackContext->env,
-        callBackContext->callbackRef->GetNapiValue(), callBackContext->eventType, std::move(callBackContext->extraInfo));
+        callBackContext->callbackRef->GetNapiValue(), callBackContext->eventType,
+        std::move(callBackContext->extraInfo));
     delete callBackContext;
 }
 
@@ -83,9 +83,6 @@ RssSession& RssSession::GetInstance()
     static RssSession session;
     return session;
 }
-
-RssSession::~RssSession()
-{}
 
 napi_value RssSession::RegisterRssData(napi_env env, napi_callback_info info)
 {
@@ -208,7 +205,8 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
     }
     bool isEqual = false;
     auto& callbackList = jsCallBackMap_[eventType];
-    for (auto iter = callbackList.begin(); iter != callbackList.end(); iter++) {
+    auto iter = callbackList.begin();
+    for (; iter != callbackList.end(); iter++) {
         NAPI_CALL_RETURN_VOID(env, napi_strict_equals(env, callbackObj, iter->first->GetNapiValue(), &isEqual));
         if (isEqual) {
             break;
@@ -227,7 +225,7 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
         napi_create_reference(env, iter->first->GetNapiValue(), 1, &cbInfo->callback_));
 
     NAPI_CALL_RETURN_VOID(env, napi_create_async_work(env, nullptr, resourceName,
-        [] (napi_env env, void* data) {},
+        [](napi_env env, void* data) {},
         CompleteCb,
         static_cast<void*>(cbInfo.get()),
         &cbInfo->asyncWork_));
@@ -245,12 +243,12 @@ napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info 
         WLOGFE("Register RssData Callback parameter error.");
         return NapiGetUndefined(env);
     }
-    napi_ref tempRef = nullptr;
-    napi_create_reference(env, jsCallback, 1, &tempRef);
+    napi_ref objRef = nullptr;
+    napi_create_reference(env, jsCallback, 1, &objRef);
     std::unique_ptr<NativeReference> callbackRef;
-    callbackRef.reset(reinterpret_cast<NativeReference*>(tempRef));
+    callbackRef.reset(reinterpret_cast<NativeReference*>(objRef));
     if (jsCallBackMap_.find(eventType) == jsCallBackMap_.end()) {
-        jsCallBackMap_[eventType] = {};
+        jsCallBackMap_[eventType] = std::list<CallBackPair>();
     }
     bool isEqual = false;
     auto& callbackList = jsCallBackMap_[eventType];
@@ -307,16 +305,13 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
         return;
     }
     std::unique_ptr<RssSessionCbInfo> cbInfo(info);
-
     napi_value undefined = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
     napi_value callback = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback_, &callback));
-
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    std::string appInfo = cbInfo->extraInfo_["selfBundleName"];
-    SetMapValue(env, "appInfo", appInfo, result);
+    SetMapValue(env, "appInfo", cbInfo->extraInfo_["selfBundleName"], result);
     std::string reason;
     ParseCallbackMutex(cbInfo->extraInfo_["mutex"], reason);
     SetMapValue(env, "reason", reason, result);

@@ -16,7 +16,7 @@
 #ifndef OHOS_WINDOW_SCENE_JS_RSS_SESSION_H
 #define OHOS_WINDOW_SCENE_JS_RSS_SESSION_H
 
-#include <map>
+#include <unordered_map>
 #include <list>
 #include <memory>
 #include <string>
@@ -55,7 +55,7 @@ public:
     static RssSession& GetInstance();
 
     struct RssSessionCbInfo {
-        explicit RssSessionCbInfo(napi_env env) : nativeEnv(env) {}
+        explicit RssSessionCbInfo(napi_env env) : nativeEnv_(env) {}
         ~RssSessionCbInfo() {}
 
         napi_ref callback_ = nullptr;
@@ -76,7 +76,7 @@ public:
 
 private:
     RssSession() = default;
-    ~RssSession();
+    ~RssSession() = default;
     
     RssSession(const RssSession&) = delete;
     RssSession& operator=(const RssSession&) = delete;
