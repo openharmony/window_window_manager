@@ -63,7 +63,7 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
-    void GetStartMoveFlag() override;
+    bool GetStartMoveFlag() override;
     WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;

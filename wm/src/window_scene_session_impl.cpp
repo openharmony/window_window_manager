@@ -2218,7 +2218,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
     }
 }
 
-WMError WindowSceneSessionImpl::GetStartMoveFlag()
+bool WindowSceneSessionImpl::GetStartMoveFlag()
 {
     bool isMoving = false;
     if (auto hostSession = GetHostSession()) {
