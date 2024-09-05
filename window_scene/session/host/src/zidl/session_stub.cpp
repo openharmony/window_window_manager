@@ -487,9 +487,9 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->want = *localWant;
-    int32_t ret = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
-    if (ret == ERR_INVALID_DATA) {
-        return ret;
+    int32_t basicAbilitySessionInfoCheck = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
+    if (basicAbilitySessionInfoCheck == ERR_INVALID_DATA) {
+        return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     if (processOptions == nullptr) {
@@ -497,16 +497,9 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     }
     abilitySessionInfo->processOptions =
         std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
-    bool hasCallerToken = false;
-    if (!data.ReadBool(hasCallerToken)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
+    int32_t CallerTokenCheckResult = CallerTokenChek(data, abilitySessionInfo);
+    if (CallerTokenCheckResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
-    }
-    if (hasCallerToken) {
-        abilitySessionInfo->callerToken = data.ReadRemoteObject();
-        if (abilitySessionInfo->callerToken == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
-        }
     }
     bool hasStartSetting = false;
     if (!data.ReadBool(hasStartSetting)) {
@@ -530,6 +523,21 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     return ERR_NONE;
 }
 
+int SessionStub::CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo) {
+    bool hasCallerToken = false;
+    if (!data.ReadBool(hasCallerToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasCallerToken) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+        if (abilitySessionInfo->callerToken == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
+        }
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "PendingSessionActivation!");
@@ -540,9 +548,9 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->want = *localWant;
-    int32_t ret = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
-    if (ret == ERR_INVALID_DATA) {
-        return ret;
+    int32_t basicAbilitySessionInfoCheck = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
+    if (basicAbilitySessionInfoCheck == ERR_INVALID_DATA) {
+        return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     if (processOptions == nullptr) {
@@ -561,16 +569,9 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
         return ERR_INVALID_VALUE;
     }
-    bool hasCallerToken = false;
-    if (!data.ReadBool(hasCallerToken)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
+    int32_t CallerTokenCheckResult = CallerTokenChek(data, abilitySessionInfo);
+    if (CallerTokenCheckResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
-    }
-    if (hasCallerToken) {
-        abilitySessionInfo->callerToken = data.ReadRemoteObject();
-        if (abilitySessionInfo->callerToken == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
-        }
     }
     bool hasStartSetting = false;
     if (!data.ReadBool(hasStartSetting)) {
