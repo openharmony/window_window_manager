@@ -128,7 +128,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
-        globalDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
     }
 }
 
