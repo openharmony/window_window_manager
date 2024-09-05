@@ -1406,10 +1406,10 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
-    bool result01 = ssm_->IsSessionVisibleForeground(sceneSession);
+    bool result01 = ssm_->IsSessionVisible(sceneSession);
     EXPECT_FALSE(result01);
     sceneSession->UpdateNativeVisibility(true);
-    bool result02 = ssm_->IsSessionVisibleForeground(sceneSession);
+    bool result02 = ssm_->IsSessionVisible(sceneSession);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_FALSE(result02);
     } else {
