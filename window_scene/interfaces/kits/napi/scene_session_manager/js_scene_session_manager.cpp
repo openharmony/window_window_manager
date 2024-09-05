@@ -307,6 +307,19 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
     taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
+void JsSceneSessionManager::OnRootSceneBackEvent()
+{
+    auto task = [rootScene = RootScene::staticRootScene_]() {
+        if (rootScene == nullptr ||  rootScene->GetUIContent() == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
+            return;
+        }
+        TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
+        rootScene->GetUIContent()->ProcessBackPressed();
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnRootSceneBackEvent");
+}
+
 void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", enable, bundleName.c_str());
@@ -1326,14 +1339,11 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
         });
     }
-    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([rootScene = rootScene_]() {
-        if (rootScene == nullptr ||  rootScene->GetUIContent() == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
-            return;
-        }
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
-        rootScene->GetUIContent()->ProcessBackPressed();
-    });
+    RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
+        TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
+        this->OnRootSceneBackEvent();
+    };
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
     });
