@@ -1210,6 +1210,10 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             !session->IsFocused() && session->GetFocusable()) {
             TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
+        if (!session->systemFocusable_) {
+            // reset systemFocusable_
+            session->SetSystemFocusable(true);
+        }
     };
     PostTask(task, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
