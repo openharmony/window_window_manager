@@ -3429,7 +3429,7 @@ WMError SceneSession::HandleActionUpdateWindowMask(const sptr<WindowSessionPrope
 WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-     if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -4397,7 +4397,7 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
 bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     if (NearEqual(scaleX_, scaleX) && NearEqual(scaleY_, scaleY) &&
-        NearEqual(pivotX_, pivotX) && NearEqual(pivotY_, pivotY)) {
+      NearEqual(pivotX_, pivotX) && NearEqual(pivotY_, pivotY)) {
         return false;
     }
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
