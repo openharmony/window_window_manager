@@ -29,13 +29,16 @@
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 using namespace ResourceSchedule;
+namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRssSession" };
 static constexpr size_t ARG_COUNT_ONE = 1;
 static constexpr size_t ARG_COUNT_TWO = 2;
 static constexpr int32_t INDENT = -1;
+} // namespace
 
 using OnRssEventCb = std::function<void(napi_env, napi_value, int32_t,
     std::unordered_map<std::string, std::string>)>;
+
 struct CallBackContext {
     napi_env env = nullptr;
     std::shared_ptr<NativeReference> callbackRef = nullptr;
@@ -93,7 +96,6 @@ RssSession& RssSession::GetInstance()
 
 RssSession::~RssSession()
 {
-    std::lock_guard<std::mutex> autoLock(jsCallbackMapLock_);
     jsCallBackMap_.clear();
 }
 
