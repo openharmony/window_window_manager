@@ -1699,7 +1699,7 @@ WSError SceneSession::GetStartMoveFlag(bool& isMoving)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         isMoving = session->moveDragController_->GetStartMoveFlag();
-        TLOGI(WmsLogTag::DEFAULT, "ismoving: %{public}u", static_cast<uint32_t>(ismoving);
+        TLOGI(WmsLogTag::DEFAULT, "isMoving: %{public}u", static_cast<uint32_t>(isMoving);
         return WSError::WS_OK;
     };
     return PostSyncTask(task, "GetStartMoveFlag");
