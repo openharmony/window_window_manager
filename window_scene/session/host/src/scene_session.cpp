@@ -2943,9 +2943,10 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
             SessionState sessionState = session->GetSessionState();
-            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, "
-                "isFoundationCall:%{public}u, canStartAbilityFromBackground:%{public}u",
-                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground);
+            TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, isFoundationCall:%{public}u, "
+                "canStartAbilityFromBackground:%{public}u, foregroundInteractiveStatus:%{public}u",
+                sessionState, isFoundationCall, abilitySessionInfo->canStartAbilityFromBackground,
+                session->GetForegroundInteractiveStatus());
             bool isSessionForeground = sessionState == SessionState::STATE_FOREGROUND ||
                 sessionState == SessionState::STATE_ACTIVE;
             if (isSessionForeground && !session->GetForegroundInteractiveStatus()) {
