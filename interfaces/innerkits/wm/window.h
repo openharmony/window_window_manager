@@ -2233,6 +2233,22 @@ public:
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+        /**
+     * @brief Notify extension synchronously
+     *
+     * @param notifyEvent event type
+     * @return * void
+     */
+    virtual void NotifyExtensionEventSync(uint32_t notifyEvent) {}
+
+    /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return * void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 };
 }
 }
