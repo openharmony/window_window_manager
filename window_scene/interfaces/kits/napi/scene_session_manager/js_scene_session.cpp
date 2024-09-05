@@ -124,7 +124,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
 };
 
-const std::vector<std::string> SyncGlobalPositionPermission {
+const std::vector<std::string> g_syncGlobalPositionPermission {
     "Recent",
 };
 } // namespace
@@ -1523,8 +1523,7 @@ napi_value JsSceneSession::SyncScenePanelGlobalPosition(napi_env env, napi_callb
 napi_value JsSceneSession::UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]in");
-    JsSceneSession*
-    me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUnSyncScenePanelGlobalPosition(env, info) : nullptr;
 }
 
@@ -4022,7 +4021,7 @@ napi_value JsSceneSession::OnCompatibleFullScreenClose(napi_env env, napi_callba
 napi_value JsSceneSession::OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc != ARGC_ONE) {
@@ -4039,9 +4038,9 @@ napi_value JsSceneSession::OnSyncScenePanelGlobalPosition(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto it = std::find_if(SyncGlobalPositionPermission.begin(), SyncGlobalPositionPermission.end(),
+    auto it = std::find_if(g_syncGlobalPositionPermission.begin(), g_syncGlobalPositionPermission.end(),
         [reason](const std::string& permission) { return permission.find(reason) != std::string::npos; });
-    if (it == SyncGlobalPositionPermission.end()) {
+    if (it == g_syncGlobalPositionPermission.end()) {
         TLOGE(WmsLogTag::WMS_PIPELINE, "[NAPI]called reason:%{public}s is not permitted", reason.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_NO_PERMISSION),
             "Input parameter is missing or invalid"));
@@ -4060,7 +4059,7 @@ napi_value JsSceneSession::OnSyncScenePanelGlobalPosition(napi_env env, napi_cal
 napi_value JsSceneSession::OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc != ARGC_ONE) {
@@ -4077,9 +4076,9 @@ napi_value JsSceneSession::OnUnSyncScenePanelGlobalPosition(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto it = std::find_if(SyncGlobalPositionPermission.begin(), SyncGlobalPositionPermission.end(),
+    auto it = std::find_if(g_syncGlobalPositionPermission.begin(), g_syncGlobalPositionPermission.end(),
         [reason](const std::string& permission) { return permission.find(reason) != std::string::npos; });
-    if (it == SyncGlobalPositionPermission.end()) {
+    if (it == g_syncGlobalPositionPermission.end()) {
         TLOGE(WmsLogTag::WMS_PIPELINE, "[NAPI]called reason:%{public}s is not permitted", reason.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_NO_PERMISSION),
             "Input parameter is missing or invalid"));
