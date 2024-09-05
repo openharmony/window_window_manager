@@ -142,11 +142,11 @@ napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload,
 
     std::string detail = "{}";
     if (!reply.contains("mutex") || !reply["mutex"].is_string() || reply.at("mutex") == "") {
-        SetMapValue(env, "detail", detail, objValue);
+        SetMapValue(env, "details", detail, objValue);
     } else {
         std::string mutexStr = reply["mutex"].get<std::string>();
         ParseMutex(mutexStr, payload, objValue);
-        SetMapValue(env, "detail", detail, objValue);
+        SetMapValue(env, "details", detail, objValue);
     }
     return objValue;
 }
