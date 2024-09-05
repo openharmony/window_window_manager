@@ -2234,14 +2234,6 @@ public:
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 
-        /**
-     * @brief Notify extension synchronously
-     *
-     * @param notifyEvent event type
-     * @return * void
-     */
-    virtual void NotifyExtensionEventSync(uint32_t notifyEvent) {}
-
     /**
      * @brief Notify extension asynchronously
      *

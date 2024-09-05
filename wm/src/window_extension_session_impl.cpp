@@ -1195,18 +1195,6 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
         oss.str());
 }
 
-void WindowExtensionSessionImpl::NotifyExtensionEventSync(uint32_t notifyEvent)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "notify extension synchronously, notifyEvent:%{public}d", notifyEvent);
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
-        return;
-    }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-    hostSession->NotifyExtensionEventSync(notifyEvent);
-}
-
 void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "notify extension asynchronously, notifyEvent:%{public}d", notifyEvent);

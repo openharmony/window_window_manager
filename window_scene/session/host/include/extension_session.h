@@ -110,7 +110,6 @@ public:
     WSError TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background(bool isFromClient = false) override;
-    void NotifyExtensionEventSync(uint32_t notifyEvent) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
 
 private:

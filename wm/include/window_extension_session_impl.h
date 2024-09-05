@@ -97,7 +97,6 @@ public:
     int32_t GetRealParentId() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
-    void NotifyExtensionEventSync(uint32_t notifyEvent) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
 
 protected:
