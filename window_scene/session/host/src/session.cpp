@@ -1956,28 +1956,28 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
 
 void Session::UnregisterSessionChangeListeners()
 {
-        sessionStateChangeFunc_ = nullptr;
-        sessionFocusableChangeFunc_ = nullptr;
-        sessionTouchableChangeFunc_ = nullptr;
-        clickFunc_ = nullptr;
-        jsSceneSessionExceptionFunc_ = nullptr;
-        sessionExceptionFunc_ = nullptr;
-        terminateSessionFunc_ = nullptr;
-        pendingSessionActivationFunc_ = nullptr;
-        changeSessionVisibilityWithStatusBarFunc_ = nullptr;
-        bufferAvailableChangeFunc_ = nullptr;
-        backPressedFunc_ = nullptr;
-        terminateSessionFuncNew_ = nullptr;
-        terminateSessionFuncTotal_ = nullptr;
-        updateSessionLabelFunc_ = nullptr;
-        updateSessionIconFunc_ = nullptr;
-        pendingSessionToForegroundFunc_ = nullptr;
-        pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
-        raiseToTopForPointDownFunc_ = nullptr;
-        sessionInfoLockedStateChangeFunc_ = nullptr;
-        contextTransparentFunc_ = nullptr;
-        sessionRectChangeFunc_ = nullptr;
-        WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
+    sessionStateChangeFunc_ = nullptr;
+    sessionFocusableChangeFunc_ = nullptr;
+    sessionTouchableChangeFunc_ = nullptr;
+    clickFunc_ = nullptr;
+    jsSceneSessionExceptionFunc_ = nullptr;
+    sessionExceptionFunc_ = nullptr;
+    terminateSessionFunc_ = nullptr;
+    pendingSessionActivationFunc_ = nullptr;
+    changeSessionVisibilityWithStatusBarFunc_ = nullptr;
+    bufferAvailableChangeFunc_ = nullptr;
+    backPressedFunc_ = nullptr;
+    terminateSessionFuncNew_ = nullptr;
+    terminateSessionFuncTotal_ = nullptr;
+    updateSessionLabelFunc_ = nullptr;
+    updateSessionIconFunc_ = nullptr;
+    pendingSessionToForegroundFunc_ = nullptr;
+    pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
+    raiseToTopForPointDownFunc_ = nullptr;
+    sessionInfoLockedStateChangeFunc_ = nullptr;
+    contextTransparentFunc_ = nullptr;
+    sessionRectChangeFunc_ = nullptr;
+    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
