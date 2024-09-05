@@ -41,7 +41,7 @@ public:
     RssEventListener(napi_env env, napi_value callbackObj, OnRssEventCb callback);
     virtual ~RssEventListener() = default;
     void OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
-        std::unordered_map<std::string, std::string> extInfo) override;
+        std::unordered_map<std::string, std::string> extraInfo) override;
 private:
     static void ThreadSafeCallBack(napi_env env, napi_value js_cb, void *context, void *data);
     napi_threadsafe_function threadSafeFunction_ = nullptr;
@@ -74,7 +74,7 @@ public:
         napi_async_work asyncWork = nullptr;
         napi_deferred deferred = nullptr;
         napi_env nativeEnv = nullptr;
-        std::unordered_map<std::string, std::string> extInfo;
+        std::unordered_map<std::string, std::string> extraInfo;
     };
 
     using CallBackPair = std::pair<std::unique_ptr<NativeReference>, sptr<RssEventListener>>;
@@ -85,10 +85,16 @@ public:
     static napi_value DealRssReply(napi_env env, const nlohmann::json& payload, const nlohmann::json& reply);
 
     void OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
-        const std::unordered_map<std::string, std::string>& extInfo);
+        const std::unordered_map<std::string, std::string>& extraInfo);
 private:
     RssSession() = default;
     ~RssSession();
+    
+    RssSession(const RssSession&) = delete;
+    RssSession& operator=(const RssSession&) = delete;
+    RssSession(RssSession&&) = delete;
+    RssSession& operator=(RssSession&&) = delete;
+
     napi_value RegisterRssDataCallback(napi_env env, napi_callback_info info);
     napi_value UnRegisterRssDataCallback(napi_env env, napi_callback_info info);
     bool CheckCallbackParam(napi_env env, napi_callback_info info, int32_t &eventType, napi_value *jsCallback);

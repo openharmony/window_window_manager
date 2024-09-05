@@ -2723,33 +2723,34 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
 
 napi_value JsSceneSessionManager::OnGetRssData(napi_env env, napi_callback_info info)
 {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_INDEX_TWO) { // ReportData args must be greater than three
+    if (argc < ARG_INDEX_TWO) { // OnGetRssData args must be greater than two
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t resType;
-    if (!ConvertFromJsValue(env, argv[0], resType)) {
+    if (!ConvertFromJsValue(env, argv[0], resType)) { // first args is int value
         WLOGFE("[NAPI]Failed to convert parameter to resType");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     nlohmann::json payload;
-    if (!ConvertJsonFromJs(env, argv[ARG_INDEX_ONE], payload)) { // second args is int value
+    if (!ConvertJsonFromJs(env, argv[ARG_INDEX_ONE], payload)) {
         WLOGFE("[NAPI]Failed to convert parameter to payload");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    payload["srcPid"] = std::to_string(getprocpid());
+    static std::string pid = std::to_string(getprocpid());
+    payload["srcPid"] = pid;
     nlohmann::json reply;
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
     return RssSession::DealRssReply(env, payload, reply);
 #endif
     return NapiGetUndefined(env);
