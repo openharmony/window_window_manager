@@ -84,7 +84,6 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    int32_t GetStatusBarHeight() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 private:
