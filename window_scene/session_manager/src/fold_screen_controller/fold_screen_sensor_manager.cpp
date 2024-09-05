@@ -144,10 +144,10 @@ void FoldScreenSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     TLOGD(WmsLogTag::DMS, "angle value in PostureData is: %{public}f.", globalAngle);
     sensorFoldStateManager_->HandleAngleChange(globalAngle, globalHall, foldScreenPolicy_);
-    notifyFoldAngleChanged(globalAngle);
+    NotifyFoldAngleChanged(globalAngle);
 }
 
-void FoldScreenSensorManager::notifyFoldAngleChanged(float foldAngle)
+void FoldScreenSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
     if (fabs(foldAngle - oldFoldAngle) < MINI_NOTIFY_FOLD_ANGLE) {
         return;
@@ -173,16 +173,16 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         return;
     }
     ExtHallData *extHallData = reinterpret_cast<ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    uint16_t flag = (uint16_t)(*extHallData).flag;
+    uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << 1))) {
         TLOGI(WmsLogTag::DMS, "NOT Support Extend Hall.");
         return;
     }
-    if (globalHall == (uint16_t)(*extHallData).hall) {
+    if (globalHall == static_cast<uint16_t>((*extHallData).hall)) {
         TLOGI(WmsLogTag::DMS, "Hall don't change, hall = %{public}u", globalHall);
         return;
     }
-    globalHall = (uint16_t)(*extHallData).hall;
+    globalHall = static_cast<uint16_t>((*extHallData).hall);
     if (globalHall == USHRT_MAX || std::isless(globalAngle, ANGLE_MIN_VAL) ||
         std::isgreater(globalAngle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
         TLOGE(WmsLogTag::DMS, "Invalid value, hall value is: %{public}u, angle value is: %{public}f.",

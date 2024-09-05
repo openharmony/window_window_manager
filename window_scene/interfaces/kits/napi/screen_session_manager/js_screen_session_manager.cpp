@@ -105,8 +105,12 @@ JsScreenSessionManager::~JsScreenSessionManager()
     TLOGI(WmsLogTag::DMS, "Destroy JsScreenSessionManager instance");
 }
 
-void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
+void JsScreenSessionManager::Finalizer([[maybe_unused]]napi_env env, void* data, [[maybe_unused]]void* hint)
 {
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "[NAPI]Finalizer. jsScreenSessionManager refcount before DecStrongRef: %{public}d",
         static_cast<JsScreenSessionManager*>(data)->GetSptrRefCount());
     // Expected to release the jsScreenSessionManager object here
