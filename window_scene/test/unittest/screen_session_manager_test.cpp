@@ -19,6 +19,7 @@
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
 #include <surface.h>
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -911,7 +912,11 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, Function | SmallTest | L
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
-    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    } else {
+        ASSERT_NE(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    }
 }
 
 /**
