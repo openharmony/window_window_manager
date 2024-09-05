@@ -789,8 +789,8 @@ int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& repl
 {
     TLOGD(WmsLogTag::DEFAULT, "HandleGetStartMoveFlag!");
     bool isMoving = false;
-    WSError errCode = GetStartMoveFlag(pointerEvent);
-    reply.WriteUint32(static_cast<uint32_t>(isMoving));
+    WSError errCode = GetStartMoveFlag(isMoving);
+    reply.WriteBool(isMoving);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -1431,7 +1431,7 @@ WSError SessionProxy::GetStartMoveFlag(bool& isMoving)
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    isMoving = static_cast<bool>(reply.ReadUint32());
+    isMoving = reply.ReadBool();
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
