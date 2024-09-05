@@ -239,12 +239,13 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
     }
-    #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
-    #endif
+#endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
-        ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_FULL, (int32_t)SCREEN_ID_MAIN);
+        ReportFoldStatusChangeBegin(static_cast<int32_t>(SCREEN_ID_FULL),
+            static_cast<int32_t>(SCREEN_ID_MAIN));
         // off full screen
         auto taskScreenOnMainOff = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdFull OFF.");
@@ -277,9 +278,9 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         auto taskScreenOnMainChangeScreenId = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
             screenId_ = SCREEN_ID_MAIN;
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_MAIN, MAIN_TP_OFF.c_str());
-            #endif
+#endif
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainChangeScreenId, "taskScreenOnMainChangeScreenId");
@@ -293,9 +294,9 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         return;
     }
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_FULL);
-    #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, FULL_TP.c_str());
-    #endif
+#endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         // off main screen

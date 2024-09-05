@@ -103,8 +103,8 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
         TLOGW(WmsLogTag::DMS, "duration < 100ms");
         std::this_thread::sleep_for(std::chrono::milliseconds(MIN_HALL_REPORT_INTERVAL - duration));
     }
-    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD
-        && PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD &&
+        PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         if (std::count(packageNames_.begin(), packageNames_.end(), applicationStateObserver_->GetForegroundApp())) {
             isHallSwitchApp_ = false;
             return;

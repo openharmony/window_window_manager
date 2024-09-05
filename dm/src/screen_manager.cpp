@@ -159,6 +159,10 @@ private:
     void NotifyVirtualScreenGroupChanged(sptr<ScreenInfo> screenInfo,
         const std::string trigger, std::vector<ScreenId>& ids, ScreenGroupChangeEvent groupEvent)
     {
+        if (screenInfo == nullptr) {
+            WLOGFE("screenInfo is nullptr");
+            return;
+        }
         // check for invalid scene
         if (pImpl_->virtualScreenGroupListeners_.size() <= 0) {
             WLOGFW("no virtual screen group listeners");
