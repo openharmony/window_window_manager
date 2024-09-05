@@ -2111,13 +2111,6 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
-     * @brief Get whether the free multi-window mode is enabled or not.
-     *
-     * @return true means the free multi-window mode is enabled, and false means the opposite.
-     */
-    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-
-    /**
      * @brief Get the height of status bar.
      *
      * @return the height of status bar.
