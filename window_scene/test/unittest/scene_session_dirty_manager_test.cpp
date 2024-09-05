@@ -145,15 +145,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    info.sceneType_ = SceneType::INPUT_SCENE;
+    info.isSystemInput_ = true;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
-    info.sceneType_ = SceneType::INPUT_SCENE;
+    info.isSystemInput_ = true;
     manager_->IsFilterSession(sceneSession);
-    info.sceneType_ = SceneType::WINDOW_SCENE;
+    info.isSystemInput_ = false;
     info.isSystem_ = false;
     sceneSession->isVisible_ = false;
     sceneSession->isSystemActive_ = false;
