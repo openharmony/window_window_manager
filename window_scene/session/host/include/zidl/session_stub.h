@@ -58,6 +58,7 @@ private:
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply);
     int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
+    int CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
     int HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
