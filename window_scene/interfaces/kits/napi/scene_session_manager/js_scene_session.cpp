@@ -315,7 +315,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 
 JsSceneSession::~JsSceneSession()
 {
-    WLOGD("~JsSceneSession")
+    WLOGD("~JsSceneSession");
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFD("session is nullptr, id:%{public}d", persistentId_);
