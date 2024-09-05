@@ -288,6 +288,27 @@ int32_t KeyboardSession::GetFocusedSessionId()
     return keyboardCallback_->onGetFocusedSessionId_();
 }
 
+int32_t KeyboardSession::GetStatusBarHeight()
+{
+    int32_t statusBarHeight = 0;
+    auto sessionProperty = GetSessionProperty();
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
+        sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback_ or session property is null, get statusBarHeight failed!");
+        return statusBarHeight;
+    }
+
+    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (const auto& statusBar : statusBarVector) {
+        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > statusBarHeight) {
+            statusBarHeight = statusBar->GetSessionRect().height_;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Status Bar height: %{public}d", statusBarHeight);
+    return statusBarHeight;
+}
+
 void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
     const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -386,7 +407,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     }
 
     WSRect newRect = callingSessionRect;
-    int32_t statusHeight = callingSession->GetStatusBarHeight();
+    int32_t statusHeight = GetStatusBarHeight();
     if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         if (oriPosYBeforeRaisedBykeyboard == 0) {
             oriPosYBeforeRaisedBykeyboard = callingSessionRect.posY_;

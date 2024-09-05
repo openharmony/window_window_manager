@@ -2111,13 +2111,6 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
-     * @brief Get the height of status bar.
-     *
-     * @return the height of status bar.
-     */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
-
-    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
