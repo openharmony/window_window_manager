@@ -177,9 +177,10 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "session or property is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+
         auto sessionProperty = session->GetSessionProperty();
         if (property && sessionProperty) {
             sessionProperty->SetWindowMode(property->GetWindowMode());
@@ -528,11 +529,11 @@ WSError SceneSession::SetAspectRatio(float ratio)
     auto task = [weakThis = wptr(this), ratio]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "SetAspectRatio failed because property is null");
+            WLOGE("[WMSCom] SetAspectRatio failed because property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
@@ -551,8 +552,8 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect fixedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s, "
-            "ratio: %{public}f", session->GetPersistentId(), fixedRect.ToString().c_str(), ratio);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s",
+            session->GetPersistentId(), fixedRect.ToString().c_str());
         if (session->FixRectByAspectRatio(fixedRect)) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
                 session->GetPersistentId(), fixedRect.ToString().c_str());
@@ -1632,7 +1633,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFI("Do not dispatch this pointer event");
         return WSError::WS_DO_NOTHING;
     }
-
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr && isPointDown) {
@@ -1643,6 +1643,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
+
     auto windowType = property->GetWindowType();
     bool isMovableWindowType = IsMovableWindowType();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
@@ -2307,7 +2308,6 @@ void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 
 void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAbilityBGAlpha");
     if (alpha < 0 || alpha > 1.0) {
         WLOGFE("OnSetSystemSceneOcclusionAlpha property is null");
         return;
@@ -2317,7 +2317,7 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
         return;
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
-    WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
+    WLOGFI("surfaceNode SetAbilityBGAlpha=%{public}u.", alpha8bit);
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
@@ -2657,6 +2657,12 @@ void SceneSession::SetSystemTouchable(bool touchable)
 {
     Session::SetSystemTouchable(touchable);
     NotifyAccessibilityVisibilityChange();
+    if (isKeyboardPanelEnabled_ && GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        const auto& keyboardPanel = GetKeyboardPanelSession();
+        if (keyboardPanel != nullptr) {
+            keyboardPanel->SetSystemTouchable(touchable);
+        }
+    }
 }
 
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
