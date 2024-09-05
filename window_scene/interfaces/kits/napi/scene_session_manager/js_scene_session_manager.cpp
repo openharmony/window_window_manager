@@ -2687,7 +2687,7 @@ napi_value JsSceneSessionManager::OnGetRssData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     nlohmann::json payload;
-    if (!ConvertJsonFromJsValue(env, argv[ARG_INDEX_ONE], payload)) { // second args is int value
+    if (!ConvertJsonFromJs(env, argv[ARG_INDEX_ONE], payload)) { // second args is int value
         WLOGFE("[NAPI]Failed to convert parameter to payload");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
