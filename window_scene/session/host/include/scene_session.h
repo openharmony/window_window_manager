@@ -212,7 +212,7 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
-    void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetRestoringRectForKeyboard(WSRect rect);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
@@ -248,7 +248,7 @@ public:
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     SubWindowModalType GetSubWindowModalType() const;
-    int32_t GetOriPosYBeforeRaisedByKeyboard() const;
+    WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
     // Session recover
@@ -535,7 +535,7 @@ private:
     std::string clientIdentityToken_ = { "" };
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
-    int32_t oriPosYBeforeRaisedBykeyboard_ = 0;
+    WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
