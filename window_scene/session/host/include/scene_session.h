@@ -358,16 +358,6 @@ public:
         return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
     }
 
-    // WMSPipeline-related: only accessed on SSM thread
-    uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
-    uint32_t UpdateUIParam();   // update invisible session, return dirty flags
-    void SetPostProcessFocusState(PostProcessFocusState state);
-    PostProcessFocusState GetPostProcessFocusState() const;
-    void ResetPostProcessFocusState();
-    void SetPostProcessProperty(bool state);
-    bool GetPostProcessProperty() const;
-    void PostProcessNotifyAvoidArea();
-    bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
     void UnregisterSessionChangeListeners() override;
 
@@ -390,17 +380,6 @@ protected:
         return "[" + to_string(rect.width_) + ", " + to_string(rect.height_) + "; "
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
-
-    bool UpdateVisibilityInner(bool visibility);
-    bool UpdateInteractiveInner(bool interactive);
-    virtual void NotifyClientToUpdateInteractive(bool interactive) {}
-    bool PipelineNeedNotifyClientToUpdateRect() const;
-    bool UpdateRectInner(const WSRect& rect, SizeChangeReason reason);
-    bool NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason reason);
-    bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
-    bool UpdateZOrderInner(uint32_t zOrder);
-    virtual void NotifyClientToUpdateAvoidArea();
-    bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
@@ -544,10 +523,6 @@ private:
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
-
-    // WMSPipeline-related: only accessed on SSM thread
-    PostProcessFocusState postProcessFocusState_;
-    bool postProcessProperty_ { false };
 
     // Session recover
     bool isRecovered_ = false;

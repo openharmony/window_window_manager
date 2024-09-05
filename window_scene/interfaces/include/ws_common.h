@@ -264,22 +264,12 @@ enum class FocusChangeReason {
     MAX,
 };
 
-enum class SceneType : uint8_t {
-    DEFAULT = 0,
-    WINDOW_SCENE,
-    SYSTEM_WINDOW_SCENE,
-    TRANSFORM_SCENE,
-    PANEL_SCENE,
-    INPUT_SCENE,
-};
-
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
     int32_t appIndex_ = 0;
     bool isSystem_ = false;
-    SceneType sceneType_ = SceneType::WINDOW_SCENE;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
@@ -315,6 +305,7 @@ struct SessionInfo {
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
+    bool isSystemInput_ = false;
     bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
@@ -600,47 +591,6 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
-};
-
-/**
- * @brief Session UI parameters
- */
-struct SessionUIParam {
-    bool interactive_ { true };
-    WSRect rect_;
-    float scaleX_ { 1.0f };
-    float scaleY_ { 1.0f };
-    float pivotX_ { 1.0f };
-    float pivotY_ { 1.0f };
-    uint32_t zOrder_ { 0 };
-    std::string sessionName_;
-};
-
-enum class SessionUIDirtyFlag {
-    NONE = 0,
-    VISIBLE = 1,
-    INTERACTIVE = 1 << 1,
-    RECT = 1 << 2,
-    SCALE = 1 << 3,
-    TOUCH_HOT_AREA = 1 << 4,
-    Z_ORDER = 1 << 5,
-    AVOID_AREA = 1 << 6,
-};
-
-/**
- * @brief State for post-process focus
- */
-struct PostProcessFocusState {
-    bool enabled_ { false };
-    bool isFocused_ { false };
-    FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
-
-    void Reset()
-    {
-        enabled_ = false;
-        isFocused_ = false;
-        reason_ = FocusChangeReason::DEFAULT;
-    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

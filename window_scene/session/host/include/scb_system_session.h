@@ -40,11 +40,8 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode();
 
-    bool IsVisibleForeground() const override;
-
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
-    void NotifyClientToUpdateAvoidArea() override;
 
 private:
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
