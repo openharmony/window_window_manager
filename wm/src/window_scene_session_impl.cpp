@@ -2220,11 +2220,11 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
 
 WMError WindowSceneSessionImpl::GetStartMoveFlag()
 {
-    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d", GetPersistentId());
     bool isMoving = false;
     if (auto hostSession = GetHostSession()) {
         hostSession->GetStartMoveFlag(isMoving);
     }
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
     return isMoving;
 }
 
