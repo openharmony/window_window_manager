@@ -103,7 +103,6 @@ private:
     static void ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName);
     static void CompleteCb(napi_env env, napi_status status, void* data);
 
-    std::mutex jsCallbackMapLock_;
     std::map<int32_t, std::list<CallBackPair>> jsCallBackMap_;
 };
 #endif
