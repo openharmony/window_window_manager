@@ -83,31 +83,25 @@ static std::map<WMError, const char*> WM_ERROR_TO_ERROR_MSG_MAP {
 };
 
 constexpr const char* WM_ERROR_CODE_MSG_OK = "ok";
-constexpr const char* WM_ERROR_CODE_MSG_NO_PERMISSION = "Permission verification failed. "
-    "The application does not have the permission required to call the API.";
-constexpr const char* WM_ERROR_CODE_MSG_NOT_SYSTEM_APP = "Permission verification failed. "
-    "A non-system application calls a system API.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARAM = "Parameter error. Possible causes: "
-    "1. Mandatory parameters are left unspecified; "
-    "2. Incorrect parameter types; "
-    "3. Parameter verification failed.";
-constexpr const char* WM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "Capability not supported. "
-    "Failed to call the API due to limited device capabilities.";
-constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "Repeated operation.";
-constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "This window manager service works abnormally.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation.";
-constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "Failed to start the ability.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "The display device is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARENT = "The parent window is invalid.";
-constexpr const char* WM_ERROR_CODE_MSG_OPER_FULLSCREEN_FAILED = "The operation is not supported in full-screen mode.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "Failed to destroy the PiP window.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "The PiP window state is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "Failed to create the PiP window.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation.";
+constexpr const char* WM_ERROR_CODE_MSG_NO_PERMISSION = "no permission";
+constexpr const char* WM_ERROR_CODE_MSG_NOT_SYSTEM_APP = "not system app";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARAM = "invalid param";
+constexpr const char* WM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "device not support";
+constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "repeat operation";
+constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "state abnormally";
+constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "system abnormally";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "invalid calling";
+constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "stage abnormally";
+constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "context abnormally";
+constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "start ability_failed";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "invalid display";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARENT = "invalid parent";
+constexpr const char* WM_ERROR_CODE_MSG_OPER_FULLSCREEN_FAILED = "oper fullscreen failed";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "pip destroy failed";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "pip state abnormally";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "pip create failed";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "pip internal error";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "pip repeat operation";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                     },
