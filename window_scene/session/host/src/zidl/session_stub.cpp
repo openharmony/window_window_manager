@@ -497,7 +497,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     }
     abilitySessionInfo->processOptions =
         std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
-    int32_t CallerTokenCheckResult = CallerTokenChek(data, abilitySessionInfo);
+    int32_t CallerTokenCheckResult = CallerTokenCheck(data, abilitySessionInfo);
     if (CallerTokenCheckResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
@@ -570,7 +570,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
         return ERR_INVALID_VALUE;
     }
-    int32_t CallerTokenCheckResult = CallerTokenChek(data, abilitySessionInfo);
+    int32_t CallerTokenCheckResult = CallerTokenCheck(data, abilitySessionInfo);
     if (CallerTokenCheckResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
