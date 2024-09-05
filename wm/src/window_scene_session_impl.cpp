@@ -2223,7 +2223,7 @@ WMError WindowSceneSessionImpl::GetStartMoveFlag()
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}d", GetPersistentId());
     bool isMoving = false;
     if (auto hostSession = GetHostSession()) {
-       hostSession->GetStartMoveFlag(isMoving);
+        hostSession->GetStartMoveFlag(isMoving);
     }
     return isMoving;
 }
