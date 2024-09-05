@@ -315,6 +315,7 @@ public:
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+    WSError GetStartMoveFlag(bool& isMoving) override;
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
