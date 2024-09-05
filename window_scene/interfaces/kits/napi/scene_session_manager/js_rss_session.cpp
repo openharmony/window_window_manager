@@ -206,10 +206,9 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
         WLOGFE("cb type has not register yet.");
         return;
     }
-    auto& callbackList = jsCallBackMap_[eventType];
-    auto iter = callbackList.begin();
     bool isEqual = false;
-    for (; iter != callbackList.end(); iter++) {
+    auto& callbackList = jsCallBackMap_[eventType];
+    for (auto iter = callbackList.begin(); iter != callbackList.end(); iter++) {
         NAPI_CALL_RETURN_VOID(env, napi_strict_equals(env, callbackObj, iter->first->GetNapiValue(), &isEqual));
         if (isEqual) {
             break;
