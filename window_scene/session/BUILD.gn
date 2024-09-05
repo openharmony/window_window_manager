@@ -77,6 +77,9 @@ ohos_shared_library("scene_session") {
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:session_info",
+    "ability_base:want",
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
     "c_utils:utils",
@@ -86,10 +89,11 @@ ohos_shared_library("scene_session") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
-    "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "image_framework:image_native",
+    "preferences:native_preferences",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]

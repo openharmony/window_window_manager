@@ -3594,7 +3594,7 @@ napi_value JsSceneSession::OnSetIsPcAppInPad(napi_env env, napi_callback_info in
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
         return NapiGetUndefined(env);
     }
     session->SetIsPcAppInPad(enable);

@@ -1159,8 +1159,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (Session::GetFloatingScale() <= miniScale) {
             return;
         }
-        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            rect.height_ < rect.width_) {
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && rect.height_ < rect.width_) {
             return;
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
@@ -1523,7 +1522,7 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
     }
     if (area != MMI::WindowArea::EXIT) {
         if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-            WLOGFE("Failed to set the cursor style, WSError:%{public}d", Session::SetPointerStyle(area));
+            WLOGFE("Failed to set the cursor style");
         }
     }
     preWindowArea = { Session::GetWindowId(), area };
@@ -2024,6 +2023,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         WLOGE("moveDragController_ is null");
         return;
     }
+
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "property is null");
@@ -2804,7 +2804,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
-        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
         info.windowMode, info.callerPersistentId_);
@@ -3810,7 +3810,7 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
             "isAppColdStart: %{public}d", session->GetPersistentId(), isAppColdStart);
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework hide keyboard end. id: %{public}d",
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify inputMethod framework hide keyboard end, id: %{public}d",
                 session->GetPersistentId());
         }
     };
@@ -4296,6 +4296,7 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed, isShow: %{public}d", isShow);
         return;
     }
+
     bool isLandscape = screenWidth > screenHeight ? true : false;
     Rect rect = isLandscape ? params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
     SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
