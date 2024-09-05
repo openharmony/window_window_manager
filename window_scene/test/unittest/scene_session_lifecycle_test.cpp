@@ -749,7 +749,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     ASSERT_NE(nullptr, abilitySessionInfo);
     OHOS::Rosen::Session session(info);
-    session.isTerminating_ = true;
+    session.isTerminating = true;
     sceneSession->TerminateSession(abilitySessionInfo);
 }
 
@@ -798,7 +798,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
     ASSERT_NE(nullptr, abilitySessionInfo);
     bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
-    session.isTerminating_ = true;
+    session.isTerminating = true;
     sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
     sceneSession->GetLastSafeRect();
     WSRect rect;
