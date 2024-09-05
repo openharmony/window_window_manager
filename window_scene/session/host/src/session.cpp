@@ -466,6 +466,16 @@ WSError Session::SetFocusable(bool isFocusable)
     return WSError::WS_OK;
 }
 
+void Session::SetSystemFocusable(bool systemFocusable)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, systemFocusable: %{public}d", GetPersistentId(), systemFocusable);
+    systemFocusable_ = systemFocusable;
+    if (isFocused_ && !systemFocusable) {
+        FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
+        NotifyRequestFocusStatusNotifyManager(false, true, reason);
+    }
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -474,6 +484,19 @@ bool Session::GetFocusable() const
     }
     WLOGFD("property is null");
     return true;
+}
+
+bool Session::GetSystemFocusable() const
+{
+    if (parentSession_) {
+        return systemFocusable_ && parentSession_->GetSystemFocusable();
+    }
+    return systemFocusable_;
+}
+
+bool Session::CheckFocusable() const
+{
+    return GetFocusable() && GetSystemFocusable();
 }
 
 bool Session::IsFocused() const
@@ -1186,6 +1209,10 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
             !session->IsFocused() && session->GetFocusable()) {
             TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
+        }
+        if (isAttach && !session->systemFocusable_) {
+            // reset systemFocusable_
+            session->SetSystemFocusable(true);
         }
     };
     PostTask(task, "SetAttachState");
