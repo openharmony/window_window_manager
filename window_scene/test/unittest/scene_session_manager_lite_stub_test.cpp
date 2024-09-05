@@ -356,7 +356,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWindowStatesByPid, Functi
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

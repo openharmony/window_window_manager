@@ -283,6 +283,7 @@ public:
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
+    void NotifyCastWhenScreenConnectChange(bool isConnected);
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
         const std::string& secondaryScreenMode);
 
@@ -488,7 +489,6 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
-    void NotifyCastWhenScreenConnectChange(bool isConnected);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

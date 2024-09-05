@@ -58,6 +58,7 @@ private:
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
+    void MockSendCastPublishEvent(std::string input);
 
 private:
     int fd_;

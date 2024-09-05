@@ -254,6 +254,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
     BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
+    BindNativeFunction(env, objValue, "setSystemFocusable", moduleName, JsSceneSession::SetSystemFocusable);
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);

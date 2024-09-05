@@ -697,17 +697,17 @@ void ScreenSession::SetVirtualPixelRatio(float virtualPixelRatio)
 
 void ScreenSession::SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func)
 {
-    SetScreenSceneDpiCallback_ = func;
+    setScreenSceneDpiCallback_ = func;
     WLOGFI("SetScreenSceneDpiChangeListener");
 }
 
 void ScreenSession::SetScreenSceneDpi(float density)
 {
-    if (SetScreenSceneDpiCallback_ == nullptr) {
-        WLOGFI("SetScreenSceneDpiCallback_ is nullptr");
+    if (setScreenSceneDpiCallback_ == nullptr) {
+        WLOGFI("setScreenSceneDpiCallback_ is nullptr");
         return;
     }
-    SetScreenSceneDpiCallback_(density);
+    setScreenSceneDpiCallback_(density);
 }
 
 void ScreenSession::SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func)
@@ -1117,8 +1117,8 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     // If setDisplayOffset is not valid for SetFrame/SetBounds
     WLOGFI("InitRSDisplayNode screenId:%{public}" PRIu64" width:%{public}u height:%{public}u",
         screenId_, width, height);
-    displayNode_->SetFrame(0, 0, width, height);
-    displayNode_->SetBounds(0, 0, width, height);
+    displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+    displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -1267,7 +1267,7 @@ std::vector<Point> ScreenSessionGroup::GetChildrenPosition() const
 
 Point ScreenSessionGroup::GetChildPosition(ScreenId screenId) const
 {
-    Point point;
+    Point point{};
     auto iter = screenSessionMap_.find(screenId);
     if (iter != screenSessionMap_.end()) {
         point = iter->second.second;
@@ -1303,7 +1303,7 @@ sptr<ScreenGroupInfo> ScreenSessionGroup::ConvertToScreenGroupInfo() const
 
 void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY)
 {
-    property_.SetOffsetY(offsetY);
+    property_.SetOffsetY(static_cast<int32_t>(offsetY));
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
 }
 
@@ -1314,8 +1314,8 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         screenMode->width_ = width;
         screenMode->height_ = height;
         UpdatePropertyByActiveMode();
-        displayNode_->SetFrame(0, 0, width, height);
-        displayNode_->SetBounds(0, 0, width, height);
+        displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+        displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
         RSTransaction::FlushImplicitTransaction();
     }
 }
@@ -1374,7 +1374,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         return nullptr;
     }
 
-    auto pixelMap = callback->GetResult(2000);
+    auto pixelMap = callback->GetResult(2000); // 2000, default timeout
     if (pixelMap != nullptr) {
         WLOGFD("save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
