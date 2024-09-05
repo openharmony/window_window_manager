@@ -18,12 +18,10 @@
 
 #include <map>
 #include <list>
-#include <mutex>
 #include <memory>
 #include <string>
 #include <functional>
 
-#include "refbase.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "native_engine/native_engine.h"
@@ -34,16 +32,18 @@
 
 namespace OHOS::Rosen {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-class RssEventListener : public OHOS::ResourceSchedule::ResSchedEventListener {
+using OnRssEventCb = std::function<void(napi_env, napi_value, int32_t,
+    std::unordered_map<std::string, std::string>&&)>;
+
+class RssEventListener : public ResourceSchedule::ResSchedEventListener {
 public:
-    using OnRssEventCb = std::function<void(napi_env, napi_value, int32_t,
-        std::unordered_map<std::string, std::string>)>;
     RssEventListener(napi_env env, napi_value callbackObj, OnRssEventCb callback);
     virtual ~RssEventListener() = default;
     void OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
         std::unordered_map<std::string, std::string> extraInfo) override;
+
 private:
-    static void ThreadSafeCallBack(napi_env env, napi_value js_cb, void *context, void *data);
+    static void ThreadSafeCallBack(napi_env env, napi_value js_cb, void* context, void* data);
     napi_threadsafe_function threadSafeFunction_ = nullptr;
     napi_env napiEnv_ = nullptr;
     OnRssEventCb eventCb_ = nullptr;
@@ -55,21 +55,9 @@ public:
     static RssSession& GetInstance();
 
     struct RssSessionCbInfo {
-        explicit RssSessionCbInfo(napi_env env)
-            : nativeEnv(env) {}
-        ~RssSessionCbInfo()
-        {
-            if (nativeEnv) {
-                if (callback) {
-                    napi_delete_reference(nativeEnv, callback);
-                    callback = nullptr;
-                }
-                if (asyncWork) {
-                    napi_delete_async_work(nativeEnv, asyncWork);
-                    asyncWork = nullptr;
-                }
-            }
-        }
+        explicit RssSessionCbInfo(napi_env env) : nativeEnv(env) {}
+        ~RssSessionCbInfo() {}
+
         napi_ref callback = nullptr;
         napi_async_work asyncWork = nullptr;
         napi_deferred deferred = nullptr;
@@ -81,11 +69,11 @@ public:
     // static function
     static napi_value RegisterRssData(napi_env env, napi_callback_info info);
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
-
     static napi_value DealRssReply(napi_env env, const nlohmann::json& payload, const nlohmann::json& reply);
 
     void OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
         const std::unordered_map<std::string, std::string>& extraInfo);
+
 private:
     RssSession() = default;
     ~RssSession();
@@ -97,13 +85,14 @@ private:
 
     napi_value RegisterRssDataCallback(napi_env env, napi_callback_info info);
     napi_value UnRegisterRssDataCallback(napi_env env, napi_callback_info info);
-    bool CheckCallbackParam(napi_env env, napi_callback_info info, int32_t &eventType, napi_value *jsCallback);
+    bool CheckCallbackParam(napi_env env, napi_callback_info info, int32_t& eventType, napi_value* jsCallback);
 
     static void ParseMutex(const std::string& mutexStr, const nlohmann::json& payload, std::string& detailStr);
     static void ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName);
     static void CompleteCb(napi_env env, napi_status status, void* data);
 
-    std::map<int32_t, std::list<CallBackPair>> jsCallBackMap_;
+    // ONLY Accessed on main thread
+    std::unordered_map<int32_t, std::list<CallBackPair>> jsCallBackMap_;
 };
 #endif
 } // OHOS
