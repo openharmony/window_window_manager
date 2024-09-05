@@ -18,7 +18,7 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-TaskScheduler::TaskScheduler(const std::string& threadName) : ssmTid_(0)
+TaskScheduler::TaskScheduler(const std::string& threadName)
 {
     auto runner = AppExecFwk::EventRunner::Create(threadName);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -27,12 +27,8 @@ TaskScheduler::TaskScheduler(const std::string& threadName) : ssmTid_(0)
         tid = gettid();
         TLOGI(WmsLogTag::WMS_MAIN, "get WMSTid %{public}d", static_cast<int>(tid));
     };
-    if (handler_) {
-        handler_->PostSyncTask(std::move(task), "wms:setTid", AppExecFwk::EventQueue::Priority::IMMEDIATE);
-        ssmTid_ = tid;
-    } else {
-        TLOGI(WmsLogTag::WMS_MAIN, "handler init failed");
-    }
+    handler_->PostSyncTask(std::move(task), "wms:setTid", AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    ssmTid_ = tid;
 }
 
 std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
@@ -47,11 +43,10 @@ void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t 
         task();
         return;
     }
-    auto localTask = [weak = weak_from_this(), task, name] () {
+    auto localTask = [weak = weak_from_this(), task, name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
-        auto self = weak.lock();
-        if (self != nullptr) {
+        if (auto self = weak.lock()) {
             self->ExecuteExportTask();
         }
     };
@@ -65,11 +60,10 @@ void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
         task();
         return;
     }
-    auto localTask = [weak = weak_from_this(), task, name] () {
+    auto localTask = [weak = weak_from_this(), task, name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
-        auto self = weak.lock();
-        if (self != nullptr) {
+        if (auto self = weak.lock()) {
             self->ExecuteExportTask();
         }
     };
@@ -83,11 +77,10 @@ void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delay
         task();
         return;
     }
-    auto localTask = [weak = weak_from_this(), task, name] () {
+    auto localTask = [weak = weak_from_this(), task, name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
-        auto self = weak.lock();
-        if (self != nullptr) {
+        if (auto self = weak.lock()) {
             self->ExecuteExportTask();
         }
     };
@@ -109,22 +102,22 @@ void TaskScheduler::AddExportTask(std::string taskName, Task task)
     exportFuncMap_[taskName] = task;
 }
 
-void TaskScheduler::SetExportHandler(std::shared_ptr<AppExecFwk::EventHandler> handler)
+void TaskScheduler::SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {
     exportHandler_ = handler;
 }
 
 void TaskScheduler::ExecuteExportTask()
 {
-    if (exportFuncMap_.size() == 0) {
+    if (exportFuncMap_.empty()) {
         return;
     }
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler = exportHandler_.lock();
     if (!exportHandler) {
         return;
     }
-    auto task = [m = exportFuncMap_]() {
-        for (auto iter = m.begin(); iter != m.end(); iter++) {
+    auto task = [funcMap = std::move(exportFuncMap_)]() {
+        for (auto iter = funcMap.begin(); iter != funcMap.end(); iter++) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", iter->first.c_str());
             iter->second();
         }

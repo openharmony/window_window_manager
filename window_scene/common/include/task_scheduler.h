@@ -50,8 +50,7 @@ public:
             StartTraceForSyncTask(name);
             ret = task();
             FinishTraceForSyncTask();
-            auto self = weak.lock();
-            if (self) {
+            if (auto self = weak.lock()) {
                 self->ExecuteExportTask();
             }
         };
@@ -64,20 +63,19 @@ public:
         return ret;
     }
 
-    void SetExportHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
+    void SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler);
     /*
-    * add export task, will be executed after a task OS_SceneSession,
-    * same name means same task, will be only executed once
-    */
+     * add export task, will be executed after a task OS_SceneSession,
+     * same name means same task, will be only executed once
+     */
     void AddExportTask(std::string taskName, Task task);
 
 private:
     void ExecuteExportTask();
-    // will used in OS_SceneSession
-    std::unordered_map<std::string, Task> exportFuncMap_;
+    std::unordered_map<std::string, Task> exportFuncMap_; // will used in OS_SceneSession
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::weak_ptr<AppExecFwk::EventHandler> exportHandler_;
-    pid_t ssmTid_;
+    pid_t ssmTid_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H
