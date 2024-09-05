@@ -2924,6 +2924,10 @@ WSError WindowSessionImpl::HandleBackEvent()
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer back event to inputEventConsumer");
         std::shared_ptr<MMI::KeyEvent> backKeyEvent = MMI::KeyEvent::Create();
+        if (backKeyEvent == nullptr) {
+            WLOGFE("backKeyEvent is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
         backKeyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
         backKeyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
         isConsumed = inputEventConsumer->OnInputEvent(backKeyEvent);
