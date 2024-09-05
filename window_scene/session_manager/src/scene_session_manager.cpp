@@ -7868,12 +7868,12 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "scene session is nullptr");
-            return WSError::WS_DO_NOTHING;
+            return;
         }
         sceneSession->SetIsStatusBarVisible(isVisible);
-        return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task, "NotifyStatusBarShowStatus");
+    taskScheduler_->PostTask(task, "NotifyStatusBarShowStatus");
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
