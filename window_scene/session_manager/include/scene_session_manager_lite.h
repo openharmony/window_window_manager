@@ -71,7 +71,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
-    WMError TerminateSessionByPersistentId(int32_t persistentId) override;
 
 protected:
     SceneSessionManagerLite() = default;

@@ -1008,26 +1008,4 @@ WMError SceneSessionManagerLiteProxy::GetWindowStyleType(WindowStyleType& window
     windowStyleType = static_cast<WindowStyleType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
 }
-
-WMError SceneSessionManagerLiteProxy::TerminateSessionByPersistentId(int32_t persistentId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<int32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "send request fail");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(reply.ReadInt32());
-}
 } // namespace OHOS::Rosen

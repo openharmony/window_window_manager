@@ -113,8 +113,6 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleClearMainSessions(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
-            return HandleTerminateSessionByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -582,16 +580,6 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t persistentId = data.ReadInt32();
-    WMError errCode = TerminateSessionByPersistentId(persistentId);
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        return ERR_INVALID_DATA;
-    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

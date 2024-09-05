@@ -99,13 +99,9 @@ bool SessionPermission::IsSystemCalling()
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         return true;
     }
-    return IsSystemAppCall();
-}
-
-bool SessionPermission::IsSystemAppCall()
-{
-    uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+    return isSystemApp;
 }
 
 bool SessionPermission::IsSACalling()
@@ -170,7 +166,8 @@ bool SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()
     if (IsSACalling() || IsShellCall()) {
         return true;
     }
-    return IsSystemAppCall();
+    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
 }
 
 bool SessionPermission::IsShellCall()

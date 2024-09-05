@@ -359,7 +359,6 @@ public:
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
-    WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
 
