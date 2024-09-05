@@ -38,6 +38,7 @@ const std::string STATUS_FOLD = "-p";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
 const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
 const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
+const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -116,6 +117,8 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         SetMotionSensorvalue(params_[0]);
     } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
         SetRotationLockedvalue(params_[0]);
+    } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
+        MockSendCastPublishEvent(params_[0]);
     }
     OutputDumpInfo();
 }
@@ -157,6 +160,32 @@ void ScreenSessionDumper::SetRotationLockedvalue(std::string input)
         ScreenSessionManager::GetInstance().SetScreenRotationLocked(static_cast<bool>(value));
         TLOGI(WmsLogTag::DMS, "mock rotation locked: %{public}d", value);
     }
+}
+
+void ScreenSessionDumper::MockSendCastPublishEvent(std::string input)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS SEND CAST PUBLISH EVENT --------------" << std::endl;
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_PUBLISH_CAST_EVENT)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            oss << std::left << "[error]: " << "the value is too long" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            oss << std::left << "[error]: " << "value is not a number" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        ScreenSessionManager::GetInstance().NotifyCastWhenScreenConnectChange(static_cast<bool>(value));
+        oss << std::left << "[success]: " << "send cast publish event success" << std::endl;
+    } else {
+        oss << std::left << "[error]: " << "the command is invalid" << std::endl;
+    }
+    dumpInfo_.append(oss.str());
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
