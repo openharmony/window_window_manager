@@ -2142,6 +2142,10 @@ napi_value JsSceneSessionManager::OnSendTouchEvent(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     auto pointerEvent = MMI::PointerEvent::Create();
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[NAPI]Failed to create pointer event");
+        return NapiGetUndefined(env);
+    }
     if (!ConvertPointerEventFromJs(env, nativeObj, *pointerEvent)) {
         WLOGFE("[NAPI]Failed to convert pointer event");
         return NapiGetUndefined(env);
