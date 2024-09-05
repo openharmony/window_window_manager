@@ -219,22 +219,20 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
         return;
     }
     std::unique_ptr<RssSessionCbInfo> cbInfo = std::make_unique<RssSessionCbInfo>(env);
-    cbInfo->extraInfo = extraInfo;
+    cbInfo->extraInfo_ = extraInfo;
     napi_value resourceName = nullptr;
     NAPI_CALL_RETURN_VOID(env,
         napi_create_string_latin1(env, "OnReceiveEvent", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL_RETURN_VOID(env,
-        napi_create_reference(env, iter->first->GetNapiValue(), 1, &cbInfo->callback));
+        napi_create_reference(env, iter->first->GetNapiValue(), 1, &cbInfo->callback_));
 
     NAPI_CALL_RETURN_VOID(env, napi_create_async_work(env, nullptr, resourceName,
         [] (napi_env env, void* data) {},
         CompleteCb,
         static_cast<void*>(cbInfo.get()),
-        &cbInfo->asyncWork));
-    NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, cbInfo->asyncWork));
+        &cbInfo->asyncWork_));
+    NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, cbInfo->asyncWork_));
     cbInfo.release();
-    napi_value result = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_get_null(env, &result));
     WLOGFI("asyncCallback end");
 }
 
@@ -313,25 +311,25 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
     napi_value undefined = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
     napi_value callback = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback, &callback));
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback_, &callback));
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    std::string appInfo = cbInfo->extraInfo["selfBundleName"];
+    std::string appInfo = cbInfo->extraInfo_["selfBundleName"];
     SetMapValue(env, "appInfo", appInfo, result);
     std::string reason;
-    ParseCallbackMutex(cbInfo->extraInfo["mutex"], reason);
+    ParseCallbackMutex(cbInfo->extraInfo_["mutex"], reason);
     SetMapValue(env, "reason", reason, result);
 
     // call js callback
     napi_value callResult = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &result, &callResult));
     // delete resources
-    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, cbInfo->asyncWork));
-    cbInfo->asyncWork = nullptr;
-    if (cbInfo->callback != nullptr) {
-        NAPI_CALL_RETURN_VOID(env, napi_delete_reference(env, cbInfo->callback));
-        cbInfo->callback = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, cbInfo->asyncWork_));
+    cbInfo->asyncWork_ = nullptr;
+    if (cbInfo->callback_ != nullptr) {
+        NAPI_CALL_RETURN_VOID(env, napi_delete_reference(env, cbInfo->callback_));
+        cbInfo->callback_ = nullptr;
     }
     WLOGFI("end");
 }
