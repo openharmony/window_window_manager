@@ -89,6 +89,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
+    bool TryToCancelScreenOff() override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
@@ -135,6 +136,7 @@ public:
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
     void NotifyDisplayCreate(sptr<DisplayInfo> displayInfo);
     void NotifyDisplayDestroy(DisplayId displayId);
+    void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
 
     std::vector<ScreenId> GetAllScreenIds() const;
@@ -278,11 +280,11 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
-    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override;
+    void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
-        const std::string& screenMode);
+        const std::string& secondaryScreenMode);
 
 protected:
     ScreenSessionManager();
@@ -331,7 +333,8 @@ private:
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
-
+    DMError CheckDisplayMangerAgentTypeAndPermission(
+        const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);

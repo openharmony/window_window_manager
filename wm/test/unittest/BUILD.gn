@@ -639,7 +639,10 @@ ohos_unittest("wm_window_adapter_test") {
 
   sources = [ "window_adapter_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [ "c_utils:utils" ]
 }

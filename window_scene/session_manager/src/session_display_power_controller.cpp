@@ -27,31 +27,59 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
     return true;
 }
 
+void SessionDisplayPowerController::SetDisplayStateToOn(DisplayState& state)
+{
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayState_ = state;
+    }
+    if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+            EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        ScreenSessionManager::GetInstance().BlockScreenOnByCV();
+    }
+}
+
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
     switch (state) {
         case DisplayState::ON: {
-            {
-                std::lock_guard<std::recursive_mutex> lock(mutex_);
-                displayState_ = state;
-            }
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
-                ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-                    EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-                ScreenSessionManager::GetInstance().BlockScreenOnByCV();
-            }
+            SetDisplayStateToOn(state);
             break;
         }
         case DisplayState::OFF: {
+            DisplayState lastState = displayState_;
             {
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
             if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
-                ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
-                    EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+                {
+                    std::lock_guard<std::mutex> notifyLock(notifyMutex_);
+                    canCancelSuspendNotify_ = false;
+                    if (needCancelNotify_) {
+                        TLOGI(WmsLogTag::DMS, "[UL_POWER]"
+                            "SetDisplayState to OFF is canceled successfully before notify");
+                        needCancelNotify_ = false;
+                        displayState_ = lastState;
+                        ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
+                            DisplayState::UNKNOWN);
+                        return false;
+                    }
+                    ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
+                        EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+                }
                 WaitScreenOffNotify(state);
+
+                if (canceledSuspend_) {
+                    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
+                    canceledSuspend_ = false;
+                    displayState_ = lastState;
+                    ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
+                        DisplayState::UNKNOWN);
+                    return false;
+                }
             }
             break;
         }

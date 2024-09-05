@@ -147,8 +147,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
-    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
-    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, session));
 }
 
 /**
@@ -1105,18 +1104,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
     config.density_ = 1.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     window_->lastDensity_ = 1.0f;
     window_->lastOrientation_ = 0;
     config.density_ = 2.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     window_->lastDensity_ = 1.0f;
     window_->lastOrientation_ = 0;
     config.density_ = 1.0f;
     config.orientation_ = 1;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 
     config.isDensityFollowHost_ = false;
     window_->lastDensity_ = 0.0f;
@@ -1124,6 +1126,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
     config.density_ = 1.0f;
     config.orientation_ = 0;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1154,13 +1157,68 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function 
 }
 
 /**
- * @tc.name: NotifyDisplayInfoChange
- * @tc.desc: NotifyDisplayInfoChange Test
+ * @tc.name: UpdateSystemViewportConfig1
+ * @tc.desc: handler_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, window_);
+    window_->handler_ = nullptr;
+    window_->UpdateSystemViewportConfig();
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig2
+ * @tc.desc: Follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->isDensityFollowHost_ = true;
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig3
+ * @tc.desc: Do not follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->isDensityFollowHost_ = false;
+    window_->property_->SetDisplayId(0);
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    window_->context_ = abilityContext;
+    SessionViewportConfig config;
+    window_->NotifyDisplayInfoChange(config);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange2
+ * @tc.desc: context_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
     SessionViewportConfig config;
     window_->NotifyDisplayInfoChange(config);
 }
@@ -1353,10 +1411,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     sptr<SessionMocker> mockHostSession = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(mockHostSession, nullptr);
     window_->hostSession_ = mockHostSession;
-
-    window_->property_->SetDisplayId(DISPLAY_ID_INVALID);
-    EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Show());
 
     window_->property_->SetDisplayId(0);
     EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));

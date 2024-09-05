@@ -1058,6 +1058,29 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
     return static_cast<DisplayState>(reply.ReadUint32());
 }
 
+bool DisplayManagerProxy::TryToCancelScreenOff()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]TryToCancelScreenOff: remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
 {
     std::vector<DisplayId> allDisplayIds;
@@ -1413,7 +1436,7 @@ DMError DisplayManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& sc
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
-    MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos);
+    static_cast<void>(MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos));
     return ret;
 }
 

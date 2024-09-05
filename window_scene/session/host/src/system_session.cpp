@@ -104,6 +104,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             session->NotifyIsCustomAnimationPlaying(true);
         }
         session->UpdateCameraWindowStatus(true);
+        session->UpdatePiPWindowStateChanged(true);
         auto ret = session->SceneSession::Foreground(property);
         return ret;
     };
@@ -145,6 +146,7 @@ WSError SystemSession::Hide()
             return WSError::WS_OK;
         }
         session->UpdateCameraWindowStatus(false);
+        session->UpdatePiPWindowStateChanged(false);
         ret = session->SceneSession::Background();
         return ret;
     };
@@ -163,6 +165,7 @@ WSError SystemSession::Disconnect(bool isFromClient)
         TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d", session->GetPersistentId());
         session->SceneSession::Disconnect(isFromClient);
         session->UpdateCameraWindowStatus(false);
+        session->UpdatePiPWindowStateChanged(false);
         return WSError::WS_OK;
     };
     PostTask(task, "Disconnect");
@@ -316,7 +319,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = systemConfig_.IsPcWindow();
     bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
@@ -371,5 +374,19 @@ WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
         session->dialogSessionBackGestureEnabled_ = isEnabled;
         return WSError::WS_OK;
     });
+}
+
+void SystemSession::UpdatePiPWindowStateChanged(bool isForeground)
+{
+    if (specificCallback_ == nullptr || !specificCallback_->onPiPStateChange_) {
+        return;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        TLOGI(WmsLogTag::WMS_PIP, "pip state changed, bundleName:%{public}s, state:%{public}d",
+            GetSessionInfo().bundleName_.c_str(), isForeground);
+        specificCallback_->onPiPStateChange_(GetSessionInfo().bundleName_, isForeground);
+    } else {
+        TLOGD(WmsLogTag::WMS_PIP, "skip type");
+    }
 }
 } // namespace OHOS::Rosen

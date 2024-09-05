@@ -228,9 +228,13 @@ int SceneSessionManagerStub::HandleRecoverAndConnectSpecificSession(MessageParce
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
@@ -265,9 +269,13 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
         TLOGE(WmsLogTag::WMS_RECOVER, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
+    bool hasProperty = false;
+    if (!data.ReadBool(hasProperty)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "Read hasProperty failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
     sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
+    if (hasProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
     } else {
         TLOGW(WmsLogTag::WMS_RECOVER, "Property not exist!");
@@ -346,7 +354,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
 
 int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetFocusSessionInfo!");
+    WLOGFD("run HandleGetFocusSessionInfo!");
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo);
     reply.WriteParcelable(&focusInfo);
@@ -992,7 +1000,6 @@ int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& 
 
 int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&data, MessageParcel&reply)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "run HandleGetCallingWindowWindowStatus!");
     int32_t persistentId = data.ReadInt32();
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     WMError ret = GetCallingWindowWindowStatus(persistentId, windowStatus);
@@ -1007,7 +1014,6 @@ int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&da
 
 int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "run HandleGetCallingWindowRect!");
     int32_t persistentId = data.ReadInt32();
     Rect rect = {0, 0, 0, 0};
     WMError ret = GetCallingWindowRect(persistentId, rect);

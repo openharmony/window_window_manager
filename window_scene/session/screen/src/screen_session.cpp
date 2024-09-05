@@ -65,7 +65,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
             break;
         }
         default : {
-            TLOGE(WmsLogTag::DMS, "INVALID invalid screen session config.");
+            TLOGE(WmsLogTag::DMS, "invalid screen session config.");
             break;
         }
     }
@@ -199,11 +199,13 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    RRect bounds = property_.GetBounds();
+    RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
-    displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
-    displayInfo->SetPhysicalWidth(property_.GetPhyBounds().rect_.GetWidth());
-    displayInfo->SetPhysicalHeight(property_.GetPhyBounds().rect_.GetHeight());
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
@@ -247,12 +249,12 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
     return DMError::DM_OK;
 }
 
-void ScreenSession::SetIsExtand(bool isExtend)
+void ScreenSession::SetIsExtend(bool isExtend)
 {
     isExtended_ = isExtend;
 }
 
-bool ScreenSession::GetIsExtand() const
+bool ScreenSession::GetIsExtend() const
 {
     return isExtended_;
 }
@@ -463,10 +465,10 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::ScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId)
+void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnScreenExtandChange(mainScreenId, extandScreenId);
+        listener->OnScreenExtendChange(mainScreenId, extendScreenId);
     }
 }
 
@@ -572,6 +574,20 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
     ReportNotifyModeChange(displayOrientation);
+}
+
+void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    property_.SetBounds(bounds);
+    property_.SetRotation(static_cast<float>(rotation));
+    property_.UpdateScreenRotation(targetRotation);
+    property_.SetDisplayOrientation(displayOrientation);
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
+        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
+        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
+        rotation, displayOrientation);
 }
 
 void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
@@ -826,7 +842,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     }
     info->SetScreenId(screenId_);
     info->SetName(name_);
-    info->SetIsExtand(GetIsExtand());
+    info->SetIsExtend(GetIsExtend());
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
@@ -1004,7 +1020,7 @@ DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
         WLOGE("SetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}u",
+    WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}d",
         rsId_, modeIdx);
     return DMError::DM_OK;
 }
@@ -1044,7 +1060,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
     }
     if (colorSpace < 0 || static_cast<int32_t>(colorSpace) >= static_cast<int32_t>(colorSpaces.size())) {
         WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64 " colorSpace %{public}d invalid.",
-            rsId_, colorSpace);
+            rsId_, static_cast<int32_t>(colorSpace));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     auto ret = RSInterfaces::GetInstance().SetScreenColorSpace(rsId_, colorSpace);
@@ -1053,7 +1069,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
-        rsId_, colorSpace);
+        rsId_, static_cast<uint32_t>(colorSpace));
     return DMError::DM_OK;
 }
 
@@ -1365,5 +1381,10 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         WLOGFE("failed to get pixelMap, return nullptr");
     }
     return pixelMap;
+}
+
+void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
+{
+    property_.SetStartPosition(startX, startY);
 }
 } // namespace OHOS::Rosen

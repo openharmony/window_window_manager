@@ -106,9 +106,11 @@ const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNode
     static std::shared_ptr<RSDisplayNode> notFound = nullptr;
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
+        WLOGFE("screen is nullptr");
         return notFound;
     }
     if (screen->rsDisplayNode_ == nullptr) {
+        WLOGE("rsDisplayNode_ is nullptr");
         return notFound;
     }
     WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",

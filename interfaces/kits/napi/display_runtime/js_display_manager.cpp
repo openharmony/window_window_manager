@@ -208,6 +208,7 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -221,6 +222,7 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
     }
     if (displayId < 0) {
         std::string errMsg = "displayid is invalid, less than 0";
+        TLOGE(WmsLogTag::DMS, "[NAPI]Invalid displayId: %{public}" PRId64", less than 0", displayId);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -620,6 +622,7 @@ napi_value OnHasPrivateWindow(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -632,6 +635,7 @@ napi_value OnHasPrivateWindow(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     if (displayId < 0) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Invalid displayId: %{public}" PRId64", less than 0", displayId);
         std::string errMsg = "displayid is invalid, less than 0";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -674,6 +678,7 @@ napi_value OnIsFoldable(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -690,6 +695,7 @@ napi_value OnIsCaptured(napi_env env, napi_callback_info info)
     napi_value argv[4] = { nullptr };  // default arg length
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -706,6 +712,7 @@ napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -720,6 +727,7 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -734,6 +742,7 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -761,6 +770,7 @@ napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -788,6 +798,7 @@ napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }

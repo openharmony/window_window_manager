@@ -385,6 +385,45 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
 }
 
 /**
+ * @tc.name: RequestFocusStatus
+ * @tc.desc: RequestFocusStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "RequestFocusStatus";
+    info.bundleName_ = "RequestFocusStatus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: RequestFocusStatus01
+ * @tc.desc: RequestFocusStatus01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "RequestFocusStatus01";
+    info.bundleName_ = "com.ohos.sceneboard";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RequestFocusStatus(1, true, true, FocusChangeReason::DEFAULT);
+    ssm_->RequestFocusStatus(1, false, true, FocusChangeReason::DEFAULT);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: RequestSessionFocus
  * @tc.desc: RequestSessionFocus
  * @tc.type: FUNC
@@ -412,7 +451,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     sceneSession->focusedOnShow_ = true;
     sceneSession->property_->focusable_ = true;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->focusedSessionId_ = 2;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->RequestSessionFocus(1, true, reason);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**

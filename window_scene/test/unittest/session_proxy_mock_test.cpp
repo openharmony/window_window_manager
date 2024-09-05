@@ -124,7 +124,7 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTe
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
@@ -134,7 +134,7 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTe
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 }

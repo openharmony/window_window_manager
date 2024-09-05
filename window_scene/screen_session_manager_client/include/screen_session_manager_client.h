@@ -93,7 +93,7 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtand) override;
+        ScreenId rsId, const std::string& name, bool isExtend) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -101,7 +101,7 @@ private:
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
-    void OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId) override;
+    void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
 

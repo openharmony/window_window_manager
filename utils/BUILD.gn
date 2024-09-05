@@ -126,6 +126,7 @@ ohos_shared_library("libwmutil_base") {
     "src/string_util.cpp",
     "src/unreliable_window_info.cpp",
     "src/window_drawing_content_info.cpp",
+    "src/window_pid_visibility_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_math.cpp",
     "src/wm_occlusion_region.cpp",

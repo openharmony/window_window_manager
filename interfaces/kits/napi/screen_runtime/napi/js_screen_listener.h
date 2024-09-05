@@ -39,6 +39,7 @@ private:
     void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);
     napi_env env_ = nullptr;
     std::mutex mtx_;
+    wptr<JsScreenListener> weakRef_  = nullptr;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
     napi_value CreateScreenIdArray(napi_env env, const std::vector<ScreenId>& data);
 };

@@ -49,6 +49,8 @@ private:
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
     void DumpRsInfoById01(sptr<ScreenSession> screenSession);
+    void DumpCutoutInfoPrint(std::ostringstream& oss,
+        const OHOS::Rosen::DMRect& areaRect, const std::string& label);
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);

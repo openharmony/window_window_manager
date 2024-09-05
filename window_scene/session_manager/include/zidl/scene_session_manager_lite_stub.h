@@ -42,6 +42,7 @@ private:
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
+    int HandleGetMainWindowStatesByPid(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
@@ -68,6 +69,9 @@ private:
     int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
+    int HandleCloseTargetFloatWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleCloseTargetPiPWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

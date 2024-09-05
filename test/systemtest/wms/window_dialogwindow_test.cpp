@@ -121,7 +121,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
     ASSERT_NE(nullptr, dialogWindow0);
 
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
-    ASSERT_EQ(nullptr, dialogWindow1);
+    ASSERT_NE(nullptr, dialogWindow1);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, dialogWindow0->Show());

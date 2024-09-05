@@ -22,6 +22,7 @@
 #include "xml_config_base.h"
 #include "screen_scene_config.h"
 #include "screen_session_manager.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -290,7 +291,11 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
         }
     }
 
-    ASSERT_GT(ScreenSceneConfig::stringConfig_.size(), readCount);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_GT(ScreenSceneConfig::stringConfig_.size(), readCount);
+    } else {
+        ASSERT_EQ(ScreenSceneConfig::stringConfig_.size(), readCount);
+    }
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
 }
@@ -347,7 +352,8 @@ HWTEST_F(ScreenSceneConfigTest, GetStringListConfig, Function | SmallTest | Leve
 HWTEST_F(ScreenSceneConfigTest, GetCurvedScreenBoundaryConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetCurvedScreenBoundaryConfig();
-    if (ScreenSessionManager::GetInstance().GetCurvedCompressionArea() == 0) {
+    if ((ScreenSessionManager::GetInstance().GetCurvedCompressionArea() == 0) &&
+        SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(0, result.size());
     } else {
         ASSERT_NE(0, result.size());

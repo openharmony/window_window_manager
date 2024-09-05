@@ -42,6 +42,7 @@ using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessToken
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
     WindowType type, uint64_t displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
@@ -80,6 +81,7 @@ using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScr
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
+using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -91,6 +93,7 @@ public:
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
@@ -99,6 +102,7 @@ public:
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
+        PiPStateChangeCallback onPiPStateChange_;
     };
 
     // callback for notify SceneBoard
@@ -156,6 +160,7 @@ public:
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
+    virtual void OnCallingSessionUpdated() {};
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
@@ -270,7 +275,6 @@ public:
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
-    bool IsVisible() const;
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsTurnScreenOn() const;
@@ -372,7 +376,7 @@ public:
     int32_t GetStatusBarHeight() override;
     bool IsFreeMultiWindowMode() const
     {
-        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+        return systemConfig_.IsFreeMultiWindowMode();
     }
 
     // WMSPipeline-related: only accessed on SSM thread
@@ -393,6 +397,7 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
+    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
