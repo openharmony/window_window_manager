@@ -824,30 +824,27 @@ HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: NotifyExtensionEvent
- * @tc.desc: test function : NotifyExtensionEvent
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: test function : NotifyExtensionEventAsync
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyExtensionEvent, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyExtensionEventAsync, Function | SmallTest | Level1)
 {
     ASSERT_NE(nullptr, extSessionEventCallback_);
     MockFunction<void(uint32_t)> mockNotifyExtensionEventFunc;
     extSessionEventCallback_->notifyExtensionEventFunc_ = mockNotifyExtensionEventFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(2);
-    extensionSession_->NotifyExtensionEventSync(0);
+    EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(1);
     extensionSession_->NotifyExtensionEventAsync(0);
 
     extSessionEventCallback_->notifyExtensionEventFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(0);
-    extensionSession_->NotifyExtensionEventSync(0);
     extensionSession_->NotifyExtensionEventAsync(0);
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockNotifyExtensionEventFunc, Call(_)).Times(0);
-    extensionSession_->NotifyExtensionEventSync(0);
     extensionSession_->NotifyExtensionEventAsync(0);
 }
 }

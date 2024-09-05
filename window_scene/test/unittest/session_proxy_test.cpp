@@ -446,30 +446,6 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
 }
 
 /**
- * @tc.name: NotifyExtensionEventSync
- * @tc.desc: NotifyExtensionEventSync test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, NotifyExtensionEventSync, Function | SmallTest | Level2)
-{
-    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(nullptr);
-    sProxy->NotifyExtensionEventSync(0);
-
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    ASSERT_NE(nullptr, iRemoteObjectMocker);
-    sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(nullptr, sProxy);
-    sProxy->NotifyExtensionEventSync(0);
-
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    sProxy->NotifyExtensionEventSync(0);
-
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    sProxy->NotifyExtensionEventSync(0);
-    MockMessageParcel::ClearAllErrorFlag();
-}
-
-/**
  * @tc.name: NotifyExtensionEventAsync
  * @tc.desc: NotifyExtensionEventAsync test
  * @tc.type: FUNC

@@ -155,8 +155,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_SYNC):
-            return HandleNotifyExtensionEventSync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         default:
@@ -904,19 +902,9 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleNotifyExtensionEventSync(MessageParcel& data, MessageParcel& reply)
-{
-    uint32_t notifyEvent;
-    if (!data.ReadUint32(notifyEvent)) {
-        return ERR_TRANSACTION_FAILED;
-    }
-    NotifyExtensionEventSync(notifyEvent);
-    return ERR_NONE;
-}
-
 int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t notifyEvent;
+    uint32_t notifyEvent = 0;
     if (!data.ReadUint32(notifyEvent)) {
         return ERR_TRANSACTION_FAILED;
     }
