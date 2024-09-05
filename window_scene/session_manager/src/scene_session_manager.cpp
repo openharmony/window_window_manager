@@ -208,6 +208,11 @@ SceneSessionManager::~SceneSessionManager()
 
 void SceneSessionManager::Init()
 {
+    auto deviceType = system::GetParameter("const.product.devicetype", "unknown");
+    bool isScbCoreEnabled = (deviceType == UI_TYPE_PHONE || deviceType == "2in1" || deviceType == "tablet") &&
+        system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    Session::SetScbCoreEnabled(isScbCoreEnabled);
+
     constexpr uint64_t interval = 5 * 1000; // 5 second
     if (HiviewDFX::Watchdog::GetInstance().AddThread(
         SCENE_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
@@ -8684,7 +8689,8 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         processingFlushUIParams_.store(false);
 
         // post process if dirty
-        if (sessionMapDirty != static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
+        if ((sessionMapDirty & (~static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA))) !=
+            static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
             TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty);
             for (const auto& item : uiParams) {
                 TLOGD(WmsLogTag::WMS_PIPELINE,
@@ -8693,10 +8699,12 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.second.transY_);
             }
             PostProcessFocus();
-            PostProcessProperty();
+            PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
             FlushWindowInfoToMMI();
             AnomalyDetection::SceneZOrderCheckProcess();
+        } else if (sessionMapDirty == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
+            PostProcessProperty(sessionMapDirty);
         }
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -8773,9 +8781,22 @@ void SceneSessionManager::PostProcessFocus()
     }
 }
 
-void SceneSessionManager::PostProcessProperty()
+void SceneSessionManager::PostProcessProperty(uint32_t dirty)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::PostProcessProperty");
+    if (dirty == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
+        // only trigger update avoid area
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto& iter : sceneSessionMap_) {
+            auto session = iter.second;
+            if (session == nullptr) {
+                continue;
+            }
+            session->PostProcessNotifyAvoidArea();
+        }
+        return;
+    }
+
     std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
