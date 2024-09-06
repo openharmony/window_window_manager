@@ -82,7 +82,6 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 class SceneSession : public Session {
 public:
-    friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
@@ -213,7 +212,7 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
-    void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetRestoringRectForKeyboard(WSRect rect);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
@@ -249,7 +248,7 @@ public:
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     SubWindowModalType GetSubWindowModalType() const;
-    int32_t GetOriPosYBeforeRaisedByKeyboard() const;
+    WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
     // Session recover
@@ -356,7 +355,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     bool IsFreeMultiWindowMode() const
     {
-        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+        return systemConfig_.IsFreeMultiWindowMode();
     }
 
     // WMSPipeline-related: only accessed on SSM thread
@@ -420,7 +419,6 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
-    WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -537,7 +535,7 @@ private:
     std::string clientIdentityToken_ = { "" };
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
-    int32_t oriPosYBeforeRaisedBykeyboard_ = 0;
+    WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;

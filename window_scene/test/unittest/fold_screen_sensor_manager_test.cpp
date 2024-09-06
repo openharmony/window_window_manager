@@ -21,6 +21,7 @@
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -199,7 +200,11 @@ namespace {
 
         mgr.globalHall = 10;
         mgr.TriggerDisplaySwitch();
-        EXPECT_EQ(mgr.globalAngle, 25);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            EXPECT_EQ(mgr.globalAngle, 25);
+        } else {
+            EXPECT_NE(mgr.globalAngle, 25);
+        }
     }
 }
 } // namespace Rosen

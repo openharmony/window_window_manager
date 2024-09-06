@@ -19,6 +19,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "mock_session_manager_service_interface.h"
 #include "session_manager_service_recover_interface.h"
 #include "scene_session_manager_lite_proxy.h"
 #include "window_manager_hilog.h"
@@ -112,7 +113,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "SessionManagerLite destroy");
+    WLOGFD("SessionManagerLite destroy");
     DeleteAllSessionListeners();
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;

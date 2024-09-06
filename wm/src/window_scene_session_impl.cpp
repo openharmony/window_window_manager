@@ -610,9 +610,10 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
+    bool isPcOrFreeWindow = (windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode());
     AreaType dragType = AreaType::UNDEFINED;
     if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect, isPcOrFreeWindow);
     }
     WindowType windowType = property_->GetWindowType();
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
@@ -1650,7 +1651,7 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     const WSError ret = hostSession->RaiseToAppTop();
-    return WM_JS_TO_ERROR_CODE_MAP.at(static_cast<WMError>(ret));
+    return static_cast<WmErrorCode>(ret);
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
@@ -2001,12 +2002,6 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     }
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
-    bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
-    bool isVerticalOrientation = IsVerticalOrientation(property_->GetRequestedOrientation());
-    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        (isVerticalOrientation || property_->GetRequestedOrientation() == Orientation::UNSPECIFIED)) {
-        enable = false;
-    }
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
         enable = true;
     }
@@ -2088,6 +2083,11 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
+
+    if (property_->GetCompatibleModeInPc()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not MaximizeFloating");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
 
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
@@ -3217,48 +3217,6 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     windowSystemConfig_.freeMultiWindowEnable_ = enable;
-    return WSError::WS_OK;
-}
-
-WSError WindowSceneSessionImpl::CompatibleFullScreenRecover()
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    if (!property_->GetCompatibleModeInPc()) {
-        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Recover");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    Recover();
-    return WSError::WS_OK;
-}
-
-WSError WindowSceneSessionImpl::CompatibleFullScreenMinimize()
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    if (!property_->GetCompatibleModeInPc()) {
-        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Minimize");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    Minimize();
-    return WSError::WS_OK;
-}
-
-WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    if (!property_->GetCompatibleModeInPc()) {
-        TLOGE(WmsLogTag::DEFAULT, "is not CompatibleModeInPc, can not Close");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    Close();
     return WSError::WS_OK;
 }
 

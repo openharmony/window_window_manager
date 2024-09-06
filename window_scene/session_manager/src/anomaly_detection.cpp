@@ -16,8 +16,12 @@
 #include "anomaly_detection.h"
 #include <hitrace_meter.h>
 
+#include "dfx_hisysevent.h"
+#include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "singleton_container.h"
 #include "perform_reporter.h"
 
 namespace OHOS {
@@ -97,7 +101,7 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             return false;
         }
         if (focusSessionFlag && session->GetBlockingFocus() && session->GetSystemTouchable() &&
-            SceneSessionManager::GetInstance().IsSessionVisibleForeground(session)) {
+            session->GetSystemFocusable() && SceneSessionManager::GetInstance().IsSessionVisibleForeground(session)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
                 session->GetPersistentId());
             ReportFocusException("check blockingFocus", focusedId, nextId, session);
