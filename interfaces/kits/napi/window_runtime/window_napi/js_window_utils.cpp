@@ -722,8 +722,9 @@ WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
     return errCode;
 }
 
-void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    std::map<WindowType, SystemBarProperty>& newSystemBarProperties, sptr<Window>& window, const std::string& name)
+void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
+    std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
+    std::map<WindowType, SystemBarProperty>& systemBarProperties)
 {
     auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
                 (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
@@ -734,8 +735,8 @@ void GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProp
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
 }
 
-bool GetSpecificBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-                          napi_env env, napi_callback_info info)
+bool GetSpecificBarStatus(napi_env env, napi_callback_info info,
+    std::map<WindowType, SystemBarProperty>& systemBarProperties)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -863,9 +864,11 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
     return true;
 }
 
-void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags, std::map<WindowType, SystemBarProperty>& newProperties,
-    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, sptr<Window>& window)
+void GetSystemBarPropertiesFromJs(sptr<Window>& window, 
+    std::map<WindowType, SystemBarProperty>& newProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags, 
+    std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     for (auto type : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
         auto property = window->GetSystemBarPropertyByType(type);
@@ -881,9 +884,8 @@ void GetSystemBarPropertiesFromJs(std::map<WindowType, SystemBarProperty>& prope
     }
 }
 
-bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
-    sptr<Window>& window)
+bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject, sptr<Window>& window
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
