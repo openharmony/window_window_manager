@@ -48,7 +48,7 @@
 #include "include/core/SkRect.h"
 #include "include/core/SkRegion.h"
 #include "parameter.h"
-#include "publish/scene_event_publish.h"
+#include "publish/scb_dump_subscriber.h"
 #include "screen_manager.h"
 #include "screen.h"
 #include "singleton.h"
@@ -163,7 +163,7 @@ constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
-static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
+static std::shared_ptr<ScbDumpSubscriber> g_scbSubscriber(nullptr);
 
 std::string GetCurrentTime()
 {
@@ -231,12 +231,12 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
-    SceneEventPublish::Subscribe(g_scbSubscriber);
+    ScbDumpSubscriber::Subscribe(g_scbSubscriber);
 }
 
 SceneSessionManager::~SceneSessionManager()
 {
-    SceneEventPublish::UnSubscribe(g_scbSubscriber);
+    ScbDumpSubscriber::UnSubscribe(g_scbSubscriber);
 }
 
 void SceneSessionManager::Init()
@@ -4065,7 +4065,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
 {
-    std::string cmd = SceneEventPublish::JoinCommands(params, params.size());
+    std::string cmd = ScbDumpSubscriber::JoinCommands(params, params.size());
 
     // publish data
     bool ret = eventHandler_->PostSyncTask([this, cmd] { return g_scbSubscriber->Publish(cmd); }, "PublishSCBDumper");
