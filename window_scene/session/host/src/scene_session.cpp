@@ -4082,11 +4082,6 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
     return isDisplayStatusBarTemporarily_.load();
 }
 
-bool SceneSession::IsDeviceWakeupByApplication() const
-{
-    return isDeviceWakeupByApplication_.load();
-}
-
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
 {
     TLOGI(WmsLogTag::DEFAULT, "SetStartingWindowExitAnimationFlag %{public}d", enable);
