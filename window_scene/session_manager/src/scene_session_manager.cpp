@@ -2727,13 +2727,8 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
 {
     TLOGI(WmsLogTag::WMS_SUB, "RegisterCreateSubSessionListener, id: %{public}d", persistentId);
     auto task = [this, persistentId, func]() {
-        auto iter = createSubSessionFuncMap_.find(persistentId);
-        if (iter == createSubSessionFuncMap_.end()) {
-            createSubSessionFuncMap_.insert(std::make_pair(persistentId, func));
-            RecoverCachedSubSession(persistentId);
-        } else {
-            TLOGW(WmsLogTag::WMS_SUB, "CreateSubSessionListener is existed, id: %{public}d", persistentId);
-        }
+        createSubSessionFuncMap_[persistentId] = func;
+        RecoverCachedSubSession(persistentId);
         return WMError::WM_OK;
     };
     taskScheduler_->PostSyncTask(task, "RegisterCreateSubSessionListener");
