@@ -286,9 +286,6 @@ public:
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
-    WSError CompatibleFullScreenRecover();
-    WSError CompatibleFullScreenMinimize();
-    WSError CompatibleFullScreenClose();
     WSError SetIsPcAppInPad(bool enable);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
