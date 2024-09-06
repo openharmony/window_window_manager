@@ -281,7 +281,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty failed.");
         return ERR_INVALID_DATA;
     }
-    sptr<WindowSessionProperty> property == nullptr;
+    sptr<WindowSessionProperty> property = nullptr;
     if (hasWindowSessionProperty) {
         property = data.ReadStrongParcelable<WindowSessionProperty>();
         if (property == nullptr) {
@@ -289,7 +289,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             return ERR_INVALID_DATA;
         }
     } else {
-        TLOGW(WmsLogTag::WMS_LIFE, "Property not exist!")
+        TLOGW(WmsLogTag::WMS_LIFE, "Property not exist!");
     }
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
