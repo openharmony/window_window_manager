@@ -113,7 +113,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "SessionManagerLite destroy");
+    WLOGFD("SessionManagerLite destroy");
     DeleteAllSessionListeners();
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
