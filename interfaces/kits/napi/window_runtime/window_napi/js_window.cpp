@@ -47,8 +47,11 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
+constexpr size_t INDEX_THREE = 3;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -465,7 +468,7 @@ napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "SetTopmost");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
 }
@@ -839,11 +842,11 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetTitleButtonRect(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTitleButtonVisible");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
@@ -851,6 +854,13 @@ napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
     WLOGI("[NAPI]SetWindowMask");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowMask(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTitleButtonVisible");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
@@ -1425,8 +1435,9 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 }
 
 static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t x, int32_t y, std::shared_ptr<WmErrorCode> errCodePtr)
+    wptr<Window> weakToken, int32_t x, int32_t y)
 {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, errCodePtr, x, y] {
         if (errCodePtr == nullptr) {
             return;
@@ -1483,10 +1494,9 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(errCode);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToAsyncTask(execute, complete, weakToken, x, y, errCodePtr);
+    SetMoveWindowToAsyncTask(execute, complete, weakToken, x, y);
 
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
@@ -1612,8 +1622,9 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 }
 
 static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t width, int32_t height, std::shared_ptr<WmErrorCode> errCodePtr)
+    wptr<Window> weakToken, int32_t width, int32_t height)
 {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, errCodePtr, width, height] {
         if (errCodePtr == nullptr) {
             return;
@@ -1675,10 +1686,9 @@ napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(errCode);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetResizeWindowAsyncTask(execute, complete, weakToken, width, height, errCodePtr);
+    SetResizeWindowAsyncTask(execute, complete, weakToken, width, height);
 
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
@@ -3484,14 +3494,14 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTopmost permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]SetTopmost permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]SetTopmost is not allowed since window is not main window");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]SetTopmost is not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -3499,7 +3509,7 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool topmost = false;
@@ -3517,7 +3527,7 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTopmost(topmost));
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set topmost end",
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set topmost end",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -5161,7 +5171,8 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -6056,6 +6067,38 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
     return TitleButtonAreaObj;
 }
 
+napi_value JsWindow::OnSetWindowContainerColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 2) {  // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::string activeColor;
+    if (!ConvertFromJsValue(env, argv[0], activeColor)) {
+        WLOGFE("Failed to convert parameter to window container activeColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string inactiveColor;
+    if (!ConvertFromJsValue(env, argv[1], inactiveColor)) {
+        WLOGFE("Failed to convert parameter to window container inactiveColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WMError errCode = windowToken_->SetWindowContainerColor(activeColor, inactiveColor);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set window container color failed!");
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling()) {
@@ -6065,7 +6108,7 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 3) { // 3: params num
+    if (argc < 3) { // 3: params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6084,20 +6127,26 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isSplitVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    bool isCloseVisible = true;
+    if (argc >= FOUR_PARAMS_SIZE && !ConvertFromJsValue(env, argv[INDEX_THREE], isCloseVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isCloseVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible);
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible,
+        isCloseVisible);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT,
-        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d]",
+        "Window [%{public}u, %{public}s] set title button visible [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible,
-        isSplitVisible);
+        isSplitVisible, isCloseVisible);
     return NapiGetUndefined(env);
 }
 
@@ -6151,28 +6200,33 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
-bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value argv)
+bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value jsObject)
 {
-    if (env == nullptr || argv == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr or argv is nullptr");
+    if (env == nullptr || jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Env is nullptr or jsObject is nullptr");
         return false;
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr");
         return false;
     }
+    uint32_t size = 0;
+    napi_get_array_length(env, jsObject, &size);
     WindowLimits windowLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Get windowLimits failed");
-        return false;
-    }
-    uint32_t size = 0;
-    napi_get_array_length(env, argv, &size);
-    if (size == 0 || static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
-            size, windowLimits.vpRatio_, windowLimits.maxWidth_);
-        return false;
+    if (ret == WmErrorCode::WM_OK) {
+        if (size == 0 ||
+            static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
+                size, windowLimits.vpRatio_, windowLimits.maxWidth_);
+            return false;
+        }
+    } else {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Get windowLimits failed, error code is %{public}d", ret);
+        if (size == 0 || size > DEFAULT_WINDOW_MAX_WIDTH) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u", size);
+            return false;
+        }
     }
     return true;
 }
@@ -6613,6 +6667,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
+    BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);

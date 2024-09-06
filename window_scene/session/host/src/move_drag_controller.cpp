@@ -29,6 +29,7 @@
 #include "session_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -248,10 +249,17 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        bool isNeedFlush = false;
+        if (isStartDrag_ && isPcWindow_) {
+            surfaceNode->MarkUifirstNode(false);
+            isNeedFlush = true;
+        }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransaction::FlushImplicitTransaction();
+        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;
@@ -259,6 +267,9 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        if (!isStartDrag_ && isPcWindow_) {
+            surfaceNode->MarkUifirstNode(true);
+        }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
@@ -840,6 +851,11 @@ void MoveDragController::OnLostFocus()
         }
         ProcessSessionRectChange(SizeChangeReason::DRAG_END);
     }
+}
+
+void MoveDragController::SetIsPcWindow(bool isPcWindow)
+{
+    isPcWindow_ = isPcWindow;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)

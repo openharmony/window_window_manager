@@ -1058,6 +1058,29 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
     return static_cast<DisplayState>(reply.ReadUint32());
 }
 
+bool DisplayManagerProxy::TryToCancelScreenOff()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("[UL_POWER]TryToCancelScreenOff: remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
 {
     std::vector<DisplayId> allDisplayIds;
@@ -1413,7 +1436,7 @@ DMError DisplayManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& sc
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
-    MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos);
+    static_cast<void>(MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos));
     return ret;
 }
 
@@ -1765,5 +1788,41 @@ DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& scree
         return DMError::DM_ERROR_NULLPTR;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+std::vector<DisplayPhysicalResolution> DisplayManagerProxy::GetAllDisplayPhysicalResolution()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    std::vector<DisplayPhysicalResolution> allPhysicalSize;
+    int32_t displayInfoSize = 0;
+    bool readRet = reply.ReadInt32(displayInfoSize);
+    if (!readRet || displayInfoSize <= 0) {
+        TLOGE(WmsLogTag::DMS, "read failed");
+        return std::vector<DisplayPhysicalResolution> {};
+    }
+    for (int32_t i = 0; i < displayInfoSize; i++) {
+        DisplayPhysicalResolution physicalItem;
+        physicalItem.foldDisplayMode_ = static_cast<FoldDisplayMode>(reply.ReadUint32());
+        physicalItem.physicalWidth_ = reply.ReadUint32();
+        physicalItem.physicalHeight_ = reply.ReadUint32();
+        allPhysicalSize.emplace_back(physicalItem);
+    }
+    return allPhysicalSize;
 }
 } // namespace OHOS::Rosen

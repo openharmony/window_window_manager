@@ -74,6 +74,7 @@ ohos_shared_library("window_native_kit") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [
@@ -98,6 +99,11 @@ ohos_shared_library("window_native_kit") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 ohos_shared_library("window_napi") {
@@ -124,6 +130,7 @@ ohos_shared_library("window_napi") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [
@@ -166,6 +173,7 @@ ohos_shared_library("windowstage_kit") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [

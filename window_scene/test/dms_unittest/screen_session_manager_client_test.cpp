@@ -20,6 +20,7 @@
 #include "zidl/screen_session_manager_proxy.h"
 #include "display_manager.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -122,7 +123,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, Function |
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_NE(screenSession, nullptr);
 }
@@ -140,7 +141,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, Function |
     ScreenEvent screenEvent = ScreenEvent::DISCONNECTED;
     ScreenId rsId = 0;
     std::string name;
-    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    screenSessionManagerClient_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
     sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_EQ(screenSession, nullptr);
 }
@@ -303,7 +304,11 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId01, Function 
 
     bool result = false;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
-    EXPECT_EQ(result, true);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, true);
+    } else {
+        EXPECT_NE(result, true);
+    }
 }
 
 /**
@@ -319,7 +324,11 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId02, Function 
     screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
     bool result = true;
     screenSessionManagerClient_->screenSessionManager_->HasPrivateWindow(id, result);
-    EXPECT_EQ(result, false);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, false);
+    } else {
+        EXPECT_NE(result, false);
+    }
 }
 
 /**

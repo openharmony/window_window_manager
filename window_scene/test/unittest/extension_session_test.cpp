@@ -308,6 +308,51 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
+
+/**
+ * @tc.name: UpdateSessionViewportConfig1
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, Function | SmallTest | Level1)
+{
+    ASSERT_NE(extensionSession_, nullptr);
+    extensionSession_->sessionStage_ = mockSessionStage_;
+    extensionSession_->state_ = SessionState::STATE_CONNECT;
+    SessionViewportConfig config;
+    EXPECT_CALL(*mockSessionStage_, UpdateSessionViewportConfig).Times(1).WillOnce(Return(WSError::WS_OK));
+    WSError res = extensionSession_->UpdateSessionViewportConfig(config);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig2
+ * @tc.desc: session is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig2, Function | SmallTest | Level1)
+{
+    ASSERT_NE(extensionSession_, nullptr);
+    SessionViewportConfig config;
+    WSError res = extensionSession_->UpdateSessionViewportConfig(config);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, res);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig3
+ * @tc.desc: sessionStage_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig3, Function | SmallTest | Level1)
+{
+    ASSERT_NE(extensionSession_, nullptr);
+    extensionSession_->sessionStage_ = nullptr;
+    extensionSession_->state_ = SessionState::STATE_CONNECT;
+    SessionViewportConfig config;
+    WSError res = extensionSession_->UpdateSessionViewportConfig(config);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
 /**
  * @tc.name: TriggerBindModalUIExtension
  * @tc.desc: test function : TriggerBindModalUIExtension
@@ -607,6 +652,8 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Func
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(WindowEventChannelListener::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteBool(true);
     data.WriteBool(true);
     data.WriteInt32(0);
     uint32_t code = static_cast<uint32_t>(IWindowEventChannelListener::WindowEventChannelListenerMessage::
@@ -778,6 +825,29 @@ HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 }
 
+/**
+ * @tc.name: NotifyDumpInfo
+ * @tc.desc: test function : NotifyDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
+{
+    extensionSession_->sessionStage_ = mockSessionStage_;
+    extensionSession_->state_ = SessionState::STATE_DISCONNECT;
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    WSError res = extensionSession_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, res);
+
+    extensionSession_->state_ = SessionState::STATE_CONNECT;
+    EXPECT_CALL(*mockSessionStage_, NotifyDumpInfo).Times(1).WillOnce(Return(WSError::WS_OK));
+    res = extensionSession_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_OK, res);
+
+    extensionSession_->sessionStage_ = nullptr;
+    res = extensionSession_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
 }
 }
 }

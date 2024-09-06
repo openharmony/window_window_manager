@@ -196,6 +196,12 @@ void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     const std::string &bundleName, const std::string &abilityName)
 {
+    return ScreenSessionConnectExtension(bundleName, abilityName, {});
+}
+
+bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::string &bundleName,
+    const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &params)
+{
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
     if (abilityConnectionStub_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "screen session ability extension is already connected");
@@ -203,6 +209,15 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     }
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
+    for (auto param : params) {
+        std::string paramKey = param.first;
+        std::string paramValue = param.second;
+        if (!paramKey.empty() && !paramValue.empty()) {
+            want.SetParam(paramKey, paramValue);
+            TLOGI(WmsLogTag::DMS, "add want param. paramKey=%{public}s, paramValue=%{public}s",
+                paramKey.c_str(), paramValue.c_str());
+        }
+    }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
         ScreenSessionAbilityConnectionStub());
     if (abilityConnectionStub_ == nullptr) {
@@ -220,7 +235,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility result: %{public}d", ret);
+    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility succeed");
     // set current callingIdentity back
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
@@ -270,8 +285,8 @@ int32_t ScreenSessionAbilityConnection::SendMessageBlock(
     return RES_SUCCESS;
 }
 
-int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
+int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
+    [[maybe_unused]]MessageParcel& reply, [[maybe_unused]]MessageOption& option)
 {
     TLOGI(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {

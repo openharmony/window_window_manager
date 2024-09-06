@@ -272,6 +272,16 @@ enum class SystemBarSettingFlag : uint32_t {
 };
 
 /**
+ * @brief Enumerates flag of multiWindowUIType.
+ */
+enum class WindowUIType : uint8_t {
+    PHONE_WINDOW = 0,
+    PC_WINDOW,
+    PAD_WINDOW,
+    INVALID_WINDOW
+};
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -316,7 +326,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
     WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_END = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_END = 1 << 8,
 };
 
 /**
@@ -496,6 +507,51 @@ struct MainWindowInfo : public Parcelable {
     int32_t bundleType_ = 0;
 };
 
+/**
+ * @struct MainWindowState.
+ *
+ * @brief main window state info.
+ */
+struct MainWindowState : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(state_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isVisible_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isForegroundInteractive_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcOrPadEnableActivation_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static MainWindowState* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowState* mainWindowState = new MainWindowState();
+        if (!mainWindowState) {
+            return nullptr;
+        }
+        if (!parcel.ReadInt32(mainWindowState->state_) ||
+            !parcel.ReadBool(mainWindowState->isVisible_) ||
+            !parcel.ReadBool(mainWindowState->isForegroundInteractive_) ||
+            !parcel.ReadBool(mainWindowState->isPcOrPadEnableActivation_)) {
+            delete mainWindowState;
+            return nullptr;
+        }
+        return mainWindowState;
+    }
+
+    int32_t state_ = 0;
+    bool isVisible_ = false;
+    bool isForegroundInteractive_ = false;
+    bool isPcOrPadEnableActivation_ = false;
+};
+
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
@@ -509,6 +565,8 @@ namespace {
     constexpr int32_t SYSTEM_USERID = 0;
     constexpr int32_t BASE_USER_RANGE = 200000;
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
+    constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+    constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

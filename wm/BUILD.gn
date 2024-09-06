@@ -59,6 +59,7 @@ ohos_static_library("libwm_static") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
     "src/pattern_detach_callback.cpp",
@@ -195,6 +196,7 @@ ohos_shared_library("libwm") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
     "src/pattern_detach_callback.cpp",
@@ -312,6 +314,10 @@ ohos_shared_library("libwm") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 ## Build libwm_lite.so
@@ -385,6 +391,10 @@ ohos_shared_library("libwm_lite") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 group("test") {

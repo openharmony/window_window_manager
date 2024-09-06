@@ -20,7 +20,6 @@
 #include <string>
 #include <unordered_map>
 #include <parcel.h>
-#include "future_callback_interface.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "wm_common.h"
@@ -43,7 +42,6 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
-    void SetLayoutCallback(const sptr<IFutureCallback>& callback);
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
@@ -102,7 +100,6 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
-    sptr<IFutureCallback> GetLayoutCallback() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -169,8 +166,6 @@ public:
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
-    bool MarshallingFutureCallback(Parcel& parcel) const;
-    static void UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -206,6 +201,8 @@ public:
     UIExtensionUsage GetUIExtensionUsage() const;
     void SetExtensionFlag(bool isExtensionFlag);
     bool GetExtensionFlag() const;
+    void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
+    bool GetIsUIExtensionAbilityProcess() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -258,7 +255,6 @@ private:
     void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
-    sptr<IFutureCallback> layoutCallback_ = nullptr;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
@@ -343,6 +339,7 @@ private:
     int32_t realParentId_ = INVALID_SESSION_ID;
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     bool isExtensionFlag_ = false;
+    bool isUIExtensionAbilityProcess_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -427,8 +424,7 @@ struct SystemSessionConfig : public Parcelable {
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
     FreeMultiWindowConfig freeMultiWindowConfig_;
-    std::string uiType_;
-    std::string multiWindowUIType_;
+    WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
@@ -463,10 +459,7 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteParcelable(&freeMultiWindowConfig_)) {
             return false;
         }
-        if (!parcel.WriteString(uiType_)) {
-            return false;
-        }
-        if (!parcel.WriteString(multiWindowUIType_)) {
+        if (!parcel.WriteUint8(static_cast<uint8_t>(windowUIType_))) {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
@@ -505,8 +498,7 @@ struct SystemSessionConfig : public Parcelable {
             return nullptr;
         }
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
-        config->uiType_ = parcel.ReadString();
-        config->multiWindowUIType_ = parcel.ReadString();
+        config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
     }
@@ -514,6 +506,21 @@ struct SystemSessionConfig : public Parcelable {
     bool IsFreeMultiWindowMode() const
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
+    }
+        
+    bool IsPhoneWindow() const
+    {
+        return windowUIType_ == WindowUIType::PHONE_WINDOW;
+    }
+
+    bool IsPcWindow() const
+    {
+        return windowUIType_ == WindowUIType::PC_WINDOW;
+    }
+
+    bool IsPadWindow() const
+    {
+        return windowUIType_ == WindowUIType::PAD_WINDOW;
     }
 };
 } // namespace Rosen

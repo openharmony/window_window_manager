@@ -475,7 +475,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     return WMError::WM_OK;
 }
@@ -813,7 +813,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, vsyncStation is null");
         return;
     }
     vsyncStation_->RequestVsync(vsyncCallback);

@@ -256,10 +256,33 @@ HWTEST_F(MainSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Le
  */
 HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
 {
-    mainSession_->RectCheck(0, 0);
-    mainSession_->RectCheck(0, 1000000000);
-    mainSession_->RectCheck(1000000000, 0);
-    mainSession_->RectCheck(1000000000, 1000000000);
+    ASSERT_NE(mainSession_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testMainSessionRectCheck";
+    info.moduleName_ = "testMainSessionRectCheck";
+    info.bundleName_ = "testMainSessionRectCheck";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    EXPECT_NE(nullptr, session);
+    mainSession_->parentSession_ = session;
+    uint32_t curWidth = 100;
+    uint32_t curHeight = 200;
+    mainSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 300;
+    curHeight = 200;
+    mainSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 1930;
+    curHeight = 200;
+    mainSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 200;
+    mainSession_->RectCheck(curWidth, curHeight);
+
+    curWidth = 330;
+    curHeight = 1930;
+    mainSession_->RectCheck(curWidth, curHeight);
 }
 
 /**

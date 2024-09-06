@@ -839,7 +839,7 @@ public:
      * @return WMError
      * @note @window.layout
      */
-    virtual WMError MoveTo(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
      * @brief move the window to (x, y)
      *
@@ -1858,6 +1858,18 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
@@ -1871,9 +1883,11 @@ public:
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
      * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
      * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @param isCloseVisible Display close button if true, or hide close button if false.
      * @return Errorcode of window.
      */
-    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2204,13 +2218,6 @@ public:
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
-     * @brief Set the parent window of sub window created by UIExtension
-     *
-     * @param parent window
-     */
-    virtual void SetParentExtensionWindow(const wptr<Window>& parentExtensionWindow) {}
-
-    /**
      * @brief Notify host that UIExtension timeout
      *
      * @param errorCode error code when UIExtension timeout
@@ -2223,6 +2230,13 @@ public:
      * @return Real parent id of UIExtension
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
+
+    /**
+     * @brief Notify modal UIExtension it may be covered
+     *
+     * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
+     */
+    virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 };
 }
 }

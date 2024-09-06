@@ -120,6 +120,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF: {
+            reply.WriteBool(TryToCancelScreenOff());
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
@@ -246,8 +250,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenId secondaryScreenId = static_cast<ScreenId>(data.ReadUint64());
-            ScreenSourceMode secondaryScreenMode = static_cast<ScreenSourceMode>(data.ReadUint32());
-            DMError ret = MultiScreenModeSwitch(mainScreenId, secondaryScreenId, secondaryScreenMode);
+            MultiScreenMode screenMode = static_cast<MultiScreenMode>(data.ReadUint32());
+            DMError ret = SetMultiScreenMode(mainScreenId, secondaryScreenId, screenMode);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
@@ -258,17 +262,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint64_t secondaryScreenId = data.ReadUint64();
             uint32_t secondaryScreenX = data.ReadUint32();
             uint32_t secondaryScreenY = data.ReadUint32();
-            ExtendOption firstScreenOption = {
+            MultiScreenPositionOptions mainScreenOptions = {
                 .screenId_ = mainScreenId,
                 .startX_ = mainScreenX,
                 .startY_ = mainScreenY,
             };
-            ExtendOption secondScreenOption = {
+            MultiScreenPositionOptions secondScreenOption = {
                 .screenId_ = secondaryScreenId,
                 .startX_ = secondaryScreenX,
                 .startY_ = secondaryScreenY,
             };
-            DMError ret = SetMultiScreenRelativePosition(firstScreenOption, secondScreenOption);
+            DMError ret = SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

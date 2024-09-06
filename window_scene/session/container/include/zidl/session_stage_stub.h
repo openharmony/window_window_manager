@@ -38,6 +38,7 @@ private:
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOrientation(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionViewportConfig(MessageParcel& data, MessageParcel& reply);
     int HandleBackEventInner(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFocus(MessageParcel& date, MessageParcel& reply);
@@ -71,6 +72,7 @@ private:
     int HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

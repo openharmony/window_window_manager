@@ -353,6 +353,13 @@ DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerAdapter::TryToCancelScreenOff()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->TryToCancelScreenOff();
+}
+
 void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -435,8 +442,9 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFD("BaseAdapter destory!");
+    WLOGFI("BaseAdapter destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    Clear();
     displayManagerServiceProxy_ = nullptr;
 }
 
@@ -458,20 +466,20 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
 }
 
-DMError ScreenManagerAdapter::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenManagerAdapter::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MultiScreenModeSwitch(mainScreenId, secondaryScreenId, secondaryScreenMode);
+    return displayManagerServiceProxy_->SetMultiScreenMode(mainScreenId, secondaryScreenId, screenMode);
 }
 
-DMError ScreenManagerAdapter::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenManagerAdapter::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->SetMultiScreenRelativePosition(firstScreenOption, secondScreenOption);
+    return displayManagerServiceProxy_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
 }
 
 DMError ScreenManagerAdapter::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
