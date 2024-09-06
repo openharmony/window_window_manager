@@ -64,6 +64,7 @@
 #include "res_type.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
+#include "window_pid_visibility_info.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -1538,6 +1539,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
             sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
     }
     RegisterSessionExceptionFunc(sceneSession);
+    RegisterVisibilityChangedDetectFunc(sceneSession);
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
@@ -2308,9 +2310,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        newSession->SetIsSystemSpecificSession(isSystemCalling);
+        property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
+        newSession->SetIsSystemSpecificSession(isSystemCalling);
         systemConfig = systemConfig_;
         if (property) {
             persistentId = property->GetPersistentId();
@@ -3791,6 +3794,59 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     TLOGD(WmsLogTag::WMS_LIFE, "success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
+void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return;
+    }
+    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
+        if (isVisible == newIsVisible || pid == -1) {
+            return;
+        }
+        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+        windowPidVisibilityInfo->pid_ = pid;
+        int32_t count = 0;
+        int32_t beforeCount = 0;
+        {
+            std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
+            if (visibleWindowCountMap_.find(pid) != visibleWindowCountMap_.end()) {
+                beforeCount = visibleWindowCountMap_[pid];
+            } else {
+                visibleWindowCountMap_[pid] = 0;
+            }
+            visibleWindowCountMap_[pid] = newIsVisible ? visibleWindowCountMap_[pid] + 1 :
+                visibleWindowCountMap_[pid] - 1;
+            count = visibleWindowCountMap_[pid];
+        }
+        if (beforeCount > 0 && count == 0) {
+            TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to invisibility.", pid);
+            windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::INVISIBILITY_STATE;
+            SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+        } else if (beforeCount == 0 && count == 1) {
+            TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
+            windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
+            SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
+        } else if (count < 0) {
+            TLOGE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
+            RecoveryVisibilityPidCount(pid);
+        }
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(func);
+}
+
+void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    visibleWindowCountMap_[pid] = 0;
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetCallingPid() == pid && session->IsVisible()) {
+            visibleWindowCountMap_[pid]++;
+        }
+    }
+}
+
 void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
@@ -3876,7 +3932,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = GetSceneSession(session->GetParentPersistentId());
+        const auto& parentSceneSession = session->GetParentSession();
         if (parentSceneSession == nullptr) {
             WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
@@ -6618,7 +6674,8 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE) {
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY) {
         if (!SessionPermission::IsSACalling()) {
             TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -6850,15 +6907,12 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         taskScheduler_->PostAsyncTask(task, "WindowChangeFunc:id:" + std::to_string(persistentId));
         return;
     }
-    auto exportTask = [this]() {
-        NotifyAllAccessibilityInfo();
-    };
-    taskScheduler_->AddExportTask("NotifyAllAccessibilityInfo", exportTask);
     auto task = [this, weakSceneSession, type]() {
-        auto scnSession = weakSceneSession.promote();
-        if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
-            scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            WindowChangedFunc_(scnSession->GetPersistentId(), type);
+        auto sceneSession = weakSceneSession.promote();
+        NotifyAllAccessibilityInfo();
+        if (WindowChangedFunc_ != nullptr && sceneSession != nullptr &&
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            WindowChangedFunc_(sceneSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
@@ -10176,5 +10230,35 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     }
 
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds)
+{
+    auto task = [this, startZOrder, persistentIds = std::move(persistentIds)] {
+        std::ostringstream oss;
+        oss << "[";
+        for (size_t i = 0; i < persistentIds.size(); i++) {
+            int32_t persistentId = persistentIds[i];
+            oss << persistentId;
+            if (i < persistentIds.size() - 1) {
+                oss << ",";
+            }
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
+                continue;
+            }
+            if (i > UINT32_MAX - startZOrder) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
+                break;
+            }
+            sceneSession->SetPcScenePanel(true);
+            sceneSession->SetZOrder(i + startZOrder);
+        }
+        oss << "]";
+        TLOGI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostTask(task, "RefreshPcZOrderList");
 }
 } // namespace OHOS::Rosen

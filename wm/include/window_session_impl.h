@@ -28,6 +28,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -276,7 +277,8 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);
@@ -480,7 +482,7 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = false;
+    std::atomic_bool windowSizeChanged_ = true;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
