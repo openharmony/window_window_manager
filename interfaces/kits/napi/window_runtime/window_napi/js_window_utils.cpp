@@ -885,8 +885,8 @@ void GetSystemBarPropertiesFromJs(sptr<Window>& window,
 }
 
 bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject, sptr<Window>& window,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
