@@ -465,6 +465,7 @@ public:
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
     bool IsVisible() const;
+    virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
