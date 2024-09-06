@@ -28,7 +28,7 @@ ohos_shared_library("screenshot") {
 
   deps = [
     "../../../../dm:libdm",
-    "../common:dm_napi_common",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [
