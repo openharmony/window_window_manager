@@ -48,6 +48,7 @@ public:
     sptr<SceneSession> GetKeyboardPanelSession() const override;
     SessionGravity GetKeyboardGravity() const override;
     void OnKeyboardPanelUpdated() override;
+    void OnCallingSessionUpdated() override;
     void OpenKeyboardSyncTransaction() override;
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
 

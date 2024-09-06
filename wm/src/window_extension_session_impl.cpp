@@ -1206,5 +1206,18 @@ void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->NotifyExtensionEventAsync(notifyEvent);
 }
+
+WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyDumpInfo, persistentId=%{public}d", GetPersistentId());
+    auto uiContentSharedPtr = GetUIContentSharedPtr();
+    if (uiContentSharedPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentSharedPtr->DumpInfo(params, info);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

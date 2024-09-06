@@ -476,4 +476,16 @@ void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
         extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
     }
 }
+
+WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyDumpInfo(params, info);
+}
 } // namespace OHOS::Rosen

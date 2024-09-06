@@ -111,6 +111,7 @@ public:
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background(bool isFromClient = false) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;

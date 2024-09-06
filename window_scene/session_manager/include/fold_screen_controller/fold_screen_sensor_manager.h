@@ -71,7 +71,7 @@ private:
 
     SensorUser hallUser {};
 
-    void notifyFoldAngleChanged(float foldAngle);
+    void NotifyFoldAngleChanged(float foldAngle);
 
     FoldScreenSensorManager();
 

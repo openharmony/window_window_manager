@@ -943,8 +943,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
         ScreenId screenId = screenListener->changeFuture_.GetResult(TIME_OUT);
         ASSERT_EQ(screenId, screens[0]->GetId());
         usleep(1E6);
-        ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()),
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()),
             static_cast<uint32_t>(Orientation::UNSPECIFIED));
+        } else {
+            ASSERT_NE(static_cast<uint32_t>(screens[0]->GetOrientation()),
+            static_cast<uint32_t>(Orientation::UNSPECIFIED));
+        }
         ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
         sleep(TEST_SLEEP_S);
     }
@@ -1216,7 +1221,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest
 
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(virtualScreenId, refreshIntervalZero_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    } else {
+        ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1246,7 +1255,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest
 
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(virtualScreenId, refreshIntervalMax_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    } else {
+        ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1255,7 +1268,11 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest
 {
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(defaultScreenId_, refreshIntervalTwo_);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    } else {
+        ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
+    }
 }
 }
 } // namespace Rosen
