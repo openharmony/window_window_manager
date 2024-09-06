@@ -207,6 +207,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetStartMoveFlag(bool& isMoving) { return WSError::WS_OK; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
 
