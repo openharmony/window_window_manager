@@ -2736,6 +2736,26 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto weakWindow = weakToken.promote();
+    if (weakWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(weakWindow->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "only main window has right to call");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    auto objValue = CreateJsSystemBarPropertiesObject(env, weakWindow);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return objValue;
+}
+
 napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -2788,26 +2808,6 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     NapiAsyncTask::Schedule("JsWindow::OnSetWindowSystemBarProperties",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
-}
-
-napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
-{
-    wptr<Window> weakToken(windowToken_);
-    auto weakWindow = weakToken.promote();
-    if (weakWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (!WindowHelper::IsMainWindow(weakWindow->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "only main window has right to call");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
-    auto objValue = CreateJsSystemBarPropertiesObject(env, weakWindow);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-    }
-    return objValue;
 }
 
 static void ParseAvoidAreaParam(napi_env env, napi_callback_info info, WMError& errCode, AvoidAreaType& avoidAreaType)
@@ -6455,8 +6455,8 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
-    BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
+    BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
