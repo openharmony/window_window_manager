@@ -1562,7 +1562,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
 
     Session session(info);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    session.isTerminating_ = true;
+    session.isTerminating = true;
     sceneSession->TerminateSession(abilitySessionInfo);
 
     bool needRemoveSession = true;

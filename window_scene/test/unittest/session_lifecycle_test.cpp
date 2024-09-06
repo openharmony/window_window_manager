@@ -527,7 +527,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    session_->isTerminating_ = true;
+    session_->isTerminating = true;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
@@ -541,7 +541,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    session_->isTerminating_ = false;
+    session_->isTerminating = false;
     ASSERT_EQ(WSError::WS_OK,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
