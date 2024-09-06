@@ -113,6 +113,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_START_MOVE_FLAG):
+            return HandleGetStartMoveFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
             return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY):
@@ -795,6 +797,16 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "HandleGetStartMoveFlag!");
+    bool isMoving = false;
+    WSError errCode = GetStartMoveFlag(isMoving);
+    reply.WriteBool(isMoving);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
