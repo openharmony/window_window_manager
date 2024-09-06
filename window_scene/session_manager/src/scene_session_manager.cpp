@@ -51,7 +51,7 @@
 #include "session/host/include/sub_session.h"
 #include "session_helper.h"
 #include "window_helper.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "singleton_container.h"
 #include "xcollie/watchdog.h"
 #include "session_manager_agent_controller.h"

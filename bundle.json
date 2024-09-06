@@ -269,7 +269,7 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/screen_session_manager:screen_session_manager_client",
+            "name": "//foundation/window/window_manager/window_scene/screen_session_manager_client:screen_session_manager_client",
             "header": {
               "header_files": [
               ],
