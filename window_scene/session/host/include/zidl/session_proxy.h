@@ -40,6 +40,7 @@ public:
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
+    bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
