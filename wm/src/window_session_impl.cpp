@@ -132,7 +132,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return;                                                            \
         }                                                                      \
     } while (false)
-
+ 
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
     do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
@@ -140,7 +140,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return ret;                                                        \
         }                                                                      \
     } while (false)
-
+ 
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
@@ -264,8 +264,7 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((GetHostSession() == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        TLOGW(WmsLogTag::WMS_LIFE, "already destroyed or not created! id: %{public}d state_: %{public}u",
-            GetPersistentId(), state_);
+        WLOGW("[WMSCom]already destroyed or not created! id: %{public}d state_: %{public}u", GetPersistentId(), state_);
     }
     return res;
 }
@@ -634,8 +633,8 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
-    
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
@@ -785,18 +784,16 @@ bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
     WLOGFI("NotifyForegroundInteractiveStatus %{public}d", interactive);
-    if (IsWindowSessionInvalid()) {
+    if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
-    if (state_ == WindowState::STATE_SHOWN) {
-        if (interactive) {
-            NotifyAfterResumed();
-        } else {
-            NotifyAfterPaused();
-        }
+    if (interactive) {
+        NotifyAfterResumed();
+    } else {
+        NotifyAfterPaused();
     }
 }
 
@@ -1001,10 +998,9 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType type, AppExecFwk::Ability* ability)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    TLOGD(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "interrupt set uicontent because window is invalid! window state: %{public}d",
-            state_);
+        WLOGFE("[WMSLife]interrupt set uicontent because window is invalid! window state: %{public}d", state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
@@ -1557,8 +1553,9 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
 
 WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
 {
-    if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
+    auto isSubWindow = WindowHelper::IsSubWindow(GetType());
+    if (!isSubWindow) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
@@ -2103,6 +2100,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start.");
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
@@ -2133,8 +2131,8 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = (window->property_) ? window->property_->GetKeepKeyboardFlag() : false;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
-            window->GetPersistentId(), isNeedKeyboard, keepKeyboardFlag);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+            isNeedKeyboard, keepKeyboardFlag);
         RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -3243,6 +3241,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler_ is nullptr, notify occupied area change info failed");
+        return;
     }
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
@@ -3311,7 +3310,7 @@ WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
 void WindowSessionImpl::UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("HostSession is invalid");
+        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
         return;
     }
     auto hostSession = GetHostSession();
