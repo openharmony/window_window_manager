@@ -74,7 +74,7 @@ enum class ListenerFuncType : uint32_t {
 };
 
 class SceneSession;
-class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
+class JsSceneSession : public RefBase {
 public:
     JsSceneSession(napi_env env, const sptr<SceneSession>& session);
     ~JsSceneSession();
