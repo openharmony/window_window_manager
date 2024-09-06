@@ -557,12 +557,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         property_->SetRequestRect(wmRect);
     }
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u, hasRSTransaction: %{public}d"
-        ", WindowInfo:[name: %{public}s, id:%{public}d]", rect.ToString().c_str(), rsTransaction != nullptr,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "updateRect %{public}s, reason:%{public}u"
+        "WindowInfo:[name: %{public}s, persistentId:%{public}d]", rect.ToString().c_str(),
         wmReason, GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
-        wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
+        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
+        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
