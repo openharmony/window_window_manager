@@ -485,6 +485,51 @@ struct MainWindowInfo : public Parcelable {
     int32_t bundleType_ = 0;
 };
 
+/**
+ * @struct MainWindowState.
+ *
+ * @brief main window state info.
+ */
+struct MainWindowState : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(state_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isVisible_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isForegroundInteractive_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcOrPadEnableActivation_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static MainWindowState* Unmarshalling(Parcel& parcel)
+    {
+        MainWindowState* mainWindowState = new MainWindowState();
+        if (!mainWindowState) {
+            return nullptr;
+        }
+        if (!parcel.ReadInt32(mainWindowState->state_) ||
+            !parcel.ReadBool(mainWindowState->isVisible_) ||
+            !parcel.ReadBool(mainWindowState->isForegroundInteractive_) ||
+            !parcel.ReadBool(mainWindowState->isPcOrPadEnableActivation_)) {
+            delete mainWindowState;
+            return nullptr;
+        }
+        return mainWindowState;
+    }
+
+    int32_t state_ = 0;
+    bool isVisible_ = false;
+    bool isForegroundInteractive_ = false;
+    bool isPcOrPadEnableActivation_ = false;
+};
+
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
