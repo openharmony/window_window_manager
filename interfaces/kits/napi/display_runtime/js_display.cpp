@@ -355,7 +355,7 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
     }
     DMError ret = DMError::DM_OK;
     auto& listenerVec = jsCbMap_[type];
-    for (auto it = listenerVec.begin(); it != listenerVec.end();) {
+    for (auto it = listenerVec.begin(); it != listenerVec.end(); ++it) {
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
