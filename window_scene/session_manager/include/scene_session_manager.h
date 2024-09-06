@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
 #include <cstdint>
+#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
 
@@ -43,7 +44,6 @@
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
 #include "screen_fold_data.h"
-#include "unordered_map"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -785,6 +785,7 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
     struct SessionInfoList {
         int32_t uid_;
         std::string bundleName_;
