@@ -76,8 +76,6 @@ private:
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply);
-    int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
-    int CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

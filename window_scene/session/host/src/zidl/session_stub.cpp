@@ -34,6 +34,40 @@ class AccessibilityEventInfo;
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
+
+static int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    if (abilitySessionInfo == nullptr) {
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read requestCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(abilitySessionInfo->persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    int32_t state = 0;
+    if (!data.ReadInt32(state)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read state failed.");
+        return ERR_INVALID_DATA;
+    }
+    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(state);
+    if (!data.ReadInt64(abilitySessionInfo->uiAbilityId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read uiAbilityId failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(abilitySessionInfo->callingTokenId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->reuse)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 } // namespace
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -242,18 +276,19 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-    sptr<WindowSessionProperty> property = nullptr;
     bool hasWindowSessionProperty = false;
     if (!data.ReadBool(hasWindowSessionProperty)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty flag failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty failed.");
         return ERR_INVALID_DATA;
     }
     if (hasWindowSessionProperty) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
+        sptr<WindowSessionProperty> property = data.ReadStrongParcelable<WindowSessionProperty>();
         if (property == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr.");
             return ERR_INVALID_DATA;
         }
+    } else {
+        TLOGW(WmsLogTag::WMS_LIFE, "Property not exist!")
     }
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
@@ -263,7 +298,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             return ERR_INVALID_DATA;
         }
     }
-    std::string identityToken = "";
+    std::string identityToken;
     if (!data.ReadString(identityToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
@@ -360,7 +395,7 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->want = *localWant;
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
         return ERR_INVALID_DATA;
     }
     if (hasCallerToken) {
@@ -387,7 +422,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     abilitySessionInfo->want = *localWant;
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
         return ERR_INVALID_DATA;
     }
     if (hasCallerToken) {
@@ -414,40 +449,6 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
-int SessionStub::ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{
-    if (abilitySessionInfo == nullptr) {
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read requestCode failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadInt32(abilitySessionInfo->persistentId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed.");
-        return ERR_INVALID_DATA;
-    }
-    int32_t state = 0;
-    if (!data.ReadInt32(state)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read state failed.");
-        return ERR_INVALID_DATA;
-    }
-    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(state);
-    if (!data.ReadInt64(abilitySessionInfo->uiAbilityId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read uiAbilityId failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadUint32(abilitySessionInfo->callingTokenId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadBool(abilitySessionInfo->reuse)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read reuse flag failed.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
@@ -458,20 +459,24 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->want = *localWant;
-    int32_t basicAbilitySessionInfoCheck = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
-    if (basicAbilitySessionInfoCheck == ERR_INVALID_DATA) {
+    int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
+    if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     abilitySessionInfo->processOptions =
         std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
-    int32_t CallerTokenCheckResult = CallerTokenCheck(data, abilitySessionInfo);
-    if (CallerTokenCheckResult == ERR_INVALID_DATA) {
+    bool hasCallerToken = false;
+    if (!data.ReadBool(hasCallerToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
         return ERR_INVALID_DATA;
+    }
+    if (hasCallerToken) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     bool hasStartSetting = false;
     if (!data.ReadBool(hasStartSetting)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartSetting flag failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartSetting failed.");
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
@@ -488,19 +493,6 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     return ERR_NONE;
 }
 
-int SessionStub::CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{
-    bool hasCallerToken = false;
-    if (!data.ReadBool(hasCallerToken)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken flag failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (hasCallerToken) {
-        abilitySessionInfo->callerToken = data.ReadRemoteObject();
-    }
-    return ERR_NONE;
-}
-
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
@@ -511,8 +503,8 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->want = *localWant;
-    int32_t basicAbilitySessionInfoCheck = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
-    if (basicAbilitySessionInfoCheck == ERR_INVALID_DATA) {
+    int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
+    if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
@@ -529,13 +521,17 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
         return ERR_INVALID_VALUE;
     }
-    int32_t CallerTokenCheckResult = CallerTokenCheck(data, abilitySessionInfo);
-    if (CallerTokenCheckResult == ERR_INVALID_DATA) {
+    bool hasCallerToken = false;
+    if (!data.ReadBool(hasCallerToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
         return ERR_INVALID_DATA;
+    }
+    if (hasCallerToken) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     bool hasStartSetting = false;
     if (!data.ReadBool(hasStartSetting)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartSetting flag failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartSetting failed.");
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
