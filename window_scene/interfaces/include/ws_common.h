@@ -85,7 +85,6 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_NO_PERMISSION = 201,
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
-    WS_ERROR_TIMEOUT = 901,
     WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
     WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
@@ -273,7 +272,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
-    uint64_t screenId_ = -1;
+    uint64_t screenId_ = -1ULL; // -1ULL: SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want; // want for ability start

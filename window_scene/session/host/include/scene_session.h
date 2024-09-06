@@ -73,9 +73,9 @@ using ClearDisplayStatusBarTemporarilyFlags = std::function<void()>;
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardGravityChangeFunc = std::function<void(SessionGravity gravity)>;
-using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
+using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
@@ -520,7 +520,6 @@ private:
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
-
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
 

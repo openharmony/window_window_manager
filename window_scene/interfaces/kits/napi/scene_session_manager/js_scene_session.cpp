@@ -310,7 +310,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 
 JsSceneSession::~JsSceneSession()
 {
-    WLOGD("JsSceneSession");
+    WLOGD("~JsSceneSession");
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFD("session is nullptr, id:%{public}d", persistentId_);
@@ -3591,7 +3591,7 @@ napi_value JsSceneSession::OnSetIsPcAppInPad(napi_env env, napi_callback_info in
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr");
         return NapiGetUndefined(env);
     }
     session->SetIsPcAppInPad(enable);
