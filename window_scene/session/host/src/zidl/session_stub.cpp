@@ -157,6 +157,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
+            return HandleNotifyExtensionEventAsync(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -910,6 +912,16 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t notifyEvent = 0;
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
