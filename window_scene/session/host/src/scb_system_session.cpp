@@ -76,11 +76,7 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
         WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            }
+            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
@@ -88,10 +84,8 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction
             session->keyboardPanelRectUpdateCallback_();
         }
         // clear after use
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
+        session->reason_ = SizeChangeReason::UNDEFINED;
+        session->isDirty_ = false;
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
@@ -232,19 +226,5 @@ std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
         return nullptr;
     }
     return surfaceNode_;
-}
-
-bool SCBSystemSession::IsVisibleForeground() const
-{
-    return isVisible_;
-}
-
-void SCBSystemSession::NotifyClientToUpdateAvoidArea()
-{
-    SceneSession::NotifyClientToUpdateAvoidArea();
-    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-        keyboardPanelRectUpdateCallback_ && isKeyboardPanelEnabled_) {
-        keyboardPanelRectUpdateCallback_();
-    }
 }
 } // namespace OHOS::Rosen

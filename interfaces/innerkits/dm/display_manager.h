@@ -569,17 +569,6 @@ public:
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
 
     /**
-     * @brief Set display scale.
-     *
-     * @param screenId screenId used in DisplayManager.
-     * @param scaleX screen scale in x axis.
-     * @param scaleY screen scale in y axis.
-     * @param pivotX screen scale pivot in x axis.
-     * @param pivotY screen scale pivot in y axis.
-     */
-    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
-
-    /**
      * @brief Locked fold status.
      *
      * @param mode locked fold status is locked.

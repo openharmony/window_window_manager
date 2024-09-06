@@ -82,7 +82,6 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 class SceneSession : public Session {
 public:
-    friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
@@ -213,7 +212,7 @@ public:
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
-    void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetRestoringRectForKeyboard(WSRect rect);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
@@ -249,7 +248,7 @@ public:
     std::string GetWindowNameAllType() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     SubWindowModalType GetSubWindowModalType() const;
-    int32_t GetOriPosYBeforeRaisedByKeyboard() const;
+    WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
 
     // Session recover
@@ -353,22 +352,12 @@ public:
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
-    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     bool IsFreeMultiWindowMode() const
     {
-        return systemConfig_.freeMultiWindowSupport_ && systemConfig_.freeMultiWindowEnable_;
+        return systemConfig_.IsFreeMultiWindowMode();
     }
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
 
-    // WMSPipeline-related: only accessed on SSM thread
-    uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
-    uint32_t UpdateUIParam();   // update invisible session, return dirty flags
-    void SetPostProcessFocusState(PostProcessFocusState state);
-    PostProcessFocusState GetPostProcessFocusState() const;
-    void ResetPostProcessFocusState();
-    void SetPostProcessProperty(bool state);
-    bool GetPostProcessProperty() const;
-    void PostProcessNotifyAvoidArea();
-    bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
     void UnregisterSessionChangeListeners() override;
 
@@ -391,17 +380,6 @@ protected:
         return "[" + to_string(rect.width_) + ", " + to_string(rect.height_) + "; "
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
-
-    bool UpdateVisibilityInner(bool visibility);
-    bool UpdateInteractiveInner(bool interactive);
-    virtual void NotifyClientToUpdateInteractive(bool interactive) {}
-    bool PipelineNeedNotifyClientToUpdateRect() const;
-    bool UpdateRectInner(const WSRect& rect, SizeChangeReason reason);
-    bool NotifyServerToUpdateRect(const WSRect& rect, SizeChangeReason reason);
-    bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
-    bool UpdateZOrderInner(uint32_t zOrder);
-    virtual void NotifyClientToUpdateAvoidArea();
-    bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
@@ -536,7 +514,7 @@ private:
     std::string clientIdentityToken_ = { "" };
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
-    int32_t oriPosYBeforeRaisedBykeyboard_ = 0;
+    WSRect restoringRectForKeyboard_ = {0, 0, 0, 0};
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
@@ -545,10 +523,6 @@ private:
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
-
-    // WMSPipeline-related: only accessed on SSM thread
-    PostProcessFocusState postProcessFocusState_;
-    bool postProcessProperty_ { false };
 
     // Session recover
     bool isRecovered_ = false;

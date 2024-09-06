@@ -15,12 +15,10 @@
 
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/single_display_fold_policy.h"
-#include "fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
-#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
-#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
+#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
@@ -33,15 +31,9 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::DOUBLE_DISPLAY_DEVICE);
         sensorFoldStateManager_ = new DualDisplaySensorFoldStateManager();
-        TLOGI(WmsLogTag::DMS, "fold polocy: DOUBLE_DISPLAY_DEVICE");
     } else if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
         sensorFoldStateManager_ = new SingleDisplaySensorFoldStateManager();
-        TLOGI(WmsLogTag::DMS, "fold polocy: SINGLE_DISPLAY_DEVICE");
-    } else if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE);
-        sensorFoldStateManager_ = new SingleDisplaySensorPocketFoldStateManager();
-        TLOGI(WmsLogTag::DMS, "fold polocy: SINGLE_DISPLAY_POCKET_DEVICE");
     }
 
     if (foldScreenPolicy_ == nullptr) {
@@ -69,10 +61,6 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
         }
         case DisplayDeviceType::DOUBLE_DISPLAY_DEVICE: {
             tempPolicy = new DualDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
-            break;
-        }
-        case DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE:{
-            tempPolicy = new SingleDisplayPocketFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         default: {

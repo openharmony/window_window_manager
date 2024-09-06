@@ -38,8 +38,7 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUInt32Vector(colorSpaces_) && parcel.WriteUInt32Vector(hdrFormats_) &&
         parcel.WriteUint32(defaultDeviceRotationOffset_) &&
         parcel.WriteUint32(availableWidth_) &&
-        parcel.WriteUint32(availableHeight_) && parcel.WriteFloat(scaleX_) &&
-        parcel.WriteFloat(scaleY_) && parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_);
+        parcel.WriteUint32(availableHeight_);
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -69,9 +68,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUInt32Vector(&(displayInfo->hdrFormats_)) &&
         parcel.ReadUint32(displayInfo->defaultDeviceRotationOffset_) &&
         parcel.ReadUint32(displayInfo->availableWidth_) &&
-        parcel.ReadUint32(displayInfo->availableHeight_) && parcel.ReadFloat(displayInfo->scaleX_) &&
-        parcel.ReadFloat(displayInfo->scaleY_) && parcel.ReadFloat(displayInfo->pivotX_) &&
-        parcel.ReadFloat(displayInfo->pivotY_);
+        parcel.ReadUint32(displayInfo->availableHeight_);
     if (!res) {
         delete displayInfo;
         return nullptr;

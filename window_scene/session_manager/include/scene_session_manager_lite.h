@@ -38,6 +38,7 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) override;
@@ -70,7 +71,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
-    WMError TerminateSessionByPersistentId(int32_t persistentId) override;
 
 protected:
     SceneSessionManagerLite() = default;

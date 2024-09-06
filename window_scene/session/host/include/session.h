@@ -112,7 +112,6 @@ struct DetectTaskInfo {
 
 class Session : public SessionStub {
 public:
-    friend class HidumpController;
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
@@ -233,7 +232,7 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
-    WSError Clear(bool needStartCaller = false);
+    WSError Clear();
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
@@ -287,26 +286,26 @@ public:
     WSError NotifyFocusStatus(bool isFocused);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
-    WSError CompatibleFullScreenRecover();
-    WSError CompatibleFullScreenMinimize();
-    WSError CompatibleFullScreenClose();
     WSError SetIsPcAppInPad(bool enable);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
+    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
+    bool GetSystemFocusable() const;
+    bool CheckFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
-    virtual WSError SetRSVisible(bool isVisible);
-    bool GetRSVisible() const;
+    virtual WSError SetVisible(bool isVisible);
+    bool GetVisible() const;
     bool GetFocused() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
@@ -431,14 +430,6 @@ public:
     };
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
-    virtual bool IsVisibleForeground() const;
-    void SetIsStarting(bool isStarting);
-    void SetUIStateDirty(bool dirty);
-    void SetMainSessionUIStateDirty(bool dirty);
-    bool GetUIStateDirty() const;
-    void ResetDirtyFlags();
-    static bool IsScbCoreEnabled();
-
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -549,8 +540,9 @@ protected:
     bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
-    bool isTerminating_ = false;
+    bool isTerminating = false;
     float floatingScale_ = 1.0f;
+    bool isDirty_ = false;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
@@ -565,9 +557,6 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
-    bool isStarting_ = false;   // when start app, session is starting state until foreground
-    std::atomic_bool mainUIStateDirty_ = false;
 
 private:
     void HandleDialogForeground();
@@ -612,6 +601,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
+    std::atomic_bool systemFocusable_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
@@ -633,7 +623,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex_;
+    mutable std::mutex leashWinSurfaceNodeMutex;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };

@@ -455,7 +455,7 @@ WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!windowProperty->Write(data, action)) {
+    if (!windowProperty || !windowProperty->Write(data, action)) {
         WLOGFE("Write windowProperty failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -965,7 +965,7 @@ void WindowManagerProxy::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI
         WLOGFE("Write anchor delatX failed");
         return;
     }
-    if (!event->WriteToParcel(data)) {
+    if (!event || !event->WriteToParcel(data)) {
         WLOGFE("Write event faild");
         return;
     }
