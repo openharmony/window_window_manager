@@ -324,7 +324,6 @@ enum class DisplayStateChangeType : uint32_t {
     UNFREEZE,
     VIRTUAL_PIXEL_RATIO_CHANGE,
     DISPLAY_COMPRESS,
-    UPDATE_SCALE,
     UNKNOWN,
 };
 
