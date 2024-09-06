@@ -1517,6 +1517,15 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
+void SceneSessionManager::InitRequestedOrientation(sptr<SceneSession>& sceneSession,
+    const SessionInfo& sessionInfo, sptr<WindowSessionProperty>& sessionProperty)
+{
+    sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    sessionProperty->SetDefaultRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u",
+        sceneSession->GetPersistentId(), sessionInfo.requestOrientation_);
+}
+
 void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
     const sptr<WindowSessionProperty>& property)
 {
@@ -1532,10 +1541,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty) {
-        sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
-        sessionProperty->SetDefaultRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
-        TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u",
-            sceneSession->GetPersistentId(), sessionInfo.requestOrientation_);
+        InitRequestedOrientation(sceneSession, sessionInfo, sessionProperty);
         sessionProperty->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
         TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
