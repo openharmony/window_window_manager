@@ -2618,7 +2618,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     }
     NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_),
         jsSystemBarProperties = std::move(jsSystemBarProperties), name = std::move(name), err]
-            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
