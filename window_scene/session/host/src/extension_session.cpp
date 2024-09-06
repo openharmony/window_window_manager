@@ -469,6 +469,14 @@ WSError ExtensionSession::Background(bool isFromClient)
     return WSError::WS_OK;
 }
 
+void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, notifyEvent: %{public}d", notifyEvent);
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
+        extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
+    }
+}
+
 WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (!IsSessionValid()) {
