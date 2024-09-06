@@ -128,11 +128,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
 
 int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleSetSessionLabel!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (token == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Token is nullptr.");
-    }
     std::string label = "";
     if (!data.ReadString(label)) {
         TLOGD(WmsLogTag::WMS_LIFE, "Read label failed.");
@@ -306,7 +303,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(Message
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleTerminateSessionNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");

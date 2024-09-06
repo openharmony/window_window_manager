@@ -544,7 +544,7 @@ int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, Messag
 
 int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleTerminateSessionNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");

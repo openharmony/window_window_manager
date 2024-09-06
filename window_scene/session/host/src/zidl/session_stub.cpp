@@ -366,12 +366,10 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
     if (hasCallerToken) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
-    int32_t resultCode = 0;
-    if (!data.ReadInt32(resultCode)) {
+    if (!data.ReadInt32(abilitySessionInfo->resultCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read resultCode failed.");
         return ERR_INVALID_DATA;
     }
-    abilitySessionInfo->resultCode = resultCode;
     WSError errCode = TerminateSession(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
