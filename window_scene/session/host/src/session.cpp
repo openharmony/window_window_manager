@@ -1434,14 +1434,14 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
     updateSessionIconFunc_ = func;
 }
 
-WSError Session::Clear(bool needStartCaller)
+WSError Session::Clear()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    auto task = [this]() {
         isTerminating = true;
         SessionInfo info = GetSessionInfo();
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+            terminateSessionFuncNew_(info, false, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
