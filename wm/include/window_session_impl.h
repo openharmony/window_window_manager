@@ -299,9 +299,9 @@ protected:
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    bool needRemoveWindowInputChannel_ = false;
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
+    bool needRemoveWindowInputChannel_ = false;
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
@@ -379,7 +379,7 @@ private:
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    void GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton, bool &hideSplitButton);
+    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     bool IsNotifyInteractiveDuplicative(bool interactive);
