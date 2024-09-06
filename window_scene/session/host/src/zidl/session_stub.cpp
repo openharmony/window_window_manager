@@ -35,7 +35,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 
-static int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (abilitySessionInfo == nullptr) {
         return ERR_INVALID_DATA;
@@ -281,8 +281,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty failed.");
         return ERR_INVALID_DATA;
     }
+    sptr<WindowSessionProperty> property == nullptr;
     if (hasWindowSessionProperty) {
-        sptr<WindowSessionProperty> property = data.ReadStrongParcelable<WindowSessionProperty>();
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
         if (property == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr.");
             return ERR_INVALID_DATA;
