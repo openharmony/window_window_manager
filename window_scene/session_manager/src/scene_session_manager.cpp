@@ -1517,13 +1517,13 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
-void SceneSessionManager::InitRequestedOrientation(sptr<SceneSession>& sceneSession,
-    const SessionInfo& sessionInfo, sptr<WindowSessionProperty>& sessionProperty)
+void SceneSessionManager::InitRequestedOrientation(const SessionInfo& sessionInfo,
+    const sptr<WindowSessionProperty>& sessionProperty)
 {
     sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
     sessionProperty->SetDefaultRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
     TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u",
-        sceneSession->GetPersistentId(), sessionInfo.requestOrientation_);
+        sessionProperty->GetPersistentId(), sessionInfo.requestOrientation_);
 }
 
 void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -3802,8 +3802,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                     info.persistentId_);
                 return;
             }
-            auto sessionProperty = session->GetSessionProperty();
-            if (sessionProperty) {
+            if (auto sessionProperty = session->GetSessionProperty()) {
                 TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, recover requestedOrientation %{public}u when exception",
                     session->GetPersistentId(), static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
                 sessionProperty->SetRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
