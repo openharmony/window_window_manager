@@ -1152,7 +1152,7 @@ WSError WindowExtensionSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     NotifySwitchFreeMultiWindow(enable);
-    //Switch process finish, update system config
+    // Switch process finish, update system config
     windowSystemConfig_.freeMultiWindowEnable_ = enable;
     return WSError::WS_OK;
 }
