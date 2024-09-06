@@ -41,24 +41,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
     switch (msgId) {
         case WindowManagerMessage::TRANS_ID_CREATE_WINDOW: {
             sptr<IRemoteObject> windowObject = data.ReadRemoteObject();
-            if (windowObject == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "TRANS_ID_CREATE_WINDOW windowObject is nullptr.");
-            }
             sptr<IWindow> windowProxy = iface_cast<IWindow>(windowObject);
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
-            if (windowProperty == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "TRANS_ID_CREATE_WINDOW windowProperty is nullptr.");
-            }
             std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
             uint32_t windowId;
             sptr<IRemoteObject> token = nullptr;
             if (windowProperty && windowProperty->GetTokenState()) {
                 token = data.ReadRemoteObject();
-            } else {
-                TLOGW(WmsLogTag::WMS_LIFE, "TRANS_ID_CREATE_WINDOW accept token is nullptr");
-            }
-            if (token == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "TRANS_ID_CREATE_WINDOW token is nullptr.");
             }
             WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);
@@ -71,9 +60,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_ADD_WINDOW: {
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
-            if (windowProperty == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "TRANS_ID_ADD_WINDOW windowProperty is nullptr.");
-            }
             WMError errCode = AddWindow(windowProperty);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
