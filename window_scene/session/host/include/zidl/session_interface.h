@@ -80,6 +80,7 @@ public:
      * @brief Raise the application subwindow to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
      */
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
 
@@ -129,6 +130,7 @@ public:
      *
      * @param subWindowId Indicates the {@link int32_t} id of the target subwindow.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
      */
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
 
