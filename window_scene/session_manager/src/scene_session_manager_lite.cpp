@@ -246,9 +246,4 @@ WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyle
 {
     return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
 }
-
-WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
-{
-    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
-}
 } // namespace OHOS::Rosen

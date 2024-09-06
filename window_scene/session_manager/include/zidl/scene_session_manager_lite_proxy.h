@@ -78,7 +78,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowModeType) override;
-    WMError TerminateSessionByPersistentId(int32_t persistentId) override;
 
 private:
     template<typename T>
