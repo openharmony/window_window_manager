@@ -3707,6 +3707,9 @@ bool SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, boo
     std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
     if (systemSessionKeyEventFunc_ != nullptr) {
         return systemSessionKeyEventFunc_(keyEvent, isPreImeEvent);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "id:%{public}d systemSessionKeyEventFunc_ is null", keyEvent->GetId());
+        keyEvent->MarkProcessed();
     }
     return false;
 }
