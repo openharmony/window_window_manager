@@ -285,12 +285,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
 
 void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName)
 {
-    BindNativeFunction(env, objValue, "compatibleFullScreenRecover", moduleName,
-        JsSceneSession::CompatibleFullScreenRecover);
-    BindNativeFunction(env, objValue, "compatibleFullScreenMinimize", moduleName,
-        JsSceneSession::CompatibleFullScreenMinimize);
-    BindNativeFunction(env, objValue, "compatibleFullScreenClose", moduleName,
-        JsSceneSession::CompatibleFullScreenClose);
     BindNativeFunction(env, objValue, "setCompatibleWindowSizeInPc", moduleName,
         JsSceneSession::SetCompatibleWindowSizeInPc);
 }
@@ -1383,27 +1377,6 @@ napi_value JsSceneSession::SetStartingWindowExitAnimationFlag(napi_env env, napi
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]called");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetStartingWindowExitAnimationFlag(env, info) : nullptr;
-}
-
-napi_value JsSceneSession::CompatibleFullScreenRecover(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]recover full screen window in compatible pc mode");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnCompatibleFullScreenRecover(env, info) : nullptr;
-}
-
-napi_value JsSceneSession::CompatibleFullScreenMinimize(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]minimize full screen window in compatible pc mode");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnCompatibleFullScreenMinimize(env, info) : nullptr;
-}
-
-napi_value JsSceneSession::CompatibleFullScreenClose(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]close full screen window in compatible pc mode");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnCompatibleFullScreenClose(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3664,42 +3637,6 @@ napi_value JsSceneSession::OnSetStartingWindowExitAnimationFlag(napi_env env, na
         return NapiGetUndefined(env);
     }
     session->SetStartingWindowExitAnimationFlag(enable);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]recover full screen window in compatible pc mode");
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    session->CompatibleFullScreenRecover();
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]minimize full screen window in compatible pc mode");
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    session->CompatibleFullScreenMinimize();
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnCompatibleFullScreenClose(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]close full screen window in compatible pc mode");
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    session->CompatibleFullScreenClose();
     return NapiGetUndefined(env);
 }
 

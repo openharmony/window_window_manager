@@ -910,7 +910,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton);
     if (property_->GetCompatibleModeInPc()) {
-        uiContent->HideWindowTitleButton(hideSplitButton, false, hideMinimizeButton);
+        uiContent->HideWindowTitleButton(hideSplitButton, true, hideMinimizeButton);
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
     }
@@ -3416,19 +3416,6 @@ bool WindowSessionImpl::IsUserOrientation(Orientation orientation) const
         orientation == Orientation::USER_ROTATION_LANDSCAPE ||
         orientation == Orientation::USER_ROTATION_PORTRAIT_INVERTED ||
         orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
-        return true;
-    }
-    return false;
-}
-
-bool WindowSessionImpl::IsVerticalOrientation(Orientation orientation) const
-{
-    if (orientation == Orientation::VERTICAL ||
-        orientation == Orientation::REVERSE_VERTICAL ||
-        orientation == Orientation::SENSOR_VERTICAL ||
-        orientation == Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED ||
-        orientation == Orientation::USER_ROTATION_PORTRAIT ||
-        orientation == Orientation::USER_ROTATION_PORTRAIT_INVERTED) {
         return true;
     }
     return false;
