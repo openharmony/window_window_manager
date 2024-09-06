@@ -205,6 +205,11 @@ void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
     requestedOrientation_ = orientation;
 }
 
+void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    defaultRequestedOrientation_ = orientation;
+}
+
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 {
     isPrivacyMode_ = isPrivate;
@@ -303,6 +308,11 @@ bool WindowSessionProperty::GetRaiseEnabled() const
 Orientation WindowSessionProperty::GetRequestedOrientation() const
 {
     return requestedOrientation_;
+}
+
+Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
+{
+    return defaultRequestedOrientation_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -1093,6 +1103,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     requestedOrientation_ = property->requestedOrientation_;
+    defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
