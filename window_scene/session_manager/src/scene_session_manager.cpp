@@ -341,7 +341,6 @@ void SceneSessionManager::LoadWindowSceneXml()
     } else {
         WLOGFE("Load window scene xml failed");
     }
-    ConfigDefaultKeyboardAnimation();
 }
 
 void SceneSessionManager::InitPrepareTerminateConfig()
@@ -830,23 +829,6 @@ bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigI
     return true;
 }
 
-void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
-{
-    LoadKeyboardAnimation(animationConfig["animationIn"]["timing"], appWindowSceneConfig_.keyboardAnimationIn_);
-    LoadKeyboardAnimation(animationConfig["animationOut"]["timing"], appWindowSceneConfig_.keyboardAnimationOut_);
-
-    const auto& defaultAnimation = appWindowSceneConfig_.keyboardAnimationIn_;
-    systemConfig_.keyboardAnimationConfig_.curveType_ = defaultAnimation.curveType_;
-    systemConfig_.keyboardAnimationConfig_.curveParams_.assign({
-        defaultAnimation.ctrlX1_,
-        defaultAnimation.ctrlY1_,
-        defaultAnimation.ctrlX2_,
-        defaultAnimation.ctrlY2_,
-    });
-    systemConfig_.keyboardAnimationConfig_.durationIn_ = appWindowSceneConfig_.keyboardAnimationIn_.duration_;
-    systemConfig_.keyboardAnimationConfig_.durationOut_ = appWindowSceneConfig_.keyboardAnimationOut_.duration_;
-}
-
 void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item,
     KeyboardSceneAnimationConfig& config)
 {
@@ -870,31 +852,45 @@ void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigI
     }
 }
 
-void SceneSessionManager::ConfigDefaultKeyboardAnimation()
+void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
 {
-    constexpr char CURVETYPE[] = "interpolatingSpring";
-    constexpr float CTRLX1 = 0;
-    constexpr float CTRLY1 = 1;
-    constexpr float CTRLX2 = 342;
-    constexpr float CTRLY2 = 37;
-    constexpr uint32_t DURATION = 150;
+    LoadKeyboardAnimation(animationConfig["animationIn"]["timing"], appWindowSceneConfig_.keyboardAnimationIn_);
+    LoadKeyboardAnimation(animationConfig["animationOut"]["timing"], appWindowSceneConfig_.keyboardAnimationOut_);
+    ConfigSystemKeyboardAnimation(appWindowSceneConfig_.keyboardAnimationIn_,
+        appWindowSceneConfig_.keyboardAnimationOut_);
 
-    if (!systemConfig_.keyboardAnimationConfig_.curveType_.empty()) {
-        return;
+}
+
+void SceneSessionManager::ConfigSystemKeyboardAnimation(const KeyboardSceneAnimationConfig& animationIn,
+    const KeyboardSceneAnimationConfig& animationOut)
+{
+    std::vector<float> in = { animationIn.ctrlX1_, animationIn.ctrlY1_, animationIn.ctrlX2_, animationIn.ctrlY2_ };
+    std::vector<float> out = { animationOut.ctrlX1_, animationOut.ctrlY1_, animationOut.ctrlX2_, animationOut.ctrlY2_ };
+    KeyboardAnimationCurve curveIn(animationIn.curveType_, in, animationIn.duration_);
+    KeyboardAnimationCurve curveOut(animationOut.curveType_, out, animationOut.duration_);
+    if (animationIn.curveType_.empty() || animationOut.curveType_.empty()) {
+        in = { 0, 1, 342, 37 }; // x1: 0, y1: 1, x2: 342, y2: 37
+        curveIn.curveType_ = "interpolatingSpring";
+        curveIn.curveParams_.assign(in.begin(), in.end());
+
+        out = { 4, 1, 342, 37 }; // x1: 4, y1: 1, x2: 342, y2: 37
+        curveOut.curveType_ = "interpolatingSpring";
+        curveOut.curveParams_.assign(out.begin(), out.end());
+
+        appWindowSceneConfig_.keyboardAnimationIn_.curveType_ = curveIn.curveType_;
+        appWindowSceneConfig_.keyboardAnimationIn_.ctrlX1_ = in[0]; // 0: ctrl x1 index
+        appWindowSceneConfig_.keyboardAnimationIn_.ctrlY1_ = in[1]; // 1: ctrl y1 index
+        appWindowSceneConfig_.keyboardAnimationIn_.ctrlX2_ = in[2]; // 2: ctrl x2 index
+        appWindowSceneConfig_.keyboardAnimationIn_.ctrlY2_ = in[3]; // 3: ctrl y2 index
+
+        appWindowSceneConfig_.keyboardAnimationOut_.curveType_ = curveOut.curveType_;
+        appWindowSceneConfig_.keyboardAnimationOut_.ctrlX1_ = out[0]; // 0: ctrl x1 index
+        appWindowSceneConfig_.keyboardAnimationOut_.ctrlY1_ = out[1]; // 1: ctrl y1 index
+        appWindowSceneConfig_.keyboardAnimationOut_.ctrlX2_ = out[2]; // 2: ctrl x2 index
+        appWindowSceneConfig_.keyboardAnimationOut_.ctrlY2_ = out[3]; // 3: ctrl y2 index
     }
-
-    appWindowSceneConfig_.keyboardAnimationIn_.curveType_ = CURVETYPE;
-    appWindowSceneConfig_.keyboardAnimationIn_.ctrlX1_ = CTRLX1;
-    appWindowSceneConfig_.keyboardAnimationIn_.ctrlY1_ = CTRLY1;
-    appWindowSceneConfig_.keyboardAnimationIn_.ctrlX2_ = CTRLX2;
-    appWindowSceneConfig_.keyboardAnimationIn_.ctrlY2_ = CTRLY2;
-    appWindowSceneConfig_.keyboardAnimationOut_ = appWindowSceneConfig_.keyboardAnimationIn_;
-    systemConfig_.keyboardAnimationConfig_.curveType_ = CURVETYPE;
-    std::vector<float> keyboardCurveParams = {CTRLX1, CTRLY1, CTRLX2, CTRLY2};
-    systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
-        keyboardCurveParams.begin(), keyboardCurveParams.end());;
-    systemConfig_.keyboardAnimationConfig_.durationIn_ = DURATION;
-    systemConfig_.keyboardAnimationConfig_.durationOut_ = DURATION;
+    systemConfig_.animationIn_ = curveIn;
+    systemConfig_.animationOut_ = curveOut;
 }
 
 void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
@@ -7206,7 +7202,7 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
         }
         if (session->GetWindowId() == visibilitySession->GetWindowId()) {
             if (isVisible) {
-                sessionRSVisible = true;   
+                sessionRSVisible = true;
             }
             break;
         }
@@ -7697,7 +7693,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
         lastUpdatedAvoidArea_[persistentId] = {};
     }
-    
+
     bool needUpdate = true;
     if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
         iter != lastUpdatedAvoidArea_[persistentId].end()) {
