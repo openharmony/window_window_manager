@@ -1202,6 +1202,8 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
             !session->IsFocused() && session->GetFocusable()) {
             TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
+            FocusChangeReason reason = FocusChangeReason::FOREGROUND;
+            session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
         }
         if (isAttach && !session->systemFocusable_) {
             // reset systemFocusable_
