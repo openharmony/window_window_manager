@@ -966,6 +966,12 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
     if (sessionProperty && property) {
+        property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
+        property->SetDefaultRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
+        TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
+            " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+            static_cast<uint32_t>(sessionProperty->GetRequestedOrientation()),
+            static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         if (sessionProperty->GetCompatibleModeInPc()) {

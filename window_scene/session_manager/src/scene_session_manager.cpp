@@ -1521,6 +1521,15 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
+void SceneSessionManager::InitRequestedOrientation(const SessionInfo& sessionInfo,
+    const sptr<WindowSessionProperty>& sessionProperty)
+{
+    sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    sessionProperty->SetDefaultRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
+    TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u",
+        sessionProperty->GetPersistentId(), sessionInfo.requestOrientation_);
+}
+
 void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
     const sptr<WindowSessionProperty>& property)
 {
@@ -1536,6 +1545,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty) {
+        InitRequestedOrientation(sessionInfo, sessionProperty);
         sessionProperty->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
         TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
@@ -3802,6 +3812,11 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 WLOGW("NotifySessionExceptionFunc, Not found session, id: %{public}d",
                     info.persistentId_);
                 return;
+            }
+            if (auto sessionProperty = session->GetSessionProperty()) {
+                TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, recover requestedOrientation %{public}u when exception",
+                    session->GetPersistentId(), static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
+                sessionProperty->SetRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
             }
             if (session->GetSessionInfo().isSystem_) {
                 WLOGW("NotifySessionExceptionFunc, id: %{public}d is system",
