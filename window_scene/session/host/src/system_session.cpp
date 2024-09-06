@@ -75,9 +75,6 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
-    if (!CheckPermissionWithPropertyAnimation(property)) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
         !SessionPermission::IsSystemCalling()) {
@@ -113,9 +110,6 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
-    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {
         // Do not need to verify the permission to hide the input method status bar.
