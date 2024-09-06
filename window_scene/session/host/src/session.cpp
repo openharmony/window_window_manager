@@ -36,7 +36,7 @@
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/ws_ffrt_helper.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"

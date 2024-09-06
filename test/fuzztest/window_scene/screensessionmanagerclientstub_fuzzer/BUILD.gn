@@ -23,8 +23,8 @@ ohos_fuzztest("ScreenSessionManagerClientStubFuzzTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "${window_base_path}/window_scene/screen_session_manager/include/zidl",
-    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager_client/include/zidl",
+    "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/wmserver/include",
     "../",
   ]
@@ -38,7 +38,7 @@ ohos_fuzztest("ScreenSessionManagerClientStubFuzzTest") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
+    "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager",
   ]

@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <parameter.h>
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"

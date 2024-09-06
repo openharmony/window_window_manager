@@ -16,7 +16,7 @@
 #include "scene_session_dirty_manager.h"
 
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
 #include "fold_screen_state_internel.h"
