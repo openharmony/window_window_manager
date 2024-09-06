@@ -44,6 +44,9 @@ void ScreenRotationController::Init()
     ProcessRotationMapping();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    if (defaultDisplayId_  == DISPLAY_ID_INVALID) {
+        WLOGFE("defaultDisplayId_ is invalid");
+    }
     lastSensorDecidedRotation_ = currentDisplayRotation_;
     rotationLockedRotation_ = currentDisplayRotation_;
 }

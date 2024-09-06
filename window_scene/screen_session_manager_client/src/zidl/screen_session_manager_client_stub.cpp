@@ -40,6 +40,9 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
         case ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED: {
             return HandleOnPowerStatusChanged(data, reply);
         }
+        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_EXTEND_CHANGED: {
+            return HandleOnScreenExtendChanged(data, reply);
+        }
         case ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED: {
             return HandleOnSensorRotationChanged(data, reply);
         }
@@ -102,7 +105,8 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
     auto rsId = static_cast<ScreenId>(data.ReadUint64());
     auto name = data.ReadString();
-    OnScreenConnectionChanged(screenId, screenEvent, rsId, name);
+    bool isExtend = data.ReadBool();
+    OnScreenConnectionChanged(screenId, screenEvent, rsId, name, isExtend);
     return ERR_NONE;
 }
 
@@ -136,6 +140,15 @@ int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel&
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto sensorRotation = data.ReadFloat();
     OnSensorRotationChanged(screenId, sensorRotation);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenExtendChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    WLOGI("mainScreenId=%{public}" PRIu64" extendScreenId=%{public}" PRIu64, mainScreenId, extendScreenId);
+    OnScreenExtendChanged(mainScreenId, extendScreenId);
     return ERR_NONE;
 }
 

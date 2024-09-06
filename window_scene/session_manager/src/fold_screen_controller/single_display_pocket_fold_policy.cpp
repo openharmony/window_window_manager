@@ -102,7 +102,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
-        globalDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
     }
 }
 

@@ -35,6 +35,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;
@@ -71,6 +72,7 @@ public:
     WSError CompatibleFullScreenClose() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

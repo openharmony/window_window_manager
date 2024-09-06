@@ -57,10 +57,7 @@ WMError ScreenScene::Destroy()
     }
     std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
     uiContent_ = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        vsyncStation_ = nullptr;
-    }
+    vsyncStation_->Destroy();
     auto task = [uiContent]() {
         if (uiContent != nullptr) {
             uiContent->Destroy();
@@ -152,31 +149,16 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
 
 void ScreenScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Receive vsync request failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 int64_t ScreenScene::GetVSyncPeriod()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Get vsync period failed, vsyncStation is nullptr");
-        return 0;
-    }
     return vsyncStation_->GetVSyncPeriod();
 }
 
 void ScreenScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "FlushFrameRate failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 

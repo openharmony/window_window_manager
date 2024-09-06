@@ -192,7 +192,7 @@ float ScreenProperty::GetVirtualPixelRatio() const
 
 void ScreenProperty::SetScreenRotation(Rotation rotation)
 {
-    bool enableRotation = system::GetParameter("persist.window.rotation.enabled", "1") == "1";
+    bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
     if (!enableRotation) {
         return;
     }
@@ -323,12 +323,12 @@ void ScreenProperty::CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight)
     yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
 }
 
-float ScreenProperty::GetXDpi()
+float ScreenProperty::GetXDpi() const
 {
     return xDpi_;
 }
 
-float ScreenProperty::GetYDpi()
+float ScreenProperty::GetYDpi() const
 {
     return yDpi_;
 }

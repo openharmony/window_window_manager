@@ -945,6 +945,30 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId
     return static_cast<ScreenPowerState>(reply.ReadUint32());
 }
 
+bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("[UL_POWER]TryToCancelScreenOff remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]TryToCancelScreenOff: WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]TryToCancelScreenOff: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
                                                         const sptr<IRemoteObject>& displayManagerAgent)
 {
@@ -1187,8 +1211,8 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, ScreenId secondaryScreenId,
-    ScreenSourceMode secondaryScreenMode)
+DMError ScreenSessionManagerProxy::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1205,7 +1229,7 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUint64(static_cast<uint64_t>(secondaryScreenId)) &&
-        data.WriteUint32(static_cast<uint32_t>(secondaryScreenMode));
+        data.WriteUint32(static_cast<uint32_t>(screenMode));
     if (!res) {
         WLOGFE("data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1219,8 +1243,8 @@ DMError ScreenSessionManagerProxy::MultiScreenModeSwitch(ScreenId mainScreenId, 
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(ExtendOption firstScreenOption,
-    ExtendOption secondScreenOption)
+DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1235,8 +1259,8 @@ DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(ExtendOption f
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    bool res = data.WriteUint64(firstScreenOption.screenId_) &&
-        data.WriteUint32(firstScreenOption.startX_) && data.WriteUint32(firstScreenOption.startY_) &&
+    bool res = data.WriteUint64(mainScreenOptions.screenId_) &&
+        data.WriteUint32(mainScreenOptions.startX_) && data.WriteUint32(mainScreenOptions.startY_) &&
         data.WriteUint64(secondScreenOption.screenId_) &&
         data.WriteUint32(secondScreenOption.startX_) && data.WriteUint32(secondScreenOption.startY_);
     if (!res) {

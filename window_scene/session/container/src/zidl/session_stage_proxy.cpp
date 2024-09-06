@@ -193,6 +193,34 @@ WSError SessionStageProxy::UpdateOrientation()
     return ret;
 }
 
+WSError SessionStageProxy::UpdateSessionViewportConfig(const SessionViewportConfig& config)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteBool(config.isDensityFollowHost_) && data.WriteFloat(config.density_) &&
+            data.WriteUint64(config.displayId_) && data.WriteInt32(config.orientation_) &&
+            data.WriteUint32(config.transform_))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write config failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::HandleBackEvent()
 {
     MessageParcel data;
@@ -1130,4 +1158,40 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
         return;
     }
 }
+
+WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteStringVector(params)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadStringVector(&info)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read string vector failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read int32 failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
+
 } // namespace OHOS::Rosen

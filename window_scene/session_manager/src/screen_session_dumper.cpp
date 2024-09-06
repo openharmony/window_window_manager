@@ -16,15 +16,30 @@
 
 #include <csignal>
 #include <fstream>
+#include <transaction/rs_interfaces.h>
 
 #include "unique_fd.h"
 #include "screen_session_manager.h"
 #include "session_permission.h"
+#include "screen_rotation_property.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+constexpr int DUMPER_PARAM_INDEX_ONE = 1;
+constexpr int DUMPER_PARAM_INDEX_TWO = 2;
+constexpr int DUMPER_PARAM_INDEX_THREE = 3;
+constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string STATUS_FOLD_HALF = "-z";
+const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_FOLD = "-p";
+const std::string ARG_DUMP_FOLD_STATUS = "-f";
+const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
+const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
+const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -49,7 +64,7 @@ ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16strin
 {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cv;
     std::string info;
-    for (auto& u16str: args) {
+    for (auto& u16str : args) {
         std::string arg = cv.to_bytes(u16str);
         params_.emplace_back(arg);
         info += arg;
@@ -64,7 +79,7 @@ void ScreenSessionDumper::OutputDumpInfo()
         return;
     }
 
-    static_cast<void>(signal(SIGPIPE, SIG_IGN)); // ignore SIGPIPE crash
+    static_cast<void>(signal(SIGPIPE, SIG_IGN));  // ignore SIGPIPE crash
     int ret = dprintf(fd_, "%s\n", dumpInfo_.c_str());
     if (ret < 0) {
         TLOGE(WmsLogTag::DMS, "dprintf error. ret: %{public}d", ret);
@@ -76,29 +91,102 @@ void ScreenSessionDumper::OutputDumpInfo()
 
 void ScreenSessionDumper::ExcuteDumpCmd()
 {
-    const std::string ARG_DUMP_HELP = "-h";
-    const std::string ARG_DUMP_ALL = "-a";
-    const std::string STATUS_FOLD_HALF = "-z";
-    const std::string STATUS_EXPAND = "-y";
-    const std::string STATUS_FOLD = "-p";
-    const std::string ARG_DUMP_FOLD_STATUS = "-f";
-    if (params_.empty() || params_[0] == ARG_DUMP_HELP) { //help command
-        ShowHelpInfo();
-    }
-
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
         TLOGE(WmsLogTag::DMS, "dump permission denied!");
         return;
     }
-    if (!params_.empty() && params_[0] == ARG_DUMP_ALL) { // dump all info command
+    if (params_.empty()) {
+        TLOGE(WmsLogTag::DMS, "params is null");
+        return;
+    }
+    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
+        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
+            params_[DUMPER_PARAM_INDEX_TWO]);
+        return;
+    }
+    if (params_[0] == ARG_DUMP_HELP) {
+        ShowHelpInfo();
+    } else if (params_[0] == ARG_DUMP_ALL) {
         ShowAllScreenInfo();
-    } else if (!params_.empty() && params_[0] == ARG_DUMP_FOLD_STATUS) { // dump fold status command
+    } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
-    } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
-        params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
+    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
         ShowNotifyFoldStatusChangedInfo();
+    } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
+        SetMotionSensorvalue(params_[0]);
+    } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
+        SetRotationLockedvalue(params_[0]);
+    } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
+        MockSendCastPublishEvent(params_[0]);
     }
     OutputDumpInfo();
+}
+
+void ScreenSessionDumper::SetMotionSensorvalue(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_SENSOR)) {
+        std::string valueStr = input.substr(commaPos + 1, MOTION_SENSOR_PARAM_SIZE);
+        if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        if (valueStr.size() == MOTION_SENSOR_PARAM_SIZE && valueStr != "-1") {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value <  static_cast<int32_t>(DeviceRotation::INVALID) ||
+            value > static_cast<int32_t>(DeviceRotation::ROTATION_LANDSCAPE_INVERTED)) {
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
+            return;
+        }
+        ScreenRotationProperty::HandleSensorEventInput(static_cast<DeviceRotation>(value));
+        TLOGI(WmsLogTag::DMS, "mock motion sensor: %{public}d", value);
+    }
+}
+
+void ScreenSessionDumper::SetRotationLockedvalue(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_LOCK)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        ScreenSessionManager::GetInstance().SetScreenRotationLocked(static_cast<bool>(value));
+        TLOGI(WmsLogTag::DMS, "mock rotation locked: %{public}d", value);
+    }
+}
+
+void ScreenSessionDumper::MockSendCastPublishEvent(std::string input)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS SEND CAST PUBLISH EVENT --------------" << std::endl;
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_PUBLISH_CAST_EVENT)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            oss << std::left << "[error]: " << "the value is too long" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            oss << std::left << "[error]: " << "value is not a number" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        ScreenSessionManager::GetInstance().NotifyCastWhenScreenConnectChange(static_cast<bool>(value));
+        oss << std::left << "[success]: " << "send cast publish event success" << std::endl;
+    } else {
+        oss << std::left << "[error]: " << "the command is invalid" << std::endl;
+    }
+    dumpInfo_.append(oss.str());
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
@@ -228,6 +316,8 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
         << static_cast<int32_t>(screenSession->GetRotation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenRequestedOrientation: "
         << static_cast<int32_t>(screenSession->GetScreenRequestedOrientation()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isExtend: "
+        << static_cast<int32_t>(screenSession->GetIsExtend()) << std::endl;
     dumpInfo_.append(oss.str());
 }
 
@@ -240,6 +330,10 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+    state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(id));
+    oss << std::left << std::setw(LINE_WIDTH) << "ScreenPowerState: "
+        << static_cast<int32_t>(state) << std::endl;
     std::vector<ScreenColorGamut> colorGamuts;
     DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
     if (ret == DMError::DM_OK && colorGamuts.size() > 0) {
@@ -307,6 +401,16 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
     dumpInfo_.append(oss.str());
 }
 
+void ScreenSessionDumper::DumpCutoutInfoPrint(std::ostringstream& oss,
+    const OHOS::Rosen::DMRect& areaRect, const std::string& label)
+{
+    oss << std::left << std::setw(LINE_WIDTH) << label
+        << areaRect.posX_ << ", "
+        << areaRect.posY_ << ", "
+        << areaRect.width_ << ", "
+        << areaRect.height_ << std::endl;
+}
+
 void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
 {
     std::ostringstream oss;
@@ -316,26 +420,10 @@ void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_L<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_T<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_R<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.height_ << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_B<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.height_ << std::endl;
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().left, "WaterFall_L<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().top, "WaterFall_T<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().right, "WaterFall_R<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().bottom, "WaterFall_B<X,Y,W,H>: ");
 
     std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
     oss << std::left << std::setw(LINE_WIDTH) << "BoundingRects<X,Y,W,H>: ";
@@ -407,6 +495,8 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << ", " << screenProperty.GetYDpi() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "Offset<X, Y>: " << screenProperty.GetOffsetX()
         << ", " << screenProperty.GetOffsetY() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "StartPosition<X, Y>: " << screenProperty.GetStartX()
+        << ", " << screenProperty.GetStartY() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "Bounds<L,T,W,H>: "
         << screenProperty.GetBounds().rect_.GetLeft() << ", "
         << screenProperty.GetBounds().rect_.GetTop() << ", "

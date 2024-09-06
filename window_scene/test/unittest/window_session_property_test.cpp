@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "future_callback.h"
 #include "window_session_property.h"
 
 using namespace testing;
@@ -243,6 +242,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
     EXPECT_EQ(UIExtensionUsage::MODAL, property->GetUIExtensionUsage());
     property->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
     EXPECT_EQ(UIExtensionUsage::EMBEDDED, property->GetUIExtensionUsage());
+}
+
+/**
+ * @tc.name: SetAndGetIsUIExtensionAbilityProcess
+ * @tc.desc: SetIsUIExtensionAbilityProcess and GetIsUIExtensionAbilityProcess test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetIsUIExtensionAbilityProcess, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetIsUIExtensionAbilityProcess(true);
+    EXPECT_EQ(true, property->GetIsUIExtensionAbilityProcess());
+    property->SetIsUIExtensionAbilityProcess(false);
+    EXPECT_EQ(false, property->GetIsUIExtensionAbilityProcess());
 }
 
 /**
@@ -636,13 +650,38 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
  */
 HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property != nullptr) {
-        Parcel parcel = Parcel();
-        property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
-        ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
-        delete property;
-    }
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    Parcel parcel = Parcel();
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_RECT);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
 /**
@@ -652,21 +691,38 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *oldProperty = new (std::nothrow) WindowSessionProperty();
-    WindowSessionProperty *newProperty = new (std::nothrow) WindowSessionProperty();
-    if ((oldProperty != nullptr) && (newProperty != nullptr)) {
-        int32_t persistentId = 2;
-        oldProperty->SetPersistentId(persistentId);
-        oldProperty->SetFocusable(true);
-        Parcel parcel = Parcel();
-        oldProperty->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-
-        newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-        ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
-        ASSERT_EQ(newProperty->GetFocusable(), true);
-        delete oldProperty;
-        delete newProperty;
-    }
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    Parcel parcel = Parcel();
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_RECT);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
 /**
@@ -1068,50 +1124,6 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);;
     ASSERT_EQ(1, property->GetSubWindowLevel());
-}
-
-/**
- * @tc.name: MarshallingFutureCallback
- * @tc.desc: MarshallingFutureCallback
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, MarshallingFutureCallback, Function | SmallTest | Level2)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    MessageParcel parcel;
-    property->SetLayoutCallback(nullptr);
-    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    property->SetLayoutCallback(layoutCallback);
-    ASSERT_EQ(true, property->MarshallingFutureCallback(parcel));
-}
-
-/**
- * @tc.name: UnmarshallingFutureCallback
- * @tc.desc: UnmarshallingFutureCallback
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, UnmarshallingFutureCallback, Function | SmallTest | Level2)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    MessageParcel parcelFalse;
-    parcelFalse.WriteBool(false);
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingFutureCallback(parcelFalse, property);
-    ASSERT_EQ(nullptr, property->GetLayoutCallback());
-
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    ASSERT_NE(nullptr, layoutCallback);
-    MessageParcel parcelTrue;
-    parcelTrue.WriteBool(true);
-    windowSessionProperty.UnmarshallingFutureCallback(parcelTrue, property);
-    ASSERT_EQ(nullptr, property->GetLayoutCallback());
-
-    MessageParcel parcelTrueWithObject;
-    parcelTrueWithObject.WriteBool(true);
-    parcelTrueWithObject.WriteObject(layoutCallback->AsObject());
-    windowSessionProperty.UnmarshallingFutureCallback(parcelTrueWithObject, property);
-    ASSERT_NE(nullptr, property->GetLayoutCallback());
 }
 } // namespace
 } // namespace Rosen

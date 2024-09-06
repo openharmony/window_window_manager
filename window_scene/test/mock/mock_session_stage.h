@@ -31,6 +31,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
+    MOCK_METHOD1(UpdateSessionViewportConfig, WSError(const SessionViewportConfig& config));
     MOCK_METHOD0(HandleBackEvent, WSError(void));
     MOCK_METHOD0(NotifyDestroy, WSError(void));
     MOCK_METHOD1(UpdateFocus, WSError(bool isFocused));
@@ -66,6 +67,8 @@ public:
     MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
+    MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
+        std::vector<std::string>& info));
 };
 } // namespace Rosen
 } // namespace OHOS

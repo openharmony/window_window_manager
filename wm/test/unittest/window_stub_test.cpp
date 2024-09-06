@@ -75,7 +75,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 }
 
 /**
@@ -149,7 +149,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -234,7 +234,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP);
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -268,7 +268,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
     uint32_t code = 0;
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 
     IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
     EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
@@ -348,7 +348,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -366,7 +366,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -384,7 +384,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -402,7 +402,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -420,10 +420,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_AVOID_AREA);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -438,10 +438,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -456,7 +456,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(100);
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -474,10 +477,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -492,10 +495,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -510,10 +513,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -528,7 +531,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -546,7 +549,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -564,7 +567,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest25, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -582,7 +585,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest26, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -600,7 +603,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest27, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_DESTROY);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -618,7 +621,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest28, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -636,7 +639,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest29, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_BACKGROUND);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -654,7 +657,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest30, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_DUMP_INFO);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -672,10 +675,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest31, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -690,7 +693,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest32, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -708,7 +711,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest33, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -726,10 +729,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest34, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_CONSUME_KEY_EVENT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -744,7 +747,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
-    
+
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);

@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
@@ -603,8 +602,6 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     Rect request = { 100, 100, 100, 100 };
     subWindow->property_->SetRequestRect(request);
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    subWindow->property_->SetLayoutCallback(layoutCallback);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     subWindow->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
@@ -676,8 +673,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     Rect request = { 100, 100, 600, 600 };
     subWindow->property_->SetRequestRect(request);
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    subWindow->property_->SetLayoutCallback(layoutCallback);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     subWindow->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
@@ -1034,29 +1029,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
-}
-
-/**
- * @tc.name: NotifySetUIContentComplete
- * @tc.desc: NotifySetUIContentComplete
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, NotifySetUIContentComplete, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("NotifySetUIContent");
-    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
-
-    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentCompleted_.load(), false);
 }
 }
 } // namespace Rosen

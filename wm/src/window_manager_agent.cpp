@@ -78,5 +78,10 @@ void WindowManagerAgent::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManager>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowPidVisibilityChanged(info);
+}
+
 } // namespace Rosen
 } // namespace OHOS

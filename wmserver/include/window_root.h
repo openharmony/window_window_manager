@@ -116,7 +116,7 @@ public:
     WMError NotifyDesktopUnfrozen();
     void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
     bool HasMainFullScreenWindowShown(DisplayId displayId);
-    WMError SetGestureNavigaionEnabled(bool enable);
+    WMError SetGestureNavigationEnabled(bool enable);
     
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
