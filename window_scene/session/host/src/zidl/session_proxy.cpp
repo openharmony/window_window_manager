@@ -660,6 +660,40 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
+WSError SessionProxy::UpdateClientRect(const WSRect& rect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!((data.WriteInt32(static_cast<int32_t>(rect.posX_))) &&
+          (data.WriteInt32(static_cast<int32_t>(rect.posY_))) &&
+          (data.WriteUint32(static_cast<uint32_t>(rect.width_))) &&
+          (data.WriteUint32(static_cast<uint32_t>(rect.height_))))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 /** @note @window.hierarchy */
 WSError SessionProxy::RaiseToAppTop()
 {

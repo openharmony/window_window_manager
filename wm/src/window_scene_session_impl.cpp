@@ -948,7 +948,14 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
-        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE, nullptr, info);
+        UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
+        auto hostSession = GetHostSession();
+        if (hostSession) {
+            WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+            hostSession->UpdateClientRect(wsRect);
+        } else {
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
+        }
     }
     state_ = WindowState::STATE_SHOWN;
     requestState_ = WindowState::STATE_SHOWN;
