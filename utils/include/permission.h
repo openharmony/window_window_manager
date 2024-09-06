@@ -22,11 +22,10 @@ namespace OHOS {
 namespace Rosen {
 class Permission {
 public:
-    static bool IsSystemServiceCalling(bool needPrintLog = true, bool isLocalSysCalling = false);
-    static bool IsSystemCalling(bool isLocalSysCalling = false);
+    static bool IsSystemServiceCalling(bool needPrintLog = true);
+    static bool IsSystemCalling();
     static bool CheckCallingPermission(const std::string& permission);
-    static bool IsStartByHdcd(bool isLocalSysCalling = false);
-    static bool IsSystemCallingOrStartByHdcd(bool isLocalSysCalling = false);
+    static bool IsStartByHdcd();
     static bool IsStartByInputMethod();
     static bool CheckIsCallingBundleName(const std::string name);
 };
