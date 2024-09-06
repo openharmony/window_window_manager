@@ -288,7 +288,6 @@ public:
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     bool GetIsDisplayStatusBarTemporarily() const;
-    bool IsDeviceWakeupByApplication() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
     bool NeedStartingWindowExitAnimation() const override;
 
@@ -537,7 +536,6 @@ private:
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;
-    std::atomic_bool isDeviceWakeupByApplication_ { false };
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
