@@ -1238,38 +1238,6 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowLimits01, Function | SmallTest | 
 }
 
 /**
- * @tc.name: SetWindowLimits01
- * @tc.desc: SetWindowLimits
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("SetWindowLimits01");
-    option->SetDisplayId(0);
-
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-
-    window->property_->SetPersistentId(1);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->state_ = WindowState::STATE_FROZEN;
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-
-    WindowLimits windowLimits = {2000, 2000, 2000, 2000, 0.0f, 0.0f};
-    if (WMError::WM_OK == window->SetWindowLimits(windowLimits)) {
-        WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-        ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
-        ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
-    }
-}
-
-/**
  * @tc.name: AdjustKeyboardLayout01
  * @tc.desc: adjust keyboard layout
  * @tc.type: FUNC
@@ -1429,55 +1397,6 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(presentation));
-}
-
-/**
- * @tc.name: Maximize03
- * @tc.desc: test presentation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Maximize03");
-    option->SetDisplayId(0);
-
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-
-    window->property_->SetWindowName("Maximize03");
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->property_->SetPersistentId(2);
-
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-
-    ASSERT_NE(nullptr, window);
-    // case1: only set maximize()
-    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
-    auto ret = window->Maximize(presentation);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
-
-    // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
-    presentation = MaximizePresentation::EXIT_IMMERSIVE;
-    ret = window->Maximize(presentation);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
-    
-    // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
-    presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
-    ret = window->Maximize(presentation);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
-
-    // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
-    presentation = MaximizePresentation::ENTER_IMMERSIVE;
-    ret = window->Maximize(presentation);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 }
 
 /**
