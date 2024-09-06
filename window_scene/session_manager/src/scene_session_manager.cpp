@@ -5750,7 +5750,7 @@ WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<M
                 WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 MainWindowState windowState;
                 windowState.state_ = static_cast<int32_t>(sceneSession->GetSessionState());
-                windowState.isVisible_ = sceneSession->GetRSVisible();
+                windowState.isVisible_ = sceneSession->GetVisible();
                 windowState.isForegroundInteractive_ = sceneSession->GetForegroundInteractiveStatus();
                 windowState.isPcOrPadEnableActivation_ = sceneSession->IsPcOrPadEnableActivation();
                 windowStates.emplace_back(windowState);
