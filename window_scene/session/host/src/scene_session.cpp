@@ -84,25 +84,6 @@ SceneSession::~SceneSession()
     TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
 }
 
-void SceneSession::InitSystemSessionDragEnable(sptr<WindowSessionProperty> property)
-{
-    auto defaultDragEnable = false;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        defaultDragEnable = sessionProperty->GetDragEnabled();
-    }
-    auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
-    bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
-    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
-    bool isSystemCalling = IsSystemSpecificSession();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
-        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
-        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
-    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
-        property->SetDragEnabled(defaultDragEnable);
-    }
-}
-
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -126,8 +107,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_OK;
         }
         if (property) {
-            session->InitSystemSessionDragEnable(property);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "set property enableDrag: %{public}d", property->GetDragEnabled());
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
         auto ret = session->Session::ConnectInner(
@@ -885,8 +864,6 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 {
     SessionGravity gravity;
     uint32_t percent = 0;
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
@@ -895,6 +872,8 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        uint32_t screenWidth = 0;
+        uint32_t screenHeight = 0;
         if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
             return false;
         }
@@ -2366,6 +2345,9 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         int32_t persistentId = session->GetPersistentId();
         WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        if (session->visibilityChangedDetectFunc_) {
+            session->visibilityChangedDetectFunc_(session->GetCallingPid(), session->isVisible_, visible);
+        }
         session->isVisible_ = visible;
         if (session->specificCallback_ == nullptr) {
             WLOGFW("specific callback is null.");
@@ -2389,11 +2371,6 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         }
     };
     PostTask(task, "UpdateNativeVisibility");
-}
-
-bool SceneSession::IsVisible() const
-{
-    return isVisible_;
 }
 
 void SceneSession::UpdateRotationAvoidArea()
@@ -4265,14 +4242,20 @@ bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSession
 uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
 {
     bool lastVisible = IsVisible();
-    dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
     dirtyFlags_ |= UpdateInteractiveInner(uiParam.interactive_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::INTERACTIVE) : 0;
+    if (!GetForegroundInteractiveStatus()) {
+        // keep ui state in recent
+        return dirtyFlags_;
+    }
+    dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
     dirtyFlags_ |= UpdateRectInner(uiParam, reason_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::RECT) : 0;
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
-    dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
+    if (!isPcScenePanel_) {
+        dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
+    }
     if (!lastVisible && IsVisible() && !isFocused_ && !postProcessFocusState_.enabled_ &&
         GetForegroundInteractiveStatus()) {
         postProcessFocusState_.enabled_ = true;
@@ -4298,6 +4281,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
 {
     if (isVisible_ == visibility) {
         return false;
+    }
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
     isVisible_ = visibility;
     return true;
@@ -4494,5 +4480,10 @@ void SceneSession::UnregisterSessionChangeListeners()
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
+}
+
+void SceneSession::SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func)
+{
+    visibilityChangedDetectFunc_ = func;
 }
 } // namespace OHOS::Rosen

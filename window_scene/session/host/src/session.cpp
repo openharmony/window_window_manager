@@ -629,6 +629,9 @@ void Session::SetCallingPid(int32_t id)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, callingPid:%{public}u", persistentId_, id);
     callingPid_ = id;
+    if (isVisible_) {
+        visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
+    }
 }
 
 void Session::SetCallingUid(int32_t id)
@@ -902,8 +905,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
-    SetWindowSessionProperty(property);
-    callingPid_ = pid;
+    InitSessionPropertyWhenConnect(property);
+    SetCallingPid(pid);
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
@@ -914,7 +917,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     return WSError::WS_OK;
 }
 
-void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
+void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property)
 {
     if (property == nullptr) {
         return;
@@ -927,6 +930,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
+    InitSystemSessionDragEnable(property);
     SetSessionProperty(property);
     if (property) {
         Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
@@ -951,6 +955,25 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
     }
 }
 
+void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
+{
+    auto defaultDragEnable = false;
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        defaultDragEnable = sessionProperty->GetDragEnabled();
+    }
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
+    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
+    bool isSystemCalling = property->GetSystemCalling();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
+        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
+        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
+    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
+        property->SetDragEnabled(defaultDragEnable);
+    }
+}
+
 WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
     int32_t pid, int32_t uid)
@@ -971,9 +994,12 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     abilityToken_ = token;
     SetSessionProperty(property);
     persistentId_ = property->GetPersistentId();
-    callingPid_ = pid;
+    SetCallingPid(pid);
     callingUid_ = uid;
     bufferAvailable_ = true;
+    auto windowRect = property->GetWindowRect();
+    layoutRect_ = { windowRect.posX_, windowRect.posY_,
+        static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
     UpdateSessionState(SessionState::STATE_CONNECT);
     return WSError::WS_OK;
 }
@@ -1104,6 +1130,9 @@ WSError Session::Disconnect(bool isFromClient)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
+    if (visibilityChangedDetectFunc_) {
+        visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
+    }
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
@@ -3100,7 +3129,11 @@ void Session::SetIsStarting(bool isStarting)
 
 void Session::ResetDirtyFlags()
 {
-    dirtyFlags_ = 0;
+    if (!isVisible_) {
+        dirtyFlags_ &= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+    } else {
+        dirtyFlags_ = 0;
+    }
 }
 
 void Session::SetUIStateDirty(bool dirty)
@@ -3123,5 +3156,10 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 bool Session::IsScbCoreEnabled()
 {
     return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+}
+
+bool Session::IsVisible() const
+{
+    return isVisible_;
 }
 } // namespace OHOS::Rosen
