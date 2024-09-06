@@ -65,7 +65,7 @@ std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() cons
 {
     std::vector<sptr<DisplayInfo>> res;
     auto displayIds = GetAllDisplayIds();
-    for (auto displayId: displayIds) {
+    for (auto displayId : displayIds) {
         sptr<DisplayInfo> display = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
         if (display != nullptr) {
             res.emplace_back(display);

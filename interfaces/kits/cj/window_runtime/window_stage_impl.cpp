@@ -159,12 +159,12 @@ int32_t CJWindowStageImpl::DisableWindowDecor()
 int32_t CJWindowStageImpl::SetShowOnLockScreen(bool showOnLockScreen)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Set show on lock screen permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Set show on lock screen permission denied!");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "[WindowStage] WindowScene is null or window is null");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[WindowStage] WindowScene is null or window is null");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto window = weakScene->GetMainWindow();
@@ -176,7 +176,7 @@ int32_t CJWindowStageImpl::SetShowOnLockScreen(bool showOnLockScreen)
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    TLOGI(WmsLogTag::WMS_DIALOG,
+    TLOGI(WmsLogTag::WMS_HIERARCHY,
         "[WindowStage] Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
     return static_cast<int32_t>(ret);

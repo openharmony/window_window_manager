@@ -59,6 +59,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE,
     TRANS_ID_NOTIFY_DENSITY_UNIQUE,
     TRANS_ID_NOTIFY_SESSION_FULLSCREEN,
+    TRANS_ID_NOTIFY_DUMP_INFO,
 };
 }   // namespace Rosen
 }   // namespace OHOS

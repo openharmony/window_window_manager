@@ -14,7 +14,7 @@
  */
 
 #include "session/host/include/sub_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
@@ -163,7 +163,7 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
+    auto isPC = systemConfig_.IsPcWindow();
     if (isPC && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {

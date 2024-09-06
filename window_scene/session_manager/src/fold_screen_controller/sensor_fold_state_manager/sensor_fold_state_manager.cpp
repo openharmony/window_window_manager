@@ -47,7 +47,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         return;
     }
     WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
-    ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
+    ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
     
