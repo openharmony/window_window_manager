@@ -173,7 +173,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         }
     } else {
         WLOGFW("[WMSCom] Property not exist!");
-        property = sptr<WindowSessionProperty>::MakeSptr();
+        property = new WindowSessionProperty();
     }
     bool isFromClient = data.ReadBool();
     const WSError errCode = Foreground(property, isFromClient);
@@ -210,7 +210,7 @@ int SessionStub::HandleShow(MessageParcel& data, MessageParcel& reply)
         }
     } else {
         WLOGFW("Property not exist!");
-        property = sptr<WindowSessionProperty>::MakeSptr();
+        property = new WindowSessionProperty();
     }
     const WSError& errCode = Show(property);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -325,7 +325,7 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_VALUE;
     }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -344,7 +344,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_VALUE;
     }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
@@ -367,7 +367,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_VALUE;
     }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -397,7 +397,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_VALUE;
     }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     abilitySessionInfo->want = *localWant;
     abilitySessionInfo->requestCode = data.ReadInt32();
     abilitySessionInfo->persistentId = data.ReadInt32();
@@ -746,7 +746,7 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
-        property = sptr<WindowSessionProperty>::MakeSptr();
+        property = new WindowSessionProperty();
         if (property != nullptr) {
             property->Read(data, action);
         }
