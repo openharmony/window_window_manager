@@ -744,20 +744,6 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
                 onlySupportFullScreen, property_->GetFullScreenStart());
             Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         }
-        // get orientation configuration
-        AppExecFwk::DisplayOrientation displayOrientation =
-            static_cast<AppExecFwk::DisplayOrientation>(
-                static_cast<uint32_t>(abilityInfo->orientation));
-        if (ABILITY_TO_SESSION_ORIENTATION_MAP.count(displayOrientation) == 0) {
-            WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
-            return;
-        }
-        Orientation orientation = ABILITY_TO_SESSION_ORIENTATION_MAP.at(displayOrientation);
-        if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
-            WLOGFE("Set orientation from ability failed");
-            return;
-        }
-        property_->SetRequestedOrientation(orientation);
     }
 }
 
