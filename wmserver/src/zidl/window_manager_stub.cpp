@@ -91,8 +91,9 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
-            uint32_t avoidAreaTypeId = data.ReadUint32();
-            if (avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+            uint32_t avoidAreaTypeId = 0;
+            if (!data.ReadUint32(avoidAreaTypeId) ||
+                avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
                 avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
                 return ERR_INVALID_DATA;
             }
@@ -327,7 +328,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER: {
             uint32_t windowId = data.ReadUint32();
-            bool haveAvoidAreaListener;
+            bool haveAvoidAreaListener = false;
             if (!data.ReadBool(haveAvoidAreaListener)) {
                 return ERR_INVALID_DATA;
             }

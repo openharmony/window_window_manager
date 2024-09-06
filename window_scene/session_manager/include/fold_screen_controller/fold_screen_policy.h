@@ -48,8 +48,8 @@ public:
     mutable std::recursive_mutex displayModeMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
-    FoldDisplayMode globalDisplayMode_ = FoldDisplayMode::UNKNOWN;
-    FoldStatus globalFoldStatus_ = FoldStatus::UNKNOWN;
+    FoldDisplayMode lastDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;

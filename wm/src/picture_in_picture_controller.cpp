@@ -317,9 +317,7 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
             pipOption_->GetPipTemplate(), FAILED, "window_ is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    if (curState_ != PiPWindowState::STATE_STOPPING) {
-        curState_ = PiPWindowState::STATE_STOPPING;
-    }
+    curState_ = PiPWindowState::STATE_STOPPING;
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStop();
     }

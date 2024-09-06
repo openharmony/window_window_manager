@@ -262,13 +262,23 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
 void SceneInputManager::FlushEmptyInfoToMMI()
 {
     auto task = [this]() {
-        TLOGI(WmsLogTag::WMS_EVENT, "Flush empty info to MMI");
+        std::vector<MMI::DisplayInfo> displayInfos;
+        ConstructDisplayInfos(displayInfos);
+        int mainScreenWidth = 0;
+        int mainScreenHeight = 0;
+        if (!displayInfos.empty()) {
+            mainScreenWidth = displayInfos[0].width;
+            mainScreenHeight = displayInfos[0].height;
+        }
         MMI::DisplayGroupInfo displayGroupInfo = {
-            .width = 0,
-            .height = 0,
+            .width = mainScreenWidth,
+            .height = mainScreenHeight,
             .focusWindowId = EMPTY_FOCUS_WINDOW_ID,
             .currentUserId = currentUserId_,
+            .displaysInfo = displayInfos
         };
+        TLOGI(WmsLogTag::WMS_EVENT, "currUserId:%{public}d width:%{public}d height:%{public}d",
+            currentUserId_, mainScreenWidth, mainScreenHeight);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
     if (eventHandler_) {
