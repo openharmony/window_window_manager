@@ -452,18 +452,19 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
  */
 HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Level2)
 {
-    sptr<SessionProxy> sProxy = new(std::nothrow) SessionProxy(nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
     sProxy->NotifyExtensionEventAsync(0);
 
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    ASSERT_NE(nullptr, iRemoteObjectMocker);
-    sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(nullptr, sProxy);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
     sProxy->NotifyExtensionEventAsync(0);
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     sProxy->NotifyExtensionEventAsync(0);
-    
+
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyExtensionEventAsync(0);
     MockMessageParcel::ClearAllErrorFlag();
