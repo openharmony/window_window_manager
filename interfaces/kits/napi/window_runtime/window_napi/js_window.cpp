@@ -2616,7 +2616,6 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         TLOGE(WmsLogTag::WMS_IMMS, "invalid param or argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    
     NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_),
         jsSystemBarProperties = std::move(jsSystemBarProperties), name = std::move(name), err]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
@@ -2740,7 +2739,6 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
     }
-
     NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_),
         jsSystemBarProperties = std::move(jsSystemBarProperties),
         jsSystemBarPropertyFlags = std::move(jsSystemBarPropertyFlags), errCode]
@@ -2798,7 +2796,6 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_),
         jsSystemBarProperties = std::move(jsSystemBarProperties),
         jsSystemBarPropertyFlags = std::move(jsSystemBarPropertyFlags), errCode]
