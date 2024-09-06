@@ -33,11 +33,15 @@ struct AnimationConfig {
         Vector3f translate_ { 0, 0, 0 };
         Vector4f rotation_ { 0, 0, 1, 0 };
     } windowAnimationConfig_;
-    struct KeyboardAnimationConfig {
+    struct KeyboardAnimationIn {
         RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
-        RSAnimationTimingProtocol durationIn_ = 500;
-        RSAnimationTimingProtocol durationOut_ = 300;
-    } keyboardAnimationConfig_;
+        RSAnimationTimingProtocol duration_ = 500;
+    } keyboardAnimationIn_;
+
+    struct KeyboardAnimationOut {
+        RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
+        RSAnimationTimingProtocol duration_ = 300;
+    } keyboardAnimationOut_;
 
     struct StartWindowTransitionAnimationConfig {
         RSAnimationTimingProtocol timingProtocol_ = 200;

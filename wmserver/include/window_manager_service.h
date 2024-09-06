@@ -185,7 +185,9 @@ private:
     void ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     void ConfigStartingWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
-    RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig, bool isForKeyboard = false);
+    RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
+    void CreateKeyboardCurve(const WindowManagerConfig::ConfigItem& config, KeyboardAnimationIn& animateConfig,
+        KeyboardAnimationCurve& sysCurveConfig);
     void RecordShowTimeEvent(int64_t costTime);
     void ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig);
     bool ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out);
