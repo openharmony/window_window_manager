@@ -414,30 +414,22 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
             TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
         }
     }
-    int32_t persistentId = 0;
-    if (!data.ReadInt32(persistentId)) {
+    if (!data.ReadInt32(abilitySessionInfo->persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed.");
         return ERR_INVALID_DATA;
     }
-    int32_t errorCode = 0;
-    if (!data.ReadInt32(errorCode)) {
+    if (!data.ReadInt32(abilitySessionInfo->errorCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read errorCode failed.");
         return ERR_INVALID_DATA;
     }
-    std::string errorReason = "";
-    if (!data.ReadString(errorReason)) {
+    if (!data.ReadString(abilitySessionInfo->errorReason)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read errorReason failed.");
         return ERR_INVALID_DATA;
     }
-    std::string identityToken = "";
-    if (!data.ReadString(identityToken)) {
+    if (!data.ReadString(abilitySessionInfo->identityToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
-    abilitySessionInfo->persistentId = persistentId;
-    abilitySessionInfo->errorCode = errorCode;
-    abilitySessionInfo->errorReason = errorReason;
-    abilitySessionInfo->identityToken = identityToken;
     WSError errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

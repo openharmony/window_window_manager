@@ -57,8 +57,6 @@ private:
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply);
-    int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
-    int CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
     int HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
@@ -78,6 +76,8 @@ private:
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply);
+    int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
+    int CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
