@@ -166,7 +166,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction>
         }
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+            session->isDirty_ = false;
         }
         return ret;
     };
@@ -185,11 +185,7 @@ void KeyboardSession::OnKeyboardPanelUpdated()
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
     RaiseCallingSession(panelRect);
     if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_ != nullptr) {
-        if (Session::IsScbCoreEnabled()) {
-            dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-        } else {
-            specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-        }
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
 }
 
@@ -558,11 +554,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         if (isKeyboardShow) {
             session->RaiseCallingSession(keyboardPanelRect, rsTransaction);
             if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-                if (Session::IsScbCoreEnabled()) {
-                    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-                } else {
-                    session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-                }
+                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             }
         } else {
             session->RestoreCallingSession(rsTransaction);
