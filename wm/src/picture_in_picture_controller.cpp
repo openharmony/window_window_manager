@@ -37,6 +37,7 @@
 namespace OHOS {
 namespace Rosen {
     sptr<IRemoteObject> PictureInPictureController::remoteObj_;
+    std::string setting_url_proxy_;
 namespace {
     constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
@@ -49,8 +50,9 @@ namespace {
     const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
     const std::string SETTING_COLUMN_VALUE = "VALUE";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
-    const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
-        "settingsdata/SETTINGSDATA?Proxy=true";
+    constexpr const char *SETTINGS_URL_PROXY_HEAD = "datashare:///com.ohos.settingsdata/"
+        "entry/settingsdata/USER_SETTINGSDATA_";
+    constexpr const char *SETTINGS_URL_PROXY_TAIL = "?Proxy=true";
     constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
     const int DEFAULT_ASPECT_RATIO[] = {16, 9};
 }
@@ -75,6 +77,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
+    int32_t clientUserId = GetUserIdByUid(getuid());
+    TLOGI(WmsLogTag::WMS_PIP, "clientUserId = %{public}d", clientUserId);
+    setting_url_proxy_ = SETTINGS_URL_PROXY_HEAD + std::to_string(clientUserId) + SETTINGS_URL_PROXY_TAIL;
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbilityManager return nullptr");
@@ -864,7 +869,7 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
         }
         remoteObj_ = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, setting_url_proxy_, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "create helper is nullptr");
         return ERR_NO_INIT;
@@ -872,7 +877,7 @@ ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(SETTING_URI_PROXY + "&key=" + key);
+    Uri uri(setting_url_proxy_ + "&key=" + key);
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Query return nullptr");
