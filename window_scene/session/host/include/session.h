@@ -140,6 +140,7 @@ public:
     WSError Hide() override;
     WSError DrawingCompleted() override;
     void ResetSessionConnectState();
+    void ResetIsActive();
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
