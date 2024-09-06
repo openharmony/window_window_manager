@@ -4211,17 +4211,6 @@ bool SceneSession::IsImmersiveType() const
         type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
 }
 
-bool SceneSession::IsPcOrPadEnableActivation() const
-{
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
-    if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
-    }
-    return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
-}
-
 void SceneSession::UnregisterSessionChangeListeners()
 {
     auto task = [weakThis = wptr(this)] {
@@ -4286,5 +4275,16 @@ void SceneSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, gravity: %{public}d, rect: %{public}s, newRequestRect: %{public}s"
         ", isLandscape: %{public}d, screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(), gravity,
         rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
+}
+
+bool SceneSession::IsPcOrPadEnableActivation() const
+{
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto property = GetSessionProperty();
+    bool isPcAppInPad = false;
+    if (property != nullptr) {
+        isPcAppInPad = property->GetIsPcAppInPad();
+    }
+    return isPC || IsFreeMultiWindowMode() || isPcAppInPad;
 }
 } // namespace OHOS::Rosen

@@ -320,12 +320,12 @@ private:
     int32_t compatibleInPcLandscapeWidth_ = 0;
     int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isSupportDragInPcCompatibleMode_ = false;
-    bool isPcAppInPad_ = false;
 
     /**
      * Sub Window
      */
     uint32_t subWindowLevel_ = 1;
+    bool isPcAppInPad_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
