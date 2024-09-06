@@ -2231,6 +2231,16 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
     }
 }
 
+bool WindowSceneSessionImpl::GetStartMoveFlag()
+{
+    bool isMoving = false;
+    if (auto hostSession = GetHostSession()) {
+        hostSession->GetStartMoveFlag(isMoving);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+    return isMoving;
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("id: %{public}d", GetPersistentId());

@@ -1510,6 +1510,13 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief get start move flag.
+     *
+     * @return true means window is moving. Otherwise is not moving
+     *
+     */
+    virtual bool GetStartMoveFlag() { return false; }
+    /**
      * @brief start move system window. It is called by application.
      *
      */

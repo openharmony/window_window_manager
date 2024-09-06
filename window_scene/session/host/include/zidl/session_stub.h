@@ -63,6 +63,7 @@ private:
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
+    int HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply);
