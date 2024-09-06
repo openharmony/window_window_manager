@@ -37,7 +37,6 @@
           "hisysevent",
           "ability_runtime",
           "napi",
-          "node",
           "common_event_service",
           "hilog",
           "access_token",

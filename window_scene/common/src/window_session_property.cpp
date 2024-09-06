@@ -1072,6 +1072,9 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     maximizeMode_ = property->maximizeMode_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
+    sessionGravity_ = property->sessionGravity_;
+    sessionGravitySizePercent_ = property->sessionGravitySizePercent_;
+    modeSupportInfo_ = property->modeSupportInfo_;
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
