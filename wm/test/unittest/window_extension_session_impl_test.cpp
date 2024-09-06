@@ -2024,6 +2024,26 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
     window_->ReportModalUIExtensionMayBeCovered(true);
     window_->NotifyModalUIExtensionMayBeCovered(false);
 }
+
+/**
+ * @tc.name: NotifyDumpInfo
+ * @tc.desc: NotifyDumpInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    auto ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    window_->uiContent_ = nullptr;
+    ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1194,5 +1194,18 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
     SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(static_cast<int32_t>(type), getpid(),
         oss.str());
 }
+
+WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyDumpInfo, persistentId=%{public}d", GetPersistentId());
+    auto uiContentSharedPtr = GetUIContentSharedPtr();
+    if (uiContentSharedPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentSharedPtr->DumpInfo(params, info);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
