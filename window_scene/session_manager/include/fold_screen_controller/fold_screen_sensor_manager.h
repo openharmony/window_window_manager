@@ -37,9 +37,9 @@ class FoldScreenSensorManager : public RefBase {
 public:
     void RegisterPostureCallback();
 
-    void RegisterApplicationStateObserver();
-
     void RegisterHallCallback();
+
+    void RegisterApplicationStateObserver();
 
     void UnRegisterPostureCallback();
 

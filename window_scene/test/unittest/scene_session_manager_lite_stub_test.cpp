@@ -65,6 +65,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) override
+    {
+        return WSError::WS_OK;
+    }
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override
     {
         return WSError::WS_OK;
@@ -162,10 +166,6 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
-    {
-        return WMError::WM_OK;
-    }
-    WMError TerminateSessionByPersistentId(int32_t persistentId) override
     {
         return WMError::WM_OK;
     }
@@ -326,6 +326,20 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfos, Function | Smal
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWindowStatesByPid
+ * @tc.desc: test function : HandleGetMainWindowStatesByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWindowStatesByPid, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -641,22 +655,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | Sma
     data.WriteInt32(persistentId);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleTerminateSessionByPersistentId
- * @tc.desc: test function : HandleTerminateSessionByPersistentId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t persistentId = 1;
-    data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

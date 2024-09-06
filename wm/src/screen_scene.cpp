@@ -19,12 +19,11 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "anr_manager.h"
 #include "app_mgr_client.h"
+#include "dm_common.h"
 #include "singleton.h"
 #include "singleton_container.h"
-
-#include "anr_manager.h"
-#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

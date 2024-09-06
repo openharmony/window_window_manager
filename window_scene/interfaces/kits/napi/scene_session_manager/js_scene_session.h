@@ -96,6 +96,7 @@ private:
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
+    static napi_value SetSystemFocusable(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value OpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
@@ -123,9 +124,6 @@ private:
     static napi_value IsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -137,6 +135,7 @@ private:
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
+    napi_value OnSetSystemFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnOpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
@@ -162,9 +161,6 @@ private:
     napi_value OnIsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

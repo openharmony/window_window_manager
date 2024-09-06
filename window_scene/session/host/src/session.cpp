@@ -156,13 +156,13 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
             rsTransaction->Commit();
         }
     }
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
     return leashWinSurfaceNode_;
 }
 
@@ -466,6 +466,16 @@ WSError Session::SetFocusable(bool isFocusable)
     return WSError::WS_OK;
 }
 
+void Session::SetSystemFocusable(bool systemFocusable)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, systemFocusable: %{public}d", GetPersistentId(), systemFocusable);
+    systemFocusable_ = systemFocusable;
+    if (isFocused_ && !systemFocusable) {
+        FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
+        NotifyRequestFocusStatusNotifyManager(false, true, reason);
+    }
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -474,6 +484,19 @@ bool Session::GetFocusable() const
     }
     WLOGFD("property is null");
     return true;
+}
+
+bool Session::GetSystemFocusable() const
+{
+    if (parentSession_) {
+        return systemFocusable_ && parentSession_->GetSystemFocusable();
+    }
+    return systemFocusable_;
+}
+
+bool Session::CheckFocusable() const
+{
+    return GetFocusable() && GetSystemFocusable();
 }
 
 bool Session::IsFocused() const
@@ -683,7 +706,7 @@ bool Session::IsSystemSession() const
 
 bool Session::IsTerminated() const
 {
-    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating_);
+    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating);
 }
 
 bool Session::IsSessionForeground() const
@@ -872,8 +895,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 {
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
-    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_) {
+        static_cast<uint32_t>(GetSessionState()), isTerminating, pid);
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
         TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
             GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -1188,6 +1211,10 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             !session->IsFocused() && session->GetFocusable()) {
             TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
+        if (isAttach && !session->systemFocusable_) {
+            // reset systemFocusable_
+            session->SetSystemFocusable(true);
+        }
     };
     PostTask(task, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
@@ -1315,7 +1342,7 @@ WSError Session::TerminateSessionNew(
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto task = [this, abilitySessionInfo, needStartCaller, isFromBroker]() {
-        isTerminating_ = true;
+        isTerminating = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1348,11 +1375,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isTerminating_) {
+    if (isTerminating) {
         TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    isTerminating_ = true;
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1408,14 +1435,14 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &f
     updateSessionIconFunc_ = func;
 }
 
-WSError Session::Clear(bool needStartCaller)
+WSError Session::Clear()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    auto task = [this]() {
+        isTerminating = true;
         SessionInfo info = GetSessionInfo();
         if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+            terminateSessionFuncNew_(info, false, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -1957,28 +1984,28 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
 
 void Session::UnregisterSessionChangeListeners()
 {
-        sessionStateChangeFunc_ = nullptr;
-        sessionFocusableChangeFunc_ = nullptr;
-        sessionTouchableChangeFunc_ = nullptr;
-        clickFunc_ = nullptr;
-        jsSceneSessionExceptionFunc_ = nullptr;
-        sessionExceptionFunc_ = nullptr;
-        terminateSessionFunc_ = nullptr;
-        pendingSessionActivationFunc_ = nullptr;
-        changeSessionVisibilityWithStatusBarFunc_ = nullptr;
-        bufferAvailableChangeFunc_ = nullptr;
-        backPressedFunc_ = nullptr;
-        terminateSessionFuncNew_ = nullptr;
-        terminateSessionFuncTotal_ = nullptr;
-        updateSessionLabelFunc_ = nullptr;
-        updateSessionIconFunc_ = nullptr;
-        pendingSessionToForegroundFunc_ = nullptr;
-        pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
-        raiseToTopForPointDownFunc_ = nullptr;
-        sessionInfoLockedStateChangeFunc_ = nullptr;
-        contextTransparentFunc_ = nullptr;
-        sessionRectChangeFunc_ = nullptr;
-        WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
+    sessionStateChangeFunc_ = nullptr;
+    sessionFocusableChangeFunc_ = nullptr;
+    sessionTouchableChangeFunc_ = nullptr;
+    clickFunc_ = nullptr;
+    jsSceneSessionExceptionFunc_ = nullptr;
+    sessionExceptionFunc_ = nullptr;
+    terminateSessionFunc_ = nullptr;
+    pendingSessionActivationFunc_ = nullptr;
+    changeSessionVisibilityWithStatusBarFunc_ = nullptr;
+    bufferAvailableChangeFunc_ = nullptr;
+    backPressedFunc_ = nullptr;
+    terminateSessionFuncNew_ = nullptr;
+    terminateSessionFuncTotal_ = nullptr;
+    updateSessionLabelFunc_ = nullptr;
+    updateSessionIconFunc_ = nullptr;
+    pendingSessionToForegroundFunc_ = nullptr;
+    pendingSessionToBackgroundForDelegatorFunc_ = nullptr;
+    raiseToTopForPointDownFunc_ = nullptr;
+    sessionInfoLockedStateChangeFunc_ = nullptr;
+    contextTransparentFunc_ = nullptr;
+    sessionRectChangeFunc_ = nullptr;
+    WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
 void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
@@ -2205,39 +2232,6 @@ WSError Session::SetIsPcAppInPad(bool enable)
     }
     property->SetIsPcAppInPad(enable);
     return WSError::WS_OK;
-}
-
-WSError Session::CompatibleFullScreenRecover()
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "recover compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    return sessionStage_->CompatibleFullScreenRecover();
-}
-
-WSError Session::CompatibleFullScreenMinimize()
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    return sessionStage_->CompatibleFullScreenMinimize();
-}
-
-WSError Session::CompatibleFullScreenClose()
-{
-    TLOGD(WmsLogTag::WMS_LIFE, "close compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    return sessionStage_->CompatibleFullScreenClose();
 }
 
 WSError Session::UpdateWindowMode(WindowMode mode)

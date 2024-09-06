@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_SCENE_EVENT_PUBLISH_H
-#define OHOS_ROSEN_SCENE_EVENT_PUBLISH_H
+#ifndef OHOS_ROSEN_SCB_DUMP_SUBSCRIBER_H
+#define OHOS_ROSEN_SCB_DUMP_SUBSCRIBER_H
 
 #include <chrono>
 #include <condition_variable>
+#include <want.h>
 
 #include <common_event_data.h>
 #include <common_event_publish_info.h>
@@ -25,15 +26,14 @@
 #include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
-#include <want.h>
 
 namespace OHOS::Rosen {
-class SceneEventPublish : public EventFwk::CommonEventSubscriber {
+class ScbDumpSubscriber : public EventFwk::CommonEventSubscriber {
 public:
-    explicit SceneEventPublish(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
+    explicit ScbDumpSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
         : CommonEventSubscriber(subscribeInfo)
     {}
-    ~SceneEventPublish() = default;
+    ~ScbDumpSubscriber() = default;
 
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
 
@@ -41,18 +41,18 @@ public:
 
     std::string GetDebugDumpInfo(std::chrono::milliseconds const &time);
 
-    static void Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
+    static void Subscribe(std::shared_ptr<ScbDumpSubscriber>& scbSubscriber);
 
-    static void UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
+    static void UnSubscribe(std::shared_ptr<ScbDumpSubscriber>& scbSubscriber);
 
     static std::string JoinCommands(const std::vector<std::string>& params, int size);
 
 private:
-    std::string s = "";
+    std::string dumpinfo_ = "";
     bool valueReady_ = false;
     std::mutex mutex_;
     std::condition_variable cv_;
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ROSEN_SCENE_EVENT_PUBLISH_H
+#endif // OHOS_ROSEN_SCB_DUMP_SUBSCRIBER_H

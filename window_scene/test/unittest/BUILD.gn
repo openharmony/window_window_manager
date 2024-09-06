@@ -33,7 +33,6 @@ group("unittest") {
     ":ws_fold_screen_state_machine_test",
     ":ws_future_callback_proxy_test",
     ":ws_future_callback_stub_test",
-    ":ws_hidumper_controller_test",
     ":ws_intention_event_manager_test",
     ":ws_keyboard_session_test",
     ":ws_main_session_lifecycle_test",
@@ -104,7 +103,6 @@ group("unittest") {
     ":ws_setting_observer_test",
     ":ws_setting_provider_test",
     ":ws_single_display_fold_policy_test",
-    ":ws_single_display_pocket_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
     ":ws_sub_session_lifecycle_test",
     ":ws_sub_session_test",
@@ -215,20 +213,6 @@ ohos_unittest("ws_single_display_fold_policy_test") {
   ]
 }
 
-ohos_unittest("ws_single_display_pocket_fold_policy_test") {
-  module_out_path = module_out_path
-
-  sources = [ "single_display_pocket_fold_policy_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("ws_sensor_fold_state_manager_test") {
   module_out_path = module_out_path
 
@@ -278,7 +262,10 @@ ohos_unittest("ws_fold_screen_sensor_manager_test") {
 
   sources = [ "fold_screen_sensor_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -503,6 +490,7 @@ ohos_unittest("ws_screen_session_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -517,6 +505,7 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -701,7 +690,10 @@ ohos_unittest("ws_screen_scene_config_test") {
 
   sources = [ "screen_scene_config_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -733,7 +725,10 @@ ohos_unittest("ws_screen_session_manager_client_test") {
 
   sources = [ "screen_session_manager_client_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
@@ -764,7 +759,10 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
 
   sources = [ "screen_session_manager_stub_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -778,7 +776,10 @@ ohos_unittest("ws_screen_session_manager_proxy_test") {
 
   sources = [ "screen_session_manager_proxy_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -792,7 +793,10 @@ ohos_unittest("ws_screen_session_manager_test") {
 
   sources = [ "screen_session_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -1492,20 +1496,6 @@ ohos_unittest("ws_fold_screen_state_machine_test") {
   ]
 }
 
-ohos_unittest("ws_hidumper_controller_test") {
-  module_out_path = module_out_path
-
-  sources = [ "hidumper_controller_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("ws_future_callback_proxy_test") {
   module_out_path = module_out_path
 
@@ -1634,19 +1624,6 @@ ohos_unittest("ws_single_display_sensor_fold_state_manager_test") {
   module_out_path = module_out_path
 
   sources = [ "single_display_sensor_fold_state_manager_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "single_display_sensor_pocket_fold_state_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1811,6 +1788,7 @@ ohos_static_library("ws_unittest_common") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_base:want",
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
     "c_utils:utils",
@@ -1819,10 +1797,6 @@ ohos_static_library("ws_unittest_common") {
     "ipc:ipc_single",
   ]
 
-  public_external_deps = [
-    "ability_base:session_info",
-    "ability_base:want",
-  ]
   defines = []
   if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
     external_deps += [ "sensor:sensor_interface_native" ]

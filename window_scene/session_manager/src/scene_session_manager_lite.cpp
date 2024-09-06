@@ -15,6 +15,7 @@
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/scene_session_manager_lite.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -64,6 +65,11 @@ WSError SceneSessionManagerLite::GetSessionInfos(const std::string& deviceId, in
 {
     WLOGFD("run GetSessionInfos");
     return SceneSessionManager::GetInstance().GetSessionInfos(deviceId, numMax, sessionInfos);
+}
+
+WSError SceneSessionManagerLite::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowStatesByPid(pid, windowStates);
 }
 
 WSError SceneSessionManagerLite::GetSessionInfo(const std::string& deviceId,
@@ -239,10 +245,5 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
 WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
 {
     return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
-}
-
-WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
-{
-    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace OHOS::Rosen

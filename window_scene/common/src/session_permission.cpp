@@ -15,7 +15,6 @@
 
 #include <accesstoken_kit.h>
 #include <app_mgr_client.h>
-#include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
@@ -99,13 +98,9 @@ bool SessionPermission::IsSystemCalling()
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         return true;
     }
-    return IsSystemAppCall();
-}
-
-bool SessionPermission::IsSystemAppCall()
-{
-    uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+    return isSystemApp;
 }
 
 bool SessionPermission::IsSACalling()
@@ -170,7 +165,8 @@ bool SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()
     if (IsSACalling() || IsShellCall()) {
         return true;
     }
-    return IsSystemAppCall();
+    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
 }
 
 bool SessionPermission::IsShellCall()
@@ -299,7 +295,7 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
     bool isUserTestMode = false;
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "AppMgeClient is null!");
+        TLOGE(WmsLogTag::DEFAULT, "AppMgrClient is null!");
         return false;
     }
     // reset ipc identity
