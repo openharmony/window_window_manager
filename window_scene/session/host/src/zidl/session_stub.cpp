@@ -232,23 +232,16 @@ int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Connect!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-    if (sessionStageObject == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "sessionStageObject is nullptr");
-    }
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-    if (eventChannelObject == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "eventChannelObject is nullptr");
-    }
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
     sptr<WindowSessionProperty> property = nullptr;
     bool hasWindowSessionProperty = false;
     if (!data.ReadBool(hasWindowSessionProperty)) {
@@ -261,10 +254,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr.");
             return ERR_INVALID_DATA;
         }
-    } else {
-        TLOGW(WmsLogTag::WMS_LIFE, "Property not exist!");
     }
-
     sptr<IRemoteObject> token = nullptr;
     if (property && property->GetTokenState()) {
         token = data.ReadRemoteObject();
@@ -272,8 +262,6 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             TLOGE(WmsLogTag::WMS_LIFE, "Token is nullptr.");
             return ERR_INVALID_DATA;
         }
-    } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "accept token is nullptr");
     }
     std::string identityToken = "";
     if (!data.ReadString(identityToken)) {
@@ -293,7 +281,6 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
             reply.WriteUint32(static_cast<uint32_t>(property->GetWindowMode()));
         }
         property->SetIsNeedUpdateWindowMode(false);
-
         Rect winRect = property->GetWindowRect();
         reply.WriteInt32(winRect.posX_);
         reply.WriteInt32(winRect.posY_);
@@ -363,7 +350,7 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleTerminateSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
@@ -378,9 +365,6 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
     }
     if (hasCallerToken) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
-        if (abilitySessionInfo->callerToken == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
-        }
     }
     int32_t resultCode = 0;
     if (!data.ReadInt32(resultCode)) {
@@ -395,7 +379,7 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleSessionException");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     std::shared_ptr<AAFwk::Want> localWant(data.ReadParcelable<AAFwk::Want>());
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
@@ -410,9 +394,6 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
     }
     if (hasCallerToken) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
-        if (abilitySessionInfo->callerToken == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
-        }
     }
     if (!data.ReadInt32(abilitySessionInfo->persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed.");
@@ -471,7 +452,7 @@ int SessionStub::ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::Se
 
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "HandleChangeSessionVisibilityWithStatusBar");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
@@ -484,9 +465,6 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    if (processOptions == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "ProcessOptions is nullptr.");
-    }
     abilitySessionInfo->processOptions =
         std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
     int32_t CallerTokenCheckResult = CallerTokenCheck(data, abilitySessionInfo);
@@ -500,9 +478,6 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     }
     if (hasStartSetting) {
         auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        if (abilityStartSetting == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "AbilityStartSetting is nullptr.");
-        }
         abilitySessionInfo->startSetting.reset(abilityStartSetting);
     }
     bool visible = false;
@@ -524,16 +499,13 @@ int SessionStub::CallerTokenCheck(MessageParcel& data, sptr<AAFwk::SessionInfo> 
     }
     if (hasCallerToken) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
-        if (abilitySessionInfo->callerToken == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "CallerToken is nullptr.");
-        }
     }
     return ERR_NONE;
 }
 
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "PendingSessionActivation!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
@@ -546,9 +518,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    if (processOptions == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "ProcessOptions is nullptr.");
-    }
     abilitySessionInfo->processOptions.reset(processOptions);
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
@@ -573,9 +542,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (hasStartSetting) {
         auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        if (abilityStartSetting == nullptr) {
-            TLOGW(WmsLogTag::WMS_LIFE, "AbilityStartSetting is nullptr.");
-        }
         abilitySessionInfo->startSetting.reset(abilityStartSetting);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
