@@ -36,9 +36,6 @@ struct AbilityInfo;
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
-const std::string UI_TYPE_PHONE = "phone";
-const std::string UI_TYPE_PC = "pc";
-const std::string UI_TYPE_PAD = "pad";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -485,7 +482,7 @@ struct WSRectT {
 
     inline bool IsInvalid() const
     {
-        return IsEmpty() || NearZero(width_) || NearZero(height_);
+        return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
     inline std::string ToString() const
@@ -571,7 +568,6 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-    std::string uiType_ = UI_TYPE_PHONE;
     std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
@@ -652,6 +648,7 @@ struct SessionUIParam {
     float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {

@@ -198,7 +198,7 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     INIT_PROXY_CHECK_RETURN();
-    WLOGFI("use Foucus window info proxy");
+    WLOGFD("use Foucus window info proxy");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
@@ -293,6 +293,31 @@ WMError WindowAdapterLite::TerminateSessionByPersistentId(int32_t persistentId)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->TerminateSessionByPersistentId(persistentId);
+}
+
+WMError WindowAdapterLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->CloseTargetFloatWindow(bundleName);
+}
+
+WMError WindowAdapterLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->CloseTargetPiPWindow(bundleName);
+}
+
+WMError WindowAdapterLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCurrentPiPWindowInfo(bundleName);
 }
 
 } // namespace Rosen

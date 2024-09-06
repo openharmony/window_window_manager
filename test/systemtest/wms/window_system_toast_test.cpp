@@ -151,6 +151,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest
     if (scene->GetMainWindow() == nullptr) {
         return;
     }
+    ASSERT_EQ(WMError::WM_OK, fltWin->Show());
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 

@@ -97,7 +97,7 @@ bool SessionPermission::IsSACalling()
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        TLOGW(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);

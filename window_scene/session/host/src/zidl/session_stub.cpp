@@ -185,8 +185,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = sptr<WindowSessionProperty>::MakeSptr();
     }
-    bool isFromClient = data.ReadBool();
-    const WSError errCode = Foreground(property, isFromClient);
+    const WSError errCode = Foreground(property, true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -194,8 +193,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    bool isFromClient = data.ReadBool();
-    const WSError errCode = Background(isFromClient);
+    const WSError errCode = Background(true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -203,8 +201,7 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
-    bool isFromClient = data.ReadBool();
-    WSError errCode = Disconnect(isFromClient);
+    WSError errCode = Disconnect(true);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -320,8 +317,12 @@ int SessionStub::HandleDrawingCompleted(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t eventId = data.ReadUint32();
-    WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
+    uint32_t eventId = 0;
+    if (!data.ReadUint32(eventId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -450,16 +451,29 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
 
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateSessionRect!");
-    auto posX = data.ReadInt32();
-    auto posY = data.ReadInt32();
-    auto width = data.ReadUint32();
-    auto height = data.ReadUint32();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
+        return ERR_INVALID_DATA;
+    }
     WSRect rect = {posX, posY, width, height};
-    WLOGFI("HandleUpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
-    const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    auto isGlobal = data.ReadBool();
+    uint32_t changeReason = 0;
+    if (!data.ReadUint32(changeReason)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
+        return ERR_INVALID_DATA;
+    }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
+    bool isGlobal = false;
+    if (!data.ReadBool(isGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -475,8 +489,12 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("RaiseAboveTarget!");
-    auto subWindowId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "In");
+    uint32_t subWindowId = 0;
+    if (!data.ReadUint32(subWindowId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read subWindowId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RaiseAboveTarget(subWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -519,7 +537,10 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
-    auto mode = data.ReadUint32();
+    uint32_t mode = 0;
+    if (!data.ReadUint32(mode)) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -569,8 +590,12 @@ int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleSetAspectRatio!");
-    float ratio = data.ReadFloat();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    float ratio = 0.0f;
+    if (!data.ReadFloat(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ratio failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetAspectRatio(ratio);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -597,7 +622,11 @@ int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParce
 int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleTransferAbilityResult!");
-    uint32_t resultCode = data.ReadUint32();
+    uint32_t resultCode = 0;
+    if (!data.ReadUint32(resultCode)) {
+        WLOGFE("Failed to read resultCode!");
+        return ERR_TRANSACTION_FAILED;
+    }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         WLOGFE("want is nullptr");
@@ -684,9 +713,33 @@ int SessionStub::HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageP
 int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "HandleUpdatePiPRect!");
-    Rect rect = {data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32()};
-    auto reason = static_cast<SizeChangeReason>(data.ReadInt32());
-    WSError errCode = UpdatePiPRect(rect, reason);
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int32_t reason = 0;
+    if (!data.ReadInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posX error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read posY error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(width)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read width error");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read height error");
+        return ERR_INVALID_DATA;
+    }
+    Rect rect = {posX, posY, width, height};
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read reason error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -720,14 +773,13 @@ int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParce
     TLOGD(WmsLogTag::WMS_EVENT, "called");
     int32_t posX = 0;
     int32_t posY = 0;
-    if (data.ReadInt32(posX) && data.ReadInt32(posY)) {
-        WSError errCode = ProcessPointDownSession(posX, posY);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
-        return ERR_NONE;
-    } else {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Read failed!");
         return ERR_INVALID_DATA;
     }
+    WSError errCode = ProcessPointDownSession(posX, posY);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply)
@@ -758,8 +810,19 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
 int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
-    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
-    uint32_t percent = data.ReadUint32();
+    uint32_t gravityValue = 0;
+    if (!data.ReadUint32(gravityValue) ||
+        gravityValue < static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_FLOAT) ||
+        gravityValue > static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Gravity read failed, gravityValue: %{public}d", gravityValue);
+        return ERR_INVALID_DATA;
+    }
+    SessionGravity gravity = static_cast<SessionGravity>(gravityValue);
+    uint32_t percent = 0;
+    if (!data.ReadUint32(percent)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Percent read failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = SetKeyboardSessionGravity(gravity, percent);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -768,8 +831,11 @@ int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessagePar
 int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetCallingSessionId!");
-    uint32_t callingSessionId = data.ReadUint32();
-
+    uint32_t callingSessionId = INVALID_WINDOW_ID;
+    if (!data.ReadUint32(callingSessionId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "callingSessionId read failed.");
+        return ERR_INVALID_DATA;
+    }
     SetCallingSessionId(callingSessionId);
     reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
     return ERR_NONE;
@@ -778,7 +844,11 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
-    int32_t height = data.ReadInt32();
+    int32_t height = 0;
+    if (!data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        return ERR_INVALID_DATA;
+    }
     SetCustomDecorHeight(height);
     return ERR_NONE;
 }
@@ -798,7 +868,12 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
-    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    uint32_t actionValue = 0;
+    if (!data.ReadUint32(actionValue)) {
+        TLOGE(WmsLogTag::DEFAULT, "read action error");
+        return ERR_INVALID_DATA;
+    }
+    auto action = static_cast<WSPropertyChangeAction>(actionValue);
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {

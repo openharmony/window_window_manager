@@ -16,7 +16,7 @@
 #include "scene_session_dirty_manager.h"
 
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
 #include "fold_screen_state_internel.h"
@@ -206,8 +206,10 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
-    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
+    bool isMidScene = sceneSession->GetIsMidScene();
+    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    if (isAppMainWindowOrPip && !isMidScene) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -297,7 +299,7 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
         }
     }
     dialogMap[mainSession->GetPersistentId()] = session;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
+    TLOGD(WmsLogTag::WMS_DIALOG, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
         session->GetPersistentId(), mainSession->GetPersistentId());
 }
 
@@ -614,7 +616,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     return {windowInfo, pixelMap};
 }
 
-void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback)
+void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
 {
     flushWindowInfoCallback_ = std::move(callback);
 }

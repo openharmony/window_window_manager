@@ -159,7 +159,10 @@ ohos_unittest("ws_fold_screen_sensor_manager_test") {
 
   sources = [ "fold_screen_sensor_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -247,6 +250,7 @@ ohos_unittest("ws_screen_session_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -261,6 +265,7 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
 
   deps = [
     ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
@@ -326,7 +331,10 @@ ohos_unittest("ws_screen_scene_config_test") {
 
   sources = [ "screen_scene_config_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -345,8 +353,7 @@ ohos_unittest("ws_screen_session_manager_client_proxy_test") {
 ohos_unittest("ws_screen_session_manager_client_stub_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${window_base_path}/window_scene/screen_session_manager/include/zidl" ]
+  include_dirs = [ "${window_base_path}/window_scene/screen_session_manager_client/include/zidl" ]
 
   sources = [ "screen_session_manager_client_stub_test.cpp" ]
 
@@ -358,7 +365,10 @@ ohos_unittest("ws_screen_session_manager_client_test") {
 
   sources = [ "screen_session_manager_client_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
@@ -389,7 +399,10 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
 
   sources = [ "screen_session_manager_stub_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",
@@ -420,7 +433,10 @@ ohos_unittest("ws_screen_session_manager_test") {
 
   sources = [ "screen_session_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_runtime:ability_context_native",
@@ -541,7 +557,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
-    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/common/include",
@@ -597,7 +613,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
-    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
+    "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",

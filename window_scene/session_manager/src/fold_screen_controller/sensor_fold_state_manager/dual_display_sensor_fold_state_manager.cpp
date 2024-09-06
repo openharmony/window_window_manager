@@ -61,6 +61,7 @@ constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
 constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
+constexpr int64_t MIN_HALL_REPORT_INTERVAL = 100;
 } // namespace
 
 DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
@@ -93,9 +94,17 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
 void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD
-        && PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+    std::lock_guard<std::mutex> lock(hallMutex_);
+    auto currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    int64_t duration = static_cast<int64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - mLastHallReportTime_).count());
+    TLOGI(WmsLogTag::DMS, "duration = %{public}" PRIu64" ", duration);
+    if (duration < MIN_HALL_REPORT_INTERVAL) {
+        TLOGW(WmsLogTag::DMS, "duration < 100ms");
+        std::this_thread::sleep_for(std::chrono::milliseconds(MIN_HALL_REPORT_INTERVAL - duration));
+    }
+    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD &&
+        PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         if (std::count(packageNames_.begin(), packageNames_.end(), applicationStateObserver_->GetForegroundApp())) {
             isHallSwitchApp_ = false;
             return;

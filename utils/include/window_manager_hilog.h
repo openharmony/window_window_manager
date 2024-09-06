@@ -59,6 +59,7 @@ enum class WmsLogTag : uint8_t {
     WMS_MULTI_WINDOW,          // C04212
     WMS_INPUT_KEY_FLOW,        // C04213
     WMS_PIPELINE,              // C04214
+    WMS_HIERARCHY,             // C04215
     END = 256,                 // Last one, do not use
 };
 
@@ -84,6 +85,7 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_MULTI_WINDOW, "WMSMultiWindow" },
     { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
     { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
+    { WmsLogTag::WMS_HIERARCHY, "WMSHierarchy" },
 };
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""

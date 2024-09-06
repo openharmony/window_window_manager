@@ -146,12 +146,8 @@ public:
         }
         WLOGD("onDisplayChange: display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
-        std::set<sptr<IDisplayListener>> displayListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-            displayListeners = pImpl_->displayListeners_;
-        }
-        for (auto listener : displayListeners) {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        for (auto listener : pImpl_->displayListeners_) {
             listener->OnChange(displayInfo->GetDisplayId());
         }
     };
@@ -296,7 +292,7 @@ DMError DisplayManagerLite::UnregisterDisplayListener(sptr<IDisplayListener> lis
 void DisplayManagerLite::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(info);
+    static_cast<void>(UpdateDisplayInfoLocked(info));
 }
 
 void DisplayManagerLite::Impl::NotifyDisplayDestroy(DisplayId displayId)
@@ -309,7 +305,7 @@ void DisplayManagerLite::Impl::NotifyDisplayDestroy(DisplayId displayId)
 void DisplayManagerLite::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(displayInfo);
+    static_cast<void>(UpdateDisplayInfoLocked(displayInfo));
 }
 
 bool DisplayManagerLite::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)

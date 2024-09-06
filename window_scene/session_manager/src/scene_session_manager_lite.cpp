@@ -61,6 +61,11 @@ WSError SceneSessionManagerLite::GetSessionInfos(const std::string& deviceId, in
     return SceneSessionManager::GetInstance().GetSessionInfos(deviceId, numMax, sessionInfos);
 }
 
+WSError SceneSessionManagerLite::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowStatesByPid(pid, windowStates);
+}
+
 WSError SceneSessionManagerLite::GetSessionInfo(const std::string& deviceId,
     int32_t persistentId, SessionInfoBean& sessionInfo)
 {
@@ -239,5 +244,20 @@ WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyle
 WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
+}
+
+WMError SceneSessionManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetFloatWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetPiPWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
 }
 } // namespace OHOS::Rosen
