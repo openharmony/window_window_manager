@@ -1695,7 +1695,7 @@ WSError SceneSession::GetStartMoveFlag(bool& isMoving)
     auto task = [weakThis = wptr(this), &isMoving]() {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            TLOGE(WmsLogTag::DEFAULT, "session or moveDragController_ is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         isMoving = session->moveDragController_->GetStartMoveFlag();
