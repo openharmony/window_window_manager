@@ -154,8 +154,8 @@ public:
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
-    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
@@ -287,9 +287,9 @@ private:
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
+    napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
-    napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
 
     /**

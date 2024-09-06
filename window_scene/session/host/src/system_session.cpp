@@ -282,15 +282,11 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
             return ret;
         }
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            }
+            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
         }
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+            session->isDirty_ = false;
         }
         return ret;
     };
@@ -301,10 +297,10 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto currentRect = winRect_;
-    if (!GetRSVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
+    if (!GetVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
         WLOGE("Error size: [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
             " persistentId: %{public}d",
-            currentRect.width_, currentRect.height_, GetRSVisible(), GetPersistentId());
+            currentRect.width_, currentRect.height_, GetVisible(), GetPersistentId());
         return false;
     }
 
@@ -365,15 +361,6 @@ void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
     uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
     uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
     RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
-}
-
-bool SystemSession::IsVisibleForeground() const
-{
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
-        parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
-        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
-    }
-    return Session::IsVisibleForeground();
 }
 
 WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)

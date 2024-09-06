@@ -63,6 +63,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnRegisterSessionListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS):
             return HandleGetSessionInfos(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID):
+            return HandleGetMainWindowStatesByPid(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID):
             return HandleGetSessionInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID):
@@ -111,8 +113,6 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleClearMainSessions(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
-            return HandleTerminateSessionByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -205,6 +205,31 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfos(MessageParcel& data, Mess
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
             WLOGFE("GetSessionInfos error");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read pid fail");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<MainWindowState> windowStates;
+    WSError errCode = GetMainWindowStatesByPid(pid, windowStates);
+    if (!reply.WriteInt32(windowStates.size())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write windowStates size fail");
+        return ERR_INVALID_DATA;
+    }
+    for (auto& state : windowStates) {
+        if (!reply.WriteParcelable(&state)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write windowState fail");
             return ERR_INVALID_DATA;
         }
     }
@@ -555,16 +580,6 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t persistentId = data.ReadInt32();
-    WMError errCode = TerminateSessionByPersistentId(persistentId);
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        return ERR_INVALID_DATA;
-    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

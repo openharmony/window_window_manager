@@ -67,6 +67,11 @@ WSError SceneSessionManagerLite::GetSessionInfos(const std::string& deviceId, in
     return SceneSessionManager::GetInstance().GetSessionInfos(deviceId, numMax, sessionInfos);
 }
 
+WSError SceneSessionManagerLite::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowStatesByPid(pid, windowStates);
+}
+
 WSError SceneSessionManagerLite::GetSessionInfo(const std::string& deviceId,
     int32_t persistentId, SessionInfoBean& sessionInfo)
 {
@@ -240,10 +245,5 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
 WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
 {
     return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
-}
-
-WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
-{
-    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace OHOS::Rosen

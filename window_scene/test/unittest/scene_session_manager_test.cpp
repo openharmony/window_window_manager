@@ -263,6 +263,19 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos, Function | SmallTest | Level3
 }
 
 /**
+ * @tc.name: GetMainWindowStatesByPid
+ * @tc.desc: SceneSesionManager get main window states
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetMainWindowStatesByPid, Function | SmallTest | Level3)
+{
+    int32_t pid = 100;
+    std::vector<MainWindowState> windowStates;
+    WSError result = ssm_->GetMainWindowStatesByPid(pid, windowStates);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: CheckIsRemote
  * @tc.desc: SceneSesionManager check is remote
  * @tc.type: FUNC
@@ -1421,7 +1434,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo02, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetRSVisible(true);
+    sceneSession->SetVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     int32_t windowId = 0;
@@ -1456,7 +1469,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
     property2->SetParentId(sceneSession->GetPersistentId());
     sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, property2);
     ASSERT_NE(nullptr, sceneSession2);
-    sceneSession2->SetRSVisible(true);
+    sceneSession2->SetVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
     int32_t windowId = 0;
@@ -1481,7 +1494,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo04, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetRSVisible(true);
+    sceneSession->SetVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     int32_t windowId = 0;
@@ -1506,7 +1519,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetRSVisible(true);
+    sceneSession->SetVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({0, nullptr});
 
@@ -1514,7 +1527,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
-    sceneSession->SetRSVisible(false);
+    sceneSession->SetVisible(false);
     result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(0, infos.size());

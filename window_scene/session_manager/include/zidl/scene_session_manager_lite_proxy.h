@@ -38,6 +38,15 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
                             std::vector<SessionInfoBean>& sessionInfos) override;
+    /**
+     * @brief Obtains main window state list by pid
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pid Target pid
+     * @param windowStates Window state list
+     */
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) override;
@@ -69,7 +78,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowModeType) override;
-    WMError TerminateSessionByPersistentId(int32_t persistentId) override;
 
 private:
     template<typename T>
