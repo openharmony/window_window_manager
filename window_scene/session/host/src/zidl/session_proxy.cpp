@@ -31,26 +31,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
-
-bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{
-    if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
-        return false;
-    }
-    if (!data.WriteInterfaceToken(GetDescriptor()) ||
-        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
-        !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
-        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
-        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
-        !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
-        !data.WriteBool(abilitySessionInfo->reuse) ||
-        !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
-        return false;
-    }
-    return true;
-}
 } // namespace
 
 WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
@@ -430,6 +410,26 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
+}
+
+bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return false;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor()) ||
+        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+        !data.WriteInt32(abilitySessionInfo->requestCode) ||
+        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
+        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
+        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteBool(abilitySessionInfo->reuse) ||
+        !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
+        return false;
+    }
+    return true;
 }
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
