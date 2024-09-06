@@ -93,10 +93,8 @@ ohos_shared_library("scene_session") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "preferences:native_preferences",
   ]
-  if (!(host_os == "linux" && host_cpu == "arm64")) {
-    external_deps += [ "preferences:native_preferences" ]
-  }
   public_external_deps = [
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
