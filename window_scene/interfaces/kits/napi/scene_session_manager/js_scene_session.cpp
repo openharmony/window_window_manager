@@ -474,7 +474,13 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
         return;
     }
     sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [weakThis = wptr(this)](bool isLandscapeMultiWindow) {
-        this->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
     };
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessLandscapeMultiWindowRegister success");
 }
@@ -518,7 +524,13 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
         return;
     }
     sessionchangeCallback->onKeyboardGravityChange_ = [weakThis = wptr(this)](SessionGravity gravity) {
-        this->OnKeyboardGravityChange(gravity);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        jsSceneSession->OnKeyboardGravityChange(gravity);
     };
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
@@ -573,7 +585,12 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
         return;
     }
     sessionchangeCallback->onLayoutFullScreenChangeFunc_ = [weakThis = wptr(this)](bool isLayoutFullScreen) {
-        this->OnLayoutFullScreenChange(isLayoutFullScreen);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null",);
+            return;
+        }
+        jsSceneSession->OnLayoutFullScreenChange(isLayoutFullScreen);
     };
     TLOGI(WmsLogTag::WMS_LAYOUT, "Register success");
 }
@@ -682,7 +699,12 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
         return;
     }
     session->RegisterDefaultAnimationFlagChangeCallback([weakThis = wptr(this)](bool isNeedDefaultAnimationFlag) {
-        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionDefaultAnimationFlagChangeRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
     });
 }
 
@@ -851,7 +873,12 @@ void JsSceneSession::ProcessRaiseToTopRegister()
         return;
     }
     sessionchangeCallback->onRaiseToTop_ = [weakThis = wptr(this)] {
-        this->OnRaiseToTop();
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRaiseToTopRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnRaiseToTop();
     };
     WLOGFD("ProcessRaiseToTopRegister success");
 }
@@ -1381,7 +1408,7 @@ void JsSceneSession::ProcessFrameLayoutFinishRegister()
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessFrameLayoutFinishRegister jsSceneSession is null");
             return;
         }
-        this->NotifyFrameLayoutFinish();
+        jsSceneSession->NotifyFrameLayoutFinish();
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2757,7 +2784,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     auto task = [weakThis = wptr(this), sessionInfo] {
         auto jsSceneSession = weak.promote();
         if (jsSceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionActivation JsSceneSession is null");
             return;
         }
         jsSceneSession->PendingSessionActivationInner(sessionInfo);
