@@ -584,6 +584,28 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestFocusByClient
+ * @tc.desc: RequestFocusByClient Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient start";
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowRequestFocusByClientCheck");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WSError res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient end";
+}
+
+/**
  * @tc.name: UpdateViewportConfig
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC

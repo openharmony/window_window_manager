@@ -134,6 +134,7 @@ public:
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
     WMError RequestFocus() const override;
+    WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;

@@ -443,6 +443,21 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
 }
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: RequestFocus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->RequestFocus(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
