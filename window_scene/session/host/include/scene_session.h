@@ -279,6 +279,8 @@ public:
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;
+    bool IsAppOrLowerSystemSession() const;
+    bool IsSystemSessionAboveApp() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     bool IsShowWhenLocked() const;
