@@ -971,9 +971,9 @@ HWTEST_F(WindowSessionTest3, RequestFocus, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
-    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(false));
+    session_->sessionInfo_.isSystem_ = false;
+    EXPECT_EQ(WSError::WS_OK, session_->RequestFocus(true));
+    EXPECT_EQ(WSError::WS_OK, session_->RequestFocus(false));
 }
 
 /**
