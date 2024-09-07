@@ -31,7 +31,7 @@ void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData& data)
     cv_.notify_all();
 }
 
-std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const time)
+std::string SceneEventPublish::GetDebugDumpInfo(const std::chrono::milliseconds& time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
