@@ -295,6 +295,7 @@ public:
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
+    WSError RequestFocus(bool isFocused) override;
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);

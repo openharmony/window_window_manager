@@ -1051,6 +1051,12 @@ public:
      * @return WM_OK means request success, others means request failed.
      */
     virtual WMError RequestFocus() const { return WMError::WM_OK; }
+        /**
+     * @brief Request to get focus or lose focus.
+     *
+     * @return WM_OK means request success, others means request failed.
+     */
+    virtual WMError RequestFocusByClient(bool isFocused) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Check current focus status.
      *

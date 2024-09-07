@@ -89,6 +89,7 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
+    WMError RequestFocus(bool isFocused) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

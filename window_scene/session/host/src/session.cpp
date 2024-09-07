@@ -2198,6 +2198,22 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError Session::RequestFocus(bool isFocused)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    NotifyRequestFocusStatusNotifyManager(false, true, reason);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",

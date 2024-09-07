@@ -845,6 +845,18 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+WMError WindowSessionImpl::RequestFocusByClient(bool isFocused) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto ret = hostSession->RequestFocus(isFocused);
+    return static_cast<WMError>(ret);
+}
+
 bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 {
     if (interactive == interactive_ && hasFirstNotifyInteractive_) {
