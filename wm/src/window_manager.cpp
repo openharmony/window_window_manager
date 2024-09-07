@@ -132,6 +132,7 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         focusChangeListeners = focusChangedListeners_;
     }
+    WLOGFD("NotifyFocused listeners: %{public}zu", focusChangeListeners.size());
     for (auto& listener : focusChangeListeners) {
         listener->OnFocused(focusChangeInfo);
     }
@@ -147,6 +148,7 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         focusChangeListeners = focusChangedListeners_;
     }
+    WLOGFD("NotifyUnfocused listeners: %{public}zu", focusChangeListeners.size());
     for (auto& listener : focusChangeListeners) {
         listener->OnUnfocused(focusChangeInfo);
     }
@@ -890,7 +892,7 @@ WMError WindowManager::RegisterDisplayInfoChangedListener(const sptr<IRemoteObje
         TLOGE(WmsLogTag::DMS, "create listener adapter failed.");
         return WMError::WM_ERROR_NO_MEM;
     }
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = pImpl_->displayInfoChangedListeners_.find(token);
     if (iter == pImpl_->displayInfoChangedListeners_.end()) {
         pImpl_->displayInfoChangedListeners_.insert({token, {listenerAdapter}});
@@ -922,7 +924,7 @@ WMError WindowManager::UnregisterDisplayInfoChangedListener(const sptr<IRemoteOb
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = pImpl_->displayInfoChangedListeners_.find(token);
     if (iter == pImpl_->displayInfoChangedListeners_.end()) {
         TLOGW(WmsLogTag::DMS, "can not find the ability token");
@@ -989,7 +991,6 @@ void WindowManager::UpdateWindowModeTypeInfo(WindowModeType type) const
 {
     pImpl_->NotifyWindowModeChange(type);
 }
-
 
 WMError WindowManager::GetWindowModeType(WindowModeType& windowModeType) const
 {
@@ -1264,7 +1265,7 @@ WMError WindowManager::RegisterWindowStyleChangedListener(const sptr<IWindowStyl
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (pImpl_->windowStyleListenerAgent_ == nullptr) {
             pImpl_->windowStyleListenerAgent_ = new WindowManagerAgent();
         }
@@ -1280,7 +1281,7 @@ WMError WindowManager::RegisterWindowStyleChangedListener(const sptr<IWindowStyl
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
     if (ret != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_MAIN, "RegisterWindowManagerAgent failed!");
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         pImpl_->windowStyleListenerAgent_ = nullptr;
         auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
         if (iter != pImpl_->windowStyleListeners_.end()) {
@@ -1298,7 +1299,7 @@ WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowSt
         return WMError::WM_ERROR_NULLPTR;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = std::find(pImpl_->windowStyleListeners_.begin(), pImpl_->windowStyleListeners_.end(), listener);
         if (iter == pImpl_->windowStyleListeners_.end()) {
             TLOGE(WmsLogTag::WMS_MAIN, "could not find this listener");
@@ -1311,7 +1312,7 @@ WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowSt
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE, pImpl_->windowStyleListenerAgent_);
         if (ret == WMError::WM_OK) {
-            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
             pImpl_->windowStyleListenerAgent_ = nullptr;
         }
     }
