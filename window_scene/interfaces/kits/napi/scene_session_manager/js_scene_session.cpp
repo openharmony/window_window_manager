@@ -1140,7 +1140,12 @@ void JsSceneSession::OnTouchOutside()
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
-    static_cast<JsSceneSession*>(data)->DecStrongRef(nullptr);
+    auto jsSceneSession = static_cast<JsSceneSession*>(data);
+    if (jsSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
+        return;
+    }
+    jsSceneSession->DecStrongRef(nullptr);
 }
 
 napi_value JsSceneSession::RegisterCallback(napi_env env, napi_callback_info info)
