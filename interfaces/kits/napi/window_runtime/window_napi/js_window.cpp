@@ -6451,7 +6451,6 @@ napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     wptr<Window> weakToken(windowToken_);
-    std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
     SetRequestFocusTask(execute, complete, weakToken, isFocused);
