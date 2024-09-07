@@ -3440,7 +3440,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
 
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 {
-    return windowSystemConfig_.keyboardAnimationConfig_;
+    return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
 }
 
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -3703,7 +3703,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-        
+
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;
