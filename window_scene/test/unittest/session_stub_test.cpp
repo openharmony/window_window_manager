@@ -646,7 +646,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest |
  * @tc.name: HandleRequestFocus
  * @tc.desc: sessionStub HandleRequestFocusTest
  * @tc.type: FUNC
- * @tc.require: #I6JLSI
+ * @tc.require: #IAPLFA
  */
 HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
 {
