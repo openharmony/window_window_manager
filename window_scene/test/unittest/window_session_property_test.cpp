@@ -245,6 +245,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetUIExtensionUsage, Function | SmallT
 }
 
 /**
+ * @tc.name: SetParentWindowType
+ * @tc.desc: SetParentWindowType and GetParentWindowType test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetParentWindowType, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetParentWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, property->GetParentWindowType());
+    property->SetParentWindowType(WindowType::WINDOW_TYPE_TOAST);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_TOAST, property->GetParentWindowType());
+}
+
+/**
  * @tc.name: SetAndGetIsUIExtensionAbilityProcess
  * @tc.desc: SetIsUIExtensionAbilityProcess and GetIsUIExtensionAbilityProcess test
  * @tc.type: FUNC
@@ -272,7 +287,6 @@ HWTEST_F(WindowSessionPropertyTest, AddWindowFlag, Function | SmallTest | Level2
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetWindowFlags(), false);
 }
-
 
 /**
  * @tc.name: IsTurnScreenOn
