@@ -1712,35 +1712,25 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     return WSError::WS_OK;
 }
 
-std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
-    const sptr<SceneSession>& sceneSession, bool isNewActive)
+WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    auto future = promise->get_future();
-    auto task = [this, weakSceneSession, isNewActive, promise]() {
+    auto task = [this, weakSceneSession, isNewActive]() {
         sptr<SceneSession> scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
-            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-            return WSError::WS_ERROR_INVALID_WINDOW;
+            return WSError::WS_ERROR_NULLPTR;
         }
-
         auto persistentId = scnSession->GetPersistentId();
-        scnSession->NotifyForegroundInteractiveStatus(true);
+        scnSession->SetForegroundInteractiveStatus(true);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         TLOGI(WmsLogTag::WMS_MAIN, "Request active id:%{public}d system:%{public}u isNewActive:%{public}d",
             persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_), isNewActive);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session invalid by %{public}d", persistentId);
-            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION));
-            return WSError::WS_ERROR_INVALID_WINDOW;
+            return WSError::WS_ERROR_INVALID_SESSION;
         }
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            WLOGD("Request active collaborator native session");
-            scnSession = GetSceneSession(persistentId);
-        }
-        auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
+        auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive);
         if (ret == WSError::WS_OK) {
             scnSession->SetExitSplitOnBackground(false);
         }
@@ -1750,7 +1740,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
     std::string taskName = "RequestSceneSessionActivation:PID:" +
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
-    return future;
+    return WSError::WS_OK;
 }
 
 bool SceneSessionManager::IsKeyboardForeground()
@@ -1809,7 +1799,7 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& 
 }
 
 WSError SceneSessionManager::RequestSceneSessionActivationInner(
-    sptr<SceneSession>& scnSession, bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise)
+    sptr<SceneSession>& scnSession, bool isNewActive)
 {
     auto persistentId = scnSession->GetPersistentId();
     RequestInputMethodCloseKeyboard(persistentId);
@@ -1826,8 +1816,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
     if (!scnSessionInfo) {
         TLOGE(WmsLogTag::WMS_LIFE, "create AbilityInfo fail id %{public}d", persistentId);
-        promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WSError::WS_ERROR_NULLPTR;
     }
     scnSession->NotifyActivation();
     scnSessionInfo->isNewWant = isNewActive;
@@ -1865,7 +1854,6 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
     }
     NotifyCollaboratorAfterStart(scnSession, scnSessionInfo);
-    promise->set_value(static_cast<int32_t>(errCode));
 
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
@@ -6060,6 +6048,13 @@ WSError SceneSessionManager::TerminateSessionNew(
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
 }
 
+WSError SceneSessionManager::SetVmaCacheStatus(bool flag)
+{
+    WLOGFI("flag: %{public}d", flag);
+    RSInterfaces::GetInstance().SetVmaCacheStatus(flag);
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                                 SessionSnapshot& snapshot, bool isLowResolution)
 {
@@ -7349,6 +7344,12 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
 
 void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     const std::string taskName, const int delayTime)
+{
+    taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
+}
+
+void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
+                                                  const std::string taskName, const int delayTime)
 {
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
