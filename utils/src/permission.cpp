@@ -32,11 +32,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
 }
 
-bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCalling)
+bool Permission::IsSystemServiceCalling(bool needPrintLog)
 {
-    uint32_t tokenId = isLocalSysCalling ?
-        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
-        IPCSkeleton::GetCallingTokenID();
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
@@ -49,22 +47,12 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog, bool isLocalSysCallin
     return false;
 }
 
-bool Permission::IsSystemCallingOrStartByHdcd(bool isLocalSysCalling)
+bool Permission::IsSystemCalling()
 {
-    if (!IsSystemCalling(isLocalSysCalling) && !IsStartByHdcd(isLocalSysCalling)) {
-        TLOGE(WmsLogTag::DEFAULT, "not system calling, not start by hdcd");
-        return false;
-    }
-    return true;
-}
-
-bool Permission::IsSystemCalling(bool isLocalSysCalling)
-{
-    if (IsSystemServiceCalling(false, isLocalSysCalling)) {
+    if (IsSystemServiceCalling(false)) {
         return true;
     }
-    uint64_t accessTokenIDEx = isLocalSysCalling ?
-        IPCSkeleton::GetSelfTokenID() : IPCSkeleton::GetCallingFullTokenID();
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
     return isSystemApp;
 }
@@ -82,13 +70,10 @@ bool Permission::CheckCallingPermission(const std::string& permission)
     return true;
 }
 
-bool Permission::IsStartByHdcd(bool isLocalSysCalling)
+bool Permission::IsStartByHdcd()
 {
-    uint32_t tokenId = isLocalSysCalling ?
-        static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
-        IPCSkeleton::GetCallingTokenID();
     OHOS::Security::AccessToken::NativeTokenInfo info;
-    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
         return false;
     }
     if (info.processName.compare("hdcd") == 0) {
