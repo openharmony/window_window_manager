@@ -124,7 +124,7 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-        bool isShow) { return WSError::WS_OK; }
+        bool visible) { return WSError::WS_OK; }
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
     {
         return WSError::WS_OK;
