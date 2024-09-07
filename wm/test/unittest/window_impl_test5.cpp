@@ -1294,7 +1294,7 @@ HWTEST_F(WindowImplTest5, UpdateTitleButtonVisibility02, Function | SmallTest | 
 
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _));
+    EXPECT_CALL(*content, HideWindowTitleButton(_, _, _, _));
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
     window->UpdateTitleButtonVisibility();
 

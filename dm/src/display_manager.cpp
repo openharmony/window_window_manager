@@ -1805,6 +1805,12 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayState(displayId);
 }
 
+bool DisplayManager::TryToCancelScreenOff()
+{
+    WLOGFD("[UL_POWER]TryToCancelScreenOff start");
+    return SingletonContainer::Get<DisplayManagerAdapter>().TryToCancelScreenOff();
+}
+
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     WLOGFI("[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);

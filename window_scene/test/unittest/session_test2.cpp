@@ -1471,7 +1471,7 @@ HWTEST_F(WindowSessionTest2, SetShowRecent003, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(false);
 
     session_->property_ = new WindowSessionProperty();
@@ -1702,6 +1702,18 @@ HWTEST_F(WindowSessionTest2, ResetSessionConnectState, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: ResetIsActive
+ * @tc.desc: ResetIsActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ResetIsActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->ResetIsActive();
+    ASSERT_EQ(session_->isActive_, false);
+}
+
+/**
  * @tc.name: PostExportTask02
  * @tc.desc: PostExportTask
  * @tc.type: FUNC
@@ -1878,33 +1890,33 @@ HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest
  */
 HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
 {
-    EXPECT_NE(session_, nullptr);
+    ASSERT_NE(session_, nullptr);
     SessionInfo info;
     info.abilityName_ = "getMainSession";
     info.moduleName_ = "getMainSession";
     info.bundleName_ = "getMainSession";
     sptr<Session> session = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session, nullptr);
+    ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session->property_, nullptr);
+    ASSERT_NE(session->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_NE(session, session->GetMainSession());
+    EXPECT_EQ(session, session->GetMainSession());
 
     sptr<Session> subSession = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(subSession, nullptr);
+    ASSERT_NE(subSession, nullptr);
     subSession->SetParentSession(session);
     subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(subSession->property_, nullptr);
+    ASSERT_NE(subSession->property_, nullptr);
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    EXPECT_NE(session, subSession->GetMainSession());
+    EXPECT_EQ(session, subSession->GetMainSession());
 
     sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(subSubSession, nullptr);
+    ASSERT_NE(subSubSession, nullptr);
     subSubSession->SetParentSession(subSession);
     subSubSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(subSubSession->property_, nullptr);
+    ASSERT_NE(subSubSession->property_, nullptr);
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(session, subSubSession->GetMainSession());
+    EXPECT_EQ(session, subSubSession->GetMainSession());
 }
 
 /**
@@ -1914,7 +1926,7 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(true);
     bool ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
@@ -1927,7 +1939,7 @@ HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level
 
     ssm_->SetScreenLocked(false);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    session_->systemConfig_.uiType_ = "pc";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session_->IsSupportDetectWindow(false);
     ASSERT_EQ(ret, false);
 }

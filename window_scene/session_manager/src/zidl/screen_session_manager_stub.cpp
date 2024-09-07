@@ -120,6 +120,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF: {
+            reply.WriteBool(TryToCancelScreenOff());
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);

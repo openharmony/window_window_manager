@@ -23,7 +23,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Scree
 } // namespace
 
 void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name, bool isExtand)
+    ScreenId rsId, const std::string& name, bool isExtend)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -54,7 +54,7 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
         WLOGFE("Write name failed");
         return;
     }
-    if (!data.WriteBool(isExtand)) {
+    if (!data.WriteBool(isExtend)) {
         WLOGFE("Write isExtended failed");
         return;
     }
@@ -97,7 +97,7 @@ void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> ol
     }
 }
 
-void ScreenSessionManagerClientProxy::OnScreenExtandChanged(ScreenId mainScreenId, ScreenId extandScreenId)
+void ScreenSessionManagerClientProxy::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -115,12 +115,12 @@ void ScreenSessionManagerClientProxy::OnScreenExtandChanged(ScreenId mainScreenI
         WLOGFE("Write screenId failed");
         return;
     }
-    if (!data.WriteUint64(extandScreenId)) {
+    if (!data.WriteUint64(extendScreenId)) {
         WLOGFE("Write screenOrientation failed");
         return;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_EXTAND_CHANGED),
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_EXTEND_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;

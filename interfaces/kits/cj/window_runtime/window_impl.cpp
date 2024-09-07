@@ -749,7 +749,7 @@ int32_t CJWindowImpl::RaiseToAppTop()
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RaiseToAppTop());
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] zorder raise success",
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] zorder raise success",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -806,7 +806,7 @@ int32_t CJWindowImpl::SetRaiseByClickEnabled(bool enable)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetRaiseByClickEnabled(enable));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set raiseEnabled end",
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set raiseEnabled end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }

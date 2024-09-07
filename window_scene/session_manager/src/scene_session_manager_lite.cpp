@@ -21,140 +21,149 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLite" };
 } // namespace
 
-WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManagerLite)
+SceneSessionManagerLite& SceneSessionManagerLite::GetInstance()
+{
+    static sptr<SceneSessionManagerLite> instance(new SceneSessionManagerLite());
+    return *instance;
+}
 
 WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
-    WLOGFD("run SetSessionContinueState");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().SetSessionContinueState(token, continueState);
 }
 
 WSError SceneSessionManagerLite::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
-    WLOGFD("run SetSessionLabel");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().SetSessionLabel(token, label);
 }
 
 WSError SceneSessionManagerLite::SetSessionIcon(const sptr<IRemoteObject>& token,
     const std::shared_ptr<Media::PixelMap>& icon)
 {
-    WLOGFD("run SetSessionIcon");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().SetSessionIcon(token, icon);
 }
 
 WSError SceneSessionManagerLite::IsValidSessionIds(
     const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {
-    WLOGFD("run IsValidSessionIds");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().IsValidSessionIds(sessionIds, results);
 }
 
 WSError SceneSessionManagerLite::GetSessionInfos(const std::string& deviceId, int32_t numMax,
     std::vector<SessionInfoBean>& sessionInfos)
 {
-    WLOGFD("run GetSessionInfos");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().GetSessionInfos(deviceId, numMax, sessionInfos);
+}
+
+WSError SceneSessionManagerLite::GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates)
+{
+    return SceneSessionManager::GetInstance().GetMainWindowStatesByPid(pid, windowStates);
 }
 
 WSError SceneSessionManagerLite::GetSessionInfo(const std::string& deviceId,
     int32_t persistentId, SessionInfoBean& sessionInfo)
 {
-    WLOGFD("run GetSessionInfo");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().GetSessionInfo(deviceId, persistentId, sessionInfo);
 }
 
 WSError SceneSessionManagerLite::GetSessionInfoByContinueSessionId(
     const std::string& continueSessionId, SessionInfoBean& sessionInfo)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "liteProxy -> continueSessionId: %{public}s", continueSessionId.c_str());
+    TLOGD(WmsLogTag::WMS_MAIN, "continueSessionId: %{public}s", continueSessionId.c_str());
     return SceneSessionManager::GetInstance().GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo);
 }
 
 WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    WLOGFD("run RegisterSessionListener");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().RegisterSessionListener(listener);
 }
 
 WSError SceneSessionManagerLite::UnRegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    WLOGFD("run UnRegisterSessionListener");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().UnRegisterSessionListener(listener);
 }
 
 WSError SceneSessionManagerLite::TerminateSessionNew(
     const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker)
 {
-    WLOGFD("run TerminateSessionNew");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().TerminateSessionNew(info, needStartCaller, isFromBroker);
 }
 
 WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
     SessionSnapshot& snapshot, bool isLowResolution)
 {
-    WLOGFD("run GetSessionSnapshot");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
 WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
-    WLOGFD("run PendingSessionToForeground");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
 WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
 {
-    WLOGFD("run PendingSessionToBackgroundForDelegator");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token);
 }
 
 WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
-    WLOGFD("run GetFocusSessionToken");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().GetFocusSessionToken(token);
 }
 
 WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName& element)
 {
-    WLOGFD("run GetFocusSessionElement");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().GetFocusSessionElement(element);
 }
 
 WSError SceneSessionManagerLite::ClearSession(int32_t persistentId)
 {
-    WLOGFD("run ClearSession with persistentId: %{public}d", persistentId);
+    WLOGFD("Id: %{public}d", persistentId);
     return SceneSessionManager::GetInstance().ClearSession(persistentId);
 }
 
 WSError SceneSessionManagerLite::ClearAllSessions()
 {
-    WLOGFD("run ClearAllSessions");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().ClearAllSessions();
 }
 
 WSError SceneSessionManagerLite::LockSession(int32_t sessionId)
 {
-    WLOGFD("run LockSession with persistentId: %{public}d", sessionId);
+    WLOGFD("Id: %{public}d", sessionId);
     return SceneSessionManager::GetInstance().LockSession(sessionId);
 }
 
 WSError SceneSessionManagerLite::UnlockSession(int32_t sessionId)
 {
-    WLOGFD("run UnlockSession with persistentId: %{public}d", sessionId);
+    WLOGFD("Id: %{public}d", sessionId);
     return SceneSessionManager::GetInstance().UnlockSession(sessionId);
 }
 
 WSError SceneSessionManagerLite::MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId)
 {
-    WLOGFD("run MoveSessionsToForeground");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().MoveSessionsToForeground(sessionIds, topSessionId);
 }
 
 WSError SceneSessionManagerLite::MoveSessionsToBackground(const std::vector<int32_t>& sessionIds,
     std::vector<int32_t>& result)
 {
-    WLOGFD("run MoveSessionsToBackground");
+    WLOGFD("in");
     return SceneSessionManager::GetInstance().MoveSessionsToBackground(sessionIds, result);
 }
 
@@ -235,5 +244,20 @@ WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyle
 WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
+}
+
+WMError SceneSessionManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetFloatWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetPiPWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
 }
 } // namespace OHOS::Rosen

@@ -26,6 +26,7 @@
 #include <input_method_controller.h>
 #include <singleton.h>
 #include <singleton_container.h>
+#include <pwd.h>
 #include "common/include/session_permission.h"
 #include "parameters.h"
 #include "window_manager_hilog.h"
@@ -56,22 +57,6 @@ sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
         return nullptr;
     }
     return bundleManagerServiceProxy;
-}
-
-bool GetInputMethodBundleName(std::string& name)
-{
-    auto imc = MiscServices::InputMethodController::GetInstance();
-    if (!imc) {
-        WLOGFE("InputMethodController is nullptr");
-        return false;
-    }
-    auto imProp = imc->GetCurrentInputMethod();
-    if (!imProp) {
-        WLOGFE("CurrentInputMethod is nullptr");
-        return false;
-    }
-    name = imProp->name;
-    return true;
 }
 }
 
@@ -113,7 +98,7 @@ bool SessionPermission::IsSACalling()
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        TLOGW(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
@@ -201,40 +186,13 @@ bool SessionPermission::IsStartByHdcd()
 
 bool SessionPermission::IsStartedByInputMethod()
 {
-    auto bundleManagerServiceProxy_ = GetBundleManagerProxy();
-    if (!bundleManagerServiceProxy_) {
-        WLOGFE("failed to get BundleManagerServiceProxy");
+    auto imc = MiscServices::InputMethodController::GetInstance();
+    if (!imc) {
+        TLOGE(WmsLogTag::DEFAULT, "InputMethodController is nullptr");
         return false;
     }
-    std::string inputMethodBundleName;
-    if (!GetInputMethodBundleName(inputMethodBundleName)) {
-        WLOGFE("failed to get input method bundle name");
-        return false;
-    }
-
-    int uid = IPCSkeleton::GetCallingUid();
-    // reset ipc identity
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::string bundleName;
-    bundleManagerServiceProxy_->GetNameForUid(uid, bundleName);
-    AppExecFwk::BundleInfo bundleInfo;
-    // 200000 use uid to caculate userId
-    int userId = uid / 200000;
-    bool result = bundleManagerServiceProxy_->GetBundleInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, userId);
-    // set ipc identity to raw
-    IPCSkeleton::SetCallingIdentity(identity);
-    if (!result) {
-        WLOGFE("failed to query extension ability info, bundleName:%{public}s, userId:%{public}d",
-               bundleName.c_str(), userId);
-        return false;
-    }
-
-    auto extensionInfo = std::find_if(bundleInfo.extensionInfos.begin(), bundleInfo.extensionInfos.end(),
-        [](AppExecFwk::ExtensionAbilityInfo extensionInfo) {
-            return (extensionInfo.type == AppExecFwk::ExtensionAbilityType::INPUTMETHOD);
-        });
-    return extensionInfo != bundleInfo.extensionInfos.end() && extensionInfo->bundleName == inputMethodBundleName;
+    int pid = IPCSkeleton::GetCallingPid();
+    return imc->IsCurrentImeByPid(pid);
 }
 
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
@@ -339,6 +297,12 @@ std::string SessionPermission::GetCallingBundleName()
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::string callingBundleName;
     bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
+    // if bundlename is empty, fill in pw_name
+    if (callingBundleName.empty()) {
+        if (struct passwd* user = getpwuid(uid)) {
+            callingBundleName = user->pw_name;
+        }
+    }
     IPCSkeleton::SetCallingIdentity(identity);
     return callingBundleName;
 }

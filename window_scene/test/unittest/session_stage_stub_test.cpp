@@ -739,6 +739,25 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTe
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionFullScreen(data, reply));
 }
+
+/**
+ * @tc.name: HandleNotifyDumpInfo
+ * @tc.desc: test function : HandleNotifyDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteStringVector(params);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
 }
 }
 }

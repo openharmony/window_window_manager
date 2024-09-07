@@ -87,10 +87,16 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);
     switch (msgId) {
         case WindowEventChannelListenerMessage::TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC: {
-            int32_t keyEventId = data.ReadInt32();
-            bool isPreImeEvent = data.ReadBool();
-            bool isConsumed = data.ReadBool();
-            WSError retCode = static_cast<WSError>(data.ReadInt32());
+            int32_t keyEventId = 0;
+            bool isPreImeEvent = false;
+            bool isConsumed = false;
+            int32_t intRetCode = 0;
+            if (!data.ReadInt32(keyEventId) || !data.ReadBool(isPreImeEvent) || !data.ReadBool(isConsumed) ||
+                !data.ReadInt32(intRetCode)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "Read keyEvent info failed");
+                return ERR_TRANSACTION_FAILED;
+            }
+            WSError retCode = static_cast<WSError>(intRetCode);
             OnTransferKeyEventForConsumed(keyEventId, isPreImeEvent, isConsumed, retCode);
             break;
         }
@@ -461,5 +467,25 @@ WSError ExtensionSession::Background(bool isFromClient)
     NotifyBackground();
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
+}
+
+void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, notifyEvent: %{public}d", notifyEvent);
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
+        extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
+    }
+}
+
+WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyDumpInfo(params, info);
 }
 } // namespace OHOS::Rosen
