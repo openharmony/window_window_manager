@@ -7348,12 +7348,6 @@ void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
 
-void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
-                                                  const std::string taskName, const int delayTime)
-{
-    taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
-}
-
 void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
 {
     auto task = [this, persistentId]() {

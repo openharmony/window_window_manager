@@ -1858,7 +1858,7 @@ napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callbac
     }
     bool flag = false;
     if (!ConvertFromJsValue(env, argv[0], flag)) {
-        WLOGFE("[NAPI]Faile to convert parameter to flag");
+        WLOGFE("[NAPI]Faile to convert parameter to flag.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid"));
         return NapiGetUndefined(env);
