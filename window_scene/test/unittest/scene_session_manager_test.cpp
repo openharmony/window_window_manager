@@ -1567,6 +1567,78 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
+ * @tc.name: ClearMainSessions001
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions001, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId()};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 0);
+}
+
+/**
+ * @tc.name: ClearMainSessions002
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test1";
+    info2.bundleName_ = "test1";
+    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    std::vector<int32_t> persistentIds = {sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
+}
+
+/**
+ * @tc.name: ClearMainSessions003
+ * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    int32_t invalidPersistentId = -1;
+    std::vector<int32_t> clearFailedIds;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId(), invalidPersistentId};
+    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(clearFailedIds.size(), 1);
+}
+
+/**
  * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
  * @tc.desc: Test whether report the correct screen fold status events
  * @tc.type: FUNC
