@@ -33,7 +33,7 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 
     WSError Publish(const std::string& cmd);
-    std::string GetDebugDumpInfo(std::chrono::milliseconds const time);
+    std::string GetDebugDumpInfo(const std::chrono::milliseconds& time);
 
     static std::shared_ptr<SceneEventPublish> Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
     static void UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
