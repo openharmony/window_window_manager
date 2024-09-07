@@ -130,7 +130,7 @@ int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, Mess
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    std::string label = "";
+    std::string label;
     if (!data.ReadString(label)) {
         TLOGD(WmsLogTag::WMS_LIFE, "Read label failed.");
         return ERR_INVALID_DATA;
