@@ -31,6 +31,25 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
+
+bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return false;
+    }
+    if (!(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+        !data.WriteInt32(abilitySessionInfo->requestCode) ||
+        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
+        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
+        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteBool(abilitySessionInfo->reuse) ||
+        !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
@@ -312,8 +331,12 @@ WSError SessionProxy::ChangeSessionVisibilityWithStatusBar(sptr<AAFwk::SessionIn
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
-        WLOGFE("WriteInterfaceToken or other param failed");
+        WLOGFE("Write abilitySessionInfoBasic failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
@@ -364,8 +387,12 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
-        WLOGFE("WriteInterfaceToken or other param failed");
+        WLOGFE("Write abilitySessionInfoBasic failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(abilitySessionInfo->canStartAbilityFromBackground)) {
@@ -418,8 +445,7 @@ bool SessionProxy::WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk:
         WLOGFE("abilitySessionInfo is null");
         return false;
     }
-    if (!data.WriteInterfaceToken(GetDescriptor()) ||
-        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+    if (!(data.WriteParcelable(&(abilitySessionInfo->want))) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
         !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
         !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||

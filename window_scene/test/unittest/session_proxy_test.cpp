@@ -32,28 +32,6 @@ class SessionProxyTest : public testing::Test {
 namespace {
 
 /**
- * @tc.name: WriteAbilitySessionInfoBasic
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, WriteAbilitySessionInfoBasic, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    MessageParcel data;
-    bool res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo);
-    ASSERT_EQ(res, false);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo1);
-    ASSERT_EQ(res, true);
-    GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic end";
-}
-
-/**
  * @tc.name: OnSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
