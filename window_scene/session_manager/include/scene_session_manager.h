@@ -238,7 +238,6 @@ public:
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
-    WSError SetVmaCacheStatus(bool flag);
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError LockSession(int32_t sessionId) override;
