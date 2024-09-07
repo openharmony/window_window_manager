@@ -3986,6 +3986,8 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;
+    oss << "scaleX: " << session->GetScaleX() << std::endl;
+    oss << "scaleY: " << session->GetScaleY() << std::endl;
     oss << "Offset: " << "[ "
         << session->GetOffsetX() << ", " << session->GetOffsetY() << " ]" << std::endl;
     oss << "Scale: " << "[ "
