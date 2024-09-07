@@ -5535,17 +5535,30 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     sptr<ScreenSession> firstScreenSession = GetScreenSession(mainScreenOptions.screenId_);
-    if (!firstScreenSession) {
-        TLOGE(WmsLogTag::DMS, "firstScreenSession is null");
-        return DMError::DM_ERROR_NULLPTR;
-    }
     sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
-    if (!secondScreenSession) {
-        TLOGE(WmsLogTag::DMS, "secondScreenSession is null");
+    if (!firstScreenSession || !secondScreenSession) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
+    firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+    secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    std::shared_ptr<RSDisplayNode> firstDisplayNode = firstScreenSession->GetDisplayNode();
+    std::shared_ptr<RSDisplayNode> secondDisplayNode = secondScreenSession->GetDisplayNode();
+    if (firstDisplayNode && secondDisplayNode) {
+        firstDisplayNode->SetDisplayOffset(mainScreenOptions.startX_, mainScreenOptions.startY_);
+        secondDisplayNode->SetDisplayOffset(secondScreenOption.startX_, secondScreenOption.startY_);
+    } else {
+        TLOGW(WmsLogTag::DMS, "DisplayNode is null");
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "free displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
     return DMError::DM_OK;
 }
 
