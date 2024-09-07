@@ -129,8 +129,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ChangeUIAbilityVisibilityBySCB);
     BindNativeFunction(env, exportObj, "getSessionSnapshot", moduleName,
         JsSceneSessionManager::GetSessionSnapshotFilePath);
-    BindNativeFunction(env, exportObj, "setVmaCacheStatus", moduleName,
-        JsSceneSessionManager::SetVmaCacheStatus);
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
     BindNativeFunction(env, exportObj, "getAllAbilityInfo", moduleName, JsSceneSessionManager::GetAllAbilityInfos);
@@ -666,13 +664,6 @@ napi_value JsSceneSessionManager::GetSessionSnapshotFilePath(napi_env env, napi_
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSessionSnapshotFilePath(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::SetVmaCacheStatus(napi_env env, napi_callback_info info)
-{
-    WLOGFI("[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetVmaCacheStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::InitWithRenderServiceAdded(napi_env env, napi_callback_info info)
@@ -1843,28 +1834,6 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, nap
     napi_value result = nullptr;
     napi_create_string_utf8(env, path.c_str(), path.length(), &result);
     return result;
-}
-
-napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callback_info info)
-{
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    bool flag = false;
-    if (!ConvertFromJsValue(env, argv[0], flag)) {
-        WLOGFE("[NAPI]Faile to convert parameter to flag.");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is invalid"));
-        return NapiGetUndefined(env);
-    }
-    SceneSessionManager::GetInstance().SetVmaCacheStatus(flag);
-    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info)
