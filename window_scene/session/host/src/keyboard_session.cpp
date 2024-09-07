@@ -71,9 +71,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (!CheckPermissionWithPropertyAnimation(property)) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -93,9 +90,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
 
 WSError KeyboardSession::Hide()
 {
-    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
