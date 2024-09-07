@@ -486,6 +486,12 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
     return displayPowerController_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerService::TryToCancelScreenOff()
+{
+    WLOGFE("[UL_POWER]DMS not support TryToCancelScreenOff");
+    return false;
+}
+
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {
@@ -810,8 +816,8 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
         }
         DisplayPhysicalResolution defaultResolution;
         defaultResolution.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
-        defaultResolution.physicalWidth_ = displayInfo->GetWidth();
-        defaultResolution.physicalHeight_ = displayInfo->GetHeight();
+        defaultResolution.physicalWidth_ = static_cast<uint32_t>(displayInfo->GetWidth());
+        defaultResolution.physicalHeight_ = static_cast<uint32_t>(displayInfo->GetHeight());
         allDisplayPhysicalResolution_.emplace_back(defaultResolution);
     }
     return allDisplayPhysicalResolution_;

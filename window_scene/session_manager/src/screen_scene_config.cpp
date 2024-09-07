@@ -339,7 +339,7 @@ void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std
     std::vector<std::string> stringVec;
     for (xmlNodePtr curNodePtr = rootNode->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            TLOGE(WmsLogTag::DMS, "SsConfig]: invalid node!");
+            TLOGE(WmsLogTag::DMS, "[SsConfig]: invalid node!");
             continue;
         }
         xmlChar* context = xmlNodeGetContent(curNodePtr);

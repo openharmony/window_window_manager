@@ -65,6 +65,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) override
+    {
+        return WSError::WS_OK;
+    }
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override
     {
         return WSError::WS_OK;
@@ -167,6 +171,19 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError TerminateSessionByPersistentId(int32_t persistentId) override
     {
+        return WMError::WM_OK;
+    }
+    WMError CloseTargetFloatWindow(const std::string& bundleName) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError CloseTargetPiPWindow(const std::string& bundleName) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName) override
+    {
+        bundleName = "test";
         return WMError::WM_OK;
     }
     sptr<IRemoteObject> AsObject() override
@@ -326,6 +343,20 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfos, Function | Smal
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetMainWindowStatesByPid
+ * @tc.desc: test function : HandleGetMainWindowStatesByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWindowStatesByPid, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -671,6 +702,49 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowStyleType, Function | S
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleCloseTargetFloatWindow
+ * @tc.desc: test function : HandleCloseTargetFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleCloseTargetFloatWindow, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("test");
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleCloseTargetPiPWindow
+ * @tc.desc: test function : HandleCloseTargetPiPWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleCloseTargetPiPWindow, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleCloseTargetPiPWindow(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetCurrentPiPWindowInfo
+ * @tc.desc: test function : HandleGetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetCurrentPiPWindowInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

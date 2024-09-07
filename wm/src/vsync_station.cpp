@@ -103,7 +103,8 @@ std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiverLocked()
     return receiver_;
 }
 
-void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
+__attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
+    const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     std::shared_ptr<VSyncReceiver> receiver;
     {
@@ -165,7 +166,7 @@ void VsyncStation::RemoveCallback()
 void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "OnVsyncCallback %{public}" PRId64 ":%{public}" PRId64, timestamp, frameCount);
+        "OnVsyncCallback %" PRId64 ":%" PRId64, timestamp, frameCount);
     Callbacks vsyncCallbacks;
     {
         std::lock_guard<std::mutex> lock(mutex_);

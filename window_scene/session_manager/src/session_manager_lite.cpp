@@ -43,14 +43,20 @@ public:
         switch (msgId) {
             case SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER: {
                 auto sessionManagerService = data.ReadRemoteObject();
+                // Even if sessionManagerService is null, the recovery process is still required.
                 OnSessionManagerServiceRecover(sessionManagerService);
                 break;
             }
             case SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED: {
-                int32_t userId = data.ReadInt32();
-                int32_t screenId = data.ReadInt32();
-                bool isConnected = data.ReadBool();
+                int32_t userId = INVALID_USER_ID;
+                int32_t screenId = DEFAULT_SCREEN_ID;
+                bool isConnected = false;
+                if (!data.ReadInt32(userId) || !data.ReadInt32(screenId) || !data.ReadBool(isConnected)) {
+                    TLOGE(WmsLogTag::WMS_MULTI_USER, "Read data failed in lite!");
+                    return ERR_TRANSACTION_FAILED;
+                }
                 if (isConnected) {
+                    // Even if data.ReadRemoteObject() is null, the WMS connection still needs to be notified.
                     OnWMSConnectionChanged(userId, screenId, isConnected, data.ReadRemoteObject());
                 } else {
                     OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
@@ -221,15 +227,14 @@ void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc
 void SessionManagerLite::OnWMSConnectionChanged(
     int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER,
-        "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
-        currentWMSUserId_, screenId, isConnected);
     bool isCallbackRegistered = false;
-    auto lastUserId = currentWMSUserId_;
-    auto lastScreenId = currentScreenId_;
+    int32_t lastUserId = INVALID_USER_ID;
+    int32_t lastScreenId = DEFAULT_SCREEN_ID;
     {
         // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
+        lastUserId = currentWMSUserId_;
+        lastScreenId = currentScreenId_;
         isWMSConnected_ = isConnected;
         isCallbackRegistered = wmsConnectionChangedFunc_ != nullptr;
         if (isConnected) {
@@ -237,7 +242,10 @@ void SessionManagerLite::OnWMSConnectionChanged(
             currentScreenId_ = screenId;
         }
     }
-    if (isConnected && lastUserId > INVALID_UID && lastUserId != userId) {
+    TLOGI(WmsLogTag::WMS_MULTI_USER,
+        "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
+        lastUserId, screenId, isConnected);
+    if (isConnected && lastUserId > INVALID_USER_ID && lastUserId != userId) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
         OnUserSwitch(sessionManagerService);
@@ -364,15 +372,19 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
         return WMError::WM_ERROR_NULLPTR;
     }
     bool isWMSAlreadyConnected = false;
+    int32_t userId = INVALID_USER_ID;
+    int32_t screenId = DEFAULT_SCREEN_ID;
     {
         // The mutex ensures the timing of the following variable states in multiple threads
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         wmsConnectionChangedFunc_ = callbackFunc;
         isWMSAlreadyConnected = isWMSConnected_ && (currentWMSUserId_ > INVALID_USER_ID);
+        userId = currentWMSUserId_;
+        screenId = currentScreenId_;
     }
     if (isWMSAlreadyConnected) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify immediately");
-        OnWMSConnectionChangedCallback(currentWMSUserId_, currentScreenId_, true, true);
+        OnWMSConnectionChangedCallback(userId, screenId, true, true);
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -461,10 +473,13 @@ void FoundationDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrD
 void SessionManagerLite::OnFoundationDied()
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enter");
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
+        isWMSConnected_ = false;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     isFoundationListenerRegistered_ = false;
     recoverListenerRegistered_ = false;
-    isWMSConnected_ = false;
     mockSessionManagerServiceProxy_ = nullptr;
     sessionManagerServiceProxy_ = nullptr;
     sceneSessionManagerLiteProxy_ = nullptr;

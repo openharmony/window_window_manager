@@ -263,25 +263,6 @@ static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windo
     }
 }
 
-static std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback>&& execute,
-    std::unique_ptr<NapiAsyncTask::CompleteCallback>&& complete,
-    napi_value* result)
-{
-    napi_valuetype type = napi_undefined;
-    napi_typeof(env, lastParam, &type);
-    if (lastParam == nullptr || type != napi_function) {
-        napi_deferred nativeDeferred = nullptr;
-        NAPI_CALL(env, napi_create_promise(env, &nativeDeferred, result));
-        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::move(execute), std::move(complete));
-    } else {
-        napi_get_undefined(env, result);
-        napi_ref callbackRef = nullptr;
-        napi_create_reference(env, lastParam, 1, &callbackRef);
-        return std::make_unique<NapiAsyncTask>(callbackRef, std::move(execute), std::move(complete));
-    }
-}
-
 static void CreateSystemWindowTask(void* contextPtr, std::string windowName, WindowType winType,
     napi_env env, NapiAsyncTask& task)
 {
@@ -926,10 +907,8 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         WLOGD("Get top window success");
     };
     napi_value result = nullptr;
-    auto asyncTask = CreateAsyncTask(env, callback,
-        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
-        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow", env, std::move(asyncTask));
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
+        env, CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -995,18 +974,18 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: minimum params num
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     WindowLayoutMode winLayoutMode = WindowLayoutMode::CASCADE;
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "set window layout mode permission denied!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set window layout mode permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeMode = argv[0];
         if (nativeMode == nullptr) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to windowLayoutMode");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to windowLayoutMode");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             uint32_t resultValue = 0;
@@ -1018,7 +997,7 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "JsWindowManager::OnSetWindowLayoutMode failed, Invalidate params.");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "JsWindowManager::OnSetWindowLayoutMode failed, Invalidate params.");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
