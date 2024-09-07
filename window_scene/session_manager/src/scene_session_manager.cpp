@@ -15,6 +15,8 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <algorithm>
+
 #include <ability_context.h>
 #include <ability_manager_client.h>
 #include <bundlemgr/launcher_service.h>
@@ -121,9 +123,7 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 
-static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
-
-static std::shared_ptr<SceneEventPublish> g_scbSubscriber(nullptr);
+const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 std::string GetCurrentTime()
 {
@@ -199,12 +199,11 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
-    SceneEventPublish::Subscribe(g_scbSubscriber);
 }
 
 SceneSessionManager::~SceneSessionManager()
 {
-    SceneEventPublish::UnSubscribe(g_scbSubscriber);
+    SceneEventPublish::UnSubscribe(sceneEventPublish_);
 }
 
 void SceneSessionManager::Init()
@@ -249,6 +248,8 @@ void SceneSessionManager::Init()
         this->NotifyWindowStateErrorFromMMI(pid, persistentId);
     });
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+
+    sceneEventPublish_ = SceneEventPublish::Subscribe();
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -4225,19 +4226,17 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params)
+WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
-    std::string cmd = SceneEventPublish::JoinCommands(params, params.size());
     // publish data
-    bool ret = eventHandler_->PostSyncTask([cmd = std::move(cmd)] { return g_scbSubscriber->Publish(cmd); },
-                                           "PublishSCBDumper");
-    if (!ret) {
+    WSError ret = eventHandler_->PostSyncTask(
+        [this, cmd = std::move(cmd)] { return sceneEventPublish_->Publish(cmd); }, "PublishSCBDumper");
+    if (ret != WSError::WS_OK) {
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-
     // get response event
-    auto task = [&dumpInfo] {
-        dumpInfo.append(g_scbSubscriber->GetDebugDumpInfo(WAIT_TIME));
+    auto task = [this, &dumpInfo] {
+        dumpInfo.append(sceneEventPublish_->GetDebugDumpInfo(WAIT_TIME));
         return WSError::WS_OK;
     };
     eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
@@ -4266,8 +4265,14 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
             return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
         }
-        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2:params num
-            return GetSCBDebugDumpInfo(dumpInfo, params);
+        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
+            std::string cmd;
+            std::for_each(params.begin() + 1, params.end(),
+                          [&cmd](const std::string& value) {
+                              cmd += value;
+                              cmd += ' ';
+                          });
+            return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
         }
         if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
             return GetTotalUITreeInfo(params[1], dumpInfo);

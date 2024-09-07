@@ -14,49 +14,45 @@
  */
 
 #include "publish/scene_event_publish.h"
+
 #include <sstream>
 
-#include "common_event_manager.h"
-#include "interfaces/include/ws_common.h"
-#include "interfaces/include/ws_common_inner.h"
-#include "matching_skills.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-static const std::string TIME_OUT("timeout");
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 
 void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     std::ostringstream oss;
     oss << data.GetData() << std::endl;
-    s = oss.str();
+    std::lock_guard<std::mutex> lock(mutex_);
+    dumpInfo_ = oss.str();
     valueReady_ = true;
     cv_.notify_all();
 }
 
-std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const& time)
+std::string SceneEventPublish::GetDebugDumpInfo(std::chrono::milliseconds const time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
-        return s;
+        return dumpInfo_;
     }
-    return TIME_OUT; // 超时返回
+    return "timeout";
 }
 
-WSError SceneEventPublish::Publish(std::string cmd)
+WSError SceneEventPublish::Publish(const std::string& cmd)
 {
-    valueReady_ = false;
-    static const std::string scbDebugEventListenerName = "com.ohos.sceneboard.debug.event.listener";
-    AAFwk::Want want;
-    want.SetAction(scbDebugEventListenerName);
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        valueReady_ = false;
+    }
 
+    AAFwk::Want want;
+    want.SetAction("com.ohos.sceneboard.debug.event.listener");
     EventFwk::CommonEventData commonEventData;
     commonEventData.SetWant(want);
     commonEventData.SetCode(0);
     commonEventData.SetData(cmd);
-
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSticky(false);
     publishInfo.SetOrdered(false);
@@ -64,43 +60,27 @@ WSError SceneEventPublish::Publish(std::string cmd)
     // publish the common event
     bool ret = EventFwk::CommonEventManager::PublishCommonEvent(commonEventData, publishInfo, nullptr);
     if (!ret) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "publish debug event to scene error.");
+        TLOGE(WmsLogTag::WMS_DEFAULT, "publish scene debug event error.");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     return WSError::WS_OK;
 }
 
-void SceneEventPublish::Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber)
+std::shared_ptr<SceneEventPublish> SceneEventPublish::Subscribe()
 {
-    static const std::string scbDebugEventResponseName = "com.ohos.sceneboard.debug.event.response";
-
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(scbDebugEventResponseName);
-
+    matchingSkills.AddEvent("com.ohos.sceneboard.debug.event.response");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-
-    if (scbSubscriber == nullptr) {
-        scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
-    }
-
+    scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(scbSubscriber);
+    return scbSubscriber;
 }
 
-void SceneEventPublish::UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber)
+void SceneEventPublish::UnSubscribe(const std::shared_ptr<SceneEventPublish>& scbSubscriber)
 {
     if (scbSubscriber) {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(scbSubscriber);
     }
-}
-
-std::string SceneEventPublish::JoinCommands(const std::vector<std::string>& params, int size)
-{
-    std::string cmd;
-    for (int i = 1; i < size; i++) { // 从1开始，0为-b
-        cmd += params[i];
-        cmd += ' ';
-    }
-    return cmd;
 }
 
 } // namespace OHOS::Rosen
