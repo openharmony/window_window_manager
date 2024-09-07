@@ -1163,6 +1163,11 @@ int32_t WindowExtensionSessionImpl::GetRealParentId() const
     return property_->GetRealParentId();
 }
 
+WindowType WindowExtensionSessionImpl::GetParentWindowType() const
+{
+    return property_->GetParentWindowType();
+}
+
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
 {
     if (property_->GetUIExtensionUsage() != UIExtensionUsage::MODAL &&
