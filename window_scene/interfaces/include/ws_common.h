@@ -258,6 +258,10 @@ enum class FocusChangeReason {
      */
     FOCUSABLE,
     /**
+     * select last focused app when requestSessionUnFocus.
+     */
+    LAST_FOCUSED_APP,
+    /**
      * focus change max.
      */
     MAX,
