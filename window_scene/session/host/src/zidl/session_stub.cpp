@@ -923,6 +923,7 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
     bool isFocused = data.ReadBool();
     WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
