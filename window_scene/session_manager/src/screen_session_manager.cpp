@@ -4873,6 +4873,7 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
         clientProxy_ = clientProxyMap_[newUserId];
         ScbStatusRecoveryWhenSwitchUser(oldScbPids_, newScbPid);
     }
+    UpdateDisplayScaleState(GetDefaultScreenId());
     currentUserId_ = newUserId;
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
