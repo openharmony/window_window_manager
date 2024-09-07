@@ -414,7 +414,8 @@ private:
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
     void ConfigWindowImmersive(const WindowSceneConfig::ConfigItem& immersiveConfig);
     void ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig);
-    void ConfigDefaultKeyboardAnimation();
+    void ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,
+        KeyboardSceneAnimationConfig& animationOut);
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     bool ConfigStatusBar(const WindowSceneConfig::ConfigItem& config, StatusBarConfig& statusBarConfig);
@@ -771,7 +772,7 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
-    
+
     /*
      * Fold Screen Status Change Report
      */
