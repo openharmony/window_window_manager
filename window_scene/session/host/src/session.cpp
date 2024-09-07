@@ -2288,7 +2288,7 @@ WSError Session::RequestFocus(bool isFocused)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
-    NotifyRequestFocusStatusNotifyManager(false, true, reason);
+    NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
     return WSError::WS_OK;
 }
 
