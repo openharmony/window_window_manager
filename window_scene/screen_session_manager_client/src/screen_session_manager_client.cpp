@@ -15,6 +15,7 @@
 
 #include "screen_session_manager_client.h"
 
+#include <hitrace_meter.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_transaction.h>
@@ -552,6 +553,10 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
     }
     TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
           translateX, translateY);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                      "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64
+                      " scaleX=%f, scaleY=%f, pivotX=%f, pivotY=%f, translateX=%f, translateY=%f",
+                      id, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     displayNode->SetScale(scaleX, scaleY);
     displayNode->SetTranslateX(translateX);
     displayNode->SetTranslateY(translateY);
@@ -559,7 +564,7 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     } else {
-        TLOGI(WmsLogTag::DMS, "transactionProxy is nullptr");
+        TLOGE(WmsLogTag::DMS, "transactionProxy is nullptr");
     }
     session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
