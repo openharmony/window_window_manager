@@ -38,7 +38,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         WLOGFE("abilitySessionInfo is null");
         return false;
     }
-    if (!(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+    if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
         !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
         !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
