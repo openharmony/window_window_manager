@@ -18,39 +18,30 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <mutex>
+#include <string>
 
-#include <common_event_data.h>
-#include <common_event_publish_info.h>
-#include "common_event_manager.h"
-#include "common/include/task_scheduler.h"
-#include "interfaces/include/ws_common.h"
-#include "interfaces/include/ws_common_inner.h"
-#include <want.h>
+#include <common_event_manager.h>
 
 namespace OHOS::Rosen {
 class SceneEventPublish : public EventFwk::CommonEventSubscriber {
 public:
     explicit SceneEventPublish(const EventFwk::CommonEventSubscribeInfo& subscribeInfo)
-        : CommonEventSubscriber(subscribeInfo)
-    {}
+        : CommonEventSubscriber(subscribeInfo) {}
     ~SceneEventPublish() = default;
 
-    void OnReceiveEvent(const EventFwk::CommonEventData& data);
+    void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 
-    WSError Publish(std::string cmd);
+    WSError Publish(const std::string& cmd);
+    std::string GetDebugDumpInfo(std::chrono::milliseconds const time);
 
-    std::string GetDebugDumpInfo(std::chrono::milliseconds const& time);
-
-    static void Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
-
+    static std::shared_ptr<SceneEventPublish> Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
     static void UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
 
-    static std::string JoinCommands(const std::vector<std::string>& params, int size);
-
 private:
-    std::string s = "";
-    bool valueReady_ = false;
     std::mutex mutex_;
+    std::string dumpInfo_;
+    bool valueReady_ = false;
     std::condition_variable cv_;
 };
 } // namespace OHOS::Rosen
