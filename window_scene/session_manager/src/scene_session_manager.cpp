@@ -389,7 +389,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
         if (numbers.size() == 1 &&
             (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
              numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
-            systemConfig_.defaultWindowMode = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
         }
     }
 
