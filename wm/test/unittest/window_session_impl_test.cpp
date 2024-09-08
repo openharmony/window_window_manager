@@ -598,9 +598,9 @@ HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Lev
     ASSERT_NE(window, nullptr);
 
     WMError res = window->RequestFocusByClient(true);
-    ASSERT_EQ(res, WMError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
     res = window->RequestFocusByClient(false);
-    ASSERT_EQ(res, WMError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient end";
 }
