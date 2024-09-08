@@ -60,7 +60,7 @@ WSError SceneEventPublish::Publish(const std::string& cmd)
     // publish the common event
     bool ret = EventFwk::CommonEventManager::PublishCommonEvent(commonEventData, publishInfo, nullptr);
     if (!ret) {
-        TLOGE(WmsLogTag::WMS_DEFAULT, "publish scene debug event error.");
+        TLOGE(WmsLogTag::DEFAULT, "publish scene debug event error.");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     return WSError::WS_OK;
