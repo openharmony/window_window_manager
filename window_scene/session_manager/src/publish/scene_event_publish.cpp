@@ -71,7 +71,7 @@ std::shared_ptr<SceneEventPublish> SceneEventPublish::Subscribe()
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("com.ohos.sceneboard.debug.event.response");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
+    auto scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(scbSubscriber);
     return scbSubscriber;
 }
