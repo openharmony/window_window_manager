@@ -47,7 +47,8 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
-using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
+    const SizeChangeReason& reason, const DisplayId newDisplayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;

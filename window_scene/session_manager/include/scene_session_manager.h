@@ -299,7 +299,7 @@ public:
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
-    void AddWindowDragHotArea(uint32_t type, WSRect& area);
+    void AddWindowDragHotArea(uint64_t displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
     bool GetImmersiveState();
