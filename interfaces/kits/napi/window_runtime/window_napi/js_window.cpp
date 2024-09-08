@@ -6444,9 +6444,9 @@ napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    
+
     bool isFocused = false;
-    napi_status retCode = napi_get_value_bool(env, nativeVal, &isFocused);
+    napi_status retCode = napi_get_value_bool(env, argv[0], &isFocused);
     if (retCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
