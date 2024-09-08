@@ -883,7 +883,8 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
@@ -919,7 +920,19 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFW("uiContent is null!");
         return;
     }
-    uiContent->UpdateViewportConfig(config, reason, rsTransaction);
+    std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
+    if (reason == WindowSizeChangeReason::ROTATION) {
+        if (auto hostSession = GetHostSession()) {
+            hostSession->GetAllAvoidAreas(avoidAreasToUpdate);
+        }
+    } else {
+        avoidAreasToUpdate = avoidAreas;
+    }
+    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+    }
+    uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
@@ -2763,6 +2776,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }
