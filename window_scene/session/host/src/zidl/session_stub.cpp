@@ -87,6 +87,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNeedAvoid(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA):
             return HandleGetAvoidAreaByType(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
+            return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG):
@@ -574,6 +576,20 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    WSError errCode = GetAllAvoidAreas(avoidAreas);
+    reply.WriteUint32(avoidAreas.size());
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        reply.WriteUint32(static_cast<uint32_t>(type));
+        reply.WriteParcelable(&avoidArea);
+    }
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

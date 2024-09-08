@@ -480,7 +480,7 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectDragStartTest, Function | SmallTe
     Rect rect2 { 100, 100, 100, 100 };
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _));
     window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG_START);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
