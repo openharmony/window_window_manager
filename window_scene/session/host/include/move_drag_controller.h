@@ -32,7 +32,8 @@ namespace OHOS::Rosen {
 
 using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
 
-using NotifyWindowDragHotAreaFunc = std::function<void(uint32_t type, const SizeChangeReason& reason)>;
+using NotifyWindowDragHotAreaFunc = std::function<void(uint64_t displayId, uint32_t type,
+    const SizeChangeReason& reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
@@ -46,12 +47,13 @@ public:
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
+    void SetStartDragFlag(bool flag);
     bool GetStartDragFlag() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
-    WSRect GetTargetRect() const;
+    WSRect GetTargetRect(bool needGlobalRect = false) const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -68,6 +70,12 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
+    static bool IsOverlap(const WSRect& rect1, const WSRect& rect2) const;
+    std::set<uint64_t> GetCurrentOverlapDisplaySet();
+    std::set<uint64_t> addedDisplayId = {};
+    uint64_t moveDragStartDisplayId_ = -1ULL;
+    uint64_t moveDragEndDisplayId_ = -1ULL;
+    uint64_t parentId_ = -1ULL;
 
 private:
     struct MoveDragProperty {
@@ -136,6 +144,8 @@ private:
     bool hasPointDown_ = false;
     float aspectRatio_ = 0.0f;
     float vpr_ = 1.0f;
+    int32_t originalDisplayOffsetX_ = 0;
+    int32_t originalDisplayOffsetY_ = 0;
     int32_t minTranX_ = INT32_MIN;
     int32_t minTranY_ = INT32_MIN;
     int32_t maxTranX_ = INT32_MAX;
@@ -171,6 +181,7 @@ private:
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
     uint32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
+    uint64_t hotAreaDisplayId_ = 0;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
 

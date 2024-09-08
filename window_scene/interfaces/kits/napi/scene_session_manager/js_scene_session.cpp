@@ -377,8 +377,8 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
-    NotifyWindowDragHotAreaFunc func = [this](uint32_t type, const SizeChangeReason& reason) {
-        this->OnWindowDragHotArea(type, reason);
+    NotifyWindowDragHotAreaFunc func = [this](uint64_t displayId, uint32_t type, const SizeChangeReason& reason) {
+        this->OnWindowDragHotArea(displayId, type, reason);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -388,7 +388,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& reason)
+void JsSceneSession::OnWindowDragHotArea(uint64_t displayId, uint32_t type, const SizeChangeReason& reason)
 {
     WLOGFI("[NAPI]OnWindowDragHotArea");
 
@@ -398,7 +398,7 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
         return;
     }
     WSRect rect = session->GetSessionTargetRect();
-    auto task = [this, persistentId = persistentId_, env = env_, type, reason, rect] {
+    auto task = [this, persistentId = persistentId_, env = env_, displayId, type, reason, rect] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnWindowDragHotArea jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
@@ -407,6 +407,11 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
         auto jsCallBack = this->GetJSCallback(WINDOW_DRAG_HOT_AREA_CB);
         if (!jsCallBack) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsHotAreaDisplayId = CreateJsValue(env, static_cast<int64_t>displayId);
+        if (jsHotAreaType == nullptr) {
+            WLOGFE("[NAPI]jsHotAreaDisplayId is nullptr");
             return;
         }
         napi_value jsHotAreaType = CreateJsValue(env, type);
@@ -424,7 +429,7 @@ void JsSceneSession::OnWindowDragHotArea(uint32_t type, const SizeChangeReason& 
             WLOGFE("[NAPI]jsHotAreaRect is nullptr");
             return;
         }
-        napi_value argv[] = {jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
+        napi_value argv[] = {jsHotAreaDisplayId, jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnWindowDragHotArea");
@@ -744,8 +749,9 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
-    NotifySessionRectChangeFunc func = [this](const WSRect& rect, const SizeChangeReason& reason) {
-        this->OnSessionRectChange(rect, reason);
+    NotifySessionRectChangeFunc func = [this](const WSRect& rect,
+        const SizeChangeReason& reason, const DisplayId newDisplayId = -1ULL) {
+        this->OnSessionRectChange(rect, reason, newDisplayId);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2173,7 +2179,8 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
     taskScheduler_->PostMainThreadTask(task, "OnBufferAvailableChange");
 }
 
-void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
+void JsSceneSession::OnSessionRectChange(const WSRect& rect,
+    const SizeChangeReason& reason, const DisplayId newDisplayId)
 {
     if (reason != SizeChangeReason::MOVE  && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
@@ -2181,7 +2188,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
     }
     WLOGFD("[NAPI]OnSessionRectChange");
 
-    auto task = [this, persistentId = persistentId_, rect, reason, env = env_] {
+    auto task = [this, persistentId = persistentId_, rect, reason, newDisplayID, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionRectChange jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
@@ -2194,7 +2201,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         }
         napi_value jsSessionStateObj = CreateJsSessionRect(env, rect);
         napi_value sizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
-        napi_value argv[] = {jsSessionStateObj, sizeChangeReason};
+        napi_value newDisplayId = CreateJsValue(env, static_cast<int32_t>(newDisplayId));
+        napi_value argv[] = {jsSessionStateObj, sizeChangeReason, newDisplayId};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)

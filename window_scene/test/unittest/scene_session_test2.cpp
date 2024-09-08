@@ -1454,18 +1454,24 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
+    sceneSession->leashWinSurfaceNode_ = nullptr;
+    sceneSession->surfaceNode_ = new std::make_shared<RSSurfaceNode> surfaceNode;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
-
     event = SessionEvent::EVENT_END_MOVE;
     ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
+    event = SessionEvent::EVENT_DRAG_START;
+    ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
+    sceneSession->property_= nullptr;
+    ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_ERROR_DESTROYED_OBJECT);
 }
 
 /**

@@ -345,8 +345,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
+    static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     int32_t GetCustomDecorHeight() override
     {
@@ -403,7 +403,8 @@ public:
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
 protected:
-    void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
+    void NotifySessionRectChange(const WSRect& rect,
+        const SizeChangeReason& reason = SizeChangeReason::UNDEFINED, const DisplayId newDisplayId = -1);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -554,7 +555,7 @@ private:
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
-    static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
+    static std::map<uint64_t, std::map<uint32_t, WSRect> > windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
