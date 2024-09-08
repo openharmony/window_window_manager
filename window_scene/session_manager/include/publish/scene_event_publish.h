@@ -35,7 +35,7 @@ public:
     WSError Publish(const std::string& cmd);
     std::string GetDebugDumpInfo(const std::chrono::milliseconds& time);
 
-    static std::shared_ptr<SceneEventPublish> Subscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
+    static std::shared_ptr<SceneEventPublish> Subscribe();
     static void UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
 
 private:
