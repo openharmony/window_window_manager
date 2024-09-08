@@ -36,7 +36,7 @@ public:
     std::string GetDebugDumpInfo(const std::chrono::milliseconds& time);
 
     static std::shared_ptr<SceneEventPublish> Subscribe();
-    static void UnSubscribe(std::shared_ptr<SceneEventPublish>& scbSubscriber);
+    static void UnSubscribe(const std::shared_ptr<SceneEventPublish>& scbSubscriber);
 
 private:
     std::mutex mutex_;
