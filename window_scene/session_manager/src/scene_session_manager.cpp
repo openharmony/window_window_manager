@@ -4229,9 +4229,9 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
     // publish data
-    WSError ret = eventHandler_->PostSyncTask(
+    bool ret = eventHandler_->PostSyncTask(
         [this, cmd = std::move(cmd)] { return sceneEventPublish_->Publish(cmd); }, "PublishSCBDumper");
-    if (ret != WSError::WS_OK) {
+    if (!ret) {
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     // get response event
