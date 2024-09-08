@@ -23,6 +23,8 @@
 
 #include <common_event_manager.h>
 
+#include "interfaces/include/ws_common.h"
+
 namespace OHOS::Rosen {
 class SceneEventPublish : public EventFwk::CommonEventSubscriber {
 public:
