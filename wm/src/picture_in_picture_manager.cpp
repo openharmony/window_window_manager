@@ -31,13 +31,15 @@ const std::string ACTION_PRE_RESTORE = "pre_restore";
 const std::string ACTION_RESTORE = "restore";
 const std::string ACTION_DESTROY = "destroy";
 const std::string ACTION_LOCATE_SOURCE = "locate_source";
+const std::string ACTION_BACKGROUND_AUTO_START = "background_auto_start";
 
 const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
     {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
     {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
     {ACTION_RESTORE, PictureInPictureManager::DoRestore},
     {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
-    {ACTION_DESTROY, PictureInPictureManager::DoDestroy}
+    {ACTION_DESTROY, PictureInPictureManager::DoDestroy},
+    {ACTION_BACKGROUND_AUTO_START, PictureInPictureManager::AutoStartPipWindow},
 };
 }
 
@@ -45,7 +47,6 @@ sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nu
 wptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
 std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
-sptr<IWindowLifeCycle> PictureInPictureManager::mainWindowLifeCycleImpl_;
 std::shared_mutex PictureInPictureManager::controllerMapMutex_;
 std::mutex PictureInPictureManager::mutex_;
 std::shared_ptr<NativeReference> PictureInPictureManager::innerCallbackRef_ = nullptr;
@@ -132,21 +133,7 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
     if (pipController == nullptr) {
         return;
     }
-    if (autoStartController_ != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
-        sptr<WindowSessionImpl> previousMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-            autoStartController_->GetMainWindowId());
-        if (previousMainWindow != nullptr) {
-            previousMainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
-        }
-    }
     autoStartController_ = pipController;
-    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        autoStartController_->GetMainWindowId());
-    if (mainWindow != nullptr) {
-        mainWindowLifeCycleImpl_ = new PictureInPictureController::PipMainWindowLifeCycleImpl(
-            pipController->GetPiPNavigationId(), mainWindow);
-        mainWindow->RegisterLifeCycleListener(mainWindowLifeCycleImpl_);
-    }
     autoStartControllerMap_[handleId] = pipController;
 }
 
@@ -162,11 +149,6 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
         pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
         TLOGE(WmsLogTag::WMS_PIP, "not same pip controller or no active pip controller");
         return;
-    }
-    sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        autoStartController_->GetMainWindowId());
-    if (mainWindow != nullptr && mainWindowLifeCycleImpl_ != nullptr) {
-        mainWindow->UnregisterLifeCycleListener(mainWindowLifeCycleImpl_);
     }
     autoStartController_ = nullptr;
 }
@@ -276,14 +258,14 @@ void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPCont
     activeController_->DoControlEvent(controlType, status);
 }
 
-void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
+void PictureInPictureManager::AutoStartPipWindow()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called, navId: %{public}s", navigationId.c_str());
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (autoStartController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
         return;
     }
-    if (navigationId == "" || autoStartController_->IsTypeNodeEnabled()) {
+    if (autoStartController_->GetPiPNavigationId() == "" || autoStartController_->IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
         autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
         return;
@@ -291,7 +273,8 @@ void PictureInPictureManager::AutoStartPipWindow(std::string navigationId)
     sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
         autoStartController_->GetMainWindowId());
     if (mainWindow) {
-        auto navController = NavigationController::GetNavigationController(mainWindow->GetUIContent(), navigationId);
+        auto navController = NavigationController::GetNavigationController(mainWindow->GetUIContent(),
+            autoStartController_->GetPiPNavigationId());
         if (!navController) {
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
             return;

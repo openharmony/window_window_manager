@@ -3523,6 +3523,17 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->SetAutoStartPiP(isAutoStart);
+}
+
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 {
     auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
