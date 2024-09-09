@@ -595,7 +595,7 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }
-    WSRect rect = {posX, posY, width, height};
+    WSRect rect = { posX, posY, width, height };
     WSError errCode = UpdateClientRect(rect);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
