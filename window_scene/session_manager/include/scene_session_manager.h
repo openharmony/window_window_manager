@@ -74,6 +74,8 @@ struct SecSurfaceInfo;
 class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
+class SceneEventPublish;
+
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)>;
@@ -191,12 +193,17 @@ public:
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
+
+    /*
+     * Dump
+     */
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetAllSessionDumpDetailInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
-    WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
+    WSError GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
+
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
@@ -786,6 +793,11 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Dump
+     */
+    std::shared_ptr<SceneEventPublish> sceneEventPublish_;
 
     struct SessionInfoList {
         int32_t uid_;
