@@ -147,6 +147,7 @@ ohos_shared_library("libwmutil_base") {
 
 ## Build libwmutil.so
 ohos_shared_library("libwmutil") {
+  branch_protector_ret = "pac_ret"
   sources = [
     "src/dms_reporter.cpp",
     "src/js_err_utils.cpp",
