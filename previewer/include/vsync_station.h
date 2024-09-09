@@ -52,6 +52,8 @@ private:
 
     std::mutex mtx_;
     NodeId nodeId_ = 0;
+    bool isFirstVsync_ = true;
+    bool isFirstVsyncBack_ = true;
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
     bool destroyed_ = false;
