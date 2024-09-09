@@ -32,7 +32,7 @@ class SessionManagerServiceLiteRecoverListener : public IRemoteStub<ISessionMana
 public:
     explicit SessionManagerServiceLiteRecoverListener() = default;
 
-    virtual int32_t OnRemoteRequest(
+    int32_t OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -335,7 +335,7 @@ void SessionManagerLite::InitSceneSessionManagerLiteProxy()
     }
     sceneSessionManagerLiteProxy_ = iface_cast<ISceneSessionManagerLite>(remoteObject);
     if (sceneSessionManagerLiteProxy_) {
-        ssmDeath_ = new SSMDeathRecipientLite();
+        ssmDeath_ = sptr<SSMDeathRecipientLite>::MakeSptr();
         if (!ssmDeath_) {
             WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
             return;
@@ -422,10 +422,6 @@ WMError SessionManagerLite::InitMockSMSProxy()
     }
     if (!foundationDeath_) {
         foundationDeath_ = sptr<FoundationDeathRecipientLite>::MakeSptr();
-        if (!foundationDeath_) {
-            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to create death Recipient ptr");
-            return WMError::WM_ERROR_NO_MEM;
-        }
     }
     if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(foundationDeath_)) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to add death recipient");
@@ -444,7 +440,7 @@ void SessionManagerLite::RegisterSMSRecoverListener()
         }
         recoverListenerRegistered_ = true;
         TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener");
-        smsRecoverListener_ = new SessionManagerServiceLiteRecoverListener();
+        smsRecoverListener_ = sptr<SessionManagerServiceLiteRecoverListener>::MakeSptr();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
         IPCSkeleton::SetCallingIdentity(identity);

@@ -33,7 +33,7 @@ class SessionManagerServiceRecoverListener : public IRemoteStub<ISessionManagerS
 public:
     explicit SessionManagerServiceRecoverListener() = default;
 
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override
     {
         if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -200,11 +200,7 @@ WMError SessionManager::InitMockSMSProxy()
         return WMError::WM_OK;
     }
     if (!foundationDeath_) {
-        foundationDeath_ = new FoundationDeathRecipient();
-        if (!foundationDeath_) {
-            WLOGFE("Failed to create death Recipient ptr FoundationDeathRecipient");
-            return WMError::WM_ERROR_NO_MEM;
-        }
+        foundationDeath_ = sptr<FoundationDeathRecipient>::MakeSptr();
     }
     if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(foundationDeath_)) {
         WLOGFE("Failed to add death recipient");
@@ -231,11 +227,7 @@ __attribute__((no_sanitize("cfi"))) void SessionManager::InitSceneSessionManager
     }
     sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
     if (sceneSessionManagerProxy_) {
-        ssmDeath_ = new SSMDeathRecipient();
-        if (!ssmDeath_) {
-            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
-            return;
-        }
+        ssmDeath_ = sptr<SSMDeathRecipient>::MakeSptr();
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(ssmDeath_)) {
             WLOGFE("Failed to add death recipient");
             return;
@@ -254,7 +246,7 @@ void SessionManager::RegisterSMSRecoverListener()
         }
         isRecoverListenerRegistered_ = true;
         TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener");
-        smsRecoverListener_ = new SessionManagerServiceRecoverListener();
+        smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
         IPCSkeleton::SetCallingIdentity(identity);

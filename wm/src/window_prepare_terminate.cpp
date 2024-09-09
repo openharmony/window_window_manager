@@ -21,15 +21,10 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowPrepareTerminateHandler"};
 }
-WindowPrepareTerminateHandler::WindowPrepareTerminateHandler()
-{
-}
-WindowPrepareTerminateHandler::~WindowPrepareTerminateHandler()
-{
-}
+
 void WindowPrepareTerminateHandler::DoPrepareTerminate()
 {
-    WLOGFI("do pending close by ability");
+    WLOGFI("in");
     if (func_) {
         func_();
     }
