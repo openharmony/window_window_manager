@@ -30,7 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Sessio
 
 class SessionManagerServiceLiteRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
 public:
-    explicit SessionManagerServiceLiteRecoverListener() = default;
+    SessionManagerServiceLiteRecoverListener() = default;
 
     int32_t OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
