@@ -2282,11 +2282,6 @@ WSError Session::RequestFocus(bool isFocused)
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
     return WSError::WS_OK;
