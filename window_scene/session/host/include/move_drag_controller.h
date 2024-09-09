@@ -55,6 +55,7 @@ public:
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(bool needGlobalRect = false) const;
     void InitMoveDragProperty();
+    void SetCrossProperty(uint64_t displayId, uint64_t parentId);
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
     void SetAspectRatio(float ratio);
