@@ -250,6 +250,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
     BindNativeFunction(env, objValue, "setZOrder", moduleName, JsSceneSession::SetZOrder);
     BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
+    BindNativeFunction(env, objValue, "setRectChangeBySystem", moduleName, JsSceneSession::SetRectChangeBySystem);
     BindNativeFunction(env, objValue, "setSystemActive", moduleName, JsSceneSession::SetSystemActive);
     BindNativeFunction(env, objValue, "setPrivacyMode", moduleName, JsSceneSession::SetPrivacyMode);
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha",
@@ -1341,6 +1342,12 @@ napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
 {
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info): nullptr;
+}
+
+napi_value JsSceneSession::SetRectChangeBySystem(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetRectChangeBySystem(env, info): nullptr;
 }
 
 napi_value JsSceneSession::SetSystemActive(napi_env env, napi_callback_info info)
@@ -3320,6 +3327,37 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
     }
 
     session->SetSystemTouchable(touchable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetRectChangeBySystem(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "[NAPI]");
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        WLOGFE("[NAPI] Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool rectChangeBySystem = false;
+    if (!ConvertFromJsValue(env, argv[0], rectChangeBySystem)) {
+        WLOGFE("[NAPI] Failed to  convert parameter to rectChangeBySystem");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI] session is null, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+
+    session->SetRectChangeBySystem(rectChangeBySystem);
     return NapiGetUndefined(env);
 }
 
