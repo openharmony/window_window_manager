@@ -332,6 +332,8 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
+    int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:

@@ -30,13 +30,6 @@ bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (displayState_ == state && ScreenSessionManager::GetInstance().BlockSetDisplayState()) {
-            TLOGE(WmsLogTag::DMS, "[UL_POWER]state is already set");
-            return false;
-        }
-    }
     switch (state) {
         case DisplayState::ON: {
             {
