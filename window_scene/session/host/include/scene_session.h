@@ -51,6 +51,7 @@ using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
     WsPiPControlStatus status)>;
+using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -211,6 +212,7 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
+    WSError SetAutoStartPiP(bool isAutoStart) override;
     void NotifyPiPWindowPrepareClose() override;
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -246,6 +248,7 @@ public:
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
+    void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -531,6 +534,7 @@ private:
         WSPropertyChangeAction action);
 
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
+    NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     static wptr<SceneSession> enterSession_;

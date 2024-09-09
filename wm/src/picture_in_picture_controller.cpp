@@ -36,24 +36,14 @@
 
 namespace OHOS {
 namespace Rosen {
-    sptr<IRemoteObject> PictureInPictureController::remoteObj_;
-    std::string setting_url_proxy_;
 namespace {
-    constexpr int32_t DELAY_RESET = 100;
     constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
     constexpr uint32_t PIP_HIGH_PRIORITY = 1;
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
-    const std::string KEY = "auto_start_pip_status";
-    const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-    const std::string SETTING_COLUMN_VALUE = "VALUE";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
-    constexpr const char *SETTINGS_URL_PROXY_HEAD = "datashare:///com.ohos.settingsdata/"
-        "entry/settingsdata/USER_SETTINGSDATA_";
-    constexpr const char *SETTINGS_URL_PROXY_TAIL = "?Proxy=true";
-    constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
     const int DEFAULT_ASPECT_RATIO[] = {16, 9};
 }
 
@@ -77,28 +67,11 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 {
     this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
-
-    int32_t clientUserId = GetUserIdByUid(getuid());
-    TLOGI(WmsLogTag::WMS_PIP, "clientUserId = %{public}d", clientUserId);
-    setting_url_proxy_ = SETTINGS_URL_PROXY_HEAD + std::to_string(clientUserId) + SETTINGS_URL_PROXY_TAIL;
-    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityManager == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbilityManager return nullptr");
-        return;
-    }
-    auto remoteObj = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (remoteObj == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "GetSystemAbility return nullptr, systemAbilityId=%{public}d",
-            WINDOW_MANAGER_SERVICE_ID);
-        return;
-    }
-    remoteObj_ = remoteObj;
 }
 
 PictureInPictureController::~PictureInPictureController()
 {
     PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
-    remoteObj_ = nullptr;
 }
 
 WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType startType)
@@ -441,6 +414,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
     TLOGI(WmsLogTag::WMS_PIP, "enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
+    mainWindow_->SetAutoStartPiP(enable);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
         if (!IsPullPiPAndHandleNavigation()) {
@@ -542,37 +516,6 @@ void PictureInPictureController::WindowLifeCycleListener::AfterDestroyed()
 {
     TLOGI(WmsLogTag::WMS_PIP, "stop picture_in_picture when attached window destroy");
     PictureInPictureManager::DoClose(true, true);
-}
-
-void PictureInPictureController::PipMainWindowLifeCycleImpl::AfterBackground()
-{
-    std::string value = "true";
-    ErrCode ret = getSettingsAutoStartStatus(KEY, value);
-    TLOGI(WmsLogTag::WMS_PIP, "getSettingsAutoStartStatus, value=%{public}s", value.c_str());
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "get setting auto pip failed, ret=%{public}d", ret);
-    }
-    if (value == "false") {
-        return;
-    }
-    if (windowListener_ != nullptr) {
-        auto curMode = windowListener_->GetMode();
-        if (curMode == WindowMode::WINDOW_MODE_FLOATING) {
-            TLOGI(WmsLogTag::WMS_PIP, "floating not process");
-            return;
-        }
-        if (!windowListener_->IsValid()) {
-            TLOGI(WmsLogTag::WMS_PIP, "split close not process");
-            return;
-        }
-    }
-    PictureInPictureManager::AutoStartPipWindow(navigationId_);
-    TLOGI(WmsLogTag::WMS_PIP, "called success");
-}
-
-void PictureInPictureController::PipMainWindowLifeCycleImpl::BackgroundFailed(int32_t type)
-{
-    TLOGD(WmsLogTag::WMS_PIP, "PipMainWindowLifeCycleImpl BackgroundFailed");
 }
 
 void PictureInPictureController::DoActionEvent(const std::string& actionName, int32_t status)
@@ -855,49 +798,6 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
     return false;
 }
 
-ErrCode PictureInPictureController::getSettingsAutoStartStatus(const std::string& key, std::string& value)
-{
-    if (remoteObj_ == nullptr) {
-        auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        if (systemAbilityManager == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "failed to get registry");
-            return ERR_NO_INIT;
-        }
-        remoteObj_ = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, setting_url_proxy_, SETTINGS_DATA_EXT_URI);
-    if (helper == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "create helper is nullptr");
-        return ERR_NO_INIT;
-    }
-    std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(setting_url_proxy_ + "&key=" + key);
-    auto resultSet = helper->Query(uri, predicates, columns);
-    if (resultSet == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Query return nullptr");
-        return ERR_INVALID_OPERATION;
-    }
-    int32_t count;
-    resultSet->GetRowCount(count);
-    if (count == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
-        resultSet->Close();
-        return ERR_NAME_NOT_FOUND;
-    }
-    const int32_t INDEX = 0;
-    resultSet->GoToRow(INDEX);
-    int32_t ret = resultSet->GetString(INDEX, value);
-    if (ret != NativeRdb::E_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "resultSet->GetString return not ok, ret=%{public}d", ret);
-        resultSet->Close();
-        return ERR_INVALID_VALUE;
-    }
-    resultSet->Close();
-    return ERR_OK;
-}
-
 std::string PictureInPictureController::GetPiPNavigationId()
 {
     return (pipOption_ != nullptr && !IsTypeNodeEnabled()) ? pipOption_->GetNavigationId() : "";
@@ -911,55 +811,6 @@ napi_ref PictureInPictureController::GetCustomNodeController()
 napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
-}
-
-PictureInPictureController::PiPMainWindowListenerImpl::PiPMainWindowListenerImpl(const sptr<Window> window)
-{
-    mode_ = window ? window->GetMode() : WindowMode::WINDOW_MODE_UNDEFINED;
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-}
-
-void PictureInPictureController::PiPMainWindowListenerImpl::OnModeChange(WindowMode mode, bool hasDeco)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        (mode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
-        isValid_ = false;
-        DelayReset();
-    } else {
-        isValid_ = true;
-    }
-    mode_ = mode;
-}
-
-void PictureInPictureController::PiPMainWindowListenerImpl::DelayReset()
-{
-    TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (handler_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_PIP, "task is not append to queue");
-        isValid_ = true;
-        return;
-    }
-    auto delayTask = [weakThis = wptr(this)]() {
-        auto listener = weakThis.promote();
-        if (!listener) {
-            TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
-            return;
-        }
-        listener->isValid_ = true;
-        TLOGI(WmsLogTag::WMS_PIP, "reset to valid");
-    };
-    handler_->PostTask(std::move(delayTask), "wms:PiPMainWindowListenerImpl_DelayReset", DELAY_RESET);
-}
-
-WindowMode PictureInPictureController::PiPMainWindowListenerImpl::GetMode()
-{
-    return mode_;
-}
-
-bool PictureInPictureController::PiPMainWindowListenerImpl::IsValid()
-{
-    return isValid_;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1717,6 +1717,13 @@ public:
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
 
     /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
+
+    /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.

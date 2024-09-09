@@ -73,6 +73,7 @@ enum class ListenerFuncType : uint32_t {
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    AUTO_START_PIP_CB,
 };
 
 class SceneSession;
@@ -195,6 +196,7 @@ private:
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
+    void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
     void ProcessClickModalSpecificWindowOutsideRegister();
@@ -243,6 +245,7 @@ private:
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
+    void OnAutoStartPiPStatusChange(bool isAutoStart);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnClickModalSpecificWindowOutside();
