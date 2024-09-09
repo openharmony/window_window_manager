@@ -592,15 +592,16 @@ HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Lev
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient start";
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("WindowRequestFocusByClientCheck");
     sptr<WindowSessionImpl> window =
         new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
 
-    WSError res = window->RequestFocusByClient(true);
-    ASSERT_EQ(res, WSError::WS_OK);
+    WMError res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_OK);
     res = window->RequestFocusByClient(false);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient end";
 }

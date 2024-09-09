@@ -845,6 +845,7 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+/** @note @window.focus */
 WMError WindowSessionImpl::RequestFocusByClient(bool isFocused) const
 {
     if (IsWindowSessionInvalid()) {
