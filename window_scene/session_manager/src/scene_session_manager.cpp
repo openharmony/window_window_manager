@@ -2122,7 +2122,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        HandleCastScreenDisConnection(scnSession);
+        HandleCastScreenDisConnection(scnSession->GetSessionInfo().screenId_);
         auto persistentId = scnSession->GetPersistentId();
         TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
@@ -2164,24 +2164,26 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession)
+void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
 {
-    auto sessionInfo = sceneSession->GetSessionInfo();
-    ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    if (defScreenId == sessionInfo.screenId_) {
-        return;
-    }
-    auto flag = Rosen::ScreenManager::GetInstance().GetVirtualScreenFlag(sessionInfo.screenId_);
-    if (flag != VirtualScreenFlag::CAST) {
-        return;
-    }
-    std::vector<uint64_t> mirrorIds { sessionInfo.screenId_ };
-    ScreenId groupId;
-    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().MakeMirror(0, mirrorIds, groupId);
-    if (ret != Rosen::DMError::DM_OK) {
-        TLOGI(WmsLogTag::WMS_LIFE, "MakeMirror failed,ret: %{public}d", ret);
-        return;
-    }
+    auto task = [screenId] {
+        ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        if (defScreenId == screenId) {
+            return;
+        }
+        auto flag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
+        if (flag != VirtualScreenFlag::CAST) {
+            return;
+        }
+        std::vector<uint64_t> mirrorIds { screenId };
+        ScreenId groupId;
+        DMError ret = ScreenManager::GetInstance().MakeMirror(0, mirrorIds, groupId);
+        if (ret != Rosen::DMError::DM_OK) {
+            TLOGI(WmsLogTag::WMS_LIFE, "MakeMirror failed, ret: %{public}d", ret);
+            return;
+        }
+    };
+    eventHandler_->PostTask(task, "HandleCastScreenDisConnection: ScreenId:" + std::to_string(screenId));
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& scnSession,
