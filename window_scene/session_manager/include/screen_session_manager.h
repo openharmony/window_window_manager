@@ -79,7 +79,6 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
-    bool IsFastFingerprintReason(PowerStateChangeReason reason);
     bool WakeUpBegin(PowerStateChangeReason reason) override;
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
@@ -428,7 +427,6 @@ private:
         PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
     std::atomic<PowerStateChangeReason> lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     std::atomic<PowerStateChangeReason> currentWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
-    std::atomic<bool> buttonBlock_ = false;
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
     std::atomic<bool> isPhyScreenConnected_ = false;
