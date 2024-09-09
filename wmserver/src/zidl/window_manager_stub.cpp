@@ -48,8 +48,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             sptr<IRemoteObject> token = nullptr;
             if (windowProperty && windowProperty->GetTokenState()) {
                 token = data.ReadRemoteObject();
-            } else {
-                WLOGI("accept token is nullptr");
             }
             WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);
@@ -67,14 +65,26 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_REMOVE_WINDOW: {
-            uint32_t windowId = data.ReadUint32();
-            bool isFromInnerkits = data.ReadBool();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "TRANS_ID_REMOVE_WINDOW Read windowId failed.");
+                return ERR_INVALID_DATA;
+            }
+            bool isFromInnerkits = false;
+            if (!data.ReadBool(isFromInnerkits)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "TRANS_ID_REMOVE_WINDOW Read isFromInnerkits failed.");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = RemoveWindow(windowId, isFromInnerkits);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_DESTROY_WINDOW: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "TRANS_ID_DESTROY_WINDOW Read windowId failed.");
+                return ERR_INVALID_DATA;
+            }
             WMError errCode = DestroyWindow(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -184,7 +194,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS: {
-            WMError errCode = MinimizeAllAppWindows(data.ReadUint64());
+            uint64_t displayId = 0;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "Read displayID failed.");
+                return ERR_INVALID_DATA;
+            }
+            WMError errCode = MinimizeAllAppWindows(displayId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
