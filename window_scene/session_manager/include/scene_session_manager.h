@@ -766,7 +766,7 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
-    void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
+    void HandleCastScreenDisConnection(uint64_t screenId);
     void ProcessWindowModeType();
     WindowModeType CheckWindowModeType();
     void NotifyRSSWindowModeTypeUpdate();
