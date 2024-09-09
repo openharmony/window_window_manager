@@ -847,7 +847,8 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
 {
-    NotifySessionPiPControlStatusChangeFunc func = [weakThis = wptr(this)](WsPiPControlType controlType, WsPiPControlStatus status) {
+    NotifySessionPiPControlStatusChangeFunc func = [weakThis = wptr(this)](
+        WsPiPControlType controlType, WsPiPControlStatus status) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionPiPControlStatusChangeRegister jsSceneSession is null");
@@ -982,7 +983,8 @@ void JsSceneSession::ProcessTerminateSessionRegister()
 void JsSceneSession::ProcessTerminateSessionRegisterNew()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "begin");
-    NotifyTerminateSessionFuncNew func = [weakThis = wptr(this)](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    NotifyTerminateSessionFuncNew func = [weakThis = wptr(this)](
+        const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessTerminateSessionRegisterNew jsSceneSession is null");
@@ -1002,7 +1004,8 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
 void JsSceneSession::ProcessTerminateSessionRegisterTotal()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "begin");
-    NotifyTerminateSessionFuncTotal func = [weakThis = wptr(this)](const SessionInfo& info, TerminateType terminateType) {
+    NotifyTerminateSessionFuncTotal func = [weakThis = wptr(this)](
+        const SessionInfo& info, TerminateType terminateType) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessTerminateSessionRegisterTotal jsSceneSession is null");
@@ -3516,7 +3519,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }        
         jsSceneSession->OnPrepareClosePiPSession();
     };
