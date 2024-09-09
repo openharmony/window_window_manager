@@ -30,7 +30,7 @@ namespace OHOS::Rosen {
 namespace {
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
-
+const uint32_t CHANGE_MODE_TASK_NUM = 3;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const int32_t TP_TYPE_MAIN = 18;
@@ -84,7 +84,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
-        SetdisplayModeChangeStatus(true);
+        SetdisplayModeChangeStatus(true, CHANGE_MODE_TASK_NUM);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {

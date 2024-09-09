@@ -57,7 +57,7 @@ public:
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
-    virtual void SetdisplayModeChangeStatus(bool status);
+    void SetdisplayModeChangeStatus(bool status, uint32_t taskNum = FOLD_TO_EXPAND_TASK_NUM);
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     

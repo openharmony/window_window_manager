@@ -41,6 +41,7 @@ const std::string MAIN_TP = "0";
 const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 0;
+const uint32_t CHANGE_MODE_TASK_NUM = 3;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
@@ -90,7 +91,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
     }
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ChangeScreenDisplayMode default screenSession is null");
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
     {
@@ -100,7 +101,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         if (!CheckDisplayMode(displayMode)) {
             return;
         }
-        SetdisplayModeChangeStatus(true);
+        SetdisplayModeChangeStatus(true, CHANGE_MODE_TASK_NUM);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::SUB: {
@@ -115,18 +116,13 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
                 ChangeScreenDisplayModeToCoordination();
                 break;
             }
-            case FoldDisplayMode::UNKNOWN: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
-                break;
-            }
             default: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
+                TLOGI(WmsLogTag::DMS, "invalid displayMode: %{public}d", displayMode);
                 break;
             }
         }
         if (currentDisplayMode_ != displayMode) {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode NotifyDisplayModeChanged displayMode = %{public}d",
-                displayMode);
+            TLOGI(WmsLogTag::DMS, "NotifyDisplayModeChanged displayMode = %{public}d", displayMode);
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
