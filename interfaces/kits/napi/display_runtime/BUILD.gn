@@ -48,7 +48,7 @@ ohos_shared_library("display_napi") {
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
-    "../common:dm_napi_common",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [

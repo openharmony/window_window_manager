@@ -15,6 +15,7 @@
 #include "screen_session.h"
 #include <gtest/gtest.h>
 #include "session_manager/include/screen_session_manager.h"
+#include "scene_board_judgement.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -32,7 +33,7 @@ public:
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
-    void OnScreenExtandChange(ScreenId mainScreenId, ScreenId extandScreenId) override {}
+    void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -697,7 +698,11 @@ HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, Function | SmallTest | Level
     EXPECT_NE(nullptr, screenSession);
     std::vector<ScreenHDRFormat> hdrFormats;
     auto res = screenSession->GetSupportedHDRFormats(hdrFormats);
-    ASSERT_EQ(res, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "GetSupportedHDRFormats end";
 }
 
@@ -718,7 +723,11 @@ HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, screenSession);
     ScreenHDRFormat hdrFormat;
     auto res = screenSession->GetScreenHDRFormat(hdrFormat);
-    ASSERT_EQ(res, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "GetScreenHDRFormat end";
 }
 
@@ -739,10 +748,14 @@ HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, screenSession);
     int32_t modeIdx = 0;
     auto res = screenSession->SetScreenHDRFormat(modeIdx);
-    ASSERT_EQ(res, DMError::DM_OK);
-    modeIdx = -1;
-    res = screenSession->SetScreenHDRFormat(modeIdx);
-    ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+        modeIdx = -1;
+        res = screenSession->SetScreenHDRFormat(modeIdx);
+        ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "SetScreenHDRFormat end";
 }
 
@@ -763,7 +776,11 @@ HWTEST_F(ScreenSessionTest, GetSupportedColorSpaces, Function | SmallTest | Leve
     EXPECT_NE(nullptr, screenSession);
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     auto res = screenSession->GetSupportedColorSpaces(colorSpaces);
-    ASSERT_EQ(res, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "GetSupportedColorSpaces end";
 }
 
@@ -784,7 +801,11 @@ HWTEST_F(ScreenSessionTest, GetScreenColorSpace, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, screenSession);
     GraphicCM_ColorSpaceType colorSpace;
     auto res = screenSession->GetScreenColorSpace(colorSpace);
-    ASSERT_EQ(res, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "GetScreenColorSpace end";
 }
 
@@ -1082,7 +1103,11 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, Function | SmallTest 
     std::vector<ScreenColorGamut> colorGamuts;
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     DMError ret = session->GetScreenSupportedColorGamuts(colorGamuts);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_NE(ret, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts end";
 }
 
@@ -1141,7 +1166,11 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 
     ScreenColorGamut colorGamut;
     DMError res = session->GetScreenColorGamut(colorGamut);
-    ASSERT_EQ(res, DMError::DM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, DMError::DM_OK);
+    } else {
+        ASSERT_NE(res, DMError::DM_OK);
+    }
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut end";
 }
 

@@ -1516,6 +1516,13 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief get start move flag.
+     *
+     * @return true means window is moving. Otherwise is not moving
+     *
+     */
+    virtual bool GetStartMoveFlag() { return false; }
+    /**
      * @brief start move system window. It is called by application.
      *
      */
@@ -1860,6 +1867,18 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
@@ -1873,9 +1892,11 @@ public:
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
      * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
      * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @param isCloseVisible Display close button if true, or hide close button if false.
      * @return Errorcode of window.
      */
-    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2219,12 +2240,27 @@ public:
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
     /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+    /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return * void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 };
 }
 }

@@ -16,7 +16,7 @@
 #include "scene_session_dirty_manager.h"
 
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
 #include "fold_screen_state_internel.h"
@@ -37,30 +37,10 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
-} //namespace
 
-static bool operator==(const MMI::Rect left, const MMI::Rect right)
+void AdjustMMIRotationFromDisplayMode(MMI::Direction& rotation, MMI::DisplayMode displayMode)
 {
-    return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
-}
-
-MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
-{
-    MMI::Direction rotation = MMI::DIRECTION0;
-    if (NearEqual(degree, DIRECTION0)) {
-        rotation = MMI::DIRECTION0;
-    }
-    if (NearEqual(degree, DIRECTION90)) {
-        rotation = MMI::DIRECTION90;
-    }
-    if (NearEqual(degree, DIRECTION180)) {
-        rotation = MMI::DIRECTION180;
-    }
-    if (NearEqual(degree, DIRECTION270)) {
-        rotation = MMI::DIRECTION270;
-    }
-    if ((displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) ||
-        (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
         switch (rotation) {
             case MMI::DIRECTION0:
                 rotation = MMI::DIRECTION90;
@@ -78,7 +58,46 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
                 rotation = MMI::DIRECTION0;
                 break;
         }
+    } else if (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        switch (rotation) {
+            case MMI::DIRECTION0:
+                rotation = MMI::DIRECTION270;
+                break;
+            case MMI::DIRECTION90:
+                rotation = MMI::DIRECTION0;
+                break;
+            case MMI::DIRECTION180:
+                rotation = MMI::DIRECTION90;
+                break;
+            case MMI::DIRECTION270:
+                rotation = MMI::DIRECTION180;
+                break;
+            default:
+                rotation = MMI::DIRECTION0;
+                break;
+        }
     }
+}
+} // namespace
+
+static bool operator==(const MMI::Rect left, const MMI::Rect right)
+{
+    return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
+}
+
+MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
+{
+    MMI::Direction rotation = MMI::DIRECTION0;
+    if (NearEqual(degree, DIRECTION0)) {
+        rotation = MMI::DIRECTION0;
+    } else if (NearEqual(degree, DIRECTION90)) {
+        rotation = MMI::DIRECTION90;
+    } else if (NearEqual(degree, DIRECTION180)) {
+        rotation = MMI::DIRECTION180;
+    } else if (NearEqual(degree, DIRECTION270)) {
+        rotation = MMI::DIRECTION270;
+    }
+    AdjustMMIRotationFromDisplayMode(rotation, displayMode);
     return rotation;
 }
 
@@ -187,8 +206,10 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
-    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
-        (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP)) {
+    bool isMidScene = sceneSession->GetIsMidScene();
+    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    if (isAppMainWindowOrPip && !isMidScene) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -278,7 +299,7 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
         }
     }
     dialogMap[mainSession->GetPersistentId()] = session;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
+    TLOGD(WmsLogTag::WMS_DIALOG, "Add dialog session, id: %{public}d, mainSessionId: %{public}d",
         session->GetPersistentId(), mainSession->GetPersistentId());
 }
 
@@ -595,7 +616,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     return {windowInfo, pixelMap};
 }
 
-void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback)
+void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
 {
     flushWindowInfoCallback_ = std::move(callback);
 }

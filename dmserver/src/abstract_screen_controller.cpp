@@ -106,9 +106,11 @@ const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNode
     static std::shared_ptr<RSDisplayNode> notFound = nullptr;
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
+        WLOGFE("screen is nullptr");
         return notFound;
     }
     if (screen->rsDisplayNode_ == nullptr) {
+        WLOGE("rsDisplayNode_ is nullptr");
         return notFound;
     }
     WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
@@ -861,11 +863,11 @@ void AbstractScreenController::SetScreenRotateAnimation(
         static const RSAnimationTimingProtocol timingProtocol(600); // animation time
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         static const RSAnimationTimingCurve curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-    #ifdef SOC_PERF_ENABLE
+#ifdef SOC_PERF_ENABLE
         // Increase frequency to improve windowRotation perf
         // 10027 means "gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10027, "");
-    #endif
+#endif
         RSNode::Animate(timingProtocol, curve, [weakNode, srect, rotationAfter, this]() {
             auto displayNode = weakNode.lock();
             if (displayNode == nullptr) {
@@ -874,10 +876,10 @@ void AbstractScreenController::SetScreenRotateAnimation(
             }
             SetDisplayNode(rotationAfter, displayNode, srect);
         }, []() {
-    #ifdef SOC_PERF_ENABLE
+#ifdef SOC_PERF_ENABLE
             // ClosePerf in finishCallBack
             OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(10027, false, "");
-    #endif
+#endif
         });
     } else {
         WLOGFD("[FixOrientation] display rotate without animation %{public}u", rotationAfter);
@@ -1518,7 +1520,7 @@ DMError AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float 
         WLOGE("cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64"", screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) {
+    if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) { // less to 1e-6 mean equal
         WLOGE("The density is equivalent to the original value, no update operation is required, aborted.");
         return DMError::DM_OK;
     }

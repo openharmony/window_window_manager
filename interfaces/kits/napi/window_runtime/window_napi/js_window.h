@@ -83,6 +83,7 @@ public:
     static napi_value IsShowing(napi_env env, napi_callback_info info);
     static napi_value IsWindowShowingSync(napi_env env, napi_callback_info info);
     static napi_value SetBackgroundColor(napi_env env, napi_callback_info info);
+    static napi_value SetWindowContainerColor(napi_env env, napi_callback_info info);
     static napi_value SetWindowBackgroundColorSync(napi_env env, napi_callback_info info);
     static napi_value SetBrightness(napi_env env, napi_callback_info info);
     static napi_value SetWindowBrightness(napi_env env, napi_callback_info info);
@@ -234,6 +235,7 @@ private:
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);

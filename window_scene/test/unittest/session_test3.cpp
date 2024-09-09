@@ -29,7 +29,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/screen/include/screen_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
@@ -154,6 +154,34 @@ HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 
     result = session_->SetFocusable(false);
     EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSystemFocusable
+ * @tc.desc: SetSystemFocusable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetSystemFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(session_->GetSystemFocusable(), true);
+    bool systemFocusable = false;
+    session_->SetSystemFocusable(systemFocusable);
+    ASSERT_EQ(session_->GetSystemFocusable(), systemFocusable);
+}
+
+/**
+ * @tc.name: CheckFocusable
+ * @tc.desc: CheckFocusable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, CheckFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(session_->CheckFocusable(), true);
+    session_->SetSystemFocusable(false);
+    ASSERT_EQ(session_->GetSystemFocusable(), false);
 }
 
 /**
@@ -717,6 +745,24 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 }
 
 /**
+ * @tc.name: SetLeashWindowSurfaceNodeChangedListener
+ * @tc.desc: SetLeashWindowSurfaceNodeChangedListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetLeashWindowSurfaceNodeChangedListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    int resultValue = 0;
+    NotifyLeashWindowSurfaceNodeChangedFunc func = [&resultValue]() {
+        resultValue = 1;
+    };
+    session_->SetLeashWindowSurfaceNodeChangedListener(func);
+    session_->SetLeashWinSurfaceNode(nullptr);
+    EXPECT_EQ(resultValue, 1);
+    session_->SetLeashWindowSurfaceNodeChangedListener(nullptr);
+}
+
+/**
  * @tc.name: NotifySessionFocusableChange
  * @tc.desc: NotifySessionFocusableChange Test
  * @tc.type: FUNC
@@ -925,9 +971,9 @@ HWTEST_F(WindowSessionTest3, RequestFocus, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
-    EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(false));
+    session_->sessionInfo_.isSystem_ = false;
+    EXPECT_EQ(WSError::WS_OK, session_->RequestFocus(true));
+    EXPECT_EQ(WSError::WS_OK, session_->RequestFocus(false));
 }
 
 /**

@@ -21,6 +21,7 @@
 #include "connection/screen_cast_connection.h"
 #include "screen_scene_config.h"
 #include <surface.h>
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -983,7 +984,11 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, Function | SmallTest | L
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
-    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    } else {
+        ASSERT_NE(DMError::DM_OK, ssm_->GetScreenColorGamut(id, colorGamut));
+    }
 }
 
 /**
@@ -2465,6 +2470,117 @@ HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | Smal
     ssm_->PhyMirrorConnectWakeupScreen();
     ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
     ssm_->PhyMirrorConnectWakeupScreen();
+}
+
+/**
+ * @tc.name: SetClient
+ * @tc.desc: SetClient
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetClient, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    sptr<IScreenSessionManagerClient> client = nullptr;
+    ssm->SetClient(client);
+}
+
+/**
+ * @tc.name: SwitchUser
+ * @tc.desc: SwitchUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ssm->SwitchUser();
+}
+
+/**
+ * @tc.name: ScbClientDeathCallback
+ * @tc.desc: ScbClientDeathCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    int32_t deathScbPid = ssm->currentScbPId_;
+    ssm->currentScbPId_ = -1;     // INVALID_SCB_PID
+    ssm->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+
+    deathScbPid = ssm->currentScbPId_;
+    ssm->currentScbPId_ = 0;
+    ssm->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+
+    deathScbPid = 0;
+    ssm->currentScbPId_ = -1;     // INVALID_SCB_PID
+    ssm->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+
+    deathScbPid = 0;
+    ssm->currentScbPId_ = 0;
+    ssm->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyClientProxyUpdateFoldDisplayMode?
+ * @tc.desc: NotifyClientProxyUpdateFoldDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    ssm->NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+}
+
+/**
+ * @tc.name: OnScreenRotationLockedChange
+ * @tc.desc: OnScreenRotationLockedChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    bool isLocked = false;
+    ScreenId screenId = 1050;
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    ssm->OnScreenRotationLockedChange(isLocked, screenId);
+}
+
+/**
+ * @tc.name: OnScreenOrientationChange
+ * @tc.desc: OnScreenOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    float screenOrientation = 75.2f;
+    ScreenId screenId = 1050;
+    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    ssm->OnScreenOrientationChange(screenOrientation, screenId);
+}
+
+/**
+ * @tc.name: NotifyDisplayModeChanged
+ * @tc.desc: NotifyDisplayModeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayModeChanged, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ssm->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
 }
 }
 } // namespace Rosen

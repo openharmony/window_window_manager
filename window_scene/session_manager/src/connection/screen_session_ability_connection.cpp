@@ -235,7 +235,7 @@ bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::st
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility result: %{public}d", ret);
+    TLOGI(WmsLogTag::DMS, "ConnectServiceExtensionAbility succeed");
     // set current callingIdentity back
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
@@ -285,8 +285,8 @@ int32_t ScreenSessionAbilityConnection::SendMessageBlock(
     return RES_SUCCESS;
 }
 
-int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
+int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
+    [[maybe_unused]]MessageParcel& reply, [[maybe_unused]]MessageOption& option)
 {
     TLOGI(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {

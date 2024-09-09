@@ -47,6 +47,7 @@ protected:
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
+    void UpdatePiPWindowStateChanged(bool isForeground);
 
     bool dialogSessionBackGestureEnabled_ = false;
 };

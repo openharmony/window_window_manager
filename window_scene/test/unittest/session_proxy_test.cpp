@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "accessibility_event_info.h"
 #include "ws_common.h"
+#include "mock_message_parcel.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -457,6 +458,31 @@ HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
     WSError res = sProxy->RequestFocus(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
+}
+
+/**
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: NotifyExtensionEventAsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen

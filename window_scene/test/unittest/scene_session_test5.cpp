@@ -30,7 +30,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/system_session.h"
 #include "session/screen/include/screen_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "wm_common.h"
 #include "window_helper.h"
 #include "ui/rs_surface_node.h"
@@ -154,7 +154,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
 
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     SystemSessionConfig systemConfig;
-    systemConfig.uiType_ = "PC";
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     session->SetSystemConfig(systemConfig);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -162,7 +162,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     session->specificCallback_->onGetSceneSessionVectorByType_ = nullptr;
     session->GetSystemAvoidArea(rect, avoidArea);
 
-    systemConfig.uiType_ = "phone";
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
@@ -204,7 +204,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
 
-    systemConfig.uiType_ = "phone";
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
@@ -353,12 +353,12 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
 
     pointerEvent->SetPointerAction(5);
     session->property_->SetDragEnabled(true);
-    systemConfig.uiType_ = "phone";
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     systemConfig.freeMultiWindowSupport_ = false;
     session->moveDragController_->isStartDrag_ = true;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
 
-    systemConfig.uiType_ = "pc";
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
     session->ClearDialogVector();
 }
@@ -586,7 +586,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea02, Function | SmallTest | Level2)
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
 
     SystemSessionConfig systemConfig;
-    systemConfig.uiType_ = "phone";
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     session->SetSystemConfig(systemConfig);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     session->GetSessionProperty()->SetDisplayId(1664);

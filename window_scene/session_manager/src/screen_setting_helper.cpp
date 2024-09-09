@@ -55,15 +55,7 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
 
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
 {
-    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    int32_t value;
-    ErrCode ret = provider.GetIntValue(key, value);
-    if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "get setting dpi failed, ret=%{public}d", ret);
-        return false;
-    }
-    dpi = static_cast<uint32_t>(value);
-    return true;
+    return GetSettingValue(dpi, key);
 }
 
 bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& key)
