@@ -2479,6 +2479,22 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetWatermarkEnabled(const std::string& busiessName, bool isEnabled)
+{
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "send RS set process watermark. busiessName:%{public}s, isEnabled:%{public}d",
+        busiessName.c_str(), isEnabled);
+    surfaceNode_->SetWatermarkEnabled(busiessName, isEnabled);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
+        leashWinSurfaceNode->SetWatermarkEnabled(busiessName, isEnabled);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
@@ -3470,7 +3486,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
         TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-   
+
     SetTopmost(property->IsTopmost());
     return WMError::WM_OK;
 }

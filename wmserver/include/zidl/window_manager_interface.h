@@ -233,6 +233,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled)
+    {
+        return WMError::WM_OK;
+    }
     virtual WMError GetWindowModeType(WindowModeType& windowModeType)
     {
         return WMError::WM_OK;

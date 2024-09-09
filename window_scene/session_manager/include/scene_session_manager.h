@@ -393,6 +393,7 @@ public:
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
+    WMError SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     void RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds);
@@ -779,6 +780,8 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    void DoAddProcessWatermarkForSession(int32_t persistentId);
+    void DeleteProcessWatermarkPid(int32_t pid);
     
     /*
      * Fold Screen Status Change Report
@@ -793,6 +796,8 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+    mutable std::shared_mutex processWatermarkPidMapMutex_;
+    std::map<int32_t, std::string> processWatermarkPidMap_;
 
     /*
      * Dump

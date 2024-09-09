@@ -1408,5 +1408,14 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
+WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, busiessName, isEnabled);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "set process watermark failed");
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS

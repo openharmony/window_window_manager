@@ -783,6 +783,16 @@ public:
      */
     WindowStyleType GetWindowStyleType();
 
+    /**
+     * @brief set process watermark.
+     *
+     * @param pid pid
+     * @param busiessName watermark picture name
+     * @param isEnabled add or remove
+     * @return @return WM_OK means set process watermark success, others means failed.
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled);
+
 private:
     WindowManager();
     ~WindowManager();
