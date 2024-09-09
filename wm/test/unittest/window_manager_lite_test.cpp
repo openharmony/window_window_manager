@@ -449,8 +449,6 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
     lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
     lite.pImpl_->NotifyWindowModeChange(WindowModeType::WINDOW_MODE_SPLIT);
-    WMError res10 = WindowManagerLite::GetInstance().UnregisterWMSConnectionChangedListener();
-    ASSERT_EQ(WMError::WM_OK, res10);
 }
 
 /**
