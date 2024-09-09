@@ -2451,8 +2451,9 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetWindowLayoutFullScreen",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    auto asyncTask = CreateAsyncTask(env, lastParam, nullptr,
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowLayoutFullScreen", env, std::move(asyncTask));
     return result;
 }
 
