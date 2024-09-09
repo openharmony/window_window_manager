@@ -922,7 +922,7 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
     TLOGD(WmsLogTag::WMS_FOCUS, "called");
     bool isFocused = false;
     if (!data.ReadBool(isFocused)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
