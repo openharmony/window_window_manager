@@ -414,7 +414,8 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
