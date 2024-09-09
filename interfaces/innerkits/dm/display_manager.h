@@ -601,21 +601,6 @@ public:
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
 
     /**
-     * @brief Set virtual screen black list to RS.
-     *
-     * @param screenId ScreenId used in virtual screen.
-     * @param windowIdList The windowId list to shield on cast screen.
-    */
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
-
-    /**
-     * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
-     *
-     * @param screenId ScreenId used in virtual screen.
-    */
-    void DisablePowerOffRenderControl(ScreenId screenId);
-
-    /**
      * @brief get to freeze status with specified pid list
      *
      * @param pidList Indicates the calling pid
@@ -631,6 +616,21 @@ public:
     */
     DMError ResetAllFreezeStatus();
 
+    /**
+     * @brief Set virtual screen black list to RS.
+     *
+     * @param screenId ScreenId used in virtual screen.
+     * @param windowIdList The windowId list to shield on cast screen.
+    */
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+
+    /**
+     * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
+     *
+     * @param screenId ScreenId used in virtual screen.
+    */
+    void DisablePowerOffRenderControl(ScreenId screenId);
+    
     /**
      * @brief get all display physical resolution
      *
