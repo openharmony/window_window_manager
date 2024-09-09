@@ -126,6 +126,10 @@ WSRect MoveDragController::GetTargetRect(bool needGlobalRect) const
 void MoveDragController::InitMoveDragProperty()
 {
     moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+}
+
+void MoveDragController::SetCrossProperty(uint64_t displayId, uint64_t parentId)
+{
     addedDisplaySet.insert(displayId);
     moveDragStartDisplayId_ = displayId;
     parentId_ = parentId;

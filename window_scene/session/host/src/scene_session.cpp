@@ -459,7 +459,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 return WMSError::WS_ERROR_DESTROYED_OBJECT;
             }
             uint64_t displayId = sessionProperty->GetDisplayId();
-            session->moveDragController_->InitMoveDragProperty(displayId, parentId);
+            session->moveDragController_->InitMoveDragProperty();
+            session->moveDragController_->SetCrossProperty(displayId, parentId);
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->lastSafeRect);
