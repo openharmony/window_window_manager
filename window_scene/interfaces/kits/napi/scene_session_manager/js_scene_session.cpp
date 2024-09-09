@@ -475,9 +475,8 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
     }
     sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [weakThis = wptr(this)](bool isLandscapeMultiWindow) {
         auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession id:%{public}d has"
-                "been destroyed", persistentId);
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
@@ -525,9 +524,8 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
     }
     sessionchangeCallback->onKeyboardGravityChange_ = [weakThis = wptr(this)](SessionGravity gravity) {
         auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession id:%{public}d has"
-                "been destroyed", persistentId);
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnKeyboardGravityChange(gravity);
@@ -677,12 +675,12 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         }
         {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession clear jsCbMap");
-            std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
-            jsCbMap_.clear();
+            std::unique_lock<std::shared_mutex> lock(jsSceneSession->jsCbMapMutex_);
+            jsSceneSession->jsCbMap_.clear();
         }
         auto iter = jsSceneSessionMap_.find(persistentId);
         if (iter != jsSceneSessionMap_.end()) {
-            napi_delete_reference(env_, iter->second);
+            napi_delete_reference(jsSceneSession->env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
             TLOGE(WmsLogTag::WMS_LIFE, "deleteRef failed , %{public}d", persistentId);
@@ -955,7 +953,7 @@ void JsSceneSession::ProcessSessionEventRegister()
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionEventRegister jsSceneSession is null");
             return;
         }
-        jsScenesession->OnSessionEvent(eventId, param);
+        jsSceneSession->OnSessionEvent(eventId, param);
     };
     WLOGFD("ProcessSessionEventRegister success");
 }
@@ -2785,7 +2783,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), sessionInfo] {
-        auto jsSceneSession = weak.promote();
+        auto jsSceneSession = weakThis.promote();
         if (jsSceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionActivation JsSceneSession is null");
             return;
@@ -3176,7 +3174,7 @@ void JsSceneSession::OnNeedAvoid(bool status)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]OnNeedAvoid %{public}d", status);
 
-    auto task = [weakThis = wptr(this) persistentId = persistentId_, needAvoid = status, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, needAvoid = status, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnNeedAvoid jsSceneSession id:%{public}d has been destroyed",
