@@ -85,6 +85,7 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
 private:
