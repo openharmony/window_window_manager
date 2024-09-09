@@ -68,6 +68,7 @@ public:
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
+    static napi_value SetVmaCacheStatus(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
@@ -121,6 +122,7 @@ private:
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
+    napi_value OnSetVmaCacheStatus(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
