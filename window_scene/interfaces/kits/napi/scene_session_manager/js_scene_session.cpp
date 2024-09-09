@@ -585,7 +585,7 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
     sessionchangeCallback->onLayoutFullScreenChangeFunc_ = [weakThis = wptr(this)](bool isLayoutFullScreen) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null",);
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnLayoutFullScreenChange(isLayoutFullScreen);
