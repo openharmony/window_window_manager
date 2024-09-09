@@ -1143,6 +1143,20 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     return false;
 }
 
+WSError WindowExtensionSessionImpl::SwitchFreeMultiWindow(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (windowSystemConfig_.freeMultiWindowEnable_ == enable) {
+        return WSError::WS_ERROR_REPEAT_OPERATION;
+    }
+    NotifySwitchFreeMultiWindow(enable);
+    // Switch process finish, update system config
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    return WSError::WS_OK;
+}
+
 bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     bool enable = false;
