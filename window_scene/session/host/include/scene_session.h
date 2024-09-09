@@ -404,7 +404,7 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason& reason = SizeChangeReason::UNDEFINED, const DisplayId newDisplayId = -1);
+        const SizeChangeReason& reason = SizeChangeReason::UNDEFINED, const DisplayId newDisplayId = -1ULL);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
