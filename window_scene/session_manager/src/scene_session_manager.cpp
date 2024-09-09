@@ -2068,7 +2068,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(
-    const sptr<SceneSession>& sceneSession, const bool needRemoveSession, bool isSaveSnapshot)
+    const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession, needRemoveSession]() {
