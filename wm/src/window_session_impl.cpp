@@ -724,7 +724,7 @@ void WindowSessionImpl::UpdateDensity()
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
 {
-    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "\
+    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "
         "new {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}",
         useUniqueDensity_, virtualPixelRatio_, useUniqueDensity, virtualPixelRatio);
     bool oldUseUniqueDensity = useUniqueDensity_;
@@ -2676,8 +2676,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2685,6 +2683,8 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -2703,8 +2703,6 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
 
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2712,6 +2710,8 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -3422,7 +3422,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
                 (windowSystemConfig_.IsPhoneWindow() ||
                  (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
             }
