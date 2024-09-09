@@ -1301,7 +1301,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(nullptr, sceneSessionManager);
-    
+
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
@@ -1649,6 +1649,82 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
     AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
     ASSERT_EQ(config.mode_, 0);
     ASSERT_EQ(config.homePage_, "");
+}
+
+/**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: add or cancel process watermark by pid
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Level3)
+{
+    auto result = ssm_->SetProcessWatermark(100, "", true);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    int32_t pid = 1000;
+    const std::string busiessName = "SetProcessWatermarkBusiessName";
+    bool isEnabled = true;
+    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_NE(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
+    isEnabled = false;
+    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetCallingPid(1000);
+    sceneSession2->SetCallingPid(1001);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId, sceneSession2});
+    ssm_->sceneSessionMap_.insert({-1, nullptr});
+    isEnabled = true;
+    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    isEnabled = false;
+    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(-1);
+}
+
+/**
+ * @tc.name: DeleteProcessWatermarkPid
+ * @tc.desc: SceneSesionManager DeleteProcessWatermarkPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, DeleteProcessWatermarkPid, Function | SmallTest | Level3)
+{
+    ssm_->processWatermarkPidMap_.insert({1, "test"});
+    ssm_->DeleteProcessWatermarkPid(1);
+    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
+}
+
+/**
+ * @tc.name: DoAddProcessWatermarkForSession
+ * @tc.desc: SceneSesionManager DoAddProcessWatermarkForSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, DoAddProcessWatermarkForSession, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession1->SetCallingPid(1);
+    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+
+    ssm_->processWatermarkPidMap_.insert({1, "test"});
+    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->processWatermarkPidMap_.erase(1);
 }
 
 /**
