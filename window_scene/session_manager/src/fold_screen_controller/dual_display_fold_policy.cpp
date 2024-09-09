@@ -78,7 +78,13 @@ bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
 
 void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode = %{public}d", displayMode);
+    SetLastCacheDisplayMode(displayMode);
+    if (GetModeChangeRunningStatus()) {
+        TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
+        displayMode, getFoldingElapsedMs());
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
     if (displayMode == FoldDisplayMode::SUB) {
         screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
@@ -94,6 +100,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         if (!CheckDisplayMode(displayMode)) {
             return;
         }
+        SetdisplayModeChangeStatus(true);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::SUB: {
@@ -124,6 +131,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         }
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
+        SetdisplayModeChangeStatus(false);
     }
 }
 
@@ -291,6 +299,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
+        SetdisplayModeChangeStatus(false);
     };
     if (screenPowerTaskScheduler_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
@@ -309,6 +318,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
+        SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
     AddOrRemoveDisplayNodeToTree(onScreenId, ADD_DISPLAY_NODE);
@@ -333,6 +343,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
+        SetdisplayModeChangeStatus(false);
     };
     if (screenPowerTaskScheduler_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
@@ -347,6 +358,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
             ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_SUB,
                 ScreenPowerStatus::POWER_STATUS_ON);
         }
+        SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnSub, "taskScreenOnSub");
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, ADD_DISPLAY_NODE);
