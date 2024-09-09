@@ -874,6 +874,52 @@ HWTEST_F(SceneSessionManagerLifecycleTest, ClearSession, Function | SmallTest | 
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(nullptr));
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(sceneSession));
 }
+
+/**
+ * @tc.name: RegisterVisibilityChangedDetectFunc
+ * @tc.desc: RegisterVisibilityChangedDetectFunc
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerLifecycleTest, RegisterVisibilityChangedDetectFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "VisibilityChanged";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->RegisterVisibilityChangedDetectFunc(nullptr);
+
+    ssm_->RegisterVisibilityChangedDetectFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->visibilityChangedDetectFunc_);
+}
+
+/**
+ * @tc.name: RecoveryVisibilityPidCount
+ * @tc.desc: RecoveryVisibilityPidCount
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerLifecycleTest, RecoveryVisibilityPidCount, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    int32_t pid = 10;
+    SessionInfo info;
+    info.abilityName_ = "VisibilityChanged";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sceneSession->SetCallingPid(pid);
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+
+    sceneSession2->SetCallingPid(pid);
+    sceneSession2->isVisible_ = true;
+
+    ssm_->RecoveryVisibilityPidCount(pid);
+    EXPECT_EQ(1, ssm_->visibleWindowCountMap_[pid]);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

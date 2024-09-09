@@ -32,6 +32,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     SCREEN_DISCONNECT,
     FOLD_SCREEN_FOLDING,
     VIRTUAL_SCREEN_RESIZE,
+    RELATIVE_POSITION_CHANGE,
 };
 class ScreenProperty {
 public:
@@ -104,8 +105,8 @@ public:
     DisplayOrientation GetDisplayOrientation() const;
     void CalcDefaultDisplayOrientation();
 
-    float GetXDpi();
-    float GetYDpi();
+    float GetXDpi() const;
+    float GetYDpi() const;
 
     void SetOffsetX(int32_t offsetX);
     int32_t GetOffsetX() const;

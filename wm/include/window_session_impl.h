@@ -28,6 +28,8 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
+#include "future_callback.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -54,6 +56,7 @@ struct WindowTitleVisibleFlags {
     bool isMaximizeVisible = true;
     bool isMinimizeVisible = true;
     bool isSplitVisible = true;
+    bool isCloseVisible = true;
 };
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
@@ -176,9 +179,11 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
-    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible) override;
+    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
+    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     virtual Orientation GetRequestedOrientation() override;
 
     int32_t GetParentId() const;
@@ -277,7 +282,8 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);
@@ -358,6 +364,11 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
 
+    /*
+     * Window Layout
+     */
+    sptr<FutureCallback> layoutCallback_ = nullptr;
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -420,7 +431,8 @@ private:
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton);
+    void GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
+        bool& hideCloseButton);
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     void SetFrameLayoutCallbackEnable(bool enable);
@@ -481,7 +493,7 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = false;
+    std::atomic_bool windowSizeChanged_ = true;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;

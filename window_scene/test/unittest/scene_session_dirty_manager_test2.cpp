@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <parameter.h>
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -106,7 +106,11 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc = [](const int32_t pid, const bool isVisible,
+        const bool newIsVisible) {
+            return;
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(visibilityChangedDetectFunc);
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
@@ -127,7 +131,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
@@ -167,7 +171,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
     windowSessionProperty->SetTouchHotAreas(rects);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     std::vector<MMI::Rect> touchHotAreas;

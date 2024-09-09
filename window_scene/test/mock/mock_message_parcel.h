@@ -29,6 +29,7 @@ public:
     static void SetWriteInterfaceTokenErrorFlag(bool flag);
     static void SetReadInt32ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
+    static void SetReadStringVectorErrorFlag(bool flag);
 };
 }
 }

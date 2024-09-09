@@ -34,15 +34,19 @@ int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
     }
     switch (code) {
         case TRANS_ID_GET_SNAPSHOT : {
-            AAFwk::Snapshot snapshot_;
             sptr<IRemoteObject> abilityObject = data.ReadRemoteObject();
-            int32_t ret = GetSnapshot(abilityObject, snapshot_);
-            if (snapshot_.GetPixelMap() == nullptr) {
+            if (abilityObject == nullptr) {
+                TLOGE(WmsLogTag::DEFAULT, "Read remote object error");
+                return ERR_INVALID_DATA;
+            }
+            AAFwk::Snapshot snapshot;
+            int32_t ret = GetSnapshot(abilityObject, snapshot);
+            if (snapshot.GetPixelMap() == nullptr) {
                 reply.WriteParcelable(nullptr);
                 reply.WriteInt32(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
                 break;
             }
-            reply.WriteParcelable(snapshot_.GetPixelMap().get());
+            reply.WriteParcelable(snapshot.GetPixelMap().get());
             reply.WriteInt32(ret);
             break;
         }

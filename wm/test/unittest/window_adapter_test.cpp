@@ -22,12 +22,14 @@
 #include "window_property.h"
 #include "window_agent.h"
 #include "window_adapter.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+constexpr uint32_t WINDOW_ID = 1000;
 class WindowAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -108,8 +110,12 @@ HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2
 {
     WindowAdapter windowAdapter;
     sptr<IRemoteObject> remoteObj;
-    auto ret = windowAdapter.GetUIContentRemoteObj(1, remoteObj);
-    ASSERT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    auto ret = windowAdapter.GetUIContentRemoteObj(WINDOW_ID, remoteObj);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    } else {
+        ASSERT_EQ(ret, WMError::WM_OK);
+    }
 }
 
 /**
@@ -404,7 +410,7 @@ HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, Function | SmallTest |
 HWTEST_F(WindowAdapterTest, UpdateProperty, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    sptr<WindowProperty> windowProperty = nullptr;
+    sptr<WindowProperty> windowProperty = sptr<WindowProperty>::MakeSptr();
     PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
     auto ret = windowAdapter.UpdateProperty(windowProperty, action);
     windowAdapter.OnUserSwitch();
@@ -424,7 +430,7 @@ HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
     uint32_t percent = 0;
     auto ret = windowAdapter.SetWindowGravity(windowId, gravity, percent);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -438,7 +444,7 @@ HWTEST_F(WindowAdapterTest, NotifyWindowTransition, Function | SmallTest | Level
     sptr<WindowTransitionInfo> from = nullptr;
     sptr<WindowTransitionInfo> to = nullptr;
     auto ret = windowAdapter.NotifyWindowTransition(from, to);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
 }
 
 /**
@@ -480,7 +486,11 @@ HWTEST_F(WindowAdapterTest, GetWindowAnimationTargets, Function | SmallTest | Le
     std::vector<uint32_t> missionIds;
     std::vector<sptr<RSWindowAnimationTarget>> targets;
     auto ret = windowAdapter.GetWindowAnimationTargets(missionIds, targets);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_ERROR_NO_MEM, ret);
+    }
 }
 
 /**
@@ -491,8 +501,10 @@ HWTEST_F(WindowAdapterTest, GetWindowAnimationTargets, Function | SmallTest | Le
 HWTEST_F(WindowAdapterTest, GetMaximizeMode, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     auto ret = windowAdapter.GetMaximizeMode();
-    ASSERT_EQ(MaximizeMode::MODE_AVOID_SYSTEM_BAR, ret);
+    ASSERT_EQ(MaximizeMode::MODE_FULL_FILL, ret);
 }
 
 /**
@@ -503,6 +515,8 @@ HWTEST_F(WindowAdapterTest, GetMaximizeMode, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, UpdateSessionAvoidAreaListener, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t persistentId = 0;
     bool haveListener = true;
     auto ret = windowAdapter.UpdateSessionAvoidAreaListener(persistentId, haveListener);
@@ -517,6 +531,8 @@ HWTEST_F(WindowAdapterTest, UpdateSessionAvoidAreaListener, Function | SmallTest
 HWTEST_F(WindowAdapterTest, UpdateSessionTouchOutsideListener, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     int32_t persistentId = 0;
     bool haveListener = true;
     auto ret = windowAdapter.UpdateSessionTouchOutsideListener(persistentId, haveListener);
@@ -546,10 +562,12 @@ HWTEST_F(WindowAdapterTest, SetSessionGravity, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, BindDialogSessionTarget, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     uint64_t persistentId = 0;
     sptr<IRemoteObject> targetToken = nullptr;
     auto ret = windowAdapter.BindDialogSessionTarget(persistentId, targetToken);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**

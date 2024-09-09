@@ -29,16 +29,20 @@ constexpr float INCH_2_MM = 25.4f;
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen)
-    : id_(id),
-      screenId_(absScreen->dmsId_),
-      screenGroupId_(absScreen->groupDmsId_),
-      width_(info->width_),
-      height_(info->height_),
-      refreshRate_(info->refreshRate_),
-      orientation_(absScreen->orientation_)
+    : id_(id)
 {
+    if (info == nullptr || absScreen == nullptr) {
+        WLOGFE("info or absScreen is nullptr");
+        return;
+    }
+    screenId_ = absScreen->dmsId_;
+    screenGroupId_ = absScreen->groupDmsId_;
+    width_ = info->width_;
+    height_ = info->height_;
+    refreshRate_ = info->refreshRate_;
+    orientation_ = absScreen->orientation_;
     name_ = absScreen->GetScreenName();
-    RequestRotation(absScreen->rotation_);
+    static_cast<void>(RequestRotation(absScreen->rotation_));
     if (width_ > height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;
     } else {

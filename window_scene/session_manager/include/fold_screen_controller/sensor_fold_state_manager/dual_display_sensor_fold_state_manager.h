@@ -60,6 +60,9 @@ private:
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> mLastHallReportTime_ =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    std::mutex hallMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
