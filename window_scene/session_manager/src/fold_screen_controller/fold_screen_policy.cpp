@@ -85,6 +85,26 @@ bool FoldScreenPolicy::GetdisplayModeRunningStatus()
     return displayModeChangeRunning_.load();
 }
 
+void FoldScreenPolicy::SetdisplayModeChangeStatus(bool status)
+{
+    if (status) {
+        pengdingTask_ = FOLD_TO_EXPAND_TASK_NUM;
+        startTimePoint_ = std::chrono::steady_clock::now();
+        displayModeChangeRunning_ = status;
+    } else {
+        pengdingTask_ --;
+        if (pengdingTask_ != 0) {
+            return;
+        }
+        displayModeChangeRunning_ = false;
+        endTimePoint_ = std::chrono::steady_clock::now();
+        if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
+            TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+            ChangeScreenDisplayMode(lastCachedisplayMode_.load());
+        }
+    }
+}
+
 FoldDisplayMode FoldScreenPolicy::GetLastCacheDisplayMode()
 {
     return lastCachedisplayMode_.load();
