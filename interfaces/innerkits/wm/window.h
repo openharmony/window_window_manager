@@ -1051,7 +1051,7 @@ public:
      * @return WM_OK means request success, others means request failed.
      */
     virtual WMError RequestFocus() const { return WMError::WM_OK; }
-        /**
+    /**
      * @brief Request to get focus or lose focus.
      *
      * @return WM_OK means request success, others means request failed.

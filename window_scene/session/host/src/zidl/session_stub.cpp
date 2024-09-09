@@ -825,8 +825,12 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called");
-    bool isEnabled = data.ReadBool();
-    WSError ret = RequestFocus(isEnabled);
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
