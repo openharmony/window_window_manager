@@ -476,8 +476,8 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
     sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [weakThis = wptr(this)](bool isLandscapeMultiWindow) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession id:%{public}d has"
+                "been destroyed", persistentId);
             return;
         }
         jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
@@ -526,8 +526,8 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
     sessionchangeCallback->onKeyboardGravityChange_ = [weakThis = wptr(this)](SessionGravity gravity) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession id:%{public}d has"
+                "been destroyed", persistentId);
             return;
         }
         jsSceneSession->OnKeyboardGravityChange(gravity);
@@ -1377,7 +1377,7 @@ void JsSceneSession::ProcessTouchOutsideRegister()
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessTouchOutsideRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnTouchOutside(); 
+        jsSceneSession->OnTouchOutside();
     };
     WLOGFD("ProcessTouchOutsideRegister success");
 }
@@ -3520,7 +3520,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
             return;
-        }        
+        }
         jsSceneSession->OnPrepareClosePiPSession();
     };
     TLOGD(WmsLogTag::WMS_PIP, "ProcessPrepareClosePiPSessionRegister success");
