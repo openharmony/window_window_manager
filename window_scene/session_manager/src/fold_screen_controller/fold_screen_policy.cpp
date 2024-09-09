@@ -85,10 +85,10 @@ bool FoldScreenPolicy::GetdisplayModeRunningStatus()
     return displayModeChangeRunning_.load();
 }
 
-void FoldScreenPolicy::SetdisplayModeChangeStatus(bool status)
+void FoldScreenPolicy::SetdisplayModeChangeStatus(bool status, uint32_t taskNum)
 {
     if (status) {
-        pengdingTask_ = FOLD_TO_EXPAND_TASK_NUM;
+        pengdingTask_ = taskNum;
         startTimePoint_ = std::chrono::steady_clock::now();
         displayModeChangeRunning_ = status;
     } else {
