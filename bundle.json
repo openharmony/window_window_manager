@@ -103,7 +103,6 @@
             "//foundation/window/window_manager/wm:libwm_lite",
             "//foundation/window/window_manager/wm:libwm_ndk",
             "//foundation/window/window_manager/utils:libwmutil",
-            "//foundation/window/window_manager/utils:libwmutil_base",
             "//foundation/window/window_manager/window_scene/common:window_scene_common"
           ],
           "service_group": [
