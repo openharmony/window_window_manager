@@ -149,6 +149,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAppForceLandscapeConfig(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
+            return HandleNotifyFrameLayoutFinish(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -290,6 +292,14 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsPcAppInPad());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
+{
+    bool notifyListener = data.ReadBool();
+    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadInt32(), data.ReadInt32() };
+    NotifyFrameLayoutFinishFromApp(notifyListener, rect);
     return ERR_NONE;
 }
 
