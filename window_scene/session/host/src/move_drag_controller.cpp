@@ -910,7 +910,7 @@ void MoveDragController::SetIsPcWindow(bool isPcWindow)
     isPcWindow_ = isPcWindow;
 }
 
-bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2) const
+bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2)
 {
     int32_t x_begin = std::max(rect1.posX_, rect2.posX_);
     int32_t x_end = std::min(rect1.posX_ + static_cast<int32_t>(rect1.width_),

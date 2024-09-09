@@ -71,7 +71,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
-    static bool IsOverlap(const WSRect& rect1, const WSRect& rect2) const;
+    static bool IsOverlap(const WSRect& rect1, const WSRect& rect2);
     std::set<uint64_t> GetCurrentOverlapDisplaySet();
     std::set<uint64_t> addedDisplayId = {};
     uint64_t moveDragStartDisplayId_ = -1ULL;
