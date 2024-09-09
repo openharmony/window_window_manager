@@ -10436,24 +10436,11 @@ void SceneSessionManager::DoAddProcessWatermarkForSession(int32_t persistentId)
 
 void SceneSessionManager::DeleteProcessWatermarkPid(int32_t pid)
 {
-    bool printLog = false;
-    {
-        std::unique_lock<std::shared_mutex> lock(processWatermarkPidMapMutex_);
-        if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-            TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
-                pid);
-            printLog = true;
-            processWatermarkPidMap_.erase(pid);
-        }
-    }
-    if (printLog) {
-        std::ostringstream oss;
-        oss << "processWatermarkPidMap_[ ";
-        for (const auto& item : processWatermarkPidMap_) {
-            oss << item.first << ":" << item.second.c_str() << " ";
-        }
-        oss << "]" << std::endl;
-        TLOGI(WmsLogTag::DEFAULT, "%{public}s", oss.str().c_str());
+    std::unique_lock<std::shared_mutex> lock(processWatermarkPidMapMutex_);
+    if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
+            pid);
+        processWatermarkPidMap_.erase(pid);
     }
 }
 
