@@ -19,6 +19,7 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <hitrace_meter.h>
+#include <type_traits>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -692,9 +693,10 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
             (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
-                session->GetPersistentId(), rect.ToString().c_str());
+            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) &&
+            session->GetClientRect() == rect) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s clientRect:%{public}s",
+                session->GetPersistentId(), rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
@@ -717,8 +719,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s",
-            session->GetPersistentId(), session->reason_, updateReason.c_str(), rect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s, "
+            "clientRect:%{public}s", session->GetPersistentId(), session->reason_, updateReason.c_str(),
+            rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
 
         return WSError::WS_OK;
     };
@@ -1033,6 +1036,31 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError SceneSession::UpdateClientRect(const WSRect& rect)
+{
+    auto task = [weakThis = wptr(this), rect] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (rect.IsInvalid()) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateClientRect id:%{public}d rect:%{public}s is invalid",
+                session->GetPersistentId(), rect.ToString().c_str());
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        if (rect == session->GetClientRect()) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "UpdateClientRect id:%{public}d skip same rect", session->GetPersistentId());
+            return WSError::WS_DO_NOTHING;
+        }
+        session->SetClientRect(rect);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "UpdateClientRect" + GetRectInfo(rect));
     return WSError::WS_OK;
 }
 
@@ -1525,6 +1553,42 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
+{
+    if (!CheckGetAvoidAreaAvailable(type)) {
+        return {};
+    }
+
+    AvoidArea avoidArea;
+    WSRect rect = GetSessionRect();
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            GetSystemAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_CUTOUT: {
+            GetCutoutAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            GetKeyboardAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            GetAINavigationBarArea(rect, avoidArea);
+            return avoidArea;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
+                type, GetPersistentId());
+            return avoidArea;
+        }
+    }
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
@@ -1533,41 +1597,29 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
-
-        if (!session->CheckGetAvoidAreaAvailable(type)) {
-            return {};
-        }
-
-        AvoidArea avoidArea;
-        WSRect rect = session->GetSessionRect();
-        switch (type) {
-            case AvoidAreaType::TYPE_SYSTEM: {
-                session->GetSystemAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_CUTOUT: {
-                session->GetCutoutAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_KEYBOARD: {
-                session->GetKeyboardAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                session->GetAINavigationBarArea(rect, avoidArea);
-                return avoidArea;
-            }
-            default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
-                    type, session->GetPersistentId());
-                return avoidArea;
-            }
-        }
+        return session->GetAvoidAreaByTypeInner(type);
     };
     return PostSyncTask(task, "GetAvoidAreaByType");
+}
+
+WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    auto task = [weakThis = wptr(this), &avoidAreas] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_IMMS, "session is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_SYSTEM);
+            avoidType <= static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR); avoidType++) {
+            auto type = static_cast<AvoidAreaType>(avoidType);
+            avoidAreas[type] = session->GetAvoidAreaByTypeInner(type);
+        }
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "GetAllAvoidAreas");
 }
 
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
@@ -1687,6 +1739,21 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     NotifyOutsideDownEvent(pointerEvent);
     TransferPointerEvent(pointerEvent, false);
     return WSError::WS_OK;
+}
+
+WSError SceneSession::GetStartMoveFlag(bool& isMoving)
+{
+    auto task = [weakThis = wptr(this), &isMoving]() {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGE(WmsLogTag::DEFAULT, "session or moveDragController_ is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        isMoving = session->moveDragController_->GetStartMoveFlag();
+        TLOGI(WmsLogTag::DEFAULT, "isMoving: %{public}u", static_cast<uint32_t>(isMoving));
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "GetStartMoveFlag");
 }
 
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

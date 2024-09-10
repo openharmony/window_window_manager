@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "accessibility_event_info.h"
 #include "ws_common.h"
+#include "mock_message_parcel.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -30,28 +31,6 @@ class SessionProxyTest : public testing::Test {
     ~SessionProxyTest() {}
 };
 namespace {
-
-/**
- * @tc.name: WriteAbilitySessionInfoBasic
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, WriteAbilitySessionInfoBasic, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    MessageParcel data;
-    bool res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo);
-    ASSERT_EQ(res, false);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo1);
-    ASSERT_EQ(res, true);
-    GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic end";
-}
 
 /**
  * @tc.name: OnSessionEvent
@@ -442,6 +421,49 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
     WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
+}
+
+/**
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: NotifyExtensionEventAsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdateClientRect01
+ * @tc.desc: UpdateClientRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateClientRect01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSRect rect = { 200, 200, 200, 200 };
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
 }
 } // namespace
 } // namespace Rosen

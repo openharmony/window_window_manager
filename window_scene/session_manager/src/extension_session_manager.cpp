@@ -53,6 +53,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->realHostWindowId = sessionInfo.realParentId_;
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
     abilitySessionInfo->uiExtensionUsage = static_cast<AAFwk::UIExtensionUsage>(sessionInfo.uiExtensionUsage_);
+    abilitySessionInfo->parentWindowType = sessionInfo.parentWindowType_;
     abilitySessionInfo->displayId = sessionInfo.config_.displayId_;
     abilitySessionInfo->density = sessionInfo.config_.density_;
     abilitySessionInfo->orientation = sessionInfo.config_.orientation_;

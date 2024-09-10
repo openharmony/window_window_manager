@@ -210,6 +210,8 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    void SetClientRect(const WSRect& rect);
+    WSRect GetClientRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -529,6 +531,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
+    WSRect clientRect_; // rect of client
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate

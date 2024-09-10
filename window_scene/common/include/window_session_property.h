@@ -54,6 +54,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetRequestedOrientation(Orientation orientation);
+    void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetSnapshotSkip(bool isSkip);
@@ -114,6 +115,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
+    Orientation GetDefaultRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     bool GetSnapshotSkip() const;
@@ -203,6 +205,8 @@ public:
     bool GetExtensionFlag() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
+    void SetParentWindowType(WindowType parentWindowType);
+    WindowType GetParentWindowType() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -268,6 +272,7 @@ private:
     bool keepScreenOn_ = false;
     bool topmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
+    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
@@ -340,6 +345,7 @@ private:
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     bool isExtensionFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
+    WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

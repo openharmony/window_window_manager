@@ -867,6 +867,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        SetClientRect(rect);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
@@ -966,6 +967,12 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     }
     if (sessionProperty && property) {
+        property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
+        property->SetDefaultRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
+        TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
+            " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+            static_cast<uint32_t>(sessionProperty->GetRequestedOrientation()),
+            static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
         property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
         property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         if (sessionProperty->GetCompatibleModeInPc()) {
@@ -2582,6 +2589,20 @@ WSRect Session::GetSessionRequestRect() const
     rect = SessionHelper::TransferToWSRect(property->GetRequestRect());
     WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
+}
+
+/** @note @window.layout */
+void Session::SetClientRect(const WSRect& rect)
+{
+    clientRect_ = rect;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+        GetPersistentId(), rect.ToString().c_str());
+}
+
+/** @note @window.layout */
+WSRect Session::GetClientRect() const
+{
+    return clientRect_;
 }
 
 WindowType Session::GetWindowType() const

@@ -181,6 +181,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
+    WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
@@ -191,7 +192,9 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
@@ -319,6 +322,7 @@ public:
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
     void SetIsStartMoving(const bool startMoving);
+    WSError GetStartMoveFlag(bool& isMoving) override;
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
