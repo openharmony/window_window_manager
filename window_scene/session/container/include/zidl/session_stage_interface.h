@@ -42,8 +42,8 @@ public:
     virtual WSError SetActive(bool active) = 0;
 
     /**
-     * @brief update the window range in the rect
-     * @param rect the update range
+     * @brief update the window rect
+     * @param rect the position and size of the window
      * @param reason the update reason
      * @param rsTransaction the handle of animation synchronization
      * @return Returns WSError::WS_OK if called success, otherwise failed.
