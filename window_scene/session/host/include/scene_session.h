@@ -33,6 +33,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 namespace {
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr float MOVE_DRAG_POSITION_Z = 100.5;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =

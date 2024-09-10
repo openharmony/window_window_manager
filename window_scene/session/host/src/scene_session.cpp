@@ -2150,7 +2150,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
             auto screenSession = ScreenSessionManagerClient::GetInstance().
                 GetScreenSessionById(displayId);
             auto rsDisplayNodeAdded = screenSession->GetDisplayNode();
-            movedSurfaceNode->SetPositionZ(moveDragController_->MOVE_DRAG_POSITIONZ); // set standard hierarchy
+            movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
             rsDisplayNodeAdded->AddCrossParentChild(movedSurfaceNode, -1);
         }
     }

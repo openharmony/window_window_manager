@@ -47,12 +47,11 @@ public:
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
-    void SetStartDragFlag(bool flag);
     bool GetStartDragFlag() const;
     uint64_t GetMoveDragStartDisplayId() const;
     uint64_t GetMoveDragEndDisplayId() const;
-    std::set<uint64_t> GetAddedDisplaySet();
     uint64_t GetParentId() const;
+    std::set<uint64_t> GetAddedDisplaySet() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
@@ -111,7 +110,6 @@ private:
 
     enum AxisType { UNDEFINED, X_AXIS, Y_AXIS };
     constexpr static float NEAR_ZERO = 0.001f;
-    constexpr static float MOVE_DRAG_POSITIONZ = 100.5;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
@@ -159,10 +157,10 @@ private:
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
     bool isPcWindow_ = false;
-    std::set<uint64_t> addedDisplaySet_ = {};
     uint64_t moveDragStartDisplayId_ = -1ULL;
     uint64_t moveDragEndDisplayId_ = -1ULL;
     uint64_t parentId_ = -1ULL;
+    std::set<uint64_t> addedDisplaySet_ = {};
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
