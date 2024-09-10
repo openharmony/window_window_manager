@@ -123,7 +123,6 @@ public:
         ClearCallbackMapFunc clearCallbackFunc_;
         NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyKeyboardGravityChangeFunc onKeyboardGravityChange_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
 
@@ -245,6 +244,7 @@ public:
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
@@ -437,6 +437,7 @@ protected:
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
+    NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
 
 private:
