@@ -174,3 +174,4 @@ ohos_shared_library("screen_session_manager") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
