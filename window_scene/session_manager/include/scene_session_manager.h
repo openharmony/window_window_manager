@@ -388,6 +388,7 @@ public:
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
+    WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled) override;
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
@@ -764,6 +765,8 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+    void DoAddProcessSnapshotSkipForSession(int32_t persistentId);
+    void DeleteProcessSnapshotSkipSetPid(int32_t pid);
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(uint64_t screenId);
@@ -789,6 +792,8 @@ private:
     void RecoveryVisibilityPidCount(int32_t pid);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
+    mutable std::shared_mutex processSnapshotSkipPidSetMutex_;
+    std::unordered_set<int32_t> processSnapshotSkipPidSet_;
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
