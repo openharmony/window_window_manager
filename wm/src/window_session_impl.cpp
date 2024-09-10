@@ -331,12 +331,20 @@ bool WindowSessionImpl::IsSupportWideGamut()
 
 void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return;
+    }
     auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(colorGamut);
 }
 
 ColorSpace WindowSessionImpl::GetColorSpace()
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
