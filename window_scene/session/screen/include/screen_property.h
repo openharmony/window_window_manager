@@ -84,6 +84,9 @@ public:
     void SetRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate() const;
 
+    void SetPropertyChangeReason(std::string propertyChangeReason);
+    std::string GetPropertyChangeReason() const;
+
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
     uint32_t GetDefaultDeviceRotationOffset() const;
 
@@ -163,6 +166,8 @@ private:
 
     uint32_t refreshRate_ { 0 };
     uint32_t defaultDeviceRotationOffset_ { 0 };
+
+    std::string propertyChangeReason_ { "" };
 
     float virtualPixelRatio_ { 1.0f };
     float defaultDensity_ { 1.0f };
