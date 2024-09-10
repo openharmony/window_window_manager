@@ -124,8 +124,8 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         }
         hasRequestedVsync_ = true;
 
-        if (isFirstVsync_) {
-            isFirstVsync_ = false;
+        if (isFirstVsyncRequest_) {
+            isFirstVsyncRequest_ = false;
             TLOGI(WmsLogTag::WMS_MAIN, "First vsync has requested, nodeId: %{public}" PRIu64, nodeId_);
         }
 
@@ -134,10 +134,6 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         auto task = [weakThis = weak_from_this()] {
             if (auto sp = weakThis.lock()) {
                 sp->OnVsyncTimeOut();
-                if (sp->isFirstVsyncBack_) {
-                    sp->isFirstVsyncBack_ = false;
-                    TLOGI(WmsLogTag::WMS_MAIN, "First vsync has done, nodeId: %{public}" PRIu64, sp->nodeId_);
-                }
             }
         };
         vsyncHandler_->PostTask(task, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
@@ -183,6 +179,10 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
         vsyncCallbacks = std::move(vsyncCallbacks_);
         vsyncCallbacks_.clear();
         vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
+        if (isFirstVsyncBack_) {
+            isFirstVsyncBack_ = false;
+            TLOGI(WmsLogTag::WMS_MAIN, "First vsync has come back, nodeId: %{public}" PRIu64, nodeId_);
+        }
     }
     for (const auto& callback: vsyncCallbacks) {
         if (callback && callback->onCallback) {
