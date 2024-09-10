@@ -76,7 +76,7 @@ enum class ListenerFuncType : uint32_t {
 };
 
 class SceneSession;
-class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
+class JsSceneSession : public RefBase {
 public:
     JsSceneSession(napi_env env, const sptr<SceneSession>& session);
     ~JsSceneSession();
@@ -93,6 +93,7 @@ private:
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value SetRectChangeBySystem(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
@@ -119,9 +120,12 @@ private:
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
+    static napi_value SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
+    static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
@@ -129,7 +133,6 @@ private:
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlankFlag(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
-    static napi_value IsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
@@ -141,6 +144,7 @@ private:
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnSetRectChangeBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
@@ -174,12 +178,13 @@ private:
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlankFlag(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
-    napi_value OnIsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
+    napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
+    napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

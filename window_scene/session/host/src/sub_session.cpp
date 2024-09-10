@@ -14,7 +14,7 @@
  */
 
 #include "session/host/include/sub_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 #include "common/include/session_permission.h"
 #include "key_event.h"

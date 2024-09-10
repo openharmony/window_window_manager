@@ -208,6 +208,29 @@ HWTEST_F(WindowSceneSessionImplTest3, Destroy, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetFreeMultiWindowModeEnabledState
+ * @tc.desc: GetFreeMultiWindowModeEnabledState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, GetFreeMultiWindowModeEnabledState, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetFreeMultiWindowModeEnabledState");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = true;
+
+    auto ret = windowSceneSessionImpl->GetFreeMultiWindowModeEnabledState();
+    ASSERT_EQ(ret, true);
+    windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    ret = windowSceneSessionImpl->GetFreeMultiWindowModeEnabledState();
+    ASSERT_EQ(ret, false);
+}
+
+/**
  * @tc.name: CheckParmAndPermission01
  * @tc.desc: CheckParmAndPermission
  * @tc.type: FUNC

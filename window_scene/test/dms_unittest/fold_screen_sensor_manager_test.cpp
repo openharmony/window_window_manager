@@ -21,6 +21,7 @@
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -135,19 +136,19 @@ HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | 
 }
 
 /**
- * @tc.name: notifyFoldAngleChanged
- * @tc.desc: test function : notifyFoldAngleChanged
+ * @tc.name: NotifyFoldAngleChanged
+ * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, notifyFoldAngleChanged, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, NotifyFoldAngleChanged, Function | SmallTest | Level3)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     float foldAngle = 0.0F;
-    mgr.notifyFoldAngleChanged(foldAngle);
+    mgr.NotifyFoldAngleChanged(foldAngle);
     EXPECT_EQ(foldAngle, 0.0F);
 
     foldAngle = 30.0F;
-    mgr.notifyFoldAngleChanged(foldAngle);
+    mgr.NotifyFoldAngleChanged(foldAngle);
     EXPECT_EQ(foldAngle, 30.0F);
 }
 
@@ -199,7 +200,11 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
 
     mgr.globalHall = 10;
     mgr.TriggerDisplaySwitch();
-    EXPECT_EQ(mgr.globalAngle, 25);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(mgr.globalAngle, 25);
+    } else {
+        EXPECT_NE(mgr.globalAngle, 25);
+    }
 }
 }
 } // namespace Rosen

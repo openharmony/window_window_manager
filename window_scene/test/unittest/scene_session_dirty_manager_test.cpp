@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <parameter.h>
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
@@ -129,7 +129,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
         propertyModal1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
         ssm_->sceneSessionMap_.insert({sceneSessionModal1->GetPersistentId(), sceneSessionModal1});
     }
-    manager_->GetFullWindowInfoList();
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    manager_->GetFullWindowInfoList(lastWindowInfoList);
     ASSERT_EQ(ret, 0);
 }
 
@@ -186,7 +187,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
 HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Level2)
 {
     int ret = 0;
-    manager_->GetWindowInfo(nullptr, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    manager_->GetWindowInfo(nullptr, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     SessionInfo info;
     info.abilityName_ = "111";
     info.bundleName_ = "111";
@@ -194,27 +196,27 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
     if (session == nullptr) {
         return;
     }
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     session = new (std::nothrow) SceneSession(info, nullptr);
     if (session == nullptr) {
         return;
     }
     sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetMaximizeMode(Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     info.isSetPointerAreas_ = true;
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING));
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     session->SetSessionProperty(nullptr);
-    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret, 0);
 }
 

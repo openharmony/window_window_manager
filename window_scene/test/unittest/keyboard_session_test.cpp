@@ -22,7 +22,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_keyboard_session.h"
 #include "session/host/include/session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -343,7 +343,7 @@ HWTEST_F(KeyboardSessionTest, SetKeyboardSessionGravity, Function | SmallTest | 
     ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
 
-    keyboardSession->sessionChangeCallback_->onKeyboardGravityChange_ = [](SessionGravity) {
+    keyboardSession->keyboardGravityChangeFunc_ = [](SessionGravity) {
         return 0;
     };
     ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);

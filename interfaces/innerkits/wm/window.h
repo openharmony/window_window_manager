@@ -1510,6 +1510,13 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief get start move flag.
+     *
+     * @return true means window is moving. Otherwise is not moving
+     *
+     */
+    virtual bool GetStartMoveFlag() { return false; }
+    /**
      * @brief start move system window. It is called by application.
      *
      */
@@ -2227,12 +2234,27 @@ public:
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
     /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+    /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return * void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 };
 }
 }

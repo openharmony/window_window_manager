@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <parameter.h>
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -106,7 +106,11 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc = [](const int32_t pid, const bool isVisible,
+        const bool newIsVisible) {
+            return;
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(visibilityChangedDetectFunc);
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
@@ -221,7 +225,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(dialogWindowPid, sceneSessionDialogWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {
@@ -271,7 +276,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {
