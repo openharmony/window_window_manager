@@ -87,14 +87,13 @@ public:
     virtual void SetFoldStatusLocked(bool locked);
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
-    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
-    virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+    virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList);
-
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };
