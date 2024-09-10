@@ -95,8 +95,6 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
-using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
-using RootSceneProcessBackEventFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -577,7 +575,6 @@ private:
     bool openDebugTrace {false};
     int32_t currentUserId_;
     std::atomic<bool> enableInputEvent_ = true;
-    bool gestureNavigationEnabled_ {true};
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
@@ -708,10 +705,6 @@ private:
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
-
-    std::condition_variable nextFlushCompletedCV_;
-    std::mutex nextFlushCompletedMutex_;
-    RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
