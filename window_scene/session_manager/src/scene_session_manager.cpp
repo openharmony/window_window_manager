@@ -1222,7 +1222,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string& bundleName,
-    const std::string& moduleName, const std::string& abilityName, const int32_t appIndex)
+    const std::string& moduleName, const std::string& abilityName, const int32_t appIndex, const uint32_t windowType)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
@@ -1230,7 +1230,8 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
         if (sceneSession->GetSessionInfo().bundleName_ == bundleName &&
             sceneSession->GetSessionInfo().moduleName_ == moduleName &&
             sceneSession->GetSessionInfo().abilityName_ == abilityName &&
-            sceneSession->GetSessionInfo().appIndex_ == appIndex) {
+            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
+            sceneSession->GetSessionInfo().windowType_ == windowType) {
             return sceneSession;
         }
     }
@@ -1505,7 +1506,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
                 sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
             auto sceneSession = GetSceneSessionByName(sessionInfo.bundleName_,
-                sessionInfo.moduleName_, sessionInfo.abilityName_, sessionInfo.appIndex_);
+                sessionInfo.moduleName_, sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.windowType_);
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
@@ -1529,6 +1530,18 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             return sceneSession;
         }
         InitSceneSession(sceneSession, sessionInfo, property);
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            TLOGI(WmsLogTag::WMS_LIFE, "ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
+            PreHandleCollaborator(sceneSession);
+            const auto& sessionAffinity = sceneSession->GetSessionInfo().sessionAffinity;
+            auto reuseSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity);
+            if (reuseSceneSession) {
+                TLOGI(WmsLogTag::WMS_LIFE, "session reuse id:%{public}d type:%{public}d affinity:%{public}s",
+                    reuseSceneSession->GetPersistentId(), reuseSceneSession->GetWindowType(), sessionAffinity.c_str());
+                NotifySessionUpdate(reuseSceneSession->GetSessionInfo(), ActionType::SINGLE_START);
+                return reuseSceneSession;
+            }
+        }
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
@@ -1591,10 +1604,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     sceneSession->SetSystemConfig(systemConfig_);
     sceneSession->SetSnapshotScale(snapshotScale_);
     UpdateParentSessionForDialog(sceneSession, property);
-    if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-        TLOGI(WmsLogTag::WMS_LIFE, "ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
-        PreHandleCollaborator(sceneSession);
-    }
 }
 
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
@@ -4953,6 +4962,12 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
     startUIAbilityErrorFunc_ = func;
 }
 
+void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
+    const AbilityManagerCollaboratorRegisteredFunc& func)
+{
+    abilityManagerCollaboratorRegisteredFunc_ = func;
+}
+
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
 {
     // unfocus
@@ -6381,6 +6396,7 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetAllAbilityIn
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     if (elementName.GetBundleName().empty() && elementName.GetAbilityName().empty()) {
@@ -6421,6 +6437,7 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
                 AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
                 AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
                 static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
                 static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     auto ret = static_cast<int32_t>(bundleMgr_->BatchGetBundleInfo(bundleNames, flag, bundleInfos, userId));
@@ -6451,6 +6468,7 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
@@ -8415,6 +8433,16 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
     {
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_[type] = impl;
+    }
+    if (abilityManagerCollaboratorRegisteredFunc_) {
+        TLOGI(WmsLogTag::DEFAULT, "Ability manager collaborator registered");
+        auto task = [this] {
+            if (abilityManagerCollaboratorRegisteredFunc_) {
+                abilityManagerCollaboratorRegisteredFunc_();
+            }
+            return WSError::WS_OK;
+        };
+        taskScheduler_->PostTask(task, "AbilityManagerCollaboratorRegistered");
     }
     return WSError::WS_OK;
 }
