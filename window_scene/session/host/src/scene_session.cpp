@@ -449,6 +449,9 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             auto movedSurfaceNode = session->GetMovedSurfaceNode();
+            if (!movedSurfaceNode) {
+                return WSError::WS_ERROR_DESTROYED_OBJECT;
+            }
             uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
             session->moveDragController_->InitMoveDragProperty();
             auto sessionProperty = session->GetSessionProperty();
@@ -2131,7 +2134,6 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
-    auto movedSurfaceNode = GetMovedSurfaceNode();
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc,
@@ -2170,6 +2172,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
 void SceneSession::MoveDragSurfaceNodeHandler(const SizeChangeReason& reason)
 {
+
     if (!moveDragController_) {
         WLOGE("moveDragController_ is null");
         return;
@@ -2178,6 +2181,11 @@ void SceneSession::MoveDragSurfaceNodeHandler(const SizeChangeReason& reason)
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "property is null");
         return;
+    }
+    auto movedSurfaceNode = GetMovedSurfaceNode();
+    if (!movedSurfaceNode) {
+        TLOGE(WmsLogTag::WMS_MAIN, "movedSurfaceNode is null");
+        return ;
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplaySet()) {
