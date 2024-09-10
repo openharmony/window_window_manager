@@ -918,6 +918,23 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            WLOGFE("session or gravityChangeFunc is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->keyboardGravityChangeFunc_ = func;
+        session->keyboardGravityChangeFunc_(session->GetKeyboardGravity());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify gravity change when register, id: %{public}d gravity: %{public}d",
+            session->GetPersistentId(), session->GetKeyboardGravity());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetKeyboardGravityChangeCallback");
+}
+
 void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
@@ -3431,7 +3448,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
         TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-   
+
     SetTopmost(property->IsTopmost());
     return WMError::WM_OK;
 }
@@ -4505,7 +4522,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
             session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
-            session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();

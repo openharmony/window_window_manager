@@ -343,7 +343,7 @@ HWTEST_F(KeyboardSessionTest, SetKeyboardSessionGravity, Function | SmallTest | 
     ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
 
-    keyboardSession->sessionChangeCallback_->onKeyboardGravityChange_ = [](SessionGravity) {
+    keyboardSession->keyboardGravityChangeFunc_ = [](SessionGravity) {
         return 0;
     };
     ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
