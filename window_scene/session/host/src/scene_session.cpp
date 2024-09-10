@@ -2150,7 +2150,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
             auto screenSession = ScreenSessionManagerClient::GetInstance().
                 GetScreenSessionById(displayId);
             auto rsDisplayNodeAdded = screenSession->GetDisplayNode();
-            movedSurfaceNode->SetPositionZ(100.5); // set standard hierarchy
+            movedSurfaceNode->SetPositionZ(moveDragController_->MOVE_DRAG_POSITIONZ); // set standard hierarchy
             rsDisplayNodeAdded->AddCrossParentChild(movedSurfaceNode, -1);
         }
     }
@@ -2174,16 +2174,16 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
-        for (const auto displayId : moveDragController_->addedDisplaySet_) {
+        for (const auto displayId : moveDragController_->GetAddedDisplaySet()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().
                 GetScreenSessionById(displayId);
             auto rsDisplayNodeRemoved = screenSession->GetDisplayNode();
-            rsDisplayNodeRemoved->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->parentId_);
+            rsDisplayNodeRemoved->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->GetParentId());
         }
-        if (moveDragController_->moveDragEndDisplayId_ == moveDragController_->moveDragStartDisplayId_) {
+        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId()) {
             NotifySessionRectChange(rect, reason);
         } else {
-            NotifySessionRectChange(rect, reason, moveDragController_->moveDragEndDisplayId_);
+            NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
         }
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
