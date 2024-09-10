@@ -76,14 +76,12 @@ public:
      */
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
-+    /**
-+     * @brief Raise a sub-window to app top.
-+     *
-+     * This function provides the ability for system applications to raise sub-window.
-+     *
-+     * @return Returns WSError::WS_OK if called success, otherwise failed.
-+     * @permission Make sure the caller has system permission.
-+     */
+    /**
+     * @brief Raise the application subwindow to the top layer of the application.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
 
     /**
@@ -129,11 +127,9 @@ public:
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
     
     /**
-     * @brief Raise a sub-window above another sub-window created by same main window.
+     * @brief Raise a subwindow above a target subwindow.
      *
-     * This function provides the ability for system applications to raise sub-window.
-     *
-     * @param subWindowId the id of target sub-window.
+     * @param subWindowId Indicates the {@link int32_t} id of the target subwindow.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      * @permission Make sure the caller has system permission.
      */
