@@ -4418,6 +4418,8 @@ uint32_t SceneSession::UpdateUIParam()
 
 bool SceneSession::UpdateVisibilityInner(bool visibility)
 {
+    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, isVisible_: %{public}d, visibility: %{public}d",
+        GetPersistentId(), isVisible_, visibility);
     if (isVisible_ == visibility) {
         return false;
     }
@@ -4541,6 +4543,8 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
 
 bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
 {
+    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, zOrder_: %{public}u, zOrder: %{public}u",
+        GetPersistentId(), zOrder_, zOrder);
     if (zOrder_ == zOrder) {
         return false;
     }
