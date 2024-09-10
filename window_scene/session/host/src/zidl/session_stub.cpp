@@ -767,7 +767,7 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
-        property = new WindowSessionProperty();
+        property = new (std::nothrow) WindowSessionProperty();
         if (property != nullptr) {
             property->Read(data, action);
         }
