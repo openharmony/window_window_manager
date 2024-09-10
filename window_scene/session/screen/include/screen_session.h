@@ -115,7 +115,9 @@ public:
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
-
+    void SetMirrorScreenType(MirrorScreenType mirrorType);
+    MirrorScreenType GetMirrorScreenType();
+    
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
 
@@ -207,9 +209,6 @@ public:
     void UpdateRotationAfterBoot(bool foldToExpand);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
-
-    void SetMirrorScreenType(MirrorScreenType mirrorType);
-    MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
 
 private:
@@ -219,6 +218,7 @@ private:
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
+    MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     bool hasPrivateWindowForeground_ = false;
     std::recursive_mutex mutex_;
     std::atomic<bool> touchEnabled_ { true };
@@ -227,7 +227,6 @@ private:
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
-    MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
