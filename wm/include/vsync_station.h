@@ -59,7 +59,7 @@ private:
     std::string vsyncTimeoutTaskName_;
 
     std::mutex mutex_;
-    bool isFirstVsync_ = true;
+    bool isFirstVsyncRequest_ = true;
     bool isFirstVsyncBack_ = true;
     bool destroyed_ = false;
     bool hasRequestedVsync_ = false;
