@@ -579,7 +579,7 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](int32_t type, const SizeChangeReason& reason) {
+    auto dragHotAreaFunc = [](DisplayId newDisplayId, int32_t type, const SizeChangeReason& reason) {
         type = 0;
     };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;

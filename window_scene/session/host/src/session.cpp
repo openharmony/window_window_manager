@@ -174,6 +174,15 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
     return leashWinSurfaceNode_;
 }
 
+std::shared_ptr<RSSurfaceNode> Session::GetMovedSurfaceNode() const
+{
+    auto movedSurfaceNode = GetLeashWinSurfaceNode();
+    if (!movedSurfaceNode) {
+        movedSurfaceNode = surfaceNode_;
+    }
+    return movedSurfaceNode;
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;

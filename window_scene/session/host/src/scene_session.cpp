@@ -438,11 +438,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     auto task = [weakThis = wptr(this), event]() {
         auto session = weakThis.promote();
-        auto movedSurfaceNode = session->GetLeashWinSurfaceNode();
-        if (!movedSurfaceNode) {
-            movedSurfaceNode = session->surfaceNode_;
-        }
-        uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
         if (!session) {
             WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -453,13 +448,14 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
-
+            auto movedSurfaceNode = session->GetMovedSurfaceNode();
+            uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
+            session->moveDragController_->InitMoveDragProperty();
             auto sessionProperty = session->GetSessionProperty();
             if (!sessionProperty) {
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
             uint64_t displayId = sessionProperty->GetDisplayId();
-            session->moveDragController_->InitMoveDragProperty();
             session->moveDragController_->SetCrossProperty(displayId, parentId);
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
@@ -2135,23 +2131,16 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
-    WSRect globalRect = moveDragController_->GetTargetRect(true);
-    auto movedSurfaceNode = GetLeashWinSurfaceNode();
-    if (!movedSurfaceNode) {
-        movedSurfaceNode = surfaceNode_;
-    }
+    auto movedSurfaceNode = GetMovedSurfaceNode();
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc,
         isSupportDragInPcCompatibleMode);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
-        auto newAddedDisplaySet = moveDragController_->GetNewAddedDisplaySet();
-        for (const auto displayId : newAddedDisplaySet) {
-            auto screenSession = ScreenSessionManagerClient::GetInstance().
-                GetScreenSessionById(displayId);
-            auto rsDisplayNodeAdded = screenSession->GetDisplayNode();
+        for (const auto displayId : moveDragController_->GetNewAddedDisplaySet()) {
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            rsDisplayNodeAdded->AddCrossParentChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
         }
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
@@ -2160,9 +2149,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode);
+        HandleCompatibleModeMoveDrag(moveDragController_->GetTargetRect(true), reason, isSupportDragInPcCompatibleMode);
     } else {
-        SetSurfaceBounds(globalRect);
+        SetSurfaceBounds(moveDragController_->GetTargetRect(true));
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
             UpdateRect(rect, reason, "OnMoveDragCallback");
@@ -2175,8 +2164,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
         for (const auto displayId : moveDragController_->GetAddedDisplaySet()) {
-            auto screenSession = ScreenSessionManagerClient::GetInstance().
-                GetScreenSessionById(displayId);
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             auto rsDisplayNodeRemoved = screenSession->GetDisplayNode();
             rsDisplayNodeRemoved->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->GetParentId());
         }

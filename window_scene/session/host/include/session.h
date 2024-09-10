@@ -177,6 +177,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetMovedSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
