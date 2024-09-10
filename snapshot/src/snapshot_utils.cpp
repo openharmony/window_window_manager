@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "snapshot_utils.h"
 
 #include <cerrno>
@@ -45,7 +46,7 @@ constexpr uint8_t B_INDEX = 0;
 constexpr uint8_t G_INDEX = 1;
 constexpr uint8_t R_INDEX = 2;
 constexpr uint8_t SHIFT_2_BIT = 2;
-constexpr uint8_t SHIFT_3_BIT = 3;
+constexpr uint8_t SHITF_3_BIT = 3;
 constexpr uint8_t SHIFT_5_BIT = 5;
 constexpr uint8_t SHIFT_8_BIT = 8;
 constexpr uint8_t SHIFT_11_BIT = 11;
@@ -58,7 +59,6 @@ constexpr uint32_t RGBA8888_MASK_BLUE = 0x000000FF;
 constexpr uint32_t RGBA8888_MASK_GREEN = 0x0000FF00;
 constexpr uint32_t RGBA8888_MASK_RED = 0x00FF0000;
 
-constexpr uint8_t PNG_PACKER_QUALITY = 100;
 constexpr uint8_t PACKER_QUALITY = 75;
 constexpr uint32_t PACKER_SUCCESS = 0;
 struct MissionErrorMgr : public jpeg_error_mgr {
@@ -71,22 +71,21 @@ void mission_error_exit(j_common_ptr cinfo)
         std::cout << __func__ << ": param is invalid." << std::endl;
         return;
     }
-    auto err = reinterpret_cast<MissionErrorMgr*>(cinfo->err);
+    auto err = (MissionErrorMgr*)cinfo->err;
     longjmp(err->environment, 1);
 }
 
 const char *VALID_SNAPSHOT_PATH = "/data/local/tmp";
 const char *DEFAULT_SNAPSHOT_PREFIX = "/snapshot";
 const char *VALID_SNAPSHOT_SUFFIX = ".jpeg";
-const char *VALID_SNAPSHOT_PNG_SUFFIX = ".png";
 
 void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 {
     std::cout << "usage: " << cmdLine.c_str() <<
-        " [-i displayId] [-f output_file] [-w width] [-h height] [-t type] [-m]" << std::endl;
+        " [-i displayId] [-f output_file] [-w width] [-h height] [-m]" << std::endl;
 }
 
-std::string SnapShotUtils::GenerateFileName(std::string fileType, int offset)
+std::string SnapShotUtils::GenerateFileName(int offset)
 {
     timeval tv;
     std::string fileName = VALID_SNAPSHOT_PATH;
@@ -104,15 +103,13 @@ std::string SnapShotUtils::GenerateFileName(std::string fileType, int offset)
             fileName += timeStr;
         }
     }
-    fileName += (fileType == "png") ? VALID_SNAPSHOT_PNG_SUFFIX : VALID_SNAPSHOT_SUFFIX;
+    fileName += VALID_SNAPSHOT_SUFFIX;
     return fileName;
 }
 
-bool SnapShotUtils::CheckFileNameValid(const std::string &fileName, std::string fileType)
+bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
-    std::cout << "fileType: " << fileType << std::endl;
-    size_t fileMinLength = (fileType == "png") ? strlen(VALID_SNAPSHOT_PNG_SUFFIX) : strlen(VALID_SNAPSHOT_SUFFIX);
-    if (fileName.length() <= fileMinLength) {
+    if (fileName.length() <= strlen(VALID_SNAPSHOT_SUFFIX)) {
         std::cout << "error: fileName " << fileName.c_str() << " invalid, file length too short!" << std::endl;
         return false;
     }
@@ -137,12 +134,13 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName, std::string 
     }
 
     // check file suffix
-    const char *fileNameSuffix = fileName.c_str() + (fileName.length() - fileMinLength);
-    const char *fileSuffix = (fileType == "png") ? VALID_SNAPSHOT_PNG_SUFFIX : VALID_SNAPSHOT_SUFFIX;
-    if (strncmp(fileNameSuffix, fileSuffix, fileMinLength) == 0) {
+    const char *fileNameSuffix = fileName.c_str() + (fileName.length() - strlen(VALID_SNAPSHOT_SUFFIX));
+    if (strncmp(fileNameSuffix, VALID_SNAPSHOT_SUFFIX, strlen(VALID_SNAPSHOT_SUFFIX)) == 0) {
         return true; // valid suffix
     }
-    std::cout << "error: fileName " << fileName.c_str() << " invalid, suffix must be " << fileSuffix << std::endl;
+    
+    std::cout << "error: fileName " << fileName.c_str() <<
+        " invalid, suffix must be " << VALID_SNAPSHOT_SUFFIX << std::endl;
     return false;
 }
 
@@ -214,9 +212,9 @@ bool SnapShotUtils::RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t *rgb888Buf,
         rgb888Buf[i * RGB888_PIXEL_BYTES + R_INDEX] = (rgb565[i] & RGB565_MASK_RED);
         rgb888Buf[i * RGB888_PIXEL_BYTES + G_INDEX] = (rgb565[i] & RGB565_MASK_GREEN) >> SHIFT_5_BIT;
         rgb888Buf[i * RGB888_PIXEL_BYTES + B_INDEX] = (rgb565[i] & RGB565_MASK_BLUE) >> SHIFT_11_BIT;
-        rgb888Buf[i * RGB888_PIXEL_BYTES + R_INDEX] <<= SHIFT_3_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + R_INDEX] <<= SHITF_3_BIT;
         rgb888Buf[i * RGB888_PIXEL_BYTES + G_INDEX] <<= SHIFT_2_BIT;
-        rgb888Buf[i * RGB888_PIXEL_BYTES + B_INDEX] <<= SHIFT_3_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + B_INDEX] <<= SHITF_3_BIT;
     }
     return true;
 }
@@ -358,12 +356,12 @@ bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam &param)
     return ret;
 }
 
-bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &pixelMap, std::string fileType)
+bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &pixelMap)
 {
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
-    option.format = (fileType == "png") ? "image/png" : "image/jpeg";
-    option.quality = (fileType == "png") ? PNG_PACKER_QUALITY : PACKER_QUALITY;
+    option.format = "image/jpeg";
+    option.quality = PACKER_QUALITY;
     option.numberHint = 1;
     std::set<std::string> formats;
     auto ret = imagePacker.GetSupportedFormats(formats);
@@ -415,7 +413,7 @@ bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplay
     } else {
         bool validFlag = false;
         auto displayIds = DisplayManager::GetInstance().GetAllDisplayIds();
-        for (auto id : displayIds) {
+        for (auto id: displayIds) {
             if (displayId == id) {
                 validFlag = true;
                 break;
@@ -424,7 +422,7 @@ bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplay
         if (!validFlag) {
             std::cout << "error: displayId " << static_cast<int64_t>(displayId) << " invalid!" << std::endl;
             std::cout << "tips: supported displayIds:" << std::endl;
-            for (auto dispId : displayIds) {
+            for (auto dispId: displayIds) {
                 std::cout << "\t" << dispId << std::endl;
             }
             return false;
@@ -433,7 +431,7 @@ bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplay
     return true;
 }
 
-bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArguments &cmdArguments)
+bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdArgments)
 {
     int opt = 0;
     const struct option longOption[] = {
@@ -441,29 +439,25 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArguments &cmd
         { "width", required_argument, nullptr, 'w' },
         { "height", required_argument, nullptr, 'h' },
         { "file", required_argument, nullptr, 'f' },
-        { "type", required_argument, nullptr, 't' },
         { "help", required_argument, nullptr, 'm' },
         { nullptr, 0, nullptr, 0 }
     };
-    while ((opt = getopt_long(argc, argv, "i:w:h:f:t:m", longOption, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "i:w:h:f:m", longOption, nullptr)) != -1) {
         switch (opt) {
             case 'i': // display id
-                cmdArguments.displayId = static_cast<DisplayId>(atoll(optarg));
-                cmdArguments.isDisplayIdSet = true;
+                cmdArgments.displayId = static_cast<DisplayId>(atoll(optarg));
+                cmdArgments.isDisplayIdSet = true;
                 break;
             case 'w': // output width
-                cmdArguments.width = atoi(optarg);
-                cmdArguments.isWidthSet = true;
+                cmdArgments.width = atoi(optarg);
+                cmdArgments.isWidthSet = true;
                 break;
             case 'h': // output height
-                cmdArguments.height = atoi(optarg);
-                cmdArguments.isHeightSet = true;
+                cmdArgments.height = atoi(optarg);
+                cmdArgments.isHeightSet = true;
                 break;
             case 'f': // output file name
-                cmdArguments.fileName = optarg;
-                break;
-            case 't': // output file type
-                cmdArguments.fileType = optarg;
+                cmdArgments.fileName = optarg;
                 break;
             case 'm': // help
             default:
@@ -472,18 +466,18 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArguments &cmd
         }
     }
 
-    if (!ProcessDisplayId(cmdArguments.displayId, cmdArguments.isDisplayIdSet)) {
+    if (!ProcessDisplayId(cmdArgments.displayId, cmdArgments.isDisplayIdSet)) {
         return false;
     }
 
-    if (cmdArguments.fileName == "") {
-        cmdArguments.fileName = GenerateFileName(cmdArguments.fileType);
-        std::cout << "process: set filename to " << cmdArguments.fileName.c_str() << std::endl;
+    if (cmdArgments.fileName == "") {
+        cmdArgments.fileName = GenerateFileName();
+        std::cout << "process: set filename to " << cmdArgments.fileName.c_str() << std::endl;
     }
 
     // check fileName
-    if (!SnapShotUtils::CheckFileNameValid(cmdArguments.fileName, cmdArguments.fileType)) {
-        std::cout << "error: filename " << cmdArguments.fileName.c_str() << " invalid!" << std::endl;
+    if (!SnapShotUtils::CheckFileNameValid(cmdArgments.fileName)) {
+        std::cout << "error: filename " << cmdArgments.fileName.c_str() << " invalid!" << std::endl;
         return false;
     }
     return true;
