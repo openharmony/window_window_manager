@@ -105,8 +105,12 @@ JsScreenSessionManager::~JsScreenSessionManager()
     TLOGI(WmsLogTag::DMS, "Destroy JsScreenSessionManager instance");
 }
 
-void JsScreenSessionManager::Finalizer(napi_env env, void* data, void* hint)
+void JsScreenSessionManager::Finalizer([[maybe_unused]]napi_env env, void* data, [[maybe_unused]]void* hint)
 {
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "[NAPI]Finalizer. jsScreenSessionManager refcount before DecStrongRef: %{public}d",
         static_cast<JsScreenSessionManager*>(data)->GetSptrRefCount());
     // Expected to release the jsScreenSessionManager object here
@@ -444,7 +448,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
     if (argc > ARGC_THREE) {
         if (!ConvertFromJsValue(env, argv[ARGC_THREE], type) || type < ScreenPropertyChangeType::UNSPECIFIED ||
-            type > ScreenPropertyChangeType::ROTATION_END) { // 3: the 4rd argv
+            type > ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) { // 3: the 4rd argv
             TLOGE(WmsLogTag::DMS, "[NAPI]screenPropertyChangeType is invalid");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));

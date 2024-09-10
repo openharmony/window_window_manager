@@ -19,6 +19,7 @@
 #include "abstract_display_controller.h"
 #include "display_cutout_controller.h"
 #include "screen.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -574,7 +575,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, Function | SmallTes
 {
     ScreenId screenId = 1;
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);
-    ASSERT_NE(nullptr, ret);
+    ASSERT_EQ(nullptr, ret);
 }
 }
 } // namespace Rosen

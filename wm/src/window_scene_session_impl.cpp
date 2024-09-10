@@ -27,7 +27,6 @@
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
-#include "future_callback.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_helper.h"
@@ -191,7 +190,7 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(iSessionStage));
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     auto persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
@@ -200,13 +199,16 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     const WindowType& type = GetType();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    auto info = property_->GetSessionInfo();
     if (abilityContext && abilityContext->GetAbilityInfo()) {
-        auto info = property_->GetSessionInfo();
         info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
         info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-        property_->SetSessionInfo(info);
+    } else if (context_) {
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        info.bundleName_ = context_->GetBundleName();
     }
+    property_->SetSessionInfo(info);
     if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
@@ -304,8 +306,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     property_->SetWindowState(state_);
 
     sptr<ISessionStage> iSessionStage(this);
-    sptr<WindowEventChannel> channel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
-    sptr<IWindowEventChannel> eventChannel(channel);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<Rosen::ISession> session = nullptr;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     if (token) {
@@ -369,7 +370,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
         GetPersistentId(), state_);
     sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> iWindowEventChannel(new WindowEventChannel(iSessionStage));
+    sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     sptr<Rosen::ISession> session = nullptr;
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
@@ -592,11 +593,12 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
+    bool isPcOrFreeWindow = (windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode());
     AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
     bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
     if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect, isPcOrFreeWindow);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
@@ -740,20 +742,6 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
                 onlySupportFullScreen, property_->GetFullScreenStart());
             Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         }
-        // get orientation configuration
-        AppExecFwk::DisplayOrientation displayOrientation =
-            static_cast<AppExecFwk::DisplayOrientation>(
-                static_cast<uint32_t>(abilityInfo->orientation));
-        if (ABILITY_TO_SESSION_ORIENTATION_MAP.count(displayOrientation) == 0) {
-            WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
-            return;
-        }
-        Orientation orientation = ABILITY_TO_SESSION_ORIENTATION_MAP.at(displayOrientation);
-        if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
-            WLOGFE("Set orientation from ability failed");
-            return;
-        }
-        property_->SetRequestedOrientation(orientation);
     }
 }
 
@@ -958,7 +946,14 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
-        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE, nullptr, info);
+        UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
+        auto hostSession = GetHostSession();
+        if (hostSession) {
+            WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+            hostSession->UpdateClientRect(wsRect);
+        } else {
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
+        }
     }
     state_ = WindowState::STATE_SHOWN;
     requestState_ = WindowState::STATE_SHOWN;
@@ -1293,7 +1288,7 @@ WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t 
         ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
         return ret;
     }
-    sptr<PatternDetachCallback> callback = new PatternDetachCallback();
+    sptr<PatternDetachCallback> callback = sptr<PatternDetachCallback>::MakeSptr();
     ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());
     if (ret != WMError::WM_OK) {
@@ -2230,6 +2225,16 @@ WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
     }
 }
 
+bool WindowSceneSessionImpl::GetStartMoveFlag()
+{
+    bool isMoving = false;
+    if (auto hostSession = GetHostSession()) {
+        hostSession->GetStartMoveFlag(isMoving);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+    return isMoving;
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("id: %{public}d", GetPersistentId());
@@ -2249,11 +2254,6 @@ WMError WindowSceneSessionImpl::Close()
             return Destroy(true);
         }
         WindowPrepareTerminateHandler* handler = new WindowPrepareTerminateHandler();
-        if (handler == nullptr) {
-            WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
-            hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-            return WMError::WM_OK;
-        }
         PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)]() {
             auto weakSession = hostSessionWptr.promote();
             if (weakSession == nullptr) {

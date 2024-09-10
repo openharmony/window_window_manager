@@ -16,7 +16,7 @@
 #include "scene_session_dirty_manager.h"
 
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
 #include "fold_screen_state_internel.h"
@@ -83,6 +83,14 @@ void AdjustMMIRotationFromDisplayMode(MMI::Direction& rotation, MMI::DisplayMode
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
 {
     return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
+}
+
+static bool operator!=(const MMI::Rect& a, const WSRect& b)
+{
+    if (a.x != b.posX_ || a.y != b.posY_ || a.width != b.width_ || a.height != b.height_) {
+        return true;
+    }
+    return false;
 }
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
@@ -417,7 +425,7 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     windowInfoList.emplace_back(windowInfo);
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
+auto SceneSessionDirtyManager::GetFullWindowInfoList(const std::vector<MMI::WindowInfo>& lastWindowInfoList) ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -435,7 +443,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
-        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
+        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, lastWindowInfoList, WindowAction::WINDOW_ADD);
         auto iter = (sceneSessionValue->GetMainSessionId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetMainSessionId());
@@ -548,8 +556,20 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     }
 }
 
+int FindLastWindowInfoIndex(const std::vector<MMI::WindowInfo>& lastWindowInfoList, int32_t windowId)
+{
+    int sizeOfLastWindowInfoList = static_cast<int>(lastWindowInfoList.size());
+    for (int i = 0; i < sizeOfLastWindowInfoList; i++) {
+        if (lastWindowInfoList[i].id == windowId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const SceneSessionDirtyManager::WindowAction& action) const
+    const sptr<SceneSession>& sceneSession, const std::vector<MMI::WindowInfo>& lastWindowInfoList,
+    const SceneSessionDirtyManager::WindowAction& action) const
 {
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
@@ -566,10 +586,19 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
     auto displayId = windowSessionProperty->GetDisplayId();
+    bool rectChangeBySystem = sceneSession->GetRectChangeBySystem();
     CalTransform(sceneSession, transform);
     std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
 
     auto agentWindowId = sceneSession->GetWindowId();
+    if (rectChangeBySystem) {
+        int lastWindowIdx = FindLastWindowInfoIndex(lastWindowInfoList, windowId);
+        if (lastWindowIdx != -1 && lastWindowInfoList[lastWindowIdx].area != windowRect) {
+            sceneSession -> SetRectChangeBySystem(false);
+        } else {
+            rectChangeBySystem = false;
+        }
+    }
     auto zOrder = sceneSession->GetZOrder();
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
     auto windowMode = windowSessionProperty->GetWindowMode();
@@ -606,6 +635,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
+        .rectChangeBySystem = rectChangeBySystem,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {

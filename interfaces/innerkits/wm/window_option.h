@@ -273,6 +273,13 @@ public:
     void SetRealParentId(int32_t realParentId);
 
     /**
+     * @brief Set parent window type of UIExtension
+     *
+     * @param parentWindowType Parent window type of UIExtension
+     */
+    void SetParentWindowType(WindowType parentWindowType);
+
+    /**
      * @brief Get window rect.
      *
      * @return The rect of window.
@@ -461,6 +468,13 @@ public:
      */
     int32_t GetRealParentId() const;
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -498,6 +512,7 @@ private:
     int32_t realParentId_ = INVALID_WINDOW_ID;
     uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
     bool isExtensionTag_ = false;
+    WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 } // namespace Rosen
 } // namespace OHOS

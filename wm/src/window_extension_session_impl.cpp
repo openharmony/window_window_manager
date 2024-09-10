@@ -1143,6 +1143,20 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     return false;
 }
 
+WSError WindowExtensionSessionImpl::SwitchFreeMultiWindow(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (windowSystemConfig_.freeMultiWindowEnable_ == enable) {
+        return WSError::WS_ERROR_REPEAT_OPERATION;
+    }
+    NotifySwitchFreeMultiWindow(enable);
+    // Switch process finish, update system config
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    return WSError::WS_OK;
+}
+
 bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     bool enable = false;
@@ -1161,6 +1175,11 @@ void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
 int32_t WindowExtensionSessionImpl::GetRealParentId() const
 {
     return property_->GetRealParentId();
+}
+
+WindowType WindowExtensionSessionImpl::GetParentWindowType() const
+{
+    return property_->GetParentWindowType();
 }
 
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
@@ -1193,6 +1212,31 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
         WindowDFXHelperType::WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK;
     SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(static_cast<int32_t>(type), getpid(),
         oss.str());
+}
+
+void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "notify extension asynchronously, notifyEvent:%{public}d", notifyEvent);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyExtensionEventAsync(notifyEvent);
+}
+
+WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "NotifyDumpInfo, persistentId=%{public}d", GetPersistentId());
+    auto uiContentSharedPtr = GetUIContentSharedPtr();
+    if (uiContentSharedPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentSharedPtr->DumpInfo(params, info);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

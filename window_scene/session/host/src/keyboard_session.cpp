@@ -17,7 +17,7 @@
 #include "session/host/include/session.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
 #include <parameters.h>
 #include "window_helper.h"
@@ -211,10 +211,34 @@ void KeyboardSession::OnKeyboardPanelUpdated()
     UpdateKeyboardAvoidArea();
 }
 
+void KeyboardSession::OnCallingSessionUpdated()
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
+    if (!IsSessionForeground()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
+        return;
+    }
+    WSRect panelRect = { 0, 0, 0, 0 };
+    panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
+    sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
+    if (callingSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        return;
+    }
+    bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    if (!CheckIfNeedRaiseCallingSession(callingSession, isCallingSessionFloating)) {
+        return;
+    }
+    WSRect callingSessionRect = callingSession->GetSessionRect();
+    NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
+
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
+}
+
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->onKeyboardGravityChange_) {
-        sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+    if (keyboardGravityChangeFunc_) {
+        keyboardGravityChangeFunc_(gravity);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {
@@ -492,6 +516,9 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
     if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);
         RestoreCallingSession();
+
+        MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
+        NotifySessionRectChange(GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
 
         sessionProperty->SetCallingSessionId(callingSessionId);
         WSRect panelRect = { 0, 0, 0, 0 };

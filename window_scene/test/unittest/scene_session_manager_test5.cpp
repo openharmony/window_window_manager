@@ -1081,7 +1081,7 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
     ssm_->DestroyToastSession(sceneSession);
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->DestroyToastSession(sceneSession);
-    ssm_->HandleCastScreenDisConnection(sceneSession);
+    ssm_->HandleCastScreenDisConnection(sceneSession->GetSessionInfo().screenId_);
     ssm_->StartUIAbilityBySCB(sceneSession);
     ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
 }

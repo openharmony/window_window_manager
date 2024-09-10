@@ -250,6 +250,7 @@ ohos_unittest("ws_task_scheduler_test") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -978,9 +979,14 @@ ohos_unittest("ws_move_drag_controller_test") {
 ohos_unittest("ws_session_proxy_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${window_base_path}/window_scene/session/host/include/zidl" ]
-  sources = [ "session_proxy_test.cpp" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include/zidl",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "session_proxy_test.cpp",
+  ]
 
   deps = [
     ":ws_unittest_common",
@@ -1058,7 +1064,12 @@ ohos_unittest("ws_scene_session_converter_test") {
 ohos_unittest("ws_session_stage_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stage_proxy_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "session_stage_proxy_test.cpp",
+  ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1326,7 +1337,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
-    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/common/include",
@@ -1382,7 +1393,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
-    "${window_base_path}/window_scene/screen_session_manager:screen_session_manager_client",
+    "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",

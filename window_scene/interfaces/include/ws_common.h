@@ -277,6 +277,10 @@ enum class FocusChangeReason {
      */
     FOCUSABLE,
     /**
+     * select last focused app when requestSessionUnFocus.
+     */
+    LAST_FOCUSED_APP,
+    /**
      * focus change max.
      */
     MAX,
@@ -356,6 +360,7 @@ struct SessionInfo {
     int32_t realParentId_ = INVALID_SESSION_ID;
     uint32_t uiExtensionUsage_ = 0;
     bool isAsyncModalBinding_ = false;
+    uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 };
 
@@ -482,7 +487,7 @@ struct WSRectT {
 
     inline bool IsInvalid() const
     {
-        return IsEmpty() || NearZero(width_) || NearZero(height_);
+        return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
     inline std::string ToString() const
@@ -648,6 +653,7 @@ struct SessionUIParam {
     float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {

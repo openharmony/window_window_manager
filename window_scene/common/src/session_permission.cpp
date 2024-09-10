@@ -26,6 +26,7 @@
 #include <input_method_controller.h>
 #include <singleton.h>
 #include <singleton_container.h>
+#include <pwd.h>
 #include "common/include/session_permission.h"
 #include "parameters.h"
 #include "window_manager_hilog.h"
@@ -296,6 +297,12 @@ std::string SessionPermission::GetCallingBundleName()
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::string callingBundleName;
     bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
+    // if bundlename is empty, fill in pw_name
+    if (callingBundleName.empty()) {
+        if (struct passwd* user = getpwuid(uid)) {
+            callingBundleName = user->pw_name;
+        }
+    }
     IPCSkeleton::SetCallingIdentity(identity);
     return callingBundleName;
 }

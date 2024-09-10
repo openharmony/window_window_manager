@@ -18,7 +18,7 @@
       ],
       "features": [
         "window_manager_use_sceneboard",
-        "window_manager_feature_coverage = false",
+        "window_manager_feature_coverage",
         "window_manager_dayu210_resource_config",
         "window_manager_feature_subscribe_motion",
         "window_manager_feature_tp_enable"
@@ -269,7 +269,7 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/screen_session_manager:screen_session_manager_client",
+            "name": "//foundation/window/window_manager/window_scene/screen_session_manager_client:screen_session_manager_client",
             "header": {
               "header_files": [
               ],
