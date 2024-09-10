@@ -108,6 +108,7 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
+        TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
@@ -254,6 +255,10 @@ public:
         return WMError::WM_OK;
     }
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled) override
     {
         return WMError::WM_OK;
     }

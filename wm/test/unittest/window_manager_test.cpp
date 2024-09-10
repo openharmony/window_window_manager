@@ -811,6 +811,19 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetProcessSnapshotSkip
+ * @tc.desc: check SetProcessSnapshotSkip
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetProcessSnapshotSkip, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    bool isEnabled = true;
+    auto ret = WindowManager::GetInstance().SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC

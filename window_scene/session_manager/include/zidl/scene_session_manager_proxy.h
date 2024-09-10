@@ -114,6 +114,7 @@ public:
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
     WMError MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
+    WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,

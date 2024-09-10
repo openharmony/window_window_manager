@@ -1399,6 +1399,15 @@ WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowSt
     return ret;
 }
 
+WMError WindowManager::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessSnapshotSkip(pid, isEnabled);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "set process snapshot skip failed");
+    }
+    return ret;
+}
+
 WindowStyleType WindowManager::GetWindowStyleType()
 {
     WindowStyleType styleType;

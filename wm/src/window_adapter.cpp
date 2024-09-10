@@ -919,6 +919,14 @@ WMError WindowAdapter::GetCallingWindowRect(int32_t persistentId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetCallingWindowRect(persistentId, rect));
 }
 
+WMError WindowAdapter::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->SetProcessSnapshotSkip(pid, isEnabled);
+}
+
 WMError WindowAdapter::GetWindowModeType(WindowModeType& windowModeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

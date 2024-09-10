@@ -379,6 +379,24 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, Functi
 }
 
 /**
+ * @tc.name: SetProcessSnapshotSkip
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetProcessSnapshotSkip, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
+        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+
+    int32_t pid = 1000;
+    bool isEnabled = false;
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->SetProcessSnapshotSkip(pid, isEnabled));
+    sceneSessionManagerProxy_ = nullptr;
+}
+
+/**
  * @tc.name: SetGestureNavigationEnabled
  * @tc.desc: normal function
  * @tc.type: FUNC

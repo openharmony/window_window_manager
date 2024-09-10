@@ -1567,6 +1567,56 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetProcessSnapshotSkip
+ * @tc.desc: add or cancel process snapshot skip by pid
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetProcessSnapshotSkip, Function | SmallTest | Level3)
+{
+    int32_t pid = 1000;
+    bool isEnabled = true;
+    auto result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_NE(ssm_->processSnapshotSkipPidSet_.find(pid), ssm_->processSnapshotSkipPidSet_.end());
+    isEnabled = false;
+    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->processSnapshotSkipPidSet_.find(pid), ssm_->processSnapshotSkipPidSet_.end());
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetCallingPid(1000);
+    sceneSession2->SetCallingPid(1001);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId, sceneSession2});
+    ssm_->sceneSessionMap_.insert({-1, nullptr});
+    isEnabled = true;
+    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    isEnabled = false;
+    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(-1);
+}
+
+/**
+ * @tc.name: DeleteProcessSnapshotSkipSetPid
+ * @tc.desc: SceneSesionManager DeleteProcessSnapshotSkipSetPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, DeleteProcessSnapshotSkipSetPid, Function | SmallTest | Level3)
+{
+    ssm_->processSnapshotSkipPidSet_.insert(1);
+    ssm_->DeleteProcessSnapshotSkipSetPid(1);
+    ASSERT_EQ(ssm_->processSnapshotSkipPidSet_.find(1), ssm_->processSnapshotSkipPidSet_.end());
+}
+
+/**
  * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
  * @tc.desc: Test whether report the correct screen fold status events
  * @tc.type: FUNC

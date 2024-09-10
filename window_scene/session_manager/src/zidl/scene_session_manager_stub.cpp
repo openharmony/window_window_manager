@@ -39,6 +39,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
     MessageOption& option)
 {
     switch (code) {
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
+            return HandleSetProcessSnapshotSkip(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION):
             return HandleCreateAndConnectSpecificSession(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION):
@@ -1046,6 +1048,15 @@ int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, Messag
         WLOGE("Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetProcessSnapshotSkip(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = data.ReadInt32();
+    bool isEnabled = data.ReadBool();
+    WMError errCode = SetProcessSnapshotSkip(pid, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
