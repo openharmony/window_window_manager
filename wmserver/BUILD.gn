@@ -46,6 +46,8 @@ config("libmockwms_config") {
     "${window_base_path}/interfaces/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/interfaces/include",
+    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager/include/zidl",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "${window_base_path}/window_scene/session_manager_service/include",
