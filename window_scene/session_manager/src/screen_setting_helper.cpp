@@ -182,7 +182,7 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
     TLOGE(WmsLogTag::DMS, "set setting rotation screen id succeed, ret:%{public}d", ret);
 }
 
-bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
+bool ScreenSettingHelper::GetSettingRotationScreenId(int32_t& screenId, const std::string& key)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValue(key, screenId);
