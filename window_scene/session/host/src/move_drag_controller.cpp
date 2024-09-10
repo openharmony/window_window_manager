@@ -104,6 +104,24 @@ bool MoveDragController::GetStartDragFlag() const
     return isStartDrag_;
 }
 
+uint64_t MoveDragController::GetMoveDragStartDisplayId() const
+{
+    WLOGFD("MoveDragStartDisplayId: %{public}lu id:%{public}d", moveDragStartDisplayId_, persistentId_);
+    return moveDragStartDisplayId_;
+}
+
+uint64_t MoveDragController::GetMoveDragEndDisplayId() const
+{
+    WLOGFD("MoveDragEndDisplayId: %{public}lu id:%{public}d", moveDragEndDisplayId_, persistentId_);
+    return moveDragEndDisplayId_;
+}
+
+uint64_t MoveDragController::GetParentId() const
+{
+    WLOGFD("ParentId: %{public}lu id:%{public}d", parentId_, persistentId_);
+    return parentId_;
+}
+
 bool MoveDragController::GetMovable() const
 {
     return isMovable_;
@@ -919,6 +937,11 @@ bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2)
     int32_t y_end = std::min(rect1.posY_ + static_cast<int32_t>(rect1.height_),
         rect2.posY_ + static_cast<int32_t>(rect2.height_));
     return y_begin < y_end && x_begin < x_end;
+}
+
+std::set<uint64_t> MoveDragController::GetAddedDisplaySet()
+{
+    return addedDisplaySet_;
 }
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplaySet()
