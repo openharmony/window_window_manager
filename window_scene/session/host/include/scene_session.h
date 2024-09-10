@@ -367,12 +367,12 @@ protected:
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
     WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
-    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
-        bool isShow);
+    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
+        const sptr<WindowSessionProperty>& sessionProperty, bool isShow);
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
-        uint32_t& screenWidth, uint32_t& screenHeight);
+        uint32_t &screenWidth, uint32_t &screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
-        uint32_t& screenWidth, uint32_t& screenHeight);
+        uint32_t &screenWidth, uint32_t &screenHeight);
     std::string GetRectInfo(const WSRect& rect)
     {
         using std::to_string;
