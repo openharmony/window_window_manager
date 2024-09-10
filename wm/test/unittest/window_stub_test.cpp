@@ -458,7 +458,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
     data.WriteInt32(0);
     data.WriteInt32(0);
-    data.WriteUint32(100);
+    data.WriteUint32(1);
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
