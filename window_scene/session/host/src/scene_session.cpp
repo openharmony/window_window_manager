@@ -300,12 +300,7 @@ WSError SceneSession::Disconnect(bool isFromClient)
             return WSError::WS_OK;
         }
     }
-    return DisconnectTask(isFromClient, true);
-}
-
-WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
-{
-    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -319,7 +314,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         }
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
-        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) && isSaveSnapshot) {
+        if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
