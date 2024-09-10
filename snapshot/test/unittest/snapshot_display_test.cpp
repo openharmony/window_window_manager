@@ -114,7 +114,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, Function | MediumTest | Leve
     int i;
 
     for (i = 0; i < testTimeCount_; i++) {
-        imgPath[i] = SnapShotUtils::GenerateFileName("jpeg", i);
+        imgPath[i] = SnapShotUtils::GenerateFileName(i);
         if (CheckFileExist(imgPath[i])) {
             remove(imgPath[i].c_str());
         }
@@ -143,7 +143,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Leve
     int i;
 
     for (i = 0; i < testTimeCount_; i++) {
-        imgPath[i] = SnapShotUtils::GenerateFileName("jpeg", i);
+        imgPath[i] = SnapShotUtils::GenerateFileName(i);
         if (CheckFileExist(imgPath[i])) {
             remove(imgPath[i].c_str());
         }
@@ -232,36 +232,6 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, Function | MediumTest | Leve
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -m";
     ASSERT_EQ(false, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
-}
-
-/**
- * @tc.name: ScreenShotCmdValid
- * @tc.desc: screenshot png type
- * @tc.type: FUNC
- */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid09, Function | MediumTest | Level2)
-{
-    std::string imgPath[testTimeCount_];
-    int i;
-
-    for (i = 0; i < testTimeCount_; i++) {
-        imgPath[i] = SnapShotUtils::GenerateFileName("png", i);
-        if (CheckFileExist(imgPath[i])) {
-            remove(imgPath[i].c_str());
-        }
-    }
-
-    const std::string cmd = defaultCmd_ + " -t png";
-    (void)system(cmd.c_str());
-
-    for (i = 0; i < testTimeCount_; i++) {
-        if (CheckFileExist(imgPath[i])) {  // ok
-            remove(imgPath[i].c_str());
-            ASSERT_TRUE(true);
-            return;
-        }
-    }
-    ADD_FAILURE(); // fail, can't find snapshot file
 }
 } // namespace
 } // namespace Rosen
