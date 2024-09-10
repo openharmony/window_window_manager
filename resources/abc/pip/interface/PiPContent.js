@@ -99,8 +99,11 @@ export class PiPContent extends ViewPU {
             return;
         }
         this.useNode = true;
-        if (this.xComponent.getParent() === null || this.xComponent.getParent() === undefined) {
-            pip.resetNodeType(this.xComponent);
+        if (!this.xComponent.isAttached()) {
+            pip.markPipNodeType(this.xComponent, false);
+        } else {
+            pip.markPipNodeType(this.xComponent, true);
+            this.xComponent.getParent().removeChild(this.xComponent);
         }
         pip.setTypeNodeEnabled();
         this.mXCNodeController = new XCNodeController(this.xComponent);
