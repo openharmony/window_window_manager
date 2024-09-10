@@ -36,7 +36,7 @@ public:
     static void SetSettingRotation(int32_t rotation);
     static void SetSettingRotationScreenId(int32_t screenId);
     static bool GetSettingRotation(int32_t& rotation, const std::string& key = SETTING_ROTATION_KEY);
-    static bool GetSettingRotationScreenID(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
+    static bool GetSettingRotationScreenId(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};

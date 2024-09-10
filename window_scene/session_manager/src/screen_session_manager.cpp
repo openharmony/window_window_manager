@@ -2607,7 +2607,7 @@ void ScreenSessionManager::RegisterSettingRotationObserver()
         int32_t rotation = -1;
         int32_t screenId = -1;
         if (ScreenSettingHelper::GetSettingRotation(rotation) &&
-            ScreenSettingHelper::GetSettingRotationScreenID(screenId)) {
+            ScreenSettingHelper::GetSettingRotationScreenId(screenId)) {
             TLOGI(WmsLogTag::DMS, "current dms setting rotation:%{public}d, screenId:%{public}d",
                 rotation, screenId);
         } else {
