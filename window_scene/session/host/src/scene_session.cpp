@@ -691,9 +691,10 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
             (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
-                session->GetPersistentId(), rect.ToString().c_str());
+            session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) &&
+            session->GetClientRect() == rect) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s clientRect:%{public}s",
+                session->GetPersistentId(), rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
             return WSError::WS_OK;
         }
         if (rect.IsInvalid()) {
@@ -716,8 +717,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s",
-            session->GetPersistentId(), session->reason_, updateReason.c_str(), rect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s, "
+            "clientRect:%{public}s", session->GetPersistentId(), session->reason_, updateReason.c_str(),
+            rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
 
         return WSError::WS_OK;
     };
@@ -918,6 +920,23 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            WLOGFE("session or gravityChangeFunc is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->keyboardGravityChangeFunc_ = func;
+        session->keyboardGravityChangeFunc_(session->GetKeyboardGravity());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify gravity change when register, id: %{public}d gravity: %{public}d",
+            session->GetPersistentId(), session->GetKeyboardGravity());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetKeyboardGravityChangeCallback");
+}
+
 void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
@@ -1030,6 +1049,31 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError SceneSession::UpdateClientRect(const WSRect& rect)
+{
+    auto task = [weakThis = wptr(this), rect] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (rect.IsInvalid()) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateClientRect id:%{public}d rect:%{public}s is invalid",
+                session->GetPersistentId(), rect.ToString().c_str());
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        if (rect == session->GetClientRect()) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "UpdateClientRect id:%{public}d skip same rect", session->GetPersistentId());
+            return WSError::WS_DO_NOTHING;
+        }
+        session->SetClientRect(rect);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "UpdateClientRect" + GetRectInfo(rect));
     return WSError::WS_OK;
 }
 
@@ -2574,6 +2618,32 @@ bool SceneSession::IsAppSession() const
     return false;
 }
 
+/** @note @window.focus */
+bool SceneSession::IsAppOrLowerSystemSession() const
+{
+    WindowType windowType = GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN ||
+        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        windowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        return true;
+    }
+    return IsAppSession();
+}
+
+/** @note @window.focus */
+bool SceneSession::IsSystemSessionAboveApp() const
+{
+    WindowType windowType = GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_DIALOG || windowType == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
+        return true;
+    }
+    if (windowType == WindowType::WINDOW_TYPE_PANEL &&
+        sessionInfo_.bundleName_.find("SCBDropdownPanel") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
@@ -3470,7 +3540,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
         TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-   
+
     SetTopmost(property->IsTopmost());
     return WMError::WM_OK;
 }
@@ -4544,7 +4614,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
             session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
-            session->sessionChangeCallback_->onKeyboardGravityChange_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();

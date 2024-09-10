@@ -597,6 +597,20 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
+bool Session::GetRectChangeBySystem() const
+{
+    return rectChangeBySystem_.load();
+}
+
+void Session::SetRectChangeBySystem(bool rectChangeBySystem)
+{
+    if (rectChangeBySystem_.load() != rectChangeBySystem) {
+        rectChangeBySystem_.store(rectChangeBySystem);
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rectChangeBySystem_:%{public}d", GetPersistentId(),
+            rectChangeBySystem);
+    }
+}
+
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
@@ -867,6 +881,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        SetClientRect(rect);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
@@ -2582,6 +2597,20 @@ WSRect Session::GetSessionRequestRect() const
     rect = SessionHelper::TransferToWSRect(property->GetRequestRect());
     WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
+}
+
+/** @note @window.layout */
+void Session::SetClientRect(const WSRect& rect)
+{
+    clientRect_ = rect;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+        GetPersistentId(), rect.ToString().c_str());
+}
+
+/** @note @window.layout */
+WSRect Session::GetClientRect() const
+{
+    return clientRect_;
 }
 
 WindowType Session::GetWindowType() const

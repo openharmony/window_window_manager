@@ -356,12 +356,20 @@ bool WindowSessionImpl::IsSupportWideGamut()
 
 void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return;
+    }
     auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(colorGamut);
 }
 
 ColorSpace WindowSessionImpl::GetColorSpace()
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
@@ -568,9 +576,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
     }
-    if (reason == SizeChangeReason::DRAG_END) {
-        property_->SetRequestRect(wmRect);
-    }
+    property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
         ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
@@ -724,7 +730,7 @@ void WindowSessionImpl::UpdateDensity()
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
 {
-    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "\
+    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "
         "new {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}",
         useUniqueDensity_, virtualPixelRatio_, useUniqueDensity, virtualPixelRatio);
     bool oldUseUniqueDensity = useUniqueDensity_;
@@ -2676,8 +2682,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2685,6 +2689,8 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -2703,8 +2709,6 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
 
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2712,6 +2716,8 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -3422,7 +3428,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
                 (windowSystemConfig_.IsPhoneWindow() ||
                  (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
             }

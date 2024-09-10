@@ -149,6 +149,41 @@ HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | Sma
     ASSERT_EQ(windowManagerAgent, nullptr);
     ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
+
+/**
+ * @tc.name: CheckLastFocusedAppSessionFocus
+ * @tc.desc: CheckLastFocusedAppSessionFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    SessionInfo info1;
+    info1.abilityName_ = "focusedSession";
+    info1.bundleName_ = "focusedSession";
+    info1.windowType_ = 1;
+    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(focusedSession, nullptr);
+    
+    SessionInfo info2;
+    info2.abilityName_ = "nextSession";
+    info2.bundleName_ = "nextSession";
+    info2.windowType_ = 1;
+    sptr<SceneSession> nextSession = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(nextSession, nullptr);
+    
+    ssm_->lastFocusedAppSessionId_ = nextSession->GetPersistentId();
+    ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
+
+    ssm_->lastFocusedAppSessionId_ = 124;
+    focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
+
+    nextSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession);
+    ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
+}
 }  // namespace
 }
 }
