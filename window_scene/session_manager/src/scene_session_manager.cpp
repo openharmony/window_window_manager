@@ -8565,7 +8565,7 @@ bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     return true;
 }
 
-void SceneSessionManager::AddWindowDragHotArea(uint64_t dispalyId, uint32_t type, WSRect& area)
+void SceneSessionManager::AddWindowDragHotArea(uint64_t displayId, uint32_t type, WSRect& area)
 {
     WLOGFI("displayId: %{public}" PRIu64 "type: %{public}d, posX: %{public}d, posY: %{public}d, width: %{public}d, "
         "height: %{public}d", displayId, type, area.posX_, area.posY_, area.width_, area.height_);

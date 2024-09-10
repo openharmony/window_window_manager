@@ -409,8 +409,8 @@ void JsSceneSession::OnWindowDragHotArea(uint64_t displayId, uint32_t type, cons
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value jsHotAreaDisplayId = CreateJsValue(env, static_cast<int64_t>displayId);
-        if (jsHotAreaType == nullptr) {
+        napi_value jsHotAreaDisplayId = CreateJsValue(env, static_cast<int64_t>(displayId));
+        if (jsHotAreaDisplayId == nullptr) {
             WLOGFE("[NAPI]jsHotAreaDisplayId is nullptr");
             return;
         }
@@ -2188,7 +2188,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect,
     }
     WLOGFD("[NAPI]OnSessionRectChange");
 
-    auto task = [this, persistentId = persistentId_, rect, reason, newDisplayID, env = env_] {
+    auto task = [this, persistentId = persistentId_, rect, reason, newDisplayId, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionRectChange jsSceneSession id:%{public}d has been destroyed",
                 persistentId);

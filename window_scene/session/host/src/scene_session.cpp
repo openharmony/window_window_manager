@@ -456,7 +456,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 
             auto sessionProperty = session->GetSessionProperty();
             if (!sessionProperty) {
-                return WMSError::WS_ERROR_DESTROYED_OBJECT;
+                return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
             uint64_t displayId = sessionProperty->GetDisplayId();
             session->moveDragController_->InitMoveDragProperty();
@@ -2136,21 +2136,21 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
     WSRect globalRect = moveDragController_->GetTargetRect(true);
+    auto movedSurfaceNode = GetLeashWinSurfaceNode();
+    if (!movedSurfaceNode) {
+        movedSurfaceNode = surfaceNode_;
+    }
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc,
         isSupportDragInPcCompatibleMode);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
-        auto currentOverlapDisplaySet = moveDragController_->GetCurrentOverlapDisplaySet();
-        for (const auto displayId : currentOverlapDisplaySet) {
+        auto newAddedDisplaySet = moveDragController_->GetNewAddedDisplaySet();
+        for (const auto displayId : newAddedDisplaySet) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().
                 GetScreenSessionById(displayId);
             auto rsDisplayNodeAdded = screenSession->GetDisplayNode();
-            auto movedSurfaceNode = GetLeashWinSurfaceNode();
-            if (!movedSurfaceNode) {
-                movedSurfaceNode = surfaceNode_;
-            }
-            movedSurfaceNode->SetPositionZ(100.0); // set standard hierarchy
+            movedSurfaceNode->SetPositionZ(100.5); // set standard hierarchy
             rsDisplayNodeAdded->AddCrossParentChild(movedSurfaceNode, -1);
         }
     }
@@ -2174,18 +2174,11 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
-        auto movedSurfaceNode = GetLeashWinSurfaceNode();
-        if (!movedSurfaceNode) {
-            movedSurfaceNode = surfaceNode_;
-        }
-        for (const auto displayId : moveDragController_->addedDisplaySet) {
-            if (displayId != moveDragController_->moveDragEndDisplayId_ &&
-                displayId != moveDragController_->moveDragStartDisplayId_) {
-                auto screenSession = ScreenSessionManagerClient::GetInstance().
-                    GetScreenSessionById(displayId);
-                auto rsDisplayNodeRemoved = screenSession->GetDisplayNode();
-                rsDisplayNodeRemoved->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->parentId_);
-            }
+        for (const auto displayId : moveDragController_->addedDisplaySet_) {
+            auto screenSession = ScreenSessionManagerClient::GetInstance().
+                GetScreenSessionById(displayId);
+            auto rsDisplayNodeRemoved = screenSession->GetDisplayNode();
+            rsDisplayNodeRemoved->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->parentId_);
         }
         if (moveDragController_->moveDragEndDisplayId_ == moveDragController_->moveDragStartDisplayId_) {
             NotifySessionRectChange(rect, reason);

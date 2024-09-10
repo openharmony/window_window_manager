@@ -72,8 +72,8 @@ public:
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
     static bool IsOverlap(const WSRect& rect1, const WSRect& rect2);
-    std::set<uint64_t> GetCurrentOverlapDisplaySet();
-    std::set<uint64_t> addedDisplayIdSet = {};
+    std::set<uint64_t> GetNewAddedDisplaySet();
+    std::set<uint64_t> addedDisplaySet_ = {};
     uint64_t moveDragStartDisplayId_ = -1ULL;
     uint64_t moveDragEndDisplayId_ = -1ULL;
     uint64_t parentId_ = -1ULL;
