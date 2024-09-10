@@ -49,10 +49,10 @@ public:
     bool GetStartMoveFlag() const;
     void SetStartDragFlag(bool flag);
     bool GetStartDragFlag() const;
-    uint64_t MoveDragController::GetMoveDragStartDisplayId() const;
-    uint64_t MoveDragController::GetMoveDragEndDisplayId() const;
-    std::set<uint64_t> MoveDragController::GetAddedDisplaySet();
-    uint64_t MoveDragController::GetParentId() const;
+    uint64_t GetMoveDragStartDisplayId() const;
+    uint64_t GetMoveDragEndDisplayId() const;
+    std::set<uint64_t> GetAddedDisplaySet();
+    uint64_t GetParentId() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
