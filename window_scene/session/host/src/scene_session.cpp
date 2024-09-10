@@ -711,7 +711,7 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
     auto task = [weakThis = wptr(this), rsTransaction]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE("session is null");
+            WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
