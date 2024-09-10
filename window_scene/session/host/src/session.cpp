@@ -604,7 +604,7 @@ bool Session::GetRectChangeBySystem() const
 
 void Session::SetRectChangeBySystem(bool rectChangeBySystem)
 {
-    if (rectChangeBySystem_ != rectChangeBySystem) {
+    if (rectChangeBySystem_.load() != rectChangeBySystem) {
         rectChangeBySystem_.store(rectChangeBySystem);
         TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rectChangeBySystem_:%{public}d", GetPersistentId(),
             rectChangeBySystem);
