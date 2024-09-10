@@ -517,6 +517,9 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);
         RestoreCallingSession();
 
+        MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
+        NotifySessionRectChange(GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
+
         sessionProperty->SetCallingSessionId(callingSessionId);
         WSRect panelRect = { 0, 0, 0, 0 };
         panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();

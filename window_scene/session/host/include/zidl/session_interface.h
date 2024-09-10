@@ -94,8 +94,10 @@ public:
      */
     virtual WSError UpdateSessionRect(
         const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
+    virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
+    virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
 
@@ -206,6 +208,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetStartMoveFlag(bool& isMoving) { return WSError::WS_OK; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
 
@@ -231,6 +234,7 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
 };
 } // namespace OHOS::Rosen
 

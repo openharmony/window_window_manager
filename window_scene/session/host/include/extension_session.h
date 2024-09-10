@@ -58,6 +58,8 @@ using NotifySyncOnFunc = std::function<void()>;
 using NotifyAsyncOnFunc = std::function<void()>;
 using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
 using NotifyBindModalFunc = std::function<void()>;
+using NotifyExtensionEventFunc = std::function<void(uint32_t notifyEvent)>;
+
 class ExtensionSession : public Session {
 public:
     struct ExtensionSessionEventCallback : public RefBase {
@@ -68,6 +70,7 @@ public:
         NotifyAsyncOnFunc notifyAsyncOnFunc_;
         NotifyGetAvoidAreaByTypeFunc notifyGetAvoidAreaByTypeFunc_;
         NotifyBindModalFunc notifyBindModalFunc_;
+        NotifyExtensionEventFunc notifyExtensionEventFunc_;
     };
 
     explicit ExtensionSession(const SessionInfo& info);
@@ -108,6 +111,7 @@ public:
     WSError TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent = false);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
     WSError Background(bool isFromClient = false) override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 private:

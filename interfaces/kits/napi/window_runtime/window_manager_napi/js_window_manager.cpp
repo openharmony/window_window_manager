@@ -908,8 +908,10 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         WLOGD("Get top window success");
     };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
-        env, CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
+    auto asyncTask = CreateAsyncTask(env, callback,
+        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow", env, std::move(asyncTask));
     return result;
 }
 
