@@ -36,7 +36,7 @@ ohos_shared_library("screen_session_manager_client") {
     debug = false
   }
   sources = [
-    "../session_manager/src/zidl/screen_session_manager_proxy.cpp",
+    "../screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/screen_session_manager_client.cpp",
     "src/zidl/screen_session_manager_client_stub.cpp",
   ]
