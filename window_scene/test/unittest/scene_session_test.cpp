@@ -761,12 +761,13 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     WSRect overlapRect = { 0, 0, 0, 0 };
-    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION);
-
-    scensession->sessionRectChangeFunc_ = [](const WSRect& rect, const SizeChangeReason& reason) {
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
+    scensession->sessionRectChangeFunc_ = [](const WSRect& rect, const SizeChangeReason& reason, DisplayId newDisplayId) {
         return;
     };
-    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION);
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
 }
 
 /**
