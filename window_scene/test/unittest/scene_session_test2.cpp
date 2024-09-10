@@ -1128,7 +1128,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     WSRect rectResult = scensession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [scensession](int32_t type, const SizeChangeReason& reason) {
+    auto dragHotAreaFunc = [scensession](DisplayId newDisplayId, int32_t type, const SizeChangeReason& reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1918,9 +1918,9 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     WSRect rect = {0, 0, 10, 10};
-    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
-    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
-    auto type = sceneSession->GetWindowDragHotAreaType(1, 2, 2);
+    sceneSession->AddOrUpdateWindowDragHotArea(0, 1, rect);
+    sceneSession->AddOrUpdateWindowDragHotArea(0, 1, rect);
+    auto type = sceneSession->GetWindowDragHotAreaType(0, 1, 2, 2);
     ASSERT_EQ(type, 1);
 }
 

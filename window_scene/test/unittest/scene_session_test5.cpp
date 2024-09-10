@@ -426,7 +426,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason, DisplayId newDisplayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);

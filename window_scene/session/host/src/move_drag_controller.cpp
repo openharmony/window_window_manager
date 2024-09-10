@@ -60,6 +60,14 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
     }
 }
 
+std::pair<int32_t, int32_t> MoveDragController::GetDisplayOffsetById(uint64 displayId) const
+{
+    ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
+        GetScreenSessionById(displayId)->GetScreenProperty();
+    std::pair<int32_t, int32_t> displayOffset = std::make_pair(screenProperty.GetStartX(), screenProperty.GetStartY());
+    return displayOffset;
+}
+
 bool MoveDragController::HasPointDown()
 {
     return hasPointDown_;
@@ -364,6 +372,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
+    std::pair<int32_t, int32_t> displayOffset = GetDisplayOffsetById(1);
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
     int32_t currentDisplayOffsetX = screenProperty.GetStartX();
