@@ -438,6 +438,7 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
 {
     WindowManagerLite lite;
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    ASSERT_NE(lite.pImpl_, nullptr);
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
     focusChangeInfo = new FocusChangeInfo();

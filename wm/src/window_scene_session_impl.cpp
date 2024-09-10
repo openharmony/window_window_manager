@@ -191,7 +191,7 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(iSessionStage));
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     auto persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
@@ -307,8 +307,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     property_->SetWindowState(state_);
 
     sptr<ISessionStage> iSessionStage(this);
-    sptr<WindowEventChannel> channel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
-    sptr<IWindowEventChannel> eventChannel(channel);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<Rosen::ISession> session = nullptr;
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     if (token) {
@@ -372,7 +371,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
         GetPersistentId(), state_);
     sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> iWindowEventChannel(new WindowEventChannel(iSessionStage));
+    sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
     sptr<Rosen::ISession> session = nullptr;
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
@@ -948,7 +947,14 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
-        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE, nullptr, info);
+        UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
+        auto hostSession = GetHostSession();
+        if (hostSession) {
+            WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+            hostSession->UpdateClientRect(wsRect);
+        } else {
+            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
+        }
     }
     state_ = WindowState::STATE_SHOWN;
     requestState_ = WindowState::STATE_SHOWN;
@@ -1283,7 +1289,7 @@ WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t 
         ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
         return ret;
     }
-    sptr<PatternDetachCallback> callback = new PatternDetachCallback();
+    sptr<PatternDetachCallback> callback = sptr<PatternDetachCallback>::MakeSptr();
     ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());
     if (ret != WMError::WM_OK) {
@@ -2249,11 +2255,6 @@ WMError WindowSceneSessionImpl::Close()
             return Destroy(true);
         }
         WindowPrepareTerminateHandler* handler = new WindowPrepareTerminateHandler();
-        if (handler == nullptr) {
-            WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
-            hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-            return WMError::WM_OK;
-        }
         PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)]() {
             auto weakSession = hostSessionWptr.promote();
             if (weakSession == nullptr) {
