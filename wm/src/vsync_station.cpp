@@ -109,6 +109,11 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         }
         hasRequestedVsync_ = true;
 
+        if (isFirstVsyncRequest_) {
+            isFirstVsyncRequest_ = false;
+            TLOGI(WmsLogTag::WMS_MAIN, "First vsync has requested, nodeId: %{public}" PRIu64, nodeId_);
+        }
+
         // post timeout task for a new vsync
         vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
         auto task = [weakThis = std::weak_ptr<VsyncStation>(shared_from_this())] {
@@ -157,6 +162,10 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
         vsyncCallbacks = std::move(vsyncCallbacks_);
         vsyncCallbacks_.clear();
         vsyncHandler_->RemoveTask(vsyncTimeoutTaskName_);
+        if (isFirstVsyncBack_) {
+            isFirstVsyncBack_ = false;
+            TLOGI(WmsLogTag::WMS_MAIN, "First vsync has come back, nodeId: %{public}" PRIu64, nodeId_);
+        }
     }
     for (const auto& callback: vsyncCallbacks) {
         if (callback && callback->onCallback) {
