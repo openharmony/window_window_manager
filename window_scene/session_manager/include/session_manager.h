@@ -27,11 +27,11 @@
 namespace OHOS::Rosen {
 class SSMDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+    void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 class FoundationDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+    void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
 class SessionManager {

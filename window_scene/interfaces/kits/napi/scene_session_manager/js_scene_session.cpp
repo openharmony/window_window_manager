@@ -516,13 +516,7 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    OnKeyboardGravityChange(session->GetKeyboardGravity());
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onKeyboardGravityChange_ = [weakThis = wptr(this)](SessionGravity gravity) {
+    NotifyKeyboardGravityChangeFunc func = [weakThis = wptr(this)](SessionGravity gravity) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession is null");
@@ -530,6 +524,7 @@ void JsSceneSession::ProcessKeyboardGravityChangeRegister()
         }
         jsSceneSession->OnKeyboardGravityChange(gravity);
     };
+    session->SetKeyboardGravityChangeCallback(func);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success");
 }
 
@@ -1448,7 +1443,12 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
-    static_cast<JsSceneSession*>(data)->DecStrongRef(nullptr);
+    auto jsSceneSession = static_cast<JsSceneSession*>(data);
+    if (jsSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
+        return;
+    }
+    jsSceneSession->DecStrongRef(nullptr);
 }
 
 napi_value JsSceneSession::RegisterCallback(napi_env env, napi_callback_info info)
