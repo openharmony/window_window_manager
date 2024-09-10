@@ -345,12 +345,6 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     if (!CheckDragEventLegal(pointerEvent, property)) {
         return false;
     }
-    int32_t pointerId = pointerEvent->GetPointerId();
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        WLOGE("Get PointerItem failed");
-        return false;
-    }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     switch (pointerEvent->GetPointerAction()) {
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
@@ -380,13 +374,22 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
-
+    UpdateTargetRect(pointerEvent);
     ProcessSessionRectChange(reason);
     return true;
 }
 
-std::pair<int32_t, int32_t> MoveDragController::GetTranXY()
+void MoveDragController::UpdateTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!CheckDragEventLegal(pointerEvent, property)) {
+        return;
+    }
+    int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+        WLOGE("Get PointerItem failed");
+        return;
+    }
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
     int32_t currentDisplayOffsetX = screenProperty.GetStartX();

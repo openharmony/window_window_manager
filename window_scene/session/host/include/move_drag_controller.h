@@ -136,8 +136,7 @@ private:
         const sptr<WindowSessionProperty> property);
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
-
-    std::pair<int32_t, int32_t> CalcUnifiedOffset(uint64 displayId) const;
+    void UpdateTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
