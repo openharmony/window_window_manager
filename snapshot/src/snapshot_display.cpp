@@ -35,15 +35,15 @@ static const std::string DEVELOPER_MODE_STATE_ON_DEFAULT = "false";
 static const std::string DEVELOPER_MODE_PARAMETER = "const.security.developermode.state";
 static const std::string IS_DEVELOPER_MODE = GetParameter(DEVELOPER_MODE_PARAMETER, DEVELOPER_MODE_STATE_ON_DEFAULT);
 
-static bool GetScreenshotByCmdArguments(CmdArguments& cmdArguments, sptr<Display> display,
+static bool GetScreenshotByCmdArgments(CmdArgments& cmdArgments, sptr<Display> display,
     std::shared_ptr<OHOS::Media::PixelMap>& pixelMap);
 
 int main(int argc, char *argv[])
 {
-    CmdArguments cmdArguments;
-    cmdArguments.fileName = "";
+    CmdArgments cmdArgments;
+    cmdArgments.fileName = "";
 
-    if (!SnapShotUtils::ProcessArgs(argc, argv, cmdArguments)) {
+    if (!SnapShotUtils::ProcessArgs(argc, argv, cmdArgments)) {
         _exit(-1);
     }
 
@@ -52,67 +52,60 @@ int main(int argc, char *argv[])
         _exit(-1);
     }
 
-    auto display = DisplayManager::GetInstance().GetDisplayById(cmdArguments.displayId);
+    auto display = DisplayManager::GetInstance().GetDisplayById(cmdArgments.displayId);
     if (display == nullptr) {
-        std::cout << "error: GetDisplayById " << cmdArguments.displayId << " error!" << std::endl;
+        std::cout << "error: GetDisplayById " << cmdArgments.displayId << " error!" << std::endl;
         _exit(-1);
     }
-    if (cmdArguments.fileType != "png") {
-        cmdArguments.fileType = "jpeg";
-    }
 
-    std::cout << "process: display " << cmdArguments.displayId << ", file type: " << cmdArguments.fileType <<
-        ", width: " << display->GetWidth() << ", height: " << display->GetHeight() << std::endl;
+    std::cout << "process: display " << cmdArgments.displayId <<
+        ": width " << display->GetWidth() << ", height " << display->GetHeight() << std::endl;
 
     // get PixelMap from DisplayManager API
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
-    if (!GetScreenshotByCmdArguments(cmdArguments, display, pixelMap)) {
+    if (!GetScreenshotByCmdArgments(cmdArgments, display, pixelMap)) {
         _exit(-1);
     }
 
     bool ret = false;
     if (pixelMap != nullptr) {
-        if (cmdArguments.fileType == "png") {
-            ret = SnapShotUtils::SaveSnapShot(cmdArguments.fileName, *pixelMap, cmdArguments.fileType);
-        } else {
-            ret = SnapShotUtils::WriteToJpegWithPixelMap(cmdArguments.fileName, *pixelMap);
-        }
+        ret = SnapShotUtils::WriteToJpegWithPixelMap(cmdArgments.fileName, *pixelMap);
     }
     if (!ret) {
-        std::cout << "\nerror: snapshot display " << cmdArguments.displayId <<
-            ", write to " << cmdArguments.fileName << " as jpeg failed!" << std::endl;
+        std::cout << "\nerror: snapshot display " << cmdArgments.displayId <<
+            ", write to " << cmdArgments.fileName << " as jpeg failed!" << std::endl;
         _exit(-1);
     }
 
-    std::cout << "\nsuccess: snapshot display " << cmdArguments.displayId << " , write to " <<
-        cmdArguments.fileName << " as " << cmdArguments.fileType << ", width: " << pixelMap->GetWidth() <<
-        ", height: " << pixelMap->GetHeight() << std::endl;
+    std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
+        cmdArgments.fileName << " as jpeg, width " << pixelMap->GetWidth() <<
+        ", height " << pixelMap->GetHeight() << std::endl;
     _exit(0);
 }
 
-static bool GetScreenshotByCmdArguments(CmdArguments& cmdArguments, sptr<Display> display,
+static bool GetScreenshotByCmdArgments(CmdArgments& cmdArgments, sptr<Display> display,
     std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
 {
-    if (!cmdArguments.isWidthSet && !cmdArguments.isHeightSet) {
-        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArguments.displayId);  // default width & height
+    if (!cmdArgments.isWidthSet && !cmdArgments.isHeightSet) {
+        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId); // default width & height
     } else {
-        if (!cmdArguments.isWidthSet) {
-            cmdArguments.width = display->GetWidth();
-            std::cout << "process: reset to display's width " << cmdArguments.width << std::endl;
+        if (!cmdArgments.isWidthSet) {
+            cmdArgments.width = display->GetWidth();
+            std::cout << "process: reset to display's width " << cmdArgments.width << std::endl;
         }
-        if (!cmdArguments.isHeightSet) {
-            cmdArguments.height = display->GetHeight();
-            std::cout << "process: reset to display's height " << cmdArguments.height << std::endl;
+        if (!cmdArgments.isHeightSet) {
+            cmdArgments.height = display->GetHeight();
+            std::cout << "process: reset to display's height " << cmdArgments.height << std::endl;
         }
-        if (!SnapShotUtils::CheckWidthAndHeightValid(cmdArguments.width, cmdArguments.height)) {
-            std::cout << "error: width " << cmdArguments.width << " height " <<
-            cmdArguments.height << " invalid!" << std::endl;
+        if (!SnapShotUtils::CheckWidthAndHeightValid(cmdArgments.width, cmdArgments.height)) {
+            std::cout << "error: width " << cmdArgments.width << " height " <<
+            cmdArgments.height << " invalid!" << std::endl;
             return false;
         }
         const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
-        const Media::Size size = {cmdArguments.width, cmdArguments.height};
+        const Media::Size size = {cmdArgments.width, cmdArgments.height};
         constexpr int rotation = 0;
-        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArguments.displayId, rect, size, rotation);
+        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId, rect, size, rotation);
     }
     return true;
 }
