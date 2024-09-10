@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/single_display_fold_policy.h"
+#include "screen_session_manager/include/fold_screen_controller/single_display_fold_policy.h"
 
 using namespace testing;
 using namespace testing::ext;
