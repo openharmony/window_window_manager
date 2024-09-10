@@ -77,7 +77,7 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
 
-    void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
+    void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
@@ -93,7 +93,7 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name) override;
+        ScreenId rsId, const std::string& name, bool isExtend) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -101,6 +101,7 @@ private:
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
+    void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
 

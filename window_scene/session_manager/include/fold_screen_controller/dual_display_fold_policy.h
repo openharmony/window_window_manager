@@ -47,9 +47,6 @@ private:
     FoldDisplayMode GetModeMatchStatus();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
-    void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
-        ScreenPropertyChangeReason reason);
-    std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen

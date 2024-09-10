@@ -53,6 +53,7 @@ ohos_shared_library("screen_session_manager_client") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
@@ -62,4 +63,9 @@ ohos_shared_library("screen_session_manager_client") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }

@@ -288,6 +288,10 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
 void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen,
     DisplayStateChangeType type)
 {
+    if (absScreen == nullptr) {
+        WLOGFE("absScreen is nullptr");
+        return;
+    }
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplayByAbsScreen(absScreen);
     if (abstractDisplay == nullptr) {
         return;

@@ -39,7 +39,8 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
-    
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
 private:
     WindowManagerAgentController() {}
     virtual ~WindowManagerAgentController() = default;

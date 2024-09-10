@@ -49,6 +49,7 @@ public:
     void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -68,6 +69,8 @@ public:
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener_;
     std::vector<sptr<IWindowStyleChangedListener>> windowStyleListeners_;
     sptr<WindowManagerAgentLite> windowStyleListenerAgent_;
+    std::vector<sptr<IPiPStateChangedListener>> pipStateChangedListeners_;
+    sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -215,6 +218,21 @@ void WindowManagerLite::Impl::NotifyWindowStyleChange(WindowStyleType type)
         TLOGI(WmsLogTag::WMS_MAIN, "real WindowStyleChange type: %{public}d",
               static_cast<uint8_t>(type));
         listener->OnWindowStyleUpdate(type);
+    }
+}
+
+void WindowManagerLite::Impl::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    std::vector<sptr<IPiPStateChangedListener>> pipStateChangedListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        pipStateChangedListeners = pipStateChangedListeners_;
+    }
+    for (auto& listener : pipStateChangedListeners) {
+        if (listener == nullptr) {
+            continue;
+        }
+        listener->OnPiPStateChanged(bundleName, isForeground);
     }
 }
 
@@ -743,6 +761,93 @@ WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
+}
+
+WMError WindowManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "bundleName is empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().CloseTargetFloatWindow(bundleName);
+}
+
+WMError WindowManagerLite::RegisterPiPStateChangedListener(const sptr<IPiPStateChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    if (pImpl_->pipStateChangedListenerAgent_ == nullptr) {
+        pImpl_->pipStateChangedListenerAgent_ = new WindowManagerAgentLite();
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PIP, pImpl_->pipStateChangedListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_PIP, "RegisterWindowManagerAgent failed!");
+        pImpl_->pipStateChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->pipStateChangedListeners_.begin(),
+            pImpl_->pipStateChangedListeners_.end(), listener);
+        if (iter != pImpl_->pipStateChangedListeners_.end()) {
+            TLOGW(WmsLogTag::WMS_PIP, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->pipStateChangedListeners_.push_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterPiPStateChangedListener(const sptr<IPiPStateChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->pipStateChangedListeners_.begin(),
+        pImpl_->pipStateChangedListeners_.end(), listener);
+    if (iter == pImpl_->pipStateChangedListeners_.end()) {
+        TLOGE(WmsLogTag::WMS_PIP, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->pipStateChangedListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->pipStateChangedListeners_.empty() &&
+        pImpl_->pipStateChangedListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PIP,
+            pImpl_->pipStateChangedListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->pipStateChangedListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_PIP, "bundleName is empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_PIP, "bundleName:%{public}s", bundleName.c_str());
+    return SingletonContainer::Get<WindowAdapterLite>().CloseTargetPiPWindow(bundleName);
+}
+
+WMError WindowManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    return SingletonContainer::Get<WindowAdapterLite>().GetCurrentPiPWindowInfo(bundleName);
+}
+
+void WindowManagerLite::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) const
+{
+    pImpl_->UpdatePiPWindowStateChanged(bundleName, isForeground);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -36,9 +36,6 @@ struct AbilityInfo;
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
-const std::string UI_TYPE_PHONE = "phone";
-const std::string UI_TYPE_PC = "pc";
-const std::string UI_TYPE_PAD = "pad";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -294,6 +291,14 @@ enum class SceneType : uint8_t {
     INPUT_SCENE,
 };
 
+struct SessionViewportConfig {
+    bool isDensityFollowHost_ = false;
+    float density_ = 1.0f; // Indicates the host's density, if following the host, use it, otherwise get it from DMS.
+    uint64_t displayId_ = 0;
+    int32_t orientation_ = 0;
+    uint32_t transform_ = 0;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -351,6 +356,8 @@ struct SessionInfo {
     int32_t realParentId_ = INVALID_SESSION_ID;
     uint32_t uiExtensionUsage_ = 0;
     bool isAsyncModalBinding_ = false;
+    uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
+    SessionViewportConfig config_;
 };
 
 enum class SessionFlag : uint32_t {
@@ -476,7 +483,7 @@ struct WSRectT {
 
     inline bool IsInvalid() const
     {
-        return IsEmpty() || NearZero(width_) || NearZero(height_);
+        return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
     inline std::string ToString() const
@@ -562,7 +569,6 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
-    std::string uiType_ = UI_TYPE_PHONE;
     std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
@@ -643,6 +649,7 @@ struct SessionUIParam {
     float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {

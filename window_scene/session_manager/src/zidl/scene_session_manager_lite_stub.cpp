@@ -62,6 +62,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnRegisterSessionListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFOS):
             return HandleGetSessionInfos(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID):
+            return HandleGetMainWindowStatesByPid(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID):
             return HandleGetSessionInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID):
@@ -112,6 +114,12 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
             return HandleTerminateSessionByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW):
+            return HandleCloseTargetFloatWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_PIP_WINDOW):
+            return HandleCloseTargetPiPWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO):
+            return HandleGetCurrentPiPWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -120,9 +128,13 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
 
 int SceneSessionManagerLiteStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleSetSessionLabel!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    std::string label = data.ReadString();
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGD(WmsLogTag::WMS_LIFE, "Read label failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetSessionLabel(token, label);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -199,7 +211,7 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }
     WSError errCode = UnRegisterSessionListener(listener);
@@ -218,6 +230,31 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfos(MessageParcel& data, Mess
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
             WLOGFE("GetSessionInfos error");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read pid fail");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<MainWindowState> windowStates;
+    WSError errCode = GetMainWindowStatesByPid(pid, windowStates);
+    if (!reply.WriteInt32(windowStates.size())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write windowStates size fail");
+        return ERR_INVALID_DATA;
+    }
+    for (auto& state : windowStates) {
+        if (!reply.WriteParcelable(&state)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write windowState fail");
             return ERR_INVALID_DATA;
         }
     }
@@ -266,14 +303,22 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(Message
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleTerminateSessionNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return ERR_INVALID_DATA;
     }
-    bool needStartCaller = data.ReadBool();
-    bool isFromBroker = data.ReadBool();
+    bool needStartCaller = false;
+    if (!data.ReadBool(needStartCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needStartCaller failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isFromBroker = false;
+    if (!data.ReadBool(isFromBroker)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromBroker failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -580,6 +625,36 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessagePar
     int32_t persistentId = data.ReadInt32();
     WMError errCode = TerminateSessionByPersistentId(persistentId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName = data.ReadString();
+    CloseTargetFloatWindow(bundleName);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCloseTargetPiPWindow(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName = data.ReadString();
+    WMError errCode = CloseTargetPiPWindow(bundleName);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    WMError errCode = GetCurrentPiPWindowInfo(bundleName);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteString(bundleName)) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

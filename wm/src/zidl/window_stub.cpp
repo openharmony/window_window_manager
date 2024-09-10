@@ -40,10 +40,31 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
     WindowMessage msgId = static_cast<WindowMessage>(code);
     switch (msgId) {
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT: {
-            struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-            bool decoStatus = data.ReadBool();
-            WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
-            bool hasRSTransaction = data.ReadBool();
+            int32_t posX = 0;
+            int32_t posY = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
+                return ERR_INVALID_DATA;
+            }
+            Rect rect { posX, posY, width, height };
+            bool decoStatus = false;
+            if (!data.ReadBool(decoStatus)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read decoStatus failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t changeReason = 0;
+            if (!data.ReadUint32(changeReason)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
+                return ERR_INVALID_DATA;
+            }
+            WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(changeReason);
+            bool hasRSTransaction = false;
+            if (!data.ReadBool(hasRSTransaction)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read hasRSTransaction failed");
+                return ERR_INVALID_DATA;
+            }
             if (hasRSTransaction) {
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
                 if (!rsTransaction) {
@@ -58,12 +79,21 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE: {
-            WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
+            uint32_t windowMode = 0;
+            if (!data.ReadUint32(windowMode)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read windowMode failed");
+                return ERR_INVALID_DATA;
+            }
+            WindowMode mode = static_cast<WindowMode>(windowMode);
             UpdateWindowMode(mode);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO: {
-            uint32_t modeSupportInfo = data.ReadUint32();
+            uint32_t modeSupportInfo = 0;
+            if (!data.ReadUint32(modeSupportInfo)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read modeSupportInfo failed");
+                return ERR_INVALID_DATA;
+            }
             UpdateWindowModeSupportInfo(modeSupportInfo);
             break;
         }
@@ -85,19 +115,31 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE: {
-            UpdateWindowState(static_cast<WindowState>(data.ReadUint32()));
+            uint32_t state = 0;
+            if (!data.ReadUint32(state)) {
+                TLOGE(WmsLogTag::DEFAULT, "read state error");
+                return ERR_INVALID_DATA;
+            }
+            UpdateWindowState(static_cast<WindowState>(state));
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT: {
-            PointInfo point;
-            point.x = data.ReadInt32();
-            point.y = data.ReadInt32();
+            PointInfo point = {0, 0};
+            if (!data.ReadInt32(point.x) || !data.ReadInt32(point.y)) {
+                return ERR_INVALID_DATA;
+            }
             DragEvent event = static_cast<DragEvent>(data.ReadUint32());
             UpdateWindowDragInfo(point, event);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID: {
-            UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
+            uint64_t from = 0;
+            uint64_t to = 0;
+            if (!data.ReadUint64(from) || !data.ReadUint64(to)) {
+                TLOGE(WmsLogTag::DEFAULT, "read display id error");
+                return ERR_INVALID_DATA;
+            }
+            UpdateDisplayId(from, to);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA: {
@@ -118,21 +160,33 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             } else {
                 UpdateOccupiedAreaChangeInfo(info);
             }
-
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
             if (info == nullptr) {
-                WLOGFE("OccupiedAreaChangeInfo is null");
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "OccupiedAreaChangeInfo is null");
                 return ERR_INVALID_DATA;
             }
-            struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-            bool hasRSTransaction = data.ReadBool();
+            int32_t posX = 0;
+            int32_t posY = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            if (!data.ReadInt32(posX) || !data.ReadInt32(posY) ||
+                !data.ReadUint32(width) || !data.ReadUint32(height)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Rect value read failed.");
+                return ERR_INVALID_DATA;
+            }
+            struct Rect rect { posX, posY, width, height };
+            bool hasRSTransaction = false;
+            if (!data.ReadBool(hasRSTransaction)) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "hasRSTransaction value read failed.");
+                return ERR_INVALID_DATA;
+            }
             if (hasRSTransaction) {
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
                 if (!rsTransaction) {
-                    WLOGFE("RSTransaction unMarsh failed");
+                    TLOGE(WmsLogTag::WMS_KEYBOARD, "RSTransaction unMarsh failed");
                     return ERR_INVALID_DATA;
                 }
                 std::shared_ptr<RSTransaction> transaction(rsTransaction);
@@ -140,7 +194,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             } else {
                 UpdateOccupiedAreaAndRect(info, rect);
             }
-
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS: {
@@ -199,7 +252,12 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE: {
-            RestoreSplitWindowMode(data.ReadUint32());
+            uint32_t splitWindowMode = 0;
+            if (!data.ReadUint32(splitWindowMode)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read splitWindowMode failed");
+                return ERR_INVALID_DATA;
+            }
+            RestoreSplitWindowMode(splitWindowMode);
             break;
         }
         case WindowMessage::TRANS_ID_CONSUME_KEY_EVENT: {

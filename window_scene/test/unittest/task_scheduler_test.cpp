@@ -82,6 +82,81 @@ HWTEST_F(TaskSchedulerText, PostTask, Function | SmallTest | Level2)
     taskScheduler->PostAsyncTask(taskFunc, name, delayTime);
     EXPECT_EQ(resultValue, 0);
 }
+
+HWTEST_F(TaskSchedulerText, AddExportTask1, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::string funcName = "funcName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    pid_t taskTid = 0;
+    auto taskFunc = [&taskTid]() {
+        GTEST_LOG_(INFO) << "START_TASK";
+        taskTid = gettid();
+    };
+    ASSERT_NE(taskScheduler, nullptr);
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+    ASSERT_NE(taskScheduler->ssmTid_, 0);
+    taskScheduler->AddExportTask(funcName, taskFunc);
+    ASSERT_EQ(taskTid, gettid());
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+}
+
+
+HWTEST_F(TaskSchedulerText, AddExportTask2, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::string funcName = "funcName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    pid_t taskTid = 0;
+    auto taskFunc = [&taskTid]() {
+        GTEST_LOG_(INFO) << "START_TASK";
+        taskTid = gettid();
+    };
+    ASSERT_NE(taskScheduler, nullptr);
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+    ASSERT_NE(taskScheduler->ssmTid_, 0);
+    taskScheduler->ssmTid_ = gettid();
+    taskScheduler->AddExportTask(funcName, taskFunc);
+    ASSERT_EQ(taskTid, 0);
+    ASSERT_NE(taskScheduler->exportFuncMap_.size(), 0);
+}
+
+HWTEST_F(TaskSchedulerText, SetExportHandler, Function | SmallTest | Level2)
+{
+    std::string exportThreadName = "exportThread";
+    auto eventRunner = AppExecFwk::EventRunner::Create(exportThreadName);
+    auto eventHandler = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    taskScheduler->SetExportHandler(eventHandler);
+    ASSERT_EQ(eventHandler.get(), taskScheduler->exportHandler_.lock().get());
+}
+
+HWTEST_F(TaskSchedulerText, ExecuteExportTask, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    bool executed = false;
+    std::string funcName = "funcName";
+    auto taskFunc = [&executed]() {
+        GTEST_LOG_(INFO) << "START_TASK";
+        executed = true;
+    };
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+    taskScheduler->ExecuteExportTask();
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+    ASSERT_EQ(executed, false);
+    taskScheduler->exportFuncMap_["taskFunc"] = taskFunc;
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 1);
+    taskScheduler->ExecuteExportTask();
+
+    std::string exportThreadName = "exportThread";
+    auto eventRunner = AppExecFwk::EventRunner::Create(exportThreadName);
+    auto eventHandler = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
+    taskScheduler->SetExportHandler(eventHandler);
+    taskScheduler->ExecuteExportTask();
+    ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

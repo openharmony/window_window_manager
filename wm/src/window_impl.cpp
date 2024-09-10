@@ -97,11 +97,7 @@ int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    property_ = new (std::nothrow) WindowProperty();
-    if (property_ == nullptr) {
-        WLOGFE("Property is null");
-        return;
-    }
+    property_ = sptr<WindowProperty>::MakeSptr();
     InitWindowProperty(option);
 
     windowTag_ = option->GetWindowTag();
@@ -114,14 +110,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    std::string surfaceNodeName;
-    if (auto bundleName = option->GetBundleName(); bundleName != "") {
-        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
-    } else {
-        surfaceNodeName = property_->GetWindowName();
-    }
-    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
-    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -179,8 +168,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             break;
     }
 
-    auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
-    if (isPhone && WindowHelper::IsWindowFollowParent(type)) {
+    if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
     return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
@@ -1160,7 +1148,7 @@ void WindowImpl::UpdateTitleButtonVisibility()
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
-    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
 }
 
 bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
@@ -1487,9 +1475,8 @@ void WindowImpl::DestroySubWindow()
 
 void WindowImpl::ClearVsyncStation()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (vsyncStation_ != nullptr) {
-        vsyncStation_.reset();
+        vsyncStation_->Destroy();
     }
 }
 
@@ -1726,7 +1713,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
@@ -3272,21 +3259,14 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 
 void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (state_ == WindowState::STATE_DESTROYED) {
-        WLOGFE("[WM] Receive Vsync Request failed, window is destroyed");
-        return;
-    }
-
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         vsyncStation_->RequestVsync(vsyncCallback);
     }
 }
 
 int64_t WindowImpl::GetVSyncPeriod()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!SingletonContainer::IsDestroyed() && vsyncStation_ != nullptr) {
+    if (vsyncStation_ != nullptr) {
         return vsyncStation_->GetVSyncPeriod();
     }
     return 0;

@@ -147,8 +147,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
-    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
-    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, session));
 }
 
 /**
@@ -1086,6 +1085,145 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
 }
 
 /**
+ * @tc.name: UpdateSessionViewportConfig1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetDisplayId(0);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+
+    SessionViewportConfig config;
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.isDensityFollowHost_ = true;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 2.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 1;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+
+    config.isDensityFollowHost_ = false;
+    window_->lastDensity_ = 0.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig2
+ * @tc.desc: invalid density
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionViewportConfig config;
+    config.isDensityFollowHost_ = true;
+    config.density_ = -1.0f;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig3
+ * @tc.desc: handler_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    SessionViewportConfig config;
+    window_->handler_ = nullptr;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig1
+ * @tc.desc: handler_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->handler_ = nullptr;
+    window_->UpdateSystemViewportConfig();
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig2
+ * @tc.desc: Follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->isDensityFollowHost_ = true;
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: UpdateSystemViewportConfig3
+ * @tc.desc: Do not follow host
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->isDensityFollowHost_ = false;
+    window_->property_->SetDisplayId(0);
+    window_->UpdateSystemViewportConfig();
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange1
+ * @tc.desc: Normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    window_->context_ = abilityContext;
+    SessionViewportConfig config;
+    window_->NotifyDisplayInfoChange(config);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange2
+ * @tc.desc: context_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->context_ = nullptr;
+    SessionViewportConfig config;
+    window_->NotifyDisplayInfoChange(config);
+}
+
+/**
  * @tc.name: NotifyAccessibilityChildTreeRegister01
  * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
@@ -1274,10 +1412,6 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
     ASSERT_NE(mockHostSession, nullptr);
     window_->hostSession_ = mockHostSession;
 
-    window_->property_->SetDisplayId(DISPLAY_ID_INVALID);
-    EXPECT_CALL(*mockHostSession, Foreground).Times(0).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Show());
-
     window_->property_->SetDisplayId(0);
     EXPECT_CALL(*mockHostSession, Foreground).Times(1).WillOnce(Return(WSError::WS_DO_NOTHING));
     ASSERT_EQ(static_cast<WMError>(WSError::WS_DO_NOTHING), window_->Show());
@@ -1344,7 +1478,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _));
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
 }
@@ -1371,7 +1505,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _));
 
     window_->isDensityFollowHost_ = true;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -1393,7 +1527,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _)).Times(0);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
 }
@@ -1432,7 +1566,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _)).Times(0);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
 
     window_->hostDensityValue_ = densityValue;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -1793,6 +1927,20 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
 }
 
 /**
+ * @tc.name: SwitchFreeMultiWindow
+ * @tc.desc: SwitchFreeMultiWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, window_);
+    auto ret = window_->SwitchFreeMultiWindow(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    ret = window_->SwitchFreeMultiWindow(false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetFreeMultiWindowModeEnabledState
  * @tc.desc: GetFreeMultiWindowModeEnabledState Test
  * @tc.type: FUNC
@@ -1832,6 +1980,112 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
+}
+
+/**
+ * @tc.name: GetParentWindowType
+ * @tc.desc: GetParentWindowType Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetParentWindowType, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->SetParentWindowType(WindowType::WINDOW_TYPE_TOAST);
+    EXPECT_EQ(window_->GetParentWindowType(), WindowType::WINDOW_TYPE_TOAST);
+}
+
+/**
+ * @tc.name: CheckHideNonSecureWindowsPermission
+ * @tc.desc: CheckHideNonSecureWindowsPermission Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_OK);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->modalUIExtensionMayBeCovered_ = true;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: NotifyModalUIExtensionMayBeCovered
+ * @tc.desc: NotifyModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(window_->property_, nullptr);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::EMBEDDED;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = true;
+    window_->NotifyModalUIExtensionMayBeCovered(true);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: ReportModalUIExtensionMayBeCovered
+ * @tc.desc: ReportModalUIExtensionMayBeCovered Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_, nullptr);
+    window_->ReportModalUIExtensionMayBeCovered(true);
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: NotifyExtensionEventAsync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_->property_);
+    window_->NotifyExtensionEventAsync(0);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+    window_->NotifyExtensionEventAsync(0);
+}
+
+/**
+ * @tc.name: NotifyDumpInfo
+ * @tc.desc: NotifyDumpInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    auto ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    window_->uiContent_ = nullptr;
+    ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 }
 } // namespace Rosen

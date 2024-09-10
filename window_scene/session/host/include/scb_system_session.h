@@ -39,6 +39,8 @@ public:
     sptr<SceneSession> GetKeyboardSession() const override;
     void SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func);
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    void SyncScenePanelGlobalPosition(bool needSync) override;
+    bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode();
 
     bool IsVisibleForeground() const override;
@@ -49,6 +51,7 @@ protected:
 
 private:
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
+    bool isNeedSyncGlobalPos_ = true; // can only accessed in main thread
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H

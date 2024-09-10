@@ -22,6 +22,7 @@
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "mock_message_parcel.h"
 
 
 using namespace testing;
@@ -126,6 +127,19 @@ HWTEST_F(SessionStageProxyTest, UpdateOrientation, Function | SmallTest | Level1
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->UpdateOrientation();
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig
+ * @tc.desc: test function : UpdateSessionViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateSessionViewportConfig, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    SessionViewportConfig config;
+    WSError res = sessionStage_->UpdateSessionViewportConfig(config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -554,6 +568,32 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, Function | SmallTest
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     sessionStage_->SetUniqueVirtualPixelRatio(true, 0.1f);
+}
+
+/**
+ * @tc.name: NotifyDumpInfo
+ * @tc.desc: test function : NotifyDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    auto res = sessionStage_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_OK, res);
+
+    MockMessageParcel::SetReadStringVectorErrorFlag(true);
+    res = sessionStage_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    sptr<SessionStageProxy> sessionStage = new SessionStageProxy(nullptr);
+    res = sessionStage_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 }
 }

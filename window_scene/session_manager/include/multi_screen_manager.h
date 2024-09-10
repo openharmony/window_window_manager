@@ -35,6 +35,10 @@ public:
     DMError MirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds,
         ScreenId& screenGroupId);
 
+    void MultiScreenModeChange(sptr<ScreenSession> mainSession, sptr<ScreenSession> secondarySession,
+        const std::string& operateType);
+
+    void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
 private:
     MultiScreenManager();
     ~MultiScreenManager();
@@ -48,6 +52,28 @@ private:
     DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds);
 
     DMError PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
+
+    /* pc multi screen switch */
+    void DoFirstExtendChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
+        const std::string& operateType);
+
+    void DoFirstMainChangeExtend(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+        sptr<ScreenSession> secondarySession);
+
+    void DoFirstMainChangeMirror(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+        sptr<ScreenSession> secondarySession);
+
+    void DoFirstMirrorChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
+        const std::string& operateType);
+    void DoFirstMirrorChangeExtend(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+        sptr<ScreenSession> secondarySession);
+    void DoFirstMirrorChangeMirror(sptr<IScreenSessionManagerClient> scbClient, sptr<ScreenSession> firstSession,
+        sptr<ScreenSession> secondarySession);
+
+    void DoFirstMainChange(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession,
+        const std::string& operateType);
+    void DoFirstExtendChangeExtend(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+    void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H

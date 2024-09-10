@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <parameter.h>
 #include <parameters.h>
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -106,7 +106,11 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-
+    VisibilityChangedDetectFunc visibilityChangedDetectFunc = [](const int32_t pid, const bool isVisible,
+        const bool newIsVisible) {
+            return;
+    };
+    sceneSession->SetVisibilityChangedDetectFunc(visibilityChangedDetectFunc);
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
@@ -127,10 +131,10 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-
+    sceneSession->globalRect_ = windowRect;
     //set hotArea without info
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
@@ -167,7 +171,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
     windowSessionProperty->SetTouchHotAreas(rects);
-    sceneSession->SetWindowSessionProperty(windowSessionProperty);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     std::vector<MMI::Rect> touchHotAreas;
@@ -195,6 +199,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     int32_t mainWindowId = 30;
     sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->zOrder_ = 55.0f;
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
     int32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
@@ -208,6 +213,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     int32_t dialogWindowId = 31;
     sptr<SceneSession> sceneSessionDialogWindow =  new (std::nothrow) SceneSession(dialogWindowInfo, nullptr);
     ASSERT_NE(sceneSessionDialogWindow, nullptr);
+    sceneSessionDialogWindow->zOrder_ = 56.0f;
     sceneSessionDialogWindow->persistentId_ = dialogWindowId;
     sceneSessionDialogWindow->isVisible_ = true;
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);

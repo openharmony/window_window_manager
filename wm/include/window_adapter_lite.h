@@ -52,6 +52,9 @@ public:
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
+    virtual WMError CloseTargetFloatWindow(const std::string& bundleName);
+    virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
+    virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
 
 private:

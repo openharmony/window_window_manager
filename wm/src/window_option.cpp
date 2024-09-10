@@ -279,6 +279,16 @@ int32_t WindowOption::GetRealParentId() const
     return realParentId_;
 }
 
+void WindowOption::SetParentWindowType(WindowType parentWindowType)
+{
+    parentWindowType_ = parentWindowType;
+}
+
+WindowType WindowOption::GetParentWindowType() const
+{
+    return parentWindowType_;
+}
+
 void WindowOption::SetExtensionTag(bool isExtensionTag)
 {
     isExtensionTag_ = isExtensionTag;

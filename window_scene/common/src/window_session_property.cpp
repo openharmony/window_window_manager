@@ -155,11 +155,6 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
     sessionInfo_ = info;
 }
 
-void WindowSessionProperty::SetLayoutCallback(const sptr<IFutureCallback>& callback)
-{
-    layoutCallback_ = callback;
-}
-
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
     windowRect_ = rect;
@@ -208,6 +203,11 @@ void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
 void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
+}
+
+void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    defaultRequestedOrientation_ = orientation;
 }
 
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
@@ -260,11 +260,6 @@ SessionInfo& WindowSessionProperty::EditSessionInfo()
     return sessionInfo_;
 }
 
-sptr<IFutureCallback> WindowSessionProperty::GetLayoutCallback() const
-{
-    return layoutCallback_;
-}
-
 Rect WindowSessionProperty::GetWindowRect() const
 {
     return windowRect_;
@@ -315,6 +310,11 @@ Orientation WindowSessionProperty::GetRequestedOrientation() const
     return requestedOrientation_;
 }
 
+Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
+{
+    return defaultRequestedOrientation_;
+}
+
 bool WindowSessionProperty::GetPrivacyMode() const
 {
     return isPrivacyMode_;
@@ -360,7 +360,6 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
-/** @note @window.hierarchy */
 void WindowSessionProperty::SetTopmost(bool topmost)
 {
     topmost_ = topmost;
@@ -968,33 +967,6 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
     return isSupportDragInPcCompatibleMode_;
 }
 
-bool WindowSessionProperty::MarshallingFutureCallback(Parcel& parcel) const
-{
-    if (!layoutCallback_) {
-        if (!parcel.WriteBool(false)) {
-            return false;
-        }
-    } else {
-        if (!parcel.WriteBool(true) ||
-            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(layoutCallback_->AsObject())) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void WindowSessionProperty::UnmarshallingFutureCallback(Parcel& parcel, WindowSessionProperty* property)
-{
-    if (!parcel.ReadBool()) {
-        return;
-    }
-    sptr<IFutureCallback> callback =
-        iface_cast<IFutureCallback>((static_cast<MessageParcel*>(&parcel))->ReadRemoteObject());
-    if (callback != nullptr) {
-        property->SetLayoutCallback(callback);
-    }
-}
-
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -1028,7 +1000,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteInt32(realParentId_) &&
         parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteBool(isUIExtensionAbilityProcess_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
@@ -1036,8 +1010,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) &&
-        MarshallingFutureCallback(parcel);
+        parcel.WriteBool(isPcAppInPad_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1095,7 +1068,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetRealParentId(parcel.ReadInt32());
     property->SetExtensionFlag(parcel.ReadBool());
+    property->SetIsUIExtensionAbilityProcess(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
+    property->SetParentWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -1109,7 +1084,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
-    UnmarshallingFutureCallback(parcel, property);
     return property;
 }
 
@@ -1131,6 +1105,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     requestedOrientation_ = property->requestedOrientation_;
+    defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
@@ -1157,7 +1132,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
-    layoutCallback_ = property->layoutCallback_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1485,6 +1459,16 @@ bool WindowSessionProperty::GetExtensionFlag() const
     return isExtensionFlag_;
 }
 
+void WindowSessionProperty::SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
+{
+    isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionAbilityProcess() const
+{
+    return isUIExtensionAbilityProcess_;
+}
+
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
 {
     uiExtensionUsage_ = uiExtensionUsage;
@@ -1493,6 +1477,16 @@ void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsag
 UIExtensionUsage WindowSessionProperty::GetUIExtensionUsage() const
 {
     return uiExtensionUsage_;
+}
+
+void WindowSessionProperty::SetParentWindowType(WindowType parentWindowType)
+{
+    parentWindowType_= parentWindowType;
+}
+
+WindowType WindowSessionProperty::GetParentWindowType() const
+{
+    return parentWindowType_;
 }
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)

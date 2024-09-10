@@ -52,6 +52,20 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
+
+    /**
+     * @brief Update session viewport config.
+     *
+     * Called when viewport configuration parameters such as density or orientation changes, update to the UIExtension
+     * process.
+     *
+     * @param config Indicates the {@link SessionViewportConfig} viewport configuration parameters.
+     * @return Returns WSError::WS_OK if called success, otherwise failed .
+     */
+    virtual WSError UpdateSessionViewportConfig(const SessionViewportConfig& config)
+    {
+        return WSError::WS_OK;
+    };
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
 
@@ -173,6 +187,11 @@ public:
     }
 
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
+
+    virtual WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

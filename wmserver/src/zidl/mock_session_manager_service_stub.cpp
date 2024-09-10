@@ -50,6 +50,10 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
         }
         case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_RECOVER_LISTENER: {
             sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+            if (listenerObject == nullptr) {
+                TLOGE(WmsLogTag::WMS_RECOVER, "ReadRemoteObject failed");
+                return ERR_INVALID_DATA;
+            }
             RegisterSMSRecoverListener(listenerObject);
             break;
         }
@@ -59,6 +63,10 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
         }
         case MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER: {
             sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+            if (listenerObject == nullptr) {
+                TLOGE(WmsLogTag::WMS_RECOVER, "ReadRemoteObject failed");
+                return ERR_INVALID_DATA;
+            }
             RegisterSMSLiteRecoverListener(listenerObject);
             break;
         }
