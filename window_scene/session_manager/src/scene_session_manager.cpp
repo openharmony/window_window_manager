@@ -10428,7 +10428,7 @@ void SceneSessionManager::DoAddProcessWatermarkForSession(int32_t persistentId)
     }
     auto callingPid = sceneSession->GetCallingPid();
     auto iter = processWatermarkPidMap_.find(callingPid);
-    if (iter != processWatermarkPidMap_.end()) {
+    if (iter == processWatermarkPidMap_.end()) {
         return;
     }
     sceneSession->SetWatermarkEnabled(iter->second, true);
