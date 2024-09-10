@@ -4543,7 +4543,8 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             rsInterface_.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+    if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        // 维护外屏独立dpi
         if (foldStatus == FoldStatus::FOLDED) {
             auto property = screenSession->GetScreenProperty();
             densityDpi_ = property.GetDensity();

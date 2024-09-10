@@ -109,7 +109,7 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
             displayNode->RemoveFromTree();
         }
         screenSession->ReleaseDisplayNode();
-        RSDisplayNodeConfig config = { screenSession->screenId_, true, true, nodeId };
+        RSDisplayNodeConfig config = { screenSession->screenId_, true, nodeId, true };
         screenSession->CreateDisplayNode(config);
     }
     TLOGI(WmsLogTag::DMS, "physical screen switch to mirror end");
