@@ -125,7 +125,7 @@ public:
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
-    
+
     /**
      * @brief Raise a subwindow above a target subwindow.
      *
@@ -134,7 +134,7 @@ public:
      * @permission Make sure the caller has system permission.
      */
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
-    
+
     /**
      * @brief Raise main window to app top.
      *
