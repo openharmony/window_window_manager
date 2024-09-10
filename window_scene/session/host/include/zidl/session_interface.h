@@ -136,12 +136,9 @@ public:
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
 
     /**
-     * @brief Raise main window to app top.
-     *
-     * This function provides the ability for system applications to raise main window.
+     * @brief Raise the application main window to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller has system permission.
      */
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
