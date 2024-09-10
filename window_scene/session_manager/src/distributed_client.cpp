@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "distributed_client.h"
 
 #include "ability_manager_errors.h"
@@ -28,59 +27,23 @@ namespace Rosen {
 namespace {
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(DistributedClient)
-
-void DistributedClient::DmsDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
-{
-    TLOGI(WmsLogTag::DEFAULT, "dms died");
-    DistributedClient::GetInstance().ClearDmsProxy();
-}
-
 sptr<IRemoteObject> DistributedClient::GetDmsProxy()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (dmsProxy_ == nullptr) {
-        ConnectDistributedSchedLocked();
-    }
-    return dmsProxy_;
-}
- 
-void DistributedClient::ConnectDistributedSchedLocked()
 {
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "fail to get samgr");
-        return;
+        WLOGFE("fail to get samgr.");
+        return nullptr;
     }
-    auto proxy = samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
-    if (!proxy) {
-        TLOGW(WmsLogTag::DEFAULT, "get dms proxy failed");
-        return;
-    }
-    dmsDeath_ = sptr<DmsDeathRecipient>::MakeSptr();
-    if (proxy->IsProxyObject() && !proxy->AddDeathRecipient(dmsDeath_)) {
-        TLOGE(WmsLogTag::DEFAULT, "failed to add death recipient");
-        return;
-    }
-    dmsProxy_ = proxy;
-    TLOGI(WmsLogTag::DEFAULT, "success");
-}
-
-void DistributedClient::ClearDmsProxy()
-{
-    TLOGI(WmsLogTag::DEFAULT, "in");
-    std::lock_guard<std::mutex> lock(mutex_);
-    dmsProxy_ = nullptr;
-    dmsDeath_ = nullptr;
+    return samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
 }
 
 int32_t DistributedClient::GetMissionInfos(const std::string& deviceId, int32_t numMissions,
                                            std::vector<AAFwk::MissionInfo>& missionInfos)
 {
-    TLOGI(WmsLogTag::DEFAULT, "called");
+    WLOGFI("called");
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote system abiity is null");
+        WLOGFE("remote system abiity is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
 
@@ -94,7 +57,7 @@ int32_t DistributedClient::GetMissionInfos(const std::string& deviceId, int32_t 
     PARCEL_WRITE_HELPER(data, Int32, numMissions);
     int32_t ret = remote->SendRequest(GET_MISSION_INFOS, data, reply, option);
     if (ret != ERR_NONE) {
-        TLOGW(WmsLogTag::DEFAULT, "sendRequest fail, error: %{public}d", ret);
+        WLOGFW("sendRequest fail, error: %{public}d", ret);
         return ret;
     }
     return ReadMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
@@ -104,12 +67,12 @@ int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& devic
                                                         AAFwk::MissionSnapshot& missionSnapshot)
 {
     if (deviceId.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "deviceId is null");
+        WLOGFE("deviceId is null");
         return ERR_NULL_OBJECT;
     }
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        WLOGFE("remote is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;
@@ -122,7 +85,7 @@ int32_t DistributedClient::GetRemoteMissionSnapshotInfo(const std::string& devic
     MessageOption option;
     int32_t error = remote->SendRequest(GET_REMOTE_MISSION_SNAPSHOT_INFO, data, reply, option);
     if (error != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "transact failed, error: %{public}d", error);
+        WLOGFE("transact failed, error: %{public}d", error);
         return error;
     }
     std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshotPtr(reply.ReadParcelable<AAFwk::MissionSnapshot>());
@@ -140,52 +103,46 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
     int32_t hasMissions = parcel.ReadInt32();
     if (hasMissions == 1) {
         int32_t len = parcel.ReadInt32();
-        TLOGD(WmsLogTag::DEFAULT, "readLength is:%{public}d", len);
+        WLOGFD("readLength is:%{public}d", len);
         if (len < 0) {
             return false;
         }
         size_t size = static_cast<size_t>(len);
         if ((size > parcel.GetReadableBytes()) || (missionInfos.max_size() < size)) {
-            TLOGE(WmsLogTag::DEFAULT, "Failed to read MissionInfo vector, size = %{public}zu", size);
+            WLOGFE("Failed to read MissionInfo vector, size = %{public}zu", size);
             return false;
         }
         missionInfos.clear();
         for (size_t i = 0; i < size; i++) {
             AAFwk::MissionInfo *ptr = parcel.ReadParcelable<AAFwk::MissionInfo>();
             if (ptr == nullptr) {
-                TLOGW(WmsLogTag::DEFAULT, "read MissionInfo failed");
+                WLOGFW("read MissionInfo failed");
                 return false;
             }
             missionInfos.emplace_back(*ptr);
             delete ptr;
         }
     }
-    TLOGI(WmsLogTag::DEFAULT, "info size is:%{public}zu", missionInfos.size());
+    WLOGFI("info size is:%{public}zu", missionInfos.size());
     return true;
 }
 
 int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Mission id: %{public}d, state: %{public}d", missionId, state);
+    WLOGFI("SetMissionContinueState called. Mission id: %{public}d, state: %{public}d", missionId, state);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "remote system ablity is null");
+        WLOGFI("remote system ablity is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
-    int32_t error = remote->SendRequest(SET_MISSION_CONTINUE_STATE, data, reply, option);
-    if (error != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "transact failed, error: %{public}d", error);
-        return error;
-    }
-    return ERR_NONE;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, SET_MISSION_CONTINUE_STATE, data, reply);
 }
 } // namespace Rosen
 } // namespace OHOS

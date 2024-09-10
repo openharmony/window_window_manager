@@ -597,7 +597,8 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoContinueState(continueState);
-        DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
+        DistributedClient dmsClient;
+        dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState));
         WLOGFI("SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
@@ -5745,10 +5746,11 @@ WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<M
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                                                std::vector<SessionInfoBean>& sessionInfos)
 {
-    TLOGI(WmsLogTag::DEFAULT, "begin");
-    int result = DistributedClient::GetInstance().GetMissionInfos(deviceId, numMax, sessionInfos);
+    WLOGFI("GetRemoteSessionInfos From Dms begin");
+    DistributedClient dmsClient;
+    int result = dmsClient.GetMissionInfos(deviceId, numMax, sessionInfos);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
+        WLOGFE("GetRemoteMissionInfos failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
@@ -6147,7 +6149,8 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
     WLOGFI("GetRemoteSessionSnapshotInfo begin");
-    int result = DistributedClient::GetInstance().GetRemoteMissionSnapshotInfo(deviceId,
+    DistributedClient dmsClient;
+    int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId,
         sessionId, sessionSnapshot);
     if (result != ERR_OK) {
         WLOGFE("GetRemoteSessionSnapshotInfo failed, result = %{public}d", result);
