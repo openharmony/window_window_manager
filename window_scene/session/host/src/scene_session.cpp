@@ -681,6 +681,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction
         if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
             const auto& keyboardSession = GetKeyboardSession();
             FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
+            if (keyboardSession != nullptr) {
+                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, nullptr);
+            }
             return ret;
         }
         if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
