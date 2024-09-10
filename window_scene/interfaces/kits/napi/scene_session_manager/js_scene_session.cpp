@@ -68,6 +68,7 @@ const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
+const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -122,6 +123,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
+    {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -1219,6 +1221,35 @@ void JsSceneSession::NotifyFrameLayoutFinish()
     taskScheduler_->PostMainThreadTask(task, "NotifyFrameLayoutFinish");
 }
 
+void JsSceneSession::ProcessPrivacyModeChangeRegister()
+{
+    NotifyPrivacyModeChangeFunc func = [this](bool isPrivacyMode) {
+        this->NotifyPrivacyModeChange(isPrivacyMode);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr");
+        return;
+    }
+    session->SetPrivacyModeChangeNotifyFunc(func);
+}
+
+void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "isPrivacyMode:%{public}d, id:%{public}d", isPrivacyMode, persistentId_);
+    auto task = [this, isPrivacyMode, env = env_]() {
+        auto jsCallback = this->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
+        if (!jsCallback) {
+            TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+            return;
+        }
+        napi_value jsSessionPrivacyMode = CreateJsValue(env, isPrivacyMode);
+        napi_value argv[] = { jsSessionPrivacyMode };
+        napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "NotifyPrivacyModeChange");
+}
+
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
@@ -1717,6 +1748,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB):
             ProcessFrameLayoutFinishRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::PRIVACY_MODE_CHANGE_CB):
+            ProcessPrivacyModeChangeRegister();
             break;
         default:
             break;

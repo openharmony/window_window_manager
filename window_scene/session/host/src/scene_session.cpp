@@ -2451,6 +2451,29 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
+    NotifyPrivacyModeChange();
+}
+
+void SceneSession::NotifyPrivacyModeChange()
+{
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "sessionProperty is null");
+        return;
+    }
+
+    bool curExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    bool curPrivacyMode = curExtPrivacyMode || sessionProperty->GetPrivacyMode();
+    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, curExtPrivacyMode:%{public}d, session property privacyMode:%{public}d"
+        ", old privacyMode:%{public}d",
+        GetPersistentId(), curExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
+    
+    if (curPrivacyMode != isPrivacyMode_) {
+        isPrivacyMode_ = curPrivacyMode;
+        if (privacyModeChangeNotifyFunc_) {
+            privacyModeChangeNotifyFunc_(isPrivacyMode_);
+        }
+    }
 }
 
 void SceneSession::SetSnapshotSkip(bool isSkip)
@@ -4018,6 +4041,8 @@ void SceneSession::CalculateCombinedExtWindowFlags()
     for (const auto& iter: extWindowFlagsMap_) {
         combinedExtWindowFlags_.bitData |= iter.second.bitData;
     }
+
+    NotifyPrivacyModeChange();
 }
 
 void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
@@ -4263,6 +4288,11 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
 void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
 {
     updatePrivateStateAndNotifyFunc_ = func;
+}
+
+void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
+{
+    privacyModeChangeNotifyFunc_ = func;
 }
 
 int32_t SceneSession::GetStatusBarHeight()
