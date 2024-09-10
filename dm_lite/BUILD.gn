@@ -26,6 +26,7 @@ config("libdm_public_config") {
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/dm_lite",
     "../utils/include",
+    "../window_scene/screen_session_manager/include",
     "../window_scene/session_manager/include",
     "../wmserver/include",
   ]
