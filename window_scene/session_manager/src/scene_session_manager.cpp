@@ -604,7 +604,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionContinueState");
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig)
