@@ -3317,7 +3317,7 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
 {
     WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
 }
