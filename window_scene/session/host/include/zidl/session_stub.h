@@ -52,6 +52,7 @@ private:
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
@@ -63,6 +64,7 @@ private:
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
+    int HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply);
@@ -86,6 +88,7 @@ private:
     int HandleNotifyExtensionTimeout(MessageParcel& data, MessageParcel& reply);
     int HandleTriggerBindModalUIExtension(MessageParcel& data, MessageParcel& reply);
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);

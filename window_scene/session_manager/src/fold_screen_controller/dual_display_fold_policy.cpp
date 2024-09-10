@@ -44,8 +44,7 @@ const int32_t ADD_DISPLAY_NODE = 0;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler)
-    : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler): screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     TLOGI(WmsLogTag::DMS, "DualDisplayFoldPolicy created");
 
@@ -124,7 +123,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
-        globalDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
     }
 }
 
@@ -277,10 +276,8 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         ChangeScreenDisplayModeOnBootAnimation(screenSession, onScreenId);
         return;
     }
-    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND;
     std::string tp = MAIN_TP;
     if (onScreenId == SCREEN_ID_SUB) {
-        reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
         tp = SUB_TP;
     }
 #ifdef TP_FEATURE_ENABLE
@@ -295,6 +292,10 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
     };
+    if (screenPowerTaskScheduler_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
+        return;
+    }
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOff, "screenOffTask");
     AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
 
@@ -311,7 +312,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
     AddOrRemoveDisplayNodeToTree(onScreenId, ADD_DISPLAY_NODE);
-    SendPropertyChangeResult(screenSession, onScreenId, reason);
 }
 
 void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
@@ -334,6 +334,10 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
     };
+    if (screenPowerTaskScheduler_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
+        return;
+    }
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
     // on sub screen
     auto taskScreenOnSub = [=] {
@@ -348,23 +352,13 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, ADD_DISPLAY_NODE);
 }
 
-void DualDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
-    ScreenPropertyChangeReason reason)
-{
-    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-    screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
-    TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
-        screenSession->GetScreenProperty().GetBounds().rect_.width_,
-        screenSession->GetScreenProperty().GetBounds().rect_.height_);
-    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-}
-
 void DualDisplayFoldPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ChangeScreenDisplayModeOnBootAnimation, ScreenSession is nullpter");
+        return;
+    }
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND;
     if (screenId == SCREEN_ID_SUB) {
@@ -411,7 +405,7 @@ void DualDisplayFoldPolicy::ExitCoordination()
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, REMOVE_DISPLAY_NODE);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     currentDisplayMode_ = displayMode;
-    globalDisplayMode_ = displayMode;
+    lastDisplayMode_ = displayMode;
     TLOGI(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d", displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }

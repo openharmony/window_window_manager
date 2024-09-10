@@ -16,7 +16,7 @@
 #include "scene_input_manager.h"
 #include <gtest/gtest.h>
 #include "session_manager/include/scene_session_manager.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;

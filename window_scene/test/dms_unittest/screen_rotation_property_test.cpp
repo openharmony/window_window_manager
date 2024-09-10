@@ -67,6 +67,8 @@ HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTes
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_PORTRAIT);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_LANDSCAPE);
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    ASSERT_EQ(screenSession, nullptr);
 }
 
 /**

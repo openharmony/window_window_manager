@@ -379,19 +379,19 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, Functi
 }
 
 /**
- * @tc.name: SetGestureNavigaionEnabled
+ * @tc.name: SetGestureNavigationEnabled
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
         new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
 
-    sceneSessionManagerProxy_->SetGestureNavigaionEnabled(true);
-    sceneSessionManagerProxy_->SetGestureNavigaionEnabled(false);
+    sceneSessionManagerProxy_->SetGestureNavigationEnabled(true);
+    sceneSessionManagerProxy_->SetGestureNavigationEnabled(false);
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
 }
 

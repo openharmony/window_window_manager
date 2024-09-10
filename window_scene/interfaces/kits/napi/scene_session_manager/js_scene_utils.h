@@ -149,6 +149,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
 bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
 bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList);
 bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap);
+bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector);
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);

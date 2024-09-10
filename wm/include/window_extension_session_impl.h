@@ -37,7 +37,7 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
@@ -92,9 +92,15 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
+    WSError SwitchFreeMultiWindow(bool enable) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
+    WindowType GetParentWindowType() const override;
+    void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
+    WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -111,8 +117,15 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+    WMError GetSystemViewportConfig(SessionViewportConfig& config);
+    void UpdateSystemViewportConfig();
+    void UpdateExtensionDensity(SessionViewportConfig& config);
+    void NotifyDisplayInfoChange(const SessionViewportConfig& config);
+    WSError UpdateSessionViewportConfigInner(const SessionViewportConfig& config);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
+    WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
+    void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
@@ -120,9 +133,11 @@ private:
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    static std::shared_mutex windowExtensionSessionMutex_;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
+    bool modalUIExtensionMayBeCovered_ { false };
+    bool modalUIExtensionSelfLoadContent_ { false };
+    float lastDensity_ { 0.0f };
+    int32_t lastOrientation_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

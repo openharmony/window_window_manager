@@ -21,26 +21,6 @@
 namespace OHOS {
 namespace Rosen {
 
-const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_SESSION_ORIENTATION_MAP {
-    {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED,                         Orientation::UNSPECIFIED},
-    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE,                           Orientation::HORIZONTAL},
-    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT,                            Orientation::VERTICAL},
-    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT,                        Orientation::LOCKED},
-    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED,                  Orientation::REVERSE_HORIZONTAL},
-    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED,                   Orientation::REVERSE_VERTICAL},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION,                       Orientation::SENSOR},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE,             Orientation::SENSOR_HORIZONTAL},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT,              Orientation::SENSOR_VERTICAL},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED,            Orientation::AUTO_ROTATION_RESTRICTED},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
-        Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
-        Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
-    {OHOS::AppExecFwk::DisplayOrientation::LOCKED,                              Orientation::LOCKED},
-    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED,           Orientation::AUTO_ROTATION_UNSPECIFIED},
-    {OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP,                      Orientation::FOLLOW_DESKTOP},
-};
-
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
@@ -63,10 +43,11 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
+    bool GetStartMoveFlag() override;
     WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
-    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
@@ -180,7 +161,6 @@ protected:
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
@@ -193,11 +173,6 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
-
-    /*
-     * DFX
-     */
-    void NotifySetUIContentComplete() override;
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -222,7 +197,8 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    void NotifyDisplayInfoChange();
+    void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Window Immersive
@@ -234,10 +210,14 @@ private:
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
-    uint32_t getAvoidAreaCnt_ = 0;
+    std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayoutOnShow(WindowType type);
-    void InitSystemSessionEnableDrag();
+    void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Property.
+     */
+    void InitSystemSessionDragEnable();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

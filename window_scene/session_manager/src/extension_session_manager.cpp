@@ -18,30 +18,24 @@
 #include <ability_manager_client.h>
 #include <hitrace_meter.h>
 
+#include "display_info.h"
+#include "display_manager.h"
+#include "singleton_container.h"
+
 #include "session/host/include/extension_session.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
 const std::string EXTENSION_SESSION_MANAGER_THREAD = "OS_ExtensionSessionManager";
-std::recursive_mutex g_instanceMutex;
 } // namespace
 
-ExtensionSessionManager& ExtensionSessionManager::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static ExtensionSessionManager* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new ExtensionSessionManager();
-        instance->Init();
-    }
-    return *instance;
-}
-
-void ExtensionSessionManager::Init()
+ExtensionSessionManager::ExtensionSessionManager()
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
 }
+
+WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
 sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
 {
@@ -59,22 +53,49 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->realHostWindowId = sessionInfo.realParentId_;
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
     abilitySessionInfo->uiExtensionUsage = static_cast<AAFwk::UIExtensionUsage>(sessionInfo.uiExtensionUsage_);
+    abilitySessionInfo->parentWindowType = sessionInfo.parentWindowType_;
+    abilitySessionInfo->displayId = sessionInfo.config_.displayId_;
+    abilitySessionInfo->density = sessionInfo.config_.density_;
+    abilitySessionInfo->orientation = sessionInfo.config_.orientation_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     }
     return abilitySessionInfo;
 }
 
+float ExtensionSessionManager::GetSystemDensity(uint64_t displayId)
+{
+    float vpr = 1.0f;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "display is null");
+        return vpr;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is null");
+        return vpr;
+    }
+    return displayInfo->GetVirtualPixelRatio();
+}
+
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
     auto task = [this, sessionInfo]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
-        sptr<ExtensionSession> extensionSession = new ExtensionSession(sessionInfo);
+        SessionInfo tempSessionInfo = sessionInfo;
+        if (!tempSessionInfo.config_.isDensityFollowHost_) {
+            tempSessionInfo.config_.density_ = GetSystemDensity(tempSessionInfo.config_.displayId_);
+        }
+        sptr<ExtensionSession> extensionSession = new ExtensionSession(tempSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
-        WLOGFI("persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-            persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-            sessionInfo.abilityName_.c_str());
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
+            "isDensityFollowHost_: %{public}d, density_: %{public}f",
+            persistentId, tempSessionInfo.bundleName_.c_str(), tempSessionInfo.moduleName_.c_str(),
+            tempSessionInfo.abilityName_.c_str(), tempSessionInfo.config_.isDensityFollowHost_,
+            tempSessionInfo.config_.density_);
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };

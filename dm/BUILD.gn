@@ -20,7 +20,7 @@ config("libdm_private_config") {
     "../dmserver/include",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene",
-    "${window_base_path}/window_scene/screen_session_manager/include",
+    "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/interfaces/innerkits/include",
@@ -142,9 +142,46 @@ ohos_shared_library("libdm") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 group("test") {
   testonly = true
   deps = [ "test:test" ]
+}
+
+## Build libdm_ndk.so
+ohos_shared_library("libdm_ndk") {
+  branch_protector_ret = "pac_ret"
+  output_name = "libnative_display_manager"
+  output_extension = "so"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "${window_base_path}/interfaces/kits/dmndk/dm",
+    "${window_base_path}/interfaces/inner_kits/dm",
+  ]
+
+  sources = [ "src/oh_display_manager.cpp" ]
+
+  deps = [ ":libdm" ]
+  innerapi_tags = [ "ndk" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }

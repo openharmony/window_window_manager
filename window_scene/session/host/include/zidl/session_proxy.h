@@ -40,7 +40,6 @@ public:
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
-    bool WriteAbilitySessionInfoBasic(MessageParcel& data, const sptr<AAFwk::SessionInfo> abilitySessionInfo);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
@@ -48,9 +47,10 @@ public:
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -77,6 +77,7 @@ public:
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError GetStartMoveFlag(bool& isMoving) override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
@@ -86,9 +87,10 @@ public:
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     int32_t GetStatusBarHeight() override;
-    WSError NotifyFrameLayoutFinishFromApp() override;
+    WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

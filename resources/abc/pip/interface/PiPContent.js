@@ -90,6 +90,7 @@ export class PiPContent extends ViewPU {
         this.nodeController = pip.getCustomUIController();
         this.xComponent = pip.getTypeNode();
         if (this.xComponent === null || this.xComponent === undefined) {
+            console.error(TAG, `xComponent node is null`);
             return;
         }
         let u1 = this.xComponent.getNodeType();

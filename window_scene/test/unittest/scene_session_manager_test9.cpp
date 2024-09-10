@@ -278,13 +278,6 @@ HWTEST_F(SceneSessionManagerTest9, UpdateFocus04, Function | SmallTest | Level3)
     sceneSession->UpdateFocus(false);
     ssm_->UpdateFocus(1, false);
 
-    ssm_->listenerController_ = nullptr;
-    ssm_->UpdateFocus(1, true);
-
-    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
-    ssm_->UpdateFocus(1, true);
-
     sessionInfo.isSystem_ = false;
     ssm_->focusedSessionId_ = 1;
     sceneSession->UpdateFocus(true);
@@ -510,11 +503,8 @@ HWTEST_F(SceneSessionManagerTest9, NotifyCompleteFirstFrameDrawing03, Function |
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->listenerController_ = nullptr;
     ssm_->NotifyCompleteFirstFrameDrawing(1);
 
-    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
     sessionInfo.isSystem_ = false;
     ssm_->eventHandler_ = nullptr;
     ssm_->NotifyCompleteFirstFrameDrawing(1);
@@ -542,13 +532,10 @@ HWTEST_F(SceneSessionManagerTest9, SetSessionLabel02, Function | SmallTest | Lev
     ASSERT_NE(nullptr, token);
     sceneSession->SetAbilityToken(token);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->listenerController_ = nullptr;
 
     std::string label = "testLabel";
     ssm_->SetSessionLabel(token, label);
 
-    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
     sessionInfo.isSystem_ = false;
     ssm_->SetSessionLabel(token, label);
 
@@ -593,6 +580,84 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     property->SetPersistentId(0);
     ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+}
+
+/**
+ * @tc.name: RefreshPcZorder
+ * @tc.desc: RefreshPcZorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, Function | SmallTest | Level3) {
+    std::vector<int32_t> persistentIds;
+    SessionInfo info1;
+    info1.abilityName_ = "RefreshPcZorder1";
+    info1.bundleName_ = "RefreshPcZorder1";
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(session1, nullptr);
+    persistentIds.push_back(session1->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({session1->GetPersistentId(), session1});
+    SessionInfo info2;
+    info2.abilityName_ = "RefreshPcZorder2";
+    info2.bundleName_ = "RefreshPcZorder2";
+    sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(session2, nullptr);
+    persistentIds.push_back(session2->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({session2->GetPersistentId(), session2});
+    SessionInfo info3;
+    info3.abilityName_ = "RefreshPcZorder3";
+    info3.bundleName_ = "RefreshPcZorder3";
+    sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
+    ASSERT_NE(session3, nullptr);
+    session3->SetZOrder(404);
+    ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
+    persistentIds.push_back(999);
+    uint32_t startZOrder = 100;
+    std::vector<int32_t> newPersistentIds = persistentIds;
+    ssm_->RefreshPcZOrderList(startZOrder, std::move(persistentIds));
+    ssm_->RefreshPcZOrderList(UINT32_MAX, std::move(newPersistentIds));
+    auto start = std::chrono::system_clock::now();
+    // Due to RefreshPcZOrderList being asynchronous, spin lock is added.
+    // The spin lock itself is set with a timeout escape time of 3 seconds
+    while (true) {
+        if ((session1->GetZOrder() != 0 && session2->GetZOrder() != 0 && session1->GetZOrder() != 100) ||
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count() >= 3) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    ASSERT_EQ(session2->GetZOrder(), 101);
+    ASSERT_EQ(session3->GetZOrder(), 404);
+    ASSERT_EQ(session1->GetZOrder(), UINT32_MAX);
+}
+
+/**
+ * @tc.name: GetSessionRSVisible
+ * @tc.desc: GetSessionRSVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, GetSessionRSVisible, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "GetSessionRSVisible";
+    sessionInfo.moduleName_ = "moduleTest";
+    uint64_t windowId = 10;
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession01->persistentId_ = windowId;
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    struct RSSurfaceNodeConfig config;
+    sceneSession02->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, sceneSession02->surfaceNode_);
+    sceneSession02->surfaceNode_->id_ = 0;
+    sceneSession02->persistentId_ = windowId;
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession02));
+
+    bool actual = ssm_->GetSessionRSVisible(sceneSession01, currVisibleData);
+    EXPECT_EQ(actual, true);
 }
 }
 } // namespace Rosen
