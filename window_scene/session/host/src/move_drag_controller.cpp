@@ -60,8 +60,18 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
     }
 }
 
-std::pair<int32_t, int32_t> MoveDragController::GetDisplayOffsetById(uint64 displayId) const
+std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedOffset(uint64 displayId) const
 {
+    ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
+        GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
+    int32_t currentDisplayOffsetX = screenProperty.GetStartX();
+    int32_t currentDisplayOffsetY = screenProperty.GetStartY();
+    // calculate trans in unified coordinates
+    int32_t tranX = (pointerItem.GetDisplayX() + currentDisplayOffsetX) -
+        (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
+    int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayOffsetY) -
+        (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
+    
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(displayId)->GetScreenProperty();
     std::pair<int32_t, int32_t> displayOffset = std::make_pair(screenProperty.GetStartX(), screenProperty.GetStartY());
@@ -335,14 +345,12 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     if (!CheckDragEventLegal(pointerEvent, property)) {
         return false;
     }
-
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
         WLOGE("Get PointerItem failed");
         return false;
     }
-
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     switch (pointerEvent->GetPointerAction()) {
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
@@ -372,7 +380,13 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
-    std::pair<int32_t, int32_t> displayOffset = GetDisplayOffsetById(1);
+
+    ProcessSessionRectChange(reason);
+    return true;
+}
+
+std::pair<int32_t, int32_t> MoveDragController::GetTranXY()
+{
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
     int32_t currentDisplayOffsetX = screenProperty.GetStartX();
@@ -382,15 +396,12 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayOffsetY) -
         (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
-
     if (aspectRatio_ > NEAR_ZERO) {
         moveDragProperty_.targetRect_ = CalcFixedAspectRatioTargetRect(type_, tranX, tranY, aspectRatio_,
             moveDragProperty_.originalRect_);
     } else {
         moveDragProperty_.targetRect_ = CalcFreeformTargetRect(type_, tranX, tranY, moveDragProperty_.originalRect_);
     }
-    ProcessSessionRectChange(reason);
-    return true;
 }
 
 bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
