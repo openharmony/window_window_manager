@@ -23,6 +23,7 @@
 #include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
+const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
@@ -39,7 +40,7 @@ public:
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
     void SetFoldStatus(FoldStatus foldStatus);
-    
+
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;
@@ -50,6 +51,25 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    /*
+     *    Avoid fold to expand process queues public interface
+     */
+    bool GetModeChangeRunningStatus();
+    virtual void SetdisplayModeChangeStatus(bool status){};
+    bool GetdisplayModeRunningStatus();
+    FoldDisplayMode GetLastCacheDisplayMode();
+    
+protected:
+    /*
+     *    Avoid fold to expand process queues private variable
+     */
+    std::atomic<int> pengdingTask_{FOLD_TO_EXPAND_TASK_NUM};
+    std::atomic<bool> displayModeChangeRunning_ = false;
+    std::atomic<FoldDisplayMode> lastCachedisplayMode_ = FoldDisplayMode::UNKNOWN;
+    std::chrono::steady_clock::time_point startTimePoint_ = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point endTimePoint_ = std::chrono::steady_clock::now();
+    void SetLastCacheDisplayMode(FoldDisplayMode mode);
+    int64_t getFoldingElapsedMs();
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
