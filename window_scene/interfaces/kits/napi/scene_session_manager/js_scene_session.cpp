@@ -2201,8 +2201,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect,
         }
         napi_value jsSessionStateObj = CreateJsSessionRect(env, rect);
         napi_value sizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
-        napi_value newDisplayId = CreateJsValue(env, static_cast<int32_t>(newDisplayId));
-        napi_value argv[] = {jsSessionStateObj, sizeChangeReason, newDisplayId};
+        napi_value newDisplay = CreateJsValue(env, static_cast<int32_t>(newDisplayId));
+        napi_value argv[] = {jsSessionStateObj, sizeChangeReason, newDisplay};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)

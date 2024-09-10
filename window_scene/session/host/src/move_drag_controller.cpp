@@ -936,11 +936,6 @@ bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2)
     return y_begin < y_end && x_begin < x_end;
 }
 
-std::set<uint64_t> MoveDragController::GetAddedDisplaySet()
-{
-    return addedDisplaySet_;
-}
-
 std::set<uint64_t> MoveDragController::GetNewAddedDisplaySet()
 {
     std::set<uint64_t> newAddedDisplayIdSet = {};
