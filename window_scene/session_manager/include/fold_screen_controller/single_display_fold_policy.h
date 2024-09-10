@@ -41,12 +41,12 @@ private:
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
-    void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
+    void SetdisplayModeChangeStatus(bool status) override;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
