@@ -2770,7 +2770,7 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
     }
 }
 
-void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session)
+void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags)
 {
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "SubSession is nullptr");
@@ -2782,7 +2782,12 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
         return;
     }
 
-    auto parentSession = GetSceneSession(persistentId);
+    sptr<SceneSession> parentSession = nullptr;
+    if (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
+        parentSession = GetMainParentSceneSession(persistentId);
+    } else {
+        parentSession = GetSceneSession(persistentId);
+    }
     if (parentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Can't find CreateSubSessionListener, parentId: %{public}d, subId: %{public}d",
             persistentId, session->GetPersistentId());
@@ -2795,6 +2800,23 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
     }
     TLOGD(WmsLogTag::WMS_LIFE, "NotifyCreateSubSession success, parentId: %{public}d, subId: %{public}d",
         persistentId, session->GetPersistentId());
+}
+
+sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId)
+{
+    sptr<SceneSession> parentSession = GetSceneSession(persistentId);
+    if (parentSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "not find parent session");
+        return nullptr;
+    }
+    bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
+        parentSession->GetWindowType == 0; // 0: invalid
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", window->GetWindowId());
+        return window;
+    }
+    return GetMainParentSceneSession(window->GetParentId());
+        
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
