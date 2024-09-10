@@ -30,7 +30,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 #include "ws_common.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -78,7 +78,7 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
-void SetStartDragFlag(bool flag) 
+void SetStartDragFlag(bool flag)
 {
     isStartDrag_ = flag;
 }
@@ -130,7 +130,7 @@ void MoveDragController::InitMoveDragProperty()
 
 void MoveDragController::SetCrossProperty(uint64_t displayId, uint64_t parentId)
 {
-    addedDisplaySet.insert(displayId);
+    addedDisplaySet_.insert(displayId);
     moveDragStartDisplayId_ = displayId;
     parentId_ = parentId;
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
@@ -921,7 +921,7 @@ bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2)
     return y_begin < y_end && x_begin < x_end;
 }
 
-std::set<uint64_t> MoveDragController::GetCurrentOverlapDisplaySet()
+std::set<uint64_t> MoveDragController::GetNewAddedDisplaySet()
 {
     std::set<uint64> newAddedDisplayIdSet = {};
     WSRect windowRect = GetTargetRect(true);
@@ -936,8 +936,8 @@ std::set<uint64_t> MoveDragController::GetCurrentOverlapDisplaySet()
             screenProperty.GetBounds().rect_.GetWidth(),
             screenProperty.GetBounds().rect_.GetHeight(),
         };
-        if (addedDisplayIdSet.find(iter.first) == addedDisplayIdSet.end() && IsOverlap(windowRect, screenRect)) {
-            addedDisplayIdSet.insert(iter.first);
+        if (addedDisplaySet_.find(iter.first) == addedDisplaySet_.end() && IsOverlap(windowRect, screenRect)) {
+            addedDisplaySet_.insert(iter.first);
             newAddedDisplayIdSet.insert(iter.first);
         }
     }
