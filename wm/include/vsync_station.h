@@ -60,6 +60,8 @@ private:
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
 
     std::mutex mutex_;
+    bool isFirstVsyncRequest_ = true;
+    bool isFirstVsyncBack_ = true;
     bool hasRequestedVsync_ = false;
     std::shared_ptr<VSyncReceiver> receiver_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
