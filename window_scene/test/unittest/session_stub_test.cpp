@@ -657,6 +657,27 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
     auto res = session_->HandleRequestFocus(data, reply);
     ASSERT_EQ(0, res);
 }
+
+/**
+ * @tc.name: HandleUpdateClientRect01
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleUpdateClientRect(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteInt32(100);
+    data.WriteInt32(100);
+    data.WriteUint32(800);
+    data.WriteUint32(800);
+    res = session_->HandleUpdateClientRect(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
