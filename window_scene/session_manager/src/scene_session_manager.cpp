@@ -6152,7 +6152,7 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
     DistributedClient dmsClient;
     int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId, sessionId, sessionSnapshot);
     if (result != ERR_OK) {
-        WLOGFE("GetRemoteMissingSnapshotInfo failed, result = %{public}d", result);
+        WLOGFE("GetRemoteMissionSnapshotInfo failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
