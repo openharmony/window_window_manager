@@ -274,6 +274,7 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+
     sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover

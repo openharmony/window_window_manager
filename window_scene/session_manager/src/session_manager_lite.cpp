@@ -336,10 +336,6 @@ void SessionManagerLite::InitSceneSessionManagerLiteProxy()
     sceneSessionManagerLiteProxy_ = iface_cast<ISceneSessionManagerLite>(remoteObject);
     if (sceneSessionManagerLiteProxy_) {
         ssmDeath_ = sptr<SSMDeathRecipientLite>::MakeSptr();
-        if (!ssmDeath_) {
-            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
-            return;
-        }
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(ssmDeath_)) {
             WLOGFE("Failed to add death recipient");
             return;
