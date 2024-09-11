@@ -24,7 +24,7 @@
 #include <parameters.h>
 #include <hitrace_meter.h>
 #include "parameter.h"
-#include "publish/scene_event_publish.h"
+#include "publish/scb_dump_subscriber.h"
 #include "screen_manager.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
@@ -203,7 +203,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 
 SceneSessionManager::~SceneSessionManager()
 {
-    SceneEventPublish::UnSubscribe(sceneEventPublish_);
+    ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
 }
 
 void SceneSessionManager::Init()
@@ -255,7 +255,7 @@ void SceneSessionManager::Init()
     });
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 
-    sceneEventPublish_ = SceneEventPublish::Subscribe();
+    scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -4224,13 +4224,13 @@ WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string&
 {
     // publish data
     bool ret = eventHandler_->PostSyncTask(
-        [this, cmd = std::move(cmd)] { return sceneEventPublish_->Publish(cmd); }, "PublishSCBDumper");
+        [this, cmd = std::move(cmd)] { return scbDumpSubscriber_->Publish(cmd); }, "PublishSCBDumper");
     if (!ret) {
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     // get response event
     auto task = [this, &dumpInfo] {
-        dumpInfo.append(sceneEventPublish_->GetDebugDumpInfo(WAIT_TIME));
+        dumpInfo.append(scbDumpSubscriber_->GetDebugDumpInfo(WAIT_TIME));
         return WSError::WS_OK;
     };
     eventHandler_->PostSyncTask(task, "GetDataSCBDumper");
