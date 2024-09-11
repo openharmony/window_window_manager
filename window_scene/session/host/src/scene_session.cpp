@@ -461,9 +461,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             auto movedSurfaceNode = session->GetMovedSurfaceNode();
-            if (!movedSurfaceNode) {
-                return WSError::WS_ERROR_DESTROYED_OBJECT;
-            }
             uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
             session->moveDragController_->InitMoveDragProperty();
             auto sessionProperty = session->GetSessionProperty();
@@ -2256,10 +2253,6 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 void SceneSession::MoveDragSurfaceNodeHandler(const SizeChangeReason& reason)
 {
     auto movedSurfaceNode = GetMovedSurfaceNode();
-    if (!movedSurfaceNode) {
-        TLOGE(WmsLogTag::WMS_MAIN, "movedSurfaceNode is null");
-        return ;
-    }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplaySet()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
