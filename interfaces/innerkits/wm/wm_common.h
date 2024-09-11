@@ -284,36 +284,7 @@ enum class WindowUIType : uint8_t {
 /**
  * @brief Used to map from WMError to WmErrorCode.
  */
-const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
-    {WMError::WM_OK,                                   WmErrorCode::WM_OK                           },
-    {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_DESTROYED_OBJECT,               WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT     },
-    {WMError::WM_ERROR_INVALID_OPERATION,              WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_PARAM,                  WmErrorCode::WM_ERROR_INVALID_PARAM          },
-    {WMError::WM_ERROR_INVALID_PERMISSION,             WmErrorCode::WM_ERROR_NO_PERMISSION          },
-    {WMError::WM_ERROR_NOT_SYSTEM_APP,                 WmErrorCode::WM_ERROR_NOT_SYSTEM_APP         },
-    {WMError::WM_ERROR_INVALID_TYPE,                   WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_WINDOW,                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,    WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_IPC_FAILED,                     WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_NO_MEM,                         WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_NO_REMOTE_ANIMATION,            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_INVALID_DISPLAY,                WmErrorCode::WM_ERROR_INVALID_DISPLAY        },
-    {WMError::WM_ERROR_INVALID_PARENT,                 WmErrorCode::WM_ERROR_INVALID_PARENT         },
-    {WMError::WM_ERROR_OPER_FULLSCREEN_FAILED,         WmErrorCode::WM_ERROR_OPER_FULLSCREEN_FAILED },
-    {WMError::WM_ERROR_REPEAT_OPERATION,               WmErrorCode::WM_ERROR_REPEAT_OPERATION       },
-    {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED   },
-    {WMError::WM_ERROR_PIP_DESTROY_FAILED,             WmErrorCode::WM_ERROR_PIP_DESTROY_FAILED     },
-    {WMError::WM_ERROR_PIP_STATE_ABNORMALLY,           WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY   },
-    {WMError::WM_ERROR_PIP_CREATE_FAILED,              WmErrorCode::WM_ERROR_PIP_CREATE_FAILED      },
-    {WMError::WM_ERROR_PIP_INTERNAL_ERROR,             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR     },
-    {WMError::WM_ERROR_PIP_REPEAT_OPERATION,           WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION   },
-    {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING        },
-    {WMError::WM_ERROR_INVALID_SESSION,                WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-};
+extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
 
 /**
  * @brief Enumerates flag of window.
@@ -1127,12 +1098,14 @@ struct TitleButtonRect {
 /*
  * Config of keyboard animation
  */
-class KeyboardAnimationConfig : public Parcelable {
+class KeyboardAnimationCurve : public Parcelable {
 public:
-    std::string curveType_ = "";
-    std::vector<float> curveParams_ = {};
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    KeyboardAnimationCurve() = default;
+    KeyboardAnimationCurve(const std::string& curveType, const std::vector<float>& curveParams, uint32_t duration)
+        : curveType_(curveType), duration_(duration)
+    {
+        curveParams_.assign(curveParams.begin(), curveParams.end());
+    }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -1156,26 +1129,48 @@ public:
             }
         }
 
-        if (!parcel.WriteUint32(durationIn_) || !parcel.WriteUint32(durationOut_)) {
+        if (!parcel.WriteUint32(duration_)) {
             return false;
         }
         return true;
     }
 
-    static KeyboardAnimationConfig* Unmarshalling(Parcel& parcel)
+    static KeyboardAnimationCurve* Unmarshalling(Parcel& parcel)
     {
-        KeyboardAnimationConfig* config = new KeyboardAnimationConfig;
-        config->curveType_ = parcel.ReadString();
-        auto paramSize = parcel.ReadUint32();
-        if (paramSize == 4) { // 4: param size
+        KeyboardAnimationCurve* config = new KeyboardAnimationCurve;
+        uint32_t paramSize = 0;
+        if (!parcel.ReadString(config->curveType_) || !parcel.ReadUint32(paramSize)) {
+            delete config;
+            return nullptr;
+        }
+
+        if (paramSize == 4) { // 4: paramSize
             for (uint32_t i = 0; i < paramSize; i++) {
-                config->curveParams_.push_back(parcel.ReadFloat());
+                float param = 0.0f;
+                if (!parcel.ReadFloat(param)) {
+                    delete config;
+                    return nullptr;
+                } else {
+                    config->curveParams_.push_back(param);
+                }
             }
         }
-        config->durationIn_ = parcel.ReadUint32();
-        config->durationOut_ = parcel.ReadUint32();
+
+        if (!parcel.ReadUint32(config->duration_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
+
+    std::string curveType_ = "";
+    std::vector<float> curveParams_ = {};
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn;
+    KeyboardAnimationCurve curveOut;
 };
 
 enum class CaseType {

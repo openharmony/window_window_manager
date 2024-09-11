@@ -861,7 +861,7 @@ HWTEST_F(SceneSessionManagerTest4, DealwithDrawingContentChange, Function | Smal
     sceneSession->surfaceNode_->id_ = 1;
     ssm_->DealwithDrawingContentChange(drawingContentChangeInfo);
 
-    ssm_->openDebugTrace = true;
+    ssm_->openDebugTrace_ = true;
     ssm_->DealwithDrawingContentChange(drawingContentChangeInfo);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
