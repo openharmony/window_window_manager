@@ -74,7 +74,7 @@ struct SecSurfaceInfo;
 class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
-class SceneEventPublish;
+class ScbDumpSubscriber;
 
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
@@ -804,7 +804,7 @@ private:
     /*
      * Dump
      */
-    std::shared_ptr<SceneEventPublish> sceneEventPublish_;
+    std::shared_ptr<ScbDumpSubscriber> scbDumpSubscriber_;
 
     struct SessionInfoList {
         int32_t uid_;
