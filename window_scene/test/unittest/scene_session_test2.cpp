@@ -1455,7 +1455,6 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->leashWinSurfaceNode_ = nullptr;
-    sceneSession->surfaceNode_ = new std::make_shared<RSSurfaceNode> surfaceNode;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
