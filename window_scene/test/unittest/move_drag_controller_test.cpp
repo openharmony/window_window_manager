@@ -1020,6 +1020,19 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
     int32_t res = moveDragController->GetOriginalPointerPosY();
     ASSERT_EQ(posY, res);
 }
+
+/**
+ * @tc.name: IsOverlap
+ * @tc.desc: IsOverlap
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, IsOverlap, Function | SmallTest | Level1)
+{
+    WSRect winRect1 = {100, 100, 1000, 1000};
+    WSRect winRect2 = {100, 100, 1000, 1000};
+    int32_t res = moveDragController->IsOverlap(winRect1, winRect2);
+    ASSERT_EQ(true, res);
+}
 }
 }
 }
