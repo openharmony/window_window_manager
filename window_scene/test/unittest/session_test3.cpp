@@ -29,7 +29,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/screen/include/screen_session.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
