@@ -816,6 +816,7 @@ enum class MaximizeMode : uint32_t {
     MODE_AVOID_SYSTEM_BAR,
     MODE_FULL_FILL,
     MODE_RECOVER,
+    MODE_END,
 };
 
 /**
