@@ -662,7 +662,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    if (!data.ReadUint32(mode) || mode >= static_cast<uint32_t>(MaximizeMode::MODE_END)) {
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
