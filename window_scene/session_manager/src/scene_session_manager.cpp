@@ -9601,11 +9601,8 @@ WMError SceneSessionManager::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
     {
         std::unique_lock<std::shared_mutex> lock(processSnapshotSkipPidSetMutex_);
         if (isEnabled) {
-            auto iter = processSnapshotSkipPidSet_.find(pid);
-            if (iter == processSnapshotSkipPidSet_.end()) {
-                processSnapshotSkipPidSet_.insert(pid);
-            }
-        } else if (processSnapshotSkipPidSet_.find(pid) != processSnapshotSkipPidSet_.end()) {
+            processSnapshotSkipPidSet_.insert(pid);
+        } else {
             processSnapshotSkipPidSet_.erase(pid);
         }
     }
@@ -9627,10 +9624,9 @@ WMError SceneSessionManager::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
 void SceneSessionManager::DeleteProcessSnapshotSkipSetPid(int32_t pid)
 {
     std::unique_lock<std::shared_mutex> lock(processSnapshotSkipPidSetMutex_);
-    if (processSnapshotSkipPidSet_.find(pid) != processSnapshotSkipPidSet_.end()) {
+    if (processSnapshotSkipPidSet_.erase(pid) != 0) {
         TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process snapshot skip pid set. pid:%{public}d",
             pid);
-        processSnapshotSkipPidSet_.erase(pid);
     }
 }
 
@@ -9641,11 +9637,9 @@ void SceneSessionManager::DoAddProcessSnapshotSkipForSession(int32_t persistentI
         return;
     }
     auto callingPid = sceneSession->GetCallingPid();
-    auto iter = processSnapshotSkipPidSet_.find(callingPid);
-    if (iter == processSnapshotSkipPidSet_.end()) {
-        return;
+    if (processSnapshotSkipPidSet_.find(callingPid) != processSnapshotSkipPidSet_.end()) {
+        sceneSession->SetSnapshotSkip(true);
     }
-    sceneSession->SetSnapshotSkip(true);
 }
 
 void SceneSessionManager::ReportWindowProfileInfos()
