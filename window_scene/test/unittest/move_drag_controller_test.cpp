@@ -114,6 +114,50 @@ HWTEST_F(MoveDragControllerTest, GetStartDragFlag, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: GetMoveDragStartDisplayId
+ * @tc.desc: test function : GetMoveDragStartDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetMoveDragStartDisplayId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetMoveDragStartDisplayId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetMoveDragEndDisplayId
+ * @tc.desc: test function : GetMoveDragEndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetMoveDragEndDisplayId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetMoveDragEndDisplayId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetParentId
+ * @tc.desc: test function : GetParentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetParentId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetParentId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetAddedDisplaySet
+ * @tc.desc: test function : GetAddedDisplaySet
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetAddedDisplaySet, Function | SmallTest | Level1)
+{
+    std::set<uint64_t> res = GetAddedDisplaySet();
+    ASSERT_EQ(true, res.empty());
+}
+
+/**
  * @tc.name: GetTargetRect
  * @tc.desc: test function : GetTargetRect
  * @tc.type: FUNC
@@ -124,6 +168,12 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, Function | SmallTest | Level1)
     int32_t pos = 0;
     moveDragController->InitMoveDragProperty();
     WSRect res = moveDragController->GetTargetRect();
+    ASSERT_EQ(tmp, res.height_);
+    ASSERT_EQ(tmp, res.width_);
+    ASSERT_EQ(pos, res.posX_);
+    ASSERT_EQ(pos, res.posY_);
+
+    res = moveDragController->GetTargetRect(true);
     ASSERT_EQ(tmp, res.height_);
     ASSERT_EQ(tmp, res.width_);
     ASSERT_EQ(pos, res.posX_);
@@ -140,6 +190,20 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, Function | SmallTest | Le
     int32_t res = 0;
     moveDragController->InitMoveDragProperty();
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: SetCrossProperty
+ * @tc.desc: test function : SetCrossProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, SetCrossProperty, Function | SmallTest | Level1)
+{
+    int32_t res = 0;
+    SetCrossProperty(1, 2);
+    ASSERT_EQ(1, moveDragController->GetMoveStartDisplayId());
+    ASSERT_EQ(2, moveDragController->GetParentId());
+    ASSERT_EQ(true, moveDragController->GetAddedDisplaySet().find(1) != moveDragController->addedDisplaySet_.end());
 }
 
 /**
@@ -1023,7 +1087,7 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
 
 /**
  * @tc.name: IsOverlap
- * @tc.desc: IsOverlap
+ * @tc.desc: test function : IsOverlap
  * @tc.type: FUNC
  */
 HWTEST_F(MoveDragControllerTest, IsOverlap, Function | SmallTest | Level1)
@@ -1032,6 +1096,35 @@ HWTEST_F(MoveDragControllerTest, IsOverlap, Function | SmallTest | Level1)
     WSRect winRect2 = {100, 100, 1000, 1000};
     int32_t res = moveDragController->IsOverlap(winRect1, winRect2);
     ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: GetNewAddedDisplaySet
+ * @tc.desc: test function : GetNewAddedDisplaySet
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetNewAddedDisplaySet, Function | SmallTest | Level1)
+{
+    std::set<uint64_t> res = GetAddedDisplaySet();
+    ASSERT_EQ(true, res.empty());
+}
+
+/**
+ * @tc.name: CalcUnifiedTrans
+ * @tc.desc: test function : CalcUnifiedTrans
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcUnifiedTrans, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t pointerType = pointerEvent->GetSourceType();
+    int32_t pointerPosX = 10;
+    int32_t pointerPosY = 30;
+    moveDragController->InitMoveDragProperty();
+    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTrans(pointerEvent);
+    ASSERT_EQ(10, res.first);
+    ASSERT_EQ(30, res.second);
 }
 }
 }
