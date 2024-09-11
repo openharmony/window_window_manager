@@ -163,14 +163,13 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t parentId)
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap)
 {
     if (parentId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
         return nullptr;
     }
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& [_, pair] : windowSessionMap_) {
+    for (const auto& [_, pair] : sessionMap) {
         auto& window = pair.second;
         if (window && window->GetWindowId() == parentId) {
             if (WindowHelper::IsMainWindow(window->GetType()) ||
@@ -178,7 +177,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t p
                 TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
                 return window;
             }
-            return FindParentMainSession(window->GetParentId());
+            return FindParentMainSession(window->GetParentId(), sessionMap);
         }
     }
     TLOGW(WmsLogTag::WMS_SUB, "don't find main session, parentId:%{public}u", parentId);
@@ -232,7 +231,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
         if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
-            parentSession = FindParentMainSession(property_->GetParentId());
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
         } else {
             parentSession = FindParentSessionByParentId(property_->GetParentId());
         }

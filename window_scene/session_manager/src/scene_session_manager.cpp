@@ -2784,7 +2784,8 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
 
     sptr<SceneSession> parentSession = nullptr;
     if (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
-        parentSession = GetMainParentSceneSession(persistentId);
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        parentSession = GetMainParentSceneSession(persistentId, sceneSessionMap_);
     } else {
         parentSession = GetSceneSession(persistentId);
     }
@@ -2802,20 +2803,26 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
         persistentId, session->GetPersistentId());
 }
 
-sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persistentId)
+sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persistentId,
+    const std::map<int32_t, sptr<SceneSession>>& sessionMap)
 {
-    sptr<SceneSession> parentSession = GetSceneSession(persistentId);
+    auto iter = sessionMap.find(persistentId);
+    if (iter == sessionMap.end()) {
+        WLOGFD("Error found scene session with id: %{public}d", persistentId);
+        return nullptr;
+    }
+    sptr<SceneSession> parentSession = iter->second;
     if (parentSession == nullptr) {
         TLOGW(WmsLogTag::WMS_LIFE, "not find parent session");
         return nullptr;
     }
     bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetParentPersistentId() == 0; // 0: invalid parent session
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
     if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
         TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
         return parentSession;
     }
-    return GetMainParentSceneSession(parentSession->GetParentPersistentId());     
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)

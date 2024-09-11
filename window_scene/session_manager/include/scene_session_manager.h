@@ -146,7 +146,8 @@ public:
     sptr<RootSceneSession> GetRootSceneSession();
     WSRect GetRootSessionAvoidSessionRect(AvoidAreaType type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
-    sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId);
+    sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
+        const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,

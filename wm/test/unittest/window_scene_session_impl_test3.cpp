@@ -1634,7 +1634,8 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentMainSession001, Function | Small
     sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(mainWindowOption);
     toastSubWindowOption->SetParentId(mainWindow->GetPersistentId());
     toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
-    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId());
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
     ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
@@ -1645,7 +1646,8 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentMainSession001, Function | Small
     sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
     toastSubWindowOption->SetParentId(subWindow->GetPersistentId());
     toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
-    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId());
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
     ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
 
     sptr<WindowOption> dialogWindowOption = sptr<WindowOption>::MakeSptr();
@@ -1656,7 +1658,8 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentMainSession001, Function | Small
     sptr<WindowSceneSessionImpl> dialogWindow = sptr<WindowSceneSessionImpl>::MakeSptr(dialogWindowOption);
     toastSubWindowOption->SetParentId(dialogWindow->GetPersistentId());
     toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
-    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId());
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
     ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
 }
 
