@@ -332,6 +332,8 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
+    bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
+    void NotifyUnfreezed(const std::set<int32_t>& pidList, const sptr<ScreenSession>& screenSession);
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     class ScreenIdManager {
@@ -372,7 +374,11 @@ private:
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
+    std::set<DisplayManagerAgentType> agentTypeSet_;
+    std::vector<float> lastFoldAngles_ {};
+    sptr<DisplayChangeInfo> lastDisplayChangeInfo_;
     ScreenChangeEvent lastScreenChangeEvent_ = ScreenChangeEvent::UNKNOWN;
+    std::mutex lastStatusUpdateMutex_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
