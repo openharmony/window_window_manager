@@ -604,7 +604,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
-    return taskScheduler_->PostSyncTask(task);
+    return taskScheduler_->PostSyncTask(task, "SetSessionContinueState");
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig)
@@ -2085,7 +2085,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
         DestroySubSession(scnSession); // destroy sub session by destruction
-        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d, remove:%{public}d,",
+        TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d, remove:%{public}d",
             persistentId, needRemoveSession);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
         WindowDestroyNotifyVisibility(scnSession);
@@ -6161,10 +6161,9 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
 {
     WLOGFI("GetRemoteSessionSnapshotInfo begin");
     DistributedClient dmsClient;
-    int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId,
-        sessionId, sessionSnapshot);
+    int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId, sessionId, sessionSnapshot);
     if (result != ERR_OK) {
-        WLOGFE("GetRemoteSessionSnapshotInfo failed, result = %{public}d", result);
+        WLOGFE("GetRemoteMissionSnapshotInfo failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
