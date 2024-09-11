@@ -1679,8 +1679,8 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession2);
     sceneSession1->SetCallingPid(1000);
     sceneSession2->SetCallingPid(1001);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId, sceneSession2});
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     isEnabled = true;
     result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
