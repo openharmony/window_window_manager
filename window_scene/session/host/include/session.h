@@ -551,6 +551,7 @@ protected:
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
     bool isDirty_ = false;
+    std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     float pivotX_ = 0.0f;
@@ -570,6 +571,7 @@ private:
     void HandleDialogForeground();
     void HandleDialogBackground();
     WSError HandleSubWindowClick(int32_t action);
+    void NotifyPointerEventToRs(int32_t pointAction);
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
