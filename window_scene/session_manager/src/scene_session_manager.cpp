@@ -1589,11 +1589,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
 {
     auto task = [this, &sessionInfo, action, fromScreenId] {
-        sptr<DisplayChangeInfo> info = new (std::nothrow) DisplayChangeInfo();
-        if (info == nullptr) {
-            WLOGFE("new info failed");
-            return;
-        }
+        sptr<DisplayChangeInfo> info = sptr<DisplayChangeInfo>::MakeSptr();
         info->action_ = action;
         info->abilityName_ = sessionInfo.abilityName_;
         info->bundleName_ = sessionInfo.bundleName_;
