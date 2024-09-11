@@ -760,7 +760,6 @@ private:
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
-    void OnSCBSystemSessionBufferAvailable(const WindowType type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
