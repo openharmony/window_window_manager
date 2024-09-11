@@ -1423,14 +1423,6 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         panelSession->GetPersistentId(), keyboardSession->GetPersistentId());
 }
 
-void SceneSessionManager::OnSCBSystemSessionBufferAvailable(WindowType type)
-{
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "In");
-    if (type == WindowType::WINDOW_TYPE_KEYGUARD) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "On screen lock buffer available");
-    }
-}
-
 sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -1439,12 +1431,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     if (sessionInfo.isSystem_) {
         sceneSession = new SCBSystemSession(sessionInfo, specificCb);
         WLOGFI("[WMSSCB]Create SCBSystemSession, type: %{public}d", sessionInfo.windowType_);
-        if (static_cast<OHOS::Rosen::WindowType>(sessionInfo.windowType_) == WindowType::WINDOW_TYPE_KEYGUARD) {
-            TLOGI(WmsLogTag::WMS_MULTI_USER, "Register screen lock buffer available");
-            sceneSession->RegisterBufferAvailableCallback([this] {
-                this->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
-            });
-        }
     } else if (property == nullptr && SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         sceneSession = new MainSession(sessionInfo, specificCb);
         TLOGI(WmsLogTag::WMS_MAIN, "Create MainSession, id: %{public}d", sceneSession->GetPersistentId());

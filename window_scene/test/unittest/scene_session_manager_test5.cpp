@@ -203,19 +203,6 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage, Function | SmallTest | Level3
 }
 
 /**
- * @tc.name: OnSCBSystemSessionBufferAvailable
- * @tc.desc: OnSCBSystemSessionBufferAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, OnSCBSystemSessionBufferAvailable02, Function | SmallTest | Level3)
-{
-    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
-    ASSERT_NE(sceneSessionManager, nullptr);
-    sceneSessionManager->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_FLOAT);
-    delete sceneSessionManager;
-}
-
-/**
  * @tc.name: CreateKeyboardPanelSession
  * @tc.desc: CreateKeyboardPanelSession
  * @tc.type: FUNC
