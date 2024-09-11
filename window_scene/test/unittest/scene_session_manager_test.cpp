@@ -1717,7 +1717,7 @@ HWTEST_F(SceneSessionManagerTest, DoAddProcessWatermarkForSession, Function | Sm
     sceneSession1->SetCallingPid(1);
     ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
 
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId, sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
 
     ssm_->processWatermarkPidMap_.insert({1, "test"});
