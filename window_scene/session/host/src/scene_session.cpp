@@ -2665,12 +2665,6 @@ void SceneSession::SetSystemTouchable(bool touchable)
 {
     Session::SetSystemTouchable(touchable);
     NotifyAccessibilityVisibilityChange();
-    if (isKeyboardPanelEnabled_ && GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        const auto& keyboardPanel = GetKeyboardPanelSession();
-        if (keyboardPanel != nullptr) {
-            keyboardPanel->SetSystemTouchable(touchable);
-        }
-    }
 }
 
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
