@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/fold_screen_controller.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/fold_screen_controller.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

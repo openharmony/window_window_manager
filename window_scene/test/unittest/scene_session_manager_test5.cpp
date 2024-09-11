@@ -22,7 +22,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"

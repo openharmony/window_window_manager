@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 #include <csignal>
 #include <cstdint>
