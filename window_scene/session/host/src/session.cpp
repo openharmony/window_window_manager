@@ -2293,6 +2293,17 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError Session::RequestFocus(bool isFocused)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
