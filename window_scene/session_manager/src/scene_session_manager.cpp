@@ -2458,8 +2458,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         WLOGFD("check create permission success, input method app create input method window.");
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP ||
-        type == WindowType::WINDOW_TYPE_TOAST) {
+    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
         return true;
     }
@@ -2787,7 +2786,7 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
     }
 }
 
-void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session)
+void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags)
 {
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "SubSession is nullptr");
@@ -2799,7 +2798,13 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
         return;
     }
 
-    auto parentSession = GetSceneSession(persistentId);
+    sptr<SceneSession> parentSession = nullptr;
+    if (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        parentSession = GetMainParentSceneSession(persistentId, sceneSessionMap_);
+    } else {
+        parentSession = GetSceneSession(persistentId);
+    }
     if (parentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Can't find CreateSubSessionListener, parentId: %{public}d, subId: %{public}d",
             persistentId, session->GetPersistentId());
@@ -2812,6 +2817,32 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
     }
     TLOGD(WmsLogTag::WMS_LIFE, "NotifyCreateSubSession success, parentId: %{public}d, subId: %{public}d",
         persistentId, session->GetPersistentId());
+}
+
+sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persistentId,
+    const std::map<int32_t, sptr<SceneSession>>& sessionMap)
+{
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_LIFE, "invalid persistentId id");
+        return nullptr;
+    }
+    auto iter = sessionMap.find(persistentId);
+    if (iter == sessionMap.end()) {
+        WLOGFD("Error found scene session with id: %{public}d", persistentId);
+        return nullptr;
+    }
+    sptr<SceneSession> parentSession = iter->second;
+    if (parentSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "not find parent session");
+        return nullptr;
+    }
+    bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
+        return parentSession;
+    }
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)

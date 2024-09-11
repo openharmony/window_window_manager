@@ -141,6 +141,7 @@ enum class SubWindowModalType : uint32_t {
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
+    TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
 };
 
