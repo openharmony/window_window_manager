@@ -1567,21 +1567,21 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
- * @tc.name: SetProcessSnapshotSkip
- * @tc.desc: add or cancel process snapshot skip by pid
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: add or cancel snapshot skip for app process
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, SetProcessSnapshotSkip, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Level3)
 {
     int32_t pid = 1000;
-    bool isEnabled = true;
-    auto result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    bool skip = true;
+    auto result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
-    ASSERT_NE(ssm_->processSnapshotSkipPidSet_.find(pid), ssm_->processSnapshotSkipPidSet_.end());
-    isEnabled = false;
-    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    ASSERT_NE(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
+    skip = false;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
-    ASSERT_EQ(ssm_->processSnapshotSkipPidSet_.find(pid), ssm_->processSnapshotSkipPidSet_.end());
+    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
 
     SessionInfo info;
     sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
@@ -1593,11 +1593,11 @@ HWTEST_F(SceneSessionManagerTest, SetProcessSnapshotSkip, Function | SmallTest |
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({-1, nullptr});
-    isEnabled = true;
-    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    skip = true;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
-    isEnabled = false;
-    result = ssm_->SetProcessSnapshotSkip(pid, isEnabled);
+    skip = false;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());

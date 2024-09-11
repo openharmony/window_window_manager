@@ -135,16 +135,16 @@ HWTEST_F(WindowAdapterTest, CheckWindowId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetProcessSnapshotSkip
- * @tc.desc: WindowAdapter/SetProcessSnapshotSkip
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: WindowAdapter/SkipSnapshotForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetProcessSnapshotSkip, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
 {
     int32_t pid = 1000;
-    bool isEnabled = true;
+    bool skip = true;
     WindowAdapter windowAdapter;
-    windowAdapter.SetProcessSnapshotSkip(pid, isEnabled);
+    windowAdapter.SkipSnapshotForAppProcess(pid, skip);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
 }

@@ -1399,15 +1399,6 @@ WMError WindowManager::UnregisterWindowStyleChangedListener(const sptr<IWindowSt
     return ret;
 }
 
-WMError WindowManager::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
-{
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessSnapshotSkip(pid, isEnabled);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "set process snapshot skip failed");
-    }
-    return ret;
-}
-
 WindowStyleType WindowManager::GetWindowStyleType()
 {
     WindowStyleType styleType;
@@ -1415,6 +1406,15 @@ WindowStyleType WindowManager::GetWindowStyleType()
         return styleType;
     }
     return styleType;
+}
+
+WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "set process snapshot skip failed");
+    }
+    return ret;
 }
 
 } // namespace Rosen

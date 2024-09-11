@@ -1234,11 +1234,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, Functi
 }
 
 /**
- * @tc.name: HandleSetProcessSnapshotSkip
- * @tc.desc: test HandleSetProcessSnapshotSkip
+ * @tc.name: HandleSkipSnapshotForAppProcess
+ * @tc.desc: test HandleSkipSnapshotForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessSnapshotSkip, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1246,7 +1246,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessSnapshotSkip, Function | S
     data.WriteInt32(123);
     data.WriteBool(true);
 
-    int res = stub_->HandleSetProcessSnapshotSkip(data, reply);
+    int res = stub_->HandleSkipSnapshotForAppProcess(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
