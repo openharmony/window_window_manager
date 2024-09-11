@@ -131,7 +131,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI] end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -326,7 +326,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
         bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
           info.bundleName_ == "");
         TLOGI(WmsLogTag::WMS_SCB,
-            "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
+            "root isCalledRightlyByCallerId: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
     }
 }
@@ -351,7 +351,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             }
         }
         if (sceneSession == nullptr) {
-            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            WLOGFI("return nullptr, RequestSceneSession");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
                 WLOGFE("RequestSceneSession return nullptr");
