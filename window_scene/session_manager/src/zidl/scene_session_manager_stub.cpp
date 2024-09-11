@@ -39,8 +39,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
     MessageOption& option)
 {
     switch (code) {
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
-            return HandleSetProcessSnapshotSkip(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION):
             return HandleCreateAndConnectSpecificSession(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION):
@@ -170,6 +168,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
+            return HandleSkipSnapshotForAppProcess(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1052,15 +1052,6 @@ int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetProcessSnapshotSkip(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t pid = data.ReadInt32();
-    bool isEnabled = data.ReadBool();
-    WMError errCode = SetProcessSnapshotSkip(pid, isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
 {
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -1085,6 +1076,23 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
         TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds fail.");
         return ERR_INVALID_DATA;
     }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    bool skip = false;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(skip)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readBool skip");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SkipSnapshotForAppProcess(pid, skip);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

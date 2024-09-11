@@ -130,10 +130,10 @@ public:
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
     virtual WMError GetFreeMultiWindowEnableState(bool& enable);
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
-    virtual WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled);
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
+    virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
     
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

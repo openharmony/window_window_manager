@@ -108,10 +108,10 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
-        TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
+        TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -258,16 +258,14 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled) override
-    {
-        return WMError::WM_OK;
-    }
     WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
 
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
 
     virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
+    
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

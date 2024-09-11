@@ -229,10 +229,6 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
-    {
-        return WMError::WM_OK;
-    }
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect)
     {
         return WMError::WM_OK;
@@ -245,6 +241,7 @@ public:
     {
         return WMError::WM_OK;
     };
+    virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
 };
 }
 }
