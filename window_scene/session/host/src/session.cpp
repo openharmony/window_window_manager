@@ -75,12 +75,14 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
-    property_ = new WindowSessionProperty();
+    property_ = sptr<WindowSessionProperty>::MakeSptr();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+
     if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
         mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
+
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
         area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
@@ -111,7 +113,7 @@ void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task, name]() {
+    auto localTask = [task = std::move(task), name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -124,7 +126,7 @@ void Session::PostExportTask(Task&& task, const std::string& name, int64_t delay
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task, name]() {
+    auto localTask = [task = std::move(task), name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -163,7 +165,7 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
 }
 
-void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc &func)
+void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
 {
     frameLayoutFinishFunc_ = func;
 }
@@ -1222,7 +1224,7 @@ WSError Session::DrawingCompleted()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}" PRIu32,
+    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}u",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
@@ -1400,7 +1402,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
         return;
     }
-    sptr<SessionLifeCycleTask> lifeCycleTask = new SessionLifeCycleTask(std::move(task), name, taskType);
+    sptr<SessionLifeCycleTask> lifeCycleTask = sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
     lifeCycleTaskQueue_.push_back(lifeCycleTask);
     TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
         name.c_str(), persistentId_);

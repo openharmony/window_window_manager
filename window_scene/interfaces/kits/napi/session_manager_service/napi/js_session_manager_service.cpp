@@ -60,7 +60,7 @@ public:
 private:
     napi_value OnInitSessionManagerService(napi_env env, napi_callback_info info)
     {
-        TLOGI(WmsLogTag::WMS_SCB, "called");
+        TLOGI(WmsLogTag::WMS_SCB, "in");
         if (SessionManagerService::GetInstance() != nullptr) {
             SessionManagerService::GetInstance()->Init();
         }
@@ -69,7 +69,7 @@ private:
 
     napi_value OnNotifySceneBoardAvailable(napi_env env, napi_callback_info info)
     {
-        TLOGI(WmsLogTag::WMS_RECOVER, "called");
+        TLOGI(WmsLogTag::WMS_RECOVER, "in");
         if (SessionManagerService::GetInstance() != nullptr) {
             SessionManagerService::GetInstance()->NotifySceneBoardAvailable();
         }
@@ -79,7 +79,7 @@ private:
 
 napi_value JsSessionManagerServiceInit(napi_env env, napi_value exportObj)
 {
-    WLOGI("JsSessionManagerServiceInit is called.");
+    WLOGFI("in");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("JsSessionManagerServiceInit env or exportObj is nullptr");
         return nullptr;
