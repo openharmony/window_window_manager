@@ -468,7 +468,7 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
-    if (foldDisplayMode == FoldDisplayMode::FULL &&
+    if (foldDisplayMode == FoldDisplayMode::FULL && g_screenRotationOffSet == ROTATION_270 &&
         property_.GetBounds() == bounds && property_.GetRotation() != static_cast<float>(rotation)) {
         needUpdateToInputManager = true;
     }
@@ -478,8 +478,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
-        && g_screenRotationOffSet == ROTATION_270) {
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
         // fold phone need fix 90 degree by remainder 360 degree
         int foldRotation = (rotation + 90) % 360;
         updateToInputManagerCallback_(static_cast<float>(foldRotation));

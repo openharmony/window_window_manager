@@ -17,15 +17,44 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "FoldScreenPolicy"};
+    const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
+} // namespace
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
-void FoldScreenPolicy::LockDisplayStatus(bool locked) { lockDisplayStatus_ = locked; }
+
+FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
+{
+    return lastDisplayMode_;
+}
+
+void FoldScreenPolicy::LockDisplayStatus(bool locked)
+{
+    lockDisplayStatus_ = locked;
+}
+
+FoldStatus FoldScreenPolicy::GetFoldStatus()
+{
+    return lastFoldStatus_;
+}
+
+void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
+{
+    WLOGI("SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    currentFoldStatus_ = foldStatus;
+    lastFoldStatus_ = foldStatus;
+}
+
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 ScreenId FoldScreenPolicy::GetCurrentScreenId() { return screenId_; }
-sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion() { return currentFoldCreaseRegion_; }
+
+sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion()
+{
+    return currentFoldCreaseRegion_;
+}
 
 void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
@@ -33,24 +62,6 @@ void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 }
 
 void FoldScreenPolicy::UpdateForPhyScreenPropertyChange() {}
-
-FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
-{
-    std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-    return globalDisplayMode_;
-}
-
-FoldStatus FoldScreenPolicy::GetFoldStatus()
-{
-    return globalFoldStatus_;
-}
-
-void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
-{
-    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
-    currentFoldStatus_ = foldStatus;
-    globalFoldStatus_ = foldStatus;
-}
 
 void FoldScreenPolicy::ClearState()
 {

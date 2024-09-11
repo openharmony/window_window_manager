@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "fold_screen_controller/single_display_fold_policy.h"
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
-#include "fold_screen_controller/single_display_fold_policy.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
@@ -128,7 +127,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
-        globalDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
     }
 }
 

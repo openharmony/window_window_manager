@@ -19,43 +19,46 @@
 #include <sstream>
 #include <parameters.h>
 #include <regex>
-
 namespace OHOS {
 namespace Rosen {
 namespace {
-    static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
-    static const  std::string SINGLE_DISPLAY = "1";
-    static const std::string DUAL_DISPLAY = "2";
+static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
+static const std::string INVALID_DEVICE = "-1";
+static const std::string PORTRAIT_DEVICE = "0";
+static const std::string SINGLE_DISPLAY = "1";
+static const std::string DUAL_DISPLAY = "2";
 }
 class FoldScreenStateInternel {
 public:
+    static std::string getFoldType()
+    {
+        if (!IsValidFoldType(g_foldScreenType)) {
+            return INVALID_DEVICE;
+        }
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return INVALID_DEVICE;
+        }
+        return foldTypes[0];
+    }
+
     static bool IsFoldScreenDevice()
     {
-        return g_foldScreenType != "";
+        std::string foldType = getFoldType();
+        return foldType != INVALID_DEVICE && foldType != PORTRAIT_DEVICE;
     }
 
+    // is two logic screen device
     static bool IsDualDisplayFoldDevice()
     {
-        if (!IsValidFoldType(g_foldScreenType)) {
-            return false;
-        }
-        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
-        if (foldTypes.empty()) {
-            return false;
-        }
-        return foldTypes[0] == DUAL_DISPLAY;
+        return getFoldType() == DUAL_DISPLAY;
     }
 
+    // only one logic screen device
     static bool IsSingleDisplayFoldDevice()
     {
-        if (!IsValidFoldType(g_foldScreenType)) {
-            return false;
-        }
-        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
-        if (foldTypes.empty()) {
-            return false;
-        }
-        return foldTypes[0] == SINGLE_DISPLAY;
+        // ALTB ccm property conflict with the chip, waiting for chip conflict resolution
+        return !IsDualDisplayFoldDevice();
     }
 
     static std::vector<std::string> StringSplit(const std::string& str, char delim)
