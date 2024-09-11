@@ -2172,16 +2172,6 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
 void SceneSession::MoveDragSurfaceNodeHandler(const SizeChangeReason& reason)
 {
-
-    if (!moveDragController_) {
-        WLOGE("moveDragController_ is null");
-        return;
-    }
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "property is null");
-        return;
-    }
     auto movedSurfaceNode = GetMovedSurfaceNode();
     if (!movedSurfaceNode) {
         TLOGE(WmsLogTag::WMS_MAIN, "movedSurfaceNode is null");
@@ -4361,6 +4351,8 @@ uint32_t SceneSession::UpdateUIParam()
 
 bool SceneSession::UpdateVisibilityInner(bool visibility)
 {
+    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, isVisible_: %{public}d, visibility: %{public}d",
+        GetPersistentId(), isVisible_, visibility);
     if (isVisible_ == visibility) {
         return false;
     }
@@ -4484,6 +4476,8 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
 
 bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
 {
+    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, zOrder_: %{public}u, zOrder: %{public}u",
+        GetPersistentId(), zOrder_, zOrder);
     if (zOrder_ == zOrder) {
         return false;
     }

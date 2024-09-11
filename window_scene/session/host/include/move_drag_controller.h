@@ -132,11 +132,12 @@ private:
         int32_t sourceType, const WSRect& winRect);
     void CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect);
     WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    std::pair<int32_t, int32_t> CalcUnifiedTrans(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem) const;
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
-    void UpdateTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
