@@ -1407,6 +1407,27 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
 }
+/**
+ * @tc.name: MoveDragSurfaceNodeHandler
+ * @tc.desc: MoveDragSurfaceNodeHandler Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MoveDragSurfaceNodeHandler, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MoveDragSurfaceNodeHandler";
+    info.bundleName_ = "MoveDragSurfaceNodeHandler";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    session->MoveDragSurfaceNodeHandler(SizeChangeReason::DRAG);
+    session->MoveDragSurfaceNodeHandler(SizeChangeReason::MOVE);
+    session->MoveDragSurfaceNodeHandler(SizeChangeReason::DRAG_END);
+    session->MoveDragSurfaceNodeHandler(SizeChangeReason::DRAG_START);
+}
 }
 }
 }
