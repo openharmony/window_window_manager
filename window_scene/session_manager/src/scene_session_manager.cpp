@@ -2806,6 +2806,10 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
 sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persistentId,
     const std::map<int32_t, sptr<SceneSession>>& sessionMap)
 {
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_LIFE, "invalid persistentId id");
+        return nullptr;
+    }
     auto iter = sessionMap.find(persistentId);
     if (iter == sessionMap.end()) {
         WLOGFD("Error found scene session with id: %{public}d", persistentId);
