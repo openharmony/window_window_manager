@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
