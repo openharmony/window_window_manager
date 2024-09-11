@@ -237,8 +237,8 @@ void KeyboardSession::OnCallingSessionUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->onKeyboardGravityChange_) {
-        sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+    if (keyboardGravityChangeFunc_) {
+        keyboardGravityChangeFunc_(gravity);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {
@@ -516,6 +516,9 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
     if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);
         RestoreCallingSession();
+
+        MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
+        NotifySessionRectChange(GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
 
         sessionProperty->SetCallingSessionId(callingSessionId);
         WSRect panelRect = { 0, 0, 0, 0 };

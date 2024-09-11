@@ -1052,5 +1052,23 @@ napi_value ExtensionWindowAttributeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SUB_WINDOW)));
     return objValue;
 }
+
+std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback>&& execute,
+    std::unique_ptr<NapiAsyncTask::CompleteCallback>&& complete, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        NAPI_CALL(env, napi_create_promise(env, &nativeDeferred, result));
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::move(execute), std::move(complete));
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::move(execute), std::move(complete));
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

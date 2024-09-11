@@ -279,7 +279,7 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         return;
     }
 
-    WLOGFI("[NAPI]OnRecoverSceneSession");
+    WLOGFI("[NAPI]");
     wptr<SceneSession> weakSession(sceneSession);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, weakSession, sessionInfo, jsCallBack = GetJSCallback(RECOVER_SCENE_SESSION_CB), env = env_]() {
@@ -310,7 +310,7 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         napi_value argv[] = { jsSceneSessionObj, jsSessionRecoverInfo };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    WLOGFI("[NAPI]OnRecoverSceneSession post task");
+    WLOGFD("[NAPI] post task");
     taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
@@ -357,7 +357,7 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const 
 
 void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
 {
-    WLOGFI("[NAPI]OnStartUIAbilityError");
+    WLOGFI("[NAPI]");
 
     auto task = [this, errorCode, jsCallBack = GetJSCallback(START_UI_ABILITY_ERROR), env = env_]() {
         if (jsCallBack == nullptr) {
@@ -372,7 +372,7 @@ void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
 
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
-    WLOGFD("[NAPI]OnOutsideDownEvent");
+    WLOGFD("[NAPI]");
 
     auto task = [this, x, y, jsCallBack = GetJSCallback(OUTSIDE_DOWN_EVENT_CB), env = env_]() {
         if (jsCallBack == nullptr) {
@@ -397,7 +397,7 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnShiftFocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
 
     auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_]() {
         if (jsCallBack == nullptr) {
@@ -412,7 +412,7 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 
 void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
 {
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]OnCallingSessionIdChange");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
     auto task = [this, sessionId, jsCallBack = GetJSCallback(CALLING_WINDOW_ID_CHANGE_CB), env = env_]() {
         if (jsCallBack == nullptr) {
             WLOGFE("[NAPI]jsCallBack is nullptr");
@@ -534,7 +534,7 @@ napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::UpdateFocus(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "UpdateFocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateFocus(env, info) : nullptr;
 }
@@ -556,7 +556,7 @@ napi_value JsSceneSessionManager::CheckSceneZOrder(napi_env env, napi_callback_i
 
 napi_value JsSceneSessionManager::InitUserInfo(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]Init user info");
+    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnInitUserInfo(env, info) : nullptr;
 }
@@ -1354,7 +1354,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         return NapiGetUndefined(env);
     }
     if (rootScene_ == nullptr) {
-        rootScene_ = new RootScene();
+        rootScene_ = sptr<RootScene>::MakeSptr();
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
@@ -2101,12 +2101,12 @@ napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_c
     WMError ret = SceneSessionManager::GetInstance().SetSystemAnimatedScenes(sceneType);
     if (ret != WMError::WM_OK) {
         WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-        WLOGFE("[NAPI]Set system animated scene failed, return %{public}d", wmErrorCode);
+        WLOGFE("[NAPI] failed, return %{public}d", wmErrorCode);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode),
             "Set system animated scene failed."));
         return NapiGetUndefined(env);
     }
-    WLOGFE("[NAPI]Set system animated scene succeed, return WmErrorCode::WM_OK");
+    WLOGFI("[NAPI] success");
     return NapiGetUndefined(env);
 }
 
@@ -2157,7 +2157,7 @@ napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_in
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    std::string msg = "";
+    std::string msg;
     if (argc == ARGC_THREE) {
         if (!ConvertFromJsValue(env, argv[ARGC_TWO], msg)) {
             WLOGFE("[NAPI]Failed to convert parameter to cmd msg");
@@ -2167,7 +2167,7 @@ napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_in
         }
     }
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, msg);
-    WLOGFD("[NAPI]PerfRequestEx success cmdId: %{public}d onOffTag: %{public}u msg:%{public}s",
+    WLOGFD("[NAPI]success cmdId: %{public}d onOffTag: %{public}u msg:%{public}s",
         cmdId, static_cast<uint32_t>(onOffTag), msg.c_str());
 #endif
     return NapiGetUndefined(env);
@@ -2269,7 +2269,7 @@ napi_value JsSceneSessionManager::OnGetRootSceneUIContext(napi_env env, napi_cal
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
-    WLOGFD("OnGetRootSceneUIContext success");
+    WLOGFD("success");
     return uiContext;
 }
 
@@ -2322,7 +2322,7 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    std::string bundleName = "";
+    std::string bundleName;
     if (!ConvertFromJsValue(env, argv[0], bundleName)) {
         WLOGFE("[NAPI]Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -2330,7 +2330,7 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     auto localScheduler = SceneSessionManager::GetInstance().GetTaskScheduler();
-    auto preloadTask = [bundleName]() {
+    auto preloadTask = [bundleName = std::move(bundleName)] {
         SceneSessionManager::GetInstance().PreloadInLakeApp(bundleName);
     };
     localScheduler->PostAsyncTask(preloadTask);
@@ -2378,7 +2378,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             return NapiGetUndefined(env);
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]persistentId: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
+    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
         "reason: %{public}d", persistentId, isFocused, byForeground, reason);
     if (Session::IsScbCoreEnabled()) {
         SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason);
@@ -2718,7 +2718,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         WLOGFI("handle reclaim type, reclaimTag=%{public}s", reclaimTag.c_str());
         if (reclaimTag == "true") {
             auto retId = SceneSessionManager::GetInstance().ReclaimPurgeableCleanMem();
-            WLOGFI("trim ReclaimPurgeableCleanMem finished, retId:%{public}d", retId);
+            WLOGFI("ReclaimPurgeableCleanMem finished, retId:%{public}d", retId);
             return NapiGetUndefined(env);
         }
     }
@@ -2842,7 +2842,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
 
 napi_value JsSceneSessionManager::GetCustomDecorHeight(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]GetCustomDecorHeight");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetCustomDecorHeight(env, info) : nullptr;
 }
@@ -2944,7 +2944,7 @@ std::shared_ptr<NativeReference> JsSceneSessionManager::GetJSCallback(const std:
     }
     jsCallBack = iter->second;
     if (jsCallBack == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Find function name %{public}s, but callback is nullptr!", functionName.c_str());
+        TLOGE(WmsLogTag::DEFAULT, "Find function %{public}s, but callback is nullptr!", functionName.c_str());
     }
     return jsCallBack;
 }
