@@ -333,7 +333,9 @@ private:
     void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
     void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
-    void NotifyUnfreezed(const std::set<int32_t>& pidList, const sptr<ScreenSession>& screenSession);
+    void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
+    void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
+        const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     class ScreenIdManager {
@@ -374,7 +376,7 @@ private:
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
-    std::set<DisplayManagerAgentType> agentTypeSet_;
+    std::map<int32_t, std::set<DisplayManagerAgentType>> pidAgentTypeMap_;
     std::vector<float> lastFoldAngles_ {};
     sptr<DisplayChangeInfo> lastDisplayChangeInfo_;
     ScreenChangeEvent lastScreenChangeEvent_ = ScreenChangeEvent::UNKNOWN;
