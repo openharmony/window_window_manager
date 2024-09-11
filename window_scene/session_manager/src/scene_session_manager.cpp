@@ -9600,7 +9600,7 @@ WMError SceneSessionManager::SetProcessSnapshotSkip(int32_t pid, bool isEnabled)
         pid, isEnabled);
     {
         std::unique_lock<std::shared_mutex> lock(processSnapshotSkipPidSetMutex_);
-        if (isEnable) {
+        if (isEnabled) {
             auto iter = processSnapshotSkipPidSet_.find(pid);
             if (iter == processSnapshotSkipPidSet_.end()) {
                 processSnapshotSkipPidSet_.insert(pid);
@@ -9636,7 +9636,7 @@ void SceneSessionManager::DeleteProcessSnapshotSkipSetPid(int32_t pid)
 
 void SceneSessionManager::DoAddProcessSnapshotSkipForSession(int32_t persistentId)
 {
-    auto sceneSession = GetSceneSession(persistendId);
+    auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         return;
     }
