@@ -869,8 +869,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation01, Function | SmallTe
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
-    ASSERT_EQ(ssm_->systemConfig_.keyboardAnimationConfig_.durationOut_, static_cast<uint32_t>(300));
+    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
+    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
 }
 
 /**
@@ -898,7 +898,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation02, Function | SmallTe
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.keyboardAnimationConfig_.durationOut_, static_cast<uint32_t>(300));
+    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
 }
 
 /**
@@ -926,7 +926,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation03, Function | SmallTe
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
+    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
 }
 
 /**
@@ -948,7 +948,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation04, Function | SmallTe
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
+    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
 }
 
 /**
@@ -1684,7 +1684,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Le
     AppExecFwk::ElementName elementName = want.GetElement();
     int32_t userId = 1;
     std::vector<SCBAbilityInfo> scbAbilityInfos;
-    
+
     ret = ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
@@ -1756,7 +1756,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    
+
     ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
 }
 

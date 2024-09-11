@@ -356,12 +356,20 @@ bool WindowSessionImpl::IsSupportWideGamut()
 
 void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return;
+    }
     auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(colorGamut);
 }
 
 ColorSpace WindowSessionImpl::GetColorSpace()
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
@@ -3459,7 +3467,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
 
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 {
-    return windowSystemConfig_.keyboardAnimationConfig_;
+    return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
 }
 
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -3722,7 +3730,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-        
+
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;

@@ -225,7 +225,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(dialogWindowPid, sceneSessionDialogWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {
@@ -275,7 +276,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {
