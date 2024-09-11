@@ -47,9 +47,9 @@ namespace {
     constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
     constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
-    static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    static const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.half_folded_min_threshold", 85));
-    static float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
+    static const float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.large_fold.half_folded_min_threshold", 25));
     constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
     float oldFoldAngle = 0.0F;
@@ -188,6 +188,9 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         TLOGE(WmsLogTag::DMS, "Invalid value, hall value is: %{public}u, angle value is: %{public}f.",
             globalHall, globalAngle);
         return;
+    }
+    if (globalHall == HALL_FOLDED_THRESHOLD) {
+        globalAngle = ANGLE_MIN_VAL;
     }
     TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
     if (globalHall == HALL_FOLDED_THRESHOLD) {
