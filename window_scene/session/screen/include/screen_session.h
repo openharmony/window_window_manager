@@ -115,9 +115,9 @@ public:
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
     void SetScreenType(ScreenType type);
-    void SetMirrorScreenType(MirrorScreenType mirrorType);
+    void SetMirrorScreenType(MirrorScreenType type);
     MirrorScreenType GetMirrorScreenType();
-    
+
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
 
