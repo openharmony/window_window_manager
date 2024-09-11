@@ -2216,6 +2216,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
+    WSRect globalRect = moveDragController_->GetTargetRect(true);
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc,
@@ -2227,9 +2228,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        HandleCompatibleModeMoveDrag(moveDragController_->GetTargetRect(true), reason, isSupportDragInPcCompatibleMode);
+        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode);
     } else {
-        SetSurfaceBounds(moveDragController_->GetTargetRect(true));
+        SetSurfaceBounds(globalRect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
             UpdateRect(rect, reason, "OnMoveDragCallback");
@@ -4459,8 +4460,6 @@ uint32_t SceneSession::UpdateUIParam()
 
 bool SceneSession::UpdateVisibilityInner(bool visibility)
 {
-    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, isVisible_: %{public}d, visibility: %{public}d",
-        GetPersistentId(), isVisible_, visibility);
     if (isVisible_ == visibility) {
         return false;
     }
@@ -4584,8 +4583,6 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
 
 bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
 {
-    TLGOI(WmsLogTag::WMS_PIPELINE, "id: %{public}lu, zOrder_: %{public}u, zOrder: %{public}u",
-        GetPersistentId(), zOrder_, zOrder);
     if (zOrder_ == zOrder) {
         return false;
     }
