@@ -39,6 +39,7 @@ public:
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override {};
+
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override { return DMError::DM_OK; }
@@ -156,7 +157,7 @@ public:
     virtual void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) {}
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
-    virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
+
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
     {
         return DMError::DM_OK;
@@ -169,6 +170,7 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
