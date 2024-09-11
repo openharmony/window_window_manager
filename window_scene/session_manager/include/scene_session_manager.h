@@ -805,7 +805,7 @@ private:
     /*
      * Window Snapshot
      */
-    std::unordered_set<int32_t> snapshotSkipPidSet_;
+    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;

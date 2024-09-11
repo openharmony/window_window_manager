@@ -1083,11 +1083,11 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
 int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = INVALID_PID;
-    bool skip = false;
     if (!data.ReadInt32(pid)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
         return ERR_INVALID_DATA;
     }
+    bool skip = false;
     if (!data.ReadBool(skip)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to readBool skip");
         return ERR_INVALID_DATA;

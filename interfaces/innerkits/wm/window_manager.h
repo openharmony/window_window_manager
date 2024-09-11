@@ -780,7 +780,7 @@ public:
      *
      * @param pid process id
      * @param skip True means skip, false means not skip.
-     * @return WM_OK means get success, others means get failed.
+     * @return WM_OK means snapshot skip success, others means snapshot skip failed.
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
 
