@@ -129,7 +129,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 return ERR_INVALID_DATA;
             }
             uint32_t eventType = 0;
-            if (!data.ReadUint32(eventType) || eventType >= static_cast<uint32_t>(DragEvent::DRAG_EVENT_END)) {
+            if (!data.ReadUint32(eventType) || eventType > static_cast<uint32_t>(DragEvent::DRAG_EVENT_END)) {
                 return ERR_INVALID_DATA;
             }
             DragEvent event = static_cast<DragEvent>(eventType);

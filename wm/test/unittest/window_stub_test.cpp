@@ -752,6 +752,27 @@ HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest19
+ * @tc.desc: test TRANS_ID_UPDATE_DRAG_EVENT fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(100);
+
+    uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT);
+    int res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 5);
+}
 }
 }
 }
