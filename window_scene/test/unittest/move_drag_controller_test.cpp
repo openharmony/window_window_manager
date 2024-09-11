@@ -153,7 +153,7 @@ HWTEST_F(MoveDragControllerTest, GetParentId, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, GetAddedDisplaySet, Function | SmallTest | Level1)
 {
-    std::set<uint64_t> res = GetAddedDisplaySet();
+    std::set<uint64_t> res = moveDragController->GetAddedDisplaySet();
     ASSERT_EQ(true, res.empty());
 }
 
@@ -200,8 +200,8 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, Function | SmallTest | Le
 HWTEST_F(MoveDragControllerTest, SetCrossProperty, Function | SmallTest | Level1)
 {
     int32_t res = 0;
-    SetCrossProperty(1, 2);
-    ASSERT_EQ(1, moveDragController->GetMoveStartDisplayId());
+    moveDragController->SetCrossProperty(1, 2);
+    ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
     ASSERT_EQ(2, moveDragController->GetParentId());
     ASSERT_EQ(true, moveDragController->GetAddedDisplaySet().find(1) != moveDragController->addedDisplaySet_.end());
 }
@@ -1105,7 +1105,7 @@ HWTEST_F(MoveDragControllerTest, IsOverlap, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, GetNewAddedDisplaySet, Function | SmallTest | Level1)
 {
-    std::set<uint64_t> res = GetAddedDisplaySet();
+    std::set<uint64_t> res = moveDragController->GetAddedDisplaySet();
     ASSERT_EQ(true, res.empty());
 }
 
@@ -1116,12 +1116,14 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplaySet, Function | SmallTest | L
  */
 HWTEST_F(MoveDragControllerTest, CalcUnifiedTrans, Function | SmallTest | Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    int32_t pointerId = pointerEvent->GetPointerId();
-    int32_t pointerType = pointerEvent->GetSourceType();
-    int32_t pointerPosX = 10;
-    int32_t pointerPosY = 30;
     moveDragController->InitMoveDragProperty();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetTargetDisplayId(0);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(0);
+    pointerItem.SetDisplayX(10);
+    pointerItem.SetDisplayY(30);
+    pointerEvent->AddPointerItem(pointerItem);
     std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTrans(pointerEvent);
     ASSERT_EQ(10, res.first);
     ASSERT_EQ(30, res.second);
