@@ -65,9 +65,9 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTrans(const std::shar
 {
     ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
+    // calculate trans in unified coordinates
     int32_t currentDisplayTranX = screenProperty.GetStartX();
     int32_t currentDisplayTranY = screenProperty.GetStartY();
-    // calculate trans in unified coordinates
     int32_t tranX = (pointerItem.GetDisplayX() + currentDisplayTranX) -
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
