@@ -10513,8 +10513,7 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u",
-        pid, skip);
+    TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
     auto task = [this, pid, skip] {
         if (skip) {
             snapshotSkipPidSet_.insert(pid);
