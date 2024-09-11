@@ -131,9 +131,8 @@ private:
     bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY,
         int32_t sourceType, const WSRect& winRect);
     void CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect);
+    std::pair<int32_t, int32_t> CalcUnifiedTrans(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    std::pair<int32_t, int32_t> CalcUnifiedTrans(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem) const;
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
     void ResSchedReportData(int32_t type, bool onOffTag);
