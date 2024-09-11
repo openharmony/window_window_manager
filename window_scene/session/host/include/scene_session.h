@@ -461,6 +461,7 @@ private:
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
     void OnMoveDragCallback(const SizeChangeReason& reason);
+    void MoveDragSurfaceNodeHandler(const SizeChangeReason& reason);
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
