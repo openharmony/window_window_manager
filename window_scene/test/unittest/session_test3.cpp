@@ -1153,6 +1153,20 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
     session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
     ASSERT_EQ(session_->property_, nullptr);
 }
+
+/**
+ * @tc.name: GetMovedSurfaceNode
+ * @tc.desc: GetMovedSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetMovedSurfaceNode, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->leashWinSurfaceNode_ = nullptr;
+    session_->surfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetMovedSurfaceNode();
+    ASSERT_EQ(res, nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
