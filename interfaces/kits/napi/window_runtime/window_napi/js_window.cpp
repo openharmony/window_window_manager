@@ -1866,7 +1866,7 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
     if (uicontent == nullptr) {
         WLOGFW("uicontent is nullptr");
     } else {
-        uicontent->GetAppPaintSize(drawableRect);
+        uicontent->GetWindowPaintSize(drawableRect);
     }
     auto objValue = CreateJsWindowPropertiesObject(env, window, drawableRect);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
