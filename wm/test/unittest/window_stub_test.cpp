@@ -754,7 +754,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnRemoteRequest19
+ * @tc.name: OnRemoteRequest36
  * @tc.desc: test TRANS_ID_UPDATE_DRAG_EVENT fail
  * @tc.type: FUNC
  */
