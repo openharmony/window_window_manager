@@ -329,23 +329,24 @@ void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_valu
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session), persistentId_(session->GetPersistentId())
 {
-    sptr<SceneSession::SessionChangeCallback> sessionchangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    if (session != nullptr) {
-        session->RegisterSessionChangeCallback(sessionchangeCallback);
-    }
-    sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove, int32_t persistentId) {
+    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    session->RegisterSessionChangeCallback(sessionchangeCallback);
+    sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove) {
+        if (!needRemove) {
+            TLOGD(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
+            return;
+        }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
             return;
         }
-        jsSceneSession->ClearCbMap(needRemove, persistentId);
+        jsSceneSession->ClearCbMap();
     };
     sessionchangeCallback_ = sessionchangeCallback;
-    WLOGFD("RegisterSessionChangeCallback success");
 
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
+    TLOGI(WmsLogTag::WMS_LIFE, "created, id:%{public}d", persistentId_);
 }
 
 JsSceneSession::~JsSceneSession()
@@ -651,32 +652,31 @@ void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
     taskScheduler_->PostMainThreadTask(task, "OnSessionInfoLockedStateChange: state " + std::to_string(lockedState));
 }
 
-void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
+void JsSceneSession::ClearCbMap()
 {
-    if (!needRemove) {
-        return;
-    }
-    auto task = [weakThis = wptr(this), persistentId]() {
-        TLOGI(WmsLogTag::WMS_LIFE, "clear callbackMap with persistent id, %{public}d", persistentId);
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ClearCbMap jsSceneSession is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
+        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: persistent id %{public}d", where, jsSceneSession->persistentId_);
         {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession clear jsCbMap");
             std::unique_lock<std::shared_mutex> lock(jsSceneSession->jsCbMapMutex_);
             jsSceneSession->jsCbMap_.clear();
         }
-        auto iter = jsSceneSessionMap_.find(persistentId);
-        if (iter != jsSceneSessionMap_.end()) {
+        // delete native reference
+        if (auto iter = jsSceneSessionMap_.find(jsSceneSession->persistentId_); iter != jsSceneSessionMap_.end()) {
             napi_delete_reference(jsSceneSession->env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
-            TLOGE(WmsLogTag::WMS_LIFE, "deleteRef failed , %{public}d", persistentId);
+            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s: delete ref failed, %{public}d",
+                  where, jsSceneSession->persistentId_);
         }
     };
-    taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId));
+    taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId_));
 }
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
