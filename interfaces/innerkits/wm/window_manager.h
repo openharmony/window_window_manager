@@ -594,7 +594,7 @@ public:
      */
     WMError UnregisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
         const sptr<IDisplayInfoChangedListener>& listener);
-    
+
     /**
      * @brief Register window in same pid visibility changed listener.
      * @caller SA
