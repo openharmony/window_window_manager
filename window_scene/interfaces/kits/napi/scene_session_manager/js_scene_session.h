@@ -133,6 +133,7 @@ private:
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlankFlag(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
+    static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
@@ -178,6 +179,7 @@ private:
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlankFlag(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
+    napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
