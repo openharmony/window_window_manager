@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 #include <csignal>
 #include <cstdint>
@@ -4904,8 +4904,10 @@ void ScreenSessionManager::SetClientInner()
             TLOGE(WmsLogTag::DMS, "clientProxy is null");
             return;
         }
-        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
-            iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        if (iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+            clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+                iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        }
     }
 }
 

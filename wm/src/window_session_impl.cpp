@@ -356,12 +356,20 @@ bool WindowSessionImpl::IsSupportWideGamut()
 
 void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return;
+    }
     auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(colorGamut);
 }
 
 ColorSpace WindowSessionImpl::GetColorSpace()
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
@@ -568,9 +576,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
     }
-    if (reason == SizeChangeReason::DRAG_END) {
-        property_->SetRequestRect(wmRect);
-    }
+    property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
         ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
@@ -724,7 +730,7 @@ void WindowSessionImpl::UpdateDensity()
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
 {
-    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "\
+    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "
         "new {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}",
         useUniqueDensity_, virtualPixelRatio_, useUniqueDensity, virtualPixelRatio);
     bool oldUseUniqueDensity = useUniqueDensity_;
@@ -839,6 +845,19 @@ WMError WindowSessionImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
 }
 
+/** @note @window.focus */
+WMError WindowSessionImpl::RequestFocusByClient(bool isFocused) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto ret = hostSession->RequestFocus(isFocused);
+    return static_cast<WMError>(ret);
+}
+
 bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 {
     if (interactive == interactive_ && hasFirstNotifyInteractive_) {
@@ -899,6 +918,10 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     }
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null!");
+        return;
+    }
+    if (rect.width_ <= 0 || rect.height_ <= 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
         return;
     }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
@@ -2672,8 +2695,6 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2681,6 +2702,8 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -2699,8 +2722,6 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
 
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool isUpdate = false;
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2708,6 +2729,8 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
     {
         std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
         ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
@@ -3418,7 +3441,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
                 (windowSystemConfig_.IsPhoneWindow() ||
                  (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
             }
@@ -3457,7 +3480,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
 
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 {
-    return windowSystemConfig_.keyboardAnimationConfig_;
+    return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
 }
 
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -3720,7 +3743,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-        
+
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;

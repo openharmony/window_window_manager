@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "publish/scene_event_publish.h"
+#include "publish/scb_dump_subscriber.h"
 
 #include <sstream>
 
@@ -21,7 +21,7 @@
 
 namespace OHOS::Rosen {
 
-void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData& data)
+void ScbDumpSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     std::ostringstream oss;
     oss << data.GetData() << std::endl;
@@ -31,7 +31,7 @@ void SceneEventPublish::OnReceiveEvent(const EventFwk::CommonEventData& data)
     cv_.notify_all();
 }
 
-std::string SceneEventPublish::GetDebugDumpInfo(const std::chrono::milliseconds& time)
+std::string ScbDumpSubscriber::GetDebugDumpInfo(const std::chrono::milliseconds& time)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (cv_.wait_for(lock, time, [&] { return valueReady_; })) {
@@ -40,7 +40,7 @@ std::string SceneEventPublish::GetDebugDumpInfo(const std::chrono::milliseconds&
     return "timeout";
 }
 
-WSError SceneEventPublish::Publish(const std::string& cmd)
+WSError ScbDumpSubscriber::Publish(const std::string& cmd)
 {
     {
         std::unique_lock<std::mutex> lock(mutex_);
@@ -66,17 +66,17 @@ WSError SceneEventPublish::Publish(const std::string& cmd)
     return WSError::WS_OK;
 }
 
-std::shared_ptr<SceneEventPublish> SceneEventPublish::Subscribe()
+std::shared_ptr<ScbDumpSubscriber> ScbDumpSubscriber::Subscribe()
 {
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("com.ohos.sceneboard.debug.event.response");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    auto scbSubscriber = std::make_shared<SceneEventPublish>(subscribeInfo);
+    auto scbSubscriber = std::make_shared<ScbDumpSubscriber>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(scbSubscriber);
     return scbSubscriber;
 }
 
-void SceneEventPublish::UnSubscribe(const std::shared_ptr<SceneEventPublish>& scbSubscriber)
+void ScbDumpSubscriber::UnSubscribe(const std::shared_ptr<ScbDumpSubscriber>& scbSubscriber)
 {
     if (scbSubscriber) {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(scbSubscriber);
