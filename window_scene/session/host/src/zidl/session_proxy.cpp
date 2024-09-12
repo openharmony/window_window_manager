@@ -1385,7 +1385,7 @@ WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP),
-                            data, reply, option) != ERR_NONE) {
+        data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
