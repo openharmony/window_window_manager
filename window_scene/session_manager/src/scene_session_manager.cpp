@@ -6467,7 +6467,7 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
         TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
         return;
     }
-    const std::string loadPath = abilityInfo.hapPath.empty() ? abilityInfo.resourcePath : abilityInfo.hapPath;
+    std::string loadPath = abilityInfo.hapPath.empty() ? abilityInfo.resourcePath : abilityInfo.hapPath;
     if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
         TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
