@@ -333,12 +333,12 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     session->RegisterSessionChangeCallback(sessionchangeCallback);
     sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove) {
         if (!needRemove) {
-            TLOGD(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
+            TLOGND(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
             return;
         }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
             return;
         }
         jsSceneSession->ClearCbMap();
@@ -658,10 +658,10 @@ void JsSceneSession::ClearCbMap()
     auto task = [weakThis = wptr(this), where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: persistent id %{public}d", where, jsSceneSession->persistentId_);
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: persistent id %{public}d", where, jsSceneSession->persistentId_);
         {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession clear jsCbMap");
             std::unique_lock<std::shared_mutex> lock(jsSceneSession->jsCbMapMutex_);
@@ -672,7 +672,7 @@ void JsSceneSession::ClearCbMap()
             napi_delete_reference(jsSceneSession->env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
-            TLOGE(WmsLogTag::WMS_LIFE, "%{public}s: delete ref failed, %{public}d",
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: delete ref failed, %{public}d",
                   where, jsSceneSession->persistentId_);
         }
     };

@@ -349,15 +349,16 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 
 void SceneSession::ClearSpecificSessionCbMap()
 {
-    auto task = [weakThis = wptr(this)] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: session is null", where);
             return;
         }
         session->ClearJsSceneSessionCbMap(true);
     };
-    PostTask(task, "ClearSpecificSessionCbMap");
+    PostTask(task, __func__);
 }
 
 void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
