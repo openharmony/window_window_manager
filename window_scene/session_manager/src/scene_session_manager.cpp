@@ -10443,11 +10443,11 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Set process watermark, pid:%{public}d,pictureName:%{public}s,isEnabled:%{public}u",
         pid, pictureName.c_str(), isEnabled);
-    if (isEnabled && pictureName.isEmpty()) {
+    if (isEnabled && pictureName.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "pictureName is empty!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto task = [this, pid] {
+    auto task = [this, pid, pictureName, isEnabled] {
         if (isEnabled) {
             auto iter = processWatermarkPidMap_.find(pid);
             if (iter != processWatermarkPidMap_.end()) {
@@ -10458,6 +10458,8 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
         } else {
             processWatermarkPidMap_.erase(pid);
         }
+
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& item : sceneSessionMap_) {
             auto sceneSession = item.second;
             if (sceneSession == nullptr) {
@@ -10468,7 +10470,7 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
                 sceneSession->SetWatermarkEnabled(pictureName, isEnabled);
             }
         }
-    }
+    };
     taskScheduler_->PostTask(task, "SetProcessWatermark");
     return WMError::WM_OK;
 }
@@ -10493,7 +10495,7 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
                 pid);
             processWatermarkPidMap_.erase(pid);
         }
-    }
+    };
     taskScheduler_->PostTask(task, "RemoveProcessWatermarkPid");
 }
 
