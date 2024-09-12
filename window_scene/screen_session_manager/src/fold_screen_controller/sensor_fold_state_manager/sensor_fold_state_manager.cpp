@@ -38,6 +38,10 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (foldScreenPolicy == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is nullptr");
+        return;
+    }
     if (nextState == FoldStatus::UNKNOWN) {
         WLOGFW("fold state is UNKNOWN");
         return;
@@ -89,7 +93,10 @@ void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
     foldScreenPolicy->ClearState();
 }
 
-void SensorFoldStateManager::RegisterApplicationStateObserver() {}
+void SensorFoldStateManager::RegisterApplicationStateObserver()
+{
+    TLOGI(WmsLogTag::DMS, "current device is not supported");
+}
 
 
 void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
