@@ -109,14 +109,14 @@ uint64_t MoveDragController::GetMoveDragEndDisplayId() const
     return moveDragEndDisplayId_;
 }
 
-uint64_t MoveDragController::GetParentId() const
+uint64_t MoveDragController::GetInitParentId() const
 {
-    return parentId_;
+    return initialParentId_;
 }
 
-std::set<uint64_t> MoveDragController::GetAddedDisplaySet() const
+std::set<uint64_t> MoveDragController::GetDisplaySetDuringMoveDrag() const
 {
-    return addedDisplaySet_;
+    return displaySetDuringMoveDrag_;
 }
 
 bool MoveDragController::GetMovable() const
@@ -131,8 +131,7 @@ WSRect MoveDragController::GetTargetRect(bool needGlobalRect) const
             moveDragProperty_.targetRect_.posX_ + originalDisplayOffsetX_,
             moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_,
             moveDragProperty_.targetRect_.width_,
-            moveDragProperty_.targetRect_.height_
-        };
+            moveDragProperty_.targetRect_.height_};
     } else {
         return moveDragProperty_.targetRect_;
     }
@@ -143,17 +142,21 @@ void MoveDragController::InitMoveDragProperty()
     moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
 }
 
-void MoveDragController::SetCrossProperty(uint64_t displayId, uint64_t parentId)
+void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t initParentId)
 {
-    addedDisplaySet_.insert(displayId);
+    displaySetDuringMoveDrag_.insert(displayId);
     moveDragStartDisplayId_ = displayId;
-    parentId_ = parentId;
-    ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
-        GetScreenSessionById(moveDragStartDisplayId_)->GetScreenProperty();
+    initParentId_ = initParentId;
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().
+        GetScreenSessionById(moveDragStartDisplayId_);
+    if (!screenSession) {
+        return;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
     originalDisplayOffsetX_ = screenProperty.GetStartX();
     originalDisplayOffsetY_ = screenProperty.GetStartY();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId_: %{public}lu, "
-        "originalDisplayOffsetX_: %{public}d, originalDisplayOffsetY_: %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}lu, "
+        "originalDisplayOffsetX: %{public}d, originalDisplayOffsetY: %{public}d",
         moveDragStartDisplayId_, originalDisplayOffsetX_, originalDisplayOffsetY_);
 }
 
@@ -275,7 +278,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     return ret;
 }
 
-void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage, const SizeChangeReason& reason)
+void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage, const SizeChangeReason reason)
 {
     if (isSendHotAreaMessage) {
         WLOGFI("ProcessWindowDragHotAreaFunc start, isSendHotAreaMessage: %{public}u, reason: %{public}d",
@@ -362,21 +365,25 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
-    std::pair<int32_t, int32_t> trans = CalcUnifiedTrans(pointerEvent);
+    std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
     moveDragProperty_.targetRect_ = aspectRatio_ > NEAR_ZERO ?
-    CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
-    CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
+        CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
+        CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     ProcessSessionRectChange(reason);
     return true;
 }
 
-std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTrans(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerId, pointerItem);
-    ScreenProperty screenProperty = ScreenSessionManagerClient::GetInstance().
-        GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()))->GetScreenProperty();
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().
+        GetScreenSessionById(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()));
+    if (!screenSession) {
+        return std::make_pair(0, 0);
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
     // calculate trans in unified coordinates
     int32_t currentDisplayTranX = screenProperty.GetStartX();
     int32_t currentDisplayTranY = screenProperty.GetStartY();
@@ -384,8 +391,7 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTrans(const std::shar
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
         (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
-    std::pair<int32_t, int32_t> Trans = std::make_pair(tranX, tranY);
-    return Trans;
+    return std::make_pair(tranX, tranY);
 }
 
 bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -408,13 +414,12 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
         return false;
     } else {
-        std::pair<int32_t, int32_t> trans = CalcUnifiedTrans(pointerEvent);
+        std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
         moveDragProperty_.targetRect_ = {
             moveDragProperty_.originalRect_.posX_ + trans.first,
             moveDragProperty_.originalRect_.posY_ + trans.second,
             originalRect.width_,
-            originalRect.height_
-        };
+            originalRect.height_};
         WLOGFD("move rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             moveDragProperty_.targetRect_.posX_, moveDragProperty_.targetRect_.posY_,
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);
@@ -674,7 +679,7 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
         WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
 }
 
-void MoveDragController::ProcessSessionRectChange(const SizeChangeReason& reason)
+void MoveDragController::ProcessSessionRectChange(const SizeChangeReason reason)
 {
     if (moveDragCallback_) {
         moveDragCallback_(reason);
@@ -879,7 +884,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
             windowDragHotAreaType_, windowDragHotAreaType);
     }
     if (hotAreaDisplayId_ != displayId) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "the displayId is changed, old: %{public}lu, new: %{public}lu",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "displayId is changed, old: %{public}lu, new: %{public}lu",
             moveDragStartDisplayId_, displayId);
         hotAreaDisplayId_ = displayId;
     }
@@ -921,35 +926,22 @@ void MoveDragController::SetIsPcWindow(bool isPcWindow)
     isPcWindow_ = isPcWindow;
 }
 
-bool MoveDragController::IsOverlap(const WSRect& rect1, const WSRect& rect2)
+std::set<uint64_t> MoveDragController::GetNewAddedDisplaysDuringMoveDrag()
 {
-    int32_t x_begin = std::max(rect1.posX_, rect2.posX_);
-    int32_t x_end = std::min(rect1.posX_ + static_cast<int32_t>(rect1.width_),
-        rect2.posX_ + static_cast<int32_t>(rect2.width_));
-    int32_t y_begin = std::max(rect1.posY_, rect2.posY_);
-    int32_t y_end = std::min(rect1.posY_ + static_cast<int32_t>(rect1.height_),
-        rect2.posY_ + static_cast<int32_t>(rect2.height_));
-    return y_begin < y_end && x_begin < x_end;
-}
-
-std::set<uint64_t> MoveDragController::GetNewAddedDisplaySet()
-{
-    std::set<uint64_t> newAddedDisplayIdSet = {};
+    std::set<uint64_t> newAddedDisplayIdSet;
     WSRect windowRect = GetTargetRect(true);
     std::map<ScreenId, ScreenProperty> screenProperties = ScreenSessionManagerClient::GetInstance().
         GetAllScreensProperties();
-    
-    for (auto& iter : screenProperties) {
-        ScreenProperty screenProperty = iter.second;
+    for (auto& [screenId, screenProperty] : screenProperties) {
         WSRect screenRect = {
             screenProperty.GetStartX(),
             screenProperty.GetStartY(),
             screenProperty.GetBounds().rect_.GetWidth(),
             screenProperty.GetBounds().rect_.GetHeight(),
         };
-        if (addedDisplaySet_.find(iter.first) == addedDisplaySet_.end() && IsOverlap(windowRect, screenRect)) {
-            addedDisplaySet_.insert(iter.first);
-            newAddedDisplayIdSet.insert(iter.first);
+        if (displaySetDuringMoveDrag_.find(screenId) == displaySetDuringMoveDrag_.end() && windowRect.IsOverlap(screenRect)) {
+            displaySetDuringMoveDrag_.insert(screenId);
+            newAddedDisplayIdSet.insert(screenId);
         }
     }
     return newAddedDisplayIdSet;

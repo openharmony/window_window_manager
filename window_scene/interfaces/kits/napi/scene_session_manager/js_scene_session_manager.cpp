@@ -2228,8 +2228,7 @@ napi_value JsSceneSessionManager::OnAddWindowDragHotArea(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     WSRect area;
-    napi_value nativeObj = argv[ARG_INDEX_TWO];
-    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, area)) {
+    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], area)) {
         WLOGFE("[NAPI]Failed to convert parameter to area");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));

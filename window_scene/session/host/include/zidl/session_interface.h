@@ -93,7 +93,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }

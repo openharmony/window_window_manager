@@ -30,10 +30,10 @@ class PointerEvent;
 
 namespace OHOS::Rosen {
 
-using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
+using MoveDragCallback = std::function<void(const SizeChangeReason)>;
 
 using NotifyWindowDragHotAreaFunc = std::function<void(uint64_t displayId, uint32_t type,
-    const SizeChangeReason& reason)>;
+    const SizeChangeReason reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
@@ -48,17 +48,12 @@ public:
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
-    uint64_t GetMoveDragStartDisplayId() const;
-    uint64_t GetMoveDragEndDisplayId() const;
-    uint64_t GetParentId() const;
-    std::set<uint64_t> GetAddedDisplaySet() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(bool needGlobalRect = false) const;
     void InitMoveDragProperty();
-    void SetCrossProperty(uint64_t displayId, uint64_t parentId);
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
     void SetAspectRatio(float ratio);
@@ -74,8 +69,16 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
-    static bool IsOverlap(const WSRect& rect1, const WSRect& rect2);
-    std::set<uint64_t> GetNewAddedDisplaySet();
+
+    /*
+    * Cross Display Move Drag
+    */
+    uint64_t GetMoveDragStartDisplayId() const;
+    uint64_t GetMoveDragEndDisplayId() const;
+    uint64_t GetInitParentId() const;
+    std::set<uint64_t> GetDisplayIdsDuringMoveDrag() const;
+    std::set<uint64_t> GetNewAddedDisplaysDuringMoveDrag();
+    void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentId);
 
 private:
     struct MoveDragProperty {
@@ -123,7 +126,7 @@ private:
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
-    void ProcessSessionRectChange(const SizeChangeReason& reason);
+    void ProcessSessionRectChange(const SizeChangeReason reason);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
     float GetVirtualPixelRatio() const;
@@ -131,12 +134,16 @@ private:
     bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY,
         int32_t sourceType, const WSRect& winRect);
     void CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect);
-    std::pair<int32_t, int32_t> CalcUnifiedTrans(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const sptr<WindowSessionProperty> property);
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
+
+    /*
+    * Cross Display Move Drag
+    */
+    std::pair<int32_t, int32_t> CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
@@ -145,8 +152,6 @@ private:
     bool hasPointDown_ = false;
     float aspectRatio_ = 0.0f;
     float vpr_ = 1.0f;
-    int32_t originalDisplayOffsetX_ = 0;
-    int32_t originalDisplayOffsetY_ = 0;
     int32_t minTranX_ = INT32_MIN;
     int32_t minTranY_ = INT32_MIN;
     int32_t maxTranX_ = INT32_MAX;
@@ -158,10 +163,6 @@ private:
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
     bool isPcWindow_ = false;
-    uint64_t moveDragStartDisplayId_ = -1ULL;
-    uint64_t moveDragEndDisplayId_ = -1ULL;
-    uint64_t parentId_ = -1ULL;
-    std::set<uint64_t> addedDisplaySet_ = {};
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
@@ -184,9 +185,8 @@ private:
     MoveTempProperty moveTempProperty_;
 
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);
+    void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason reason);
     uint32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
-    uint64_t hotAreaDisplayId_ = 0;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
@@ -200,6 +200,17 @@ private:
         {AreaType::RIGHT_BOTTOM,  Gravity::TOP_LEFT},
         {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
     };
+
+    /*
+    * Cross Display Move Drag
+    */
+    uint64_t moveDragStartDisplayId_ = -1ULL;
+    uint64_t moveDragEndDisplayId_ = -1ULL;
+    uint64_t initParentId_ = -1ULL;
+    std::set<uint64_t> displaySetDuringMoveDrag_;
+    uint64_t hotAreaDisplayId_ = 0;
+    int32_t originalDisplayOffsetX_ = 0;
+    int32_t originalDisplayOffsetY_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

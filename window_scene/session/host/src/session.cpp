@@ -176,7 +176,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
     return leashWinSurfaceNode_;
 }
 
-std::shared_ptr<RSSurfaceNode> Session::GetMovedSurfaceNode() const
+std::shared_ptr<RSSurfaceNode> Session::sGetSurfaceNodeForMoveDrag() const
 {
     auto movedSurfaceNode = GetLeashWinSurfaceNode();
     if (!movedSurfaceNode) {

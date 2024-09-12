@@ -382,7 +382,7 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]");
-    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](uint64_t displayId, uint32_t type, const SizeChangeReason& reason) {
+    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](uint64_t displayId, uint32_t type, const SizeChangeReason reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessWindowDragHotAreaRegister jsSceneSession is null");
@@ -398,7 +398,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(uint64_t displayId, uint32_t type, const SizeChangeReason& reason)
+void JsSceneSession::OnWindowDragHotArea(uint64_t displayId, uint32_t type, const SizeChangeReason reason)
 {
     WLOGFI("[NAPI]");
 
@@ -822,13 +822,13 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
     NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
-        const SizeChangeReason& reason, const DisplayId newDisplayId = -1ULL) {
+        const SizeChangeReason reason, const DisplayId DisplayId = -1ULL) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnSessionRectChange(rect, reason, newDisplayId);
+        jsSceneSession->OnSessionRectChange(rect, reason, DisplayId);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2411,14 +2411,14 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 }
 
 void JsSceneSession::OnSessionRectChange(const WSRect& rect,
-    const SizeChangeReason& reason, const DisplayId newDisplayId)
+    const SizeChangeReason reason, const DisplayId DisplayId)
 {
     if (reason != SizeChangeReason::MOVE && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
     WLOGFD("[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, newDisplayId, reason, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, DisplayId, reason, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionRectChange jsSceneSession id:%{public}d has been destroyed",
@@ -2430,10 +2430,10 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect,
             WLOGFE("[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionStateObj = CreateJsSessionRect(env, rect);
-        napi_value sizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
-        napi_value newDisplay = CreateJsValue(env, static_cast<int32_t>(newDisplayId));
-        napi_value argv[] = {jsSessionStateObj, sizeChangeReason, newDisplay};
+        napi_value jsSessionRect = CreateJsSessionRect(env, rect);
+        napi_value jsSizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
+        napi_value jsDisplay = CreateJsValue(env, static_cast<int32_t>(DisplayId));
+        napi_value argv[] = {jsSessionRect, jsSizeChangeReason, jsDisplay};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)

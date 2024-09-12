@@ -48,7 +48,7 @@ class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
-    const SizeChangeReason& reason, const DisplayId newDisplayId)>;
+    const SizeChangeReason reason, const DisplayId DisplayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -160,6 +160,11 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
 
+    /*
+    * Cross Display Move Drag
+    */
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
+
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -177,7 +182,6 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
-    std::shared_ptr<RSSurfaceNode> GetMovedSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);

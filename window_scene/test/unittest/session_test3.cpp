@@ -1155,16 +1155,16 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: GetMovedSurfaceNode
- * @tc.desc: GetMovedSurfaceNode Test
+ * @tc.name: GetSurfaceNodeForMoveDrag
+ * @tc.desc: GetSurfaceNodeForMoveDrag Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest3, GetMovedSurfaceNode, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->leashWinSurfaceNode_ = nullptr;
     session_->surfaceNode_ = nullptr;
-    std::shared_ptr<RSSurfaceNode> res = session_->GetMovedSurfaceNode();
+    std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
     ASSERT_EQ(res, nullptr);
 }
 }
