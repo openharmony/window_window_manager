@@ -937,14 +937,6 @@ WMError WindowAdapter::GetWindowStyleType(WindowStyleType& windowStyleType)
     return wmsProxy->GetWindowStyleType(windowStyleType);
 }
 
-WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->SetProcessWatermark(pid, busiessName, isEnabled);
-}
-
 sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -957,6 +949,14 @@ WMError WindowAdapter::SkipSnapshotForAppProcess(int32_t pid, bool skip)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return wmsProxy->SkipSnapshotForAppProcess(pid, skip);
+}
+
+WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetProcessWatermark(pid, pictureName, isEnabled);
 }
 
 } // namespace Rosen

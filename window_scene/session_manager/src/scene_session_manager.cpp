@@ -10435,25 +10435,25 @@ void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProces
     TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
 
-WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled)
+WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DEFAULT, "Process satermark permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Set process watermark, pid:%{public}d,busiessName:%{public}s,isEnabled:%{public}u",
-        pid, busiessName.c_str(), isEnabled);
-    if (isEnabled && busiessName.isEmpty()) {
-        TLOGE(WmsLogTag::DEFAULT, "busiessName is empty!");
+    TLOGI(WmsLogTag::WMS_LIFE, "Set process watermark, pid:%{public}d,pictureName:%{public}s,isEnabled:%{public}u",
+        pid, pictureName.c_str(), isEnabled);
+    if (isEnabled && pictureName.isEmpty()) {
+        TLOGE(WmsLogTag::DEFAULT, "pictureName is empty!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto task = [this, pid, skip] {
+    auto task = [this, pid] {
         if (isEnabled) {
             auto iter = processWatermarkPidMap_.find(pid);
             if (iter != processWatermarkPidMap_.end()) {
-                iter->second = busiessName;
+                iter->second = pictureName;
             } else {
-                processWatermarkPidMap_.insert({pid, busiessName});
+                processWatermarkPidMap_.insert({pid, pictureName});
             }
         } else {
             processWatermarkPidMap_.erase(pid);
@@ -10465,7 +10465,7 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
             }
             int32_t callingPid = sceneSession->GetCallingPid();
             if (pid == callingPid) {
-                sceneSession->SetWatermarkEnabled(busiessName, isEnabled);
+                sceneSession->SetWatermarkEnabled(pictureName, isEnabled);
             }
         }
     }

@@ -1028,9 +1028,9 @@ HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, Function | SmallTest
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
 
     int32_t pid = 1000;
-    const std::string busiessName = "SetProcessWatermarkBusiessName";
+    const std::string pictureName = "SetProcessWatermarkPictureName";
     bool isEnabled = false;
-    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->SetProcessWatermark(pid, busiessName, isEnabled));
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->SetProcessWatermark(pid, pictureName, isEnabled));
     sceneSessionManagerProxy_ = nullptr;
 }
 

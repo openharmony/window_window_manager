@@ -404,10 +404,11 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+
     /*
-     * process Watermark
+     * Window Watermark
      */
-    WMError SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled) override;
+    WMError SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled) override;
 
     /*
      * Window Snapshot
@@ -803,6 +804,7 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+
     /*
      * Fold Screen Status Change Report
      */
@@ -810,8 +812,9 @@ private:
     WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid);
+
     /*
-     * process watermark
+     * Window Watermark
      */
     void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
@@ -826,8 +829,9 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
     /*
-     * process watermark
+     * Window watermark
      */
     std::map<int32_t, std::string> processWatermarkPidMap_;
 

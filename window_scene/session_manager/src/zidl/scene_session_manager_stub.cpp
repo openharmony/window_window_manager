@@ -166,12 +166,12 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetFreeMultiWindowEnableState(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
             return HandleGetWindowStyleType(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
-            return HandleSetProcessWatermark(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
             return HandleSkipSnapshotForAppProcess(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
+            return HandleSetProcessWatermark(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1067,16 +1067,6 @@ int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t pid = data.ReadInt32();
-    std::string busiessName = data.ReadString();
-    bool isEnabled = data.ReadBool();
-    WMError errCode = SetProcessWatermark(pid, busiessName, isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = data.ReadInt32();
@@ -1105,6 +1095,28 @@ int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data
         return ERR_INVALID_DATA;
     }
     WMError errCode = SkipSnapshotForAppProcess(pid, skip);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    std::string pictureName = "";
+    if (!data.ReadString(pictureName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to ReadString pictureName");
+        return ERR_INVALID_DATA;
+    }
+    bool isEnabled = false;
+    if (!data.ReadBool(isEnabled)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readBool isEnabled");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetProcessWatermark(pid, pictureName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

@@ -620,10 +620,10 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
 {
     int32_t pid = 1000;
-    const std::string busiessName = "SetProcessWatermarkBusiessName";
+    const std::string pictureName = "SetProcessWatermarkPictureName";
     bool isEnabled = true;
     WindowAdapter windowAdapter;
-    windowAdapter.SetProcessWatermark(pid, busiessName, isEnabled);
+    windowAdapter.SetProcessWatermark(pid, pictureName, isEnabled);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
 }
