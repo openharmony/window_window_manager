@@ -76,7 +76,7 @@ namespace {
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, DualDisplaySensorFoldStateManager, Function | SmallTest | Level3)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
-        ASSERT_EQ(mgr.packageNames_.size(), 0);
+        ASSERT_EQ(mgr.hallSwitchPackageNameList_.size(), 0);
     }
 
     /**

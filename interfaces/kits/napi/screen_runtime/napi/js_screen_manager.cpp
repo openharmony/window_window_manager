@@ -406,7 +406,7 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [mainScreenId, screenIds](napi_env env, NapiAsyncTask& task, int32_t status) {
             ScreenId screenGroupId = INVALID_SCREEN_ID;
@@ -460,7 +460,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
         }
         options.emplace_back(expandOption);
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [options](napi_env env, NapiAsyncTask& task, int32_t status) {
             ScreenId screenGroupId = INVALID_SCREEN_ID;
@@ -516,7 +516,7 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [ screenIds](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -568,7 +568,7 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [screenIds](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -648,9 +648,11 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
             auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
             auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
             if (screen == nullptr) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                    "ScreenManager::CreateVirtualScreen failed."));
+                DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+                if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
+                    ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+                }
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
                 WLOGFE("ScreenManager::CreateVirtualScreen failed.");
                 return;
             }
@@ -887,7 +889,7 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
         WLOGFE("JsScreenManager::OnSetScreenRotationLocked failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [isLocked](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto res = DM_JS_TO_ERROR_CODE_MAP.at(
