@@ -32,7 +32,6 @@
 
 namespace OHOS::Rosen {
 using ScreenInfoChangeClientListener = std::function<void(uint64_t)>;
-
 class IScreenConnectionListener {
 public:
     virtual void OnScreenConnected(const sptr<ScreenSession>& screenSession) = 0;
@@ -76,7 +75,8 @@ public:
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
-    void RegisterSwitchingToAnotherUserFunction(std::function<void()> && func);
+
+    void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
@@ -88,7 +88,7 @@ protected:
 
 private:
     void ConnectToServer();
-    bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
+    bool CheckIfNeedCennectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
     void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
         ScreenId rsId, const std::string& name) override;
     void OnPropertyChanged(ScreenId screenId,
@@ -110,6 +110,9 @@ private:
     IScreenConnectionListener* screenConnectionListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
+
+    bool hasCheckFoldableStatus_ = false;
+    bool isFoldable_ = false;
 };
 } // namespace OHOS::Rosen
 
