@@ -2768,26 +2768,26 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     }
 }
 
-void SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
+WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
 {
-    auto task = [weakThis = wptr(this), orientation]() {
+    auto task = [weakThis = wptr(this), orientation]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::DEFAULT, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return WSError::WS_ERROR_NULLPTR;
         }
         TLOGI(WmsLogTag::DEFAULT, "id: %{public}d defaultRequestedOrientation: %{public}u",
-            GetPersistentId(), static_cast<uint32_t>(orientation));
+            session->GetPersistentId(), static_cast<uint32_t>(orientation));
         auto property = session->GetSessionProperty();
         if (property == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "get session property failed");
-            return;
+            return WSError::WS_ERROR_NULLPTR;
         }
         property->SetRequestedOrientation(orientation);
         property->SetDefaultRequestedOrientation(orientation);
         return WSError::WS_OK;
     };
-    PostSyncTask(task, "SetDefaultRequestedOrientation");
+    return PostSyncTask(task, "SetDefaultRequestedOrientation");
 }
 
 void SceneSession::NotifyForceHideChange(bool hide)
