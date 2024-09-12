@@ -46,7 +46,6 @@ SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateMa
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -54,7 +53,6 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
