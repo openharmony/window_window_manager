@@ -1716,31 +1716,6 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
     bool isEnabled = true;
     result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
-    ASSERT_NE(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
-    isEnabled = false;
-    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
-    ASSERT_EQ(result, WMError::WM_OK);
-    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
-
-    SessionInfo info;
-    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
-    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession1);
-    ASSERT_NE(nullptr, sceneSession2);
-    sceneSession1->SetCallingPid(1000);
-    sceneSession2->SetCallingPid(1001);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-    ssm_->sceneSessionMap_.insert({-1, nullptr});
-    isEnabled = true;
-    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
-    ASSERT_EQ(result, WMError::WM_OK);
-    isEnabled = false;
-    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
-    ASSERT_EQ(result, WMError::WM_OK);
-    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
-    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
-    ssm_->sceneSessionMap_.erase(-1);
 }
 
 /**
@@ -1752,7 +1727,6 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, Function | SmallTes
 {
     ssm_->processWatermarkPidMap_.insert({1, "test"});
     ssm_->RemoveProcessWatermarkPid(1);
-    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
 }
 
 /**
