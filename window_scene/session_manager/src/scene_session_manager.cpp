@@ -2988,8 +2988,13 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
         auto sessionProperty = sceneSession->GetSessionProperty();
-        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
+        if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+            !sessionProperty->GetIsUIExtensionAbilityProcess()) {
             sceneSession->NotifyDestroy();
+            int32_t errCode = AAFWK::AbilityManagerClient::GetInstance()->
+                TerminateUIServiceExtensionAbility(sceneSession->GetAbilityToken());
+            TLOGI(WmsLogTag::WMS_SUB,"TerminateUIServiceExtensionAbility id:%{public}d errCode:%{public}d",
+                sceneSession->GetPersistentId(), errCode);
         }
     }
     {
