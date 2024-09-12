@@ -925,7 +925,6 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 
 int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleGetStartMoveFlag!");
     bool isMoving = false;
     WSError errCode = GetStartMoveFlag(isMoving);
     reply.WriteBool(isMoving);
