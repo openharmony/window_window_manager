@@ -1234,6 +1234,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, Functi
 }
 
 /**
+ * @tc.name: HandleSkipSnapshotForAppProcess
+ * @tc.desc: test HandleSkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(123);
+    data.WriteBool(true);
+
+    int res = stub_->HandleSkipSnapshotForAppProcess(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetFocusSessionInfo
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC

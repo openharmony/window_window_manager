@@ -132,7 +132,7 @@ public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
-    std::future<int32_t> RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
@@ -409,6 +409,11 @@ public:
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& busiessName, bool isEnabled) override;
 
+    /*
+     * Window Snapshot
+     */
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -536,8 +541,7 @@ private:
     WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
-        bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession, bool isNewActive);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
@@ -777,6 +781,13 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Snapshot
+     */
+    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessSnapshotSkip(int32_t pid);
+
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(uint64_t screenId);
@@ -806,6 +817,11 @@ private:
     void RemoveProcessWatermarkPid(int32_t pid);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
+
+    /*
+     * Window Snapshot
+     */
+    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;

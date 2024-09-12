@@ -1717,35 +1717,27 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     return WSError::WS_OK;
 }
 
-std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
-    const sptr<SceneSession>& sceneSession, bool isNewActive)
+WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    auto future = promise->get_future();
-    auto task = [this, weakSceneSession, isNewActive, promise]() {
+    auto task = [this, weakSceneSession, isNewActive]() {
         sptr<SceneSession> scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
-            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-            return WSError::WS_ERROR_INVALID_WINDOW;
+            return WSError::WS_ERROR_NULLPTR;
         }
-
         auto persistentId = scnSession->GetPersistentId();
-        scnSession->NotifyForegroundInteractiveStatus(true);
+        if (!Session::IsScbCoreEnabled()) {
+            scnSession->SetForegroundInteractiveStatus(true);
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         TLOGI(WmsLogTag::WMS_MAIN, "Request active id:%{public}d system:%{public}u isNewActive:%{public}d",
             persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_), isNewActive);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session invalid by %{public}d", persistentId);
-            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION));
-            return WSError::WS_ERROR_INVALID_WINDOW;
+            return WSError::WS_ERROR_INVALID_SESSION;
         }
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            WLOGD("Request active collaborator native session");
-            scnSession = GetSceneSession(persistentId);
-        }
-        auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive, promise);
+        auto ret = RequestSceneSessionActivationInner(scnSession, isNewActive);
         if (ret == WSError::WS_OK) {
             scnSession->SetExitSplitOnBackground(false);
         }
@@ -1756,7 +1748,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
     std::string taskName = "RequestSceneSessionActivation:PID:" +
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
-    return future;
+    return WSError::WS_OK;
 }
 
 bool SceneSessionManager::IsKeyboardForeground()
@@ -1815,7 +1807,7 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& 
 }
 
 WSError SceneSessionManager::RequestSceneSessionActivationInner(
-    sptr<SceneSession>& scnSession, bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise)
+    sptr<SceneSession>& scnSession, bool isNewActive)
 {
     auto persistentId = scnSession->GetPersistentId();
     RequestInputMethodCloseKeyboard(persistentId);
@@ -1846,8 +1838,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
     if (!scnSessionInfo) {
         TLOGE(WmsLogTag::WMS_LIFE, "create AbilityInfo fail id %{public}d", persistentId);
-        promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WSError::WS_ERROR_NULLPTR;
     }
     scnSession->NotifyActivation();
     scnSessionInfo->isNewWant = isNewActive;
@@ -1891,7 +1882,6 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
     }
     NotifyCollaboratorAfterStart(scnSession, scnSessionInfo);
-    promise->set_value(static_cast<int32_t>(errCode));
 
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
@@ -2837,12 +2827,12 @@ sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persis
         return nullptr;
     }
     bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
-    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID;
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {
         TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
         return parentSession;
     }
-    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
@@ -4601,7 +4591,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     needBlockNotifyFocusStatusUntilForeground_ = false;
 
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
 
     return ShiftFocus(nextSession, reason);
@@ -4653,7 +4643,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
 
     TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
         lastFocusedAppSessionId_, nextSession->GetPersistentId());
-    
+
     if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_ ) {
         return false;
     }
@@ -5542,10 +5532,12 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_CONNECT:
+            SetSessionSnapshotSkipForAppProcess(sceneSession);
             SetSessionWatermarkForAppProcess(sceneSession);
             break;
         case SessionState::STATE_DISCONNECT:
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                RemoveProcessSnapshotSkip(sceneSession->GetCallingPid());
                 RemoveProcessWatermarkPid(sceneSession->GetCallingPid());
             }
             break;
@@ -10626,5 +10618,49 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
     }
     TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
+    auto task = [this, pid, skip] {
+        if (skip) {
+            snapshotSkipPidSet_.insert(pid);
+        } else {
+            snapshotSkipPidSet_.erase(pid);
+        }
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (pid == sceneSession->GetCallingPid()) {
+                TLOGI(WmsLogTag::DEFAULT, "send rs set snapshot skip, persistentId:%{public}d, skip:%{public}u",
+                    persistentId, skip);
+                sceneSession->SetSnapshotSkip(skip);
+            }
+        }
+    };
+    taskScheduler_->PostTask(task, "SkipSnapshotForAppProcess");
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RemoveProcessSnapshotSkip(int32_t pid)
+{
+    if (snapshotSkipPidSet_.erase(pid) != 0) {
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from snapshot skip pid set. pid:%{public}d", pid);
+    }
+}
+
+void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession)
+{
+    auto callingPid = sceneSession->GetCallingPid();
+    if (snapshotSkipPidSet_.find(callingPid) != snapshotSkipPidSet_.end()) {
+        sceneSession->SetSnapshotSkip(true);
+    }
 }
 } // namespace OHOS::Rosen
