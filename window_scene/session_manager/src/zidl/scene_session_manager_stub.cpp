@@ -1108,7 +1108,7 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
     }
     std::string pictureName = "";
     if (!data.ReadString(pictureName)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to ReadString pictureName");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readString pictureName");
         return ERR_INVALID_DATA;
     }
     bool isEnabled = false;
