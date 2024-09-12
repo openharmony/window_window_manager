@@ -1094,7 +1094,7 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "SetAutoStartPiP", "SetAutoStartPiP", "SetAutoStartPiP" };
-    auto window = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     bool isAutoStart = true;
