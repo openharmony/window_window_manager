@@ -487,6 +487,25 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: HandleSetAutoStartPiP
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    float isAutoStartInvalid = 0.55;
+    data.WriteInt32(isAutoStartInvalid);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
+    bool isAutoStartValid = true;
+    data.WriteInt32(isAutoStartValid);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetAutoStartPiP(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

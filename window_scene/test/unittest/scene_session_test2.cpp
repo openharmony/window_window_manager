@@ -1512,6 +1512,22 @@ HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function |
 }
 
 /**
+ * @tc.name: SetAutoStartPiPStatusChangeCallback
+ * @tc.desc:  * @tc.name: SetAutoStartPiPStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAutoStartPiPStatusChangeCallback";
+    info.bundleName_ = "SetAutoStartPiPStatusChangeCallback";
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyAutoStartPiPStatusChangeFunc func;
+    sceneSession->SetAutoStartPiPStatusChangeCallback(func);
+}
+
+/**
  * @tc.name: RaiseAppMainWindowToTop
  * @tc.desc:  * @tc.name: RaiseAppMainWindowToTop
  * @tc.type: FUNC

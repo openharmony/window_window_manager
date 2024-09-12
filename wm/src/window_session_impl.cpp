@@ -3526,7 +3526,7 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
 void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
 {
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
         return;
     }
     auto hostSession = GetHostSession();
