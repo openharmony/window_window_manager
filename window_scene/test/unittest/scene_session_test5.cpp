@@ -849,6 +849,28 @@ HWTEST_F(SceneSessionTest5, SetSnapshotSkip, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWatermarkEnabled
+ * @tc.desc: SetWatermarkEnabled function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWatermarkEnabled";
+    info.bundleName_ = "SetWatermarkEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    std::string busiessName = "busiessNameTest";
+    session->SetWatermarkEnabled(busiessName,true);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->SetWatermarkEnabled(busiessName,true);
+}
+
+/**
  * @tc.name: UIExtSurfaceNodeIdCache
  * @tc.desc: UIExtSurfaceNodeIdCache
  * @tc.type: FUNC
@@ -1302,28 +1324,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
     res = session->HandleActionUpdateTurnScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
-}
-
-/**
- * @tc.name: SetWatermarkEnabled
- * @tc.desc: SetWatermarkEnabled function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetWatermarkEnabled";
-    info.bundleName_ = "SetWatermarkEnabled";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    std::string busiessName = "busiessNameTest";
-    session->SetWatermarkEnabled(busiessName,true);
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
-    session->SetWatermarkEnabled(busiessName,true);
 }
 
 /**

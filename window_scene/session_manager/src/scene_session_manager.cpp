@@ -5489,11 +5489,11 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_CONNECT:
-            DoAddProcessWatermarkForSession(persistentId);
+            SetSessionWatermarkForAppProcess(sceneSession);
             break;
         case SessionState::STATE_DISCONNECT:
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-                DeleteProcessWatermarkPid(sceneSession->GetCallingPid());
+                RemoveProcessWatermarkPid(sceneSession->GetCallingPid());
             }
             break;
         default:
@@ -10394,8 +10394,7 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
         TLOGE(WmsLogTag::DEFAULT, "busiessName is empty!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    {
-        std::unique_lock<std::shared_mutex> lock(processWatermarkPidMapMutex_);
+    auto task = [this, pid, skip] {
         if (isEnable) {
             auto iter = processWatermarkPidMap_.find(pid);
             if (iter != processWatermarkPidMap_.end()) {
@@ -10406,37 +10405,35 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
         } else {
             processWatermarkPidMap_.erase(pid);
         }
-    }
-    for (const auto& item : sceneSessionMap_) {
-        auto sceneSession = item.second;
-        if (sceneSession == nullptr) {
-            continue;
+        for (const auto& item : sceneSessionMap_) {
+            auto sceneSession = item.second;
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            int32_t callingPid = sceneSession->GetCallingPid();
+            if (pid == callingPid) {
+                sceneSession->SetWatermarkEnabled(busiessName, isEnabled);
+            }
         }
-        int32_t callingPid = sceneSession->GetCallingPid();
-        if (pid == callingPid) {
-            sceneSession->SetWatermarkEnabled(busiessName, isEnabled);
-        }
     }
+    taskScheduler_->PostTask(task, "SetProcessWatermark");
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::DoAddProcessWatermarkForSession(int32_t persistentId)
+void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
 {
-    auto sceneSession = GetSceneSession(persistendId);
     if (sceneSession == nullptr) {
         return;
     }
-    auto callingPid = sceneSession->GetCallingPid();
-    auto iter = processWatermarkPidMap_.find(callingPid);
+    auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
     if (iter == processWatermarkPidMap_.end()) {
         return;
     }
     sceneSession->SetWatermarkEnabled(iter->second, true);
 }
 
-void SceneSessionManager::DeleteProcessWatermarkPid(int32_t pid)
+void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
 {
-    std::unique_lock<std::shared_mutex> lock(processWatermarkPidMapMutex_);
     if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
         TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
             pid);
