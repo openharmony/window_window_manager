@@ -403,17 +403,15 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, SetAutoStartPiP, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    float isAutoStartInvalid = 0.55;
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, session_->SetAutoStartPiP(isAutoStartInvalid));
     bool isAutoStartValid = true;
-    ASSERT_EQ(WSError::WS_OK, session_->SetAutoStartPiP(isAutoStartValid));
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid));
     GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP end";
 }
 

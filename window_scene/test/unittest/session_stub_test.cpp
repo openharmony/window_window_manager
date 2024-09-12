@@ -497,8 +497,6 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    float isAutoStartInvalid = 0.55;
-    data.WriteInt32(isAutoStartInvalid);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     bool isAutoStartValid = true;
     data.WriteInt32(isAutoStartValid);
