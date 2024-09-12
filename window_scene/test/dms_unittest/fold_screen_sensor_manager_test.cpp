@@ -145,11 +145,12 @@ HWTEST_F(FoldScreenSensorManagerTest, NotifyFoldAngleChanged, Function | SmallTe
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     float foldAngle = 0.0F;
     mgr.NotifyFoldAngleChanged(foldAngle);
-    EXPECT_EQ(foldAngle, 0.0F);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
 
     foldAngle = 30.0F;
     mgr.NotifyFoldAngleChanged(foldAngle);
-    EXPECT_EQ(foldAngle, 30.0F);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
+    usleep(SLEEP_TIME_US);
 }
 
 /**
