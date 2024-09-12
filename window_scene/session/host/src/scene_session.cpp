@@ -439,8 +439,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     auto task = [weakThis = wptr(this), event]() {
         auto session = weakThis.promote();
-        if (!session || !session->moveDragController_) {
-            WLOGFE("[WMSCom] session or moveDragController is null");
+        if (!session) {
+            WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
@@ -463,7 +463,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
-        if (event == SessionEvent::EVENT_DRAG) {
+        if (session->moveDragController_ && event == SessionEvent::EVENT_DRAG) {
             WSRect rect = session->moveDragController_->GetTargetRect();
             session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
         }
