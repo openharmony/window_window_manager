@@ -366,8 +366,8 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             return false;
     }
     std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
-    moveDragProperty_.targetRect_ = aspectRatio_ > NEAR_ZERO ?
-        CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
+    moveDragProperty_.targetRect_ = aspectRatio_ > NEAR_ZERO ? CalcFixedAspectRatioTargetRect(
+        type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
         CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     ProcessSessionRectChange(reason);
     return true;
