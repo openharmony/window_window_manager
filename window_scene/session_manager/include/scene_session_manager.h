@@ -230,8 +230,8 @@ public:
     void StartWindowInfoReportLoop();
 
     /**
-     * @brief get gocus window info
-     * @param focusInfo focus Info
+     * @brief get the focused window info
+     * @param focusInfo the focused session info
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);

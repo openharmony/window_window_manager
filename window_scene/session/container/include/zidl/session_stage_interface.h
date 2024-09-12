@@ -71,7 +71,7 @@ public:
 
     /**
      * @brief update the focus
-     * @param isFocused set isfocused
+     * @param isFocused set isFocused
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
