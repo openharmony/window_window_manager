@@ -36,6 +36,12 @@ config("libdm_public_config") {
   ]
 }
 
+config("libdm_ndk_public_config") {
+  include_dirs = [
+    "../interfaces/kits/dmndk/dm",
+  ]
+}
+
 config("for_libdm_public_config") {
   include_dirs =
       [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
@@ -172,6 +178,8 @@ ohos_shared_library("libdm_ndk") {
     "${window_base_path}/interfaces/kits/dmndk/dm",
     "${window_base_path}/interfaces/inner_kits/dm",
   ]
+
+  public_configs = [ ":libdm_ndk_public_config" ]
 
   sources = [ "src/oh_display_manager.cpp" ]
 
