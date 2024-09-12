@@ -5531,6 +5531,14 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
                 ProcessSubSessionBackground(sceneSession);
             }
             break;
+        case SessionState::STATE_CONNECT:
+            SetSessionSnapshotSkipForAppProcess(sceneSession);
+            break;
+        case SessionState::STATE_DISCONNECT:
+            if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                RemoveProcessSnapshotSkip(sceneSession->GetCallingPid());
+            }
+            break;
         default:
             break;
     }
@@ -10546,5 +10554,49 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
     }
     TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
+    auto task = [this, pid, skip] {
+        if (skip) {
+            snapshotSkipPidSet_.insert(pid);
+        } else {
+            snapshotSkipPidSet_.erase(pid);
+        }
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (pid == sceneSession->GetCallingPid()) {
+                TLOGI(WmsLogTag::DEFAULT, "send rs set snapshot skip, persistentId:%{public}d, skip:%{public}u",
+                    persistentId, skip);
+                sceneSession->SetSnapshotSkip(skip);
+            }
+        }
+    };
+    taskScheduler_->PostTask(task, "SkipSnapshotForAppProcess");
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RemoveProcessSnapshotSkip(int32_t pid)
+{
+    if (snapshotSkipPidSet_.erase(pid) != 0) {
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from snapshot skip pid set. pid:%{public}d", pid);
+    }
+}
+
+void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession)
+{
+    auto callingPid = sceneSession->GetCallingPid();
+    if (snapshotSkipPidSet_.find(callingPid) != snapshotSkipPidSet_.end()) {
+        sceneSession->SetSnapshotSkip(true);
+    }
 }
 } // namespace OHOS::Rosen
