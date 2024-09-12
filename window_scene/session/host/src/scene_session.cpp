@@ -362,7 +362,7 @@ void SceneSession::ClearSpecificSessionCbMap()
 
 void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 {
-    if (sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
+    if (sessionChangeCallback_ && sessionChangeCallback_->clearCallbackFunc_) {
         TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, needRemove: %{public}d", GetPersistentId(), needRemove);
         sessionChangeCallback_->clearCallbackFunc_(needRemove);
     } else {
