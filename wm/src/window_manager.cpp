@@ -1417,5 +1417,14 @@ WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& busie
     return ret;
 }
 
+WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "set process snapshot skip failed");
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS

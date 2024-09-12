@@ -245,6 +245,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
 };
 }
 }

@@ -58,6 +58,8 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
         return NapiGetUndefined(env);
     }
 
+    napi_set_named_property(env, objValue, "propertyChangeReason",
+        CreateJsValue(env, screenProperty.GetPropertyChangeReason()));
     napi_set_named_property(env, objValue, "rotation", CreateJsValue(env, screenProperty.GetRotation()));
     napi_set_named_property(env, objValue, "bounds", CreateJsRRect(env, screenProperty.GetBounds()));
     return objValue;
