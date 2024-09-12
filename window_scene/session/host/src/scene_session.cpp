@@ -2265,7 +2265,8 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-            screenSession->GetDisplayNode()->RemoveCrossParentChild(movedSurfaceNode, moveDragController_->GetInitParentId());
+            screenSession->GetDisplayNode()->RemoveCrossParentChild(
+                movedSurfaceNode, moveDragController_->GetInitParentId());
         }
     }
 }
