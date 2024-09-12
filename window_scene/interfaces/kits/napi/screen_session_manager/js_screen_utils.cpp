@@ -16,8 +16,6 @@
 #include "js_screen_utils.h"
 
 #include <js_runtime_utils.h>
-#include <event_handler.h>
-#include "process_options.h"
 
 #include "dm_common.h"
 #include "window_manager_hilog.h"
@@ -258,83 +256,5 @@ bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
         rect.height_ = static_cast<uint32_t>(height);
     }
     return true;
-}
-
-
-struct AsyncInfo {
-    napi_env env;
-    napi_async_work work;
-    std::function<void()> func;
-};
-
-void NapiAsyncWork(napi_env env, std::function<void()> task)
-{
-    napi_value resource = nullptr;
-    napi_status status = napi_ok;
-    AsyncInfo* info = new (std::nothrow) AsyncInfo();
-    if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "malloc asyncinfo failed");
-        return;
-    }
-    info->env = env;
-    info->func = task;
-    status = napi_create_string_utf8(env, "DMSAsyncWork", NAPI_AUTO_LENGTH, &resource);
-    if (status != napi_ok) {
-        TLOGE(WmsLogTag::DMS, "napi_create_string_utf8 failed");
-        delete info;
-        return;
-    }
-    static_cast<void>(napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
-    },
-    [](napi_env env, napi_status status, void* data) {
-        AsyncInfo* info = (AsyncInfo*)data;
-        if (info == nullptr) {
-            TLOGE(WmsLogTag::DMS, "async info is nullptr");
-            return;
-        }
-        info->func();
-        napi_delete_async_work(env, info->work);
-        delete info;
-    }, (void*)info, &info->work));
-
-    static_cast<void>(napi_queue_async_work(env, info->work));
-}
-
-MainThreadScheduler::MainThreadScheduler(napi_env env)
-    : env_(env)
-{
-    GetMainEventHandler();
-}
-
-inline void MainThreadScheduler::GetMainEventHandler()
-{
-    if (handler_ != nullptr) {
-        return;
-    }
-    auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
-    if (runner == nullptr) {
-        return;
-    }
-    handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
-}
-
-void MainThreadScheduler::PostMainThreadTask(Task && localTask, std::string traceInfo, int64_t delayTime)
-{
-    GetMainEventHandler();
-    auto task = [env = env_, localTask, traceInfo] () {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "DMS:%s", traceInfo.c_str());
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        localTask();
-        napi_close_handle_scope(env, scope);
-    };
-    if (handler_ && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        return task();
-    } else if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        handler_->PostTask(std::move(task), "dms:" + traceInfo, delayTime,
-            OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    } else {
-        NapiAsyncWork(env_, task);
-    }
 }
 } // namespace OHOS::Rosen
