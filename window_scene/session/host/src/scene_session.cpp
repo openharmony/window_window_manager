@@ -2770,10 +2770,15 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 
 void SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
 {
-    WLOGFI("id: %{public}d defaultRequestedOrientation: %{public}u", GetPersistentId(),
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d defaultRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(orientation));
-    GetSessionProperty()->SetRequestedOrientation(orientation);
-    GetSessionProperty()->SetDefaultRequestedOrientation(orientation);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "get session property failed");
+        return;
+    }
+    property->SetRequestedOrientation(orientation);
+    property->SetDefaultRequestedOrientation(orientation);
 }
 
 void SceneSession::NotifyForceHideChange(bool hide)
