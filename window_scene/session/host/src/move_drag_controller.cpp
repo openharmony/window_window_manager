@@ -373,7 +373,8 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     return true;
 }
 
-std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTransform(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
@@ -939,7 +940,8 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplaysDuringMoveDrag()
             screenProperty.GetBounds().rect_.GetWidth(),
             screenProperty.GetBounds().rect_.GetHeight(),
         };
-        if (displaySetDuringMoveDrag_.find(screenId) == displaySetDuringMoveDrag_.end() && windowRect.IsOverlap(screenRect)) {
+        if (displaySetDuringMoveDrag_.find(screenId) == displaySetDuringMoveDrag_.end() &&
+            windowRect.IsOverlap(screenRect)) {
             displaySetDuringMoveDrag_.insert(screenId);
             newAddedDisplayIdSet.insert(screenId);
         }

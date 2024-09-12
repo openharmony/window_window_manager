@@ -202,7 +202,8 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest 
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
     ASSERT_EQ(2, moveDragController->GetInitParentId());
-    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) != moveDragController->addedDisplaySet_.end());
+    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
+        moveDragController->addedDisplaySet_.end());
 }
 
 /**

@@ -601,7 +601,7 @@ private:
     /*
     * Move Drag
     */
-   static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
+    static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
