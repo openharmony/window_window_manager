@@ -1599,7 +1599,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
 {
     auto task = [this, abilityName = sessionInfo.abilityName_,
-        bundleName = sessionInfo.bundleName_, toScreenId = sessionInfo.screenId_, action, fromScreenId] {
+        bundleName = sessionInfo.bundleName_, toScreenId = sessionInfo.screenId_, action, fromScreenId]() {
         sptr<DisplayChangeInfo> info = sptr<DisplayChangeInfo>::MakeSptr();
         info->action_ = action;
         info->abilityName_ = std::move(abilityName);
