@@ -1605,15 +1605,15 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
 }
 
 /**
- * @tc.name: DeleteProcessSnapshotSkipSetPid
- * @tc.desc: SceneSesionManager DeleteProcessSnapshotSkipSetPid
+ * @tc.name: RemoveProcessSnapshotSkip
+ * @tc.desc: SceneSesionManager RemoveProcessSnapshotSkip
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, DeleteProcessSnapshotSkipSetPid, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, RemoveProcessSnapshotSkip, Function | SmallTest | Level3)
 {
-    ssm_->processSnapshotSkipPidSet_.insert(1);
-    ssm_->DeleteProcessSnapshotSkipSetPid(1);
-    ASSERT_EQ(ssm_->processSnapshotSkipPidSet_.find(1), ssm_->processSnapshotSkipPidSet_.end());
+    ssm_->snapshotSkipPidSet_.insert(1);
+    ssm_->RemoveProcessSnapshotSkip(1);
+    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(1), ssm_->snapshotSkipPidSet_.end());
 }
 
 /**
