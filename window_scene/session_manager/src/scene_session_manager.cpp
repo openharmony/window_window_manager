@@ -10390,12 +10390,12 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Set process watermark, pid:%{public}d,busiessName:%{public}s,isEnabled:%{public}u",
         pid, busiessName.c_str(), isEnabled);
-    if (isEnable && busiessName.isEmpty()) {
+    if (isEnabled && busiessName.isEmpty()) {
         TLOGE(WmsLogTag::DEFAULT, "busiessName is empty!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto task = [this, pid, skip] {
-        if (isEnable) {
+        if (isEnabled) {
             auto iter = processWatermarkPidMap_.find(pid);
             if (iter != processWatermarkPidMap_.end()) {
                 iter->second = busiessName;
@@ -10434,11 +10434,14 @@ void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSessi
 
 void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
 {
-    if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
-            pid);
-        processWatermarkPidMap_.erase(pid);
+    auto task = [this, pid] {
+        if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
+            TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
+                pid);
+            processWatermarkPidMap_.erase(pid);
+        }
     }
+    taskScheduler_->PostTask(task, "RemoveProcessWatermarkPid");
 }
 
 WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,

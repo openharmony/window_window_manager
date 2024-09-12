@@ -862,12 +862,12 @@ HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
 
     std::string busiessName = "busiessNameTest";
-    session->SetWatermarkEnabled(busiessName,true);
+    session->SetWatermarkEnabled(busiessName, true);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
-    session->SetWatermarkEnabled(busiessName,true);
+    session->SetWatermarkEnabled(busiessName, true);
 }
 
 /**
