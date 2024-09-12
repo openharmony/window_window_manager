@@ -1022,16 +1022,16 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest 
  */
 HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     int32_t pid = 1000;
     const std::string pictureName = "SetProcessWatermarkPictureName";
     bool isEnabled = false;
-    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->SetProcessWatermark(pid, pictureName, isEnabled));
-    sceneSessionManagerProxy_ = nullptr;
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SetProcessWatermark(pid, pictureName, isEnabled));
+    sceneSessionManagerProxy = nullptr;
 }
 
 /**
