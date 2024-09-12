@@ -30,7 +30,6 @@ public:
 
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
-private:
     int32_t ProcFoldAngleChanged(MessageParcel& data);
     int32_t ProcPrivateWindowList(MessageParcel& data);
     int32_t ProcCaptureStatusChanged(MessageParcel& data);

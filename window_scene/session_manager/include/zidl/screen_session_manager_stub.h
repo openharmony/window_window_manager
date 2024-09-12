@@ -34,6 +34,7 @@ private:
     void ProcGetSnapshotByPicker(MessageParcel& reply);
     void ProcSetVirtualScreenFlag(MessageParcel& data, MessageParcel& reply);
     void ProcGetVirtualScreenFlag(MessageParcel& data, MessageParcel& reply);
+    void ProcSetVirtualScreenScaleMode(MessageParcel& data, MessageParcel& reply);
     void ProcGetAvailableArea(MessageParcel& data, MessageParcel& reply);
     void ProcProxyForFreeze(MessageParcel& data, MessageParcel& reply);
     void ProcGetAllDisplayPhysicalResolution(MessageParcel& data, MessageParcel& reply);

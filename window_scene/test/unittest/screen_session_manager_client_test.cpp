@@ -147,11 +147,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, Function |
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen01
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen01
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen01, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -159,16 +159,16 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen01, Function | 
     ScreenId rsId = 0;
     std::string name = "HiCar";
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, true);
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen02
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen02
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen02, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -176,16 +176,16 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen02, Function | 
     ScreenId rsId = SCREEN_ID_INVALID;
     std::string name;
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, false);
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen03
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen0403
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen03, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen03, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -193,16 +193,16 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen03, Function | 
     ScreenId rsId = 0;
     std::string name;
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::REAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, true);
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen04
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen04
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen04, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen04, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -210,16 +210,16 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen04, Function | 
     ScreenId rsId = 0;
     std::string name = "HiCar";
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, true);
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen05
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen05
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen05, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen05, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -227,16 +227,16 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen05, Function | 
     ScreenId rsId = 0;
     std::string name = "SuperLauncher";
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, true);
 }
 
 /**
- * @tc.name: CheckIfNeedConnectScreen06
- * @tc.desc: CheckIfNeedConnectScreen test
+ * @tc.name: CheckIfNeedCennectScreen06
+ * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen06, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen06, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
 
@@ -244,7 +244,7 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedConnectScreen06, Function | 
     ScreenId rsId = 0;
     std::string name = "CastEngine";
     screenSessionManagerClient_->screenSessionManager_->GetScreenProperty(screenId).SetScreenType(ScreenType::VIRTUAL);
-    bool result = screenSessionManagerClient_->CheckIfNeedConnectScreen(screenId, rsId, name);
+    bool result = screenSessionManagerClient_->CheckIfNeedCennectScreen(screenId, rsId, name);
     EXPECT_EQ(result, true);
 }
 

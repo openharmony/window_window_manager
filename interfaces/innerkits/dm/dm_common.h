@@ -37,7 +37,7 @@ namespace {
 }
 
 /**
- * @struct MHookInfo.
+ * @struct HookInfo.
  *
  * @brief hook diaplayinfo deepending on the window size.
  */
