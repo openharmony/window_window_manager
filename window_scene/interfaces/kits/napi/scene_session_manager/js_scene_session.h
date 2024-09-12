@@ -37,6 +37,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
+    SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
@@ -73,7 +74,6 @@ enum class ListenerFuncType : uint32_t {
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
-    AUTO_START_PIP_CB,
 };
 
 class SceneSession;

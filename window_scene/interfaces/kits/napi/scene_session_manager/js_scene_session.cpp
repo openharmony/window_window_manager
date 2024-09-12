@@ -32,6 +32,7 @@ const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
+const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
@@ -68,7 +69,6 @@ const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
-const std::string AUTO_START_PIP_CB = "autoStartPiP";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -85,6 +85,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
     {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
     {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
+    {SESSION_AUTO_START_PIP_CB,             ListenerFuncType::SESSION_AUTO_START_PIP_CB},
     {CREATE_SUB_SESSION_CB,                 ListenerFuncType::CREATE_SUB_SESSION_CB},
     {BIND_DIALOG_TARGET_CB,                 ListenerFuncType::BIND_DIALOG_TARGET_CB},
     {RAISE_TO_TOP_CB,                       ListenerFuncType::RAISE_TO_TOP_CB},
@@ -123,7 +124,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
-    {AUTO_START_PIP_CB,                     ListenerFuncType::AUTO_START_PIP_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -1626,7 +1626,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB):
             ProcessSessionPiPControlStatusChangeRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::AUTO_START_PIP_CB):
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_AUTO_START_PIP_CB):
             ProcessAutoStartPiPStatusChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CREATE_SUB_SESSION_CB):
@@ -2252,7 +2252,7 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
                 " destroyed", persistentId);
             return;
         }
-        auto jsCallBack = this->GetJSCallback(AUTO_START_PIP_CB);
+        auto jsCallBack = this->GetJSCallback(SESSION_AUTO_START_PIP_CB);
         if (!jsCallBack) {
             TLOGE(WmsLogTag::WMS_PIP, "[NAPI]jsCallBack is nullptr");
             return;
