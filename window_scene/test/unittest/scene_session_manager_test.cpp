@@ -1744,34 +1744,34 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: DeleteProcessWatermarkPid
- * @tc.desc: SceneSesionManager DeleteProcessWatermarkPid
+ * @tc.name: RemoveProcessWatermarkPid
+ * @tc.desc: SceneSesionManager RemoveProcessWatermarkPid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, DeleteProcessWatermarkPid, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, Function | SmallTest | Level3)
 {
     ssm_->processWatermarkPidMap_.insert({1, "test"});
-    ssm_->DeleteProcessWatermarkPid(1);
+    ssm_->RemoveProcessWatermarkPid(1);
     ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
 }
 
 /**
- * @tc.name: DoAddProcessWatermarkForSession
- * @tc.desc: SceneSesionManager DoAddProcessWatermarkForSession
+ * @tc.name: SetSessionWatermarkForAppProcess
+ * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, DoAddProcessWatermarkForSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, Function | SmallTest | Level3)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
     sceneSession1->SetCallingPid(1);
-    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
 
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
 
     ssm_->processWatermarkPidMap_.insert({1, "test"});
-    ssm_->DoAddProcessWatermarkForSession(sceneSession1->GetPersistentId());
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
 
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->processWatermarkPidMap_.erase(1);
