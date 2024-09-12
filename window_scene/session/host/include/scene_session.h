@@ -225,7 +225,7 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
-    void SetWatermarkEnabled(const std::string& busiessName, bool isEnabled);
+    void SetWatermarkEnabled(const std::string& pictureName, bool isEnabled);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void SetRequestedOrientation(Orientation orientation);

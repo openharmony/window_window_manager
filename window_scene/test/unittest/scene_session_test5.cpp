@@ -861,13 +861,13 @@ HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
 
-    std::string busiessName = "busiessNameTest";
-    session->SetWatermarkEnabled(busiessName, true);
+    std::string pictureName = "pictureNameTest";
+    session->SetWatermarkEnabled(pictureName, true);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
-    session->SetWatermarkEnabled(busiessName, true);
+    session->SetWatermarkEnabled(pictureName, true);
 }
 
 /**

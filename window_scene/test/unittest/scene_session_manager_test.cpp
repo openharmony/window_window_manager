@@ -1712,13 +1712,13 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     int32_t pid = 1000;
-    const std::string busiessName = "SetProcessWatermarkBusiessName";
+    const std::string pictureName = "SetProcessWatermarkPictureName";
     bool isEnabled = true;
-    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_NE(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
     isEnabled = false;
-    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
 
@@ -1733,10 +1733,10 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     isEnabled = true;
-    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
     isEnabled = false;
-    result = ssm_->SetProcessWatermark(pid, busiessName, isEnabled);
+    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());

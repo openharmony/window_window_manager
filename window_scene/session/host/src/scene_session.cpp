@@ -2539,18 +2539,18 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     RSTransaction::FlushImplicitTransaction();
 }
 
-void SceneSession::SetWatermarkEnabled(const std::string& busiessName, bool isEnabled)
+void SceneSession::SetWatermarkEnabled(const std::string& pictureName, bool isEnabled)
 {
     if (!surfaceNode_) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
         return;
     }
-    TLOGI(WmsLogTag::DEFAULT, "send RS set process watermark. busiessName:%{public}s, isEnabled:%{public}d",
-        busiessName.c_str(), isEnabled);
-    surfaceNode_->SetWatermarkEnabled(busiessName, isEnabled);
+    TLOGI(WmsLogTag::DEFAULT, "send RS set process watermark. pictureName:%{public}s, isEnabled:%{public}d",
+        pictureName.c_str(), isEnabled);
+    surfaceNode_->SetWatermarkEnabled(pictureName, isEnabled);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
-        leashWinSurfaceNode->SetWatermarkEnabled(busiessName, isEnabled);
+        leashWinSurfaceNode->SetWatermarkEnabled(pictureName, isEnabled);
     }
     RSTransaction::FlushImplicitTransaction();
 }
