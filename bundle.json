@@ -190,6 +190,17 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/dm:libdm_ndk",
+            "header": {
+              "header_files": [
+                "oh_display_info.h",
+                "oh_display_manager.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/dm_lite:libdm_lite",
             "header": {
               "header_files": [
