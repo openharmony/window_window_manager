@@ -27,18 +27,20 @@
 
 namespace OHOS {
 namespace Rosen {
+using OHOS::AppExecFwk::AbilityStateData;
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::IApplicationStateObserver;
+using OHOS::AppExecFwk::ProcessData;
 class ApplicationStateObserver : public IApplicationStateObserver {
 public:
     ApplicationStateObserver();
     virtual ~ApplicationStateObserver() = default;
     void OnForegroundApplicationChanged(const AppStateData &appStateData) override;
-    void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
-    void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
-    void OnProcessCreated(const AppExecFwk::ProcessData &processData) override {};
-    void OnProcessDied(const AppExecFwk::ProcessData &processData) override {};
-    void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
+    void OnAbilityStateChanged(const AbilityStateData &abilityStateData) override {};
+    void OnExtensionStateChanged(const AbilityStateData &abilityStateData) override {};
+    void OnProcessCreated(const ProcessData &processData) override {};
+    void OnProcessDied(const ProcessData &processData) override {};
+    void OnApplicationStateChanged(const AppStateData &appStateData) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
 
@@ -57,9 +59,10 @@ public:
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
+    void ProcessHalfFoldState(FoldStatus& state, float angle, float halfFoldMinThreshold, float halfFoldMaxThreshold);
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
-    std::vector<std::string> packageNames_;
+    std::vector<std::string> hallSwitchPackageNameList_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSession" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession" };
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
@@ -151,6 +151,16 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
+{
+    mirrorScreenType_ = mirrorType;
+}
+
+MirrorScreenType ScreenSession::GetMirrorScreenType()
+{
+    return mirrorScreenType_;
+}
+
 void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
 {
     if (displayNode_ != nullptr) {
@@ -251,16 +261,6 @@ void ScreenSession::SetName(std::string name)
     name_ = name;
 }
 
-void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
-{
-    mirrorScreenType_ = mirrorType;
-}
-
-MirrorScreenType ScreenSession::GetMirrorScreenType()
-{
-    return mirrorScreenType_;
-}
-
 ScreenId ScreenSession::GetScreenId()
 {
     return screenId_;
@@ -278,7 +278,7 @@ ScreenProperty ScreenSession::GetScreenProperty() const
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
 {
-    WLOGFI("set device default rotation offset: %{public}d", defaultRotationOffset);
+    WLOGFI("set device default rotation offset: %{public}u", defaultRotationOffset);
     property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
 }
 
@@ -468,7 +468,7 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
-    if (foldDisplayMode == FoldDisplayMode::FULL &&
+    if (foldDisplayMode == FoldDisplayMode::FULL && g_screenRotationOffSet == ROTATION_270 &&
         property_.GetBounds() == bounds && property_.GetRotation() != static_cast<float>(rotation)) {
         needUpdateToInputManager = true;
     }
@@ -478,8 +478,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
-        && g_screenRotationOffSet == ROTATION_270) {
+    if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr) {
         // fold phone need fix 90 degree by remainder 360 degree
         int foldRotation = (rotation + 90) % 360;
         updateToInputManagerCallback_(static_cast<float>(foldRotation));
@@ -623,13 +622,13 @@ void ScreenSession::SetVirtualPixelRatio(float virtualPixelRatio)
 void ScreenSession::SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func)
 {
     SetScreenSceneDpiCallback_ = func;
-    WLOGFI("SetScreenSceneDpiChangeListener");
+    TLOGI(WmsLogTag::DMS, "SetScreenSceneDpiChangeListener");
 }
 
 void ScreenSession::SetScreenSceneDpi(float density)
 {
     if (SetScreenSceneDpiCallback_ == nullptr) {
-        WLOGFI("SetScreenSceneDpiCallback_ is nullptr");
+        TLOGI(WmsLogTag::DMS, "SetScreenSceneDpiCallback_ is nullptr");
         return;
     }
     SetScreenSceneDpiCallback_(density);
@@ -637,17 +636,17 @@ void ScreenSession::SetScreenSceneDpi(float density)
 
 void ScreenSession::SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func)
 {
-    destroyScreenSceneCallback_  = func;
-    WLOGFI("SetScreenSceneDestroyListener");
+    destroyScreenSceneCallback_ = func;
+    TLOGI(WmsLogTag::DMS, "SetScreenSceneDestroyListener");
 }
 
 void ScreenSession::DestroyScreenScene()
 {
     if (destroyScreenSceneCallback_  == nullptr) {
-        WLOGFI("destroyScreenSceneCallback_  is nullptr");
+        TLOGI(WmsLogTag::DMS, "destroyScreenSceneCallback_  is nullptr");
         return;
     }
-    destroyScreenSceneCallback_ ();
+    destroyScreenSceneCallback_();
 }
 
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)

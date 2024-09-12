@@ -33,7 +33,7 @@ namespace {
     const static uint32_t MAX_RETRY_NUM = 6;
     const static uint32_t RETRY_WAIT_MS = 500;
     const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 25000;
+    const static uint32_t MAX_INTERVAL_US = 15000;
     std::atomic<bool> g_dmIsDestroyed = false;
     std::mutex snapBypickerMutex;
 }
@@ -501,6 +501,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
+    WLOGFI("Clear displaymanager listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -540,7 +541,7 @@ DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFD("Destroy displaymanager instance");
+    WLOGFI("Destroy displaymanager instance");
     g_dmIsDestroyed = true;
 }
 
@@ -1893,16 +1894,6 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return res;
 }
 
-void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList);
-}
-
-void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
-}
-
 DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
 {
     return pImpl_->ProxyForFreeze(pidList, isProxy);
@@ -1921,6 +1912,16 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList);
+}
+
+void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

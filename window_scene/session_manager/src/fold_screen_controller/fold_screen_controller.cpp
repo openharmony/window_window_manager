@@ -35,9 +35,12 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
         sensorFoldStateManager_ = new SingleDisplaySensorFoldStateManager();
     }
-
     if (foldScreenPolicy_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "FoldScreenPolicy is null");
+        return;
+    }
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "SensorFoldStateManager is null");
         return;
     }
 #ifdef SENSOR_ENABLE
