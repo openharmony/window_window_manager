@@ -355,7 +355,7 @@ void SceneSession::ClearSpecificSessionCbMap()
             TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
             return;
         }
-        session->ClearJsSceneSessionCbMapInner(true);
+        session->ClearJsSceneSessionCbMap(true);
     };
     PostTask(task, "ClearSpecificSessionCbMap");
 }
