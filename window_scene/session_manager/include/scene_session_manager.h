@@ -405,6 +405,11 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
+    /*
+     * Window Snapshot
+     */
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -772,6 +777,13 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Snapshot
+     */
+    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessSnapshotSkip(int32_t pid);
+
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(uint64_t screenId);
@@ -797,6 +809,11 @@ private:
     void RecoveryVisibilityPidCount(int32_t pid);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
+
+    /*
+     * Window Snapshot
+     */
+    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;

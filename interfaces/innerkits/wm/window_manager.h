@@ -776,6 +776,15 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
+     * @brief Skip Snapshot for app process.
+     *
+     * @param pid process id
+     * @param skip True means skip, false means not skip.
+     * @return WM_OK means snapshot skip success, others means snapshot skip failed.
+     */
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
+
+    /**
      * @brief Get window style type.
      *
      * @param windowStyleType WindowType
