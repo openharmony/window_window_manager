@@ -286,6 +286,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
+    BindNativeFunction(env, objValue, "syncDefaultRequestedOrientation", moduleName,
+        JsSceneSession::SyncDefaultRequestedOrientation);
     BindNativeFunction(env, objValue, "setIsPcAppInPad", moduleName,
         JsSceneSession::SetIsPcAppInPad);
     BindNativeFunction(env, objValue, "setStartingWindowExitAnimationFlag", moduleName,
@@ -1694,6 +1696,13 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSyncDefaultRequestedOrientation(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetIsPcAppInPad(napi_env env, napi_callback_info info)
@@ -4191,6 +4200,33 @@ napi_value JsSceneSession::OnSetBufferAvailableCallbackEnable(napi_env env, napi
         return NapiGetUndefined(env);
     }
     session->SetBufferAvailableCallbackEnable(enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t defaultRequestedOrientation = 0;
+    if (!ConvertFromJsValue(env, argv[0], defaultRequestedOrientation)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to defaultRequestedOrientation");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetDefaultRequestedOrientation(static_cast<Orientation>(defaultRequestedOrientation));
     return NapiGetUndefined(env);
 }
 

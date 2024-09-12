@@ -123,6 +123,24 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 
+const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
+    {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
+    {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
+    {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
+    {"follow_recent",                       OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT},
+    {"landscape_inverted",                  OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED},
+    {"portrait_inverted",                   OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED},
+    {"auto_rotation",                       OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION},
+    {"auto_rotation_landscape",             OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE},
+    {"auto_rotation_portrait",              OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT},
+    {"auto_rotation_restricted",            OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED},
+    {"auto_rotation_landscape_restricted",  OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {"auto_rotation_portrait_restricted",   OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
+    {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
+    {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
+};
+
 const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 std::string GetCurrentTime()
@@ -1522,15 +1540,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
 }
 
-void SceneSessionManager::InitRequestedOrientation(const SessionInfo& sessionInfo,
-    const sptr<WindowSessionProperty>& sessionProperty)
-{
-    sessionProperty->SetRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
-    sessionProperty->SetDefaultRequestedOrientation(static_cast<Orientation>(sessionInfo.requestOrientation_));
-    TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u",
-        sessionProperty->GetPersistentId(), sessionInfo.requestOrientation_);
-}
-
 void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
     const sptr<WindowSessionProperty>& property)
 {
@@ -1546,7 +1555,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty) {
-        InitRequestedOrientation(sessionInfo, sessionProperty);
         sessionProperty->SetDisplayId(curDisplayId);
         sceneSession->SetScreenId(curDisplayId);
         TLOGD(WmsLogTag::WMS_LIFE, "synchronous screenId with displayid %{public}" PRIu64,
@@ -6459,18 +6467,12 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
         TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
         return;
     }
-    resourceMgr->UpdateResConfig(*resConfig);
-    std::string loadPath;
-    if (!abilityInfo.hapPath.empty()) { // zipped hap
-        loadPath = abilityInfo.hapPath;
-    } else {
-        loadPath = abilityInfo.resourcePath;
-    }
+    std::string loadPath = abilityInfo.hapPath.empty() ? abilityInfo.resourcePath : abilityInfo.hapPath;
     if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
         TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
     std::string orientation;
-    auto ret = resourceMgr->GetStringById(static_cast<uint32_t>(abilityInfo.orientationId), orientation);
+    auto ret = resourceMgr->GetStringById(abilityInfo.orientationId, orientation);
     if (ret != Global::Resource::RState::SUCCESS) {
         TLOGE(WmsLogTag::DEFAULT, "GetStringById failed errcode:%{public}d, labelId:%{public}d",
             static_cast<int32_t>(ret), abilityInfo.orientationId);

@@ -287,19 +287,6 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
-bool IsJsRequestOrientationUndefined(napi_env env, napi_value jsRequestOrientation, SessionInfo& sessionInfo)
-{
-    if (GetType(env, jsRequestOrientation) != napi_undefined) {
-        uint32_t requestOrientation = 0;
-        if (!ConvertFromJsValue(env, jsRequestOrientation, requestOrientation)) {
-            TLOGI(WmsLogTag::DEFAULT, "Failed to convert parameter to requestOrientation");
-            return false;
-        }
-        sessionInfo.requestOrientation_ = requestOrientation;
-    }
-    return true;
-}
-
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -318,8 +305,6 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
     napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
-    napi_value jsRequestOrientation = nullptr;
-    napi_get_named_property(env, jsObject, "requestOrientation", &jsRequestOrientation);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -342,9 +327,6 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsRequestOrientationUndefined(env, jsRequestOrientation, sessionInfo)) {
         return false;
     }
     return true;

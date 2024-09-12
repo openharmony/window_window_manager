@@ -2768,6 +2768,14 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     }
 }
 
+void SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    WLOGFI("id: %{public}d defaultRequestedOrientation: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(orientation));
+    GetSessionProperty()->SetRequestedOrientation(orientation);
+    GetSessionProperty()->SetDefaultRequestedOrientation(orientation);
+}
+
 void SceneSession::NotifyForceHideChange(bool hide)
 {
     WLOGFI("id: %{public}d forceHide: %{public}u", persistentId_, hide);
