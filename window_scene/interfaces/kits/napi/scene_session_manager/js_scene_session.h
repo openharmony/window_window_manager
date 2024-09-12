@@ -82,9 +82,7 @@ public:
     ~JsSceneSession();
 
     static napi_value Create(napi_env env, const sptr<SceneSession>& session);
-    static void Finalizer(napi_env env, void* data, void* hint);
 
-    void ClearCbMap(bool needRemove, int32_t persistentId);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
@@ -279,7 +277,10 @@ private:
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void NotifyFrameLayoutFinish();
 
+    static void Finalizer(napi_env env, void* data, void* hint);
+
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ClearCbMap();
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
