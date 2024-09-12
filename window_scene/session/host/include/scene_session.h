@@ -180,7 +180,7 @@ public:
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
@@ -411,7 +411,7 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason& reason = SizeChangeReason::UNDEFINED, const DisplayId newDisplayId = -1ULL);
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = -1ULL);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -457,12 +457,16 @@ private:
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
+    /*
+    * Move Drag
+    */
+    void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void OnMoveDragCallback(const SizeChangeReason& reason);
-    void MoveDragSurfaceNodeHandler(const SizeChangeReason& reason);
-    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
+    void OnMoveDragCallback(const SizeChangeReason reason);
+    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
@@ -476,7 +480,7 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
+    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -564,7 +568,6 @@ private:
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
-    static std::map<uint64_t, std::map<uint32_t, WSRect> > windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
@@ -594,6 +597,11 @@ private:
      * Window ZOrder: PC
      */
     bool isPcScenePanel_ { false };
+
+    /*
+    * Move Drag
+    */
+   static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

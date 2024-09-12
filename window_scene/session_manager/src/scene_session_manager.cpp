@@ -1598,15 +1598,16 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
 
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
 {
-    auto task = [this, &sessionInfo, action, fromScreenId] {
+    auto task = [this, abilityName = sessionInfo.abilityName_,
+        bundleName = sessionInfo.bundleName_, toScreenId = sessionInfo.screenId_, action, fromScreenId] {
         sptr<DisplayChangeInfo> info = sptr<DisplayChangeInfo>::MakeSptr();
         info->action_ = action;
-        info->abilityName_ = sessionInfo.abilityName_;
-        info->bundleName_ = sessionInfo.bundleName_;
-        info->toScreenId_ = sessionInfo.screenId_;
+        info->abilityName_ = std::move(abilityName);
+        info->bundleName_ = std::move(bundleName);
+        info->toScreenId_ = std::move(toScreenId);
         info->fromScreenId_ = fromScreenId;
         ScreenSessionManagerClient::GetInstance().NotifyDisplayChangeInfoChanged(info);
-        WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64"",
+        WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64
             info->abilityName_.c_str(), info->bundleName_.c_str(), info->toScreenId_);
     };
     taskScheduler_->PostAsyncTask(task, "NotifySessionUpdate");
@@ -8612,7 +8613,7 @@ bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
 
 void SceneSessionManager::AddWindowDragHotArea(uint64_t displayId, uint32_t type, WSRect& area)
 {
-    WLOGFI("displayId: %{public}" PRIu64 "type: %{public}d, posX: %{public}d, posY: %{public}d, width: %{public}d, "
+    WLOGFI("displayId: %{public}" PRIu64 " type: %{public}d, posX: %{public}d, posY: %{public}d, width: %{public}d, "
         "height: %{public}d", displayId, type, area.posX_, area.posY_, area.width_, area.height_);
     SceneSession::AddOrUpdateWindowDragHotArea(displayId, type, area);
 }

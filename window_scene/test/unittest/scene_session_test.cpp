@@ -885,7 +885,7 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
     scensession->sessionRectChangeFunc_ = [](const WSRect& rect,
-        const SizeChangeReason& reason, DisplayId newDisplayId) {
+        const SizeChangeReason reason, DisplayId newDisplayId) {
         return;
     };
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);

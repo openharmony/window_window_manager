@@ -1128,7 +1128,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     WSRect rectResult = scensession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [scensession](DisplayId newDisplayId, int32_t type, const SizeChangeReason& reason) {
+    auto dragHotAreaFunc = [scensession](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1469,8 +1469,6 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
     event = SessionEvent::EVENT_DRAG_START;
     ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
-    sceneSession->property_= nullptr;
-    ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_ERROR_DESTROYED_OBJECT);
 }
 
 /**
