@@ -772,7 +772,7 @@ void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
     TLOGI(WmsLogTag::WMS_PIP, "register success");
 }
 
-    void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
+void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
 {
     NotifyAutoStartPiPStatusChangeFunc func = [this](bool isAutoStart) {
         this->OnAutoStartPiPStatusChange(isAutoStart);
