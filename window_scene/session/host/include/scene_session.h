@@ -225,7 +225,6 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
-    void SetWatermarkEnabled(const std::string& pictureName, bool isEnabled);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void SetRequestedOrientation(Orientation orientation);
@@ -273,6 +272,11 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+
+    /*
+     * Window Watermark
+     */
+    void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
     sptr<MoveDragController> moveDragController_ = nullptr;
 

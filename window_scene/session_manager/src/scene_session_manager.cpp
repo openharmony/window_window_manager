@@ -10435,70 +10435,6 @@ void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProces
     TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
 
-WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled)
-{
-    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "Process satermark permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "Set process watermark, pid:%{public}d,pictureName:%{public}s,isEnabled:%{public}u",
-        pid, pictureName.c_str(), isEnabled);
-    if (isEnabled && pictureName.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "pictureName is empty!");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    auto task = [this, pid, pictureName, isEnabled] {
-        if (isEnabled) {
-            auto iter = processWatermarkPidMap_.find(pid);
-            if (iter != processWatermarkPidMap_.end()) {
-                iter->second = pictureName;
-            } else {
-                processWatermarkPidMap_.insert({pid, pictureName});
-            }
-        } else {
-            processWatermarkPidMap_.erase(pid);
-        }
-
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& item : sceneSessionMap_) {
-            auto sceneSession = item.second;
-            if (sceneSession == nullptr) {
-                continue;
-            }
-            int32_t callingPid = sceneSession->GetCallingPid();
-            if (pid == callingPid) {
-                sceneSession->SetWatermarkEnabled(pictureName, isEnabled);
-            }
-        }
-    };
-    taskScheduler_->PostTask(task, "SetProcessWatermark");
-    return WMError::WM_OK;
-}
-
-void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        return;
-    }
-    auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
-    if (iter == processWatermarkPidMap_.end()) {
-        return;
-    }
-    sceneSession->SetWatermarkEnabled(iter->second, true);
-}
-
-void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
-{
-    auto task = [this, pid] {
-        if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-            TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from process watermark pid map. pid:%{public}d",
-                pid);
-            processWatermarkPidMap_.erase(pid);
-        }
-    };
-    taskScheduler_->PostTask(task, "RemoveProcessWatermarkPid");
-}
-
 WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
     const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
 {
@@ -10665,4 +10601,55 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSe
         sceneSession->SetSnapshotSkip(true);
     }
 }
+
+WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::DEFAULT, " pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
+        pid, watermarkName.c_str(), isEnabled);
+    if (isEnabled && watermarkName.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "watermarkName is empty!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto task = [this, pid, watermarkName, isEnabled] {
+        if (isEnabled) {
+            processWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+        } else {
+            processWatermarkPidMap_.erase(pid);
+        }
+
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (pid == sceneSession->GetCallingPid()) {
+                sceneSession->SetWatermarkEnabled(watermarkName, isEnabled);
+            }
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
+{
+    if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
+        iter != processWatermarkPidMap_.end()) {
+        sceneSession->SetWatermarkEnabled(iter->second, true);
+    }
+}
+
+void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
+{
+    if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from watermark pid map. pid:%{public}d",
+            pid);
+        processWatermarkPidMap_.erase(pid);
+    }
+}
+
 } // namespace OHOS::Rosen

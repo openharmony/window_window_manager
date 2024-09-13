@@ -1705,16 +1705,16 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
  * @tc.name: SetProcessWatermark
  * @tc.desc: add or cancel process watermark by pid
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Level3)
 {
     auto result = ssm_->SetProcessWatermark(100, "", true);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     int32_t pid = 1000;
-    const std::string pictureName = "SetProcessWatermarkPictureName";
+    const std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
-    result = ssm_->SetProcessWatermark(pid, pictureName, isEnabled);
+    result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
@@ -1727,6 +1727,7 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, Function | SmallTes
 {
     ssm_->processWatermarkPidMap_.insert({1, "test"});
     ssm_->RemoveProcessWatermarkPid(1);
+    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
 }
 
 /**

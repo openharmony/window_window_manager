@@ -408,7 +408,7 @@ public:
     /*
      * Window Watermark
      */
-    WMError SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled) override;
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
 
     /*
      * Window Snapshot
@@ -831,9 +831,9 @@ private:
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 
     /*
-     * Window watermark
+     * Window Watermark
      */
-    std::map<int32_t, std::string> processWatermarkPidMap_;
+    std::map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
 
     /*
      * Dump

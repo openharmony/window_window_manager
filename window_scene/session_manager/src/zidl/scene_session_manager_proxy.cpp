@@ -2250,7 +2250,7 @@ WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool sk
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled)
+WMError SceneSessionManagerProxy::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2263,8 +2263,8 @@ WMError SceneSessionManagerProxy::SetProcessWatermark(int32_t pid, const std::st
         TLOGE(WmsLogTag::DEFAULT, "Write pid failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(pictureName)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write pictureName failed");
+    if (!data.WriteString(watermarkName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write watermarkName failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isEnabled)) {

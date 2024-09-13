@@ -1106,9 +1106,9 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
         TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
         return ERR_INVALID_DATA;
     }
-    std::string pictureName = "";
-    if (!data.ReadString(pictureName)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to readString pictureName");
+    std::string watermarkName;
+    if (!data.ReadString(watermarkName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readString watermarkName");
         return ERR_INVALID_DATA;
     }
     bool isEnabled = false;
@@ -1116,7 +1116,7 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
         TLOGE(WmsLogTag::DEFAULT, "Failed to readBool isEnabled");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetProcessWatermark(pid, pictureName, isEnabled);
+    WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
