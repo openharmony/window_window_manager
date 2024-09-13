@@ -2043,7 +2043,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     {
         DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
         if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
@@ -2056,11 +2055,12 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             RSInterfaces::GetInstance().DisableCacheForRotation();
             return;
         } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
-            if (screenSession == nullptr || displayInfo == nullptr) {
+            if (screenSession == nullptr) {
                 TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen "
-                    "%{public}" PRIu64" or displayInfo is nullptr", screenId);
+                    "%{public}" PRIu64"", screenId);
                 return;
             }
+            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
@@ -2074,11 +2074,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, displayInfo is nullptr");
-        return;
-    }
-
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
 
