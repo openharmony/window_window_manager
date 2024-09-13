@@ -485,6 +485,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
+        if (session->moveDragController_ && event == SessionEvent::EVENT_DRAG) {
+            WSRect rect = session->moveDragController_->GetTargetRect();
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
+        }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
                 session->sessionEventParam_);
@@ -554,6 +558,9 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
         return modalType;
     }
     auto windowType = property->GetWindowType();
+    if (WindowHelper::IsToastSubWindow(windowType, property->GetWindowFlags())) {
+        return SubWindowModalType::TYPE_TOAST;
+    }
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
@@ -736,11 +743,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
                 "preRect: %{public}s",
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
-            session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         } else {
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
+        session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s, "
             "clientRect:%{public}s", session->GetPersistentId(), session->reason_, updateReason.c_str(),
             rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
@@ -2230,6 +2237,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode);
     } else {
+        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+            return;
+        }
         SetSurfaceBounds(globalRect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
@@ -2800,6 +2811,28 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
         sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
+}
+
+WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    auto task = [weakThis = wptr(this), orientation]() -> WSError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        TLOGI(WmsLogTag::DEFAULT, "id: %{public}d defaultRequestedOrientation: %{public}u",
+            session->GetPersistentId(), static_cast<uint32_t>(orientation));
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "get session property failed");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        property->SetRequestedOrientation(orientation);
+        property->SetDefaultRequestedOrientation(orientation);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "SetDefaultRequestedOrientation");
 }
 
 void SceneSession::NotifyForceHideChange(bool hide)
@@ -4470,7 +4503,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    Session::SetForegroundInteractiveStatus(interactive);
+    SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);
     return true;
 }

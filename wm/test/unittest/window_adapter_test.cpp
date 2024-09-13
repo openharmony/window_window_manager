@@ -135,6 +135,21 @@ HWTEST_F(WindowAdapterTest, CheckWindowId, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: WindowAdapter/SkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    bool skip = true;
+    WindowAdapter windowAdapter;
+    windowAdapter.SkipSnapshotForAppProcess(pid, skip);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
  * @tc.name: SetWindowAnimationController
  * @tc.desc: WindowAdapter/SetWindowAnimationController
  * @tc.type: FUNC

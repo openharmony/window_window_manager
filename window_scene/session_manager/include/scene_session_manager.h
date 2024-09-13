@@ -74,7 +74,7 @@ struct SecSurfaceInfo;
 class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
-class SceneEventPublish;
+class ScbDumpSubscriber;
 
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
@@ -132,7 +132,7 @@ public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
-    std::future<int32_t> RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
@@ -148,6 +148,8 @@ public:
     sptr<RootSceneSession> GetRootSceneSession();
     WSRect GetRootSessionAvoidSessionRect(AvoidAreaType type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
+        const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
@@ -403,6 +405,11 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
+    /*
+     * Window Snapshot
+     */
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -457,7 +464,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     void PostProcessFocus();
-    void PostProcessProperty();
+    void PostProcessProperty(uint32_t dirty);
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -480,7 +487,6 @@ private:
     bool CheckParentSessionVisible(const sptr<SceneSession>& session);
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property);
-    void InitRequestedOrientation(const SessionInfo& sessionInfo, const sptr<WindowSessionProperty>& sessionProperty);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
@@ -530,8 +536,7 @@ private:
     WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
-        bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession, bool isNewActive);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
@@ -753,14 +758,13 @@ private:
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
-    void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session);
+    void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
     void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
-    void OnSCBSystemSessionBufferAvailable(const WindowType type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
@@ -772,6 +776,13 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Snapshot
+     */
+    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessSnapshotSkip(int32_t pid);
+
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
     void HandleCastScreenDisConnection(uint64_t screenId);
@@ -798,6 +809,11 @@ private:
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
+    /*
+     * Window Snapshot
+     */
+    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
+
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
@@ -805,7 +821,7 @@ private:
     /*
      * Dump
      */
-    std::shared_ptr<SceneEventPublish> sceneEventPublish_;
+    std::shared_ptr<ScbDumpSubscriber> scbDumpSubscriber_;
 
     struct SessionInfoList {
         int32_t uid_;

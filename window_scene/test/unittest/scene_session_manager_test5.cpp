@@ -22,7 +22,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
@@ -200,19 +200,6 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage, Function | SmallTest | Level3
     std::string path = "path";
     uint32_t bgColor = 1;
     ssm_->GetStartupPage(info, path, bgColor);
-}
-
-/**
- * @tc.name: OnSCBSystemSessionBufferAvailable
- * @tc.desc: OnSCBSystemSessionBufferAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, OnSCBSystemSessionBufferAvailable02, Function | SmallTest | Level3)
-{
-    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
-    ASSERT_NE(sceneSessionManager, nullptr);
-    sceneSessionManager->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_FLOAT);
-    delete sceneSessionManager;
 }
 
 /**

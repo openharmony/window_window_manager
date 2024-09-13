@@ -383,6 +383,25 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 }
 
+/**
+ * @tc.name: SetDefaultRequestedOrientation
+ * @tc.desc: SetDefaultRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "SetDefaultRequestedOrientation";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
+    scensession->SetDefaultRequestedOrientation(orientation);
+    Orientation ret = scensession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+}
+
 
 /**
  * @tc.name: IsKeepScreenOn
@@ -1449,7 +1468,6 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     info.bundleName_ = "OnSessionEvent";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
