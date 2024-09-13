@@ -2261,6 +2261,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
 void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    if (movedSurfaceNode == nullptr) {
+        TLOGD(WmsLogTag::WMS_PIP, "SurfaceNode is null");
+        return;
+    }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplaysDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
