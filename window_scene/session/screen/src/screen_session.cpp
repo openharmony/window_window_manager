@@ -611,6 +611,7 @@ void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation
 
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 {
+    TLOGI(WmsLogTag::DMS, "ENTER!");
     if (foldToExpand) {
         SensorRotationChange(currentSensorRotation_);
     }

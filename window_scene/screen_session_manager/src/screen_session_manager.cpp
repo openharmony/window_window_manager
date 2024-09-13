@@ -177,23 +177,23 @@ void ScreenSessionManager::FoldScreenPowerInit()
 {
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
-        #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
         int32_t tpType = 12;
         std::string fullTpChange = "0";
         std::string mainTpChange = "1";
-        #endif
+#endif
         if (rsInterface_.GetActiveScreenId() == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 2.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
@@ -201,16 +201,16 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 4.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
@@ -839,8 +839,7 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
     DmsXcollie dmsXcollie("DMS:GetScreenInfoById", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "GetScreenInfoById permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "Permission Denied.calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return nullptr;
     }
@@ -1801,6 +1800,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
         } else {
             TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
+            screenEventTracker_.RecordEvent("HandlerSensor start!");
         }
     }
 }
@@ -4704,7 +4704,7 @@ void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, Sc
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenOrientation: %{public}f", screenId, screenOrientation);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenOrientationChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenOrientationChanged(screenId, screenOrientation);
@@ -4714,7 +4714,7 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " isLocked: %{public}d", screenId, isLocked);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenRotationLockedChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
@@ -5221,7 +5221,7 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyFoldToExpandCompletion ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
