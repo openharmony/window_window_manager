@@ -234,6 +234,7 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+    virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
 };
 } // namespace OHOS::Rosen

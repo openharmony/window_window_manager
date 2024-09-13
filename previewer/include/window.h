@@ -197,6 +197,7 @@ public:
     virtual WMError SetBackdropBlur(float radius) = 0;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) = 0;
     virtual WMError RequestFocus() const = 0;
+    virtual WMError RequestFocusByClient(bool isFocused) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool IsFocused() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;

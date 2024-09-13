@@ -20,6 +20,7 @@ config("libdm_private_config") {
     "../dmserver/include",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
@@ -54,7 +55,7 @@ ohos_static_library("libdm_static") {
   }
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
-    "../window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp",
+    "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
     "src/display_manager_adapter.cpp",
@@ -101,7 +102,7 @@ ohos_shared_library("libdm") {
   branch_protector_ret = "pac_ret"
   sources = [
     "../dmserver/src/display_manager_proxy.cpp",
-    "../window_scene/session_manager/src/zidl/screen_session_manager_proxy.cpp",
+    "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
     "src/display_manager_adapter.cpp",

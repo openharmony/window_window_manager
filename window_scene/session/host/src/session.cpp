@@ -72,6 +72,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
+bool Session::isScbCoreEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -2302,6 +2303,17 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError Session::RequestFocus(bool isFocused)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
@@ -3264,7 +3276,13 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    return isScbCoreEnabled_;
+}
+
+void Session::SetScbCoreEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_PIPELINE, "%{public}d", enabled);
+    isScbCoreEnabled_ = enabled;
 }
 
 bool Session::IsVisible() const
