@@ -77,7 +77,7 @@ public:
     */
     uint64_t GetMoveDragStartDisplayId() const;
     uint64_t GetMoveDragEndDisplayId() const;
-    uint64_t GetInitParentId() const;
+    uint64_t GetInitParentNodeId() const;
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag() const;
     std::set<uint64_t> GetNewAddedDisplaysDuringMoveDrag();
     void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentId);
@@ -209,7 +209,7 @@ private:
     */
     uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t initParentId_ = DISPLAY_ID_INVALID;
+    uint64_t InitParentNodeId_ = DISPLAY_ID_INVALID;
     std::set<uint64_t> displaySetDuringMoveDrag_;
     uint64_t hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;

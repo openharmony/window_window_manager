@@ -110,9 +110,9 @@ uint64_t MoveDragController::GetMoveDragEndDisplayId() const
     return moveDragEndDisplayId_;
 }
 
-uint64_t MoveDragController::GetInitParentId() const
+uint64_t MoveDragController::GetInitParentNodeId() const
 {
-    return initParentId_;
+    return InitParentNodeId_;
 }
 
 std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag() const
@@ -143,11 +143,11 @@ void MoveDragController::InitMoveDragProperty()
     moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
 }
 
-void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t initParentId)
+void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t InitParentNodeId)
 {
     displaySetDuringMoveDrag_.insert(displayId);
     moveDragStartDisplayId_ = displayId;
-    initParentId_ = initParentId;
+    InitParentNodeId_ = InitParentNodeId;
     sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().
         GetScreenSessionById(moveDragStartDisplayId_);
     if (!screenSession) {

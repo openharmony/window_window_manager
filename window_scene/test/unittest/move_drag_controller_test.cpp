@@ -136,13 +136,13 @@ HWTEST_F(MoveDragControllerTest, GetMoveDragEndDisplayId, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetInitParentId
- * @tc.desc: test function : GetInitParentId
+ * @tc.name: GetInitParentNodeId
+ * @tc.desc: test function : GetInitParentNodeId
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, GetInitParentId, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, GetInitParentNodeId, Function | SmallTest | Level1)
 {
-    uint64_t res = moveDragController->GetInitParentId();
+    uint64_t res = moveDragController->GetInitParentNodeId();
     ASSERT_EQ(-1ULL, res);
 }
 
@@ -201,7 +201,7 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest 
 {
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
-    ASSERT_EQ(2, moveDragController->GetInitParentId());
+    ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
     ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
         moveDragController->GetDisplayIdsDuringMoveDrag().end());
 }
