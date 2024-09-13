@@ -1606,7 +1606,7 @@ void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, Ac
         info->toScreenId_ = std::move(toScreenId);
         info->fromScreenId_ = fromScreenId;
         ScreenSessionManagerClient::GetInstance().NotifyDisplayChangeInfoChanged(info);
-        WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64
+        WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64 ".",
             info->abilityName_.c_str(), info->bundleName_.c_str(), info->toScreenId_);
     };
     taskScheduler_->PostAsyncTask(task, "NotifySessionUpdate");
