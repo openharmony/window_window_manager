@@ -359,6 +359,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             isStartDrag_ = false;
             hasPointDown_ = false;
             std::lock_guard<std::mutex> lock(moveDragMutex_);
+            if (GetScreenRectById(moveDragStartDisplayId_) == {-1, -1, -1, -1}) return false;
             moveDragEndDisplayId_ = GetTargetRect(true).IsOverlap(GetScreenRectById(moveDragStartDisplayId_)) ?
                 moveDragStartDisplayId_ : pointerEvent->GetTargetDisplayId();
             ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
@@ -369,7 +370,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             return false;
     }
     std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
-    moveDragProperty_.targetRect_ = aspectRatio_ > NEAR_ZERO ? CalcFixedAspectRatioTargetRect(
+    moveDragProperty_.targetRect_ = GreatNotEqual(aspectRatio_, NEAR_ZERO) ? CalcFixedAspectRatioTargetRect(
         type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
         CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     ProcessSessionRectChange(reason);
@@ -380,6 +381,10 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
 {
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+    if (!screenSession) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "ScreenSession id null.");
+        return {-1, -1, -1, -1};
+    }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     WSRect screenRect = {
     screenProperty.GetStartX(),
@@ -950,7 +955,7 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplaysDuringMoveDrag()
     WSRect windowRect = GetTargetRect(true);
     std::map<ScreenId, ScreenProperty> screenProperties = ScreenSessionManagerClient::GetInstance().
         GetAllScreensProperties();
-    for (auto& [screenId, screenProperty] : screenProperties) {
+    for (const auto& [screenId, screenProperty] : screenProperties) {
         WSRect screenRect = {
             screenProperty.GetStartX(),
             screenProperty.GetStartY(),

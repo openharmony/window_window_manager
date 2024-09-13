@@ -541,8 +541,7 @@ uint32_t SceneSession::GetWindowDragHotAreaType(uint64_t displayId, uint32_t typ
 void SceneSession::AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area)
 {
     std::unique_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
-    auto& hotAreaMap = windowDragHotAreaMap_[displayId];
-    auto const result = hotAreaMap.insert({type, area});
+    auto const result = windowDragHotAreaMap_[displayId].insert({type, area});
     if (!result.second) {
         result.first->second = area;
     }
