@@ -462,7 +462,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             auto movedSurfaceNode = session->GetSurfaceNodeForMoveDrag();
             if (!movedSurfaceNode || !movedSurfaceNode->GetParent()) {
-                return WSError::WS_ERROR_DESTROYED_OBJECT;;
+                return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
             uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
             session->moveDragController_->InitMoveDragProperty();
