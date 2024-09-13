@@ -209,7 +209,7 @@ private:
     */
     uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t InitParentNodeId_ = DISPLAY_ID_INVALID;
+    uint64_t InitParentNodeId_ = -1ULL;
     std::set<uint64_t> displaySetDuringMoveDrag_;
     uint64_t hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
