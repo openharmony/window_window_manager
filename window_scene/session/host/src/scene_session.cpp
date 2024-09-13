@@ -4505,6 +4505,8 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, isVisible_: %{public}d, visibility: %{public}d",
+        GetPersistentId(), isVisible_, visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
@@ -4628,6 +4630,8 @@ bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
     if (zOrder_ == zOrder) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder_: %{public}u, zOrder: %{public}u",
+        GetPersistentId(), zOrder_, zOrder);
     zOrder_ = zOrder;
     return true;
 }
