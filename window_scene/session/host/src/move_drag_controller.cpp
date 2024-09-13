@@ -40,6 +40,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
+std::mutex moveDragMutex_;
 }
 
 MoveDragController::MoveDragController(int32_t persistentId)
@@ -357,7 +358,11 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
-            moveDragEndDisplayId_ = pointerEvent->GetTargetDisplayId();
+            WSRect windowRect = GetTargetRect(true);
+            WSRect screenRect = GetScreenRectById(moveDragStartDisplayId_);
+            std::lock_guard<std::mutex> lock(moveDragMutex_);
+            moveDragEndDisplayId_ = windowRect.IsOverlap(screenRect) ? 
+                moveDragStartDisplayId_ : pointerEvent->GetTargetDisplayId();
             ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
             NotifyWindowInputPidChange(isStartDrag_);
             break;
@@ -371,6 +376,24 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     ProcessSessionRectChange(reason);
     return true;
+}
+
+WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
+{
+   sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+    if (!screenSession) {
+        TLOGI("Display is null");
+        return false;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    WSRect screenRect = {
+    screenProperty.GetStartX(),
+    screenProperty.GetStartY(),
+    screenProperty.GetBounds().rect_.GetWidth(),
+    screenProperty.GetBounds().rect_.GetHeight(),
+    }; 
+    return screenRect;
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTransform(
@@ -942,6 +965,7 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplaysDuringMoveDrag()
         };
         if (displaySetDuringMoveDrag_.find(screenId) == displaySetDuringMoveDrag_.end() &&
             windowRect.IsOverlap(screenRect)) {
+            std::lock_guard<std::mutex> lock(moveDragMutex_);
             displaySetDuringMoveDrag_.insert(screenId);
             newAddedDisplayIdSet.insert(screenId);
         }

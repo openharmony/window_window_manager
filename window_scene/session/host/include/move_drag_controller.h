@@ -23,6 +23,8 @@
 #include "property/rs_properties_def.h"
 #include "window.h"
 #include "ws_common_inner.h"
+#include <mutex>
+
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -79,6 +81,7 @@ public:
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag() const;
     std::set<uint64_t> GetNewAddedDisplaysDuringMoveDrag();
     void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentId);
+    WSRect GetScreenRectById(DisplayId displayId);
 
 private:
     struct MoveDragProperty {
