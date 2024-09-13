@@ -2248,13 +2248,12 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     auto task = [this, persistentId = persistentId_, isAutoStart, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been"
-                " destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = this->GetJSCallback(SESSION_AUTO_START_PIP_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_PIP, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_PIP, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value isAutoStartValue = CreateJsValue(env, isAutoStart);
