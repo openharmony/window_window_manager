@@ -964,7 +964,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
     auto task = [weakThis = wptr(this), func]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_PIP, "session is null");
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->autoStartPiPStatusChangeFunc_ = func;
@@ -3917,11 +3917,11 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
     auto task = [weakThis = wptr(this), isAutoStart, callingPid]() {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
-            TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         if (callingPid != session->GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
+            TLOGNW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->autoStartPiPStatusChangeFunc_) {
