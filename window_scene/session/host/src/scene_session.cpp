@@ -494,7 +494,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<int>(event)));
+    PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
     return WSError::WS_OK;
 }
 
