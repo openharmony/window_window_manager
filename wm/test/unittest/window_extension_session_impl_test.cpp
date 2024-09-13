@@ -815,6 +815,10 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
     std::shared_ptr<RSTransaction> rsTransaction;
     ASSERT_NE(nullptr, window_);
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+
+    rsTransaction = nullptr;
+    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    window_->UpdateRectForOtherReason(rect, wmReason);
 }
 
 /**
@@ -832,7 +836,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Functi
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK,
-        window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+    window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
 }
 
 /**
@@ -849,7 +853,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Functi
     int64_t timeMs = 0;
     window_->uiContent_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
-        window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+    window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
 }
 
 /**
