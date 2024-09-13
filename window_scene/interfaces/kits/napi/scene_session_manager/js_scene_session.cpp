@@ -673,7 +673,7 @@ void JsSceneSession::ClearCbMap()
             jsSceneSessionMap_.erase(iter);
         } else {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: delete ref failed, %{public}d",
-                  where, jsSceneSession->persistentId_);
+                   where, jsSceneSession->persistentId_);
         }
     };
     taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId_));
