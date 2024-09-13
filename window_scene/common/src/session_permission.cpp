@@ -241,6 +241,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
             "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
             callingBundleName.c_str(),
             bundleName.c_str());
+        IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
     AppExecFwk::BundleInfo bundleInfo;
