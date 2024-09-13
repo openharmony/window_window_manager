@@ -359,7 +359,6 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             isStartDrag_ = false;
             hasPointDown_ = false;
             std::lock_guard<std::mutex> lock(moveDragMutex_);
-            if (!GetScreenRectById(moveDragStartDisplayId_)) return false;
             moveDragEndDisplayId_ = GetTargetRect(true).IsOverlap(GetScreenRectById(moveDragStartDisplayId_)) ?
                 moveDragStartDisplayId_ : pointerEvent->GetTargetDisplayId();
             ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
@@ -381,10 +380,6 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
 {
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-    if (!screenSession) {
-        TLOGI(WmsLogTag::WMS,"Display is null");
-        return nullptr;
-    }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     WSRect screenRect = {
     screenProperty.GetStartX(),
