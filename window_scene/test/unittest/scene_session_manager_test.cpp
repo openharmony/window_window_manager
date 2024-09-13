@@ -1712,7 +1712,7 @@ HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Le
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     int32_t pid = 1000;
-    const std::string watermarkName = "SetProcessWatermarkName";
+    std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
     result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
@@ -1738,17 +1738,17 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, Function | SmallTes
 HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
-    sceneSession1->SetCallingPid(1);
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession->SetCallingPid(1);
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
 
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
 
     ssm_->processWatermarkPidMap_.insert({1, "test"});
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession1);
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
 
-    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
     ssm_->processWatermarkPidMap_.erase(1);
 }
 
