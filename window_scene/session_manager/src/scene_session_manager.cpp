@@ -4425,7 +4425,8 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    bool isSceneBoardBundle = SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER);
+    bool isSceneBoardBundle =
+        SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER);
     if (!isSceneBoardBundle && (callingPid != sceneSession->GetCallingPid())) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;

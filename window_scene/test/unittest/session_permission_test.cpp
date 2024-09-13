@@ -118,7 +118,7 @@ HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, Function | SmallTest 
  * @tc.name: IsSameAppAsCalling
  * @tc.desc: test function : IsSameAppAsCalling
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsSameAppAsCalling, Function | SmallTest | Level1)
 {
     const std::string appIdentifier = "123";

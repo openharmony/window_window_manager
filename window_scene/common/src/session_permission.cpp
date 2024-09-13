@@ -252,7 +252,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
         return false;
     }
 
-    if (callingBundleName == bundleName && bundleInfo.signatureInfo.appIdentifier ==  appIdentifier) {
+    if (callingBundleName == bundleName && bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
         TLOGI(WmsLogTag::DEFAULT, "verify app success");
         return true;
     }
