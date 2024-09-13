@@ -3930,11 +3930,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
         }
         return WSError::WS_OK;
     };
-    if (mainHandler_ != nullptr) {
-        mainHandler_->PostTask(std::move(task), "wms:SetAutoStartPiP", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    } else {
-        PostTask(task, "SetAutoStartPiP");
-    }
+    PostTask(task, "SetAutoStartPiP");
     return WSError::WS_OK;
 }
 
