@@ -943,7 +943,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            session->sessionRectChangeFunc_(session->GetSessionRequestRect(), reason);
+            session->NotifySessionRectChange(rect, reason);
         }
         return WSError::WS_OK;
     };
@@ -2210,7 +2210,7 @@ void SceneSession::SetMoveDragCallback()
 
 void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
 {
-    if (!moveDragController_ || property == nullptr) {
+    if (!moveDragController_) {
         WLOGE("moveDragController_ is null");
         return;
     }
@@ -2234,7 +2234,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode);
-    } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()){
+    } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     } else {
