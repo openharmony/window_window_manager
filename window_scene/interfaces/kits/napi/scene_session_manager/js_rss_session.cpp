@@ -71,7 +71,7 @@ void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     CallBackContext* callBackContext = new CallBackContext();
     callBackContext->env = napiEnv_;
     callBackContext->callbackRef = callbackRef_;
-    callBackContext->eventType = eventType;
+    callBackContext->eventType = static_cast<int32_t>(eventType);
     callBackContext->extraInfo = std::move(extraInfo);
     callBackContext->eventCb = eventCb_;
     napi_acquire_threadsafe_function(threadSafeFunction_);
