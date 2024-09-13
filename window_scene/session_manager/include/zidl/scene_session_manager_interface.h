@@ -268,10 +268,8 @@ public:
 
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override { return WMError::WM_OK; }
 
-    WMError SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled) override
-    {
-        return WMError::WM_OK;
-    }
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
+        bool isEnabled) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

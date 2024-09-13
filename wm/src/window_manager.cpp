@@ -1408,20 +1408,20 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
-WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& pictureName, bool isEnabled)
-{
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, pictureName, isEnabled);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "set process watermark failed");
-    }
-    return ret;
-}
-
 WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "set process snapshot skip failed");
+        TLOGE(WmsLogTag::DEFAULT, "skip failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, watermarkName, isEnabled);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
     }
     return ret;
 }

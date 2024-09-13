@@ -1310,9 +1310,9 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
 HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
 {
     int32_t pid = 1000;
-    const std::string pictureName = "SetProcessWatermarkPictureName";
+    const std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
-    auto ret = WindowManager::GetInstance().SetProcessWatermark(pid, pictureName, isEnabled);
+    auto ret = WindowManager::GetInstance().SetProcessWatermark(pid, watermarkName, isEnabled);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
