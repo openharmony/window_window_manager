@@ -2042,6 +2042,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | Small
 }
 
 /**
+ * @tc.name: HandleSetProcessWatermark
+ * @tc.desc: test HandleSetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(123);
+    data.WriteString("SetProcessWatermarkName");
+    data.WriteBool(true);
+
+    int res = stub_->HandleSetProcessWatermark(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: test HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC

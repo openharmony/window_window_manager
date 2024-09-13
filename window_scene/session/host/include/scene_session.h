@@ -275,6 +275,11 @@ public:
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
 
+    /*
+     * Window Watermark
+     */
+    void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
+
     sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover

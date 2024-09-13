@@ -407,6 +407,11 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
     /*
+     * Window Watermark
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+
+    /*
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
@@ -808,6 +813,12 @@ private:
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid);
 
+    /*
+     * Window Watermark
+     */
+    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessWatermarkPid(int32_t pid);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
     /*
@@ -818,6 +829,11 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Window Watermark
+     */
+    std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
 
     /*
      * Dump
