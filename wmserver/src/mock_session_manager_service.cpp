@@ -205,6 +205,10 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
         std::unique_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
         sessionManagerServiceMap_[currentWMSUserId_] = sessionManagerService;
     }
+    auto iter = userIdBundleNameListMap_.find(currentWMSUserId_);
+    if (iter != userIdBundleNameListMap_.end()) {
+        SetSnapshotSkipByUserIdAndBundleNameList(iter->first, iter->second);
+    }
     auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
     if (!smsDeathRecipient) {
         smsDeathRecipient = new SMSDeathRecipient(currentWMSUserId_);
@@ -774,6 +778,52 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
     }
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    const std::vector<std::string>& bundleNameList)
+{
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    if (sessionManagerService == nullptr) {
+        WLOGFE("sessionManagerService is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
+        userIdBundleNameListMap_[userId] = bundleNameList;
+    }
+    sptr<ISessionManagerService> sessionManagerServiceProxy = iface_cast<ISessionManagerService>(sessionManagerService);
+    if (sessionManagerServiceProxy == nullptr) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy->GetSceneSessionManager();
+    if (remoteObject == nullptr) {
+        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
+    WMError ret = sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Set SnapShotSkip By userId And BundleNameList failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByMap(
+    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+{
+    int32_t flag = ERR_NONE;
+    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
+        int32_t userId = it->first;
+        std::vector<std::string> bundleNameList = it->second;
+        int32_t errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+        if (errCode != ERR_NONE) {
+            flag = errCode;
+        }
+    }
+    return flag;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -2249,4 +2249,36 @@ WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool sk
 
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    const std::vector<std::string>& bundleNameList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write userId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteStringVector(bundleNameList)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write bundleNameList failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
