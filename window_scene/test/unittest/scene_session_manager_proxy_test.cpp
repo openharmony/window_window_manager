@@ -1035,6 +1035,24 @@ HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Fu
     sceneSessionManagerProxy_ = nullptr;
 }
 
+/**
+ * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+            new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+
+    int32_t userid = 1;
+    std::vector<std::string> bundleNameList = {"a", "b", "c"};
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(
+        userid, bundleNameList));
+}
+
 }  // namespace
 }
 }
