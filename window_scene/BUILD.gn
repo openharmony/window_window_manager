@@ -17,10 +17,10 @@ import("../windowmanager_aafwk.gni")
 group("window_scene") {
   public_deps = [
     "intention_event:libintention_event",
+    "screen_session_manager:screen_session_manager",
     "session:scene_session",
     "session:screen_session",
     "session_manager:scene_session_manager",
-    "session_manager:screen_session_manager",
     "session_manager:session_manager",
   ]
   if (window_manager_use_sceneboard) {

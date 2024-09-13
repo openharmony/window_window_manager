@@ -31,7 +31,7 @@
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "event_handler.h"
-#include "session_manager/include/screen_rotation_property.h"
+#include "screen_session_manager/include/screen_rotation_property.h"
 
 namespace OHOS::Rosen {
 using SetScreenSceneDpiFunc = std::function<void(float density)>;

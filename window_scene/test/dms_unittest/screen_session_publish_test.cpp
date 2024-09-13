@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <common_event_manager.h>
 
-#include "session_manager/include/publish/screen_session_publish.h"
+#include "screen_session_manager/include/publish/screen_session_publish.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;

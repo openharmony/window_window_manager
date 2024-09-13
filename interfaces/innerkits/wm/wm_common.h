@@ -141,6 +141,7 @@ enum class SubWindowModalType : uint32_t {
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
+    TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
 };
 
@@ -816,6 +817,7 @@ enum class MaximizeMode : uint32_t {
     MODE_AVOID_SYSTEM_BAR,
     MODE_FULL_FILL,
     MODE_RECOVER,
+    MODE_END,
 };
 
 /**
