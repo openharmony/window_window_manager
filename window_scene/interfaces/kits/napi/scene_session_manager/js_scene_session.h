@@ -73,6 +73,7 @@ enum class ListenerFuncType : uint32_t {
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    PRIVACY_MODE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -281,6 +282,8 @@ private:
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void NotifyFrameLayoutFinish();
+    void ProcessPrivacyModeChangeRegister();
+    void NotifyPrivacyModeChange(bool isPrivacyMode);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
