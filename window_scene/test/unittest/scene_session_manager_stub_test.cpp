@@ -2071,7 +2071,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleName
     MessageParcel data;
     MessageParcel reply;
     int32_t userId = 100;
-    std::vector<int32_t> bundleNameList = {"a", "b", "c"};
+    std::vector<std::string> bundleNameList = {"a", "b", "c"};
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteStringVector(bundleNameList);

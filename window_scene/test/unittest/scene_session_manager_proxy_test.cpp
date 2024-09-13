@@ -1047,10 +1047,10 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSnapshotSkipByUserIdAndBundleNameList,
             new SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
-    int32_t userid = 1;
+    int32_t userId = 1;
     std::vector<std::string> bundleNameList = {"a", "b", "c"};
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(
-        userid, bundleNameList));
+        userId, bundleNameList));
 }
 
 }  // namespace
