@@ -1765,6 +1765,19 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(info1.abilityName_, bundleName);
 }
+
+/**
+ * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string bundleName = "TestName";
+    auto ret = ssm_->SetSnapshotSkipByUserIdAndBundleNameList(100, {bundleName});
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
