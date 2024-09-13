@@ -10608,7 +10608,7 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::DEFAULT, " pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
+    TLOGI(WmsLogTag::DEFAULT, "pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
         pid, watermarkName.c_str(), isEnabled);
     if (isEnabled && watermarkName.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "watermarkName is empty!");
@@ -10646,8 +10646,7 @@ void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSessi
 void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
 {
     if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from watermark pid map. pid:%{public}d",
-            pid);
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from watermark pid map. pid:%{public}d", pid);
         processWatermarkPidMap_.erase(pid);
     }
 }

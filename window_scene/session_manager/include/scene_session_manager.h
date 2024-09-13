@@ -833,7 +833,7 @@ private:
     /*
      * Window Watermark
      */
-    std::map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
+    std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
 
     /*
      * Dump
