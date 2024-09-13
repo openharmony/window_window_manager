@@ -262,8 +262,8 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     if (bundleName == "" || appIdentifier == "") {
         return false;
     }
-    auto bundleManagerServiceProxy_ = GetBundleManagerProxy();
-    if (!bundleManagerServiceProxy_) {
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
         TLOGE(WmsLogTag::DEFAULT, "failed to get BundleManagerServiceProxy");
         return false;
     }
@@ -271,10 +271,17 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::string callingBundleName;
-    bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
+    bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
+    if (callingBundleName != bundleName) {
+        TLOGE(WmsLogTag::DEFAULT,
+            "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
+            callingBundleName.c_str(),
+            bundleName.c_str());
+        return false;
+    }
     AppExecFwk::BundleInfo bundleInfo;
     int userId = uid / 200000; // 200000 use uid to caculate userId
-    bool ret = bundleManagerServiceProxy_->GetBundleInfo(callingBundleName,
+    bool ret = bundleManagerServiceProxy->GetBundleInfo(callingBundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
         bundleInfo,
         userId);
@@ -288,7 +295,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
         return false;
     }
 
-    if (callingBundleName == bundleName && bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
+    if (bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
         TLOGI(WmsLogTag::DEFAULT, "verify app success");
         return true;
     }
