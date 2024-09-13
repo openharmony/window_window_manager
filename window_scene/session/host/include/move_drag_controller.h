@@ -207,9 +207,9 @@ private:
     /*
     * Cross Display Move Drag
     */
-    uint64_t moveDragStartDisplayId_ = -1ULL;
-    uint64_t moveDragEndDisplayId_ = -1ULL;
-    uint64_t initParentId_ = -1ULL;
+    uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    uint64_t initParentId_ = DISPLAY_ID_INVALID;
     std::set<uint64_t> displaySetDuringMoveDrag_;
     uint64_t hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
