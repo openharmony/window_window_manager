@@ -825,7 +825,7 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
     NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
-        const SizeChangeReason reason, const DisplayId DisplayId = -1ULL) {
+        const SizeChangeReason reason, const DisplayId DisplayId = DISPLAY_ID_INVALID) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");

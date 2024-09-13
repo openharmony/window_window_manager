@@ -245,7 +245,7 @@ private:
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = -1ULL);
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
