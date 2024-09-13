@@ -131,7 +131,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
             uint32_t windowType = 0;
-            if (!data.ReadUint32(windowType)) {
+            if (!data.ReadUint32(windowType) ||
+                windowType >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
                 return ERR_INVALID_DATA;
             }
             auto type = static_cast<WindowManagerAgentType>(windowType);
@@ -491,7 +492,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE: {
             uint32_t modeId = 0;
-            if (!data.ReadUint32(modeId)) {
+            if (!data.ReadUint32(modeId) || modeId >= static_cast<uint32_t>(MaximizeMode::MODE_END)) {
                 return ERR_INVALID_DATA;
             }
             MaximizeMode maximizeMode = static_cast<MaximizeMode>(modeId);

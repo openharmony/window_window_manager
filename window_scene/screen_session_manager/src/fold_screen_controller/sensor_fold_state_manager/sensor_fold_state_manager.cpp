@@ -19,7 +19,7 @@
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_state_internel.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

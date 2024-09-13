@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 #include <csignal>
 #include <cstdint>
@@ -879,7 +879,9 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
     screenSession->activeIdx_ = static_cast<int32_t>(modeId);
     screenSession->UpdatePropertyByActiveMode();
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    ScreenProperty property = screenSession->GetScreenProperty();
+    property.SetPropertyChangeReason("active mode change");
+    screenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     return DMError::DM_OK;

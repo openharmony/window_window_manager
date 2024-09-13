@@ -2223,4 +2223,30 @@ WMError SceneSessionManagerProxy::GetProcessSurfaceNodeIdByPersistentId(const in
     reply.ReadUInt64Vector(&surfaceNodeIds);
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write pid failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(skip)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write skip failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

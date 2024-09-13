@@ -811,6 +811,19 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: check SkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    bool skip = true;
+    auto ret = WindowManager::GetInstance().SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC
