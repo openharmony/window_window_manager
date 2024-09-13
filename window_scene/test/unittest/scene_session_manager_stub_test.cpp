@@ -2052,7 +2052,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, Function | Smal
     MessageParcel reply;
 
     data.WriteInt32(123);
-    data.WriteString("SetProcessWatermarkWatermarkName");
+    data.WriteString("SetProcessWatermarkName");
     data.WriteBool(true);
 
     int res = stub_->HandleSetProcessWatermark(data, reply);
