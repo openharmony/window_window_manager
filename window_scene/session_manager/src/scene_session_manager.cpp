@@ -2178,31 +2178,30 @@ void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
     eventHandler_->PostTask(task, "HandleCastScreenDisConnection: ScreenId:" + std::to_string(screenId));
 }
 
-WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& scnSession,
+WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
     sptr<AAFwk::SessionInfo> scnSessionInfo, const bool needRemoveSession, const bool isForceClean)
 {
-    auto persistentId = scnSession->GetPersistentId();
-    TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}u",
-        persistentId,
-        static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
+    auto persistentId = sceneSession->GetPersistentId();
+    TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}d",
+        persistentId, sceneSession->GetSessionInfo().isSystem_);
     if (isForceClean) {
         AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(scnSessionInfo);
     } else {
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
     }
-    scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
+    sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
     if (needRemoveSession) {
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            NotifyClearSession(sceneSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
         EraseSceneSessionMapById(persistentId);
     } else {
         // if terminate, reset want. so start from recent, start a new one.
         TLOGI(WmsLogTag::WMS_MAIN, "reset want: %{public}d", persistentId);
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            scnSession->SetSessionInfoWant(nullptr);
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            sceneSession->SetSessionInfoWant(nullptr);
         }
-        auto& sessionInfo = scnSession->GetSessionInfo();
+        auto& sessionInfo = sceneSession->GetSessionInfo();
         if (sessionInfo.want != nullptr) {
             const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
             const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
@@ -2213,12 +2212,15 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
                 element.SetAbilityName(abilityName);
                 want->SetElement(element);
                 want->SetBundle(bundleName);
-                scnSession->SetSessionInfoWant(want);
+                sceneSession->SetSessionInfoWant(want);
             }
         }
     }
-    NotifySessionForCallback(scnSession, needRemoveSession);
-    scnSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
+    NotifySessionForCallback(sceneSession, needRemoveSession);
+    // Arrive at the STOP task end.
+    sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
+    // Clear js cb map if needed.
+    sceneSession->ClearJsSceneSessionCbMap(needRemoveSession);
     return WSError::WS_OK;
 }
 

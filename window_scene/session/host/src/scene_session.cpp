@@ -349,20 +349,26 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 
 void SceneSession::ClearSpecificSessionCbMap()
 {
-    auto task = [weakThis = wptr(this)]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: session is null", where);
             return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
-            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
-            TLOGD(WmsLogTag::WMS_SYSTEM, "ClearCallbackMap, id: %{public}d", session->GetPersistentId());
-        } else {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "get callback failed, id: %{public}d", session->GetPersistentId());
-        }
+        session->ClearJsSceneSessionCbMap(true);
     };
-    PostTask(task, "ClearSpecificSessionCbMap");
+    PostTask(task, __func__);
+}
+
+void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
+{
+    if (sessionChangeCallback_ && sessionChangeCallback_->clearCallbackFunc_) {
+        TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, needRemove: %{public}d", GetPersistentId(), needRemove);
+        sessionChangeCallback_->clearCallbackFunc_(needRemove);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "get callback failed, id: %{public}d", GetPersistentId());
+    }
 }
 
 WSError SceneSession::Disconnect(bool isFromClient)
