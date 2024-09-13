@@ -2576,6 +2576,21 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
+{
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
+        watermarkName.c_str(), isEnabled, GetPersistentId());
+    surfaceNode_->SetWatermarkEnabled(watermarkName, isEnabled);
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
