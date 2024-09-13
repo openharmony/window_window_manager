@@ -81,6 +81,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -407,6 +408,8 @@ public:
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
+    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -533,10 +536,12 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    void NotifyPrivacyModeChange();
 
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
@@ -590,6 +595,9 @@ private:
      * Window ZOrder: PC
      */
     bool isPcScenePanel_ { false };
+
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
