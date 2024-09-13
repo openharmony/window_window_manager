@@ -2248,7 +2248,7 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     auto task = [this, persistentId = persistentId_, isAutoStart, env = env_] {
         if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "OnAutoStartPiPStatusChange jsSceneSession id:%{public}d has been"
+            TLOGE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been"
                 " destroyed", persistentId);
             return;
         }

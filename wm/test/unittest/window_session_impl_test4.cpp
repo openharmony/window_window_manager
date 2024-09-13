@@ -1086,7 +1086,7 @@ HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest 
 */
 HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto option = sptr<WindowOption>::MakeSptr(option);
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetAutoStartPiP");
     auto window = sptr<WindowSessionImpl>::MakeSptr(option);
