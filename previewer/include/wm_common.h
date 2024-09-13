@@ -230,7 +230,8 @@ enum class SystemBarSettingFlag : uint32_t {
     ALL_SETTING = 0b11
 };
 
-inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs) {
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
     using T = std::underlying_type<SystemBarSettingFlag>::type;
     return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
