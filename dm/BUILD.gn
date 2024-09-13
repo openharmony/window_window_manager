@@ -172,6 +172,8 @@ ohos_shared_library("libdm_ndk") {
     debug = false
   }
 
+  public_configs = [ ":libdm_ndk_public_config" ]
+
   include_dirs = [
     "${window_base_path}/interfaces/kits/dmndk/dm",
     "${window_base_path}/interfaces/inner_kits/dm",
@@ -181,8 +183,6 @@ ohos_shared_library("libdm_ndk") {
 
   deps = [ ":libdm" ]
   innerapi_tags = [ "ndk" ]
-
-  public_configs = [ ":libdm_ndk_public_config" ]
 
   external_deps = [
     "c_utils:utils",
