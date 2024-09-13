@@ -543,6 +543,7 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
         }
     }
     systemConfig_.freeMultiWindowEnable_ = enable;
+    rsInterface_.SetFreeMultiWindowStatus(enable);
 }
 
 const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
