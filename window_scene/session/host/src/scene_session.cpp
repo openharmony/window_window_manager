@@ -2268,12 +2268,20 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplaysDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+            if (movedSurfaceNode == nullptr) {
+                TLOGD(WmsLogTag::WMS_PIP, "ScreenSession is null");
+                return;
+            }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
             screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+            if (movedSurfaceNode == nullptr) {
+                TLOGD(WmsLogTag::WMS_PIP, "ScreenSession is null");
+                return;
+            }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
                 movedSurfaceNode, moveDragController_->GetInitParentNodeId());
         }
