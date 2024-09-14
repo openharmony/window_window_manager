@@ -898,7 +898,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 
 void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func)
 {
-    auto task = [weakThis = wptr(this), func]{
+    auto task = [weakThis = wptr(this), func]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -961,7 +961,7 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
 
 void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    auto task = [weakThis = wptr(this), func] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null");
