@@ -1185,6 +1185,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ &&
         specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
         SetIsDisplayStatusBarTemporarily(false);
+        isStatusBarVisible_ = true;
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
