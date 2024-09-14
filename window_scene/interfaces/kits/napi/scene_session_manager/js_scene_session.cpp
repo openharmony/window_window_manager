@@ -774,16 +774,21 @@ void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
 
 void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
 {
-    NotifyAutoStartPiPStatusChangeFunc func = [this](bool isAutoStart) {
-        this->OnAutoStartPiPStatusChange(isAutoStart);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
+    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart);
+    };
     session->SetAutoStartPiPStatusChangeCallback(func);
-    TLOGI(WmsLogTag::WMS_PIP, "register success");
+    TLOGI(WmsLogTag::WMS_PIP, "success");
 }
 
 /** @note @window.hierarchy */
@@ -2246,12 +2251,13 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
 void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
 {
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
-    auto task = [this, persistentId = persistentId_, isAutoStart, env = env_] {
-        if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
-        auto jsCallBack = this->GetJSCallback(SESSION_AUTO_START_PIP_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_AUTO_START_PIP_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_PIP, "[NAPI]jsCallBack is nullptr");
             return;

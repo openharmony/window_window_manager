@@ -898,7 +898,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 
 void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    auto task = [weakThis = wptr(this), func]{
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -3914,7 +3914,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
 {
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    auto task = [weakThis = wptr(this), isAutoStart, callingPid]() {
+    auto task = [weakThis = wptr(this), isAutoStart, callingPid] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
@@ -3930,7 +3930,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "SetAutoStartPiP");
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 

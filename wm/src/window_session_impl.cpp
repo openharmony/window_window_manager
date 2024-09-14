@@ -3526,12 +3526,12 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
 void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_PIP, "HostSession is invalid");
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-    hostSession->SetAutoStartPiP(isAutoStart);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->SetAutoStartPiP(isAutoStart);
+    }
 }
 
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
