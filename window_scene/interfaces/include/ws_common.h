@@ -467,7 +467,7 @@ struct WSRectT {
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
     }
 
-    inline bool IsOverlap(const WSRectT<T>& a -> rect) const
+    inline bool IsOverlap(const WSRectT<T>& a) const
     {
         int32_t xStart = std::max(posX_, a.posX_);
         int32_t xEnd = std::min(posX_ + static_cast<int32_t>(width_),

@@ -72,7 +72,7 @@ public:
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
 
-    /*   
+    /*
      * Cross Display Move Drag
      */
     uint64_t GetMoveDragStartDisplayId() const;

@@ -360,12 +360,10 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             hasPointDown_ = false;
             std::lock_guard<std::mutex> lock(moveDragMutex_);
             WSRect invalidRect = {-1, -1, -1, -1};
-            WSRect windowRect = GetTargetRect(true);
-            WSRect startScreenRect = GetScreenRectById(moveDragStartDisplayId_);
-            if (GetScreenRectById(moveDragStartDisplayId_) == invalidRect){
+            if (GetScreenRectById(moveDragStartDisplayId_) == invalidRect) {
                 return false;
             }
-            moveDragEndDisplayId_ = windowRect.IsOverlap(startScreenRect) ?
+            moveDragEndDisplayId_ = GetTargetRect(true).IsOverlap(GetScreenRectById(moveDragStartDisplayId_)) ?
                 moveDragStartDisplayId_ : pointerEvent->GetTargetDisplayId();
             ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
             NotifyWindowInputPidChange(isStartDrag_);
