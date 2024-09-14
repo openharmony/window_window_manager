@@ -40,6 +40,7 @@ enum class ListenerFunctionType : uint32_t {
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
+    ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -198,6 +199,8 @@ private:
     void OnCloseTargetFloatWindow(const std::string& bundleName);
     void ProcessCloseTargetFloatWindow();
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ProcessAbilityManagerCollaboratorRegistered();
+    void OnAbilityManagerCollaboratorRegistered();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
