@@ -955,7 +955,7 @@ void MoveDragController::SetIsPcWindow(bool isPcWindow)
     isPcWindow_ = isPcWindow;
 }
 
-std::set<uint64_t> MoveDragController::GetNewAddedDisplaysDuringMoveDrag()
+std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
 {
     std::set<uint64_t> newAddedDisplayIdSet;
     WSRect windowRect = GetTargetRect(true);

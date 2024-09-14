@@ -72,15 +72,15 @@ public:
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
 
-    /*
+    /*   
     * Cross Display Move Drag
     */
     uint64_t GetMoveDragStartDisplayId() const;
     uint64_t GetMoveDragEndDisplayId() const;
     uint64_t GetInitParentNodeId() const;
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag() const;
-    std::set<uint64_t> GetNewAddedDisplaysDuringMoveDrag();
-    void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentId);
+    std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
+    void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentNodeId);
     WSRect GetScreenRectById(DisplayId displayId);
 
 private:

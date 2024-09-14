@@ -1086,11 +1086,11 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
 }
 
 /**
- * @tc.name: GetNewAddedDisplaysDuringMoveDrag
- * @tc.desc: test function : GetNewAddedDisplaysDuringMoveDrag
+ * @tc.name: GetNewAddedDisplayIdsDuringMoveDrag
+ * @tc.desc: test function : GetNewAddedDisplayIdsDuringMoveDrag
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, GetNewAddedDisplaysDuringMoveDrag, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function | SmallTest | Level1)
 {
     std::set<uint64_t> res = moveDragController->GetDisplayIdsDuringMoveDrag();
     ASSERT_EQ(true, res.empty());
