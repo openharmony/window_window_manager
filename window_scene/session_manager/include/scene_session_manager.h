@@ -790,7 +790,7 @@ private:
      */
     void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessSnapshotSkip(int32_t pid);
-    void DoIdBundlesSnapshotSkipForSession(const sptr<SceneSession>& sceneSession);
+    void SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession);
 
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
@@ -828,7 +828,7 @@ private:
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
-    std::unordered_set<std::string> idBundleSnapshotSkipPidSet_;
+    std::unordered_set<std::string> snapshotBundleNameSet_;
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;

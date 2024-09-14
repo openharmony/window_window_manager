@@ -84,6 +84,12 @@ private:
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
+    sptr<IRemoteObject> GetSceneSessionManagerByUserId(const int32_t userId);
+    int32_t RecoverSCBSnapshotSkipByUserId(const int32_t userId);
+    int32_t NotifySCBSnapshotSkipByUserIdAndBundleName(const int32_t userId,
+    const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
+
+
     static void WriteStringToFile(int32_t pid, const char* str);
 
     sptr<IRemoteObject> screenSessionManager_;
