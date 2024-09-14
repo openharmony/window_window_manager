@@ -7241,21 +7241,20 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
         TLOGI(WmsLogTag::WMS_IMMS, "scene session null or in recent no need update avoid area");
         return false;
     }
-    auto iter = lastUpdatedAvoidArea_.find(persistentId);
+    if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
+        lastUpdatedAvoidArea_[persistentId] = {};
+    }
+    
     bool needUpdate = true;
-
-    if (iter != lastUpdatedAvoidArea_.end()) {
-        auto avoidAreaIter = iter->second.find(avoidAreaType);
-        if (avoidAreaIter != iter->second.end()) {
-            needUpdate = avoidAreaIter->second != avoidArea;
-        } else {
-            if (avoidArea.isEmptyAvoidArea()) {
-                TLOGI(WmsLogTag::WMS_IMMS,
-                    "scene avoid area equal to last, persistentId=%{public}d avoidAreaType=%{public}d",
-                    persistentId, avoidAreaType);
-                needUpdate = false;
-                return needUpdate;
-            }
+    if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
+        iter != lastUpdatedAvoidArea_[persistentId].end()) {
+        needUpdate = iter->second != avoidArea;
+    } else {
+        if (avoidArea.isEmptyAvoidArea()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d type %{public}d empty avoid area",
+                persistentId, avoidAreaType);
+            needUpdate = false;
+            return needUpdate;
         }
     }
     if (needUpdate) {
@@ -7384,6 +7383,22 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
+}
+
+WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}u, persistentId %{public}u",
+        isVisible, persistentId);
+    auto task = [this, persistentId, isVisible] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "scene session is nullptr");
+            return;
+        }
+        sceneSession->SetIsStatusBarVisible(isVisible);
+    };
+    taskScheduler_->PostTask(task, "NotifyStatusBarShowStatus");
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
