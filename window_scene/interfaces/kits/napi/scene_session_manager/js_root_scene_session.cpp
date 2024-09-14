@@ -347,7 +347,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
                     info.sessionAffinity);
             } else {
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_, info.windowType_);
             }
         }
         if (sceneSession == nullptr) {
