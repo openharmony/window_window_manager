@@ -4073,16 +4073,11 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
 WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
 {
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-    auto task = [weakThis = wptr(this), isAutoStart, callingPid] {
+    auto task = [weakThis = wptr(this), isAutoStart] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
-        }
-        if (callingPid != session->GetCallingPid()) {
-            TLOGNW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
-            return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (session->autoStartPiPStatusChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
