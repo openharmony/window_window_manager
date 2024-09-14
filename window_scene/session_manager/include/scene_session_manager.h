@@ -751,6 +751,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
+    
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
     std::atomic_bool processingFlushUIParams_ { false };
