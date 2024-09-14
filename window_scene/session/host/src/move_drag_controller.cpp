@@ -116,7 +116,7 @@ uint64_t MoveDragController::GetInitParentNodeId() const
 
 std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag() const
 {
-    std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
+    std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
     return displayIdSetDuringMoveDrag_;
 }
 
@@ -146,7 +146,7 @@ void MoveDragController::InitMoveDragProperty()
 void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t InitParentNodeId)
 {
     {
-        std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
+        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
         displayIdSetDuringMoveDrag_.insert(displayId);
     }
     moveDragStartDisplayId_ = displayId;
@@ -361,8 +361,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
-            WSRect invalidRect = {-1, -1, -1, -1};
-            if (GetScreenRectById(moveDragStartDisplayId_) == invalidRect) {
+            if (GetScreenRectById(moveDragStartDisplayId_) == WSRect{-1, -1, -1, -1}) {
                 return false;
             }
             moveDragEndDisplayId_ = GetTargetRect(true).IsOverlap(GetScreenRectById(moveDragStartDisplayId_)) ?
@@ -962,8 +961,8 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
     std::map<ScreenId, ScreenProperty> screenProperties = ScreenSessionManagerClient::GetInstance().
         GetAllScreensProperties();
     for (const auto& [screenId, screenProperty] : screenProperties) {
-        std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
-        if(displaySetDuringMoveDrag_.find(screenId) != displaySetDuringMoveDrag_.end()) {
+        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
+        if (displayIdSetDuringMoveDrag_.find(screenId) != displayIdSetDuringMoveDrag_.end()) {
             continue;
         }
         WSRect screenRect = {
@@ -973,7 +972,7 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
             screenProperty.GetBounds().rect_.GetHeight(),
         };
         if (windowRect.IsOverlap(screenRect)) {
-            displaySetDuringMoveDrag_.insert(screenId);
+            displayIdSetDuringMoveDrag_.insert(screenId);
             newAddedDisplayIdSet.insert(screenId);
         }
     }
