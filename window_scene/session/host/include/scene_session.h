@@ -603,8 +603,8 @@ private:
     bool isPcScenePanel_ { false };
 
     /*
-    * Move Drag
-    */
+     * Move Drag
+     */
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
