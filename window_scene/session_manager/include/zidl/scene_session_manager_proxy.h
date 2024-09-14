@@ -123,10 +123,6 @@ public:
         const std::vector<std::string>& bundleNameList) override;
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
 
-    WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
-        const std::vector<std::string>& bundleNameList) override;
-
-    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
 
 
 private:
