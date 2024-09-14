@@ -1518,7 +1518,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
     }
 
-    auto task = [this, sessionInfo, property]() {
+    const char* const where = __func__;
+    auto task = [this, sessionInfo, property, where]() {
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
@@ -1531,15 +1532,18 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         InitSceneSession(sceneSession, sessionInfo, property);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-            TLOGI(WmsLogTag::WMS_LIFE, "ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
+                where, sceneSession->GetSessionInfo().ancoSceneState);
             PreHandleCollaborator(sceneSession);
             const auto& sessionAffinity = sceneSession->GetSessionInfo().sessionAffinity;
-            auto reuseSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity);
-            if (reuseSceneSession) {
-                TLOGI(WmsLogTag::WMS_LIFE, "session reuse id:%{public}d type:%{public}d affinity:%{public}s",
-                    reuseSceneSession->GetPersistentId(), reuseSceneSession->GetWindowType(), sessionAffinity.c_str());
-                NotifySessionUpdate(reuseSceneSession->GetSessionInfo(), ActionType::SINGLE_START);
-                return reuseSceneSession;
+            auto reusedSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity);
+            if (reusedSceneSession) {
+                TLOGNI(WmsLogTag::WMS_LIFE,
+                    "%{public}s: session reuse id:%{public}d type:%{public}d affinity:%{public}s",
+                    where, reusedSceneSession->GetPersistentId(),
+                    reusedSceneSession->GetWindowType(), sessionAffinity.c_str());
+                NotifySessionUpdate(reusedSceneSession->GetSessionInfo(), ActionType::SINGLE_START);
+                return reusedSceneSession;
             }
         }
         {
@@ -4965,7 +4969,11 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
 void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
     const AbilityManagerCollaboratorRegisteredFunc& func)
 {
-    abilityManagerCollaboratorRegisteredFunc_ = func;
+    auto task = [this, &func] {
+        abilityManagerCollaboratorRegisteredFunc_ = func;
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
@@ -8434,16 +8442,13 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_[type] = impl;
     }
-    if (abilityManagerCollaboratorRegisteredFunc_) {
-        TLOGI(WmsLogTag::DEFAULT, "Ability manager collaborator registered");
-        auto task = [this] {
-            if (abilityManagerCollaboratorRegisteredFunc_) {
-                abilityManagerCollaboratorRegisteredFunc_();
-            }
-            return WSError::WS_OK;
-        };
-        taskScheduler_->PostTask(task, "AbilityManagerCollaboratorRegistered");
-    }
+    auto task = [this] {
+        if (abilityManagerCollaboratorRegisteredFunc_) {
+            abilityManagerCollaboratorRegisteredFunc_();
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostTask(task, __func__);
     return WSError::WS_OK;
 }
 
