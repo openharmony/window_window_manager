@@ -10639,7 +10639,7 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppBundleName(const sptr<Scen
     if (snapshotBundleNameSet_.find(name) != snapshotBundleNameSet_.end()) {
         TLOGI(WmsLogTag::DEFAULT, "new session set RS snapshot skip true, name:%{public}s",
                 name.c_str());
-    sceneSession->SetSnapshotSkip(true);
+        sceneSession->SetSnapshotSkip(true);
     }
 }
 
