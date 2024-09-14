@@ -40,6 +40,8 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "defaultMaximizeMode",                          WindowManagerConfig::ValueType::INTS },
     { "windowAnimation",                              WindowManagerConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowManagerConfig::ValueType::MAP },
+    { "animationIn",                                  WindowManagerConfig::ValueType::MAP },
+    { "animationOut",                                 WindowManagerConfig::ValueType::MAP },
     { "timing",                                       WindowManagerConfig::ValueType::MAP },
     { "windowEffect",                                 WindowManagerConfig::ValueType::MAP },
     { "appWindows",                                   WindowManagerConfig::ValueType::MAP },

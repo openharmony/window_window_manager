@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
 #include "connection/screen_cast_connection.h"

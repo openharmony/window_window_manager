@@ -389,7 +389,7 @@ HWTEST_F(ScreenTest, SetScreenColorSpace, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
 {
-    auto res = screen_->SetDensityDpi(1000);
+    auto res = screen_->SetDensityDpi(DOT_PER_INCH_MAXIMUM_VALUE + 1);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     res = screen_->SetDensityDpi(100);
@@ -419,7 +419,7 @@ HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
 {
-    auto res = screen_->SetDensityDpiSystem(1000);
+    auto res = screen_->SetDensityDpiSystem(DOT_PER_INCH_MAXIMUM_VALUE + 1);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
     res = screen_->SetDensityDpiSystem(100);

@@ -968,6 +968,18 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
 
     result = sceneSession->PendingSessionActivation(abilitySessionInfo);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->SetForegroundInteractiveStatus(false);
+    result = sceneSession->PendingSessionActivation(abilitySessionInfo);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    abilitySessionInfo->canStartAbilityFromBackground = false;
+    result = sceneSession->PendingSessionActivation(abilitySessionInfo);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**
