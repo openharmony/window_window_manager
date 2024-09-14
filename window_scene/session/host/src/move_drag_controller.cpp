@@ -40,7 +40,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
-std::mutex moveDragMutex_;
 }
 
 MoveDragController::MoveDragController(int32_t persistentId)
@@ -117,7 +116,8 @@ uint64_t MoveDragController::GetInitParentNodeId() const
 
 std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag() const
 {
-    return displaySetDuringMoveDrag_;
+    std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
+    return displayIdSetDuringMoveDrag_;
 }
 
 bool MoveDragController::GetMovable() const
@@ -145,7 +145,10 @@ void MoveDragController::InitMoveDragProperty()
 
 void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t InitParentNodeId)
 {
-    displaySetDuringMoveDrag_.insert(displayId);
+    {
+        std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
+        displayIdSetDuringMoveDrag_.insert(displayId);
+    }
     moveDragStartDisplayId_ = displayId;
     InitParentNodeId_ = InitParentNodeId;
     sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().
@@ -358,7 +361,6 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
-            std::lock_guard<std::mutex> lock(moveDragMutex_);
             WSRect invalidRect = {-1, -1, -1, -1};
             if (GetScreenRectById(moveDragStartDisplayId_) == invalidRect) {
                 return false;
@@ -960,20 +962,22 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
     std::map<ScreenId, ScreenProperty> screenProperties = ScreenSessionManagerClient::GetInstance().
         GetAllScreensProperties();
     for (const auto& [screenId, screenProperty] : screenProperties) {
+        std::lock_guard lock(displayIdSetDuringMoveDragMutex_);
+        if(displaySetDuringMoveDrag_.find(screenId) != displaySetDuringMoveDrag_.end()) {
+            continue;
+        }
         WSRect screenRect = {
             screenProperty.GetStartX(),
             screenProperty.GetStartY(),
             screenProperty.GetBounds().rect_.GetWidth(),
             screenProperty.GetBounds().rect_.GetHeight(),
         };
-        if (displaySetDuringMoveDrag_.find(screenId) == displaySetDuringMoveDrag_.end() &&
-            windowRect.IsOverlap(screenRect)) {
-            std::lock_guard<std::mutex> lock(moveDragMutex_);
+        if (windowRect.IsOverlap(screenRect)) {
             displaySetDuringMoveDrag_.insert(screenId);
             newAddedDisplayIdSet.insert(screenId);
         }
     }
-    return newAddedDisplayIdSet;
+return newAddedDisplayIdSet;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
