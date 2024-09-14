@@ -1026,7 +1026,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
     PostTask(task, __func__);
 }
 
-void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
+void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason)
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
