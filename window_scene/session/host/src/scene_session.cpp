@@ -1011,7 +1011,6 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
             return;
         }
         session->autoStartPiPStatusChangeFunc_ = func;
-        return;
     };
     PostTask(task, __func__);
 }
@@ -4083,7 +4082,6 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
             session->autoStartPiPStatusChangeFunc_(isAutoStart);
         }
-        return;
     };
     PostTask(task, __func__);
     return WSError::WS_OK;
