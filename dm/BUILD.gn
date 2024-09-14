@@ -36,6 +36,10 @@ config("libdm_public_config") {
   ]
 }
 
+config("libdm_ndk_public_config") {
+  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
+}
+
 config("for_libdm_public_config") {
   include_dirs =
       [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
@@ -167,6 +171,8 @@ ohos_shared_library("libdm_ndk") {
     cfi_vcall_icall_only = true
     debug = false
   }
+
+  public_configs = [ ":libdm_ndk_public_config" ]
 
   include_dirs = [
     "${window_base_path}/interfaces/kits/dmndk/dm",

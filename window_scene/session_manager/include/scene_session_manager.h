@@ -68,6 +68,7 @@ namespace AncoConsts {
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
+    std::string codePath_;
 };
 class SceneSession;
 struct SecSurfaceInfo;
@@ -101,6 +102,7 @@ using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, con
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
+using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -152,8 +154,9 @@ public:
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
-    sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
-        const std::string& moduleName, const std::string& abilityName, const int32_t appIndex);
+    sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const int32_t appIndex,
+        const uint32_t windowType = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -293,6 +296,10 @@ public:
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
 
+    /*
+     * Collaborator
+     */
+    void SetAbilityManagerCollaboratorRegisteredFunc(const AbilityManagerCollaboratorRegisteredFunc& func);
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
@@ -364,7 +371,8 @@ public:
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
-    std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
+    std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
+
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
@@ -380,7 +388,7 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
-     * Mutil Window
+     * Multi Window
      */
     void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
     WMError CloseTargetFloatWindow(const std::string& bundleName);
@@ -406,9 +414,16 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
     /*
+     * Window Watermark
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+
+    /*
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+    WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+        const std::vector<std::string>& bundleNameList) override;
 
 protected:
     SceneSessionManager();
@@ -729,11 +744,16 @@ private:
                                      AAFwk::MissionSnapshot& sessionSnapshot);
     sptr<AAFwk::IAbilityManagerCollaborator> GetCollaboratorByType(int32_t collaboratorType);
 
+    /*
+     * Collaborator
+     */
+    AbilityManagerCollaboratorRegisteredFunc abilityManagerCollaboratorRegisteredFunc_;
     const int32_t BROKER_UID = 5557;
     const int32_t BROKER_RESERVE_UID = 5005;
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
+    
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
     std::atomic_bool processingFlushUIParams_ { false };
@@ -782,6 +802,7 @@ private:
      */
     void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessSnapshotSkip(int32_t pid);
+    void SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession);
 
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
@@ -807,16 +828,28 @@ private:
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid);
 
+    /*
+     * Window Watermark
+     */
+    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessWatermarkPid(int32_t pid);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
     /*
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
+    std::unordered_set<std::string> snapshotBundleNameSet_;
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Window Watermark
+     */
+    std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
 
     /*
      * Dump

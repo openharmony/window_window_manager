@@ -594,7 +594,7 @@ public:
      */
     WMError UnregisterDisplayInfoChangedListener(const sptr<IRemoteObject>& token,
         const sptr<IDisplayInfoChangedListener>& listener);
-    
+
     /**
      * @brief Register window in same pid visibility changed listener.
      * @caller SA
@@ -791,6 +791,16 @@ public:
      * @return @return WM_OK means get window style success, others means failed.
      */
     WindowStyleType GetWindowStyleType();
+
+    /**
+     * @brief set process watermark.
+     *
+     * @param pid pid
+     * @param watermarkName watermark picture name
+     * @param isEnabled add or remove
+     * @return @return WM_OK means set process watermark success, others means failed.
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
 
 private:
     WindowManager();

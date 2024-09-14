@@ -197,5 +197,72 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
     }
 }
 
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    const std::vector<std::string>& bundleNameList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write userId failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteStringVector(bundleNameList)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write bundleNameList failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
+    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+    data.WriteInt32(idBundlesMap.size());
+    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
+        if (!data.WriteInt32(it->first)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.WriteStringVector(it->second)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return reply.ReadInt32();
+}
+
 } // namespace Rosen
 } // namespace OHOS

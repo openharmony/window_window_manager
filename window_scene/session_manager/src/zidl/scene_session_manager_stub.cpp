@@ -170,6 +170,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
             return HandleSkipSnapshotForAppProcess(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST):
+            return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
+            return HandleSetProcessWatermark(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1093,6 +1097,45 @@ int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data
         return ERR_INVALID_DATA;
     }
     WMError errCode = SkipSnapshotForAppProcess(pid, skip);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t userId = -1;
+    if (!data.ReadInt32(userId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 userId");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::string> bundleNameList;
+    if (!data.ReadStringVector(&bundleNameList)) {
+        TLOGE(WmsLogTag::DEFAULT, "Fail to read bundleNameList");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    std::string watermarkName;
+    if (!data.ReadString(watermarkName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readString watermarkName");
+        return ERR_INVALID_DATA;
+    }
+    bool isEnabled = false;
+    if (!data.ReadBool(isEnabled)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readBool isEnabled");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

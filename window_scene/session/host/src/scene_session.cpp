@@ -349,20 +349,26 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 
 void SceneSession::ClearSpecificSessionCbMap()
 {
-    auto task = [weakThis = wptr(this)]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: session is null", where);
             return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
-            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
-            TLOGD(WmsLogTag::WMS_SYSTEM, "ClearCallbackMap, id: %{public}d", session->GetPersistentId());
-        } else {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "get callback failed, id: %{public}d", session->GetPersistentId());
-        }
+        session->ClearJsSceneSessionCbMap(true);
     };
-    PostTask(task, "ClearSpecificSessionCbMap");
+    PostTask(task, __func__);
+}
+
+void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
+{
+    if (sessionChangeCallback_ && sessionChangeCallback_->clearCallbackFunc_) {
+        TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, needRemove: %{public}d", GetPersistentId(), needRemove);
+        sessionChangeCallback_->clearCallbackFunc_(needRemove);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "get callback failed, id: %{public}d", GetPersistentId());
+    }
 }
 
 WSError SceneSession::Disconnect(bool isFromClient)
@@ -1007,7 +1013,20 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
     PostTask(task, __func__);
 }
 
-void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason)
+void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            return;
+        }
+        session->autoStartPiPStatusChangeFunc_ = func;
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
@@ -1190,6 +1209,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ &&
         specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
         SetIsDisplayStatusBarTemporarily(false);
+        isStatusBarVisible_ = true;
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
@@ -1677,9 +1697,6 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "action: %{public}s, status: %{public}d", action.c_str(), status);
-    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
-        return WSError::WS_ERROR_INVALID_TYPE;
-    }
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2609,6 +2626,21 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
+void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
+{
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
+        watermarkName.c_str(), isEnabled, GetPersistentId());
+    surfaceNode_->SetWatermarkEnabled(watermarkName, isEnabled);
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -4081,6 +4113,24 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return WSError::WS_OK;
 }
 
+WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    auto task = [weakThis = wptr(this), isAutoStart] {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
+            return;
+        }
+        if (session->autoStartPiPStatusChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
+            session->autoStartPiPStatusChangeFunc_(isAutoStart);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
@@ -4527,6 +4577,8 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, isVisible_: %{public}d, visibility: %{public}d",
+        GetPersistentId(), isVisible_, visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
@@ -4650,6 +4702,8 @@ bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
     if (zOrder_ == zOrder) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder_: %{public}u, zOrder: %{public}u",
+        GetPersistentId(), zOrder_, zOrder);
     zOrder_ = zOrder;
     return true;
 }

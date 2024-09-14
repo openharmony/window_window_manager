@@ -1924,6 +1924,11 @@ void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
 
 DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
 {
+    std::ostringstream oss;
+    for (auto pid : pidList) {
+        oss << pid << " ";
+    }
+    WLOGFI("pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
     return pImpl_->ProxyForFreeze(pidList, isProxy);
 }
 
