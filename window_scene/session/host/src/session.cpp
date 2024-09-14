@@ -53,6 +53,8 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
+const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -1209,7 +1211,7 @@ WSError Session::Hide()
 WSError Session::DrawingCompleted()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    if (!SessionPermission::IsSameBundleNameAsCalling("com.huawei.shell_assistant")) {
+    if (!SessionPermission::IsSameAppAsCalling(SHELL_BUNDLE_NAME, SHELL_APP_IDENTIFIER)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
