@@ -1452,7 +1452,6 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();

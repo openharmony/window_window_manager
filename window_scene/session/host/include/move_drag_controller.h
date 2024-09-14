@@ -209,7 +209,7 @@ private:
      */
     uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t InitParentNodeId_ = -1ULL;
+    uint64_t initParentNodeId_ = -1ULL;
     std::mutex displayIdSetDuringMoveDragMutex_;
     std::set<uint64_t> displayIdSetDuringMoveDrag_;
     uint64_t hotAreaDisplayId_ = 0;
