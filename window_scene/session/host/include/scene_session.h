@@ -210,10 +210,21 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+
+    /*
+    * PiP Window
+    */
+    PiPTemplateInfo GetPiPTemplateInfo() const;
+    void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError SetAutoStartPiP(bool isAutoStart) override;
     void NotifyPiPWindowPrepareClose() override;
+    void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
+    void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
+    WSError SetPipActionEvent(const std::string& action, int32_t status);
+    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
+
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -226,7 +237,6 @@ public:
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
-    void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
@@ -247,8 +257,6 @@ public:
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
-    void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
-    void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -272,7 +280,6 @@ public:
     std::vector<sptr<SceneSession>> GetToastSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     std::string GetWindowNameAllType() const;
-    PiPTemplateInfo GetPiPTemplateInfo() const;
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
@@ -327,8 +334,6 @@ public:
     WSError GetStartMoveFlag(bool& isMoving) override;
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
-    WSError SetPipActionEvent(const std::string& action, int32_t status);
-    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     void SetShouldHideNonSecureWindows(bool shouldHide);
     void UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
         const ExtensionWindowFlags& extWindowActions);
@@ -533,8 +538,13 @@ private:
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
 
+    /*
+    * PiP Window
+    */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
+    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     static wptr<SceneSession> enterSession_;
@@ -546,7 +556,6 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
