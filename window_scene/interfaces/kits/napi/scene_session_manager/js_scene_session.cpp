@@ -422,27 +422,27 @@ void JsSceneSession::OnWindowDragHotArea(uint64_t displayId, uint32_t type, cons
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(WINDOW_DRAG_HOT_AREA_CB);
         if (!jsCallBack) {
-            TLOGNE("[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsHotAreaDisplayId = CreateJsValue(env, static_cast<int64_t>(displayId));
         if (jsHotAreaDisplayId == nullptr) {
-            TLOGNE("[NAPI]jsHotAreaDisplayId is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsHotAreaDisplayId is nullptr");
             return;
         }
         napi_value jsHotAreaType = CreateJsValue(env, type);
         if (jsHotAreaType == nullptr) {
-            TLOGNE("[NAPI]jsHotAreaType is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsHotAreaType is nullptr");
             return;
         }
         napi_value jsHotAreaReason = CreateJsValue(env, reason);
         if (jsHotAreaReason == nullptr) {
-            TLOGNE("[NAPI]jsHotAreaReason is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsHotAreaReason is nullptr");
             return;
         }
         napi_value jsHotAreaRect = CreateJsSessionRect(env, rect);
         if (jsHotAreaRect == nullptr) {
-            TLOGNE("[NAPI]jsHotAreaRect is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsHotAreaRect is nullptr");
             return;
         }
         napi_value argv[] = {jsHotAreaDisplayId, jsHotAreaType, jsHotAreaReason, jsHotAreaRect};
@@ -2470,7 +2470,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_RECT_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE("[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsSessionRect = CreateJsSessionRect(env, rect);
