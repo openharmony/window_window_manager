@@ -185,6 +185,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS):
             return HandleUpdatePiPControlStatus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
+            return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -881,6 +883,19 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     } else {
         return ERR_INVALID_DATA;
     }
+}
+
+int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    bool isAutoStart = false;
+    if (!data.ReadBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart);
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
