@@ -1008,10 +1008,10 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
         session->autoStartPiPStatusChangeFunc_ = func;
-        return WSError::WS_OK;
+        return;
     };
     PostTask(task, __func__);
 }
@@ -4077,13 +4077,13 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
-            return WSError::WS_ERROR_INVALID_OPERATION;
+            return;
         }
         if (session->autoStartPiPStatusChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
             session->autoStartPiPStatusChangeFunc_(isAutoStart);
         }
-        return WSError::WS_OK;
+        return;
     };
     PostTask(task, __func__);
     return WSError::WS_OK;
