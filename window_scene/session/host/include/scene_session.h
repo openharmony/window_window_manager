@@ -349,6 +349,7 @@ public:
     void ClearExtWindowFlags();
     void NotifyDisplayMove(DisplayId from, DisplayId to);
     void NotifySessionFullScreen(bool fullScreen);
+    void SetDefaultDisplayIdIfNeed();
 
     void SetSessionState(SessionState state) override;
     void UpdateSessionState(SessionState state) override;
