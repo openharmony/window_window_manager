@@ -846,9 +846,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByMap(
     userIdBundleNameListMap_.clear();
     int32_t flag = ERR_NONE;
     for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
-        int32_t userId = it->first;
-        std::vector<std::string> bundleNameList = it->second;
-        userIdBundleNameListMap_[userId] = bundleNameList;
+        userIdBundleNameListMap_[it->first] = it->second;
     }
     for (auto it = userIdBundleNameListMap_.begin(); it != userIdBundleNameListMap_.end(); ++it) {
         sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(it->first);
