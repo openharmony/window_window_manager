@@ -2078,6 +2078,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
     int res = stub_->HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleSetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: test HandleSetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t userId = 100;
+    std::vector<std::string> bundleNameList = {"a", "b", "c"};
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+    data.WriteStringVector(bundleNameList);
+    int res = stub_->HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }
