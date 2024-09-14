@@ -1367,7 +1367,7 @@ WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
 
 WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

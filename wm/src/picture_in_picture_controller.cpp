@@ -414,6 +414,9 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
 {
     TLOGI(WmsLogTag::WMS_PIP, "enable: %{public}u, mainWindow: %{public}u", enable, mainWindowId_);
     isAutoStartEnabled_ = enable;
+    if (mainWindow_ == nullptr) {
+        return;
+    }
     mainWindow_->SetAutoStartPiP(enable);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
@@ -433,7 +436,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
             return;
         }
         std::string navId = pipOption_->GetNavigationId();
-        if (navId != "" && mainWindow_) {
+        if (navId != "") {
             auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
             if (navController) {
                 navController->DeletePIPMode(handleId_);

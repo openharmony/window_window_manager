@@ -260,12 +260,12 @@ void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPCont
 
 void PictureInPictureManager::AutoStartPipWindow()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (autoStartController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
         return;
     }
-    if (autoStartController_->GetPiPNavigationId() == "" || autoStartController_->IsTypeNodeEnabled()) {
+    if (autoStartController_->GetPiPNavigationId().empty() || autoStartController_->IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
         autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
         return;

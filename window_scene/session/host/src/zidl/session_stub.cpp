@@ -768,15 +768,14 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGD(WmsLogTag::WMS_PIP, "in");
     bool isAutoStart = false;
     if (!data.ReadBool(isAutoStart)) {
         TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
         return ERR_INVALID_DATA;
     }
-
     WSError errCode = SetAutoStartPiP(isAutoStart);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

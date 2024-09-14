@@ -1507,7 +1507,7 @@ HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function |
 
 /**
  * @tc.name: SetAutoStartPiPStatusChangeCallback
- * @tc.desc:  * @tc.name: SetAutoStartPiPStatusChangeCallback
+ * @tc.desc: SetAutoStartPiPStatusChangeCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | SmallTest | Level2)

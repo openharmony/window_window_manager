@@ -387,6 +387,7 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
 
+    pipControl->mainWindow_ = mw;
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
@@ -399,14 +400,9 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->pipOption_ = option;
 
     pipControl->pipOption_->SetNavigationId("");
-    pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = mw;
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = nullptr;
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = mw;
 }
 
 /**
