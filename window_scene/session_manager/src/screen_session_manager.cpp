@@ -1446,6 +1446,7 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
 
 int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
 {
+    DmsXcollie dmsXcollie("DMS:SetScreenOffDelayTime", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "set screen off delay time permission denied!");
         return 0;
@@ -4638,6 +4639,7 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
 
 ScreenProperty ScreenSessionManager::GetScreenProperty(ScreenId screenId)
 {
+    DmsXcollie dmsXcollie("DMS:GetScreenProperty", XCOLLIE_TIMEOUT_10S);
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGI(WmsLogTag::DMS, "GetScreenProperty screenSession is null");
@@ -4648,6 +4650,7 @@ ScreenProperty ScreenSessionManager::GetScreenProperty(ScreenId screenId)
 
 std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNode(ScreenId screenId)
 {
+    DmsXcollie dmsXcollie("DMS:GetDisplayNode", XCOLLIE_TIMEOUT_10S);
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "GetDisplayNode screenSession is null");
