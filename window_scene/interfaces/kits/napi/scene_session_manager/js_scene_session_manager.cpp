@@ -429,15 +429,15 @@ void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
 void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
-    auto task = [this, jsCallBack = GetJSCallback(ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB), env = env_] {
+    const char* const where = __func__;
+    auto task = [jsCallBack = GetJSCallback(ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB), env = env_, where] {
         if (jsCallBack == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnAbilityManagerCollaboratorRegistered");
+    taskScheduler_->PostMainThreadTask(task, where);
 }
 
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
@@ -543,7 +543,7 @@ void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
 
 void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
 {
-    AbilityManagerCollaboratorRegisteredFunc func = [this] {
+    auto func = [this] {
         this->OnAbilityManagerCollaboratorRegistered();
     };
     SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
