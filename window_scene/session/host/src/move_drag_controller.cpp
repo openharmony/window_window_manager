@@ -114,7 +114,7 @@ uint64_t MoveDragController::GetInitParentNodeId() const
     return initParentNodeId_;
 }
 
-std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag() const
+std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag()
 {
     std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
     return displayIdSetDuringMoveDrag_;
