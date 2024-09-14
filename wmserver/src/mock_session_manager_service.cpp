@@ -805,7 +805,7 @@ int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t 
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
-    if (!remoteObj) {
+    if (!remoteObject) {
         return ERR_NULL_OBJECT;
     }
     int err = NotifySCBSnapshotSkipByUserIdAndBundleName(userId, iter->second, remoteObject);
@@ -828,7 +828,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNameList(cons
     const std::vector<std::string>& bundleNameList)
 {
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
-    if (!remoteObj) {
+    if (!remoteObject) {
         return ERR_NULL_OBJECT;
     }
     {
