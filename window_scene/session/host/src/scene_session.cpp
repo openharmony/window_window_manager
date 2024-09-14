@@ -3111,6 +3111,8 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.processOptions = abilitySessionInfo->processOptions;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
+    info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
+
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
         info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -3123,10 +3125,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, "
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
-        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d",
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d "
+        "needClearInNotShowRecent:%{public}u",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
-        info.windowMode, info.callerPersistentId_);
+        info.windowMode, info.callerPersistentId_, info.needClearInNotShowRecent_);
     return info;
 }
 
