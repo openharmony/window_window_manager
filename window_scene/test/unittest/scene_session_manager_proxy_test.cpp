@@ -1016,6 +1016,24 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest 
 }
 
 /**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+
+    int32_t pid = 1000;
+    const std::string watermarkName = "SetProcessWatermarkName";
+    bool isEnabled = false;
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SetProcessWatermark(pid, watermarkName, isEnabled));
+}
+
+/**
  * @tc.name: GetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: normal function
  * @tc.type: FUNC

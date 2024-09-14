@@ -100,6 +100,7 @@ private:
     int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply);
     int HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply);
+    int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

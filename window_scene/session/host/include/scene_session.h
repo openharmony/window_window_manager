@@ -65,7 +65,7 @@ using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
-using ClearCallbackMapFunc = std::function<void(bool needRemove, int32_t persistentId)>;
+using ClearCallbackMapFunc = std::function<void(bool needRemove)>;
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using HandleSecureSessionShouldHideCallback = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
@@ -81,6 +81,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -274,6 +275,11 @@ public:
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
 
+    /*
+     * Window Watermark
+     */
+    void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
+
     sptr<MoveDragController> moveDragController_ = nullptr;
 
     // Session recover
@@ -319,7 +325,13 @@ public:
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Lifecycle
+     */
+    void ClearJsSceneSessionCbMap(bool needRemove); // ONLY Accessed on OS_sceneSession thread
     void ClearSpecificSessionCbMap();
+
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
@@ -406,6 +418,8 @@ public:
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
+
+    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -533,10 +547,12 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    void NotifyPrivacyModeChange();
 
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
@@ -547,7 +563,7 @@ private:
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
-    SessionEventParam sessionEventParam_ = { 0, 0 };
+    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
@@ -590,6 +606,9 @@ private:
      * Window ZOrder: PC
      */
     bool isPcScenePanel_ { false };
+
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

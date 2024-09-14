@@ -85,6 +85,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+const std::string SCENE_BOARD_APP_IDENTIFIER = "5765880207853062833";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -543,6 +544,7 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
         }
     }
     systemConfig_.freeMultiWindowEnable_ = enable;
+    rsInterface_.SetFreeMultiWindowStatus(enable);
 }
 
 const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
@@ -2177,31 +2179,30 @@ void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
     eventHandler_->PostTask(task, "HandleCastScreenDisConnection: ScreenId:" + std::to_string(screenId));
 }
 
-WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& scnSession,
+WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
     sptr<AAFwk::SessionInfo> scnSessionInfo, const bool needRemoveSession, const bool isForceClean)
 {
-    auto persistentId = scnSession->GetPersistentId();
-    TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}u",
-        persistentId,
-        static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
+    auto persistentId = sceneSession->GetPersistentId();
+    TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}d",
+        persistentId, sceneSession->GetSessionInfo().isSystem_);
     if (isForceClean) {
         AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(scnSessionInfo);
     } else {
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
     }
-    scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
+    sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
     if (needRemoveSession) {
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            NotifyClearSession(sceneSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
         EraseSceneSessionMapById(persistentId);
     } else {
         // if terminate, reset want. so start from recent, start a new one.
         TLOGI(WmsLogTag::WMS_MAIN, "reset want: %{public}d", persistentId);
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            scnSession->SetSessionInfoWant(nullptr);
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            sceneSession->SetSessionInfoWant(nullptr);
         }
-        auto& sessionInfo = scnSession->GetSessionInfo();
+        auto& sessionInfo = sceneSession->GetSessionInfo();
         if (sessionInfo.want != nullptr) {
             const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
             const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
@@ -2212,12 +2213,15 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
                 element.SetAbilityName(abilityName);
                 want->SetElement(element);
                 want->SetBundle(bundleName);
-                scnSession->SetSessionInfoWant(want);
+                sceneSession->SetSessionInfoWant(want);
             }
         }
     }
-    NotifySessionForCallback(scnSession, needRemoveSession);
-    scnSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
+    NotifySessionForCallback(sceneSession, needRemoveSession);
+    // Arrive at the STOP task end.
+    sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
+    // Clear js cb map if needed.
+    sceneSession->ClearJsSceneSessionCbMap(needRemoveSession);
     return WSError::WS_OK;
 }
 
@@ -2460,12 +2464,16 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // some system types could be created by normal app
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_FLOAT &&
-        SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+    if (type == WindowType::WINDOW_TYPE_FLOAT) {
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (systemConfig_.supportTypeFloatWindow_) {
-            WLOGFD("check create float window permission success on 2in1 device.");
+        if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
+            (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
+            systemConfig_.supportTypeFloatWindow_)) {
+            WLOGFI("check float permission success.");
             return true;
+        } else {
+            WLOGFE("check float permission failed.");
+            return false;
         }
     }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
@@ -2835,12 +2843,12 @@ sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persis
         return nullptr;
     }
     bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
-    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID;
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {
         TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
         return parentSession;
     }
-    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
@@ -4423,8 +4431,8 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    bool isSameBundleName = SessionPermission::IsSameBundleNameAsCalling(SCENE_BOARD_BUNDLE_NAME);
-    if (!isSameBundleName && (callingPid != sceneSession->GetCallingPid())) {
+    if (callingPid != sceneSession->GetCallingPid() &&
+        !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -4599,7 +4607,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     needBlockNotifyFocusStatusUntilForeground_ = false;
 
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
 
     return ShiftFocus(nextSession, reason);
@@ -4651,7 +4659,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
 
     TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
         lastFocusedAppSessionId_, nextSession->GetPersistentId());
-    
+
     if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_ ) {
         return false;
     }
@@ -5542,10 +5550,12 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         case SessionState::STATE_CONNECT:
             SetSessionSnapshotSkipForAppProcess(sceneSession);
             DoIdBundlesSnapshotSkipForSession(sceneSession);
+            SetSessionWatermarkForAppProcess(sceneSession);
             break;
         case SessionState::STATE_DISCONNECT:
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 RemoveProcessSnapshotSkip(sceneSession->GetCallingPid());
+                RemoveProcessWatermarkPid(sceneSession->GetCallingPid());
             }
             break;
         default:
@@ -7093,15 +7103,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-
-    auto notifySceneInputTask = [weakSceneSession, type]() {
-        auto sceneSession = weakSceneSession.promote();
-        if (sceneSession == nullptr) {
-            return;
-        }
-        SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, type);
-    };
-    taskScheduler_->PostAsyncTask(notifySceneInputTask);
 }
 
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
@@ -10641,4 +10642,54 @@ void SceneSessionManager::DoIdBundlesSnapshotSkipForSession(const sptr<SceneSess
     sceneSession->SetSnapshotSkip(true);
     }
 }
+
+WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
+        pid, watermarkName.c_str(), isEnabled);
+    if (isEnabled && watermarkName.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "watermarkName is empty!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto task = [this, pid, watermarkName, isEnabled] {
+        if (isEnabled) {
+            processWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+        } else {
+            processWatermarkPidMap_.erase(pid);
+        }
+
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (pid == sceneSession->GetCallingPid()) {
+                sceneSession->SetWatermarkEnabled(watermarkName, isEnabled);
+            }
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
+{
+    if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
+        iter != processWatermarkPidMap_.end()) {
+        sceneSession->SetWatermarkEnabled(iter->second, true);
+    }
+}
+
+void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
+{
+    if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
+        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from watermark pid map. pid:%{public}d", pid);
+        processWatermarkPidMap_.erase(pid);
+    }
+}
+
 } // namespace OHOS::Rosen

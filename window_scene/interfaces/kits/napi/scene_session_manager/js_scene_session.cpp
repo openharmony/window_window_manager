@@ -68,6 +68,7 @@ const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
+const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -122,6 +123,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
+    {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -331,23 +333,24 @@ void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_valu
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session), persistentId_(session->GetPersistentId())
 {
-    sptr<SceneSession::SessionChangeCallback> sessionchangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    if (session != nullptr) {
-        session->RegisterSessionChangeCallback(sessionchangeCallback);
-    }
-    sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove, int32_t persistentId) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
+    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    session->RegisterSessionChangeCallback(sessionchangeCallback);
+    sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove) {
+        if (!needRemove) {
+            TLOGND(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
             return;
         }
-        jsSceneSession->ClearCbMap(needRemove, persistentId);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->ClearCbMap();
     };
     sessionchangeCallback_ = sessionchangeCallback;
-    WLOGFD("RegisterSessionChangeCallback success");
 
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
+    TLOGI(WmsLogTag::WMS_LIFE, "created, id:%{public}d", persistentId_);
 }
 
 JsSceneSession::~JsSceneSession()
@@ -653,32 +656,31 @@ void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
     taskScheduler_->PostMainThreadTask(task, "OnSessionInfoLockedStateChange: state " + std::to_string(lockedState));
 }
 
-void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
+void JsSceneSession::ClearCbMap()
 {
-    if (!needRemove) {
-        return;
-    }
-    auto task = [weakThis = wptr(this), persistentId]() {
-        TLOGI(WmsLogTag::WMS_LIFE, "clear callbackMap with persistent id, %{public}d", persistentId);
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ClearCbMap jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: persistent id %{public}d", where, jsSceneSession->persistentId_);
         {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession clear jsCbMap");
             std::unique_lock<std::shared_mutex> lock(jsSceneSession->jsCbMapMutex_);
             jsSceneSession->jsCbMap_.clear();
         }
-        auto iter = jsSceneSessionMap_.find(persistentId);
-        if (iter != jsSceneSessionMap_.end()) {
+        // delete native reference
+        if (auto iter = jsSceneSessionMap_.find(jsSceneSession->persistentId_); iter != jsSceneSessionMap_.end()) {
             napi_delete_reference(jsSceneSession->env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
-            TLOGE(WmsLogTag::WMS_LIFE, "deleteRef failed , %{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: delete ref failed, %{public}d",
+                   where, jsSceneSession->persistentId_);
         }
     };
-    taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId));
+    taskScheduler_->PostMainThreadTask(task, "ClearCbMap PID:" + std::to_string(persistentId_));
 }
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
@@ -1437,6 +1439,35 @@ void JsSceneSession::NotifyFrameLayoutFinish()
     taskScheduler_->PostMainThreadTask(task, "NotifyFrameLayoutFinish");
 }
 
+void JsSceneSession::ProcessPrivacyModeChangeRegister()
+{
+    NotifyPrivacyModeChangeFunc func = [this](bool isPrivacyMode) {
+        this->NotifyPrivacyModeChange(isPrivacyMode);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr");
+        return;
+    }
+    session->SetPrivacyModeChangeNotifyFunc(func);
+}
+
+void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "isPrivacyMode:%{public}d, id:%{public}d", isPrivacyMode, persistentId_);
+    auto task = [this, isPrivacyMode, env = env_]() {
+        auto jsCallback = this->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
+        if (!jsCallback) {
+            TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+            return;
+        }
+        napi_value jsSessionPrivacyMode = CreateJsValue(env, isPrivacyMode);
+        napi_value argv[] = { jsSessionPrivacyMode };
+        napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "NotifyPrivacyModeChange");
+}
+
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
     WLOGFI("[NAPI]");
@@ -1953,6 +1984,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB):
             ProcessFrameLayoutFinishRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::PRIVACY_MODE_CHANGE_CB):
+            ProcessPrivacyModeChangeRegister();
             break;
         default:
             break;

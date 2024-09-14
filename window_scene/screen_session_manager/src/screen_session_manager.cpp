@@ -177,23 +177,23 @@ void ScreenSessionManager::FoldScreenPowerInit()
 {
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
-        #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
         int32_t tpType = 12;
         std::string fullTpChange = "0";
         std::string mainTpChange = "1";
-        #endif
+#endif
         if (rsInterface_.GetActiveScreenId() == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 2.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
@@ -201,16 +201,16 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 4.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
@@ -839,8 +839,7 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
     DmsXcollie dmsXcollie("DMS:GetScreenInfoById", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "GetScreenInfoById permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "Permission Denied.calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return nullptr;
     }
@@ -1433,6 +1432,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
     gotScreenlockFingerprint_ = false;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
+    lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    }
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
     sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
@@ -1797,6 +1800,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
         } else {
             TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
+            screenEventTracker_.RecordEvent("HandlerSensor start!");
         }
     }
 }
@@ -2039,7 +2043,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     {
         DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
         if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
@@ -2052,11 +2055,12 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             RSInterfaces::GetInstance().DisableCacheForRotation();
             return;
         } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
-            if (screenSession == nullptr || displayInfo == nullptr) {
+            if (screenSession == nullptr) {
                 TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen "
-                    "%{public}" PRIu64" or displayInfo is nullptr", screenId);
+                    "%{public}" PRIu64"", screenId);
                 return;
             }
+            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
@@ -2070,11 +2074,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, displayInfo is nullptr");
-        return;
-    }
-
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
 
@@ -4545,7 +4545,8 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             rsInterface_.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+    if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        // 维护外屏独立dpi
         if (foldStatus == FoldStatus::FOLDED) {
             auto property = screenSession->GetScreenProperty();
             densityDpi_ = property.GetDensity();
@@ -4703,7 +4704,7 @@ void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, Sc
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenOrientation: %{public}f", screenId, screenOrientation);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenOrientationChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenOrientationChanged(screenId, screenOrientation);
@@ -4713,7 +4714,7 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " isLocked: %{public}d", screenId, isLocked);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenRotationLockedChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
@@ -5220,7 +5221,7 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyFoldToExpandCompletion ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());

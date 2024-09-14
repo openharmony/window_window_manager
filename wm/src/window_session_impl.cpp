@@ -3707,8 +3707,10 @@ void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
 
 void WindowSessionImpl::UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason)
 {
+    bool isDragInPcmode = IsFreeMultiWindowMode() && (wmReason == WindowSizeChangeReason::DRAG_END);
     if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT || wmReason == WindowSizeChangeReason::SPLIT_TO_FULL ||
-        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL) {
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL ||
+        isDragInPcmode) {
         TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable framelayoutfinish callback reason:%{public}u", wmReason);
         SetFrameLayoutCallbackEnable(true);
     }
