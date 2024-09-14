@@ -52,7 +52,7 @@ public:
     static void DoLocateSource();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
-    static void AutoStartPipWindow(std::string navigationId);
+    static void AutoStartPipWindow();
     static void DoDestroy();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
 private:
@@ -63,7 +63,6 @@ private:
     static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
-    static sptr<IWindowLifeCycle> mainWindowLifeCycleImpl_;
     static std::shared_mutex controllerMapMutex_;
     static std::mutex mutex_;
 };

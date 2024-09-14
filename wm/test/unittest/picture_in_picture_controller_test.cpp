@@ -34,13 +34,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
-const std::string SETTING_COLUMN_VALUE = "VALUE";
-const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/"
-    "settingsdata/SETTINGSDATA?Proxy=true";
-constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-}
 class MockWindow : public Window {
 public:
     MockWindow() {};
@@ -394,6 +387,7 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
 
+    pipControl->mainWindow_ = mw;
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
@@ -406,14 +400,9 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->pipOption_ = option;
 
     pipControl->pipOption_->SetNavigationId("");
-    pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = mw;
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = nullptr;
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = mw;
 }
 
 /**
@@ -553,68 +542,6 @@ HWTEST_F(PictureInPictureControllerTest, IsContentSizeChanged, Function | SmallT
     ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 10.5, 10.5));
     ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 10.5, 10.5, 10.5));
     ASSERT_EQ(false, pipControl->IsContentSizeChanged(0, 0, 0, 0));
-}
-
-/**
- * @tc.name: getSettingsAutoStartStatus
- * @tc.desc: getSettingsAutoStartStatus
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus01, Function | SmallTest | Level2)
-{
-    std::string key = "auto_start_pip_status";
-    std::string value;
-    sptr<MockWindow> mw = new MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    PictureInPictureController::remoteObj_ = nullptr;
-    ASSERT_EQ(ERR_NAME_NOT_FOUND,  pipControl->getSettingsAutoStartStatus(key, value));
-}
-
-/**
- * @tc.name: getSettingsAutoStartStatus
- * @tc.desc: getSettingsAutoStartStatus
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus02, Function | SmallTest | Level2)
-{
-    std::string key = " ";
-    std::string value;
-    sptr<MockWindow> mw = new MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    ASSERT_EQ(ERR_NAME_NOT_FOUND,  pipControl->getSettingsAutoStartStatus(key, value));
-}
-
-/**
- * @tc.name: getSettingsAutoStartStatus
- * @tc.desc: getSettingsAutoStartStatus
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, getSettingsAutoStartStatus03, Function | SmallTest | Level2)
-{
-    std::string key = "auto_start_pip_status";
-    std::string value;
-    sptr<MockWindow> mw = new MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-
-    auto helper = DataShare::DataShareHelper::Creator(PictureInPictureController::remoteObj_, SETTING_URI_PROXY,
-        SETTINGS_DATA_EXT_URI);
-    std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(SETTING_URI_PROXY + "&key=" + key);
-    auto resultSet = helper->Query(uri, predicates, columns);
-    int32_t count;
-    resultSet->GetRowCount(count);
-    int32_t INDEX = 0;
-    int32_t ret = resultSet->GetString(INDEX, value);
-    ASSERT_NE(NativeRdb::E_OK,  ret);
-    pipControl->getSettingsAutoStartStatus(key, value);
 }
 
 /**
@@ -1049,48 +976,6 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     pipControl->window_ = window;
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
-}
-
-/**
- * @tc.name: OnModeChange
- * @tc.desc: OnModeChange
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, OnModeChange, Function | SmallTest | Level2)
-{
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-
-    auto pipMainWinListener = sptr<PictureInPictureController::PiPMainWindowListenerImpl>::MakeSptr(mw);
-    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    pipMainWinListener->OnModeChange(mode, true);
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-    pipMainWinListener->OnModeChange(mode, true);
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_FLOATING;
-    pipMainWinListener->OnModeChange(mode, true);
-    mode = WindowMode::WINDOW_MODE_UNDEFINED;
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    pipMainWinListener->OnModeChange(mode, true);
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-    pipMainWinListener->OnModeChange(mode, true);
-    pipMainWinListener->mode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    pipMainWinListener->OnModeChange(mode, true);
-}
-
-/**
- * @tc.name: DelayReset
- * @tc.desc: DelayReset
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, DelayReset, Function | SmallTest | Level2)
-{
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-
-    auto pipMainWinListener = sptr<PictureInPictureController::PiPMainWindowListenerImpl>::MakeSptr(mw);
-    pipMainWinListener->handler_ = nullptr;
-    pipMainWinListener->DelayReset();
 }
 }
 }

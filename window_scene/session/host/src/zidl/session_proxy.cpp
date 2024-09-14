@@ -1406,6 +1406,34 @@ WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write isAutoStart failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     MessageParcel data;
