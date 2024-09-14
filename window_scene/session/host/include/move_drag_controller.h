@@ -73,8 +73,8 @@ public:
     void SetIsPcWindow(bool isPcWindow);
 
     /*   
-    * Cross Display Move Drag
-    */
+     * Cross Display Move Drag
+     */
     uint64_t GetMoveDragStartDisplayId() const;
     uint64_t GetMoveDragEndDisplayId() const;
     uint64_t GetInitParentNodeId() const;
@@ -144,8 +144,8 @@ private:
     void NotifyWindowInputPidChange(bool isServerPid);
 
     /*
-    * Cross Display Move Drag
-    */
+     * Cross Display Move Drag
+     */
     std::pair<int32_t, int32_t> CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
@@ -205,8 +205,8 @@ private:
     };
 
     /*
-    * Cross Display Move Drag
-    */
+     * Cross Display Move Drag
+     */
     uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t InitParentNodeId_ = -1ULL;

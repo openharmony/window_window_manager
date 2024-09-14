@@ -161,8 +161,8 @@ public:
         int64_t uiExtensionIdLevel) override;
 
     /*
-    * Cross Display Move Drag
-    */
+     * Cross Display Move Drag
+     */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
