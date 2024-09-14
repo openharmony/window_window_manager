@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,7 +25,8 @@ namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
-class SingleDisplaySensorPocketFoldStateManager : public testing::Test {
+
+class SingleDisplaySensorPocketFoldStateManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -33,20 +34,20 @@ public:
     void TearDown() override;
 };
 
-void SingleDisplaySensorPocketFoldStateManager::SetUpTestCase()
+void SingleDisplaySensorPocketFoldStateManagerTest::SetUpTestCase()
 {
 }
 
-void SingleDisplaySensorPocketFoldStateManager::TearDownTestCase()
+void SingleDisplaySensorPocketFoldStateManagerTest::TearDownTestCase()
 {
     usleep(SLEEP_TIME_IN_US);
 }
 
-void SingleDisplaySensorPocketFoldStateManager::SetUp()
+void SingleDisplaySensorPocketFoldStateManagerTest::SetUp()
 {
 }
 
-void SingleDisplaySensorPocketFoldStateManager::TearDown()
+void SingleDisplaySensorPocketFoldStateManagerTest::TearDown()
 {
 }
 
@@ -56,27 +57,12 @@ namespace {
  * @tc.desc: test function : HandleAngleChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleAngleChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleAngleChange, Function | SmallTest | Level1)
 {
     float angel = 0;
     int hall = 0;
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
-    manager.HandleAngleChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(true);
-}
-
-/**
- * @tc.name: HandleAngleChange
- * @tc.desc: test function : HandleAngleChange
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleAngleChange, Function | SmallTest | Level1)
-{
-    float angel = 180;
-    int hall = 0;
-    sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
+    SingleDisplaySensorPocketFoldStateManager manager;
     manager.HandleAngleChange(angel, hall, foldScreenPolicy);
     EXPECT_TRUE(true);
 }
@@ -86,160 +72,123 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleAngleChange, Function 
  * @tc.desc: test function : HandleHallChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleHallChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleHallChange, Function | SmallTest | Level1)
 {
     float angel = 0;
     int hall = 0;
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
+    SingleDisplaySensorPocketFoldStateManager manager;
     manager.HandleHallChange(angel, hall, foldScreenPolicy);
     EXPECT_TRUE(true);
 }
 
 /**
- * @tc.name: HandleHallChange
- * @tc.desc: test function : HandleHallChange
+ * @tc.name: UpdateSwitchScreenBoundaryForLargeFoldDevice
+ * @tc.desc: test function : UpdateSwitchScreenBoundaryForLargeFoldDevice
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleHallChange, Function | SmallTest | Level1)
-{
-    float angel = -1;
-    int hall = 1;
-    sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
-    manager.HandleHallChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(true);
-}
-
-/**
- * @tc.name: HandleHallChange
- * @tc.desc: test function : HandleHallChange
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleHallChange, Function | SmallTest | Level1)
-{
-    float angel = 180;
-    int hall = 1;
-    sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
-    manager.HandleHallChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(true);
-}
-
-/**
- * @tc.name: HandleHallChange
- * @tc.desc: test function : HandleHallChange
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManager, HandleHallChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDevice,
+        Function | SmallTest | Level1)
 {
     float angel = 0;
-    int hall = 1;
-    sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
-    SingleDisplaySensorFoldStateManager manager;
-    manager.HandleHallChange(angel, hall, foldScreenPolicy);
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleAngleChange, Function | SmallTest | Level3)
-{
-    SingleDisplaySensorPocketFoldStateManager mgr = SingleDisplaySensorPocketFoldStateManager();
-    float angle = 0.0f;
     int hall = 0;
-    sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
-    mgr.HandleAngleChange(angle, hall, foldScreenPolicy);
-    ASSERT_TRUE(std::islessequal(angle, INWARD_FOLDED_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_FALSE(hall == HALL_THRESHOLD);
+    SingleDisplaySensorPocketFoldStateManager manager;
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDevice(angel, hall);
+    EXPECT_TRUE(true);
 
+    angel = 91.0F;
     hall = 1;
-    mgr.HandleAngleChange(angle, hall, foldScreenPolicy);
-    ASSERT_TRUE(std::islessequal(angle, INWARD_FOLDED_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_TRUE(hall == HALL_THRESHOLD);
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDevice(angel, hall);
+    EXPECT_TRUE(true);
+}
 
-    angle = 100.0f;
-    mgr.HandleAngleChange(angle, hall, foldScreenPolicy);
-    ASSERT_FALSE(std::islessequal(angle, INWARD_FOLDED_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_TRUE(hall == HALL_THRESHOLD);
+/**
+ * @tc.name: GetNextFoldState01
+ * @tc.desc: test function : GetNextFoldState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState01, Function | SmallTest | Level1)
+{
+    float angel = -0.1;
+    int hall = 0;
+    SingleDisplaySensorPocketFoldStateManager manager;
+    auto result1 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result1), 0);
 
+    manager.allowUserSensorForLargeFoldDevice = 0;
+    angel = 90.0F;
+    hall = 1;
+    auto result2 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result2), 3);
+
+    angel = 130.0F - 0.1;
+    hall = 1;
+    auto result3 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result3), 3);
+    
+    angel = 130.0F - 0.1;
     hall = 0;
-    mgr.HandleAngleChange(angle, hall, foldScreenPolicy);
-    ASSERT_FALSE(std::islessequal(angle, INWARD_FOLDED_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_FALSE(hall == HALL_THRESHOLD);
-}
+    auto result4 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result4), 2);
 
-/**
- * @tc.name: HandleHallChange
- * @tc.desc: HandleHallChange
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleHallChange, Function | SmallTest | Level3)
-{
-    SingleDisplaySensorPocketFoldStateManager mgr = SingleDisplaySensorPocketFoldStateManager();
-    float angle = 0.0f;
-    int hall = 1;
-    sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
-    mgr.applicationStateObserver_ = nullptr;
-    mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-    ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
-    ASSERT_TRUE(hall == HALL_THRESHOLD);
-
-    mgr.applicationStateObserver_ = new ApplicationStateObserver();
-    mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-    ASSERT_TRUE(mgr.applicationStateObserver_ != nullptr);
-    ASSERT_TRUE(hall == HALL_THRESHOLD);
-
-    mgr.applicationStateObserver_ = nullptr;
+    angel = 130.0F + 0.1;
     hall = 0;
-    mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-    ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
-    ASSERT_FALSE(hall == HALL_THRESHOLD);
+    auto result5 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result5), 2);
+
+    angel = 140.0F + 0.1;
+    hall = 0;
+    auto result6 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result6), 2);
+
+    angel = 140.0F + 0.1;
+    hall = 1;
+    auto result7 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result7), 1);
 }
 
 /**
- * @tc.name: GetNextFoldState
- * @tc.desc: GetNextFoldState
+ * @tc.name: GetNextFoldState02
+ * @tc.desc: test function : GetNextFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Function | SmallTest | Level1)
 {
-    SingleDisplaySensorPocketFoldStateManager mgr = SingleDisplaySensorPocketFoldStateManager();
-    float angle = 200.0f;
+    SingleDisplaySensorPocketFoldStateManager manager;
+    manager.allowUserSensorForLargeFoldDevice = 1;
+    float angel = 25.0F;
     int hall = 1;
-    FoldStatus ret = mgr.GetNextFoldState(angle, hall);
-    ASSERT_TRUE(std::isgreaterequal(angle, INWARD_EXPAND_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_EQ(ret, FoldStatus::EXPAND);
+    auto result1 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result1), 0);
 
-    angle = 0.0f;
-    ret = mgr.GetNextFoldState(angle, hall);
-    ASSERT_TRUE(std::islessequal
-    (angle, INWARD_FOLDED_LOWER_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_EQ(ret, FoldStatus::FOLDED);
+    angel = 70.0F - 0.1;
+    auto result2 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result2), 2);
 
-    mgr.isHallSwitchApp_ = true;
-    angle = 30.0f;
-    ret = mgr.GetNextFoldState(angle, hall);
-    ASSERT_TRUE(std::isgreaterequal(angle, INWARD_FOLDED_UPPER_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_TRUE(std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_EQ(ret, FoldStatus::HALF_FOLD);
+    angel = 70.0F + 0.1;
+    auto result3 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result3), 3);
+    
+    angel = 130.0F - 0.1;
+    auto result4 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result4), 3);
 
-    mgr.isHallSwitchApp_ = false;
-    angle = 120.0f;
-    ret = mgr.GetNextFoldState(angle, hall);
-    ASSERT_TRUE(std::isgreaterequal(angle, INWARD_HALF_FOLDED_MIN_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_TRUE(std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD + ANGLE_BUFFER));
-    ASSERT_EQ(ret, FoldStatus::HALF_FOLD);
-}
+    angel = 130.0F + 0.1;
+    auto result5 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result5), 3);
 
-/**
- * @tc.name: RegisterApplicationStateObserver
- * @tc.desc: RegisterApplicationStateObserver
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, RegisterApplicationStateObserver, Function | SmallTest | Level3)
-{
-    SingleDisplaySensorPocketFoldStateManager mgr = SingleDisplaySensorPocketFoldStateManager();
-    mgr.RegisterApplicationStateObserver();
-    ASSERT_NE(mgr.applicationStateObserver_, nullptr);
+    angel = 80.0F - 0.1;
+    auto result6 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result6), 3);
+
+    angel = 70.0F + 0.1;
+    hall = 0;
+    auto result7 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result7), 2);
+
+    angel = 130.0F + 0.1;
+    auto result8 = manager.GetNextFoldState(angel, hall);
+    EXPECT_EQ(static_cast<int>(result8), 2);
 }
 }
 }

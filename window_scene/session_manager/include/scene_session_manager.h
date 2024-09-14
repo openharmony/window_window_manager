@@ -74,6 +74,8 @@ struct SecSurfaceInfo;
 class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
+class ScbDumpSubscriber;
+
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)>;
@@ -108,17 +110,17 @@ public:
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
-    virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
-    virtual void OnScreenshot(DisplayId displayId) override;
-    virtual void OnImmersiveStateChange(bool& immersive) override;
-    virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
+    void OnScreenshot(DisplayId displayId) override;
+    void OnImmersiveStateChange(bool& immersive) override;
+    void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
 
     /*
      * Fold Screen Status Change Report
      */
-    virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
+    void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -130,7 +132,7 @@ public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
-    std::future<int32_t> RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
@@ -146,6 +148,8 @@ public:
     sptr<RootSceneSession> GetRootSceneSession();
     WSRect GetRootSessionAvoidSessionRect(AvoidAreaType type);
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
+        const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
@@ -191,12 +195,17 @@ public:
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
+
+    /*
+     * Dump
+     */
     WSError GetAllSessionDumpInfo(std::string& info);
     WSError GetAllSessionDumpDetailInfo(std::string& info);
     WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
         const std::string& strId);
-    WSError GetSCBDebugDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params);
+    WSError GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
+
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
@@ -355,7 +364,8 @@ public:
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
-    std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
+    std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
+
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
@@ -371,7 +381,7 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
-     * Mutil Window
+     * Multi Window
      */
     void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
     WMError CloseTargetFloatWindow(const std::string& bundleName);
@@ -396,6 +406,16 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
+    /*
+     * Window Watermark
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+
+    /*
+     * Window Snapshot
+     */
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -414,7 +434,8 @@ private:
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
     void ConfigWindowImmersive(const WindowSceneConfig::ConfigItem& immersiveConfig);
     void ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig);
-    void ConfigDefaultKeyboardAnimation();
+    void ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,
+        KeyboardSceneAnimationConfig& animationOut);
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     bool ConfigStatusBar(const WindowSceneConfig::ConfigItem& config, StatusBarConfig& statusBarConfig);
@@ -449,7 +470,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     void PostProcessFocus();
-    void PostProcessProperty();
+    void PostProcessProperty(uint32_t dirty);
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -460,6 +481,7 @@ private:
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestFocusBasicCheck(int32_t persistentId);
+    bool CheckLastFocusedAppSessionFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession);
     WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
@@ -471,7 +493,6 @@ private:
     bool CheckParentSessionVisible(const sptr<SceneSession>& session);
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property);
-    void InitRequestedOrientation(const SessionInfo& sessionInfo, const sptr<WindowSessionProperty>& sessionProperty);
 
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
@@ -521,8 +542,7 @@ private:
     WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
-        bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession, bool isNewActive);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
@@ -632,13 +652,19 @@ private:
     float snapshotScale_ = 0.5;
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
+    int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
-    bool openDebugTrace {false};
+
+    /*
+     * DFX
+     */
+    bool openDebugTrace_ {false};
+
     std::atomic<bool> enableInputEvent_ = true;
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
@@ -738,14 +764,13 @@ private:
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
                                 bool isFromInnerkits);
-    void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session);
+    void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
     void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
-    void OnSCBSystemSessionBufferAvailable(const WindowType type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
@@ -757,9 +782,16 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Snapshot
+     */
+    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessSnapshotSkip(int32_t pid);
+
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
-    void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
+    void HandleCastScreenDisConnection(uint64_t screenId);
     void ProcessWindowModeType();
     WindowModeType CheckWindowModeType();
     void NotifyRSSWindowModeTypeUpdate();
@@ -772,7 +804,7 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
-    
+
     /*
      * Fold Screen Status Change Report
      */
@@ -781,11 +813,32 @@ private:
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid);
 
+    /*
+     * Window Watermark
+     */
+    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessWatermarkPid(int32_t pid);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
+
+    /*
+     * Window Snapshot
+     */
+    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Window Watermark
+     */
+    std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
+
+    /*
+     * Dump
+     */
+    std::shared_ptr<ScbDumpSubscriber> scbDumpSubscriber_;
 
     struct SessionInfoList {
         int32_t uid_;

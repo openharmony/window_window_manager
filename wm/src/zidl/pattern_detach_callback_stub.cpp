@@ -31,7 +31,11 @@ int PatternDetachCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     PatternDetachCallbackMessage msgId = static_cast<PatternDetachCallbackMessage>(code);
     switch (msgId) {
         case PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH: {
-            auto persisitentId = data.ReadInt32();
+            int32_t persisitentId = -1;
+            if (!data.ReadInt32(persisitentId)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "Read persisitentId failed.");
+                return ERR_INVALID_DATA;
+            }
             OnPatternDetach(persisitentId);
             break;
         }

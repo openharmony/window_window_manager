@@ -118,6 +118,8 @@ public:
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
+    WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
 
 private:
     template<typename T>
