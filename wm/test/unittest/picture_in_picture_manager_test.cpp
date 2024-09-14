@@ -164,13 +164,8 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     ASSERT_NE(pipController1, nullptr);
 
     PictureInPictureManager::autoStartController_ = nullptr;
-    PictureInPictureManager::mainWindowLifeCycleImpl_ = nullptr;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
     PictureInPictureManager::autoStartController_ = pipController1;
-    PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
-    ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
-    PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
     auto option1 = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option1);
@@ -211,16 +206,12 @@ HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | Smal
     PictureInPictureManager::autoStartController_ = pipController1;
 
     sptr<Window> mainWindow = nullptr;
-    PictureInPictureManager::mainWindowLifeCycleImpl_ = nullptr;
     PictureInPictureManager::DetachAutoStartController(0, pipController1);
     ASSERT_EQ(result, 1);
     mainWindow = PictureInPictureManager::GetCurrentWindow();
     ASSERT_EQ(mainWindow, pipController->window_);
     PictureInPictureManager::DetachAutoStartController(0, pipController1);
     ASSERT_EQ(result, 1);
-    sptr<IWindowLifeCycle> mainWindowLifeCycleImpl = new (std::nothrow) IWindowLifeCycle();
-    ASSERT_NE(mainWindowLifeCycleImpl, nullptr);
-    PictureInPictureManager::mainWindowLifeCycleImpl_ = mainWindowLifeCycleImpl;
     PictureInPictureManager::DetachAutoStartController(0, pipController1);
 }
 
@@ -332,10 +323,8 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
 {
     int result = 0;
-
-    std::string navId = "";
     PictureInPictureManager::autoStartController_ = nullptr;
-    PictureInPictureManager::AutoStartPipWindow(navId);
+    PictureInPictureManager::AutoStartPipWindow();
     ASSERT_EQ(result, 0);
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
@@ -343,15 +332,10 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::autoStartController_ = pipController;
-    ASSERT_EQ(navId, "");
     option->SetTypeNodeEnabled(true);
-    PictureInPictureManager::AutoStartPipWindow(navId);
+    PictureInPictureManager::AutoStartPipWindow();
     option->SetTypeNodeEnabled(false);
-    PictureInPictureManager::AutoStartPipWindow(navId);
-    ASSERT_EQ(result, 0);
-    navId = "NavId";
-    ASSERT_NE(navId, "");
-    PictureInPictureManager::AutoStartPipWindow(navId);
+    PictureInPictureManager::AutoStartPipWindow();
     ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, "close");
 }

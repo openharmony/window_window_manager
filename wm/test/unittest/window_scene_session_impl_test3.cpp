@@ -1186,6 +1186,23 @@ HWTEST_F(WindowSceneSessionImplTest3, StartMove, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetStartMoveFlag
+ * @tc.desc: GetStartMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetStartMoveFlag");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    bool isMoving = windowSceneSessionImpl->GetStartMoveFlag();
+    EXPECT_EQ(false, isMoving);
+}
+
+/**
  * @tc.name: DisableAppWindowDecor
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC

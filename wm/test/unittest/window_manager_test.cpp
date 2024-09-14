@@ -973,7 +973,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
- 
+
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     VisibleWindowNumInfo newInfo;
     newInfo.displayId = 0;
@@ -1300,6 +1300,20 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
 
     ret = WindowManager::GetInstance().UnregisterFocusChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: check SetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    const std::string watermarkName = "SetProcessWatermarkName";
+    bool isEnabled = true;
+    auto ret = WindowManager::GetInstance().SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**

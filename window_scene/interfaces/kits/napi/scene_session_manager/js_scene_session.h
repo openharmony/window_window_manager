@@ -37,6 +37,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
+    SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
@@ -83,9 +84,7 @@ public:
     ~JsSceneSession();
 
     static napi_value Create(napi_env env, const sptr<SceneSession>& session);
-    static void Finalizer(napi_env env, void* data, void* hint);
 
-    void ClearCbMap(bool needRemove, int32_t persistentId);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
@@ -199,6 +198,7 @@ private:
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
+    void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
     void ProcessClickModalSpecificWindowOutsideRegister();
@@ -248,6 +248,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
+    void OnAutoStartPiPStatusChange(bool isAutoStart);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnClickModalSpecificWindowOutside();
@@ -285,7 +286,10 @@ private:
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
 
+    static void Finalizer(napi_env env, void* data, void* hint);
+
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ClearCbMap();
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;

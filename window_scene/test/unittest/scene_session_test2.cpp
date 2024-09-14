@@ -1152,21 +1152,15 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetPipActionEvent";
     info.bundleName_ = "SetPipActionEvent";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    WSError res = scensession->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
-
-    property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    scensession->SetSessionProperty(property);
-    res = scensession->SetPipActionEvent("close", 0);
+    WSError res = sceneSession->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    auto mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    res = sceneSession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /*
@@ -1512,6 +1506,22 @@ HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function |
     EXPECT_NE(sceneSession, nullptr);
     NotifySessionPiPControlStatusChangeFunc func;
     sceneSession->SetSessionPiPControlStatusChangeCallback(func);
+}
+
+/**
+ * @tc.name: SetAutoStartPiPStatusChangeCallback
+ * @tc.desc: SetAutoStartPiPStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAutoStartPiPStatusChangeCallback";
+    info.bundleName_ = "SetAutoStartPiPStatusChangeCallback";
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyAutoStartPiPStatusChangeFunc func;
+    sceneSession->SetAutoStartPiPStatusChangeCallback(func);
 }
 
 /**
