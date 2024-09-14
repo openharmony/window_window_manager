@@ -1519,7 +1519,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     }
 
     const char* const where = __func__;
-    auto task = [this, sessionInfo, property, where]() {
+    auto task = [this, sessionInfo, property, where] {
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
@@ -1536,8 +1536,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 where, sceneSession->GetSessionInfo().ancoSceneState);
             PreHandleCollaborator(sceneSession);
             const auto& sessionAffinity = sceneSession->GetSessionInfo().sessionAffinity;
-            auto reusedSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity);
-            if (reusedSceneSession) {
+            if (auto reusedSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity)) {
                 TLOGNI(WmsLogTag::WMS_LIFE,
                     "%{public}s: session reuse id:%{public}d type:%{public}d affinity:%{public}s",
                     where, reusedSceneSession->GetPersistentId(),
@@ -4969,11 +4968,10 @@ void SceneSessionManager::SetStartUIAbilityErrorListener(const ProcessStartUIAbi
 void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
     const AbilityManagerCollaboratorRegisteredFunc& func)
 {
-    auto task = [this, &func] {
+    auto task = [this, func] {
         abilityManagerCollaboratorRegisteredFunc_ = func;
-        return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task, __func__);
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason)
@@ -8446,7 +8444,6 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
         if (abilityManagerCollaboratorRegisteredFunc_) {
             abilityManagerCollaboratorRegisteredFunc_();
         }
-        return WSError::WS_OK;
     };
     taskScheduler_->PostTask(task, __func__);
     return WSError::WS_OK;
