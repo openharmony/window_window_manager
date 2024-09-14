@@ -2262,14 +2262,14 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
     if (movedSurfaceNode == nullptr) {
-        TLOGD(WmsLogTag::WMS_PIP, "SurfaceNode is null");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             if (movedSurfaceNode == nullptr) {
-                TLOGD(WmsLogTag::WMS_PIP, "ScreenSession is null");
+                TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 return;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);

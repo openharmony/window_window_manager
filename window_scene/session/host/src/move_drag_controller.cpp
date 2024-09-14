@@ -393,10 +393,10 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     WSRect screenRect = {
-    screenProperty.GetStartX(),
-    screenProperty.GetStartY(),
-    screenProperty.GetBounds().rect_.GetWidth(),
-    screenProperty.GetBounds().rect_.GetHeight(),
+        screenProperty.GetStartX(),
+        screenProperty.GetStartY(),
+        screenProperty.GetBounds().rect_.GetWidth(),
+        screenProperty.GetBounds().rect_.GetHeight(),
     };
     return screenRect;
 }
