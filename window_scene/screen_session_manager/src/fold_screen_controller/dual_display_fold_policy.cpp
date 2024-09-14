@@ -166,7 +166,7 @@ void DualDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
 
 void DualDisplayFoldPolicy::RecoverWhenBootAnimationExit()
 {
-    TLOGI(WmsLogTag::DMS, "RecoverWhenBootAnimationExit currentScreen(%{public}" PRIu64 ")", screenId_);
+    TLOGI(WmsLogTag::DMS, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (currentDisplayMode_ != displayMode) {
         ChangeScreenDisplayMode(displayMode);

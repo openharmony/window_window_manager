@@ -23,9 +23,9 @@ namespace Rosen {
 using PrepareTerminateFunc = std::function<void()>;
 class WindowPrepareTerminateHandler : public AAFwk::PrepareTerminateCallbackStub {
 public:
-    WindowPrepareTerminateHandler();
-    virtual ~WindowPrepareTerminateHandler() override;
-    virtual void DoPrepareTerminate() override;
+    WindowPrepareTerminateHandler() = default;
+    virtual ~WindowPrepareTerminateHandler() = default;
+    void DoPrepareTerminate() override;
     void SetPrepareTerminateFun(const PrepareTerminateFunc& func);
     
 private:

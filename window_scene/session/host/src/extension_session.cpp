@@ -177,17 +177,8 @@ WSError ExtensionSession::ConnectInner(
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
 
-            session->channelListener_ = new WindowEventChannelListener();
-            if (session->channelListener_  == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create death Recipient ptr.");
-                return WSError::WS_ERROR_NULLPTR;
-            }
-            session->channelDeath_ = new (std::nothrow) ChannelDeathRecipient(session->channelListener_);
-            if (session->channelDeath_ == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create listener ptr.");
-                return WSError::WS_ERROR_NULLPTR;
-            }
-
+            session->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
+            session->channelDeath_ = sptr<ChannelDeathRecipient>::MakeSptr(session->channelListener_);
             if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(session->channelDeath_)) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
                 return WSError::WS_ERROR_INTERNAL_ERROR;
@@ -380,9 +371,8 @@ WSError ExtensionSession::TransferKeyEventAsync(const std::shared_ptr<MMI::KeyEv
 sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExtensionSessionEventCallback()
 {
     if (extSessionEventCallback_ == nullptr) {
-        extSessionEventCallback_ = new(std::nothrow) ExtensionSessionEventCallback();
+        extSessionEventCallback_ = sptr<ExtensionSessionEventCallback>::MakeSptr();
     }
-
     return extSessionEventCallback_;
 }
 

@@ -133,7 +133,9 @@ public:
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
-    
+    virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
+    virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();

@@ -168,6 +168,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
+            return HandleSkipSnapshotForAppProcess(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
+            return HandleSetProcessWatermark(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -544,14 +548,22 @@ int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, Messag
 
 int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleTerminateSessionNew");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return ERR_INVALID_DATA;
     }
-    bool needStartCaller = data.ReadBool();
-    bool isFromBroker = data.ReadBool();
+    bool needStartCaller = false;
+    if (!data.ReadBool(needStartCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needStartCaller failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isFromBroker = false;
+    if (!data.ReadBool(isFromBroker)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromBroker failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1066,6 +1078,45 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
         TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds fail.");
         return ERR_INVALID_DATA;
     }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    bool skip = false;
+    if (!data.ReadBool(skip)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readBool skip");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SkipSnapshotForAppProcess(pid, skip);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    std::string watermarkName;
+    if (!data.ReadString(watermarkName)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readString watermarkName");
+        return ERR_INVALID_DATA;
+    }
+    bool isEnabled = false;
+    if (!data.ReadBool(isEnabled)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readBool isEnabled");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
