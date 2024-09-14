@@ -57,8 +57,8 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         case ScreenSessionReason::CREATE_SESSION_FOR_MIRROR: {
             rsConfig.screenId = screenId_;
             rsConfig.isMirrored = true;
-            rsConfig.isSync = true;
             rsConfig.mirrorNodeId = config.mirrorNodeId;
+            rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
@@ -119,8 +119,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
     rsId_ = screenId;
-    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .isSync = true,
-        .mirrorNodeId = nodeId};
+    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
+        .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
         WLOGI("Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"", screenId_);
@@ -611,6 +611,7 @@ void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation
 
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 {
+    TLOGI(WmsLogTag::DMS, "ENTER!");
     if (foldToExpand) {
         SensorRotationChange(currentSensorRotation_);
     }
@@ -1175,7 +1176,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             NodeId nodeId = displayNode->GetId();
             WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
                 mirrorScreenId_, screenSession->rsId_, nodeId);
-            config = {screenSession->rsId_, true, true, nodeId};
+            config = {screenSession->rsId_, true, nodeId, true};
             break;
         }
         default:

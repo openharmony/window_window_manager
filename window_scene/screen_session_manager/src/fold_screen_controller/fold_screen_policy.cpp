@@ -22,11 +22,13 @@ FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
+
 void FoldScreenPolicy::LockDisplayStatus(bool locked)
 {
     lockDisplayStatus_ = locked;
 }
 void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
+
 ScreenId FoldScreenPolicy::GetCurrentScreenId()
 {
     return screenId_;
