@@ -436,7 +436,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
             return;
         }
         std::string navId = pipOption_->GetNavigationId();
-        if (navId != "") {
+        if (!navId.empty()) {
             auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
             if (navController) {
                 navController->DeletePIPMode(handleId_);

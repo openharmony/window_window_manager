@@ -226,8 +226,8 @@ public:
     bool IsMainHandlerAvailable() const override;
 
     /*
-    * PiP Window
-    */
+     * PiP Window
+     */
     WSError NotifyCloseExistPipWindow() override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;

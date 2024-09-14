@@ -212,8 +212,8 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 
     /*
-    * PiP Window
-    */
+     * PiP Window
+     */
     PiPTemplateInfo GetPiPTemplateInfo() const;
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
@@ -539,8 +539,8 @@ private:
         WSPropertyChangeAction action);
 
     /*
-    * PiP Window
-    */
+     * PiP Window
+     */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
