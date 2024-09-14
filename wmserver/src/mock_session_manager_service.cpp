@@ -848,7 +848,15 @@ int32_t MockSessionManagerService::SetSnapshotSkipByMap(
     for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
         int32_t userId = it->first;
         std::vector<std::string> bundleNameList = it->second;
-        int32_t errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+        userIdBundleNameListMap_[userId] = bundleNameList;
+    }
+    for (auto it = userIdBundleNameListMap_.begin(); it != userIdBundleNameListMap_.end(); ++it) {
+        sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(it->first);
+        if (!remoteObject) {
+            flag =  ERR_NULL_OBJECT;
+            break;
+        }
+        int32_t errCode = NotifySCBSnapshotSkipByUserIdAndBundleName(it->first, it->second, remoteObject);
         if (errCode != ERR_NONE) {
             flag = errCode;
         }
