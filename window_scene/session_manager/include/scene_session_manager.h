@@ -364,7 +364,8 @@ public:
     void OnBundleUpdated(const std::string& bundleName, int userId);
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
-    std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
+    std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
+
     int32_t GetCustomDecorHeight(int32_t persistentId);
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
@@ -380,7 +381,7 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
-     * Mutil Window
+     * Multi Window
      */
     void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
     WMError CloseTargetFloatWindow(const std::string& bundleName);
@@ -404,6 +405,11 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+
+    /*
+     * Window Watermark
+     */
+    WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
 
     /*
      * Window Snapshot
@@ -810,6 +816,12 @@ private:
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid);
 
+    /*
+     * Window Watermark
+     */
+    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void RemoveProcessWatermarkPid(int32_t pid);
+
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
     /*
@@ -821,6 +833,11 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Window Watermark
+     */
+    std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
 
     /*
      * Dump

@@ -349,20 +349,26 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 
 void SceneSession::ClearSpecificSessionCbMap()
 {
-    auto task = [weakThis = wptr(this)]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: session is null", where);
             return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
-            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
-            TLOGD(WmsLogTag::WMS_SYSTEM, "ClearCallbackMap, id: %{public}d", session->GetPersistentId());
-        } else {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "get callback failed, id: %{public}d", session->GetPersistentId());
-        }
+        session->ClearJsSceneSessionCbMap(true);
     };
-    PostTask(task, "ClearSpecificSessionCbMap");
+    PostTask(task, __func__);
+}
+
+void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
+{
+    if (sessionChangeCallback_ && sessionChangeCallback_->clearCallbackFunc_) {
+        TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, needRemove: %{public}d", GetPersistentId(), needRemove);
+        sessionChangeCallback_->clearCallbackFunc_(needRemove);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "get callback failed, id: %{public}d", GetPersistentId());
+    }
 }
 
 WSError SceneSession::Disconnect(bool isFromClient)
@@ -473,6 +479,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
+        }
+        if (session->moveDragController_ && event == SessionEvent::EVENT_DRAG) {
+            WSRect rect = session->moveDragController_->GetTargetRect();
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
@@ -2217,6 +2227,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
+        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+            return;
+        }
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
@@ -2511,6 +2525,29 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
+    NotifyPrivacyModeChange();
+}
+
+void SceneSession::NotifyPrivacyModeChange()
+{
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "sessionProperty is null");
+        return;
+    }
+
+    bool curExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    bool curPrivacyMode = curExtPrivacyMode || sessionProperty->GetPrivacyMode();
+    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, curExtPrivacyMode:%{public}d, session property privacyMode:%{public}d"
+        ", old privacyMode:%{public}d",
+        GetPersistentId(), curExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
+    
+    if (curPrivacyMode != isPrivacyMode_) {
+        isPrivacyMode_ = curPrivacyMode;
+        if (privacyModeChangeNotifyFunc_) {
+            privacyModeChangeNotifyFunc_(isPrivacyMode_);
+        }
+    }
 }
 
 void SceneSession::SetSnapshotSkip(bool isSkip)
@@ -2535,6 +2572,21 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
+void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
+{
+    if (!surfaceNode_) {
+        TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
+        watermarkName.c_str(), isEnabled, GetPersistentId());
+    surfaceNode_->SetWatermarkEnabled(watermarkName, isEnabled);
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -4126,6 +4178,8 @@ void SceneSession::CalculateCombinedExtWindowFlags()
     for (const auto& iter: extWindowFlagsMap_) {
         combinedExtWindowFlags_.bitData |= iter.second.bitData;
     }
+
+    NotifyPrivacyModeChange();
 }
 
 void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
@@ -4373,6 +4427,11 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
+void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
+{
+    privacyModeChangeNotifyFunc_ = func;
+}
+
 int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
@@ -4446,6 +4505,8 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, isVisible_: %{public}d, visibility: %{public}d",
+        GetPersistentId(), isVisible_, visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
@@ -4569,6 +4630,8 @@ bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
     if (zOrder_ == zOrder) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder_: %{public}u, zOrder: %{public}u",
+        GetPersistentId(), zOrder_, zOrder);
     zOrder_ = zOrder;
     return true;
 }
