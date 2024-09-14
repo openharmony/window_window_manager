@@ -274,7 +274,7 @@ enum class SystemBarSettingFlag : uint32_t {
 
 inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
 {
-    using T = std::underlying_type<SystemBarSettingFlag>::type;
+    using T = std::underlying_type_t<SystemBarSettingFlag>::type;
     return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
