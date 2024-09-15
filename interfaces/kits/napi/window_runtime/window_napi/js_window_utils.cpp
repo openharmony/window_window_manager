@@ -733,6 +733,8 @@ void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
     systemBarProperties[type] = property;
     systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
+    systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
+        SystemBarSettingFlag::ENABLE_SETTING;
 }
 
 bool GetSpecificBarStatus(napi_env env, napi_callback_info info,
