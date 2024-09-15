@@ -400,7 +400,8 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write canStartAbilityFromBackground failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(abilitySessionInfo->isAtomicService) || !data.WriteBool(abilitySessionInfo->isBackTransition) || 
+    if (!data.WriteBool(abilitySessionInfo->isAtomicService) ||
+        !data.WriteBool(abilitySessionInfo->isBackTransition) ||
         !data.WriteBool(abilitySessionInfo->needClearInNotShowRecent)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write isAtomicService or isBackTransition or needClearInNotShowRecent failed");
         return WSError::WS_ERROR_IPC_FAILED;
