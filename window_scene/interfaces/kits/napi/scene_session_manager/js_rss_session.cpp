@@ -38,7 +38,7 @@ struct CallBackContext {
     napi_env env = nullptr;
     std::shared_ptr<NativeReference> callbackRef = nullptr;
     OnRssEventCb eventCb = nullptr;
-    int32_t eventType = 0;
+    uint32_t eventType = 0;
     std::unordered_map<std::string, std::string> extraInfo;
 };
 
@@ -71,7 +71,7 @@ void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     CallBackContext* callBackContext = new CallBackContext();
     callBackContext->env = napiEnv_;
     callBackContext->callbackRef = callbackRef_;
-    callBackContext->eventType = static_cast<int32_t>(eventType);
+    callBackContext->eventType = eventType;
     callBackContext->extraInfo = std::move(extraInfo);
     callBackContext->eventCb = eventCb_;
     napi_acquire_threadsafe_function(threadSafeFunction_);
@@ -195,7 +195,7 @@ void RssSession::ParseCallbackMutex(const std::string& mutexStr, std::string& bu
     }
 }
 
-void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
+void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, uint32_t eventType,
     const std::unordered_map<std::string, std::string>& extraInfo)
 {
     WLOGFI("asyncCallback.");
@@ -237,7 +237,7 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t ev
 napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("start");
-    int32_t eventType;
+    uint32_t eventType;
     napi_value jsCallback = nullptr;
     if (!CheckCallbackParam(env, info, eventType, &jsCallback)) {
         WLOGFE("Register RssData Callback parameter error.");
@@ -259,7 +259,7 @@ napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info 
             return NapiGetUndefined(env);
         }
     }
-    auto rssDataCb = [](napi_env env, napi_value callbackObj, int32_t eventType,
+    auto rssDataCb = [](napi_env env, napi_value callbackObj, uint32_t eventType,
         std::unordered_map<std::string, std::string>&& extraInfo) {
         RssSession::GetInstance().OnReceiveEvent(env, callbackObj, eventType, extraInfo);
     };
@@ -273,7 +273,7 @@ napi_value RssSession::RegisterRssDataCallback(napi_env env, napi_callback_info 
 napi_value RssSession::UnRegisterRssDataCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("start");
-    int32_t eventType;
+    uint32_t eventType;
     napi_value jsCallback = nullptr;
     if (!CheckCallbackParam(env, info, eventType, &jsCallback)) {
         WLOGFE("UnRegister RssData Callback parameter error.");
@@ -330,7 +330,7 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
 }
 
 bool RssSession::CheckCallbackParam(napi_env env, napi_callback_info info,
-                                    int32_t& eventType, napi_value* jsCallback)
+                                    uint32_t& eventType, napi_value* jsCallback)
 {
     if (jsCallback == nullptr) {
         WLOGFE("Input callback is nullptr.");
