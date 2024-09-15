@@ -3863,6 +3863,15 @@ void SceneSession::SetMovable(bool movable)
     PostTask(task, "SetMovable");
 }
 
+WSError SceneSession::SetSplitButtonVisible(bool isVizible)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isVizible: %{public}d", isVizible);
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetSplitButtonVisible(isVizible);
+}
+
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
     return oriPosYBeforeRaisedByKeyboard_;
