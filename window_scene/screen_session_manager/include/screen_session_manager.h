@@ -231,6 +231,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void RegisterSettingDpiObserver();
+    void RegisterExtendSettingDpiObserver();
     void RegisterSettingRotationObserver();
 
     void OnConnect(ScreenId screenId) override {}
@@ -471,6 +472,7 @@ private:
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
+    void SetDpiFromSettingData(bool isInternal);
     void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void UpdateDisplayScaleState(ScreenId screenId);
