@@ -103,11 +103,14 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
+constexpr int32_t INVALID_DPI = 0;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
+static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -1814,6 +1817,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
+        that.RegisterExtendSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -1845,8 +1849,20 @@ void ScreenSessionManager::SetRotateLockedFromSettingData()
 void ScreenSessionManager::RegisterSettingDpiObserver()
 {
     TLOGI(WmsLogTag::DMS, "Register Setting Dpi Observer");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
-    ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
+        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    } else {
+        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(true); };
+        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    }
+}
+
+void ScreenSessionManager::RegisterExtendSettingDpiObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register Extend Setting Dpi Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(false); };
+    ScreenSettingHelper::RegisterExtendSettingDpiObserver(updateFunc);
 }
 
 void ScreenSessionManager::SetDpiFromSettingData()
@@ -1865,6 +1881,41 @@ void ScreenSessionManager::SetDpiFromSettingData()
         float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
+    }
+}
+
+void ScreenSessionManager::SetDpiFromSettingData(bool isInternal)
+{
+    uint32_t settingDpi = INVALID_DPI;
+    bool ret = false;
+    if (isInternal == true) {
+        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY);
+    } else {
+        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY_EXTEND);
+    }
+    if (!ret) {
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
+        settingDpi = defaultDpi;
+    } else {
+        TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
+    }
+    if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE
+        && cachedSettingDpi_ != settingDpi) {
+        cachedSettingDpi_ = settingDpi;
+        float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+        ScreenId screenId = SCREEN_ID_INVALID;
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            for (const auto& sessionIt : screenSessionMap_) {
+                const auto& screenSession = sessionIt.second;
+                if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+                    screenSession->isInternal_ == isInternal) {
+                    screenId = sessionIt.first;
+                    break;
+                }
+            }
+        }
+        SetVirtualPixelRatio(screenId, dpi);
     }
 }
 
