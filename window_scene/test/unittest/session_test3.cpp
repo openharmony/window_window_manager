@@ -960,6 +960,8 @@ HWTEST_F(WindowSessionTest3, NotifyFocusStatus, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyFocusStatus(true));
 }
 
 /**
@@ -1011,6 +1013,10 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(result, WSError::WS_OK);
+
+    session_->sessionStage_ = nullptr;
+    result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1160,6 +1166,20 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
     session_->SetSessionProperty(nullptr);
     session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
     ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: GetSurfaceNodeForMoveDrag
+ * @tc.desc: GetSurfaceNodeForMoveDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->leashWinSurfaceNode_ = nullptr;
+    session_->surfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
+    ASSERT_EQ(res, nullptr);
 }
 }
 } // namespace Rosen

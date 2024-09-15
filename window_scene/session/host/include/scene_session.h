@@ -33,6 +33,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 namespace {
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =
@@ -179,7 +180,7 @@ public:
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
@@ -370,8 +371,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
+    static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     int32_t GetCustomDecorHeight() override
     {
@@ -430,7 +431,8 @@ public:
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
 protected:
-    void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
+    void NotifySessionRectChange(const WSRect& rect,
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -476,11 +478,16 @@ private:
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
+    /*
+    * Move Drag
+    */
+    void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void OnMoveDragCallback(const SizeChangeReason& reason);
-    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason& reason,
+    void OnMoveDragCallback(const SizeChangeReason reason);
+    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
@@ -494,7 +501,7 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
+    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -589,7 +596,6 @@ private:
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
-    static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
@@ -620,6 +626,11 @@ private:
      */
     bool isPcScenePanel_ { false };
 
+    /*
+     * Move Drag
+     */
+    static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
+    
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
 };

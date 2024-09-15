@@ -426,7 +426,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId newDisplayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -454,7 +454,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -1428,6 +1428,31 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     rect.height_ = 800;
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode
+ * @tc.desc: HandleMoveDragSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode";
+    info.bundleName_ = "HandleMoveDragSurfaceNode";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    EXPECT_NE(session->moveDragController_, nullptr);
+
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
 }
 }
 }

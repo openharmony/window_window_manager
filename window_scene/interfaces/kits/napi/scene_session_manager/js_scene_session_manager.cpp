@@ -2228,29 +2228,35 @@ napi_value JsSceneSessionManager::OnAddWindowDragHotArea(napi_env env, napi_call
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    int64_t displayId;
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     uint32_t type;
-    if (!ConvertFromJsValue(env, argv[0], type)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], type)) {
         WLOGFE("[NAPI]Failed to convert parameter to type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect area;
-    napi_value nativeObj = argv[1];
-    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, area)) {
+    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], area)) {
         WLOGFE("[NAPI]Failed to convert parameter to area");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    SceneSessionManager::GetInstance().AddWindowDragHotArea(type, area);
+    SceneSessionManager::GetInstance().AddWindowDragHotArea(displayId, type, area);
     return NapiGetUndefined(env);
 }
 
