@@ -206,7 +206,7 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
-    bool isScreenLocked_ = true;
+    std::atomic<bool> isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
@@ -239,7 +239,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
-    std::recursive_mutex mutex_;
+    mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
