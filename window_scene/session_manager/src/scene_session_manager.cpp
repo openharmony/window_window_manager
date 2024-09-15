@@ -4398,7 +4398,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     needBlockNotifyFocusStatusUntilForeground_ = false;
 
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
 
     return ShiftFocus(nextSession, reason);
@@ -4451,7 +4451,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
     TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
         lastFocusedAppSessionId_, nextSession->GetPersistentId());
     
-    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_ ) {
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_) {
         return false;
     }
 
@@ -4465,7 +4465,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
         (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
          mode == WindowMode::WINDOW_MODE_FLOATING)) {
         if (RequestSessionFocus(lastFocusedAppSessionId_, false, FocusChangeReason::LAST_FOCUSED_APP) ==
-            WSError::WS_OK){
+            WSError::WS_OK) {
             return true;
         }
         lastFocusedAppSessionId_ = INVALID_SESSION_ID;
