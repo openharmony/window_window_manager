@@ -2027,10 +2027,9 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
 
     if (reason == SizeChangeReason::DRAG_END) {
-        if (!SessionHelper::IsEmptyRect(GetRestoringRectForKeyboard())) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset restoringRectForKeyboard_");
-            WSRect restoringRect = {0, 0, 0, 0};
-            SetRestoringRectForKeyboard(restoringRect);
+        if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
+            SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -3456,14 +3455,14 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     return;
 }
 
-WSRect SceneSession::GetRestoringRectForKeyboard() const
+int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return restoringRectForKeyboard_;
+    return oriPosYBeforeRaisedBykeyboard_;
 }
 
-void SceneSession::SetRestoringRectForKeyboard(WSRect rect)
+void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    restoringRectForKeyboard_ = rect;
+    oriPosYBeforeRaisedBykeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
