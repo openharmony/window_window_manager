@@ -595,6 +595,18 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: SetSplitButtonVisible
+ * @tc.desc: test function : SetSplitButtonVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetSplitButtonVisible(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

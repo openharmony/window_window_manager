@@ -264,6 +264,7 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
+    WSError SetSplitButtonVisible(bool isVisible) override;
 
 protected:
     WMError Connect();
@@ -504,6 +505,7 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+    bool isSplitButtonVisible_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS
