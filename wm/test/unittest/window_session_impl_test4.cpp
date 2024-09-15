@@ -1126,6 +1126,102 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
     window->NotifyWindowVisibility(false);
     window->UnregisterWindowVisibilityChangeListener(listener);
 }
+
+/**
+ * @tc.name: SetWindowContainerColor01
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor02
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor03
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
+    sptr option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor04
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
+    sptr option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::string activeColor = "color";
+    std::string inactiveColor = "123";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
