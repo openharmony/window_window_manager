@@ -149,12 +149,12 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFD("[NAPI]OnAvoidAreaChanged");
+    WLOGFD("[NAPI]");
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("[NAPI]this listener or env is nullptr");
+            TLOGNE("[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
@@ -170,7 +170,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_value objValue = nullptr;
             napi_create_object(env, &objValue);
             if (objValue == nullptr) {
-                WLOGFE("Failed to get object");
+                TLOGNE("Failed to get object");
                 return;
             }
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
@@ -181,12 +181,12 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
         napi_close_handle_scope(env, scope);
     };
 
-    if (!eventHandler_) {
+    if (eventHandler_) {
+        eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnAvoidAreaChanged", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
         WLOGFE("get main event handler failed!");
-        return;
     }
-    eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnAvoidAreaChanged", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
