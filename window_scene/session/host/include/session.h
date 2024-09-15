@@ -47,7 +47,8 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
-using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
+    const SizeChangeReason reason, const DisplayId DisplayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -158,6 +159,11 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
+
+    /*
+     * Cross Display Move Drag
+     */
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true);

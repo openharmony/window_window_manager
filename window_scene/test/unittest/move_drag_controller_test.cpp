@@ -114,6 +114,50 @@ HWTEST_F(MoveDragControllerTest, GetStartDragFlag, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: GetMoveDragStartDisplayId
+ * @tc.desc: test function : GetMoveDragStartDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetMoveDragStartDisplayId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetMoveDragStartDisplayId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetMoveDragEndDisplayId
+ * @tc.desc: test function : GetMoveDragEndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetMoveDragEndDisplayId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetMoveDragEndDisplayId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetInitParentNodeId
+ * @tc.desc: test function : GetInitParentNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetInitParentNodeId, Function | SmallTest | Level1)
+{
+    uint64_t res = moveDragController->GetInitParentNodeId();
+    ASSERT_EQ(-1ULL, res);
+}
+
+/**
+ * @tc.name: GetDisplayIdsDuringMoveDrag
+ * @tc.desc: test function : GetDisplayIdsDuringMoveDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetDisplayIdsDuringMoveDrag, Function | SmallTest | Level1)
+{
+    std::set<uint64_t> res = moveDragController->GetDisplayIdsDuringMoveDrag();
+    ASSERT_EQ(true, res.empty());
+}
+
+/**
  * @tc.name: GetTargetRect
  * @tc.desc: test function : GetTargetRect
  * @tc.type: FUNC
@@ -124,6 +168,12 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, Function | SmallTest | Level1)
     int32_t pos = 0;
     moveDragController->InitMoveDragProperty();
     WSRect res = moveDragController->GetTargetRect();
+    ASSERT_EQ(tmp, res.height_);
+    ASSERT_EQ(tmp, res.width_);
+    ASSERT_EQ(pos, res.posX_);
+    ASSERT_EQ(pos, res.posY_);
+
+    res = moveDragController->GetTargetRect(true);
     ASSERT_EQ(tmp, res.height_);
     ASSERT_EQ(tmp, res.width_);
     ASSERT_EQ(pos, res.posX_);
@@ -140,6 +190,20 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, Function | SmallTest | Le
     int32_t res = 0;
     moveDragController->InitMoveDragProperty();
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: InitCrossDisplayProperty
+ * @tc.desc: test function : InitCrossDisplayProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest | Level1)
+{
+    moveDragController->InitCrossDisplayProperty(1, 2);
+    ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
+    ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
+    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
+        moveDragController->GetDisplayIdsDuringMoveDrag().end());
 }
 
 /**
@@ -579,7 +643,7 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](int32_t type, const SizeChangeReason& reason) {
+    auto dragHotAreaFunc = [](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
         type = 0;
     };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
@@ -986,7 +1050,7 @@ HWTEST_F(MoveDragControllerTest, ProcessSessionRectChange, Function | SmallTest 
     int32_t res = 0;
     auto preCallback = moveDragController->moveDragCallback_;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    MoveDragCallback callBack = [](const SizeChangeReason& reason) {
+    MoveDragCallback callBack = [](const SizeChangeReason reason) {
             return;
         };
     moveDragController->moveDragCallback_ = callBack;
@@ -1019,6 +1083,37 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
     int32_t posY = moveDragController->moveDragProperty_.originalPointerPosY_;
     int32_t res = moveDragController->GetOriginalPointerPosY();
     ASSERT_EQ(posY, res);
+}
+
+/**
+ * @tc.name: GetNewAddedDisplayIdsDuringMoveDrag
+ * @tc.desc: test function : GetNewAddedDisplayIdsDuringMoveDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function | SmallTest | Level1)
+{
+    std::set<uint64_t> res = moveDragController->GetDisplayIdsDuringMoveDrag();
+    ASSERT_EQ(true, res.empty());
+}
+
+/**
+ * @tc.name: CalcUnifiedTransform
+ * @tc.desc: test function : CalcUnifiedTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcUnifiedTransform, Function | SmallTest | Level1)
+{
+    moveDragController->InitMoveDragProperty();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetTargetDisplayId(0);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(0);
+    pointerItem.SetDisplayX(10);
+    pointerItem.SetDisplayY(30);
+    pointerEvent->AddPointerItem(pointerItem);
+    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTransform(pointerEvent);
+    ASSERT_EQ(10, res.first);
+    ASSERT_EQ(30, res.second);
 }
 }
 }
