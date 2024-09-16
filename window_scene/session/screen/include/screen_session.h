@@ -21,6 +21,7 @@
 
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
+#include <shared_mutex>
 #include <ui/rs_display_node.h>
 
 #include "screen_property.h"
