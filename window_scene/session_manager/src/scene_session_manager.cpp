@@ -4922,7 +4922,7 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
         bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
                               (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
-                              (isPhoneOrPad && ssession->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+                              (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
         if (IsSessionVisibleForeground(session) && isBlockingType)  {
             ret = session;
             return true;
@@ -8914,7 +8914,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
-            CheckFocusedSessionZOrder();
+            CheckFocusedSessionZOrder(sessionMapDirty);
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
@@ -8941,7 +8941,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
 }
 
 void SceneSessionManager::CheckFocusedSessionZOrder(uint32_t dirty) {
-    if (!(sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
+    if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
     }
     if (!systemConfig_.IsPhoneWindow() && !systemConfig_.IsPadWindow()) {
@@ -8954,7 +8954,6 @@ void SceneSessionManager::CheckFocusedSessionZOrder(uint32_t dirty) {
         focusedSession->GetLastZOrder() <= focusedSession->GetZOrder()) {
         return;
     }
-
     auto voiceInterActionSession = GetSceneSessionByType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
     if (voiceInterActionSession == nullptr) {
         return;
