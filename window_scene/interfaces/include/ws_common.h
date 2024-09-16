@@ -262,6 +262,10 @@ enum class FocusChangeReason {
      */
     LAST_FOCUSED_APP,
     /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
+    /**
      * focus change max.
      */
     MAX,

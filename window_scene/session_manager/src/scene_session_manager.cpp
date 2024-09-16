@@ -1238,6 +1238,18 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
     return nullptr;
 }
 
+sptr<SceneSession> SceneSessionManager::GetSceneSessionByType(WindowType type)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession->GetWindowType() == type) {
+            return sceneSession;
+        }
+    }
+    return nullptr;
+}
+
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
     WindowType type, uint64_t displayId)
 {
@@ -4676,7 +4688,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
     TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
         lastFocusedAppSessionId_, nextSession->GetPersistentId());
 
-    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_ ) {
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_) {
         return false;
     }
 
@@ -4690,7 +4702,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
         (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
          mode == WindowMode::WINDOW_MODE_FLOATING)) {
         if (RequestSessionFocus(lastFocusedAppSessionId_, false, FocusChangeReason::LAST_FOCUSED_APP) ==
-            WSError::WS_OK){
+            WSError::WS_OK) {
             return true;
         }
         lastFocusedAppSessionId_ = INVALID_SESSION_ID;
@@ -4907,8 +4919,10 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
+        bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
-            (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus());
+                              (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
+                              (isPhoneOrPad && ssession->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
         if (IsSessionVisibleForeground(session) && isBlockingType)  {
             ret = session;
             return true;
@@ -8900,6 +8914,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
+            CheckFocusedSessionZOrder();
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
@@ -8923,6 +8938,36 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         }
     };
     taskScheduler_->PostAsyncTask(task, "FlushUIParams");
+}
+
+void SceneSessionManager::CheckFocusedSessionZOrder(uint32_t dirty) {
+    if (!(sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
+        return;
+    }
+    if (!systemConfig_.IsPhoneWindow() && !systemConfig_.IsPadWindow()) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_PIPELINE, "has zOrder dirty");
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    // Whether is it from a high zOrder to a low zOrder
+    if (focusedSession == nullptr || focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION ||
+        focusedSession->GetLastZOrder() <= focusedSession->GetZOrder()) {
+        return;
+    }
+
+    auto voiceInterActionSession = GetSceneSessionByType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    if (voiceInterActionSession == nullptr) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_PIPELINE,
+          "voiceInterActionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder %{public}d zOrder "
+          "%{public}d",
+          voiceInterActionSession->GetPersistentId(), voiceInterActionSession->GetZOrder(),
+          focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
+    if (focusedSession->GetLastZOrder() > voiceInterActionSession->GetZOrder() &&
+        focusedSession->GetZOrder() < voiceInterActionSession->GetZOrder()) {
+        RequestSessionFocus(voiceInterActionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
+    }
 }
 
 void SceneSessionManager::PostProcessFocus()
