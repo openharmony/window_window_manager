@@ -75,6 +75,10 @@ public:
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
+    bool ReadSmallStringVectorFromParcel(
+        MessageParcel& reply, std::vector<std::string>& infos);
+    bool ReadBigStringVectorFromParcel(
+        MessageParcel& reply, std::vector<std::string>& infos);
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
 } // namespace OHOS::Rosen
