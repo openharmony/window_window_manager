@@ -425,6 +425,7 @@ public:
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
+    WMError ReleaseForegroundSessionScreenLock() override;
     WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
 
