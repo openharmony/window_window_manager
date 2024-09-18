@@ -45,7 +45,6 @@ constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
 constexpr int32_t POSTURE_INTERVAL = 100000000;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
-constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
 static float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
     ("const.fold.half_folded_min_threshold", 85));
@@ -53,6 +52,7 @@ static float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::G
     ("const.large_fold.half_folded_min_threshold", 25));
 constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
 float oldFoldAngle = 0.0F;
+bool registerPosture_ = false;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
@@ -190,7 +190,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         return;
     }
     TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
-    if (globalHall == HALL_FOLDED_THRESHOLD) {
+    if (!registerPosture_) {
         globalAngle = ANGLE_MIN_VAL;
     }
     sensorFoldStateManager_->HandleHallChange(globalAngle, globalHall, foldScreenPolicy_);
@@ -201,11 +201,16 @@ void FoldScreenSensorManager::RegisterApplicationStateObserver()
     sensorFoldStateManager_->RegisterApplicationStateObserver();
 }
 
+void FoldScreenSensorManager::SetRegisterPosture(bool registerPosture)
+{
+    registerPosture_ = registerPosture;
+}
+
 void FoldScreenSensorManager::TriggerDisplaySwitch()
 {
     TLOGI(WmsLogTag::DMS, "TriggerDisplaySwitch hall value is: %{public}u, angle value is: %{public}f",
         globalHall, globalAngle);
-    if (globalHall == HALL_FOLDED_THRESHOLD) {
+    if (!registerPosture_) {
         globalAngle = ANGLE_MIN_VAL;
     } else {
         if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
