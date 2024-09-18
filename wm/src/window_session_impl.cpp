@@ -558,7 +558,7 @@ void WindowSessionImpl::DestroySubWindow()
     auto subIter = subWindowSessionMap_.find(parentPersistentId);
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end();iter++) {
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
             if ((*iter) == nullptr) {
                 continue;
             }

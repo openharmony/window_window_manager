@@ -237,6 +237,11 @@ private:
      */
     void InitSystemSessionDragEnable();
 
+    /**
+     * Sub Window
+     */
+    void AddSubWindowMapForExtensionWindow();
+
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;

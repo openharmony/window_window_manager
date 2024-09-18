@@ -188,6 +188,18 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
+{
+    // update subWindowSessionMap_
+    auto extensionWindow = FindExtensionWindowWithContext();
+    if (extensionWindow != nullptr) {
+        subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
+            property_->GetWindowName().c_str());
+    }
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -229,14 +241,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        // update subWindowSessionMap_
-        auto extensionWindow = FindExtensionWindowWithContext();
-        if (extensionWindow != nullptr) {
-            subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
-        } else {
-            TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s, id: %{public}d, not found parent extension window",
-                property_->GetWindowName().c_str(), persistentId);
-        }
+        AddSubWindowMapForExtensionWindow();
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
