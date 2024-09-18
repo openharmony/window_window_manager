@@ -2011,7 +2011,7 @@ napi_value JsSceneSessionManager::OnUpdateRotateAnimationConfig(napi_env env, na
     }
     RotateAnimationConfig rotateAnimationConfig;
     if (!ConvertRotateAnimationConfigFromJs(env, argv[0], rotateAnimationConfig)) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Faile to convert parameter to rotateAnimationConfig.");
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to rotateAnimationConfig.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);

@@ -3992,7 +3992,7 @@ void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<Sc
         taskScheduler_->PostVoidSyncTask(task, "acquireRotateAnimationConfig");
     };
     sceneSession->SetAcquireRotateAnimationConfigFunc(acquireRotateAnimationConfigFunc);
-    TLOGD(WmsLogTag::DEFAULT, "RegisterAcquireRotateAnimationConfigFunc success, id: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "Register acquire Rotate Animation config success, id: %{public}d",
         sceneSession->GetPersistentId());
 }
 
