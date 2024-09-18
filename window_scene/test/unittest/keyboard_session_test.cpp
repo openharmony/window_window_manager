@@ -1383,6 +1383,144 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
     resultId = keyboardSession->GetCallingSessionId();
     ASSERT_EQ(resultId, 100);
 }
+
+/**
+ * @tc.name: CheckKeyboardRectValid01
+ * @tc.desc: test function : CheckKeyboardRectValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, CheckKeyboardRectValid01, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CheckKeyboardRectValid01",
+        "CheckKeyboardRectValid01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    keyboardSession->winRect_.posY_ = 0;
+    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 1);
+    bool result = keyboardSession->CheckKeyboardRectValid();
+    ASSERT_EQ(result, false);
+
+    keyboardSession->winRect_.posY_ = 0;
+    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
+    result = keyboardSession->CheckKeyboardRectValid();
+    ASSERT_EQ(result, true);
+
+    keyboardSession->winRect_.posY_ = 100;
+    result = keyboardSession->CheckKeyboardRectValid();
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: UpdateKeyboardAvoidArea01
+ * @tc.desc: test function : UpdateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, UpdateKeyboardAvoidArea01, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea01",
+        "UpdateKeyboardAvoidArea01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    // not foreground
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->state_ = SessionState::STATE_CONNECT;
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
+
+    // has callback
+    auto expectDirtyFlag = 0;
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->specificCallback_->onUpdateAvoidArea_ = [&expectDirtyFlag](const uint32_t& persistentId) {
+        expectDirtyFlag = 1;
+    };
+    keyboardSession->UpdateKeyboardAvoidArea();
+    if (Session::IsScbCoreEnabled()) {
+        expectDirtyFlag = 0 | static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+        ASSERT_EQ(keyboardSession->dirtyFlags_, expectDirtyFlag);
+    } else {
+        ASSERT_EQ(expectDirtyFlag, 1);
+    }
+
+    // miss callback
+    keyboardSession->dirtyFlags_ = 1;
+    keyboardSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 1);
+
+    keyboardSession->dirtyFlags_ = 2;
+    keyboardSession->specificCallback_ = nullptr;
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 2);
+}
+
+/**
+ * @tc.name: MoveAndResizeKeyboard01
+ * @tc.desc: test function : MoveAndResizeKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, MoveAndResizeKeyboard01, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard01",
+        "MoveAndResizeKeyboard01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    KeyboardLayoutParams param;
+    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
+    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
+
+    keyboardSession->isScreenAngleMismatch_ = true;
+    keyboardSession->targetScreenWidth_ = 300;
+    keyboardSession->targetScreenHeight_ = 400;
+
+    // branch SESSION_GRAVITY_BOTTOM
+    param.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    Rect expectRect = { 0, 300, 300, 100 };
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
+    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
+
+    //branch SESSION_GRAVITY_DEFAULT
+    param.gravity_ = WindowGravity::WINDOW_GRAVITY_DEFAULT;
+    expectRect = { 200, 300, 200, 100 };
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
+    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
+}
+
+/**
+ * @tc.name: MoveAndResizeKeyboard02
+ * @tc.desc: test function : MoveAndResizeKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, MoveAndResizeKeyboard02, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard02",
+        "MoveAndResizeKeyboard02");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    KeyboardLayoutParams param;
+    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
+    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
+
+    keyboardSession->isScreenAngleMismatch_ = true;
+    keyboardSession->targetScreenWidth_ = 300;
+    keyboardSession->targetScreenHeight_ = 400;
+    param.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
+
+    // branch else
+    Rect expectRect = param.PortraitKeyboardRect_;
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
+    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
+    
+    param.PortraitKeyboardRect_ = { 200, 200, 200, 0 };
+    auto requestRect = keyboardSession->GetSessionRequestRect();
+    expectRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
+    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
+
+    param.PortraitKeyboardRect_ = { 200, 200, 0, 0 };
+    requestRect = keyboardSession->GetSessionRequestRect();
+    expectRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
+    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
+}
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS
