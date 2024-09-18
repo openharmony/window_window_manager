@@ -545,18 +545,21 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
 
 void WindowSessionImpl::DestroySubWindow()
 {
-    const int32_t parentPersistentId = property_->GetParentPersistentId();
+    int32_t parentPersistentId = property_->GetParentPersistentId();
     const int32_t persistentId = GetPersistentId();
-
+    if (property_->GetExtensionFlag() == true) {
+        auto extensionWindow = FindExtensionWindowWithContext();
+        if (extensionWindow != nullptr) {
+            parentPersistentId = extensionWindow->GetPersistentId();
+        }
+    }
     TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d, parentId: %{public}d", persistentId, parentPersistentId);
-
     // remove from subWindowMap_ when destroy sub window
     auto subIter = subWindowSessionMap_.find(parentPersistentId);
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end();) {
+        for (auto iter = subWindows.begin(); iter != subWindows.end();iter++) {
             if ((*iter) == nullptr) {
-                iter++;
                 continue;
             }
             if ((*iter)->GetPersistentId() == persistentId) {
@@ -565,11 +568,9 @@ void WindowSessionImpl::DestroySubWindow()
                 break;
             } else {
                 TLOGD(WmsLogTag::WMS_SUB, "Exists other sub window, persistentId: %{public}d", persistentId);
-                iter++;
             }
         }
     }
-
     // remove from subWindowMap_ when destroy parent window
     auto mainIter = subWindowSessionMap_.find(persistentId);
     if (mainIter != subWindowSessionMap_.end()) {
