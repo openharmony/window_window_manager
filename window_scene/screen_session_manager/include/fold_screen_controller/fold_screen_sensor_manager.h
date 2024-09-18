@@ -55,6 +55,8 @@ public:
 
     void TriggerDisplaySwitch();
 
+    void SetRegisterPosture(bool registerPosture);
+
 protected:
     FoldStatus GetCurrentState();
 
