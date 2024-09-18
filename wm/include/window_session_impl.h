@@ -129,7 +129,7 @@ public:
      */
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION}) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     WSError UpdateOrientation() override;
