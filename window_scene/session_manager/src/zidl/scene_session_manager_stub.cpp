@@ -172,6 +172,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
             return HandleSkipSnapshotForAppProcess(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
+            return HandleReleaseForegroundSessionScreenLock(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST):
             return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
@@ -1117,6 +1119,13 @@ int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data
         return ERR_INVALID_DATA;
     }
     WMError errCode = SkipSnapshotForAppProcess(pid, skip);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
+{
+    WMError errCode = ReleaseForegroundSessionScreenLock();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

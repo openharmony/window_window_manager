@@ -824,6 +824,17 @@ HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC

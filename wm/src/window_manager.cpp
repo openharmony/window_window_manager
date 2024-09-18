@@ -1426,5 +1426,14 @@ WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& water
     return ret;
 }
 
+WMError WindowManager::ReleaseForegroundSessionScreenLock()
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "release screen lock of foreground session failed");
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS
