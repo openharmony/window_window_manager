@@ -433,7 +433,7 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -480,8 +480,8 @@ private:
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
     /*
-    * Move Drag
-    */
+     * Move Drag
+     */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
 
 #ifdef DEVICE_STATUS_ENABLE
@@ -595,7 +595,6 @@ private:
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
@@ -630,6 +629,7 @@ private:
     /*
      * Move Drag
      */
+    static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
