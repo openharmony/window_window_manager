@@ -3541,11 +3541,6 @@ static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSess
         TLOGW(WmsLogTag::WMS_SUB, "not find parent session");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", sceneSession->GetWindowId());
-        mainWindowId = sceneSession->GetWindowId();
-        return WMError::WM_OK;
-    }
     if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
         WindowHelper::IsDialogWindow(sceneSession->GetWindowType())) {
         return GetParentMainWindowIdInner(sceneSessionMap, sceneSession->GetParentPersistentId(), mainWindowId);
@@ -3561,7 +3556,7 @@ WMError SceneSessionManager::GetParentMainWindowId(uint32_t windowId, uint32_t& 
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     return GetParentMainWindowIdInner(sceneSessionMap_, windowId, mainWindowId);
 }
 
