@@ -150,6 +150,19 @@ HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: ReleaseForegroundSessionScreenLock 
+ * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    windowAdapter.ReleaseForegroundSessionScreenLock();
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
  * @tc.name: SetWindowAnimationController
  * @tc.desc: WindowAdapter/SetWindowAnimationController
  * @tc.type: FUNC
