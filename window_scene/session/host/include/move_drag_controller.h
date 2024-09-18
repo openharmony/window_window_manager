@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 #define OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 
-#include <mutex>
-
 #include <refbase.h>
 #include <struct_multimodal.h>
 
@@ -25,6 +23,8 @@
 #include "property/rs_properties_def.h"
 #include "window.h"
 #include "ws_common_inner.h"
+
+#include <mutex>
 
 namespace OHOS::MMI {
 class PointerEvent;
