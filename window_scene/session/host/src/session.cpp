@@ -2791,6 +2791,7 @@ uint32_t Session::GetZOrder() const
     return zOrder_;
 }
 
+/** @note @window.hierarchy */
 uint32_t Session::GetLastZOrder() const
 {
     return lastZOrder_;
