@@ -2668,7 +2668,7 @@ int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
     }
     uint32_t mainWindowId = INVALID_SESSION_ID;
     {
-        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
         if (findRet == WMError::WM_OK) {
             return mainWindowId;
