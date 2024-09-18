@@ -540,6 +540,13 @@ public:
      */
     static sptr<Window> Find(const std::string& windowName);
     /**
+     * @brief find main window id
+     *
+     * @param windowId
+     * @return sptr<Window> Return the main window id
+     */
+    uint32_t FindMainWindowId(const uint32_t windowId);
+    /**
      * @brief Get the final show window by context. Its implemented in api8
      *
      * @param context Indicates the context on which the window depends

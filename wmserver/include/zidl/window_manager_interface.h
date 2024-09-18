@@ -52,6 +52,7 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_AVOID_AREA,
         TRANS_ID_GET_TOP_WINDOW_ID,
+        TRANS_ID_FIND_MAIN_WINDOW_ID,
         TRANS_ID_PROCESS_POINT_DOWN,
         TRANS_ID_PROCESS_POINT_UP,
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
@@ -244,6 +245,10 @@ public:
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) { return WMError::WM_OK; }
+    virtual WMError FindMainWindowId(const uint32_t windowId, uint32_t& mainWindowId)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

@@ -177,6 +177,15 @@ sptr<Window> Window::Find(const std::string& windowName)
     }
 }
 
+uint32_t Window::FindMainWindowId(const uint32_t windowId)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::FindMainWindowId(windowId);
+    } else {
+        return INVALID_SESSION_ID;
+    }
+}
+
 sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
