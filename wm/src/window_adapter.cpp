@@ -943,5 +943,21 @@ sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
     return windowManagerServiceProxy_;
 }
 
+WMError WindowAdapter::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->SkipSnapshotForAppProcess(pid, skip);
+}
+
+WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
+}
+
 } // namespace Rosen
 } // namespace OHOS

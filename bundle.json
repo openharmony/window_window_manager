@@ -190,6 +190,15 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/dm:libdm_ndk",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/dm_lite:libdm_lite",
             "header": {
               "header_files": [
@@ -260,7 +269,7 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/session_manager:screen_session_manager",
+            "name": "//foundation/window/window_manager/window_scene/screen_session_manager:screen_session_manager",
             "header": {
               "header_files": [
               ],

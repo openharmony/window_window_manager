@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/screen_session_manager_lite.h"
+#include "screen_session_manager/include/screen_session_manager_lite.h"
 #include "window_manager_hilog.h"
 #include "display_manager_agent_default.h"
 

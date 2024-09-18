@@ -224,7 +224,9 @@ HWTEST_F(SceneSessionManagerTest3, ConfigKeyboardAnimation, Function | SmallTest
     animationConfig.SetValue({{"timing", itemCurve}, {"timing", itemDurationIn}, {"timing", itemDurationOut}});
     int ret = 0;
     ssm_->ConfigKeyboardAnimation(animationConfig);
-    ssm_->ConfigDefaultKeyboardAnimation();
+    KeyboardSceneAnimationConfig animationIn;
+    KeyboardSceneAnimationConfig animationOut;
+    ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
     ASSERT_EQ(ret, 0);
 }
 
@@ -611,17 +613,6 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
     ssm_->PerformRegisterInRequestSceneSession(sceneSession);
     ssm_->sceneSessionMap_.erase(windowId);
     ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: OnSCBSystemSessionBufferAvailable
- * @tc.desc: OnSCBSystemSessionBufferAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, OnSCBSystemSessionBufferAvailable, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->OnSCBSystemSessionBufferAvailable(WindowType::WINDOW_TYPE_KEYGUARD);
 }
 
 /**

@@ -356,12 +356,20 @@ bool WindowSessionImpl::IsSupportWideGamut()
 
 void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return;
+    }
     auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(colorGamut);
 }
 
 ColorSpace WindowSessionImpl::GetColorSpace()
 {
+    if (IsWindowSessionInvalid() || surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
@@ -836,6 +844,19 @@ WMError WindowSessionImpl::RequestFocus() const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().RequestFocusStatus(GetPersistentId(), true);
+}
+
+/** @note @window.focus */
+WMError WindowSessionImpl::RequestFocusByClient(bool isFocused) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto ret = hostSession->RequestFocus(isFocused);
+    return static_cast<WMError>(ret);
 }
 
 bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
@@ -3463,7 +3484,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
 
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 {
-    return windowSystemConfig_.keyboardAnimationConfig_;
+    return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
 }
 
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -3529,6 +3550,17 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
         static_cast<WsPiPControlStatus>(status));
+}
+
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return;
+    }
+    if (auto hostSession = GetHostSession()) {
+        hostSession->SetAutoStartPiP(isAutoStart);
+    }
 }
 
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
@@ -3691,8 +3723,10 @@ void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
 
 void WindowSessionImpl::UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason)
 {
+    bool isDragInPcmode = IsFreeMultiWindowMode() && (wmReason == WindowSizeChangeReason::DRAG_END);
     if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT || wmReason == WindowSizeChangeReason::SPLIT_TO_FULL ||
-        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL) {
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::FLOATING_TO_FULL ||
+        isDragInPcmode) {
         TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable framelayoutfinish callback reason:%{public}u", wmReason);
         SetFrameLayoutCallbackEnable(true);
     }
@@ -3727,7 +3761,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-        
+
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;

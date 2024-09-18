@@ -47,7 +47,8 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
-using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
+    const SizeChangeReason reason, const DisplayId DisplayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -159,6 +160,11 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
 
+    /*
+     * Cross Display Move Drag
+     */
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
+
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -177,7 +183,8 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(
+        bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -302,6 +309,7 @@ public:
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
+    WSError RequestFocus(bool isFocused) override;
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
@@ -323,6 +331,8 @@ public:
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    bool GetRectChangeBySystem() const;
+    void SetRectChangeBySystem(bool rectChangeBySystem);
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
@@ -467,6 +477,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
@@ -607,6 +618,7 @@ protected:
     uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
+    static bool isScbCoreEnabled_;
 
 private:
     void HandleDialogForeground();
@@ -679,6 +691,7 @@ private:
     float vpr_ { 1.5f };
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
+    std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
     std::atomic<bool> isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;

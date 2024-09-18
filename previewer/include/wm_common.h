@@ -230,6 +230,12 @@ enum class SystemBarSettingFlag : uint32_t {
     ALL_SETTING = 0b11
 };
 
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
+    using T = std::underlying_type_t<SystemBarSettingFlag>;
+    return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
 /**
  * @brief Enumerates flag of window.
  */
@@ -241,7 +247,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
     WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_END = 1 << 7
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_END = 1 << 8,
 };
 
 /**
@@ -702,12 +709,14 @@ struct TitleButtonRect {
 /*
  * Config of keyboard animation
  */
-class KeyboardAnimationConfig : public Parcelable {
+class KeyboardAnimationCurve : public Parcelable {
 public:
-    std::string curveType_ = "";
-    std::vector<float> curveParams_ = {};
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    KeyboardAnimationCurve() = default;
+    KeyboardAnimationCurve(const std::string& curveType, const std::vector<float>& curveParams, uint32_t duration)
+        : curveType_(curveType), duration_(duration)
+    {
+        curveParams_.assign(curveParams.begin(), curveParams.end());
+    }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -715,13 +724,8 @@ public:
             return false;
         }
 
-        const uint32_t curveParamSize = 4; // 4: param size
         auto paramSize = curveParams_.size();
-        if (paramSize != curveParamSize) {
-            if (!parcel.WriteUint32(0)) {
-                return false;
-            }
-        } else {
+        if (paramSize == 4) { // 4: param size
             if (!parcel.WriteUint32(static_cast<uint32_t>(paramSize))) {
                 return false;
             }
@@ -730,28 +734,54 @@ public:
                     return false;
                 }
             }
+        } else {
+            if (!parcel.WriteUint32(0)) {
+                return false;
+            }
         }
 
-        if (!parcel.WriteUint32(durationIn_) || !parcel.WriteUint32(durationOut_)) {
+        if (!parcel.WriteUint32(duration_)) {
             return false;
         }
         return true;
     }
 
-    static KeyboardAnimationConfig* Unmarshalling(Parcel& parcel)
+    static KeyboardAnimationCurve* Unmarshalling(Parcel& parcel)
     {
-        KeyboardAnimationConfig* config = new KeyboardAnimationConfig;
-        config->curveType_ = parcel.ReadString();
-        auto parameterSize = parcel.ReadUint32();
-        if (parameterSize == 4) { // 4: param size
-            for (uint32_t i = 0; i < parameterSize; i++) {
-                config->curveParams_.push_back(parcel.ReadFloat());
+        KeyboardAnimationCurve* config = new KeyboardAnimationCurve;
+        uint32_t paramSize = 0;
+        if (!parcel.ReadString(config->curveType_) || !parcel.ReadUint32(paramSize)) {
+            delete config;
+            return nullptr;
+        }
+
+        if (paramSize == 4) { // 4: paramSize
+            for (uint32_t i = 0; i < paramSize; i++) {
+                float param = 0.0f;
+                if (!parcel.ReadFloat(param)) {
+                    delete config;
+                    return nullptr;
+                } else {
+                    config->curveParams_.push_back(param);
+                }
             }
         }
-        config->durationIn_ = parcel.ReadUint32();
-        config->durationOut_ = parcel.ReadUint32();
+
+        if (!parcel.ReadUint32(config->duration_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
+
+    std::string curveType_ = "";
+    std::vector<float> curveParams_ = {};
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn;
+    KeyboardAnimationCurve curveOut;
 };
 
 enum class MaximizePresentation {

@@ -185,6 +185,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS):
             return HandleUpdatePiPControlStatus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
+            return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -195,6 +197,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         default:
@@ -527,8 +531,9 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
         return ERR_INVALID_VALUE;
     }
-    if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
+    if (!data.ReadBool(abilitySessionInfo->isBackTransition) ||
+        !data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition or needClearInNotShowRecent failed.");
         return ERR_INVALID_VALUE;
     }
     bool hasCallerToken = false;
@@ -661,7 +666,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    if (!data.ReadUint32(mode) || mode >= static_cast<uint32_t>(MaximizeMode::MODE_END)) {
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
@@ -883,6 +888,19 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     }
 }
 
+int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    bool isAutoStart = false;
+    if (!data.ReadBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart);
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = data.ReadBool();
@@ -925,7 +943,6 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 
 int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleGetStartMoveFlag!");
     bool isMoving = false;
     WSError errCode = GetStartMoveFlag(isMoving);
     reply.WriteBool(isMoving);
@@ -1046,6 +1063,19 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     TLOGD(WmsLogTag::WMS_DIALOG, "called");
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

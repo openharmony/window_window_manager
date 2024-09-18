@@ -287,19 +287,6 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
-bool IsJsRequestOrientationUndefined(napi_env env, napi_value jsRequestOrientation, SessionInfo& sessionInfo)
-{
-    if (GetType(env, jsRequestOrientation) != napi_undefined) {
-        uint32_t requestOrientation = 0;
-        if (!ConvertFromJsValue(env, jsRequestOrientation, requestOrientation)) {
-            TLOGI(WmsLogTag::DEFAULT, "Failed to convert parameter to requestOrientation");
-            return false;
-        }
-        sessionInfo.requestOrientation_ = requestOrientation;
-    }
-    return true;
-}
-
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -318,8 +305,6 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
     napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
-    napi_value jsRequestOrientation = nullptr;
-    napi_get_named_property(env, jsObject, "requestOrientation", &jsRequestOrientation);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -342,9 +327,6 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         return false;
     }
     if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsRequestOrientationUndefined(env, jsRequestOrientation, sessionInfo)) {
         return false;
     }
     return true;
@@ -891,6 +873,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isAtomicService_));
     napi_set_named_property(env, objValue, "isBackTransition",
         CreateJsValue(env, sessionInfo.isBackTransition_));
+    napi_set_named_property(env, objValue, "needClearInNotShowRecent",
+        CreateJsValue(env, sessionInfo.needClearInNotShowRecent_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
@@ -1217,6 +1201,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 
     napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
+    napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
+    napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     return objValue;
 }
 
@@ -1241,6 +1227,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_DIALOG)));
     napi_set_named_property(env, objValue, "TYPE_WINDOW_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
+    napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;

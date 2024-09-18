@@ -193,12 +193,12 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     WSRect rect;
     AvoidArea avoidArea;
     session->property_->SetWindowFlags(0);
-  
+
     session->isDisplayStatusBarTemporarily_.store(false);
 
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     SystemSessionConfig systemConfig;
- 
+
     session->SetSystemConfig(systemConfig);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -408,7 +408,7 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
         (nullptr, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
         (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-    
+
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
         (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
 }
@@ -426,7 +426,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId newDisplayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -454,7 +454,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -849,6 +849,28 @@ HWTEST_F(SceneSessionTest5, SetSnapshotSkip, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWatermarkEnabled
+ * @tc.desc: SetWatermarkEnabled function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWatermarkEnabled";
+    info.bundleName_ = "SetWatermarkEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    std::string watermarkName = "watermarkNameTest";
+    session->SetWatermarkEnabled(watermarkName, true);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->SetWatermarkEnabled(watermarkName, true);
+}
+
+/**
  * @tc.name: UIExtSurfaceNodeIdCache
  * @tc.desc: UIExtSurfaceNodeIdCache
  * @tc.type: FUNC
@@ -1104,13 +1126,10 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     session->state_ = SessionState::STATE_CONNECT;
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(true, 520));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 79));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 641));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
 
     session->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, session->sessionStage_);
-    EXPECT_EQ(WMError::WM_OK, session->SetUniqueDensityDpi(false, 641));
 }
 
 /**
@@ -1409,6 +1428,31 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     rect.height_ = 800;
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode
+ * @tc.desc: HandleMoveDragSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode";
+    info.bundleName_ = "HandleMoveDragSurfaceNode";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    EXPECT_NE(session->moveDragController_, nullptr);
+
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
 }
 }
 }

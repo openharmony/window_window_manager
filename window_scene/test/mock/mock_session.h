@@ -37,7 +37,7 @@ public:
     MOCK_METHOD1(Background, WSError(bool isFromClient));
     MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
 
-    MOCK_METHOD3(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal));
+    MOCK_METHOD3(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason reason, bool isGlobal));
     MOCK_METHOD1(UpdateClientRect, WSError(const WSRect& rect));
 
     MOCK_METHOD0(Recover, WSError(void));

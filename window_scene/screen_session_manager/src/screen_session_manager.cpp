@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 #include <csignal>
 #include <cstdint>
@@ -103,11 +103,14 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
+constexpr int32_t INVALID_DPI = 0;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
+static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -177,23 +180,23 @@ void ScreenSessionManager::FoldScreenPowerInit()
 {
     SetFoldScreenPowerInit([&]() {
         int64_t timeStamp = 50;
-        #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
         int32_t tpType = 12;
         std::string fullTpChange = "0";
         std::string mainTpChange = "1";
-        #endif
+#endif
         if (rsInterface_.GetActiveScreenId() == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 2.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
@@ -201,16 +204,16 @@ void ScreenSessionManager::FoldScreenPowerInit()
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 4.");
-            #ifdef TP_FEATURE_ENABLE
+#ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-            #endif
+#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
             if (foldScreenController_ != nullptr) {
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
@@ -839,8 +842,7 @@ sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
     DmsXcollie dmsXcollie("DMS:GetScreenInfoById", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "GetScreenInfoById permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "Permission Denied.calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return nullptr;
     }
@@ -879,7 +881,9 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
     rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
     screenSession->activeIdx_ = static_cast<int32_t>(modeId);
     screenSession->UpdatePropertyByActiveMode();
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    ScreenProperty property = screenSession->GetScreenProperty();
+    property.SetPropertyChangeReason("active mode change");
+    screenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     return DMError::DM_OK;
@@ -1431,6 +1435,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 
     gotScreenlockFingerprint_ = false;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
+    lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    }
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
     sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
@@ -1557,6 +1565,7 @@ bool ScreenSessionManager::TryToCancelScreenOff()
 
 int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
 {
+    DmsXcollie dmsXcollie("DMS:SetScreenOffDelayTime", XCOLLIE_TIMEOUT_10S);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "set screen off delay time permission denied!");
         return 0;
@@ -1795,6 +1804,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
         } else {
             TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
+            screenEventTracker_.RecordEvent("HandlerSensor start!");
         }
     }
 }
@@ -1807,6 +1817,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
+        that.RegisterExtendSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -1838,8 +1849,20 @@ void ScreenSessionManager::SetRotateLockedFromSettingData()
 void ScreenSessionManager::RegisterSettingDpiObserver()
 {
     TLOGI(WmsLogTag::DMS, "Register Setting Dpi Observer");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
-    ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
+        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    } else {
+        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(true); };
+        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
+    }
+}
+
+void ScreenSessionManager::RegisterExtendSettingDpiObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register Extend Setting Dpi Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(false); };
+    ScreenSettingHelper::RegisterExtendSettingDpiObserver(updateFunc);
 }
 
 void ScreenSessionManager::SetDpiFromSettingData()
@@ -1858,6 +1881,41 @@ void ScreenSessionManager::SetDpiFromSettingData()
         float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
+    }
+}
+
+void ScreenSessionManager::SetDpiFromSettingData(bool isInternal)
+{
+    uint32_t settingDpi = INVALID_DPI;
+    bool ret = false;
+    if (isInternal == true) {
+        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY);
+    } else {
+        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY_EXTEND);
+    }
+    if (!ret) {
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
+        settingDpi = defaultDpi;
+    } else {
+        TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
+    }
+    if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE
+        && cachedSettingDpi_ != settingDpi) {
+        cachedSettingDpi_ = settingDpi;
+        float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
+        ScreenId screenId = SCREEN_ID_INVALID;
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            for (const auto& sessionIt : screenSessionMap_) {
+                const auto& screenSession = sessionIt.second;
+                if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+                    screenSession->isInternal_ == isInternal) {
+                    screenId = sessionIt.first;
+                    break;
+                }
+            }
+        }
+        SetVirtualPixelRatio(screenId, dpi);
     }
 }
 
@@ -2037,7 +2095,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     {
         DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
         if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
@@ -2050,11 +2107,12 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             RSInterfaces::GetInstance().DisableCacheForRotation();
             return;
         } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
-            if (screenSession == nullptr || displayInfo == nullptr) {
+            if (screenSession == nullptr) {
                 TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen "
-                    "%{public}" PRIu64" or displayInfo is nullptr", screenId);
+                    "%{public}" PRIu64"", screenId);
                 return;
             }
+            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
@@ -2068,11 +2126,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, displayInfo is nullptr");
-        return;
-    }
-
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
 
@@ -4543,7 +4597,8 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             rsInterface_.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+    if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        // 维护外屏独立dpi
         if (foldStatus == FoldStatus::FOLDED) {
             auto property = screenSession->GetScreenProperty();
             densityDpi_ = property.GetDensity();
@@ -4701,7 +4756,7 @@ void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, Sc
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenOrientation: %{public}f", screenId, screenOrientation);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenOrientationChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenOrientationChanged(screenId, screenOrientation);
@@ -4711,7 +4766,7 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " isLocked: %{public}d", screenId, isLocked);
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "OnScreenRotationLockedChange clientProxy_ is null");
+        TLOGI(WmsLogTag::DMS, "ClientProxy_ is null");
         return;
     }
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
@@ -4904,8 +4959,10 @@ void ScreenSessionManager::SetClientInner()
             TLOGE(WmsLogTag::DMS, "clientProxy is null");
             return;
         }
-        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
-            iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        if (iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+            clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+                iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        }
     }
 }
 
@@ -4941,6 +4998,7 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
 
 ScreenProperty ScreenSessionManager::GetScreenProperty(ScreenId screenId)
 {
+    DmsXcollie dmsXcollie("DMS:GetScreenProperty", XCOLLIE_TIMEOUT_10S);
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGI(WmsLogTag::DMS, "GetScreenProperty screenSession is null");
@@ -4951,6 +5009,7 @@ ScreenProperty ScreenSessionManager::GetScreenProperty(ScreenId screenId)
 
 std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNode(ScreenId screenId)
 {
+    DmsXcollie dmsXcollie("DMS:GetDisplayNode", XCOLLIE_TIMEOUT_10S);
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "GetDisplayNode screenSession is null");
@@ -5216,7 +5275,7 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyFoldToExpandCompletion ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());

@@ -237,8 +237,8 @@ void KeyboardSession::OnCallingSessionUpdated()
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->onKeyboardGravityChange_) {
-        sessionChangeCallback_->onKeyboardGravityChange_(gravity);
+    if (keyboardGravityChangeFunc_) {
+        keyboardGravityChangeFunc_(gravity);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {

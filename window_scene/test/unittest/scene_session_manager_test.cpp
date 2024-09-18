@@ -1301,7 +1301,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(nullptr, sceneSessionManager);
-    
+
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
@@ -1567,6 +1567,56 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: add or cancel snapshot skip for app process
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Level3)
+{
+    int32_t pid = 1000;
+    bool skip = true;
+    auto result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_NE(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
+    skip = false;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetCallingPid(1000);
+    sceneSession2->SetCallingPid(1001);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({-1, nullptr});
+    skip = true;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(result, WMError::WM_OK);
+    skip = false;
+    result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(-1);
+}
+
+/**
+ * @tc.name: RemoveProcessSnapshotSkip
+ * @tc.desc: SceneSesionManager RemoveProcessSnapshotSkip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RemoveProcessSnapshotSkip, Function | SmallTest | Level3)
+{
+    ssm_->snapshotSkipPidSet_.insert(1);
+    ssm_->RemoveProcessSnapshotSkip(1);
+    ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(1), ssm_->snapshotSkipPidSet_.end());
+}
+
+/**
  * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
  * @tc.desc: Test whether report the correct screen fold status events
  * @tc.type: FUNC
@@ -1652,6 +1702,57 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
 }
 
 /**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: add or cancel process watermark by pid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Level3)
+{
+    auto result = ssm_->SetProcessWatermark(100, "", true);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    int32_t pid = 1000;
+    std::string watermarkName = "SetProcessWatermarkName";
+    bool isEnabled = true;
+    result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveProcessWatermarkPid
+ * @tc.desc: SceneSesionManager RemoveProcessWatermarkPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, Function | SmallTest | Level3)
+{
+    ssm_->processWatermarkPidMap_.insert({1, "test"});
+    ssm_->RemoveProcessWatermarkPid(1);
+    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(1), ssm_->processWatermarkPidMap_.end());
+}
+
+/**
+ * @tc.name: SetSessionWatermarkForAppProcess
+ * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession->SetCallingPid(1);
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
+
+    ssm_->processWatermarkPidMap_.insert({1, "test"});
+    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
+
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+    ssm_->processWatermarkPidMap_.erase(1);
+}
+
+/**
  * @tc.name: CloseTargetFloatWindow
  * @tc.desc: SceneSesionManager CloseTargetFloatWindow
  * @tc.type: FUNC
@@ -1714,6 +1815,19 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
     auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(info1.abilityName_, bundleName);
+}
+
+/**
+ * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string bundleName = "TestName";
+    auto ret = ssm_->SetSnapshotSkipByUserIdAndBundleNameList(100, {bundleName});
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 } // namespace Rosen

@@ -1234,6 +1234,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, Functi
 }
 
 /**
+ * @tc.name: HandleSkipSnapshotForAppProcess
+ * @tc.desc: test HandleSkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(123);
+    data.WriteBool(true);
+
+    int res = stub_->HandleSkipSnapshotForAppProcess(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetFocusSessionInfo
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC
@@ -2025,6 +2042,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | Small
 }
 
 /**
+ * @tc.name: HandleSetProcessWatermark
+ * @tc.desc: test HandleSetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInt32(123);
+    data.WriteString("SetProcessWatermarkName");
+    data.WriteBool(true);
+
+    int res = stub_->HandleSetProcessWatermark(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: test HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC
@@ -2041,6 +2076,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
     data.WriteInt32Vector(persistentIds);
     data.WriteUInt64Vector(surfaceNodeIds);
     int res = stub_->HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: test HandleSetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t userId = 100;
+    std::vector<std::string> bundleNameList = {"a", "b", "c"};
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteInt32(userId);
+    data.WriteStringVector(bundleNameList);
+    int res = stub_->HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }
