@@ -1241,9 +1241,8 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByType(WindowType type)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto &item : sceneSessionMap_) {
-        auto sceneSession = item.second;
-        if (sceneSession->GetWindowType() == type) {
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetWindowType() == type) {
             return sceneSession;
         }
     }
@@ -8949,7 +8948,7 @@ void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "has zOrder dirty");
     auto focusedSession = GetSceneSession(focusedSessionId_);
-    // Whether is it from a high zOrder to a low zOrder
+    // only when it's from a high zOrder to a low zOrder
     if (focusedSession == nullptr || focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION ||
         focusedSession->GetLastZOrder() <= focusedSession->GetZOrder()) {
         return;
@@ -8958,11 +8957,9 @@ void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
     if (voiceInteractionSession == nullptr) {
         return;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS,
-          "voiceInteractionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder %{public}d zOrder "
-          "%{public}d",
-          voiceInteractionSession->GetPersistentId(), voiceInteractionSession->GetZOrder(),
-          focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
+    TLOGD(WmsLogTag::WMS_FOCUS, "voiceInteractionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder "
+          "%{public}d zOrder %{public}d", voiceInteractionSession->GetPersistentId(),
+          voiceInteractionSession->GetZOrder(), focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
     if (focusedSession->GetLastZOrder() < voiceInteractionSession->GetZOrder() ||
         focusedSession->GetZOrder() > voiceInteractionSession->GetZOrder()) {
         return;
