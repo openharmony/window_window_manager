@@ -118,6 +118,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
+using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -2633,8 +2634,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
-static WMError GetParentMainWindowIdInner(std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>& sessionMap,
-    uint32_t windowId, uint32_t& mainWindowId)
+static WMError GetParentMainWindowIdInner(SessionMap& sessionMap, uint32_t windowId, uint32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {
         const auto& window = pair.second;
