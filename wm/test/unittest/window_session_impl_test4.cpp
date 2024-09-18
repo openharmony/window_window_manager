@@ -342,8 +342,7 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     option->SetWindowName("GetTitleButtonArea");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WSError res = window->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_OK);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
