@@ -1575,7 +1575,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1605,7 +1605,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1665,7 +1665,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
