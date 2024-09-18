@@ -496,7 +496,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
-            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
+            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
+                session->sessionEventParam_);
         }
         return WSError::WS_OK;
     };
