@@ -541,7 +541,7 @@ public:
     static sptr<Window> Find(const std::string& windowName);
 
     /**
-     * @brief Get a window parent window, and the parent window is main window
+     * @brief Get parent main windowId，which is used for mainWindow、subWindow or dialog
      *
      * @param windowId window id that need get parent main window
      * @return uint32_t Return the parent main window id

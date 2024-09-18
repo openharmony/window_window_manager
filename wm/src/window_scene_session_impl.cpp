@@ -2645,7 +2645,7 @@ static WMError GetParentMainWindowIdInner(std::map<std::string, std::pair<int32_
             continue;
         }
 
-        if (WindowHelper::IsMainWindow(window->GetType()) || WindowHelper::IsSystemWindow(window->GetType())) {
+        if (WindowHelper::IsMainWindow(window->GetType())) {
             TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
             mainWindowId = window->GetWindowId();
             return WMError::WM_OK;
