@@ -613,6 +613,17 @@ HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Lev
     ASSERT_NE(window, nullptr);
 
     WMError res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "RequestFocusByClient", "RequestFocusByClient", "RequestFocusByClient" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_INITIAL;
+    res = window->RequestFocusByClient(true);
     ASSERT_EQ(res, WMError::WM_OK);
     res = window->RequestFocusByClient(false);
     ASSERT_EQ(res, WMError::WM_OK);
