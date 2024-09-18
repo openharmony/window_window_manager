@@ -380,7 +380,7 @@ enum class SizeChangeReason : uint32_t {
 };
 
 enum class SessionEvent : uint32_t {
-    EVENT_MAXIMIZE = 100,
+    EVENT_MAXIMIZE =     100,
     EVENT_RECOVER,
     EVENT_MINIMIZE,
     EVENT_CLOSE,
