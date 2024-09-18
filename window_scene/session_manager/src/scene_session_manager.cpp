@@ -1845,7 +1845,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             if (scnSession->IsVisibleForeground()) {
                 RequestSessionFocusImmediately(persistentId);
             } else {
-                PostProcessFocusState state = { true, true, FocusChangeReason::SCB_START_APP };
+                PostProcessFocusState state = { true, true, true, FocusChangeReason::SCB_START_APP };
                 scnSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -4477,7 +4477,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (reason == FocusChangeReason::MOVE_UP) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
                 return;
@@ -4488,7 +4488,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (RequestSessionFocus(persistentId, byForeground, reason) != WSError::WS_OK) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
             }
@@ -5606,7 +5606,7 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             if (IsSessionVisibleForeground(sceneSession)) {
                 RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
             } else {
-                PostProcessFocusState state = {true, true, FocusChangeReason::APP_FOREGROUND};
+                PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
                 sceneSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -8968,6 +8968,9 @@ void SceneSessionManager::PostProcessFocus()
         if (session->GetPostProcessFocusState().isFocused_) {
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
                 ret = RequestSessionFocusImmediately(session->GetPersistentId());
+            } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::RECENT) {
+                ret = RequestSessionFocus(session->GetPersistentId(), session->GetPostProcessFocusState().byForeground_,
+                                          session->GetPostProcessFocusState().reason_);
             } else {
                 ret = RequestSessionFocus(session->GetPersistentId(), true,
                                           session->GetPostProcessFocusState().reason_);
