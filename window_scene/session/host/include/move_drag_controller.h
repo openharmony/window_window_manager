@@ -23,8 +23,8 @@
 #include "property/rs_properties_def.h"
 #include "window.h"
 #include "ws_common_inner.h"
-#include <mutex>
 
+#include <mutex>
 
 namespace OHOS::MMI {
 class PointerEvent;
