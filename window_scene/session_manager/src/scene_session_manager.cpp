@@ -1611,16 +1611,16 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
 
 void SceneSessionManager::NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType action, ScreenId fromScreenId)
 {
-    auto task = [this, abilityName = sessionInfo.abilityName_,
+    auto task = [abilityName = sessionInfo.abilityName_,
         bundleName = sessionInfo.bundleName_, toScreenId = sessionInfo.screenId_, action, fromScreenId]() {
         sptr<DisplayChangeInfo> info = sptr<DisplayChangeInfo>::MakeSptr();
         info->action_ = action;
         info->abilityName_ = std::move(abilityName);
         info->bundleName_ = std::move(bundleName);
-        info->toScreenId_ = std::move(toScreenId);
+        info->toScreenId_ = toScreenId;
         info->fromScreenId_ = fromScreenId;
         ScreenSessionManagerClient::GetInstance().NotifyDisplayChangeInfoChanged(info);
-        WLOGFI("Notify ability %{public}s bundle %{public}s update,toScreen id: %{public}" PRIu64 ".",
+        TLOGNI(WmsLogTag::DMS, "Notify ability %{public}s bundle %{public}s update toScreen id: %{public}" PRIu64 ".",
             info->abilityName_.c_str(), info->bundleName_.c_str(), info->toScreenId_);
     };
     taskScheduler_->PostAsyncTask(task, "NotifySessionUpdate");
