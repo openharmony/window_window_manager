@@ -793,6 +793,21 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
     return true;
 }
 
+bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
+{
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, value, "duration", &jsDuration);
+    if (GetType(env, jsDuration) != napi_undefined) {
+        int32_t duration = ROTATE_ANIMATION_DURATION;
+        if (!ConvertFromJsValue(env, jsDuration, duration)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
+            return false;
+        }
+        config.duration_ = duration;
+    }
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {

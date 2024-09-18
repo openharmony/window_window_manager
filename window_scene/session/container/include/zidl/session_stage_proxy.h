@@ -32,7 +32,7 @@ public:
 
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION}) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;

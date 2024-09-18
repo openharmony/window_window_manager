@@ -90,7 +90,7 @@ WSError SessionStageProxy::UpdateDisplayId(uint64_t displayId)
 }
 
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const SceneAnimationConfig& config)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,6 +111,7 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
+    const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
     bool hasRSTransaction = rsTransaction != nullptr;
     if (!data.WriteBool(hasRSTransaction)) {
         WLOGFE("Write has transaction failed");
@@ -124,6 +125,11 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             return WSError::WS_ERROR_IPC_FAILED;
         }
         rsTransaction->SetParentPid(pid);
+    }
+
+    if (!data.WriteInt32(config.animationDuration_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();

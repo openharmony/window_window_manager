@@ -34,6 +34,8 @@ struct AbilityInfo;
 }
 
 namespace OHOS::Rosen {
+class RSTransaction;
+constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 
 enum class WSError : int32_t {
@@ -584,6 +586,16 @@ struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
     bool isRightPowerButton_ = true;
 };
+
+struct SceneAnimationConfig {
+    std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
+    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+};
+
+struct RotateAnimationConfig {
+    int32_t duration_ = ROTATE_ANIMATION_DURATION;
+};
+
 
 struct SessionEventParam {
     int32_t pointerX_ = 0;
