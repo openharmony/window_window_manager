@@ -1120,7 +1120,7 @@ HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, Function | Sma
     int32_t duration = session_->GetRotateAnimationDuration();
     ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
 
-    AcquireRotateAnimationConfigFunc func =[](RotateAnimationConfig& config){
+    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) {
         config.duration_ = 800;
     };
     session_->SetAcquireRotateAnimationConfigFunc(func);
