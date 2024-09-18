@@ -3775,6 +3775,37 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 #endif
 }
 
+WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
+{
+#ifdef POWER_MANAGER_ENABLE
+    auto task = [this]() {
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, scnSession] : sceneSessionMap_) {
+            if (!IsSessionVisibleForeground(scnSession) || scnSession->keepScreenLock_ == nullptr) {
+                continue;
+            }
+
+            auto res = scnSession->keepScreenLock_->UnLock();
+            if (res != ERR_OK) {
+                WLOGFE("release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d]",
+                    persistentId, scnSession->GetWindowName().c_str(), res);
+                return WMError::WM_ERROR_INVALID_OPERATION;
+            } else {
+                WLOGFI("release screen lock success: window: [%{public}d, %{public}s]",
+                    persistentId, scnSession->GetWindowName().c_str());
+            }
+        }
+        return WMError::WM_OK;
+    };
+
+    return taskScheduler_->PostSyncTask(task, "ReleaseForegroundSessionScreenLock");
+#else
+    WLOGFD("Can not find the sub system of PowerMgr");
+#endif
+
+    return WMError::WM_OK;
+}
+
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE

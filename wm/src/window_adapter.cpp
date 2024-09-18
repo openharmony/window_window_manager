@@ -960,6 +960,14 @@ WMError WindowAdapter::SkipSnapshotForAppProcess(int32_t pid, bool skip)
     return wmsProxy->SkipSnapshotForAppProcess(pid, skip);
 }
 
+WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->ReleaseForegroundSessionScreenLock();
+}
+
 WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

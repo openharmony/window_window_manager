@@ -785,6 +785,13 @@ public:
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
 
     /**
+     * @brief Release screen locks of foreground sessions.
+     *
+     * @return WM_OK means release success, others means failed.
+     */
+    WMError ReleaseForegroundSessionScreenLock();
+
+    /**
      * @brief Get window style type.
      *
      * @param windowStyleType WindowType

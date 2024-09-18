@@ -396,6 +396,21 @@ HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotForAppProcess, Function | Sma
 }
 
 /**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock());
+}
+
+/**
  * @tc.name: SetGestureNavigationEnabled
  * @tc.desc: normal function
  * @tc.type: FUNC
