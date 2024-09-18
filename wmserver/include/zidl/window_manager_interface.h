@@ -245,7 +245,7 @@ public:
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) { return WMError::WM_OK; }
-    virtual WMError FindMainWindowId(const uint32_t windowId, uint32_t& mainWindowId)
+    virtual WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
     {
         return WMError::WM_OK;
     }

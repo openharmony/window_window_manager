@@ -135,7 +135,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID):
             return HandleGetTopWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_FIND_MAIN_WINDOW_ID):
-            return HandleFindMainWindowId(data, reply);
+            return HandleGetParentMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE):
             return HandleNotifyWindowExtensionVisibilityChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER):
@@ -881,7 +881,7 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleFindMainWindowId(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
 {
     int32_t windowId = INVALID_SESSION_ID;
     if (!data.ReadInt32(windowId)) {
@@ -889,14 +889,13 @@ int SceneSessionManagerStub::HandleFindMainWindowId(MessageParcel& data, Message
         return ERR_INVALID_DATA;
     }
     uint32_t mainWindowId = INVALID_SESSION_ID;
-    WMError errCode = FindMainWindowId(windowId, mainWindowId);
+    WMError errCode = GetParentMainWindowId(windowId, mainWindowId);
     if (!reply.WriteInt32(mainWindowId)) {
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
-    
     return ERR_NONE;
 }
 

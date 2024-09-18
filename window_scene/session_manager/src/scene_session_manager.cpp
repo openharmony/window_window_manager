@@ -3528,41 +3528,42 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
 }
 
-static WMError FindMainWindowIdInner(const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap,
-    const uint32_t windowId, uint32_t& mainWindowId)
+static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap,
+    uint32_t windowId, uint32_t& mainWindowId)
 {
     auto iter = sceneSessionMap.find(windowId);
     if (iter == sceneSessionMap.end()) {
         TLOGD(WmsLogTag::WMS_SUB, "not found scene session with id: %{public}d", windowId);
         return WMError::WM_ERROR_NULLPTR;
     }
-    sptr<SceneSession> parentSession = iter->second;
-    if (parentSession == nullptr) {
+    sptr<SceneSession> sceneSession = iter->second;
+    if (sceneSession == nullptr) {
         TLOGW(WmsLogTag::WMS_SUB, "not find parent session");
         return WMError::WM_ERROR_NULLPTR;
     }
-    bool isSystemMainWindow = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetWindowId() == INVALID_SESSION_ID;
-    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isSystemMainWindow) {
-        TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", parentSession->GetWindowId());
-        mainWindowId = parentSession->GetWindowId();
-    } else if (WindowHelper::IsSubWindow(parentSession->GetWindowType()) ||
-        WindowHelper::IsDialogWindow(parentSession->GetWindowType())) {
-        return FindMainWindowIdInner(sceneSessionMap, parentSession->GetParentPersistentId(), mainWindowId);
-    } else {
-        mainWindowId = INVALID_SESSION_ID;
+    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsSystemWindow(sceneSession->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", sceneSession->GetWindowId());
+        mainWindowId = sceneSession->GetWindowId();
+        return WMError::WM_OK;
     }
+    if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsDialogWindow(sceneSession->GetWindowType())) {
+        return GetParentMainWindowIdInner(sceneSessionMap, sceneSession->GetParentPersistentId(), mainWindowId);
+    }
+    // not sub window, dialog, return invalid id
+    mainWindowId = INVALID_SESSION_ID;
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::FindMainWindowId(const uint32_t windowId, uint32_t& mainWindowId)
+WMError SceneSessionManager::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    return FindMainWindowIdInner(sceneSessionMap_, windowId, mainWindowId);
+    return GetParentMainWindowIdInner(sceneSessionMap_, windowId, mainWindowId);
 }
 
 void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
