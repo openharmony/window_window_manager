@@ -2028,6 +2028,26 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
 }
+
+/**
+ * @tc.name: SetDefaultDisplayIdIfNeed
+ * @tc.desc: SetDefaultDisplayIdIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetDisplayId(-99);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+    EXPECT_NE(property->GetDisplayId(), SCREEN_ID_INVALID);
+}
 }
 }
 }

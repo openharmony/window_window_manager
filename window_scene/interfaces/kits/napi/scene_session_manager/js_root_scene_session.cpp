@@ -361,6 +361,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        sceneSession->SetDefaultDisplayIdIfNeed();
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
