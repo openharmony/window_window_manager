@@ -1729,6 +1729,43 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
     return static_cast<WMError>(ret);
 }
 
+WMError SceneSessionManagerProxy::FindMainWindowId(const uint32_t windowId, uint32_t& mainWindowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_FIND_MAIN_WINDOW_ID),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t replyMainWindowId = INVALID_SESSION_ID;
+    if (!reply.ReadUint32(replyMainWindowId)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    mainWindowId = replyMainWindowId;
+    return static_cast<WMError>(ret);
+}
+
 WMError SceneSessionManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     MessageParcel data;
