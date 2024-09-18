@@ -186,8 +186,8 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
 }
 
 /**
- * @tc.name: CheckLastFocusedAppSessionFocus
- * @tc.desc: CheckLastFocusedAppSessionFocus
+ * @tc.name: ProcessFocusZOrderChange
+ * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTest | Level3)
