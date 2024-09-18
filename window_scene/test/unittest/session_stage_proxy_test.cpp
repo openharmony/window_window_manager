@@ -103,7 +103,8 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, Function | SmallTest | Level1)
     WSError res = sessionStage_->UpdateRect(rect, reason);
     ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    res = sessionStage_->UpdateRect(rect, reason, rsTransaction);
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
