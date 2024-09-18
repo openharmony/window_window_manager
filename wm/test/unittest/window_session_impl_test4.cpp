@@ -1131,7 +1131,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
  * @tc.name: SetWindowContainerColor01
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
@@ -1140,7 +1140,6 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest
     option->SetWindowName("SetWindowContainerColor");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
@@ -1153,7 +1152,7 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest
  * @tc.name: SetWindowContainerColor02
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
@@ -1162,7 +1161,6 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest
     option->SetWindowName("SetWindowContainerColor");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
@@ -1175,16 +1173,15 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest
  * @tc.name: SetWindowContainerColor03
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
-    sptr option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetWindowContainerColor");
-    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
@@ -1201,16 +1198,15 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest
  * @tc.name: SetWindowContainerColor04
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
-    sptr option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetWindowContainerColor");
-    sptr window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
