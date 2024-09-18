@@ -503,7 +503,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 }
 
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const SceneAnimationConfig& config)
 {
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
@@ -526,6 +526,7 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     }
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
+        const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else if (handler_ != nullptr) {
         UpdateRectForOtherReason(wmRect, wmReason);

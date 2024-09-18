@@ -1634,6 +1634,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
+    RegisterAcquireRotateAnimationConfigFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -3078,6 +3079,15 @@ const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
     return appWindowSceneConfig_;
 }
 
+void SceneSessionManager::UpdateRotateAnimationConfig(const RotateAnimationConfig& config)
+{
+    auto task = [this, &config]() {
+        TLOGI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
+        rotateAnimationConfig_.duration_ = config.duration_;
+    };
+    taskScheduler_->PostVoidSyncTask(task, "UpdateRotateAnimationConfig");
+}
+
 WSError SceneSessionManager::ProcessBackEvent()
 {
     auto task = [this]() {
@@ -3967,6 +3977,23 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
     };
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("success, id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        return;
+    }
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc = [this](RotateAnimationConfig& config) {
+        auto task = [this, &config]() {
+            config.duration_ = rotateAnimationConfig_.duration_;
+        };
+        taskScheduler_->PostVoidSyncTask(task, "acquireRotateAnimationConfig");
+    };
+    sceneSession->SetAcquireRotateAnimationConfigFunc(acquireRotateAnimationConfigFunc);
+    TLOGD(WmsLogTag::DEFAULT, "RegisterAcquireRotateAnimationConfigFunc success, id: %{public}d",
+        sceneSession->GetPersistentId());
 }
 
 void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession)

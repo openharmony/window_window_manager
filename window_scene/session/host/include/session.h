@@ -85,6 +85,7 @@ using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
+using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 
 class ILifecycleListener {
 public:
@@ -352,6 +353,8 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+    void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
+    int32_t GetRotateAnimationDuration();
 
     /*
      * Multi Window
@@ -588,6 +591,7 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;

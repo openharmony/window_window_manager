@@ -1108,6 +1108,28 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAcquireRotateAnimationConfigFunc
+ * @tc.desc: SetAcquireRotateAnimationConfigFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetAcquireRotateAnimationConfigFunc(nullptr);
+    ASSERT_EQ(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    int32_t duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
+
+    AcquireRotateAnimationConfigFunc func =[](RotateAnimationConfig& config){
+        config.duration_ = 800;
+    };
+    session_->SetAcquireRotateAnimationConfigFunc(func);
+    ASSERT_NE(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    int32_t duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, 800);
+}
+
+/**
  * @tc.name: SetIsPcAppInPad
  * @tc.desc: SetIsPcAppInPad Test
  * @tc.type: FUNC
