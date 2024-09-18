@@ -8957,7 +8957,7 @@ void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
     if (voiceInteractionSession == nullptr) {
         return;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "voiceInteractionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder "
+    TLOGD(WmsLogTag::WMS_FOCUS, "interactionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder "
           "%{public}d zOrder %{public}d", voiceInteractionSession->GetPersistentId(),
           voiceInteractionSession->GetZOrder(), focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
     if (focusedSession->GetLastZOrder() < voiceInteractionSession->GetZOrder() ||

@@ -254,7 +254,7 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
