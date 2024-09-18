@@ -2633,43 +2633,49 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
-static WMError FindMainWindowIdInner(std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>& sessionMap,
-    const uint32_t windowId, uint32_t& mainWindowId)
+static WMError GetParentMainWindowIdInner(std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>& sessionMap,
+    uint32_t windowId, uint32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {
-        auto& window = pair.second;
+        const auto& window = pair.second;
+        if (window == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
         if (window->GetWindowId() != windowId) {
             continue;
         }
 
-        bool isSystemMainWindow = WindowHelper::IsSystemWindow(window->GetType()) &&
-            window->GetParentId() == INVALID_SESSION_ID;
-        if (WindowHelper::IsMainWindow(window->GetType()) || isSystemMainWindow) {
+        if (WindowHelper::IsMainWindow(window->GetType()) || WindowHelper::IsSystemWindow(window->GetType())) {
             TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
             mainWindowId = window->GetWindowId();
-        } else if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
-            return FindMainWindowIdInner(sessionMap, window->GetParentId(), mainWindowId);
-        } else {
-            mainWindowId = INVALID_SESSION_ID;
+            return WMError::WM_OK;
         }
+        if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
+            return GetParentMainWindowIdInner(sessionMap, window->GetParentId(), mainWindowId);
+        }
+        // not main window, sub window, dialog, set invalid id
+        mainWindowId = INVALID_SESSION_ID;
         return WMError::WM_OK;
     }
     return WMError::WM_ERROR_INVALID_PARENT;
 }
-int32_t WindowSceneSessionImpl::FindMainWindowId(const int32_t windowId)
+
+int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
         return INVALID_SESSION_ID;
     }
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     uint32_t mainWindowId = INVALID_SESSION_ID;
-    WMError findRet = FindMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
-    if (findRet == WMError::WM_OK) {
-        return mainWindowId;
+    {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
+        if (findRet == WMError::WM_OK) {
+            return mainWindowId;
+        }
     }
-    // can't find in client, need to service find
-    WMError ret = SingletonContainer::Get<WindowAdapter>().FindMainWindowId(windowId, mainWindowId);
+    // can't find in client, need to server find
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetParentMainWindowId(windowId, mainWindowId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "cant't find main window id, err:%{public}d", static_cast<uint32_t>(ret));
         return INVALID_SESSION_ID;

@@ -1729,7 +1729,7 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::FindMainWindowId(const uint32_t windowId, uint32_t& mainWindowId)
+WMError SceneSessionManagerProxy::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1738,12 +1738,10 @@ WMError SceneSessionManagerProxy::FindMainWindowId(const uint32_t windowId, uint
         TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteUint32(windowId)) {
         TLOGE(WmsLogTag::WMS_SUB, "Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "Remote is null");
