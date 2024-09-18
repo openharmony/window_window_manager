@@ -132,7 +132,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    sceneSession->
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
