@@ -315,6 +315,7 @@ struct SessionInfo {
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
+    bool needClearInNotShowRecent_ = false;
 };
 
 enum class SessionFlag : uint32_t {
