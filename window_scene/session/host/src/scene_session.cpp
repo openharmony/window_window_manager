@@ -948,7 +948,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            session->NotifySessionRectChange(rect, reason);
+            session->NotifySessionRectChange(rect, reason, DISPLAY_ID_INVALID);
         }
         return WSError::WS_OK;
     };
@@ -2027,9 +2027,9 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 #endif // DEVICE_STATUS_ENABLE
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
-    const SizeChangeReason reason, const DisplayId DisplayId)
+    const SizeChangeReason reason, const DisplayId displayId)
 {
-    auto task = [weakThis = wptr(this), rect, reason, DisplayId]() {
+    auto task = [weakThis = wptr(this), rect, reason, displayId]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -2037,7 +2037,7 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect,
         }
         if (session->sessionRectChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
-            session->sessionRectChangeFunc_(rect, reason, DisplayId);
+            session->sessionRectChangeFunc_(rect, reason, displayId);
         }
     };
     PostTask(task, "NotifySessionRectChange" + GetRectInfo(rect));
@@ -2285,7 +2285,7 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-            if (movedSurfaceNode == nullptr) {
+            if (screenSession == nullptr) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 return;
             }
@@ -2295,8 +2295,8 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-            if (movedSurfaceNode == nullptr) {
-                TLOGD(WmsLogTag::WMS_PIP, "ScreenSession is null");
+            if (screenSession == nullptr) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 return;
             }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
