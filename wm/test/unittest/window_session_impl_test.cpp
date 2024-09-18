@@ -286,16 +286,30 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
     option->SetWindowName("ColorSpace");
     sptr<WindowSessionImpl> window =
         new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
     ColorSpace colorSpace = window->GetColorSpace();
     ASSERT_EQ(colorSpace, ColorSpace::COLOR_SPACE_DEFAULT);
 
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    window->surfaceNode_ = nullptr;
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ColorSpace colorSpace1 = window->GetColorSpace();
-    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_DEFAULT);
+
+    struct RSSurfaceNodeConfig config;
+    window->surfaceNode_ = RSSurfaceNode::Create(config);
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ColorSpace colorSpace2 = window->GetColorSpace();
+    ASSERT_EQ(colorSpace2, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: ColorSpace end";
 }
 
