@@ -38,10 +38,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (foldScreenPolicy == nullptr) {
-        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is nullptr");
-        return;
-    }
     if (nextState == FoldStatus::UNKNOWN) {
         WLOGFW("fold state is UNKNOWN");
         return;
