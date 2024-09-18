@@ -8963,10 +8963,11 @@ void SceneSessionManager::ProcessFocusZOrderJumping(uint32_t dirty) {
           "%{public}d",
           voiceInteractionSession->GetPersistentId(), voiceInteractionSession->GetZOrder(),
           focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
-    if (focusedSession->GetLastZOrder() > voiceInteractionSession->GetZOrder() &&
-        focusedSession->GetZOrder() < voiceInteractionSession->GetZOrder()) {
-        RequestSessionFocus(voiceInteractionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
+    if (focusedSession->GetLastZOrder() < voiceInteractionSession->GetZOrder() ||
+        focusedSession->GetZOrder() > voiceInteractionSession->GetZOrder()) {
+        return;
     }
+    RequestSessionFocus(voiceInteractionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
 }
 
 void SceneSessionManager::PostProcessFocus()
