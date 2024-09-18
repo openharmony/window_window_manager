@@ -322,6 +322,12 @@ protected:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     // protect windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
+
+    /**
+     * Sub Window
+     */
+    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
+    void DestroySubWindow();
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
