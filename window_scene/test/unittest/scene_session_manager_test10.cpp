@@ -184,6 +184,52 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession);
     ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
 }
+
+/**
+ * @tc.name: CheckLastFocusedAppSessionFocus
+ * @tc.desc: CheckLastFocusedAppSessionFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ssm_->ProcessFocusZOrderChange(10);
+    ssm_->systemConfig_.windowUIType_ = 1;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    ssm_->systemConfig_.windowUIType_ = 0;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "focusedSession";
+    sessionInfo.abilityName_ = "focusedSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->ProcessFocusZOrderChange(97);
+    
+    sessionInfo->lastZOrder_ = 2203;
+    sessionInfo->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "voiceInteractionSession";
+    sessionInfo1.abilityName_ = "voiceInteractionSession";
+    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->zOrder_ = 2109;
+    ssm_->sceneSessionMap_.emplace(2, sceneSession1);
+
+    sessionInfo->lastZOrder_ = 103;
+    sessionInfo->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    sessionInfo->lastZOrder_ = 2203;
+    sessionInfo->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+}
 }  // namespace
 }
 }
