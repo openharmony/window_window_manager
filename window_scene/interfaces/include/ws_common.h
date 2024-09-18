@@ -669,12 +669,14 @@ enum class SessionUIDirtyFlag {
 struct PostProcessFocusState {
     bool enabled_ { false };
     bool isFocused_ { false };
+    bool byForeground_ { true };
     FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
 
     void Reset()
     {
         enabled_ = false;
         isFocused_ = false;
+        byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
