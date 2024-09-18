@@ -4801,4 +4801,18 @@ void SceneSession::SetVisibilityChangedDetectFunc(const VisibilityChangedDetectF
 {
     visibilityChangedDetectFunc_ = func;
 }
+
+void SceneSession::SetDefaultDisplayIdIfNeed()
+{
+    if (sessionInfo_.screenId_ == SCREEN_ID_INVALID) {
+        auto defaultDisplayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        sessionInfo_.screenId_ = defaultDisplayId;
+        TLOGI(WmsLogTag::WMS_LIFE, "winId: %{public}d, update screen id %{public}" PRIu64,
+            GetPersistentId(), defaultDisplayId);
+        auto sessionProperty = GetSessionProperty();
+        if (sessionProperty) {
+            sessionProperty->SetDisplayId(defaultDisplayId);
+        }
+    }
+}
 } // namespace OHOS::Rosen
