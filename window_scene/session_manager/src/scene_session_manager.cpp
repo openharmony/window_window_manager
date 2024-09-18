@@ -8914,7 +8914,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
-            CheckFocusedSessionZOrder(sessionMapDirty);
+            ProcessFocusZOrderJumping(sessionMapDirty);
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
@@ -8940,7 +8940,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     taskScheduler_->PostAsyncTask(task, "FlushUIParams");
 }
 
-void SceneSessionManager::CheckFocusedSessionZOrder(uint32_t dirty) {
+void SceneSessionManager::ProcessFocusZOrderJumping(uint32_t dirty) {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
     }
@@ -8954,18 +8954,18 @@ void SceneSessionManager::CheckFocusedSessionZOrder(uint32_t dirty) {
         focusedSession->GetLastZOrder() <= focusedSession->GetZOrder()) {
         return;
     }
-    auto voiceInterActionSession = GetSceneSessionByType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
-    if (voiceInterActionSession == nullptr) {
+    auto voiceInteractionSession = GetSceneSessionByType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    if (voiceInteractionSession == nullptr) {
         return;
     }
     TLOGD(WmsLogTag::WMS_PIPELINE,
-          "voiceInterActionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder %{public}d zOrder "
+          "voiceInteractionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder %{public}d zOrder "
           "%{public}d",
-          voiceInterActionSession->GetPersistentId(), voiceInterActionSession->GetZOrder(),
+          voiceInteractionSession->GetPersistentId(), voiceInteractionSession->GetZOrder(),
           focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
-    if (focusedSession->GetLastZOrder() > voiceInterActionSession->GetZOrder() &&
-        focusedSession->GetZOrder() < voiceInterActionSession->GetZOrder()) {
-        RequestSessionFocus(voiceInterActionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
+    if (focusedSession->GetLastZOrder() > voiceInteractionSession->GetZOrder() &&
+        focusedSession->GetZOrder() < voiceInteractionSession->GetZOrder()) {
+        RequestSessionFocus(voiceInteractionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
     }
 }
 
