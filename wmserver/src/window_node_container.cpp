@@ -839,9 +839,9 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
-        auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
+        auto timingProtocol = animationConfig_.keyboardAnimationIn_.duration_;
         OpenInputMethodSyncTransaction();
-        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
+        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
         CloseInputMethodSyncTransaction();
     } else {
         WLOGFD("add node without animation");
@@ -911,8 +911,8 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
         OpenInputMethodSyncTransaction();
-        auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
-        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
+        auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
+        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
         CloseInputMethodSyncTransaction();
     } else {
         updateRSTreeFunc();

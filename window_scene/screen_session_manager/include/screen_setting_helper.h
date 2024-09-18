@@ -26,6 +26,8 @@ class ScreenSettingHelper {
 public:
     static void RegisterSettingDpiObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingDpiObserver();
+    static void RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterExtendSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
     static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
@@ -40,10 +42,12 @@ public:
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
+    static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
     static sptr<SettingObserver> dpiObserver_;
+    static sptr<SettingObserver> extendDpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
 };

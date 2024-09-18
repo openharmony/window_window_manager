@@ -71,7 +71,7 @@ public:
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
     static napi_value DealRssReply(napi_env env, const nlohmann::json& payload, const nlohmann::json& reply);
 
-    void OnReceiveEvent(napi_env env, napi_value callbackObj, int32_t eventType,
+    void OnReceiveEvent(napi_env env, napi_value callbackObj, uint32_t eventType,
         const std::unordered_map<std::string, std::string>& extraInfo);
 
 private:
@@ -85,14 +85,14 @@ private:
 
     napi_value RegisterRssDataCallback(napi_env env, napi_callback_info info);
     napi_value UnRegisterRssDataCallback(napi_env env, napi_callback_info info);
-    bool CheckCallbackParam(napi_env env, napi_callback_info info, int32_t& eventType, napi_value* jsCallback);
+    bool CheckCallbackParam(napi_env env, napi_callback_info info, uint32_t& eventType, napi_value* jsCallback);
 
     static void ParseMutex(const std::string& mutexStr, const nlohmann::json& payload, std::string& detailStr);
     static void ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName);
     static void CompleteCb(napi_env env, napi_status status, void* data);
 
     // ONLY Accessed on main thread
-    std::unordered_map<int32_t, std::list<CallBackPair>> jsCallBackMap_;
+    std::unordered_map<uint32_t, std::list<CallBackPair>> jsCallBackMap_;
 };
 #endif
 } // OHOS

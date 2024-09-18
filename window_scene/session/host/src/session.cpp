@@ -53,6 +53,8 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
+const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -72,15 +74,18 @@ const std::map<SessionState, bool> DETACH_MAP = {
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
+bool Session::isScbCoreEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
-    property_ = new WindowSessionProperty();
+    property_ = sptr<WindowSessionProperty>::MakeSptr();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+
     if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
         mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
+
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
         area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
@@ -111,7 +116,7 @@ void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task, name]() {
+    auto localTask = [task = std::move(task), name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -124,7 +129,7 @@ void Session::PostExportTask(Task&& task, const std::string& name, int64_t delay
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task, name]() {
+    auto localTask = [task = std::move(task), name]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -163,7 +168,7 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
 }
 
-void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc &func)
+void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
 {
     frameLayoutFinishFunc_ = func;
 }
@@ -172,6 +177,15 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     return leashWinSurfaceNode_;
+}
+
+std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
+{
+    auto movedSurfaceNode = GetLeashWinSurfaceNode();
+    if (!movedSurfaceNode) {
+        movedSurfaceNode = surfaceNode_;
+    }
+    return movedSurfaceNode;
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
@@ -595,6 +609,20 @@ void Session::SetSystemTouchable(bool touchable)
 bool Session::GetSystemTouchable() const
 {
     return forceTouchable_ && systemTouchable_ && GetTouchable();
+}
+
+bool Session::GetRectChangeBySystem() const
+{
+    return rectChangeBySystem_.load();
+}
+
+void Session::SetRectChangeBySystem(bool rectChangeBySystem)
+{
+    if (rectChangeBySystem_.load() != rectChangeBySystem) {
+        rectChangeBySystem_.store(rectChangeBySystem);
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rectChangeBySystem_:%{public}d", GetPersistentId(),
+            rectChangeBySystem);
+    }
 }
 
 bool Session::IsSystemActive() const
@@ -1192,7 +1220,7 @@ WSError Session::Hide()
 WSError Session::DrawingCompleted()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    if (!SessionPermission::IsSameBundleNameAsCalling("com.huawei.shell_assistant")) {
+    if (!SessionPermission::IsSameAppAsCalling(SHELL_BUNDLE_NAME, SHELL_APP_IDENTIFIER)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -1208,7 +1236,7 @@ WSError Session::DrawingCompleted()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}" PRIu32,
+    TLOGI(WmsLogTag::WMS_LIFE, "new active:%{public}d, id:%{public}d, state:%{public}u",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
@@ -1386,7 +1414,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
         return;
     }
-    sptr<SessionLifeCycleTask> lifeCycleTask = new SessionLifeCycleTask(std::move(task), name, taskType);
+    sptr<SessionLifeCycleTask> lifeCycleTask = sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
     lifeCycleTaskQueue_.push_back(lifeCycleTask);
     TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
         name.c_str(), persistentId_);
@@ -1962,7 +1990,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float scaleParam) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scaleParam, bool useCurWindow) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
     if (scenePersistence_ == nullptr) {
@@ -1979,7 +2007,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
-        .useCurWindow = false,
+        .useCurWindow = useCurWindow,
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
     if (!ret) {
@@ -2274,6 +2302,17 @@ WSError Session::NotifyFocusStatus(bool isFocused)
     }
     sessionStage_->UpdateFocus(isFocused);
 
+    return WSError::WS_OK;
+}
+
+WSError Session::RequestFocus(bool isFocused)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
     return WSError::WS_OK;
 }
 
@@ -3245,7 +3284,13 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    return isScbCoreEnabled_;
+}
+
+void Session::SetScbCoreEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_PIPELINE, "%{public}d", enabled);
+    isScbCoreEnabled_ = enabled;
 }
 
 bool Session::IsVisible() const

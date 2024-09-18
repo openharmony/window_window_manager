@@ -27,7 +27,6 @@
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
-#include "future_callback.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_helper.h"
@@ -163,6 +162,27 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap)
+{
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
+        return nullptr;
+    }
+    for (const auto& [_, pair] : sessionMap) {
+        auto& window = pair.second;
+        if (window && window->GetWindowId() == parentId) {
+            if (WindowHelper::IsMainWindow(window->GetType()) ||
+                (WindowHelper::IsSystemWindow(window->GetType()) && window->GetParentId() == INVALID_SESSION_ID)) {
+                TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
+                return window;
+            }
+            return FindParentMainSession(window->GetParentId(), sessionMap);
+        }
+    }
+    TLOGW(WmsLogTag::WMS_SUB, "don't find main session, parentId:%{public}u", parentId);
+    return nullptr;
+}
+
 bool WindowSceneSessionImpl::IsSessionMainWindow(uint32_t parentId)
 {
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -211,7 +231,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     property_->SetSessionInfo(info);
     if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
-        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        sptr<WindowSessionImpl> parentSession = nullptr;
+        if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+        } else {
+            parentSession = FindParentSessionByParentId(property_->GetParentId());
+        }
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);

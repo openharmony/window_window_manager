@@ -23,6 +23,7 @@ config("screen_session_manager_client_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
   ]
 }
@@ -36,7 +37,7 @@ ohos_shared_library("screen_session_manager_client") {
     debug = false
   }
   sources = [
-    "../session_manager/src/zidl/screen_session_manager_proxy.cpp",
+    "../screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/screen_session_manager_client.cpp",
     "src/zidl/screen_session_manager_client_stub.cpp",
   ]

@@ -131,7 +131,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI] end, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -323,10 +323,11 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
+        bool isSceneBoardBundle = SessionPermission::IsSameAppAsCalling("", "");
         bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-          info.bundleName_ == "");
+            isSceneBoardBundle);
         TLOGI(WmsLogTag::WMS_SCB,
-            "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
+            "root isCalledRightlyByCallerId: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
     }
 }
@@ -347,11 +348,11 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
                     info.sessionAffinity);
             } else {
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_, info.windowType_);
             }
         }
         if (sceneSession == nullptr) {
-            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            WLOGFI("return nullptr, RequestSceneSession");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
                 WLOGFE("RequestSceneSession return nullptr");
@@ -360,6 +361,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        sceneSession->SetDefaultDisplayIdIfNeed();
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {

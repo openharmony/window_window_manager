@@ -1186,6 +1186,23 @@ HWTEST_F(WindowSceneSessionImplTest3, StartMove, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetStartMoveFlag
+ * @tc.desc: GetStartMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetStartMoveFlag");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    bool isMoving = windowSceneSessionImpl->GetStartMoveFlag();
+    EXPECT_EQ(false, isMoving);
+}
+
+/**
  * @tc.name: DisableAppWindowDecor
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC
@@ -1634,6 +1651,56 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentSessionByParentId, Function | Sm
     ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetExtensionFlag(true);
     EXPECT_FALSE(nullptr != windowSceneSessionImpl->FindParentSessionByParentId(1));
+}
+/**
+ * @tc.name: FindParentMainSession
+ * @tc.desc: FindParentMainSession001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, FindParentMainSession001, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionImpl> parentSession;
+    sptr<WindowOption> toastSubWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, toastSubWindowOption);
+    toastSubWindowOption->SetWindowName("toastSubWindow");
+    toastSubWindowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    toastSubWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> toastSubWindow;
+
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, mainWindowOption);
+    mainWindowOption->SetWindowName("mainWindow");
+    mainWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(mainWindowOption);
+    toastSubWindowOption->SetParentId(mainWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, subWindowOption);
+    subWindowOption->SetWindowName("subWindow");
+    subWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowOption->SetParentId(mainWindow->GetPersistentId());
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    toastSubWindowOption->SetParentId(subWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
+
+    sptr<WindowOption> dialogWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, dialogWindowOption);
+    dialogWindowOption->SetWindowName("dialogWindow");
+    dialogWindowOption->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    dialogWindowOption->SetParentId(mainWindow->GetPersistentId());
+    sptr<WindowSceneSessionImpl> dialogWindow = sptr<WindowSceneSessionImpl>::MakeSptr(dialogWindowOption);
+    toastSubWindowOption->SetParentId(dialogWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
 }
 
 /**

@@ -80,7 +80,8 @@ void MotionSubscriber::UnsubscribeMotionSensor()
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);
-    if (ret != MotionErrorCode::MOTION_SUCCESS && ret != MotionErrorCode::MOTION_NO_SUBSCRIBE) {
+    if (ret != static_cast<int32_t>(OHOS::Msdp::MotionErrorCode::MOTION_SUCCESS)
+        && ret != static_cast<int32_t>(OHOS::Msdp::MotionErrorCode::MOTION_NO_SUBSCRIBE)) {
         return;
     }
     isMotionSensorSubscribed_ = false;

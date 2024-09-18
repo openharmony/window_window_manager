@@ -149,42 +149,44 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFD("[NAPI]OnAvoidAreaChanged");
+    WLOGFD("[NAPI]");
     // js callback should run in js thread
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
-            NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
-                return;
-            }
-            napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
-            if (avoidAreaValue == nullptr) {
-                return;
-            }
-            if (thisListener->isDeprecatedInterface_) {
-                napi_value argv[] = { avoidAreaValue };
-                thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
-            } else {
-                napi_value objValue = nullptr;
-                napi_create_object(env, &objValue);
-                if (objValue == nullptr) {
-                    WLOGFE("Failed to get object");
-                    return;
-                }
-                napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
-                napi_set_named_property(env, objValue, "area", avoidAreaValue);
-                napi_value argv[] = { objValue };
-                thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
-            }
+    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
+            return;
         }
-    );
+        napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
+        if (avoidAreaValue == nullptr) {
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (thisListener->isDeprecatedInterface_) {
+            napi_value argv[] = { avoidAreaValue };
+            thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        } else {
+            napi_value objValue = nullptr;
+            napi_create_object(env, &objValue);
+            if (objValue == nullptr) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "Failed to get object");
+                return;
+            }
+            napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
+            napi_set_named_property(env, objValue, "area", avoidAreaValue);
+            napi_value argv[] = { objValue };
+            thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+        napi_close_handle_scope(env, scope);
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnAvoidAreaChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    if (eventHandler_) {
+        eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnAvoidAreaChanged", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else {
+        WLOGFE("get main event handler failed!");
+    }
 }
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)

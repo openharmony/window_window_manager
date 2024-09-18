@@ -1056,6 +1056,12 @@ public:
      */
     virtual WMError RequestFocus() const { return WMError::WM_OK; }
     /**
+     * @brief Request to get focus or lose focus.
+     *
+     * @return WM_OK means request success, others means request failed.
+     */
+    virtual WMError RequestFocusByClient(bool isFocused) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief Check current focus status.
      *
      * @return True means window is focused, false means window is unfocused.
@@ -1719,6 +1725,13 @@ public:
      * @param status pip control status.
      */
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
+
+    /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.

@@ -124,6 +124,7 @@ public:
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value IsFocused(napi_env env, napi_callback_info info);
+    static napi_value RequestFocus(napi_env env, napi_callback_info info);
     static napi_value StartMoving(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
@@ -239,6 +240,7 @@ private:
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
+    napi_value OnRequestFocus(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
