@@ -4283,6 +4283,11 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
+
+    if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
+        return WSError::WS_OK;
+    }
+
     return ShiftFocus(nextSession, reason);
 }
 
@@ -4320,6 +4325,42 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
 }
 
 /**
+ * @note @window.focus
+ * When high zOrder System Session unfocus, check if the last focused app window can focus.
+ */
+bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
+    sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession)
+{
+    if (focusedSession == nullptr || nextSession == nullptr) {
+        return false;
+    }
+
+    TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
+        lastFocusedAppSessionId_, nextSession->GetPersistentId());
+    
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_) {
+        return false;
+    }
+
+    if (!focusedSession->IsSystemSessionAboveApp()) {
+        return false;
+    }
+
+    auto mode = nextSession->GetWindowMode();
+    // only when next session is app, and in split or floation
+    if (nextSession->IsAppSession() &&
+        (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+         mode == WindowMode::WINDOW_MODE_FLOATING)) {
+        if (RequestSessionFocus(lastFocusedAppSessionId_, false, FocusChangeReason::LAST_FOCUSED_APP) ==
+            WSError::WS_OK) {
+            return true;
+        }
+        lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    }
+    return false;
+}
+
+/**
  * When switching focus, check if the blockingType window has been  traversed downwards.
  *
  * @return true: traversed downwards, false: not.
@@ -4329,7 +4370,7 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>
 {
     uint32_t requestSessionZOrder = requestSceneSession->GetZOrder();
     uint32_t focusedSessionZOrder = focusedSession->GetZOrder();
-    TLOGD(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %d{public}d, focusedSessionZOrder: %{public}d",
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestSessionZOrder: %{public}d, focusedSessionZOrder: %{public}d",
         requestSessionZOrder, focusedSessionZOrder);
     if  (requestSessionZOrder < focusedSessionZOrder)  {
         auto topNearestBlockingFocusSession = GetTopNearestBlockingFocusSession(requestSessionZOrder,
@@ -4608,6 +4649,7 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
     if (sceneSession == nullptr) {
         if (isFocused) {
             SetFocusedSessionId(INVALID_SESSION_ID);
+            lastFocusedAppSessionId_ = INVALID_SESSION_ID;
         }
         return;
     }
@@ -4616,6 +4658,9 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
     // set focused
     if (isFocused) {
         SetFocusedSessionId(sceneSession->GetPersistentId());
+        if (sceneSession->IsAppOrLowerSystemSession()) {
+            lastFocusedAppSessionId_ = sceneSession->GetPersistentId();
+        }
     }
     sceneSession->UpdateFocus(isFocused);
     if ((isFocused && !needBlockNotifyFocusStatusUntilForeground_) || (!isFocused && !needBlockNotifyUnfocusStatus_)) {

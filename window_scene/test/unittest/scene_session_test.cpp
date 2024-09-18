@@ -448,6 +448,127 @@ HWTEST_F(SceneSessionTest, IsAppSession02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsAppOrLowerSystemSession
+ * @tc.desc: IsAppOrLowerSystemSession true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsAppOrLowerSystemSession01";
+    info.windowType_ = 2126;
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(true, scensession->IsAppOrLowerSystemSession());
+}
+
+/**
+ * @tc.name: IsAppOrLowerSystemSession
+ * @tc.desc: IsAppOrLowerSystemSession false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background02";
+    info.bundleName_ = "IsAppOrLowerSystemSession02";
+    info.windowType_ = 2106;
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(false, scensession->IsAppOrLowerSystemSession());
+
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "testSession1";
+    parentInfo.moduleName_ = "testSession2";
+    parentInfo.bundleName_ = "testSession3";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
+    ASSERT_NE(parentSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(false, scensession->IsAppOrLowerSystemSession());
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionProperty(property);
+    scensession->SetParentSession(parentSession);
+    ASSERT_EQ(true, scensession->IsAppOrLowerSystemSession());
+}
+
+/**
+ * @tc.name: IsSystemSessionAboveApp
+ * @tc.desc: IsSystemSessionAboveApp true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Level2)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "HighZOrder01";
+    info1.bundleName_ = "IsSystemSessionAboveApp01";
+    info1.windowType_ = 2122;
+
+    sptr<SceneSession> scensession1;
+    scensession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    EXPECT_NE(scensession1, nullptr);
+    ASSERT_EQ(true, scensession1->IsSystemSessionAboveApp());
+
+    SessionInfo info2;
+    info2.abilityName_ = "HighZOrder02";
+    info2.bundleName_ = "IsSystemSessionAboveApp02";
+    info2.windowType_ = 2104;
+
+    sptr<SceneSession> scensession2;
+    scensession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    EXPECT_NE(scensession2, nullptr);
+    ASSERT_EQ(true, scensession2->IsSystemSessionAboveApp());
+
+    SessionInfo info3;
+    info3.abilityName_ = "HighZOrder03";
+    info3.bundleName_ = "SCBDropdownPanel13";
+    info3.windowType_ = 2109;
+
+    sptr<SceneSession> scensession3;
+    scensession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    EXPECT_NE(scensession3, nullptr);
+    ASSERT_EQ(true, scensession3->IsSystemSessionAboveApp());
+
+    SessionInfo info4;
+    info4.abilityName_ = "HighZOrder04";
+    info4.bundleName_ = "IsSystemSessionAboveApp04";
+    info4.windowType_ = 2109;
+
+    sptr<SceneSession> scensession4;
+    scensession4 = new (std::nothrow) SceneSession(info4, nullptr);
+    EXPECT_NE(scensession4, nullptr);
+    ASSERT_EQ(false, scensession4->IsSystemSessionAboveApp());
+}
+
+/**
+ * @tc.name: IsSystemSessionAboveApp
+ * @tc.desc: IsSystemSessionAboveApp false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HighZOrder05";
+    info.bundleName_ = "IsSystemSessionAboveApp05";
+    info.windowType_ = 1;
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(false, scensession->IsSystemSessionAboveApp());
+}
+
+/**
  * @tc.name: GetWindowName
  * @tc.desc: GetWindowName
  * @tc.type: FUNC

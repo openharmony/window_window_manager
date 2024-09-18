@@ -2396,6 +2396,32 @@ bool SceneSession::IsAppSession() const
     return false;
 }
 
+/** @note @window.focus */
+bool SceneSession::IsAppOrLowerSystemSession() const
+{
+    WindowType windowType = GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_NEGATIVE_SCREEN ||
+        windowType == WindowType::WINDOW_TYPE_GLOBAL_SEARCH ||
+        windowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        return true;
+    }
+    return IsAppSession();
+}
+
+/** @note @window.focus */
+bool SceneSession::IsSystemSessionAboveApp() const
+{
+    WindowType windowType = GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_DIALOG || windowType == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
+        return true;
+    }
+    if (windowType == WindowType::WINDOW_TYPE_PANEL &&
+        sessionInfo_.bundleName_.find("SCBDropdownPanel") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
