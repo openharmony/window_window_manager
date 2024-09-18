@@ -85,7 +85,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
-const std::string SCENE_BOARD_APP_IDENTIFIER = "5765880207853062833";
+const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
