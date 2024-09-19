@@ -25,10 +25,10 @@ static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
 
 #define PRINT_WLOG(level, ...) HILOG_IMPL(LABEL.type, level, LABEL.domain, LABEL.tag, ##__VA_ARGS__)
 
-#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, fmt, ##__VA_ARGS__)
-#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, fmt, ##__VA_ARGS__)
-#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, fmt, ##__VA_ARGS__)
-#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, fmt, ##__VA_ARGS__)
+#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, "(%{public}d)" fmt, __LINE__, ##__VA_ARGS__)
 
 #define C_W_FUNC __func__
 
