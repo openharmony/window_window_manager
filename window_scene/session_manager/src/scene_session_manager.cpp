@@ -2170,9 +2170,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_NULLPTR;
         }
         scnSession->GetCloseAbilityWantAndClean(scnSessionInfo->want);
-        if (scnSessionInfo->isClearSession) {
-            scnSessionInfo->resultCode = -1;
-        }
         if (scnSessionInfo->resultCode == -1) {
             OHOS::AAFwk::Want want;
             scnSessionInfo->want = want;
