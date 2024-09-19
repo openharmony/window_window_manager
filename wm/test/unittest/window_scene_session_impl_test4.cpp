@@ -279,7 +279,7 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetDecorEnable(true);
+    windowSceneSessionImpl->property_->SetDecorEnable(false);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
