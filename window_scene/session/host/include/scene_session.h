@@ -431,6 +431,11 @@ public:
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
+    /*
+     * Multi Window
+     */
+    WSError SetSplitButtonVisible(bool isVisible);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
