@@ -217,6 +217,12 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
+void Session::SetSessionInfoResultCode(int32_t resultCode)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.resultCode = resultCode;
+}
+
 void Session::SetSessionInfoPersistentId(int32_t persistentId)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
