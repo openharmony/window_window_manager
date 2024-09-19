@@ -244,7 +244,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
-    data.WriteString("OnRemoteRequest UT Testing.")
+    data.WriteString("OnRemoteRequest UT Testing.");
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_NONE, res);
