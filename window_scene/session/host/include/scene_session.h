@@ -247,7 +247,6 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
     void SetMovable(bool isMovable);
-    WSError SetSplitButtonVisible(bool isVizible);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
@@ -430,6 +429,11 @@ public:
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
+
+    /*
+     * Multi Window
+     */
+    WSError SetSplitButtonVisible(bool isVizible);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,

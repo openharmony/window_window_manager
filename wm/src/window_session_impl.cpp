@@ -2250,8 +2250,8 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
 WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "isVisible: %{public}d", isVisible);
-    auto task = [weak = wptr(this), isVisible] {
-        auto window = weak.promote();
+    auto task = [weakThis = wptr(this), isVisible] {
+        auto window = weakThis.promote();
         if (!window) {
             return;
         }

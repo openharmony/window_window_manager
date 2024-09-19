@@ -540,7 +540,7 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
 
 int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "called");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     bool isVisible = data.ReadBool();
     SetSplitButtonVisible(isVisible);
     return ERR_NONE;
