@@ -229,7 +229,7 @@ namespace {
 HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(SceneSessionManagerLiteStub::
-        SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN);
+        SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -242,6 +242,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
         SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
     EXPECT_EQ(IPC_STUB_UNKNOW_TRANS_ERR, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    data.WriteString("OnRemoteRequest UT Testing.")
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_NONE, res);
