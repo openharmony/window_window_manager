@@ -70,6 +70,7 @@ private:
     int HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply);
     int HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply);
     int HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);

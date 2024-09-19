@@ -128,6 +128,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
 
