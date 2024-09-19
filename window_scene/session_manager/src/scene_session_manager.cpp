@@ -3085,7 +3085,7 @@ void SceneSessionManager::UpdateRotateAnimationConfig(const RotateAnimationConfi
         TLOGI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
         rotateAnimationConfig_.duration_ = config.duration_;
     };
-    taskScheduler_->PostVoidSyncTask(task, "UpdateRotateAnimationConfig");
+    taskScheduler_->PostAsyncTask(task, "UpdateRotateAnimationConfig");
 }
 
 WSError SceneSessionManager::ProcessBackEvent()
@@ -3986,10 +3986,7 @@ void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<Sc
         return;
     }
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc = [this](RotateAnimationConfig& config) {
-        auto task = [this, &config]() {
-            config.duration_ = rotateAnimationConfig_.duration_;
-        };
-        taskScheduler_->PostVoidSyncTask(task, "acquireRotateAnimationConfig");
+        config.duration_ = rotateAnimationConfig_.duration_;
     };
     sceneSession->SetAcquireRotateAnimationConfigFunc(acquireRotateAnimationConfigFunc);
     TLOGD(WmsLogTag::DEFAULT, "Register acquire Rotate Animation config success, id: %{public}d",
