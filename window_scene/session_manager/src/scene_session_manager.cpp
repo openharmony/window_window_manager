@@ -124,6 +124,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -4147,8 +4148,8 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    bool isSameBundleName = SessionPermission::IsSameBundleNameAsCalling(SCENE_BOARD_BUNDLE_NAME);
-    if (!isSameBundleName && (callingPid != sceneSession->GetCallingPid())) {
+    if (callingPid != sceneSession->GetCallingPid() &&
+        !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
