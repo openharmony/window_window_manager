@@ -3081,7 +3081,7 @@ const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 
 void SceneSessionManager::UpdateRotateAnimationConfig(const RotateAnimationConfig& config)
 {
-    auto task = [this, &config]() {
+    auto task = [this, config]() {
         TLOGI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
         rotateAnimationConfig_.duration_ = config.duration_;
     };
