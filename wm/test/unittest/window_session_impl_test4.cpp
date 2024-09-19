@@ -342,8 +342,17 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     option->SetWindowName("GetTitleButtonArea");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WSError res = window->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(10000));
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(window->FindWindowById(1), nullptr);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
