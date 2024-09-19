@@ -1880,11 +1880,13 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    // 异步发送屏幕旋转公共事件
-    auto task = [=]() {
-        TLOGI(WmsLogTag::DMS, "publish dms rotation event");
-        ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
-            displayInfo->GetScreenId(), displayInfo->GetRotation());
+    // screenId要在rotation前进行设置
+    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
+    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
+    auto task = [settingScreenId, settingRotation]() {
+        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
+        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
+        ScreenSettingHelper::SetSettingRotation(settingRotation);
     };
     taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
@@ -1898,7 +1900,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     {
-        DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty", XCOLLIE_TIMEOUT_10S);
+        DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
         if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
             // Rs is used to mark the start of the rotation animation
             TLOGI(WmsLogTag::DMS, "EnableCacheForRotation");
@@ -1922,13 +1924,13 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             return;
         }
     }
-
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail to update screen rotation property, cannot find screen %{public}" PRIu64"",
             screenId);
         return;
     }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+    
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
