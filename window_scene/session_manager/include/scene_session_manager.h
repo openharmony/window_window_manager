@@ -613,6 +613,7 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+    void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
     /*
      * Multi User
