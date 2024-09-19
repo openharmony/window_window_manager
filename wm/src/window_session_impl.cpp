@@ -454,7 +454,7 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
     return PreNotifyKeyEvent(keyEvent);
 }
 
-void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState)
+void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
     auto iter = subWindowSessionMap_.find(parentPersistentId);
     if (iter == subWindowSessionMap_.end()) {
