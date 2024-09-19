@@ -96,9 +96,9 @@ inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
-#define TLOGI(tag, fmt, ...)
+#define TLOGI(tag, fmt, ...) \
 PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, LINE, ##VA_ARGS)
-#define TLOGW(tag, fmt, ...)
+#define TLOGW(tag, fmt, ...) \
 PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, LINE, ##VA_ARGS)
 #define TLOGE(tag, fmt, ...) \
 PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
