@@ -4586,6 +4586,10 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
     isVisible_ = visibility;
+    int32_t persistentId = GetPersistentId();
+    if (updatePrivateStateAndNotifyFunc_ != nullptr) {
+        updatePrivateStateAndNotifyFunc_(persistentId);
+    }
     return true;
 }
 
