@@ -157,6 +157,7 @@ public:
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const int32_t appIndex,
         const uint32_t windowType = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
+    sptr<SceneSession> GetSceneSessionByType(WindowType type);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -478,8 +479,13 @@ private:
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
+    /*
+     * Window Pipeline
+     */
+    void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
+
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);

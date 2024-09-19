@@ -2780,6 +2780,7 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
 /** @note @window.hierarchy */
 void Session::SetZOrder(uint32_t zOrder)
 {
+    lastZOrder_ = zOrder_;
     zOrder_ = zOrder;
     NotifySessionInfoChange();
 }
@@ -2788,6 +2789,12 @@ void Session::SetZOrder(uint32_t zOrder)
 uint32_t Session::GetZOrder() const
 {
     return zOrder_;
+}
+
+/** @note @window.hierarchy */
+uint32_t Session::GetLastZOrder() const
+{
+    return lastZOrder_;
 }
 
 void Session::SetUINodeId(uint32_t uiNodeId)

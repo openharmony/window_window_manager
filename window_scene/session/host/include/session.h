@@ -381,8 +381,14 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+
+    /*
+     * Window ZOrder
+     */
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
+    uint32_t GetLastZOrder() const;
+
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
@@ -593,7 +599,13 @@ protected:
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    /*
+     * Window ZOrder
+     */
     uint32_t zOrder_ = 0;
+    uint32_t lastZOrder_ = 0;
+
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     bool blockingFocus_ {false};
