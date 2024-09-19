@@ -1747,7 +1747,7 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(uint32_t windowId, uint3
         TLOGE(WmsLogTag::WMS_SUB, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_FIND_MAIN_WINDOW_ID),
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_MAIN_WINDOW_ID),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

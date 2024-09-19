@@ -2660,7 +2660,7 @@ static WMError GetParentMainWindowIdInner(SessionMap& sessionMap, uint32_t windo
     return WMError::WM_ERROR_INVALID_PARENT;
 }
 
-int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
+uint32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
