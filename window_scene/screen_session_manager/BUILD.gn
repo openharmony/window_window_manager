@@ -170,6 +170,10 @@ ohos_shared_library("screen_session_manager") {
     defines += [ "DEVICE_STATUS_ENABLE" ]
   }
 
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
