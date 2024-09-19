@@ -3858,7 +3858,7 @@ napi_value JsSceneSession::OnSetMovable(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetSplitButtonVisible(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSplitButtonVisible(env, info) : nullptr;
 }
@@ -3876,7 +3876,7 @@ napi_value JsSceneSession::OnSetSplitButtonVisible(napi_env env, napi_callback_i
     }
     bool isVisible = true;
     if (!ConvertFromJsValue(env, argv[0], isVisible)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to string");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
