@@ -2080,6 +2080,7 @@ public:
      */
     virtual WMError UnregisterMainWindowCloseListeners(
         const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief Register switch free multi-window listener.
      *
