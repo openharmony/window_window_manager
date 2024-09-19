@@ -1854,7 +1854,7 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     int32_t hostWindowId = -1;
-    auto result = ssm->GetRootMainWindowId(sceneSession2->GetPersistentId(), hostWindowId);
+    auto result = ssm_->GetRootMainWindowId(sceneSession2->GetPersistentId(), hostWindowId);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
 }
