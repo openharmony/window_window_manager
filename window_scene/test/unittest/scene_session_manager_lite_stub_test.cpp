@@ -229,7 +229,7 @@ namespace {
 HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest | Level1)
 {
     uint32_t code = static_cast<uint32_t>(SceneSessionManagerLiteStub::
-        SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL);
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
