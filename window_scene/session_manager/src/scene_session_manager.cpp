@@ -3020,10 +3020,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
-        auto sessionProperty = sceneSession->GetSessionProperty();
-        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
-            sceneSession->NotifyDestroy();
-        }
+        DestroyUIServiceExtensionSubWindow(sceneSession);
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -3082,6 +3079,23 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
     };
 
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
+}
+
+void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession)
+{
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_SUB,"sceneSession is null");
+        return;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+        !sessionProperty->GetIsUIExtensionAbilityProcess()) {
+        sceneSession->NotifyDestroy();
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->
+            TerminateUIServiceExtensionAbility(sceneSession->GetAbilityToken());
+        TLOGI(WmsLogTag::WMS_SUB,"TerminateUIServiceExtensionAbility id:%{public}d errCode:%{public}d",
+            sceneSession->GetPersistentId(), errCode);
+    }
 }
 
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
