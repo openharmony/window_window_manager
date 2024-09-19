@@ -7182,6 +7182,15 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
+    
+    auto notifySceneInputTask = [weakSceneSession, type]() {
+        auto sceneSession = weakSceneSession.promote();
+        if (sceneSession == nullptr) {
+            return;
+        }
+        SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, type);
+    };
+    taskScheduler_->PostAsyncTask(notifySceneInputTask);
 }
 
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
