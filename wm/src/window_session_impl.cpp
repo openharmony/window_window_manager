@@ -805,7 +805,7 @@ void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButto
     if (hideSplitButton > !windowTitleVisibleFlags_.isSplitVisible) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "isSplitVisible param INVALID");
     }
-    hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible);
+    hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible) || !isSplitButtonVisible_;
     if (hideCloseButton > !windowTitleVisibleFlags_.isCloseVisible) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "isCloseVisible param INVALID");
     }
@@ -2337,6 +2337,21 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
+}
+
+WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isVisible: %{public}d", isVisible);
+    auto task = [weakThis = wptr(this), isVisible] {
+        auto window = weakThis.promote();
+        if (!window) {
+            return;
+        }
+        window->isSplitButtonVisible_ = isVisible;
+        window->UpdateTitleButtonVisibility();
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SetSplitButtonVisible");
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)

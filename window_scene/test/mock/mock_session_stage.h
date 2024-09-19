@@ -69,6 +69,7 @@ public:
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
         std::vector<std::string>& info));
+    MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
 };
 } // namespace Rosen
 } // namespace OHOS

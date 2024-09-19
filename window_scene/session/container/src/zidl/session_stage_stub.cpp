@@ -114,6 +114,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifySessionFullScreen(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
             return HandleNotifyDumpInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE):
+            return HandleSetSplitButtonVisible(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -535,6 +537,14 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
         TLOGE(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo write info failed");
         return ERR_TRANSACTION_FAILED;
     }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool isVisible = data.ReadBool();
+    SetSplitButtonVisible(isVisible);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
