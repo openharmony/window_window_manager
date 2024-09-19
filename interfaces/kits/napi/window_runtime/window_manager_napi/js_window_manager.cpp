@@ -893,7 +893,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             WLOGFE("%{public}s", lists->errMsg.c_str());
             return;
         }
-        if (lists->window == nullptr) {
+        if (lists->window == nullptr || lists->window->GetWindowState() == WindowState::STATE_DESTROYED) {
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "Get top window failed"));
