@@ -194,10 +194,10 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
 {
     ssm_->sceneSessionMap_.clear();
     ssm_->ProcessFocusZOrderChange(10);
-    ssm_->systemConfig_.windowUIType_ = 1;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->ProcessFocusZOrderChange(97);
 
-    ssm_->systemConfig_.windowUIType_ = 0;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->ProcessFocusZOrderChange(97);
 
     SessionInfo sessionInfo;
@@ -209,8 +209,8 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     ssm_->focusedSessionId_ = 1;
     ssm_->ProcessFocusZOrderChange(97);
     
-    sessionInfo->lastZOrder_ = 2203;
-    sessionInfo->zOrder_ = 101;
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 
     SessionInfo sessionInfo1;
@@ -222,12 +222,12 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sceneSession1->zOrder_ = 2109;
     ssm_->sceneSessionMap_.emplace(2, sceneSession1);
 
-    sessionInfo->lastZOrder_ = 103;
-    sessionInfo->zOrder_ = 101;
+    sceneSession->lastZOrder_ = 103;
+    sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 
-    sessionInfo->lastZOrder_ = 2203;
-    sessionInfo->zOrder_ = 101;
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 }
 }  // namespace
