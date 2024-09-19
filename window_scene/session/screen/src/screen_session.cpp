@@ -242,6 +242,12 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
     displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
+    displayInfo->SetScaleX(property_.GetScaleX());
+    displayInfo->SetScaleY(property_.GetScaleY());
+    displayInfo->SetPivotX(property_.GetPivotX());
+    displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
     return displayInfo;
 }
 
@@ -282,6 +288,17 @@ ScreenId ScreenSession::GetRSScreenId()
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;
+}
+
+void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
+                                   float translateY)
+{
+    property_.SetScaleX(scaleX);
+    property_.SetScaleY(scaleY);
+    property_.SetPivotX(pivotX);
+    property_.SetPivotY(pivotY);
+    property_.SetTranslateX(translateX);
+    property_.SetTranslateY(translateY);
 }
 
 void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset)
@@ -463,6 +480,11 @@ Rotation ScreenSession::ConvertIntToRotation(int rotation)
 void ScreenSession::SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback)
 {
     updateToInputManagerCallback_ = updateToInputManagerCallback;
+}
+
+void ScreenSession::SetUpdateScreenPivotCallback(std::function<void(float, float)>&& updateScreenPivotCallback)
+{
+    updateScreenPivotCallback_ = std::move(updateScreenPivotCallback);
 }
 
 VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
