@@ -109,13 +109,11 @@ HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject> remoteObj;
     auto ret = windowAdapter.GetUIContentRemoteObj(WINDOW_ID, remoteObj);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
-    } else {
-        ASSERT_EQ(ret, WMError::WM_OK);
-    }
+    ASSERT_EQ(ret, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -441,11 +439,13 @@ HWTEST_F(WindowAdapterTest, UpdateProperty, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     uint32_t windowId = 0;
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
     uint32_t percent = 0;
     auto ret = windowAdapter.SetWindowGravity(windowId, gravity, percent);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -456,10 +456,12 @@ HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, NotifyWindowTransition, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     sptr<WindowTransitionInfo> from = nullptr;
     sptr<WindowTransitionInfo> to = nullptr;
     auto ret = windowAdapter.NotifyWindowTransition(from, to);
-    ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
