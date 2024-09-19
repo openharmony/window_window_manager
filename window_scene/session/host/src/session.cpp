@@ -1007,6 +1007,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
         property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
+        property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
@@ -2332,6 +2333,28 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
         property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeEnableInPad(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, enable: %{public}d", persistentId_, enable);
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetCompatibleModeEnableInPad(enable);
+
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_SCB, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyCompatibleModeEnableInPad(enable);
 }
 
 WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
