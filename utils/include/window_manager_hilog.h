@@ -25,10 +25,10 @@ static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
 
 #define PRINT_WLOG(level, ...) HILOG_IMPL(LABEL.type, level, LABEL.domain, LABEL.tag, ##__VA_ARGS__)
 
-#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
-#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, "<%{public}d>" fmt, __LINE__, ##__VA_ARGS__)
+#define WLOGD(fmt, ...) PRINT_WLOG(LOG_DEBUG, fmt, ##__VA_ARGS__)
+#define WLOGI(fmt, ...) PRINT_WLOG(LOG_INFO, fmt, ##__VA_ARGS__)
+#define WLOGW(fmt, ...) PRINT_WLOG(LOG_WARN, fmt, ##__VA_ARGS__)
+#define WLOGE(fmt, ...) PRINT_WLOG(LOG_ERROR, fmt, ##__VA_ARGS__)
 
 #define C_W_FUNC __func__
 
@@ -61,7 +61,7 @@ enum class WmsLogTag : uint8_t {
     END = 256,                 // Last one, do not use
 };
 
-const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
+inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::DEFAULT, "WMS" },
     { WmsLogTag::DMS, "DMS" },
     { WmsLogTag::WMS_MAIN, "WMSMain" },
@@ -85,7 +85,9 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
 };
 
 #define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
-#define FMT_PREFIX "[%{public}s] %{public}s<%{public}d>: "
+#define FMT_PREFIX "[%{public}s] %{public}s: "
+
+#define FMT_PREFIX_NO_FUNC "[%{public}s]: "
 
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
@@ -95,11 +97,25 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     } while (0)
 
 #define TLOGD(tag, fmt, ...) \
-PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
-#define TLOGI(tag, fmt, ...) PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
-#define TLOGW(tag, fmt, ...) PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
+PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+#define TLOGI(tag, fmt, ...) \
+PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+#define TLOGW(tag, fmt, ...) \
+PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
 #define TLOGE(tag, fmt, ...) \
-PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
+PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+
+/*
+ * There is no function name built in TLOGN log micros. Choose suitable log micros when needed.
+ */
+#define TLOGND(tag, fmt, ...) \
+PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
+#define TLOGNI(tag, fmt, ...) \
+PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
+#define TLOGNW(tag, fmt, ...) \
+PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
+#define TLOGNE(tag, fmt, ...) \
+PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
 
 } // namespace OHOS
 }
