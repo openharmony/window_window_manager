@@ -4959,10 +4959,12 @@ void ScreenSessionManager::SetClientInner()
             TLOGE(WmsLogTag::DMS, "clientProxy is null");
             return;
         }
-        if (iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
-            clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
-                iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        if (iter.second->GetIsExtend() && iter.second->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            TLOGI(WmsLogTag::DMS, "current screen is extend and mirror, return before OnScreenConnectionChanged");
+            continue;
         }
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
     }
 }
 
