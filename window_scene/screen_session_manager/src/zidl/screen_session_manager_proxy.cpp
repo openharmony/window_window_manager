@@ -772,6 +772,65 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendEnd()
     return reply.ReadBool();
 }
 
+ScreenId OHOS::Rosen::ScreenSessionManagerProxy::GetInternalScreenId()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("[UL_POWER]GetInternalScreenId remote is nullptr");
+        return -1;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]GetInternalScreenId: WriteInterfaceToken failed");
+        return -1;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_INTERNAL_SCREEN_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]GetInternalScreenId: SendRequest failed");
+        return -1;
+    }
+    return reply.ReadUint64();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("[UL_POWER]SetScreenPowerById remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("[UL_POWER]Write ScreenId failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("[UL_POWER]SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 bool OHOS::Rosen::ScreenSessionManagerProxy::SetDisplayState(DisplayState state)
 {
     sptr<IRemoteObject> remote = Remote();

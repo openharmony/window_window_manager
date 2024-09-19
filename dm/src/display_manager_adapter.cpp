@@ -339,6 +339,21 @@ bool DisplayManagerAdapter::SuspendEnd()
     return displayManagerServiceProxy_->SuspendEnd();
 }
 
+ScreenId DisplayManagerAdapter::GetInternalScreenId()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->GetInstanceScreenId();
+}
+
+bool DisplayManagerAdapter::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    
+    return displayManagerServiceProxy_->SetScreenPowerById(screenId, state, reason);
+}
+
 bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 {
     INIT_PROXY_CHECK_RETURN(false);

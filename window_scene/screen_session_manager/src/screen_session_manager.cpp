@@ -1478,6 +1478,53 @@ bool ScreenSessionManager::SuspendEnd()
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
+ScreenId ScreenSessionManager::GetInternalScreenId()
+{
+    ScreenId screenId = -1;
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInteral_) {
+            screenId = sessionIt.first;
+            break;
+        }
+    }
+    return -1;
+}
+
+bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "SetSpecifiedScreenPower permission denied!");
+        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64 ", state:%{public}u",
+        screenId, state);
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
+            break;
+        }
+        default: {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById state not support");
+            return false;
+        }
+    }
+
+    rsInterface_.SetScreenPowerStatus(screenId, status);
+    return true;
+}
+
 bool ScreenSessionManager::IsPreBrightAuthFail(void)
 {
     return lastWakeUpReason_ == PowerStateChangeReason::

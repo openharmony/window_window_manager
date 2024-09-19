@@ -276,6 +276,23 @@ public:
     bool SuspendEnd();
 
     /**
+     * @brief Get id of internal screen.
+     *
+     * @return Internal screen id.
+     */
+    bool GetInternalScreenId();
+
+    /**
+     * @brief Set the screen power state by screen id.
+     *
+     * @param screenId Screen id.
+     * @param state Screen power state.
+     * @param reason Reason for power state change.
+     * @return True means set success, false means set failed.
+     */
+    bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
+
+    /**
      * @brief Set the Display State object
      *
      * @param state State of display.
