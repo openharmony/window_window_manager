@@ -1443,13 +1443,25 @@ HWTEST_F(KeyboardSessionTest, UpdateKeyboardAvoidArea01, Function | SmallTest | 
     }
 
     // miss callback
+    expectDirtyFlag = 0;
     keyboardSession->dirtyFlags_ = 1;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
-    ASSERT_EQ(keyboardSession->dirtyFlags_, 1);
+    keyboardSession->UpdateKeyboardAvoidArea();
+    if (Session::IsScbCoreEnabled()) {
+        ASSERT_EQ(keyboardSession->dirtyFlags_, 1);
+    } else {
+        ASSERT_EQ(expectDirtyFlag, 0);
+    }
 
+    expectDirtyFlag = 0;
     keyboardSession->dirtyFlags_ = 2;
     keyboardSession->specificCallback_ = nullptr;
-    ASSERT_EQ(keyboardSession->dirtyFlags_, 2);
+    keyboardSession->UpdateKeyboardAvoidArea();
+    if (Session::IsScbCoreEnabled()) {
+        ASSERT_EQ(keyboardSession->dirtyFlags_, 2);
+    } else {
+        ASSERT_EQ(expectDirtyFlag, 0);
+    }
 }
 
 /**
