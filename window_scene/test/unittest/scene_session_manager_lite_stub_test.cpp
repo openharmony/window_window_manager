@@ -186,6 +186,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bundleName = "test";
         return WMError::WM_OK;
     }
+    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -745,6 +749,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetCurrentPiPWindowInfo, Functio
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetRootMainWindowId
+ * @tc.desc: test function : HandleGetRootMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }
