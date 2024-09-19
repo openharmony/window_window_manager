@@ -174,6 +174,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_FROM_POINT):
+            return HandleGetWindowFromPoint(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1137,6 +1139,23 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
     }
     WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowFromPoint(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t displayId = data.ReadUint64();
+    int32_t windowNumber = data.ReadInt32();
+    int32_t x = data.ReadInt32();
+    int32_t y = data.ReadInt32();
+    std::vector<int32_t> windowIds;
+    WMError errCode = GetWindowFromPoint(displayId, windowNumber, x, y, windowIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get window from point failed.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32Vector(windowIds);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

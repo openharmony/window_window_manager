@@ -135,6 +135,8 @@ public:
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
+    virtual WMError GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
