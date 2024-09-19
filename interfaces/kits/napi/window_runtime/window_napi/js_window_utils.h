@@ -324,6 +324,9 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
+        std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback>&& execute,
+        std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback>&& complete, napi_value* result);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
