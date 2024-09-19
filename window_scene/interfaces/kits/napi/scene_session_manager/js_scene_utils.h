@@ -183,6 +183,7 @@ bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
+WSError GetIntValue(const std::string& str, int32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;

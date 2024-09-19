@@ -15,6 +15,7 @@
 
 #include "js_scene_utils.h"
 
+#include <cerrno>
 #include <iomanip>
 
 #include <event_handler.h>
@@ -69,6 +70,16 @@ napi_valuetype GetType(napi_env env, napi_value value)
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
     return res;
+}
+
+WSError GetIntValue(const std::string& str, int32_t& value)
+{
+    errno = 0;
+    value = strtol(str.c_str(), nullptr, 10); // 10 number convert base
+    if (errno != 0) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return WSError::WS_OK;
 }
 
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
