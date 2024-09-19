@@ -1437,6 +1437,21 @@ HWTEST_F(WindowImplTest3, GetSubWindow03, Function | SmallTest | Level3)
 
     ASSERT_EQ(std::vector<sptr<Window>>(), window->GetSubWindow(parentId));
 }
+
+/**
+ * @tc.name: SetNeedDefaultAnimation
+ * @tc.desc: SetNeedDefaultAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, SetNeedDefaultAnimation, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetNeedDefaultAnimation");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    bool defaultAnimation = true;
+    window->SetNeedDefaultAnimation(defaultAnimation);
+    EXPECT_EQ(WMError::WM_OK, window->SetTextFieldAvoidInfo(2.0, 3.0));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
