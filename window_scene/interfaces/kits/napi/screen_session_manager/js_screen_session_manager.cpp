@@ -432,7 +432,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
     if (argc > ARGC_THREE) {
         if (!ConvertFromJsValue(env, argv[ARGC_THREE], type) || type < ScreenPropertyChangeType::UNSPECIFIED ||
-            type > ScreenPropertyChangeType::ROTATION_END) { // 3: the 4rd argv
+            type > ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) { // 3: the 4rd argv
             TLOGE(WmsLogTag::DMS, "[NAPI]screenPropertyChangeType is invalid");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
