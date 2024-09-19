@@ -38,6 +38,10 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 const std::string PIP_WINDOW = "pip_window";
+constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -149,6 +153,12 @@ napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_inf
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnGetVisibleWindowInfo(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::GetWindowFromPoint(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetWindowFromPoint(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -1191,6 +1201,58 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     return result;
 }
 
+napi_value JsWindowManager::OnGetWindowFromPoint(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE || argc > ARGC_FOUR) { // min param num 1, max param num 4
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t windowNumber = 0;
+    int32_t x = -1;
+    int32_t y = -1;
+    if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[ARGC_ONE], windowNumber)) {
+        windowNumber = 0;
+    }
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARGC_TWO], x)) {
+        x = -1;
+    }
+    if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_THREE], y)) {
+        y = -1;
+    }
+    napi_value result = nullptr;
+    NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
+        std::vector<sptr<Window>> windows;
+        std::vector<int32_t> windowIds;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetWindowFromPoint(
+            static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
+        if (ret == WmErrorCode::WM_OK) {
+            for (const auto& windowId: windowIds) {
+                sptr<Window> window = Window::GetWindowWithId(windowId);
+                windows.emplace_back(window);
+            }
+            task.Resolve(env, CreateJsWindowArrayObject(env, windows));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetWindowFromPoint failed"));
+        }
+    };
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetWindowFromPoint",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    return result;
+}
+
 
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
@@ -1237,6 +1299,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
+    BindNativeFunction(env, exportObj, "getWindowFromPoint", moduleName, JsWindowManager::GetWindowFromPoint);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

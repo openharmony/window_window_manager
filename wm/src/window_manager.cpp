@@ -1426,5 +1426,15 @@ WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& water
     return ret;
 }
 
+WMError WindowManager::GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowFromPoint(displayId, windowNumber, x, y, windowIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get window from point failed");
+    }
+    return ret;
+}
+
 } // namespace Rosen
 } // namespace OHOS
