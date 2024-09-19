@@ -85,7 +85,7 @@ inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
 };
 
 #define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
-#define FMT_PREFIX "[%{public}s] %{public}s: "
+#define FMT_PREFIX "[%{public}s] %{public}s(%{public}d): "
 
 #define FMT_PREFIX_NO_FUNC "[%{public}s]: "
 
@@ -96,14 +96,12 @@ inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
-#define TLOGD(tag, fmt, ...) \
-PRINT_TLOG(LOG_DEBUG, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
-#define TLOGI(tag, fmt, ...) \
-PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
-#define TLOGW(tag, fmt, ...) \
-PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+#define TLOGI(tag, fmt, ...)
+PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, LINE, ##VA_ARGS)
+#define TLOGW(tag, fmt, ...)
+PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, LINE, ##VA_ARGS)
 #define TLOGE(tag, fmt, ...) \
-PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, __LINE__, ##__VA_ARGS__)
 
 /*
  * There is no function name built in TLOGN log micros. Choose suitable log micros when needed.
