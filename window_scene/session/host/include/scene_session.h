@@ -433,7 +433,7 @@ public:
     /*
      * Multi Window
      */
-    WSError SetSplitButtonVisible(bool isVizible);
+    WSError SetSplitButtonVisible(bool isVisible);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
