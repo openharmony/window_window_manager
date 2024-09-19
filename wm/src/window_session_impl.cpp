@@ -2296,6 +2296,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
         subWindowCloseListeners_[GetPersistentId()] = nullptr;
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
+        ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
+    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
