@@ -452,10 +452,10 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
-        switch (static_cast<uint32_t>(registerListenerType)) {
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_STAGE_EVENT_CB):
+        switch (registerListenerType) {
+            case RegisterListenerType::WINDOW_STAGE_EVENT_CB:
                 return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_STAGE_CLOSE_CB):
+            case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
                 return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 TLOGE(WmsLogTag::DEFAULT, "[NAPI]RegisterListenerType %{public}u is not supported",
@@ -576,8 +576,8 @@ WmErrorCode JsWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<JsWindow
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<JsWindowListener> listener,
+    const sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
