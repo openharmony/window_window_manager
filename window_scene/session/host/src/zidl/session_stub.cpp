@@ -36,7 +36,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{
+{   // Note that this method is NOT pair with "WriteAbilitySessionInfoBasic" in session_proxy.cpp.
+    // Compare with "WriteAbilitySessionInfoBasic" method, this method has NO want info at head and processOption info at tail.
     if (abilitySessionInfo == nullptr) {
         return ERR_INVALID_DATA;
     }
