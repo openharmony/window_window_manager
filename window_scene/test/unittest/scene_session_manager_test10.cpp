@@ -160,10 +160,12 @@ HWTEST_F(SceneSessionManagerTest10, UpdateRotateAnimationConfig, Function | Smal
     ASSERT_NE(ssm_, nullptr);
     RotateAnimationConfig config = { 400 };
     ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
 
     config.duration_ = 600;
     ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
 }
 
