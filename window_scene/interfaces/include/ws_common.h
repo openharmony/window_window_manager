@@ -254,13 +254,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
