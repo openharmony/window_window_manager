@@ -173,7 +173,17 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     }
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    FoldScreenPowerInit();
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        SetFoldScreenPowerInit([&]() {
+            foldScreenController_->BootAnimationFinishPowerInit();
+            FixPowerStatus();
+            foldScreenController_->SetOnBootAnimation(false);
+            RegisterApplicationStateObserver();
+        });
+    } else {
+        // 后续其他设备rs上电规格将陆续迁移到BootAnimationFinishPowerInit中
+        FoldScreenPowerInit();
+    }
 }
 
 void ScreenSessionManager::FoldScreenPowerInit()
