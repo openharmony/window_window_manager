@@ -354,7 +354,6 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
-    int32_t GetRotateAnimationDuration();
 
     /*
      * Multi Window
@@ -638,6 +637,7 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    int32_t GetRotateAnimationDuration();
 
     /*
      * Window Property
