@@ -28,6 +28,7 @@
 #include "process_options.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
+#include "start_window_option.h"
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
@@ -427,6 +428,16 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         if (!data.WriteBool(false)) {
             WLOGFE("Write has not startSetting failed");
             return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (abilitySessionInfo->startWindowOption) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
+             WLOGFE("Write startWindowOption failed");
+        } else {
+            if (!data.WriteBool(false)) {
+                WLOGFE("Write has not startWindowOption failed");
+                return WSError::WS_ERROR_IPC_FAILED;
+            }
         }
     }
     sptr<IRemoteObject> remote = Remote();
