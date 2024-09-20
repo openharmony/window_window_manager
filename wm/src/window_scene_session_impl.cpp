@@ -120,6 +120,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
+using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -244,9 +245,20 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         info.bundleName_ = context_->GetBundleName();
     }
     property_->SetSessionInfo(info);
-    if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
+
+    bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    bool isUiExtSubWindowFlag = property_->GetIsUIExtensionSubWindowFlag();
+
+    bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && !isUiExtSubWindowFlag;
+    bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && isUiExtSubWindowFlag && !isToastFlag;
+    bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag && isToastFlag;
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag();
+
+    if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
+        if (isToastFlag) {
             std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
             parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
         } else {
@@ -266,7 +278,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
-    } else if (property_->GetExtensionFlag() == true) {
+    } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
         property_->SetParentPersistentId(property_->GetParentId());
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // creat sub session by parent session
@@ -2572,6 +2584,55 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
+static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint32_t windowId, uint32_t& mainWindowId)
+{
+    for (const auto& [_, pair] : sessionMap) {
+        const auto& window = pair.second;
+        if (window == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (window->GetWindowId() != windowId) {
+            continue;
+        }
+
+        if (WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
+            mainWindowId = window->GetWindowId();
+            return WMError::WM_OK;
+        }
+        if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
+            return GetParentMainWindowIdInner(sessionMap, window->GetParentId(), mainWindowId);
+        }
+        // not main window, sub window, dialog, set invalid id
+        mainWindowId = INVALID_SESSION_ID;
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_PARENT;
+}
+
+uint32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
+{
+    if (windowId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
+        return INVALID_SESSION_ID;
+    }
+    uint32_t mainWindowId = INVALID_SESSION_ID;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
+        if (findRet == WMError::WM_OK) {
+            return mainWindowId;
+        }
+    }
+    // can't find in client, need to find in server find
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetParentMainWindowId(windowId, mainWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "cant't find main window id, err:%{public}d", static_cast<uint32_t>(ret));
+        return INVALID_SESSION_ID;
+    }
+    return mainWindowId;
+}
+
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     enableDefaultAnimation_= needDefaultAnimation;
@@ -3970,6 +4031,16 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "Id:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionFlag() const
+{
+    return property_->GetExtensionFlag();
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
+{
+    return property_->GetIsUIExtensionSubWindowFlag();
 }
 } // namespace Rosen
 } // namespace OHOS
