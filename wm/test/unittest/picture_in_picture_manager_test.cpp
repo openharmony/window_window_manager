@@ -32,6 +32,12 @@ public:
     void TearDown() override;
 };
 
+class MockWindow : public Window {
+public:
+    MockWindow() {};
+    ~MockWindow() {};
+};
+
 void PictureInPictureManagerTest::SetUpTestCase()
 {
 }
@@ -49,6 +55,20 @@ void PictureInPictureManagerTest::TearDown()
 }
 
 namespace {
+
+/**
+ * @tc.name: IsSupportPiP
+ * @tc.desc: IsSupportPiP
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsSupportPiP, Function | SmallTest | Level2)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(true, PictureInPictureManager::IsSupportPiP());
+    } else {
+        ASSERT_EQ(false, PictureInPictureManager::IsSupportPiP());
+    }
+}
 
 /**
  * @tc.name: PiPWindowState
@@ -162,23 +182,8 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
-
-    PictureInPictureManager::autoStartController_ = nullptr;
-    PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    PictureInPictureManager::autoStartController_ = pipController1;
-    PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    auto option1 = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option1);
-    auto windowSession = sptr<WindowSessionImpl>::MakeSptr(option1);
-    ASSERT_NE(nullptr, windowSession);
-    auto windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-    windowSceneSessionImpl->GetMainWindowWithId(1);
-    PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    pipController1->mainWindowId_ = 2;
-    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(2, windowSession)));
-    windowSceneSessionImpl->GetMainWindowWithId(2);
-    PictureInPictureManager::AttachAutoStartController(0, pipController1);
+    PictureInPictureManager::AttachAutoStartController(1, pipController1);
+    ASSERT_EQ(pipController1, PictureInPictureManager::autoStartControllerMap_[handleId]);
 }
 
 /**
@@ -188,31 +193,21 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
  */
 HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | SmallTest | Level2)
 {
-    int result = 0;
-    PictureInPictureManager::DetachAutoStartController(0, nullptr);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
+    wptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
-    PictureInPictureManager::SetActiveController(pipController);
-    result++;
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
-    PictureInPictureManager::autoStartController_ = pipController;
-    PictureInPictureManager::DetachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
-    PictureInPictureManager::autoStartController_ = pipController1;
-
-    sptr<Window> mainWindow = nullptr;
-    PictureInPictureManager::DetachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
-    mainWindow = PictureInPictureManager::GetCurrentWindow();
-    ASSERT_EQ(mainWindow, pipController->window_);
-    PictureInPictureManager::DetachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
-    PictureInPictureManager::DetachAutoStartController(0, pipController1);
+    PictureInPictureManager::AttachAutoStartController(0, pipController);
+    PictureInPictureManager::AttachAutoStartController(1, pipController1);
+    ASSERT_EQ(2, PictureInPictureManager::autoStartControllerMap_.size());
+    PictureInPictureManager::DetachAutoStartController(0, nullptr);
+    ASSERT_EQ(1, PictureInPictureManager::autoStartControllerMap_.size());
+    PictureInPictureManager::DetachAutoStartController(0, pipController);
+    ASSERT_EQ(1, PictureInPictureManager::autoStartControllerMap_.size());
 }
 
 /**
@@ -270,49 +265,99 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: DoPreRestore
+ * @tc.desc: DoPreRestore
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoPreRestore, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
+    PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoPreRestore();
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
+    PictureInPictureManager::SetActiveController(pipController);
+    PictureInPictureManager::DoPreRestore();
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_RESTORING);
+}
+
+/**
  * @tc.name: DoRestore
- * @tc.desc: DoRestore/DoClose/DoActionEvent
+ * @tc.desc: DoRestore
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
 {
-    int result = 0;
-    sptr<PipOption> option = new (std::nothrow) PipOption();
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
+    PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoRestore();
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
+    pipController->window_ = mw;
+    PictureInPictureManager::SetActiveController(pipController);
+    PictureInPictureManager::DoRestore();
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPING);
+}
+
+/**
+ * @tc.name: DoClose
+ * @tc.desc: DoClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
-    PictureInPictureManager::DoPreRestore();
-    PictureInPictureManager::DoRestore();
+    ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
+    PictureInPictureManager::SetActiveController(pipController);
+    ASSERT_EQ(true, PictureInPictureManager::HasActiveController());
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::DoClose(true, true);
-    PictureInPictureManager::DoActionClose();
-    PictureInPictureManager::DoLocateSource();
+    pipController->window_ = mw;
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
+    PictureInPictureManager::DoClose(false, true);
+    ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
+}
+
+/**
+ * @tc.name: DoActionEvent
+ * @tc.desc: DoActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoActionEvent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::activeController_ = nullptr;
+    ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
-    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
-    auto status = PiPControlStatus::PLAY;
-    PictureInPictureManager::DoControlEvent(controlType, status);
-    ASSERT_EQ(result, 0);
-    
     PictureInPictureManager::SetActiveController(pipController);
-    result++;
-
-    PictureInPictureManager::DoPreRestore();
-    PictureInPictureManager::DoRestore();
-    PictureInPictureManager::DoClose(true, true);
-    PictureInPictureManager::DoClose(true, false);
-    PictureInPictureManager::DoActionClose();
-    PictureInPictureManager::DoLocateSource();
+    ASSERT_EQ(true, PictureInPictureManager::HasActiveController());
     const std::string ACTION_CLOSE = "close";
-    const std::string ACTION_PRE_RESTORE = "pre_restore";
-    const std::string ACTION_RESTORE = "restore";
-    const std::string ACTION_DESTROY = "destroy";
     PictureInPictureManager::DoActionEvent(ACTION_CLOSE, 0);
-    PictureInPictureManager::DoActionEvent(ACTION_PRE_RESTORE, 0);
-    PictureInPictureManager::DoActionEvent(ACTION_RESTORE, 0);
-    PictureInPictureManager::DoActionEvent(ACTION_DESTROY, 0);
-    ASSERT_EQ(result, 1);
 }
 
 /**
@@ -322,10 +367,8 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
  */
 HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
 {
-    int result = 0;
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::AutoStartPipWindow();
-    ASSERT_EQ(result, 0);
 
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
@@ -336,7 +379,6 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
     PictureInPictureManager::AutoStartPipWindow();
     option->SetTypeNodeEnabled(false);
     PictureInPictureManager::AutoStartPipWindow();
-    ASSERT_EQ(result, 0);
     SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, "close");
 }
 
@@ -347,9 +389,13 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
  */
 HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
 {
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
@@ -357,6 +403,8 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     PictureInPictureManager::activeController_ = pipController;
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
+    pipController->window_ = mw;
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
 }
 }
