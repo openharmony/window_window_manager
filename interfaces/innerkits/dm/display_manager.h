@@ -280,7 +280,7 @@ public:
      *
      * @return Internal screen id.
      */
-    bool GetInternalScreenId();
+    ScreenId GetInternalScreenId();
 
     /**
      * @brief Set the screen power state by screen id.
