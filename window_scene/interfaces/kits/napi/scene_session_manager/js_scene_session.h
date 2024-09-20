@@ -102,6 +102,7 @@ private:
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value OpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     static napi_value CloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
+    static napi_value NotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
     static napi_value SetWindowLastSafeRect(napi_env env, napi_callback_info info);
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
@@ -115,6 +116,7 @@ private:
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
@@ -141,6 +143,7 @@ private:
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnOpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     napi_value OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
+    napi_value OnNotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLastSafeRect(napi_env env, napi_callback_info info);
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
