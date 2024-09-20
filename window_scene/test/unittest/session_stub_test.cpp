@@ -345,6 +345,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
     ASSERT_EQ(data.WriteUint32(1), true);
     AAFwk::Want options;
     EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->ProcessRemoteRequest(
@@ -415,12 +416,12 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: sessionStubTest02
- * @tc.desc: sessionStub sessionStubTest02
+ * @tc.name: sessionStubTest03
+ * @tc.desc: sessionStub sessionStubTest03
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -428,8 +429,8 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteUint32(1), true);
     auto res = session_->HandleSetGlobalMaximizeMode(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    auto res = session_->HandleTransferExtensionData(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
+    res = session_->HandleTransferExtensionData(data, reply);
+    ASSERT_EQ(ERR_INVALID_VALUE, res);
 }
 
 /**
