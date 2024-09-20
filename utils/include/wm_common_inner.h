@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class KeyboardAnimationConfig;
+class KeyboardAnimationCurve;
 
 enum class LifeCycleEvent : uint32_t {
     CREATE_EVENT,
@@ -101,7 +101,8 @@ struct SystemConfig : public Parcelable {
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    KeyboardAnimationConfig keyboardAnimationConfig_;
+    KeyboardAnimationCurve animationIn_;
+    KeyboardAnimationCurve animationOut_;
     std::string uiType_;
     bool supportTypeFloatWindow_ = false;
 
@@ -113,7 +114,7 @@ struct SystemConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteParcelable(&keyboardAnimationConfig_)) {
+            !parcel.WriteParcelable(&animationIn_) || !parcel.WriteParcelable(&animationOut_)) {
             return false;
         }
 
@@ -135,12 +136,18 @@ struct SystemConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
-        if (keyboardConfig == nullptr) {
+        sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationIn == nullptr) {
             delete config;
             return nullptr;
         }
-        config->keyboardAnimationConfig_ = *keyboardConfig;
+        config->animationIn_ = *animationIn;
+        sptr<KeyboardAnimationCurve> animationOut = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationOut == nullptr) {
+            delete config;
+            return nullptr;
+        }
+        config->animationOut_ = *animationOut;
         config->uiType_ = parcel.ReadString();
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         return config;
