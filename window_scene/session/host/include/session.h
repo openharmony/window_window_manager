@@ -490,6 +490,7 @@ public:
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
+    void SetAppInstanceKey(const std::string& appInstanceKey);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
