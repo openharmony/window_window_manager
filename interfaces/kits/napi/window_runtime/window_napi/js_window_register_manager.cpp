@@ -576,18 +576,17 @@ WmErrorCode JsWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<JsWindow
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<JsWindowListener> listener,
-    const sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<IMainWindowCloseListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
     }
     return ret;
 }
