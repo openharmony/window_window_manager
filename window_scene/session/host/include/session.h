@@ -85,6 +85,7 @@ using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
+using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 
 class ILifecycleListener {
 public:
@@ -192,6 +193,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
@@ -353,6 +355,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+    void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
     /*
      * Multi Window
@@ -382,8 +385,14 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+
+    /*
+     * Window ZOrder
+     */
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
+    uint32_t GetLastZOrder() const;
+
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
@@ -589,12 +598,19 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    /*
+     * Window ZOrder
+     */
     uint32_t zOrder_ = 0;
+    uint32_t lastZOrder_ = 0;
+
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     bool blockingFocus_ {false};
@@ -635,6 +651,7 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    int32_t GetRotateAnimationDuration();
 
     /*
      * Window Property

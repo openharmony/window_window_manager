@@ -90,7 +90,7 @@ WSError SessionStageProxy::UpdateDisplayId(uint64_t displayId)
 }
 
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const SceneAnimationConfig& config)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,6 +111,7 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
+    const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
     bool hasRSTransaction = rsTransaction != nullptr;
     if (!data.WriteBool(hasRSTransaction)) {
         WLOGFE("Write has transaction failed");
@@ -124,6 +125,11 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             return WSError::WS_ERROR_IPC_FAILED;
         }
         rsTransaction->SetParentPid(pid);
+    }
+
+    if (!data.WriteInt32(config.animationDuration_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -1220,6 +1226,32 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
+}
+
+WSError SessionStageProxy::SetSplitButtonVisible(bool isVisible)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
 }
 
 } // namespace OHOS::Rosen

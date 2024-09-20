@@ -176,6 +176,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
+    DestroySubWindow();
     {
         TLOGI(WmsLogTag::WMS_LIFE, "Reset state, id: %{public}d.", GetPersistentId());
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
@@ -503,7 +504,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 }
 
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const SceneAnimationConfig& config)
 {
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
@@ -526,6 +527,7 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     }
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
+        const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
     } else if (handler_ != nullptr) {
         UpdateRectForOtherReason(wmRect, wmReason);
@@ -847,6 +849,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();

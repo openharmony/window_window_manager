@@ -1053,6 +1053,86 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, Function | SmallTest | 
     window->hostSession_ = session;
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
 }
+
+/**
+ * @tc.name: KeepKeyboardOnFocus01
+ * @tc.desc: KeepKeyboardOnFocus
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest4, KeepKeyboardOnFocus01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, keyboardOption);
+    keyboardOption->SetWindowName("KeepKeyboardOnFocus01");
+    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowSceneSessionImpl> keyboardWindow = new (std::nothrow) WindowSceneSessionImpl(keyboardOption);
+    ASSERT_NE(nullptr, keyboardWindow);
+
+    keyboardWindow->KeepKeyboardOnFocus(false);
+    ASSERT_EQ(keyboardWindow->property_->keepKeyboardFlag_, false);
+
+    keyboardWindow->KeepKeyboardOnFocus(true);
+    ASSERT_EQ(keyboardWindow->property_->keepKeyboardFlag_, true);
+}
+
+/**
+ * @tc.name: MoveAndResizeKeyboard01
+ * @tc.desc: MoveAndResizeKeyboard
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, keyboardOption);
+    keyboardOption->SetWindowName("MoveAndResizeKeyboard01");
+    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowSceneSessionImpl> keyboardWindow = new (std::nothrow) WindowSceneSessionImpl(keyboardOption);
+    ASSERT_NE(nullptr, keyboardWindow);
+
+    bool isLandscape = false;
+    keyboardWindow->property_->displayId_ = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    if (display != nullptr) {
+        isLandscape = display->GetWidth() > display->GetHeight();
+    }
+    KeyboardLayoutParams param;
+    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
+    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
+    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
+    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
+    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: MoveAndResizeKeyboard02
+ * @tc.desc: MoveAndResizeKeyboard
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, keyboardOption);
+    keyboardOption->SetWindowName("MoveAndResizeKeyboard02");
+    keyboardOption->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowSceneSessionImpl> keyboardWindow = new (std::nothrow) WindowSceneSessionImpl(keyboardOption);
+    ASSERT_NE(nullptr, keyboardWindow);
+
+    bool isLandscape = false;
+    keyboardWindow->property_->displayId_ = DISPLAY_ID_INVALID;
+    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplayInfo != nullptr) {
+        isLandscape = defaultDisplayInfo->GetWidth() > defaultDisplayInfo->GetHeight();
+    }
+    KeyboardLayoutParams param;
+    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
+    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
+    auto result = keyboardWindow->MoveAndResizeKeyboard(param);
+    auto expectRect = isLandscape ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
+    ASSERT_EQ(keyboardWindow->property_->requestRect_, expectRect);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

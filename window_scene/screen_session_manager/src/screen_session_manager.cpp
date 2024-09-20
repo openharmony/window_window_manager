@@ -173,7 +173,17 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     }
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    FoldScreenPowerInit();
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        SetFoldScreenPowerInit([&]() {
+            foldScreenController_->BootAnimationFinishPowerInit();
+            FixPowerStatus();
+            foldScreenController_->SetOnBootAnimation(false);
+            RegisterApplicationStateObserver();
+        });
+    } else {
+        // 后续其他设备rs上电规格将陆续迁移到BootAnimationFinishPowerInit中
+        FoldScreenPowerInit();
+    }
 }
 
 void ScreenSessionManager::FoldScreenPowerInit()
@@ -4959,10 +4969,12 @@ void ScreenSessionManager::SetClientInner()
             TLOGE(WmsLogTag::DMS, "clientProxy is null");
             return;
         }
-        if (iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
-            clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
-                iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        if (iter.second->GetIsExtend() && iter.second->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            TLOGI(WmsLogTag::DMS, "current screen is extend and mirror, return before OnScreenConnectionChanged");
+            continue;
         }
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
     }
 }
 
