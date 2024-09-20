@@ -180,7 +180,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
 
     ratio = 10;
     result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**

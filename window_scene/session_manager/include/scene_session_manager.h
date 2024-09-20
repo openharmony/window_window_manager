@@ -157,6 +157,7 @@ public:
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const int32_t appIndex,
         const uint32_t windowType = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
+    sptr<SceneSession> GetSceneSessionByType(WindowType type);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -186,6 +187,7 @@ public:
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+    void UpdateRotateAnimationConfig(const RotateAnimationConfig& config);
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
     void GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
@@ -479,8 +481,13 @@ private:
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
+    /*
+     * Window Pipeline
+     */
+    void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
+
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -579,6 +586,7 @@ private:
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession);
     void RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession);
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
@@ -608,6 +616,7 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+    void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
     /*
      * Multi User
@@ -657,6 +666,7 @@ private:
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
+    RotateAnimationConfig rotateAnimationConfig_;
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;

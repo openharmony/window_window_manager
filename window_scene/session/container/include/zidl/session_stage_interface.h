@@ -41,7 +41,7 @@ public:
     // IPC interface
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
 
@@ -173,6 +173,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
