@@ -79,6 +79,7 @@ ohos_shared_library("scene_session") {
   external_deps = [
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
+    "ability_runtime:start_window_option",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
