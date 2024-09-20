@@ -254,6 +254,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
+    napi_set_named_property(env, objValue, "appInstanceKey",
+        CreateJsValue(env, session->GetSessionInfo().appInstanceKey_));
     SetWindowSize(env, objValue, session);
 
     const char* moduleName = "JsSceneSession";
@@ -2847,8 +2849,8 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
             } else {
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_, info.windowType_);
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(info.bundleName_,
+                    info.moduleName_, info.abilityName_, info.appIndex_, info.appInstanceKey_, info.windowType_);
             }
         }
         if (sceneSession == nullptr) {
