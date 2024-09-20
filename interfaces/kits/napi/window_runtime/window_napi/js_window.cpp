@@ -5718,7 +5718,7 @@ napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window
     for (size_t i = 0; i < windows.size(); i++) {
         auto window = windows[i];
         if (window == nullptr) {
-            napi_set_element(env, arrayValue, index++, nullptr);
+            TLOGW(WmsLogTag::DEFAULT, "window is null");
         } else {
             napi_set_element(env, arrayValue, index++, CreateJsWindowObject(env, window));
         }
