@@ -92,6 +92,8 @@ constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
+constexpr int32_t MAX_POINTERS = 16;
+constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -668,7 +670,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const MMI::PointerEvent::PointerItem& pointerItem)
+    MMI::PointerEvent::PointerItem& pointerItem)
 {
     const int32_t& action = pointerEvent->GetPointerAction();
     const auto& sourceType = pointerEvent->GetSourceType();
@@ -676,6 +678,9 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool needNotifyEvent = true;
+    if (property_->GetCompatibleModeEnableInPad()) {
+        HandleEventForCompatibleMode(pointerEvent, pointerItem);
+    }
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -3222,6 +3227,17 @@ WSError WindowSceneSessionImpl::CompatibleFullScreenClose()
     return WSError::WS_OK;
 }
 
+WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, enable: %{public}d", GetPersistentId(), enable);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    property_->SetCompatibleModeEnableInPad(enable);
+    return WSError::WS_OK;
+}
+
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     WLOGFI("in");
@@ -3748,6 +3764,188 @@ uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
     TLOGI(WmsLogTag::WMS_IMMS, "%{public}d", height);
     return height;
+}
+
+template <typename K, typename V>
+static V GetValueByKey(const std::unordered_map<K, V>& map, K key)
+{
+    auto it = map.find(key);
+    return it != map.end() ? it->second : V{};
+}
+
+void WindowSceneSessionImpl::HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    int32_t action = pointerEvent->GetPointerAction();
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            HandleDownForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_MOVE:
+            HandleMoveForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+            HandleUpForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        default:
+            break;
+    }
+}
+
+void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    int32_t displayX = pointerItem.GetDisplayX();
+    int32_t displayY = pointerItem.GetDisplayY();
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerCount = pointerEvent->GetPointerCount();
+    if (pointerCount == 1) {
+        eventMapTriggerByDisplay_[displayId] = std::vector<bool>(MAX_POINTERS);
+        eventMapDeltaXByDisplay_[displayId] = std::vector<int32_t>(MAX_POINTERS);
+        downPointerByDisplay_[displayId] = std::vector<PointInfo>(MAX_POINTERS);
+        isOverTouchSlop_ = false;
+        isDown_ = true;
+    }
+
+    if (IsInMappingRegionForCompatibleMode(displayX, displayY)) {
+        int32_t pointerId = pointerEvent->GetPointerId();
+        if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+            pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size() ||
+            pointerId >= GetValueByKey(downPointerByDisplay_, displayId).size()) {
+            TLOGE(WmsLogTag::DEFAULT, "pointerId: %{public}d out of range", pointerId);
+            return;
+        }
+        eventMapTriggerByDisplay_[displayId][pointerId] = true;
+        downPointerByDisplay_[displayId][pointerId] = {displayX, displayY};
+        const auto& windowRect = GetRect();
+        float xMappingScale = 1.0f;
+        if (windowRect.posX_ != 0) {
+            xMappingScale = static_cast<float>(windowRect.width_) / windowRect.posX_;
+        }
+        int32_t windowLeft = windowRect.posX_;
+        int32_t windowRight = windowRect.posX_ + windowRect.width_;
+        int32_t transferX;
+        if (displayX <= windowLeft) {
+            transferX = windowRight - xMappingScale * (windowLeft - displayX);
+        } else {
+            transferX = windowLeft + xMappingScale * (displayX - windowRight);
+        }
+        if (transferX < 0) {
+            transferX = 0;
+        }
+        TLOGI(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{public}d, transferX: %{public}d, "
+            "pointerId: %{public}d", displayX, transferX, pointerId);
+        eventMapDeltaXByDisplay_[displayId][pointerId] = transferX - displayX;
+        ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+    }
+}
+
+void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    if (!isDown_) {
+        TLOGW(WmsLogTag::DEFAULT, "receive move before down, skip");
+        return;
+    }
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+        pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size() ||
+        !GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId]) {
+        return;
+    }
+
+    int32_t displayX = pointerItem.GetDisplayX();
+    int32_t displayY = pointerItem.GetDisplayY();
+    const auto& windowRect = GetRect();
+    if (!isOverTouchSlop_ && CheckTouchSlop(pointerId, displayX, displayY, windowRect.width_ / TOUCH_SLOP_RATIO)) {
+        TLOGD(WmsLogTag::DEFAULT, "reach touch slop, threshold: %{public}d", windowRect.width_ / TOUCH_SLOP_RATIO);
+        isOverTouchSlop_ = true;
+    }
+    int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
+    TLOGD(WmsLogTag::DEFAULT, "MOVE, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+        displayX, transferX, pointerId);
+    ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+}
+
+void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    if (!isDown_) {
+        TLOGW(WmsLogTag::DEFAULT, "receive up before down, skip");
+        return;
+    }
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+        pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size()) {
+        return;
+    }
+    if (GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId]) {
+        int32_t displayX = pointerItem.GetDisplayX();
+        int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
+        ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+        TLOGI(WmsLogTag::DEFAULT, "UP, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+            displayX, transferX, pointerId);
+        GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId] = 0;
+        GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId] = false;
+        IgnoreClickEvent(pointerEvent);
+    }
+    int32_t pointerCount = pointerEvent->GetPointerCount();
+    if (pointerCount == 1) {
+        eventMapDeltaXByDisplay_.erase(displayId);
+        eventMapTriggerByDisplay_.erase(displayId);
+        downPointerByDisplay_.erase(displayId);
+        isDown_ = false;
+    }
+}
+
+void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem, int32_t transferX)
+{
+    const auto& windowRect = GetRect();
+    int32_t pointerId = pointerEvent->GetPointerId();
+
+    pointerItem.SetDisplayX(transferX);
+    pointerItem.SetDisplayXPos(static_cast<double>(transferX));
+    pointerItem.SetWindowX(transferX - windowRect.posX_);
+    pointerItem.SetWindowXPos(static_cast<double>(transferX - windowRect.posX_));
+    pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+}
+
+bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
+{
+    const auto& windowRect = GetRect();
+    Rect pointerRect = { displayX, displayY, 0, 0 };
+    return !pointerRect.IsInsideOf(windowRect);
+}
+
+bool WindowSceneSessionImpl::CheckTouchSlop(int32_t pointerId, int32_t displayX, int32_t displayY, int32_t threshold)
+{
+    int32_t displayId = property_->GetDisplayId();
+    if (downPointerByDisplay_.find(displayId) == downPointerByDisplay_.end()) {
+        return false;
+    }
+    std::vector<PointInfo> downPointers = downPointerByDisplay_[displayId];
+    return pointerId < downPointers.size() &&
+        (std::abs(displayX - downPointers[pointerId].x) >= threshold ||
+        std::abs(displayY - downPointers[pointerId].y) >= threshold);
+}
+
+void WindowSceneSessionImpl::IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_UP) {
+        return;
+    }
+    if (isOverTouchSlop_) {
+        if (pointerEvent->GetPointerCount() == 1) {
+            isOverTouchSlop_ = false;
+        }
+    } else {
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        TLOGI(WmsLogTag::DEFAULT, "transfer UP to CANCEL for not over touch slop");
+    }
 }
 
 WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)

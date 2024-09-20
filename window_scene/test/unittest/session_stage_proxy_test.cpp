@@ -415,6 +415,18 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: NotifyCompatibleModeEnableInPad
+ * @tc.desc: test function : NotifyCompatibleModeEnableInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyCompatibleModeEnableInPad(true);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: UpdateTitleInTargetPos
  * @tc.desc: test function : UpdateTitleInTargetPos
  * @tc.type: FUNC
