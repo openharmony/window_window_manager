@@ -10789,17 +10789,22 @@ WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int
         TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    hostWindowId = INVALID_WINDOW_ID;
-    sptr<Session> session = GetSceneSession(persistentId);
-    while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
-    {
-        session = session->GetParentSession();
-    }
-    if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
-        hostWindowId = session->GetPersistentId();
-    }
-    TLOGI(WmsLogTag::WMS_MAIN, "persistentId:%{public}d hostWindowId:%{public}d", persistentId, hostWindowId);
-    return WMError::WM_OK;
+    const char* const where = __func__;
+    auto task = [this, persistentId, &hostWindowId, where]() {
+        hostWindowId = INVALID_WINDOW_ID;
+        sptr<Session> session = GetSceneSession(persistentId);
+        while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
+        {
+            session = session->GetParentSession();
+        }
+        if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
+            hostWindowId = session->GetPersistentId();
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: persistentId:%{public}d hostWindowId:%{public}d",
+            where, persistentId, hostWindowId);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, where);
 }
 
 } // namespace OHOS::Rosen
