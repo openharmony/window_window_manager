@@ -282,7 +282,6 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
-    void ClearWindowCloseListenersById(int32_t persistentId);
     void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
