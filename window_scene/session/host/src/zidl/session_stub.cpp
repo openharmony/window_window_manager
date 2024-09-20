@@ -421,6 +421,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->canStartAbilityFromBackground = data.ReadBool();
     abilitySessionInfo->isAtomicService = data.ReadBool();
     abilitySessionInfo->isBackTransition = data.ReadBool();
+    abilitySessionInfo->needClearInNotShowRecent = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
