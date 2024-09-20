@@ -758,6 +758,25 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Leve
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
+
+/**
+ * @tc.name: HandleNotifyDumpInfo
+ * @tc.desc: test function : HandleNotifyDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteBool(false);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetSplitButtonVisible(data, reply));
+}
 }
 }
 }

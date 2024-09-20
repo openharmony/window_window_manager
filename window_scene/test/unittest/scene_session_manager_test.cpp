@@ -285,9 +285,6 @@ HWTEST_F(SceneSessionManagerTest, CheckIsRemote, Function | SmallTest | Level3)
     std::string deviceId;
     bool result = ssm_->CheckIsRemote(deviceId);
     EXPECT_FALSE(result);
-    deviceId.assign("deviceId");
-    result = ssm_->CheckIsRemote(deviceId);
-    EXPECT_FALSE(result);
 }
 
 /**

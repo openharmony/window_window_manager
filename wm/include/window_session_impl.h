@@ -129,7 +129,7 @@ public:
      */
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     WSError UpdateOrientation() override;
@@ -265,6 +265,11 @@ public:
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
+    /*
+     * Multi Window
+     */
+    WSError SetSplitButtonVisible(bool isVisible) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -310,6 +315,12 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+
+    /**
+     * Sub Window
+     */
+    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
+    void DestroySubWindow();
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
@@ -431,7 +442,7 @@ private:
     std::string GetRestoredRouterStack();
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
@@ -504,6 +515,11 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    /*
+     * Multi Window
+     */
+    bool isSplitButtonVisible_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS
