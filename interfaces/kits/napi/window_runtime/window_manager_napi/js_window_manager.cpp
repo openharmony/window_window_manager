@@ -42,6 +42,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
+constexpr int32_t INVALID_COORDINATE = -1;
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -1221,24 +1222,24 @@ napi_value JsWindowManager::OnGetWindowFromPoint(napi_env env, napi_callback_inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t windowNumber = 0;
-    int32_t x = -1;
-    int32_t y = -1;
     if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[ARGC_ONE], windowNumber)) {
         windowNumber = 0;
     }
+    int32_t x = INVALID_COORDINATE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARGC_TWO], x)) {
         x = -1;
     }
+    int32_t y = INVALID_COORDINATE;
     if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_THREE], y)) {
         y = -1;
     }
     napi_value result = nullptr;
     NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-        std::vector<sptr<Window>> windows;
         std::vector<int32_t> windowIds;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetWindowFromPoint(
             static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
         if (ret == WmErrorCode::WM_OK) {
+            std::vector<sptr<Window>> windows;
             for (const auto& windowId: windowIds) {
                 sptr<Window> window = Window::GetWindowWithId(windowId);
                 windows.emplace_back(window);

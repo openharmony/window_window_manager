@@ -10192,7 +10192,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 WMError SceneSessionManager::GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
-    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}ld windowNumber %{public}d x %{public}d y %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
           displayId, windowNumber, x, y);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
@@ -10225,7 +10225,7 @@ WMError SceneSessionManager::GetWindowFromPoint(DisplayId displayId, int32_t win
         WSRect windowRect = session->GetSessionRect();
         bool isPointInWindow = x > windowRect.posX_ && x < (windowRect.posX_ + windowRect.width_) &&
                                y > windowRect.posY_ && y < (windowRect.posY_ + windowRect.height_);
-        TLOGD(WmsLogTag::DEFAULT, "PersistentId %{public}d bundleName_ %{public}s displayId %{public}ld "
+        TLOGND(WmsLogTag::DEFAULT, "PersistentId %{public}d bundleName_ %{public}s displayId %{public}llu "
             "isRsVisible %{public}d checkPoint %{public}d isPointInWindow %{public}d",
             session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
             sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindow);
@@ -10237,7 +10237,7 @@ WMError SceneSessionManager::GetWindowFromPoint(DisplayId displayId, int32_t win
         return false;
     };
     TraverseSessionTree(func, true);
-    TLOGD(WmsLogTag::DEFAULT, "windowIds size %{public}lu", windowIds.size());
+    TLOGD(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
     return WMError::WM_OK;
 }
 
