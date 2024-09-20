@@ -207,7 +207,6 @@ public:
     bool GetIsUIExtensionAbilityProcess() const;
     void SetParentWindowType(WindowType parentWindowType);
     WindowType GetParentWindowType() const;
-    bool GetIsUIExtensionFlag() const;
     void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
     bool GetIsUIExtensionSubWindowFlag() const;
 

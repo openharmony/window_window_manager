@@ -173,7 +173,7 @@ public:
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override { return WMError::WM_OK; }
-    // only main window、sub window and dialog window can use
+    // only main window,sub window and dialog window can use
     WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) override { return WMError::WM_OK; }
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override {}

@@ -541,12 +541,13 @@ public:
     static sptr<Window> Find(const std::string& windowName);
 
     /**
-     * @brief Get parent main windowId，which is used for mainWindow、subWindow or dialog
+     * @brief Get parent main windowId, which is used for mainWindow,subWindow or dialog
      *
-     * @param windowId window id that need get parent main window
+     * @param windowId window id that need to get parent main window
      * @return uint32_t Return the parent main window id
      */
     static uint32_t GetParentMainWindowId(uint32_t windowId);
+
     /**
      * @brief Get the final show window by context. Its implemented in api8
      *
@@ -2283,13 +2284,6 @@ public:
      * @return true - is UIExtension window, flase - is not UIEXtension window.
      */
     virtual bool GetIsUIExtensionFlag() const { return false; }
-
-    /**
-     * @brief Set whether this window is a sub window of the UIExtension.
-     *
-     * @param isUIExtensionSubWindowFlag
-     */
-    virtual void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag) {}
 
     /**
      * @brief Get IsUIExtensionSubWindowFlag of window.
