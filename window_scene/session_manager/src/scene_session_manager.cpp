@@ -3576,6 +3576,10 @@ static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSess
         TLOGW(WmsLogTag::WMS_SUB, "not find parent session");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        mainWindowId = sceneSession->GetPersistentId();
+        return WMError::WM_OK;
+    }
     if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
         WindowHelper::IsDialogWindow(sceneSession->GetWindowType())) {
         return GetParentMainWindowIdInner(sceneSessionMap, sceneSession->GetParentPersistentId(), mainWindowId);

@@ -246,12 +246,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
     bool isUiExtSubWindowFlag = property_->GetIsUIExtensionSubWindowFlag();
-    bool isUiExtFlag = property_->GetExtensionFlag();
 
-    bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) && !isUiExtFlag && !isUiExtSubWindowFlag;
-    bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) && !isUiExtFlag && isUiExtSubWindowFlag && !isToastFlag;
-    bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag;
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && isUiExtFlag;
+    bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && !isUiExtSubWindowFlag;
+    bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && isUiExtSubWindowFlag && !isToastFlag;
+    bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag && isToastFlag;
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag();
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
@@ -275,17 +276,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
-    } else if (isUiExtSubWindow) {
+    } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
         property_->SetParentPersistentId(property_->GetParentId());
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         AddSubWindowMapForExtensionWindow();
-    } else if (isUiExtSubWindowToast) {
-        property_->SetParentPersistentId(property_->GetParentId());
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
