@@ -343,7 +343,7 @@ ScreenId DisplayManagerAdapter::GetInternalScreenId()
 {
     INIT_PROXY_CHECK_RETURN(false);
 
-    return displayManagerServiceProxy_->GetInstanceScreenId();
+    return displayManagerServiceProxy_->GetInternalScreenId();
 }
 
 bool DisplayManagerAdapter::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
