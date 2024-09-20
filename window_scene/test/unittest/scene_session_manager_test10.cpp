@@ -412,6 +412,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint05, Function | SmallTest |
     ssm_->sceneSessionMap_.clear();
 }
 
+/**
  * @tc.name: ProcessFocusZOrderChange
  * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
