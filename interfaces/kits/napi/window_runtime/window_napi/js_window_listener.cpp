@@ -589,7 +589,7 @@ void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 
 void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
-    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_] () mutable {
+    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_]() mutable {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnMainWindowClose");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
