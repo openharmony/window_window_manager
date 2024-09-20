@@ -154,7 +154,6 @@ public:
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtensionFlag() const override;
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag) override;
     bool GetIsUIExtensionSubWindowFlag() const override;
 
 protected:
