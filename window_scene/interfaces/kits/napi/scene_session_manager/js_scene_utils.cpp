@@ -77,7 +77,8 @@ WSError GetIntValue(const std::string& str, int32_t& value)
     errno = 0;
     value = strtol(str.c_str(), nullptr, 10); // 10 number convert base
     if (errno != 0) {
-        return WSError::WS_ERROR_NULLPTR;
+        TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
     }
     return WSError::WS_OK;
 }
