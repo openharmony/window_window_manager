@@ -1483,7 +1483,7 @@ ScreenId ScreenSessionManager::GetInternalScreenId()
     ScreenId screenId = -1;
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInteral_) {
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
             screenId = sessionIt.first;
             break;
         }
