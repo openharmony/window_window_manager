@@ -52,6 +52,7 @@
 #include "screen.h"
 #include "singleton_container.h"
 #include "fold_screen_state_internel.h"
+#include "start_window_option.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -3152,6 +3153,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.callingTokenId_ = abilitySessionInfo->callingTokenId;
     info.reuse = abilitySessionInfo->reuse;
     info.processOptions = abilitySessionInfo->processOptions;
+    info.startWindowOption = abilitySessionInfo->startWindowOption;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
