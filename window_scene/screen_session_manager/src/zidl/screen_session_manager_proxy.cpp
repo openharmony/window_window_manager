@@ -796,7 +796,8 @@ ScreenId OHOS::Rosen::ScreenSessionManagerProxy::GetInternalScreenId()
     return reply.ReadUint64();
 }
 
-bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
