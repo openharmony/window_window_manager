@@ -103,7 +103,8 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, Function | SmallTest | Level1)
     WSError res = sessionStage_->UpdateRect(rect, reason);
     ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    res = sessionStage_->UpdateRect(rect, reason, rsTransaction);
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -594,6 +595,18 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     res = sessionStage->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetSplitButtonVisible
+ * @tc.desc: test function : SetSplitButtonVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetSplitButtonVisible(false);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 }
 }

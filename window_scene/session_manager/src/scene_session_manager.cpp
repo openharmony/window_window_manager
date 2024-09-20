@@ -1238,6 +1238,17 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
     return nullptr;
 }
 
+sptr<SceneSession> SceneSessionManager::GetSceneSessionByType(WindowType type)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetWindowType() == type) {
+            return sceneSession;
+        }
+    }
+    return nullptr;
+}
+
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
     WindowType type, uint64_t displayId)
 {
@@ -1634,6 +1645,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
+    RegisterAcquireRotateAnimationConfigFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -3009,10 +3021,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
-        auto sessionProperty = sceneSession->GetSessionProperty();
-        if (sessionProperty && sessionProperty->GetExtensionFlag() == true) {
-            sceneSession->NotifyDestroy();
-        }
+        DestroyUIServiceExtensionSubWindow(sceneSession);
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -3073,9 +3082,35 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
 }
 
+void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession)
+{
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_SUB,"sceneSession is null");
+        return;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+        !sessionProperty->GetIsUIExtensionAbilityProcess()) {
+        sceneSession->NotifyDestroy();
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->
+            TerminateUIServiceExtensionAbility(sceneSession->GetAbilityToken());
+        TLOGI(WmsLogTag::WMS_SUB,"TerminateUIServiceExtensionAbility id:%{public}d errCode:%{public}d",
+            sceneSession->GetPersistentId(), errCode);
+    }
+}
+
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 {
     return appWindowSceneConfig_;
+}
+
+void SceneSessionManager::UpdateRotateAnimationConfig(const RotateAnimationConfig& config)
+{
+    auto task = [this, config]() {
+        TLOGI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
+        rotateAnimationConfig_.duration_ = config.duration_;
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateRotateAnimationConfig");
 }
 
 WSError SceneSessionManager::ProcessBackEvent()
@@ -4001,6 +4036,20 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
     WLOGFD("success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
+void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        return;
+    }
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc = [this](RotateAnimationConfig& config) {
+        config.duration_ = rotateAnimationConfig_.duration_;
+    };
+    sceneSession->SetAcquireRotateAnimationConfigFunc(acquireRotateAnimationConfigFunc);
+    TLOGD(WmsLogTag::DEFAULT, "Register acquire Rotate Animation config success, id: %{public}d",
+        sceneSession->GetPersistentId());
+}
+
 void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
 {
     if (sceneSession == nullptr) {
@@ -4708,7 +4757,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
     TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
         lastFocusedAppSessionId_, nextSession->GetPersistentId());
 
-    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_ ) {
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId_) {
         return false;
     }
 
@@ -4722,7 +4771,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
         (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
          mode == WindowMode::WINDOW_MODE_FLOATING)) {
         if (RequestSessionFocus(lastFocusedAppSessionId_, false, FocusChangeReason::LAST_FOCUSED_APP) ==
-            WSError::WS_OK){
+            WSError::WS_OK) {
             return true;
         }
         lastFocusedAppSessionId_ = INVALID_SESSION_ID;
@@ -4939,8 +4988,10 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
+        bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
-            (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus());
+                              (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
+                              (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
         if (IsSessionVisibleForeground(session) && isBlockingType)  {
             ret = session;
             return true;
@@ -7163,6 +7214,15 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
+    
+    auto notifySceneInputTask = [weakSceneSession, type]() {
+        auto sceneSession = weakSceneSession.promote();
+        if (sceneSession == nullptr) {
+            return;
+        }
+        SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, type);
+    };
+    taskScheduler_->PostAsyncTask(notifySceneInputTask);
 }
 
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
@@ -8932,6 +8992,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
+            ProcessFocusZOrderChange(sessionMapDirty);
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
@@ -8955,6 +9016,34 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         }
     };
     taskScheduler_->PostAsyncTask(task, "FlushUIParams");
+}
+
+void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
+    if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
+        return;
+    }
+    if (!systemConfig_.IsPhoneWindow() && !systemConfig_.IsPadWindow()) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "has zOrder dirty");
+    auto focusedSession = GetSceneSession(focusedSessionId_);
+    // only when it's from a high zOrder to a low zOrder
+    if (focusedSession == nullptr || focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION ||
+        focusedSession->GetLastZOrder() <= focusedSession->GetZOrder()) {
+        return;
+    }
+    auto voiceInteractionSession = GetSceneSessionByType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    if (voiceInteractionSession == nullptr) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "interactionSession: id %{public}d zOrder %{public}d, focusedSession: lastZOrder "
+          "%{public}d zOrder %{public}d", voiceInteractionSession->GetPersistentId(),
+          voiceInteractionSession->GetZOrder(), focusedSession->GetLastZOrder(), focusedSession->GetZOrder());
+    if (focusedSession->GetLastZOrder() < voiceInteractionSession->GetZOrder() ||
+        focusedSession->GetZOrder() > voiceInteractionSession->GetZOrder()) {
+        return;
+    }
+    RequestSessionFocus(voiceInteractionSession->GetPersistentId(), true, FocusChangeReason::VOICE_INTERACTION);
 }
 
 void SceneSessionManager::PostProcessFocus()
