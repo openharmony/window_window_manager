@@ -205,23 +205,23 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
-static void SetWindowPositionAndSize(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+static void SetWindowSize(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
 {
     auto sessionInfo = session->GetSessionInfo();
     auto abilityInfo = sessionInfo.abilityInfo;
     if (!abilityInfo) {
         return;
     }
+    uint32_t value = 0;
     auto metadata = abilityInfo->metadata;
-    int32_t value = 0;
     for (auto item : metadata) {
         if (item.name == "ohos.ability.window.width") {
-            if (GetIntValue(item.value, value) == WSError::WS_OK) {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
                 TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.width = %{public}d", value);
                 napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.height") {
-            if (GetIntValue(item.value, value) == WSError::WS_OK) {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
                 TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.height = %{public}d", value);
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
             }
@@ -255,7 +255,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
-    SetWindowPositionAndSize(env, objValue, session);
+    SetWindowSize(env, objValue, session);
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
