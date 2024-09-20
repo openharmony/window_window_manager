@@ -462,6 +462,21 @@ public:
 };
 
 /**
+ * @class IMainWindowCloseListener
+ *
+ * @brief IMainWindowCloseListener is used for preprocessing when the main window exits.
+ */
+class IMainWindowCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when main window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the main window close process.
+     */
+    virtual void OnMainWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
  * @class ISwitchFreeMultiWindowListener
  *
  * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
@@ -2047,6 +2062,24 @@ public:
      */
     virtual WMError UnregisterSubWindowCloseListeners(
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register switch free multi-window listener.

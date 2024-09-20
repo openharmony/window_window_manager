@@ -177,6 +177,7 @@ protected:
 
 private:
     WMError DestroyInner(bool needNotifyServer);
+    WMError MainWindowCloseInner();
     WMError SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
