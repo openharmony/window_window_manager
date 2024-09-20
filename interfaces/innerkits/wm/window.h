@@ -2276,6 +2276,27 @@ public:
      * @return * void
      */
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+
+    /**
+     * @brief Get IsUIExtensionFlag of window.
+     *
+     * @return true - is UIExtension window, flase - is not UIEXtension window.
+     */
+    virtual bool GetIsUIExtensionFlag() const { return false; }
+
+    /**
+     * @brief Set whether this window is a sub window of the UIExtension.
+     *
+     * @param isUIExtensionSubWindowFlag
+     */
+    virtual void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag) {}
+
+    /**
+     * @brief Get IsUIExtensionSubWindowFlag of window.
+     *
+     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     */
+    virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
 };
 }
 }

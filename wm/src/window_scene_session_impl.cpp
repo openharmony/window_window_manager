@@ -231,7 +231,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         info.bundleName_ = context_->GetBundleName();
     }
     property_->SetSessionInfo(info);
-    if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
+    if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false 
+        && property_->GetIsUIExtensionSubWindowFlag() == false) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
         if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
             std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -257,6 +258,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetParentPersistentId(property_->GetParentId());
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // creat sub session by parent session
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+    } else if (property_->GetIsUIExtensionSubWindowFlag()) {
+        property_->SetParentPersistentId(property_->GetParentId());
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
     } else { // system window
@@ -3888,6 +3893,21 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "Id:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionFlag() const
+{
+    return property_->GetExtensionFlag();
+}
+
+void WindowSceneSessionImpl::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    property_->SetIsUIExtensionSubWindowFlag(isUIExtensionSubWindowFlag);
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
+{
+    return property_->GetIsUIExtensionSubWindowFlag();
 }
 } // namespace Rosen
 } // namespace OHOS
