@@ -27,6 +27,7 @@
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "start_window_option.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -553,6 +554,15 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (hasStartSetting) {
         auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
         abilitySessionInfo->startSetting.reset(abilityStartSetting);
+    }
+    bool hasStartWindowOption = false;
+        if (!data.ReadBool(hasStartWindowOption)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartWindowOption) {
+        auto abilityStartWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+        abilitySessionInfo->startWindowOption.reset(abilityStartWindowOption);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
