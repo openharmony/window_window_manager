@@ -2133,7 +2133,7 @@ public:
      */
     virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -2144,7 +2144,7 @@ public:
      */
     virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**

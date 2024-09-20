@@ -842,6 +842,8 @@ ScreenSourceMode ScreenSession::GetSourceMode() const
 
 void ScreenSession::SetScreenCombination(ScreenCombination combination)
 {
+    WLOGFI("screenId:%{public}" PRIu64", set combination:%{public}d", screenId_,
+        static_cast<int32_t>(combination));
     combination_ = combination;
 }
 

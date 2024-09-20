@@ -152,6 +152,16 @@ ScreenId FoldScreenController::GetCurrentScreenId()
     return foldScreenPolicy_->GetCurrentScreenId();
 }
 
+void FoldScreenController::BootAnimationFinishPowerInit()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->BootAnimationFinishPowerInit();
+    foldScreenPolicy_->currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+}
+
 void FoldScreenController::SetOnBootAnimation(bool onBootAnimation)
 {
     if (foldScreenPolicy_ == nullptr) {

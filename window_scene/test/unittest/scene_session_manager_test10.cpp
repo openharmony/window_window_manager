@@ -170,6 +170,51 @@ HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | Sma
 }
 
 /**
+ * @tc.name: UpdateRotateAnimationConfig
+ * @tc.desc: UpdateRotateAnimationConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, UpdateRotateAnimationConfig, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    RotateAnimationConfig config = { 400 };
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
+
+    config.duration_ = 600;
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
+}
+
+/**
+ * @tc.name: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.desc: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterAcquireRotateAnimationConfigFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.persistentId_ = 1;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(sessionInfo.abilityInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
+    WSRect rect({1, 1, 1, 1});
+    SizeChangeReason reason = SizeChangeReason::ROTATION;
+    WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest10");
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: CheckLastFocusedAppSessionFocus
  * @tc.desc: CheckLastFocusedAppSessionFocus
  * @tc.type: FUNC
@@ -365,6 +410,51 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint05, Function | SmallTest |
     EXPECT_EQ(133, windowIds[1]);
     EXPECT_EQ(139, windowIds[2]);
     ssm_->sceneSessionMap_.clear();
+}
+
+ * @tc.name: ProcessFocusZOrderChange
+ * @tc.desc: ProcessFocusZOrderChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ssm_->ProcessFocusZOrderChange(10);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "focusedSession";
+    sessionInfo.abilityName_ = "focusedSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->ProcessFocusZOrderChange(97);
+    
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "voiceInteractionSession";
+    sessionInfo1.abilityName_ = "voiceInteractionSession";
+    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->zOrder_ = 2109;
+    ssm_->sceneSessionMap_.emplace(2, sceneSession1);
+
+    sceneSession->lastZOrder_ = 103;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
 }
 }  // namespace
 }
