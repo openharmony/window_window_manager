@@ -737,6 +737,12 @@ WSError SceneSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rs
 bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
     uint32_t &screenWidth, uint32_t &screenHeight)
 {
+    if (isScreenAngleMismatch_) {
+        screenWidth = targetScreenWidth_;
+        screenHeight = targetScreenHeight_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+        return true;
+    }
     const auto& screenSession = sessionProperty != nullptr ?
         ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId()) : nullptr;
     if (screenSession != nullptr) {
@@ -760,6 +766,12 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
 bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
     uint32_t &screenWidth, uint32_t &screenHeight)
 {
+    if (isScreenAngleMismatch_) {
+        screenWidth = targetScreenWidth_;
+        screenHeight = targetScreenHeight_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+        return true;
+    }
     auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo != nullptr) {
         screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
@@ -770,6 +782,32 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}u, screenHeight: %{public}u", screenWidth, screenHeight);
     return true;
+}
+
+
+void SceneSession::NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
+    uint32_t screenHeight)
+{
+    auto task = [weakThis = wptr(this), isScreenAngleMismatch, screenWidth, screenHeight]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            return;
+        }
+        session->isScreenAngleMismatch_ = isScreenAngleMismatch;
+        session->targetScreenWidth_ = screenWidth;
+        session->targetScreenHeight_ = screenHeight;
+        sptr<SceneSession> keyboardPanelSession = session->GetKeyboardPanelSession();
+        if (keyboardPanelSession != nullptr) {
+            keyboardPanelSession->isScreenAngleMismatch_ = isScreenAngleMismatch;
+            keyboardPanelSession->targetScreenWidth_ = screenWidth;
+            keyboardPanelSession->targetScreenHeight_ = screenHeight;
+        }
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "target isMismatch: %{public}d, width_: %{public}d, height_: %{public}d",
+            isScreenAngleMismatch, screenWidth, screenHeight);
+        return;
+    };
+    PostTask(task, "NotifyTargetScreenWidthAndHeight");
 }
 
 bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
