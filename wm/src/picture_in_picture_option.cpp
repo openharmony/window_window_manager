@@ -109,8 +109,8 @@ uint32_t PipOption::GetPipTemplate()
 
 void PipOption::GetContentSize(uint32_t& width, uint32_t& height)
 {
-    width = contentWidth_;
-    height = contentHeight_;
+    contentWidth_ = width;
+    contentHeight_ = height;
 }
 
 std::vector<std::uint32_t> PipOption::GetControlGroup()

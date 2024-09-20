@@ -119,8 +119,8 @@ HWTEST_F(PictureInPictureOptionTest, NavigationId, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: NavigationId
- * @tc.desc: SetNavigationId/GetNavigationId
+ * @tc.name: ControlGroup
+ * @tc.desc: SetControlGroup/GetControlGroup
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, Function | SmallTest | Level2)
@@ -188,6 +188,21 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
     ASSERT_TRUE(option->IsTypeNodeEnabled());
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
+}
+
+/**
+ * @tc.name: XComponentController
+ * @tc.desc: SetXComponentController/GetXComponentController
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    std::shared_ptr<XComponentController> xComponentController = std::make_shared<XComponentController>();
+    ASSERT_NE(nullptr, xComponentController);
+    option->SetXComponentController(xComponentController);
+    ASSERT_EQ(option->GetXComponentController(), xComponentController);
 }
 }
 }

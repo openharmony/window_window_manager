@@ -801,11 +801,6 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
     return false;
 }
 
-std::string PictureInPictureController::GetPiPNavigationId()
-{
-    return (pipOption_ != nullptr && !IsTypeNodeEnabled()) ? pipOption_->GetNavigationId() : "";
-}
-
 napi_ref PictureInPictureController::GetCustomNodeController()
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetNodeControllerRef();
