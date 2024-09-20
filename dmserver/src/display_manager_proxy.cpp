@@ -934,7 +934,7 @@ ScreenId DisplayManagerProxy::GetInternalScreenId()
     return reply.ReadUint64();
 }
 
-bool DisplayManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, 
+bool DisplayManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
     sptr<IRemoteObject> remote = Remote();
