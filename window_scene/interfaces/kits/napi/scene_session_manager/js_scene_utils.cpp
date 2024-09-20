@@ -15,7 +15,6 @@
 
 #include "js_scene_utils.h"
 
-#include <cerrno>
 #include <iomanip>
 
 #include <event_handler.h>
@@ -72,15 +71,16 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
-WSError GetIntValue(const std::string& str, int32_t& value)
+WSError GetIntValueFromString(const std::string& str, uint32_t& value)
 {
-    errno = 0;
-    value = strtol(str.c_str(), nullptr, 10); // 10 number convert base
-    if (errno != 0) {
-        TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
-        return WSError::WS_ERROR_INVALID_PARAM;
+    char* end;
+    value = 0;
+    value = strtoul(str.c_str(), &end, 10); // 10 number convert base
+    if (*end == '\0' && value != 0) {
+        return WSError::WS_OK;
     }
-    return WSError::WS_OK;
+    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
 }
 
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
