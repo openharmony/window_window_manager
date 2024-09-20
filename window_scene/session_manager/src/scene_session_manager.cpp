@@ -2241,7 +2241,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
                 sceneSession->SetSessionInfoWant(want);
             }
         }
-        sceneSession->SetSessionInfoResultCode(-1);
+        sceneSession->ResetSessionInfoResultCode();
     }
     NotifySessionForCallback(sceneSession, needRemoveSession);
     // Arrive at the STOP task end.
