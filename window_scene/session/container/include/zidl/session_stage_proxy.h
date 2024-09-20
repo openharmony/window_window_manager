@@ -32,7 +32,7 @@ public:
 
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
@@ -74,6 +74,7 @@ public:
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WSError SetSplitButtonVisible(bool isVisible) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

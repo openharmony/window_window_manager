@@ -3863,6 +3863,16 @@ void SceneSession::SetMovable(bool movable)
     PostTask(task, "SetMovable");
 }
 
+WSError SceneSession::SetSplitButtonVisible(bool isVisible)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isVisible: %{public}d", isVisible);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetSplitButtonVisible(isVisible);
+}
+
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
     return oriPosYBeforeRaisedByKeyboard_;
@@ -4586,6 +4596,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
     }
     isVisible_ = visibility;
+    if (updatePrivateStateAndNotifyFunc_ != nullptr) {
+        updatePrivateStateAndNotifyFunc_(GetPersistentId());
+    }
     return true;
 }
 
@@ -4705,8 +4718,9 @@ bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
     if (zOrder_ == zOrder) {
         return false;
     }
-    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder_: %{public}u, zOrder: %{public}u",
-        GetPersistentId(), zOrder_, zOrder);
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}u -> %{public}u, lastZOrder: %{public}u",
+          GetPersistentId(), zOrder_, zOrder, lastZOrder_);
+    lastZOrder_ = zOrder_;
     zOrder_ = zOrder;
     return true;
 }
