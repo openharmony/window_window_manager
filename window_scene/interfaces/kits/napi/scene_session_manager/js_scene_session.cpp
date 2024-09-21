@@ -207,8 +207,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
 
 static void SetWindowSize(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
 {
-    auto sessionInfo = session->GetSessionInfo();
-    auto abilityInfo = sessionInfo.abilityInfo;
+    auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
         return;
     }
