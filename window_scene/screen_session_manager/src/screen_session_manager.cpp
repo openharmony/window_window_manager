@@ -1478,6 +1478,54 @@ bool ScreenSessionManager::SuspendEnd()
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
 }
 
+ScreenId ScreenSessionManager::GetInternalScreenId()
+{
+    ScreenId screenId = SCREEN_ID_INVALID;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
+            screenId = sessionIt.first;
+            break;
+        }
+    }
+    return screenId;
+}
+
+bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return false;
+    }
+
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
+    ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
+            break;
+        }
+        default: {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById state not support");
+            return false;
+        }
+    }
+
+    rsInterface_.SetScreenPowerStatus(screenId, status);
+    return true;
+}
+
 bool ScreenSessionManager::IsPreBrightAuthFail(void)
 {
     return lastWakeUpReason_ == PowerStateChangeReason::
