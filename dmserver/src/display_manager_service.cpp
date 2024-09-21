@@ -434,19 +434,6 @@ bool DisplayManagerService::SuspendEnd()
         EventStatus::END);
 }
 
-ScreenId DisplayManagerService::GetInternalScreenId()
-{
-    WLOGFE("[UL_POWER]DMS not support GetInternalScreenId");
-    return -1;
-}
-
-bool DisplayManagerService::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
-{
-    WLOGFE("[UL_POWER]DMS not support SetScreenPowerById: screen:%{public}" PRIu64 ", state:%{public}u",
-        screenId, state);
-    return false;
-}
-
 bool DisplayManagerService::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFE("[UL_POWER]DMS not support SetSpecifiedScreenPower: screen:%{public}" PRIu64 ", state:%{public}u",

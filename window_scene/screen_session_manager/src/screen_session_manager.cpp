@@ -1480,7 +1480,8 @@ bool ScreenSessionManager::SuspendEnd()
 
 ScreenId ScreenSessionManager::GetInternalScreenId()
 {
-    ScreenId screenId = -1;
+    ScreenId screenId = SCREEN_ID_INVALID;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
@@ -1488,20 +1489,20 @@ ScreenId ScreenSessionManager::GetInternalScreenId()
             break;
         }
     }
-    return -1;
+    return screenId;
 }
 
 bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "SetSpecifiedScreenPower permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64 ", state:%{public}u",
-        screenId, state);
+
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
+    ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
 
     ScreenPowerStatus status;
     switch (state) {
