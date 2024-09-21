@@ -52,7 +52,6 @@ static float LARGE_FOLD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::G
     ("const.large_fold.half_folded_min_threshold", 25));
 constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
 float oldFoldAngle = 0.0F;
-bool registerPosture_ = false;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldScreenSensorManager);
 
