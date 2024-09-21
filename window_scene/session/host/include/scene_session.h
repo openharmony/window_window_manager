@@ -31,8 +31,6 @@ const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionI
 const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 namespace {
-constexpr int32_t MIN_DECOR_HEIGHT = 37;
-constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 }
 class SceneSession;
@@ -375,18 +373,13 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-    int32_t GetCustomDecorHeight() override
-    {
-        return customDecorHeight_;
-    }
 
-    void SetCustomDecorHeight(int32_t height) override
-    {
-        if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
-            return;
-        }
-        customDecorHeight_ = height;
-    }
+    /*
+     * Window Decor
+     */
+    int32_t GetCustomDecorHeight() override { return customDecorHeight_; }
+    void SetCustomDecorHeight(int32_t height) override;
+
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);

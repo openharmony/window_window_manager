@@ -4829,4 +4829,14 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
         }
     }
 }
+
+void SceneSession::SetCustomDecorHeight(int32_t height)
+{
+    constexpr int32_t MIN_DECOR_HEIGHT = 37;
+    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
+        return;
+    }
+    customDecorHeight_ = height;
+}
 } // namespace OHOS::Rosen
