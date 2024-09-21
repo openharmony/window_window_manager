@@ -7950,8 +7950,9 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
     if (avoidArea.bottomRect_.IsUninitializedRect()) {
         return true;
     }
-    if (isVisible &&
-        (avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) == sessionBottom)) {
+    auto heightDiff =
+        avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom;
+    if (isVisible && std::abs(heightDiff) <= 1) {
         return true;
     }
     return false;
