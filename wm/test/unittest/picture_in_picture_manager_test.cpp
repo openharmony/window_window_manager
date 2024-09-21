@@ -18,6 +18,7 @@
 #include "singleton_container.h"
 #include "window_scene_session_impl.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -183,7 +184,7 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
     PictureInPictureManager::AttachAutoStartController(1, pipController1);
-    ASSERT_EQ(pipController1, PictureInPictureManager::autoStartControllerMap_[handleId]);
+    ASSERT_EQ(pipController1, PictureInPictureManager::autoStartControllerMap_[1]);
 }
 
 /**
@@ -344,7 +345,6 @@ HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
  */
 HWTEST_F(PictureInPictureManagerTest, DoActionEvent, Function | SmallTest | Level2)
 {
-    ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
@@ -391,15 +391,17 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
     pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
-    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
-        sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    
     PictureInPictureManager::activeController_ = pipController;
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
