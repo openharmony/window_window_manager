@@ -82,6 +82,7 @@ void FoldScreenSensorManager::RegisterPostureCallback()
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         TLOGE(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
+        registerPosture_ = true;
         TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.RegisterPostureCallback success.");
     }
 }
@@ -93,6 +94,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
     TLOGI(WmsLogTag::DMS, "UnRegisterPostureCallback, deactivateRet: %{public}d, unsubscribeRet: %{public}d",
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
+        registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
@@ -199,11 +201,6 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
 void FoldScreenSensorManager::RegisterApplicationStateObserver()
 {
     sensorFoldStateManager_->RegisterApplicationStateObserver();
-}
-
-void FoldScreenSensorManager::SetRegisterPosture(bool registerPosture)
-{
-    registerPosture_ = registerPosture;
 }
 
 void FoldScreenSensorManager::TriggerDisplaySwitch()

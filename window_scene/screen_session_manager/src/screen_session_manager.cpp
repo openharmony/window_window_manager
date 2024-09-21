@@ -1783,7 +1783,6 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-                FoldScreenSensorManager::GetInstance().SetRegisterPosture(true);
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
             }
@@ -1799,7 +1798,6 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #ifdef SENSOR_ENABLE
             if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-                FoldScreenSensorManager::GetInstance().SetRegisterPosture(false);
             } else {
                 TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
             }
