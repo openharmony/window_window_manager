@@ -1763,6 +1763,18 @@ bool DisplayManager::SuspendEnd()
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
 }
 
+ScreenId DisplayManager::GetInternalScreenId()
+{
+    WLOGFD("[UL_POWER]GetInternalScreenId start");
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetInternalScreenId();
+}
+
+bool DisplayManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFD("[UL_POWER]SetScreenPowerById start");
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerById(screenId, state, reason);
+}
+
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     WLOGFD("[UL_POWER]state:%{public}u", state);
