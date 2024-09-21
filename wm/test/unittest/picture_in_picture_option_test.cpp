@@ -195,7 +195,7 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
  * @tc.desc: SetXComponentController/GetXComponentController
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, XComponentController, Function | SmallTest | Level2)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);

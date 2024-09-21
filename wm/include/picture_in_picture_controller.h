@@ -94,6 +94,7 @@ public:
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
+    std::string GetPiPNavigationId();
     napi_ref GetCustomNodeController();
     napi_ref GetTypeNode() const;
     void OnPictureInPictureStart();
