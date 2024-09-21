@@ -6842,17 +6842,16 @@ void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t per
         TLOGE(WmsLogTag::WMS_LIFE, "invalid pid");
         return;
     }
-    auto task = [this, pid, persistentId] {
-        int32_t ret = HiSysEventWrite(
-            HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-            "WINDOW_STATE_ERROR",
-            HiviewDFX::HiSysEvent::EventType::FAULT,
-            "PID", pid,
-            "PERSISTENT_ID", persistentId);
-        if (ret != 0) {
-            TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
-        }
-
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", pid,
+        "PERSISTENT_ID", persistentId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    auto task = [this, pid] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (!sceneSession || pid != sceneSession->GetCallingPid() ||
@@ -6867,7 +6866,8 @@ void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t per
             }
         }
     };
-    taskScheduler_->PostAsyncTask(task, "NotifyWindowStateErrorFromMMI");
+    // delay 2000ms, wait for hidumper
+    taskScheduler_->PostAsyncTask(task, __func__, 2000);
 }
 
 sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)
