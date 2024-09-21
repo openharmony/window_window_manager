@@ -911,65 +911,6 @@ bool DisplayManagerProxy::SuspendEnd()
     return reply.ReadBool();
 }
 
-ScreenId DisplayManagerProxy::GetInternalScreenId()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("[UL_POWER]GetInternalScreenId: remote is nullptr");
-        return -1;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
-        return -1;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_INTERNAL_SCREEN_ID),
-        data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
-        return -1;
-    }
-    return reply.ReadUint64();
-}
-
-bool DisplayManagerProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
-    PowerStateChangeReason reason)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("[UL_POWER]SetScreenPowerById: remote is nullptr");
-        return false;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
-        return false;
-    }
-    if (!data.WriteUint64(screenId)) {
-        WLOGFE("[UL_POWER]Write ScreenId failed");
-        return false;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
-        return false;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_BY_ID),
-        data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
-        return false;
-    }
-    return reply.ReadBool();
-}
-
 bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -87,7 +87,7 @@ public:
     virtual bool WakeUpEnd() override { return false; }
     virtual bool SuspendBegin(PowerStateChangeReason reason) override { return false; }
     virtual bool SuspendEnd() override { return false; }
-    virtual ScreenId GetInternalScreenId() override { return -1; }
+    virtual ScreenId GetInternalScreenId() override { return SCREEN_ID_INVALID; }
     virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override
     {
         return false;

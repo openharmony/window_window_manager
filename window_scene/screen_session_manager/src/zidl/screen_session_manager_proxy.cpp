@@ -777,21 +777,21 @@ ScreenId OHOS::Rosen::ScreenSessionManagerProxy::GetInternalScreenId()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("[UL_POWER]GetInternalScreenId remote is nullptr");
-        return -1;
+        return SCREEN_ID_INVALID;
     }
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("[UL_POWER]GetInternalScreenId: WriteInterfaceToken failed");
-        return -1;
+        return SCREEN_ID_INVALID;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_INTERNAL_SCREEN_ID),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]GetInternalScreenId: SendRequest failed");
-        return -1;
+        return SCREEN_ID_INVALID;
     }
     return reply.ReadUint64();
 }
@@ -807,7 +807,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenI
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("[UL_POWER]WriteInterfaceToken failed");
         return false;

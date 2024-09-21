@@ -229,8 +229,11 @@ public:
     virtual bool WakeUpEnd() = 0;
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
-    virtual ScreenId GetInternalScreenId() = 0;
-    virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
+    virtual ScreenId GetInternalScreenId() { return SCREEN_ID_INVALID; }
+    virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+    {
+        return false;
+    }
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
