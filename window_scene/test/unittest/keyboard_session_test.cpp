@@ -1385,32 +1385,6 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
 }
 
 /**
- * @tc.name: CheckKeyboardRectValid01
- * @tc.desc: test function : CheckKeyboardRectValid
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, CheckKeyboardRectValid01, Function | SmallTest | Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CheckKeyboardRectValid01",
-        "CheckKeyboardRectValid01");
-    ASSERT_NE(keyboardSession, nullptr);
-
-    keyboardSession->winRect_.posY_ = 0;
-    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 1);
-    bool result = keyboardSession->CheckKeyboardRectValid();
-    ASSERT_EQ(result, false);
-
-    keyboardSession->winRect_.posY_ = 0;
-    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
-    result = keyboardSession->CheckKeyboardRectValid();
-    ASSERT_EQ(result, true);
-
-    keyboardSession->winRect_.posY_ = 100;
-    result = keyboardSession->CheckKeyboardRectValid();
-    ASSERT_EQ(result, true);
-}
-
-/**
  * @tc.name: UpdateKeyboardAvoidArea01
  * @tc.desc: test function : UpdateKeyboardAvoidArea
  * @tc.type: FUNC
