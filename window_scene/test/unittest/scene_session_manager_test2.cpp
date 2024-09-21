@@ -88,7 +88,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
 bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
 bool SceneSessionManagerTest2::statusBarEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 ProcessStatusBarEnabledChangeFunc SceneSessionManagerTest2::statusBarEnabledCallbackFunc_ = [](bool enable,
@@ -2106,6 +2106,46 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
     Info.bundleName_ = "testInfo1b";
     sptr<SceneSession> session = new (std::nothrow) SceneSession(Info, nullptr);
     ssm_->NotifyCreateToastSession(persistentId, session);
+}
+
+/**
+ * @tc.name: UpdateGestureBackEnableStatus
+ * @tc.desc: UpdateGestureBackEnableStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnableStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdateGestureBackEnableStatus(true);
+    ASSERT_NE(callbackFunc_, nullptr);
+    ssm_->SetGestureNavigationEnabledChangeListener(callbackFunc_);
+    ssm_->UpdateGestureBackEnableStatus(true);
+}
+
+/**
+ * @tc.name: UpdateGestureBackEnabled
+ * @tc.desc: UpdateGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->UpdateGestureBackEnabled(1);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "UpdateGestureBackEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->isEnableGestureBack_ =false;
+    sceneSession->isEnableGestureBackHadSet_ =true;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->SetFocusedSessionId(1);
+    ssm_->UpdateGestureBackEnabled(1);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->UpdateGestureBackEnabled(1);
 }
 }
 } // namespace Rosen

@@ -745,6 +745,36 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
     sceneSession->property_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
     sceneSession->SetWindowFlags(property);
 }
+
+/**
+ * @tc.name: SetGestureBackEnabled
+ * @tc.desc: SetGestureBackEnabled
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetGestureBackEnabled";
+    info.bundleName_ = "SetGestureBackEnabled";
+
+    sptr<SceneSession> session = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetGestureBackEnabled(false));
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isEnableGestureBack_ = false;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
+    sceneSession->specificCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    EXPECT_NE(nullptr, sceneSession->specificCallback_);
+    auto func = [sceneSession](const int32_t persistentId) {
+        return;
+    };
+    sceneSession->specificCallback_->onUpdateGestureBackEnabled_ = func;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
+    EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
+    EXPECT_EQ(true, sceneSession->GetGestureBackEnableFlag());
+}
 }
 }
 }

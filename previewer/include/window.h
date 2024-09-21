@@ -377,6 +377,10 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+ 
+    virtual bool GetGestureBackEnabled() const { return true; }
+
 };
 }
 }
