@@ -265,6 +265,9 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             session->specificCallback_->onWindowInfoUpdate_(
                 persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+            if (session->specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+                session->specificCallback_->onUpdateGestureBackEnabled_(persistentId);
+            }
         } else {
             TLOGI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
         }
@@ -340,6 +343,9 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+            if (session->specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+                session->specificCallback_->onUpdateGestureBackEnabled_(session->GetPersistentId());
+            }
         }
         return WSError::WS_OK;
     };
@@ -408,6 +414,9 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+            if (session->specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+                session->specificCallback_->onUpdateGestureBackEnabled_(session->GetPersistentId());
+            }
         }
         return WSError::WS_OK;
     },
@@ -3319,6 +3328,33 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     return PostSyncTask(task, "UpdateProperty");
 }
 
+WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
+{
+    if (isEnableGestureBack_ == isEnabled) {
+        TLOGD(WmsLogTag::WMS_IMMS, "isEnabled equals last.");
+        return WMError::WM_OK;
+    }
+    if (specificCallback_ == nullptr ||
+        specificCallback_->onUpdateGestureBackEnabled_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}d, isEnabled: %{public}d", GetPersistentId(), isEnabled);
+    isEnableGestureBack_ = isEnabled;
+    isEnableGestureBackHadSet_ = true;
+    specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
+    return WMError::WM_OK;
+}
+
+bool SceneSession::GetGestureBackEnabled()
+{
+    return isEnableGestureBack_;
+}
+
+bool SceneSession::GetGestureBackEnableFlag()
+{
+    return isEnableGestureBackHadSet_;
+}
+
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
     TLOGD(WmsLogTag::DEFAULT, "setListener success");
@@ -4838,5 +4874,13 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
         return;
     }
     customDecorHeight_ = height;
+}
+
+void SceneSession::UpdateGestureBackEnabled()
+{
+    if (specificCallback_ != nullptr &&
+        specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+        specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
+    }
 }
 } // namespace OHOS::Rosen

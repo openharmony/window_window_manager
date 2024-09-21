@@ -84,7 +84,8 @@ using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& 
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
-using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName,
+    GestureBackType type)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -428,6 +429,11 @@ public:
     WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
 
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnableStatus(bool enable);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -625,6 +631,12 @@ private:
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
 
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled(const int32_t persistentId);
+    std::set<int32_t> gestureBackEnableListenerSet_;
+    
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -679,6 +691,7 @@ private:
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
+    bool lastGestureBackEnable_ { true };
 
     /*
      * DFX

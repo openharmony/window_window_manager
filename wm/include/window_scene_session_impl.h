@@ -156,6 +156,8 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
+    WMError SetGestureBackEnabled(bool enable) override;
+    bool GetGestureBackEnabled() const override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -231,6 +233,7 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
+    bool enableGestureBack_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
     /*

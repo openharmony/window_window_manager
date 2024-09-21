@@ -2313,6 +2313,7 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    UpdateGestureBackEnabled();
     // notify scb arkui focus
     if (!isFocused) {
         NotifyUILostFocus();
@@ -2488,6 +2489,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property->SetWindowMode(mode);
         property->SetIsNeedUpdateWindowMode(true);
+        UpdateGestureBackEnabled();
     } else {
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -2498,6 +2500,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         } else {
             surfaceNode_->MarkUifirstNode(true);
         }
+        UpdateGestureBackEnabled();
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }

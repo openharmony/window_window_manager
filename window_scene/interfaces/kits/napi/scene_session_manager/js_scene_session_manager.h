@@ -176,7 +176,7 @@ private:
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
-    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
+    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName, GestureBackType type);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);

@@ -434,6 +434,15 @@ enum class WindowStyleType : uint8_t {
 };
 
 /**
+ * @brief Disable Gesture Back Type
+ */
+enum class GestureBackType : int32_t {
+    GESTURE_SIDE = 0,
+    GESTURE_SWIPE_UP  = 1,
+    GESTURE_ALL = 2,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.

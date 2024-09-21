@@ -94,6 +94,11 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

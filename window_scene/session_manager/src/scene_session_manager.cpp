@@ -1349,6 +1349,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
         this->UpdatePiPWindowStateChanged(bundleName, isForeground);
     };
+    specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
+        this->UpdateGestureBackEnabled(persistentId);
+    };
     return specificCb;
 }
 
@@ -3856,7 +3859,7 @@ WMError SceneSessionManager::SetGestureNavigationEnabled(bool enable)
             return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
-            gestureNavigationEnabledChangeFunc_(enable, bundleName);
+            gestureNavigationEnabledChangeFunc_(enable, bundleName, GestureBackType::GESTURE_ALL);
         }
         if (statusBarEnabledChangeFunc_) {
             statusBarEnabledChangeFunc_(enable, bundleName);
@@ -7962,6 +7965,8 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
+            persistentId, sceneSession->IsVisible(), sceneSession->GetSessionState());
         needUpdate = false;
         return;
     }
@@ -8033,6 +8038,38 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
+}
+
+void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
+{
+    auto task = [this, persistentId]() {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
+            return;
+        }
+        if (!sceneSession->GetGestureBackEnableFlag()) {
+            gestureBackEnableListenerSet_.erase(persistentId);
+            return;
+        }
+        gestureBackEnableListenerSet_.insert(persistentId);
+        auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
+        if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN ||
+            (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) ||
+            enterRecent_.load() || persistentId != GetFocusedSessionId()) {
+            needEnableGestureBack = true;
+        }
+        if (needEnableGestureBack == lastGestureBackEnable_) { 
+            TLOGI(WmsLogTag::WMS_IMMS, "gestureback enable equals last. Id : %{public}d, status : %{public}d", 
+                persistentId, needEnableGestureBack);
+            return;
+        }
+        lastGestureBackEnable_ = needEnableGestureBack;
+        UpdateGestureBackEnableStatus(needEnableGestureBack);
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled:PID:" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
@@ -10318,6 +10355,17 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
     enterRecent_.store(enterRecent);
     SetSystemAnimatedScenes(enterRecent ?
         SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
+    auto task = [this]() {
+        for (auto persistentId : gestureBackEnableListenerSet_) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
+                continue;
+            }
+            UpdateGestureBackEnabled(persistentId);
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabledTask");
     return WSError::WS_OK;
 }
 
@@ -10850,4 +10898,14 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
+void SceneSessionManager::UpdateGestureBackEnableStatus(bool enable)
+{
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    TLOGI(WmsLogTag::WMS_IMMS, "enable:%{public}d name:%{public}s", enable, callerBundleName.c_str());
+    if (!gestureNavigationEnabledChangeFunc_) {
+        TLOGE(WmsLogTag::WMS_IMMS, "callback func is null");
+        return ;
+    }
+    gestureNavigationEnabledChangeFunc_(enable, callerBundleName, GestureBackType::GESTURE_SIDE);
+}
 } // namespace OHOS::Rosen
