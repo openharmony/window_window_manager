@@ -525,6 +525,8 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     abilitySessionInfo->processOptions.reset(processOptions);
+    auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+    abilitySessionInfo->startWindowOption.reset(startWindowOption);
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
         return ERR_INVALID_VALUE;
@@ -554,15 +556,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (hasStartSetting) {
         auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
         abilitySessionInfo->startSetting.reset(abilityStartSetting);
-    }
-    bool hasStartWindowOption = false;
-        if (!data.ReadBool(hasStartWindowOption)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (hasStartWindowOption) {
-        auto abilityStartWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
-        abilitySessionInfo->startWindowOption.reset(abilityStartWindowOption);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
