@@ -211,6 +211,18 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+bool WindowSceneSessionImpl::IsPcOrPadEnableActivation() const
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return WindowSessionImpl::IsPcOrPadEnableActivation();
+    }
+    auto mainWindow = GetMainWindowWithContext(GetContext());
+    if (mainWindow == nullptr) {
+        return false;
+    }
+    return mainWindow->IsPcOrPadEnableActivation();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
@@ -268,6 +280,11 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);
             return WMError::WM_ERROR_NULLPTR;
+        }
+        if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+            !parentSession->IsPcOrPadEnableActivation()) {
+            TLOGE(WmsLogTag::WMS_SUB, "device not support");
+            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -2154,10 +2171,8 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isValidWindow = isMainWindow ||
-            ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) &&
-             (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadEnableActivation() &&
+                                          (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
