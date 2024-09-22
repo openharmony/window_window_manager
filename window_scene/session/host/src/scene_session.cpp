@@ -4373,6 +4373,26 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled, bool isDockHoverShowEnabled)
+{
+    auto task = [weakThis = wptr(this), isTitleHoverShowEnabled, isDockHoverShowEnabled]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "isTitleHoverShowEnabled: %{public}d, isDockHoverShowEnabled: %{public}d",
+            isTitleHoverShowEnabled, isDockHoverShowEnabled);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_) {
+            session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_(
+                isTitleHoverShowEnabled, isDockHoverShowEnabled);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnTitleAndDockHoverShowChange");
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetForceHideState(ForceHideState forceHideState)
 {
     forceHideState_ = forceHideState;

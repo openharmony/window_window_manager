@@ -817,6 +817,18 @@ public:
      */
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
     /**
+     * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
+     *
+     * @param status
+     * @param status
+     * @return WMError
+     */
+    virtual WMError SetTitleAndDockHoverShowEnabled(bool isTitleHoverShowEnabled = true,
+        bool isDockHoverShowEnabled = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
      * @brief Set this window full screen, with hide status bar and nav bar
      *
      * @param status if true, hide status bar and nav bar; Otherwise, show status bar and nav bar
