@@ -262,7 +262,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (isToastFlag)) {
+        if (isToastFlag) {
             std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
             parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
         } else {
