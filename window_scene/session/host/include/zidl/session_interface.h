@@ -77,6 +77,18 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing full-screen layout changes.
+     *
+     * @param isLayoutFullScreen Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled = true,
+        bool isDockHoverShowEnabled = true)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
      * @brief Raise the application subwindow to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.

@@ -193,6 +193,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
+            return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
@@ -398,6 +400,17 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     bool isLayoutFullScreen = data.ReadBool();
     TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isTitleHoverShowEnabled = data.ReadBool();
+    bool isDockHoverShowEnabled = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShowEnabled, isDockHoverShowEnabled: %{public}d, %{public}d",
+        isTitleHoverShowEnabled, isDockHoverShowEnabled);
+    WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShowEnabled, isDockHoverShowEnabled);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
