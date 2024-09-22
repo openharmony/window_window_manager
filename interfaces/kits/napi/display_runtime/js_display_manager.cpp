@@ -191,7 +191,7 @@ napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
 {
     WLOGD("GetDefaultDisplaySync called");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:GetDefaultDisplay");
-    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
+    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
     if (display == nullptr) {
         WLOGFE("[NAPI]Display info is nullptr, js error will be happen");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
