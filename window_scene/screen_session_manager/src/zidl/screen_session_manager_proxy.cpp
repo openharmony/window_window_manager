@@ -824,7 +824,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenI
         WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_BY_ID),
         data, reply, option) != ERR_NONE) {
         WLOGFW("[UL_POWER]SendRequest failed");
         return false;
