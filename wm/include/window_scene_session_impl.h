@@ -91,6 +91,8 @@ public:
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
+    // only main window, sub window, dialog window can use
+    static uint32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -164,6 +166,8 @@ public:
     virtual bool GetImmersiveModeEnabledState() const override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
+    bool GetIsUIExtensionFlag() const override;
+    bool GetIsUIExtensionSubWindowFlag() const override;
 
 protected:
     void DestroySubWindow();
@@ -187,6 +191,8 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
+    sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
 
 private:
     WMError DestroyInner(bool needNotifyServer);

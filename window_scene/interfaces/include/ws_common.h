@@ -320,6 +320,7 @@ struct SessionInfo {
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+    uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
 };
 
 enum class SessionFlag : uint32_t {
