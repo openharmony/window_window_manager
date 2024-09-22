@@ -2797,12 +2797,12 @@ sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persis
         return nullptr;
     }
     bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
-    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID;
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {
         TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
         return parentSession;
     }
-    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
