@@ -395,7 +395,8 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    KeyboardAnimationConfig keyboardAnimationConfig_;
+    KeyboardAnimationCurve animationIn_;
+    KeyboardAnimationCurve animationOut_;
     // 1920: default max window size
     uint32_t maxFloatingWindowSize_ = 1920;
     // 320: default minWidth main window size
@@ -421,7 +422,7 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteParcelable(&keyboardAnimationConfig_) ||
+            !parcel.WriteParcelable(&animationIn_) || !parcel.WriteParcelable(&animationOut_) ||
             !parcel.WriteUint32(maxFloatingWindowSize_)) {
             return false;
         }
@@ -434,11 +435,11 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(backgroundswitch)) {
             return false;
         }
-        
+
         if (!parcel.WriteBool(freeMultiWindowEnable_)) {
             return false;
         }
-        
+
         if (!parcel.WriteBool(freeMultiWindowSupport_)) {
             return false;
         }
@@ -464,12 +465,18 @@ struct SystemSessionConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
-        if (keyboardConfig == nullptr) {
+        sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationIn == nullptr) {
             delete config;
             return nullptr;
         }
-        config->keyboardAnimationConfig_ = *keyboardConfig;
+        config->animationIn_ = *animationIn;
+        sptr<KeyboardAnimationCurve> animationOut = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationOut == nullptr) {
+            delete config;
+            return nullptr;
+        }
+        config->animationOut_ = *animationOut;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
         config->miniWidthOfMainWindow_ = parcel.ReadUint32();
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
