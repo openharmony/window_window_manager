@@ -530,9 +530,12 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
         return ERR_INVALID_VALUE;
     }
-    if (!data.ReadBool(abilitySessionInfo->isBackTransition) ||
-        !data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read some bool failed.");
+    if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearInNotShowRecent failed.");
         return ERR_INVALID_VALUE;
     }
     bool hasCallerToken = false;
