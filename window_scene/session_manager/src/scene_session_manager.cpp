@@ -7807,14 +7807,15 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
     return taskScheduler_->PostSyncTask(task, "PendingSessionToForeground");
 }
 
-WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
+WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+    bool shouldBackToCaller)
 {
-    auto task = [this, &token]() {
+    auto task = [this, &token, shouldBackToCaller] {
         auto session = FindSessionByToken(token);
         if (session != nullptr) {
-            return session->PendingSessionToBackgroundForDelegator();
+            return session->PendingSessionToBackgroundForDelegator(shouldBackToCaller);
         }
-        TLOGE(WmsLogTag::WMS_LIFE, "PendingBackgroundForDelegator: fail to find token");
+        TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");

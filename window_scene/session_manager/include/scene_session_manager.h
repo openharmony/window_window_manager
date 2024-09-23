@@ -237,7 +237,8 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
