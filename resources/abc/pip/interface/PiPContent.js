@@ -99,7 +99,7 @@ export class PiPContent extends ViewPU {
             return;
         }
         this.useNode = true;
-        if (!this.xComponent.isAttached()) {
+        if (this.xComponent.getParent() === null || this.xComponent.getParent() === undefined) {
             pip.markPipNodeType(this.xComponent, false);
         } else {
             pip.markPipNodeType(this.xComponent, true);
