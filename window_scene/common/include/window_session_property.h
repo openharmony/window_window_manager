@@ -89,8 +89,6 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
-    void SetExtensionFlag(bool isExtensionFlag);
-    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
@@ -144,8 +142,6 @@ public:
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
-    bool GetExtensionFlag() const;
-    UIExtensionUsage GetUIExtensionUsage() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -194,6 +190,18 @@ public:
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+
+    /*
+     * UIExtension
+     */
+    void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
+    UIExtensionUsage GetUIExtensionUsage() const;
+    void SetExtensionFlag(bool isExtensionFlag);
+    bool GetExtensionFlag() const;
+    void SetParentWindowType(WindowType parentWindowType);
+    WindowType GetParentWindowType() const;
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    bool GetIsUIExtensionSubWindowFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -305,8 +313,6 @@ private:
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
-    bool isExtensionFlag_ = false;
-    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
 
     bool isShaped_ = false;
     bool fullScreenStart_ = false;
@@ -326,6 +332,14 @@ private:
      */
     uint32_t subWindowLevel_ = 1;
     bool isPcAppInPad_ = false;
+
+    /*
+     * UIExtension
+     */
+    UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
+    bool isExtensionFlag_ = false;
+    bool isUIExtensionSubWindowFlag_ = false;
+    WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
