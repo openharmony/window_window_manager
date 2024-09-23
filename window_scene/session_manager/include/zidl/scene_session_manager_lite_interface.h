@@ -86,7 +86,8 @@ public:
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
-    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;

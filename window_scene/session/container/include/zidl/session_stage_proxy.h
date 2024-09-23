@@ -77,6 +77,10 @@ public:
     WSError SetSplitButtonVisible(bool isVisible) override;
 
 private:
+    bool ReadSmallStringVectorFromParcel(
+        MessageParcel& reply, std::vector<std::string>& infos);
+    bool ReadBigStringVectorFromParcel(
+        MessageParcel& reply, std::vector<std::string>& infos);
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
 } // namespace OHOS::Rosen
