@@ -43,6 +43,7 @@ using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessToken
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
     WindowType type, uint64_t displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateAvoidAreaByTypeCallback = std::function<void(const int32_t persistentId, AvoidAreaType type)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
@@ -91,6 +92,7 @@ public:
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
@@ -173,10 +175,6 @@ public:
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
     WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
-    WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
-    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
@@ -217,8 +215,22 @@ public:
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
+
+    /**
+     * Window Immersive
+     */
+    WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
-    void SetIsStatusBarVisible(bool isVisible) { isStatusBarVisible_ = isVisible; }
+    void SetIsStatusBarVisible(bool isVisible);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    void UpdateRotationAvoidArea();
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    bool GetIsDisplayStatusBarTemporarily() const;
+    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
@@ -226,7 +238,6 @@ public:
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
-    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
@@ -273,19 +284,16 @@ public:
     void NotifyUILostFocus() override;
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
-    bool GetIsDisplayStatusBarTemporarily() const;
     bool IsDeviceWakeupByApplication() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
     bool NeedStartingWindowExitAnimation() const override;
 
-    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     void NotifyTouchOutside();
     void NotifyWindowVisibility();
     bool CheckOutTouchOutsideRegister();
     void UpdateNativeVisibility(bool visible);
-    void UpdateRotationAvoidArea();
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);
     WSError BindDialogSessionTarget(const sptr<SceneSession>& sceneSession);
@@ -348,7 +356,6 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
