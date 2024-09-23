@@ -243,6 +243,7 @@ private:
      * Sub Window
      */
     void AddSubWindowMapForExtensionWindow();
+    WMError GetParentSessionAndVerify(bool isToastFlag, sptr<WindowSessionImpl>& parentSession);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
