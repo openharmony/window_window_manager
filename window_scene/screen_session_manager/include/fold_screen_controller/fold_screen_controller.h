@@ -37,6 +37,7 @@ public:
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     virtual ~FoldScreenController();
 
+    void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();

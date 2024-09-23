@@ -55,7 +55,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-constexpr int32_t ANIMATION_TIME = 400;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
@@ -105,6 +104,7 @@ std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
+std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -121,6 +121,7 @@ std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
+std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
@@ -197,6 +198,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
+    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -463,7 +465,7 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
     return PreNotifyKeyEvent(keyEvent);
 }
 
-void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState)
+void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
     auto iter = subWindowSessionMap_.find(parentPersistentId);
     if (iter == subWindowSessionMap_.end()) {
@@ -590,11 +592,12 @@ void WindowSessionImpl::DestroySubWindow()
                 subWindows.erase(iter);
                 continue;
             }
-            TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", (*iter)->GetPersistentId());
-            auto ret = (*iter)->Destroy(false);
+            bool isExtDestroyed = (*iter)->property_->GetExtensionFlag();
+            TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
+                (*iter)->GetPersistentId(), isExtDestroyed);
+            auto ret = (*iter)->Destroy(isExtDestroyed);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "Destroy sub window failed. persistentId: %{public}d",
-                    (*iter)->GetPersistentId());
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", (*iter)->GetPersistentId());
                 subWindows.erase(iter);
             }
         }
@@ -657,7 +660,7 @@ WSError WindowSessionImpl::SetActive(bool active)
 }
 
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const SceneAnimationConfig& config)
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
@@ -670,16 +673,17 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ", [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
-        rsTransaction != nullptr, GetWindowName().c_str(), GetPersistentId());
+        ",duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
+        wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
+        GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
-        wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, rsTransaction != nullptr);
+        wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
-        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForRotation(wmRect, preRect, wmReason, config);
     } else {
-        UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
     layoutCallback_->OnUpdateSessionRect(rect);
@@ -688,21 +692,22 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 }
 
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
 {
-    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
             return;
         }
+        const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
         window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(ANIMATION_TIME);
+        protocol.SetDuration(config.animationDuration_);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
@@ -804,7 +809,7 @@ void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButto
     if (hideSplitButton > !windowTitleVisibleFlags_.isSplitVisible) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "isSplitVisible param INVALID");
     }
-    hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible);
+    hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible) || !isSplitButtonVisible_;
     if (hideCloseButton > !windowTitleVisibleFlags_.isCloseVisible) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "isCloseVisible param INVALID");
     }
@@ -2102,6 +2107,52 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 }
 
 template<typename T>
+EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> WindowSessionImpl::GetListeners()
+{
+    sptr<IMainWindowCloseListener> mainWindowCloseListener;
+    mainWindowCloseListener = mainWindowCloseListeners_[GetPersistentId()];
+    return mainWindowCloseListener;
+}
+
+WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    mainWindowCloseListeners_[GetPersistentId()] = listener;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    mainWindowCloseListeners_[GetPersistentId()] = nullptr;
+    return WMError::WM_OK;
+}
+
+template<typename T>
 EnableIfSame<T, ISwitchFreeMultiWindowListener,
     std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::GetListeners()
 {
@@ -2284,12 +2335,24 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
+        std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+        ClearUselessListeners(windowNoInteractionListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
-        subWindowCloseListeners_[GetPersistentId()] = nullptr;
+        ClearUselessListeners(subWindowCloseListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+        ClearUselessListeners(mainWindowCloseListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
+        ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
     }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
@@ -2336,6 +2399,21 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
+}
+
+WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isVisible: %{public}d", isVisible);
+    auto task = [weakThis = wptr(this), isVisible] {
+        auto window = weakThis.promote();
+        if (!window) {
+            return;
+        }
+        window->isSplitButtonVisible_ = isVisible;
+        window->UpdateTitleButtonVisibility();
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SetSplitButtonVisible");
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
@@ -2771,6 +2849,17 @@ void WindowSessionImpl::NotifySubWindowClose(bool& terminateCloseProcess)
     if (subWindowCloseListeners != nullptr) {
         subWindowCloseListeners->OnSubWindowClose(terminateCloseProcess);
     }
+}
+
+WMError WindowSessionImpl::NotifyMainWindowClose(bool& terminateCloseProcess)
+{
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    auto mainWindowCloseListener = GetListeners<IMainWindowCloseListener>();
+    if (mainWindowCloseListener != nullptr) {
+        mainWindowCloseListener->OnMainWindowClose(terminateCloseProcess);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_NULLPTR;
 }
 
 void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)

@@ -52,6 +52,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
     {WINDOW_STAGE_EVENT_CB, RegisterListenerType::WINDOW_STAGE_EVENT_CB},
+    {WINDOW_STAGE_CLOSE_CB, RegisterListenerType::WINDOW_STAGE_CLOSE_CB},
 };
 
 const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_CODE_MAP {
@@ -451,8 +452,15 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     } else if (caseType == CaseType::CASE_STAGE) {
-        if (registerListenerType == RegisterListenerType::WINDOW_STAGE_EVENT_CB) {
-            return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+        switch (registerListenerType) {
+            case RegisterListenerType::WINDOW_STAGE_EVENT_CB:
+                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+            case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
+                return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            default:
+                TLOGE(WmsLogTag::DEFAULT, "[NAPI]RegisterListenerType %{public}u is not supported",
+                    static_cast<uint32_t>(registerListenerType));
+                return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     }
     return WmErrorCode::WM_OK;
@@ -564,6 +572,21 @@ WmErrorCode JsWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<JsWindow
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSubWindowCloseListeners(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSubWindowCloseListeners(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
     }
     return ret;
 }

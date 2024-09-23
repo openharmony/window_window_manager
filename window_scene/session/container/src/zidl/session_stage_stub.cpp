@@ -108,12 +108,16 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleCompatibleFullScreenMinimize(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
             return HandleCompatibleFullScreenClose(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE):
+            return HandleNotifyCompatibleModeEnableInPad(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
             return HandleNotifyDumpInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE):
+            return HandleSetSplitButtonVisible(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -141,10 +145,12 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
             WLOGFE("transaction unMarsh failed");
             return -1;
         }
-        WSError errCode = UpdateRect(rect, reason, transaction);
+        SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     } else {
-        WSError errCode = UpdateRect(rect, reason);
+        SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     }
     return ERR_NONE;
@@ -510,6 +516,14 @@ int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply)
+{
+    bool enable = data.ReadBool();
+    WSError errCode = NotifyCompatibleModeEnableInPad(enable);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
@@ -533,6 +547,14 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
         TLOGE(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo write info failed");
         return ERR_TRANSACTION_FAILED;
     }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool isVisible = data.ReadBool();
+    SetSplitButtonVisible(isVisible);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

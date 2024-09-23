@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <mutex>
+#include <ipc_skeleton.h>
 #include <pixel_map.h>
 #include <set>
 
@@ -179,7 +180,7 @@ public:
      *
      * @return Default display id.
      */
-    sptr<Display> GetDefaultDisplaySync();
+    sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false);
 
     /**
      * @brief Get the display object by id.
@@ -274,6 +275,23 @@ public:
      * @return False means suspend screen end failed.
      */
     bool SuspendEnd();
+
+    /**
+     * @brief Get id of internal screen.
+     *
+     * @return Internal screen id.
+     */
+    ScreenId GetInternalScreenId();
+
+    /**
+     * @brief Set the screen power state by screen id.
+     *
+     * @param screenId Screen id.
+     * @param state Screen power state.
+     * @param reason Reason for power state change.
+     * @return True means set success, false means set failed.
+     */
+    bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
 
     /**
      * @brief Set the Display State object
@@ -666,10 +684,30 @@ public:
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
+    /**
+     * @brief Add displayId for current ability through Ability Management.
+     *
+     * @param displayId Identifier of the current display.
+     * @param abilityToken Token of the ability.
+     */
+    void AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemoteObject>& abilityToken);
+
+    /**
+     * @brief Removes the display identifier through the Ability Management.
+     *
+     * @param abilityToken Token of ability.
+     */
+    void RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken);
+
 private:
     DisplayManager();
     ~DisplayManager();
     void OnRemoteDied();
+
+    void ShowDisplayIdList();
+    std::mutex displayOperateMutex_;
+    DisplayId GetCallingAbilityDisplayId();
+    std::vector<std::pair<wptr<IRemoteObject>, DisplayId>> displayIdList_ {};
 
     class Impl;
     std::recursive_mutex mutex_;

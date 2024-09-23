@@ -468,6 +468,15 @@ WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     return wmsProxy->GetTopWindowId(mainWinId, topWinId);
 }
 
+WMError WindowAdapter::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetParentMainWindowId(windowId, mainWindowId);
+}
+
 WMError WindowAdapter::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
