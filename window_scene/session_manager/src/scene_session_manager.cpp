@@ -1319,6 +1319,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidArea_ = [this](const int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
     };
+    specificCb->onUpdateAvoidAreaByType_ = [this](const int32_t persistentId, AvoidAreaType type) {
+        this->UpdateAvoidAreaByType(persistentId, type);
+    };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
     };
@@ -7997,6 +8000,24 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
+}
+
+void SceneSessionManager::UpdateAvoidAreaByType(const int32_t persistentId, AvoidAreaType type)
+{
+    auto task = [this, persistentId, type]() {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr");
+            return;
+        }
+        if (sceneSession->IsImmersiveType()) {
+            TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is immersive type");
+            return;
+        }
+        auto avoidArea = sceneSession->GetAvoidAreaByType(type);
+        UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateAvoidAreaByType:PID:" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)

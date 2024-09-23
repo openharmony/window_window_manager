@@ -43,6 +43,7 @@ using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessToken
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
     WindowType type, uint64_t displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateAvoidAreaByTypeCallback = std::function<void(const int32_t persistentId, AvoidAreaType type)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
@@ -95,6 +96,7 @@ public:
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
         UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
@@ -252,7 +254,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
-    void SetIsStatusBarVisible(bool isVisible) { isStatusBarVisible_ = isVisible; }
+    void SetIsStatusBarVisible(bool isVisible);
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
