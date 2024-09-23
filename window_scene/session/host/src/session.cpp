@@ -217,6 +217,12 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
+void Session::ResetSessionInfoResultCode()
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.resultCode = -1; // -1: initial result code
+}
+
 void Session::SetSessionInfoPersistentId(int32_t persistentId)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -283,6 +289,11 @@ void Session::SetScreenId(uint64_t screenId)
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
     }
+}
+
+void Session::SetAppInstanceKey(const std::string& appInstanceKey)
+{
+    sessionInfo_.appInstanceKey_ = appInstanceKey;
 }
 
 const SessionInfo& Session::GetSessionInfo() const
@@ -894,7 +905,10 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     }
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        int32_t rotateAnimationDuration = GetRotateAnimationDuration();
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
+            .animationDuration_ = rotateAnimationDuration };
+        sessionStage_->UpdateRect(rect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
@@ -1007,6 +1021,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
         property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
+        property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
@@ -2097,6 +2112,25 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
+void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
+{
+    if (func == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "func is nullptr");
+        return;
+    }
+    acquireRotateAnimationConfigFunc_ = func;
+}
+
+int32_t Session::GetRotateAnimationDuration()
+{
+    if (acquireRotateAnimationConfigFunc_) {
+        RotateAnimationConfig rotateAnimationConfig;
+        acquireRotateAnimationConfigFunc_(rotateAnimationConfig);
+        return rotateAnimationConfig.duration_;
+    }
+    return ROTATE_ANIMATION_DURATION;
+}
+
 void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
@@ -2120,6 +2154,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -2332,6 +2367,28 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
         property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeEnableInPad(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, enable: %{public}d", persistentId_, enable);
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetCompatibleModeEnableInPad(enable);
+
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_SCB, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyCompatibleModeEnableInPad(enable);
 }
 
 WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)

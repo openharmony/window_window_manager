@@ -71,6 +71,17 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+WSError GetIntValueFromString(const std::string& str, uint32_t& value)
+{
+    char* end;
+    value = strtoul(str.c_str(), &end, 10); // 10 number convert base
+    if (*end == '\0' && value != 0) {
+        return WSError::WS_OK;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsBundleName) != napi_undefined) {
@@ -287,6 +298,32 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
+bool IsJsIsNewAppInstanceUndefined(napi_env env, napi_value jsIsNewAppInstance, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsNewAppInstance) != napi_undefined) {
+        bool isNewAppInstance = false;
+        if (!ConvertFromJsValue(env, jsIsNewAppInstance, isNewAppInstance)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isNewAppInstance");
+            return false;
+        }
+        sessionInfo.isNewAppInstance_ = isNewAppInstance;
+    }
+    return true;
+}
+
+bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsInstanceKey) != napi_undefined) {
+        std::string instanceKey;
+        if (!ConvertFromJsValue(env, jsInstanceKey, instanceKey)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to instanceKey");
+            return false;
+        }
+        sessionInfo.appInstanceKey_ = instanceKey;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -305,6 +342,10 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
     napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
+    napi_value jsIsNewAppInstance = nullptr;
+    napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
+    napi_value jsInstanceKey = nullptr;
+    napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -326,7 +367,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
         return false;
     }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
+    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+        !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
         return false;
     }
     return true;
@@ -789,6 +832,21 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
             continue;
         }
         payload[propName] = std::move(valName);
+    }
+    return true;
+}
+
+bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
+{
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, value, "duration", &jsDuration);
+    if (GetType(env, jsDuration) != napi_undefined) {
+        int32_t duration = ROTATE_ANIMATION_DURATION;
+        if (!ConvertFromJsValue(env, jsDuration, duration)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
+            return false;
+        }
+        config.duration_ = duration;
     }
     return true;
 }
