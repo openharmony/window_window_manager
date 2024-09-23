@@ -962,6 +962,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
@@ -1025,6 +1026,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
+    property->SetParentWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -1406,6 +1408,16 @@ bool WindowSessionProperty::GetExtensionFlag() const
     return isExtensionFlag_;
 }
 
+void WindowSessionProperty::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionSubWindowFlag() const
+{
+    return isUIExtensionSubWindowFlag_;
+}
+
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
 {
     uiExtensionUsage_ = uiExtensionUsage;
@@ -1414,6 +1426,16 @@ void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsag
 UIExtensionUsage WindowSessionProperty::GetUIExtensionUsage() const
 {
     return uiExtensionUsage_;
+}
+
+void WindowSessionProperty::SetParentWindowType(WindowType parentWindowType)
+{
+    parentWindowType_= parentWindowType;
+}
+
+WindowType WindowSessionProperty::GetParentWindowType() const
+{
+    return parentWindowType_;
 }
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)

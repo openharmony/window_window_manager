@@ -1018,6 +1018,11 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
     return false;
 }
 
+WindowType WindowExtensionSessionImpl::GetParentWindowType() const
+{
+    return property_->GetParentWindowType();
+}
+
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
 {
     if (property_->GetUIExtensionUsage() != UIExtensionUsage::MODAL &&

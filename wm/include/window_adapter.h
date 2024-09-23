@@ -47,6 +47,7 @@ public:
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
+    virtual WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);

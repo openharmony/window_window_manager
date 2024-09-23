@@ -188,6 +188,10 @@ public:
     void Read(Parcel& parcel, WSPropertyChangeAction action);
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
+    void SetParentWindowType(WindowType parentWindowType);
+    WindowType GetParentWindowType() const;
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    bool GetIsUIExtensionSubWindowFlag() const;
 
     /**
      * Sub Window
@@ -326,6 +330,8 @@ private:
      */
     uint32_t subWindowLevel_ = 1;
     bool isPcAppInPad_ = false;
+    bool isUIExtensionSubWindowFlag_ = false;
+    WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
