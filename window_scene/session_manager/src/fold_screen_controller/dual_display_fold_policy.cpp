@@ -40,8 +40,8 @@ const int32_t TP_TYPE = 12;
 const std::string MAIN_TP = "0";
 const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
-const int32_t ADD_DISPLAY_NODE = 0;
-const uint32_t CHANGE_MODE_TASK_NUM = 3;
+const int32_t ADD_DISPLAY_NODE = 1;
+const uint32_t CHANGE_MODE_TASK_NUM = 4;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
@@ -62,6 +62,26 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
+}
+
+void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
+{
+    if (status) {
+        pengdingTask_ = CHANGE_MODE_TASK_NUM;
+        startTimePoint_ = std::chrono::steady_clock::now();
+        displayModeChangeRunning_ = status;
+    } else {
+        pengdingTask_ --;
+        if (pengdingTask_ != 0) {
+            return;
+        }
+        displayModeChangeRunning_ = false;
+        endTimePoint_ = std::chrono::steady_clock::now();
+        if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
+            TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+            ChangeScreenDisplayMode(lastCachedisplayMode_.load());
+        }
+    }
 }
 
 bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
@@ -108,7 +128,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         if (!CheckDisplayMode(displayMode)) {
             return;
         }
-        SetdisplayModeChangeStatus(true, CHANGE_MODE_TASK_NUM);
+        SetdisplayModeChangeStatus(true);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::SUB: {
