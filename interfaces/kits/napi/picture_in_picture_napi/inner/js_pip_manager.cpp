@@ -186,13 +186,13 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
     return NapiGetUndefined(env);
 }
 
-napi_value JsPipManager::MarkPipNodeType(napi_env env, napi_callback_info info)
+napi_value JsPipManager::SetPipNodeType(napi_env env, napi_callback_info info)
 {
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnMarkPipNodeType(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetPipNodeType(env, info) : nullptr;
 }
 
-napi_value JsPipManager::OnMarkPipNodeType(napi_env env, napi_callback_info info)
+napi_value JsPipManager::OnSetPipNodeType(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     size_t argc = 4;
@@ -288,7 +288,7 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
     BindNativeFunction(env, exportObj, "setTypeNodeEnabled", moduleName, JsPipManager::SetTypeNodeEnabled);
-    BindNativeFunction(env, exportObj, "markPipNodeType", moduleName, JsPipManager::MarkPipNodeType);
+    BindNativeFunction(env, exportObj, "setPipNodeType", moduleName, JsPipManager::SetPipNodeType);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen

@@ -100,9 +100,9 @@ export class PiPContent extends ViewPU {
         }
         this.useNode = true;
         if (this.xComponent.getParent() === null || this.xComponent.getParent() === undefined) {
-            pip.markPipNodeType(this.xComponent, false);
+            pip.setPipNodeType(this.xComponent, false);
         } else {
-            pip.markPipNodeType(this.xComponent, true);
+            pip.setPipNodeType(this.xComponent, true);
             this.xComponent.getParent().removeChild(this.xComponent);
         }
         pip.setTypeNodeEnabled();
