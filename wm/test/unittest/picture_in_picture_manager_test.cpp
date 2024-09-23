@@ -404,8 +404,8 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     
     PictureInPictureManager::activeController_ = pipController;
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
-    PictureInPictureManager::DoDestroy();
     pipController->window_ = mw;
+    PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
 }
