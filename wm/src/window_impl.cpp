@@ -2661,9 +2661,9 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display)
 {
     auto task = [weakThis = wptr(this), reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
-        auto promoteThis = weakThis.promote();
-        if (!promoteThis) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "promoteThis is null");
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
         if (rsTransaction) {
@@ -2674,16 +2674,16 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve);
-        if ((rectToAce != lastOriRect) || (reason != promoteThis->lastSizeChangeReason_)) {
-            promoteThis->NotifySizeChange(rectToAce, reason, rsTransaction);
-            promoteThis->lastSizeChangeReason_ = reason;
+        if ((rectToAce != lastOriRect) || (reason != window->lastSizeChangeReason_)) {
+            window->NotifySizeChange(rectToAce, reason, rsTransaction);
+            window->lastSizeChangeReason_ = reason;
         }
-        promoteThis->UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
+        window->UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
         }
-        promoteThis->postTaskDone_ = true;
+        window->postTaskDone_ = true;
     };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
@@ -2744,16 +2744,16 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
 void WindowImpl::PerformBack()
 {
     auto task = [weakThis = wptr(this)]() {
-        auto promoteThis = weakThis.promote();
-        if (!promoteThis) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "promoteThis is null");
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
-        if (!WindowHelper::IsMainWindow(promoteThis->property_->GetWindowType())) {
+        if (!WindowHelper::IsMainWindow(window->property_->GetWindowType())) {
             WLOGD("it is not a main window");
             return;
         }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(promoteThis->context_);
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(window->context_);
         if (abilityContext == nullptr) {
             WLOGFE("abilityContext is null");
             return;
@@ -2763,18 +2763,18 @@ void WindowImpl::PerformBack()
         if (ret == ERR_OK && needMoveToBackground) {
             abilityContext->MoveAbilityToBackground();
             WLOGD("id: %{public}u closed, to move Ability: %{public}u",
-                  promoteThis->property_->GetWindowId(), needMoveToBackground);
+                  window->property_->GetWindowId(), needMoveToBackground);
             return;
         }
         // TerminateAbility will invoke last ability, CloseAbility will not.
-        bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(promoteThis->property_->GetWindowMode());
+        bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(window->property_->GetWindowMode());
         if (shouldTerminateAbility) {
             abilityContext->TerminateSelf();
         } else {
             abilityContext->CloseAbility();
         }
         WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
-              promoteThis->property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
+              window->property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
     };
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     handler_->PostTask(task, "WindowImpl::PerformBack");
