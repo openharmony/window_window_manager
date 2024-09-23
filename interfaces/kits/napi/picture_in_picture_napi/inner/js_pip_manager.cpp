@@ -27,7 +27,7 @@ namespace {
     constexpr int32_t NUMBER_TWO = 2;
 }
 
-napi_value GetType(napi_env env, napi_value value)
+napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
