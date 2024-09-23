@@ -349,7 +349,8 @@ void SceneSessionManager::LoadWindowSceneXml()
     } else {
         WLOGFE("Load window scene xml failed");
     }
-    ConfigDefaultKeyboardAnimation();
+    ConfigDefaultKeyboardAnimation(appWindowSceneConfig_.keyboardAnimationIn_,
+        appWindowSceneConfig_.keyboardAnimationOut_);
 }
 
 void SceneSessionManager::InitPrepareTerminateConfig()
@@ -857,23 +858,6 @@ bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigI
     return true;
 }
 
-void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
-{
-    LoadKeyboardAnimation(animationConfig["animationIn"]["timing"], appWindowSceneConfig_.keyboardAnimationIn_);
-    LoadKeyboardAnimation(animationConfig["animationOut"]["timing"], appWindowSceneConfig_.keyboardAnimationOut_);
-
-    const auto& defaultAnimation = appWindowSceneConfig_.keyboardAnimationIn_;
-    systemConfig_.keyboardAnimationConfig_.curveType_ = defaultAnimation.curveType_;
-    systemConfig_.keyboardAnimationConfig_.curveParams_.assign({
-        defaultAnimation.ctrlX1_,
-        defaultAnimation.ctrlY1_,
-        defaultAnimation.ctrlX2_,
-        defaultAnimation.ctrlY2_,
-    });
-    systemConfig_.keyboardAnimationConfig_.durationIn_ = appWindowSceneConfig_.keyboardAnimationIn_.duration_;
-    systemConfig_.keyboardAnimationConfig_.durationOut_ = appWindowSceneConfig_.keyboardAnimationOut_.duration_;
-}
-
 void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item,
     KeyboardSceneAnimationConfig& config)
 {
@@ -897,25 +881,63 @@ void SceneSessionManager::LoadKeyboardAnimation(const WindowSceneConfig::ConfigI
     }
 }
 
-void SceneSessionManager::ConfigDefaultKeyboardAnimation()
+void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
 {
-    constexpr char CURVETYPE[] = "interpolatingSpring";
-    constexpr float CTRLX1 = 0;
-    constexpr float CTRLY1 = 1;
-    constexpr float CTRLX2 = 342;
-    constexpr float CTRLY2 = 37;
-    constexpr uint32_t DURATION = 150;
+    LoadKeyboardAnimation(animationConfig["animationIn"]["timing"], appWindowSceneConfig_.keyboardAnimationIn_);
+    LoadKeyboardAnimation(animationConfig["animationOut"]["timing"], appWindowSceneConfig_.keyboardAnimationOut_);
 
-    if (!systemConfig_.keyboardAnimationConfig_.curveType_.empty()) {
+    // config system animation
+    const auto& appConfigIn = appWindowSceneConfig_.keyboardAnimationIn_;
+    systemConfig_.animationIn_ = KeyboardAnimationCurve(appConfigIn.curveType_,
+        {appConfigIn.ctrlX1_, appConfigIn.ctrlY1_, appConfigIn.ctrlX2_, appConfigIn.ctrlY2_},
+        appConfigIn.duration_);
+    const auto& appConfigOut = appWindowSceneConfig_.keyboardAnimationOut_;
+    systemConfig_.animationOut_ = KeyboardAnimationCurve(appConfigOut.curveType_,
+        {appConfigOut.ctrlX1_, appConfigOut.ctrlY1_, appConfigOut.ctrlX2_, appConfigOut.ctrlY2_},
+        appConfigOut.duration_);
+}
+
+void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,
+    KeyboardSceneAnimationConfig& animationOut)
+{
+    if (!(systemConfig_.animationIn_.curveType_.empty() && systemConfig_.animationOut_.curveType_.empty())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "product config, curveIn:[%{public}s, %{public}u], "
+            "curveOut:[%{public}s, %{public}u]", systemConfig_.animationIn_.curveType_.c_str(),
+            systemConfig_.animationIn_.duration_, systemConfig_.animationOut_.curveType_.c_str(),
+            systemConfig_.animationOut_.duration_);
         return;
     }
 
-    systemConfig_.keyboardAnimationConfig_.curveType_ = CURVETYPE;
-    std::vector<float> keyboardCurveParams = {CTRLX1, CTRLY1, CTRLX2, CTRLY2};
-    systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
-        keyboardCurveParams.begin(), keyboardCurveParams.end());;
-    systemConfig_.keyboardAnimationConfig_.durationIn_ = DURATION;
-    systemConfig_.keyboardAnimationConfig_.durationOut_ = DURATION;
+    // default animation curve params
+    constexpr char CURVETYPE[] = "interpolatingSpring";
+    constexpr float IN_CTRLX1 = 0.0f;
+    constexpr float OUT_CTRLX1 = 4.0f;
+    constexpr float CTRLY1 = 1.0f;
+    constexpr float CTRLX2 = 342.0f;
+    constexpr float CTRLY2 = 37.0f;
+    constexpr uint32_t DURATION = 150;
+    std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+    std::vector<float> out = { OUT_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+
+    // update system config for client
+    systemConfig_.animationIn_ = KeyboardAnimationCurve(CURVETYPE, in, DURATION);
+    systemConfig_.animationOut_ = KeyboardAnimationCurve(CURVETYPE, out, DURATION);
+
+    // update app config for server
+    animationIn.curveType_ = CURVETYPE;
+    animationIn.ctrlX1_ = in[0]; // 0: ctrl x1 index
+    animationIn.ctrlY1_ = in[1]; // 1: ctrl y1 index
+    animationIn.ctrlX2_ = in[2]; // 2: ctrl x2 index
+    animationIn.ctrlY2_ = in[3]; // 3: ctrl y2 index
+    animationIn.duration_ = DURATION;
+
+    animationOut.curveType_ = CURVETYPE;
+    animationOut.ctrlX1_ = out[0]; // 0: ctrl x1 index
+    animationOut.ctrlY1_ = out[1]; // 1: ctrl y1 index
+    animationOut.ctrlX2_ = out[2]; // 2: ctrl x2 index
+    animationOut.ctrlY2_ = out[3]; // 3: ctrl y2 index
+    animationOut.duration_ = DURATION;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "use default config");
 }
 
 void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
@@ -7295,7 +7317,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
         lastUpdatedAvoidArea_[persistentId] = {};
     }
-    
+
     bool needUpdate = true;
     if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
         iter != lastUpdatedAvoidArea_[persistentId].end()) {
