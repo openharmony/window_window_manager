@@ -1464,3 +1464,4 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTe
 }
 } // namespace Rosen
 } // namespace OHOS
+
