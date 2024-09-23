@@ -209,6 +209,8 @@ public:
     bool GetIsUIExtensionAbilityProcess() const;
     void SetParentWindowType(WindowType parentWindowType);
     WindowType GetParentWindowType() const;
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    bool GetIsUIExtensionSubWindowFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -349,6 +351,7 @@ private:
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     bool isExtensionFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
+    bool isUIExtensionSubWindowFlag_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 
