@@ -150,7 +150,7 @@ HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock 
+ * @tc.name: ReleaseForegroundSessionScreenLock
  * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
  * @tc.type: FUNC
  */
