@@ -21,7 +21,6 @@
 #include <float.h>
 #include <sstream>
 #include <string>
-#include <vector>
 
 namespace OHOS {
 namespace Rosen {
@@ -893,19 +892,17 @@ public:
             ss << "empty";
             return ss.str();
         }
-
-        std::vector<std::pair<std::string, Rect>> rects = {
-            std::make_pair("top", topRect_),
-            std::make_pair("bottom", bottomRect_),
-            std::make_pair("left", leftRect_),
-            std::make_pair("right", rightRect_)
-        };
-        for (const auto& pair: rects) {
-            if (!pair.second.IsUninitializedRect()) {
-                auto rect = pair.second;
-                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
-                    << rect.width_ << " " << rect.height_ << "] ";
-            }
+        if (!topRect_.IsUninitializedRect()) {
+            ss << "top " << topRect_.ToString() << " ";
+        }
+        if (!bottomRect_.IsUninitializedRect()) {
+            ss << "bottom " << bottomRect_.ToString() << " ";
+        }
+        if (!leftRect_.IsUninitializedRect()) {
+            ss << "left " << leftRect_.ToString() << " ";
+        }
+        if (!rightRect_.IsUninitializedRect()) {
+            ss << "right " << rightRect_.ToString() << " ";
         }
         return ss.str();
     }
