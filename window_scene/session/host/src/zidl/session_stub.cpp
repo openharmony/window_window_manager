@@ -527,14 +527,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->processOptions.reset(processOptions);
     auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
     abilitySessionInfo->startWindowOption.reset(startWindowOption);
-    if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!data.ReadBool(abilitySessionInfo->isAtomicService)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
-        return ERR_INVALID_VALUE;
-    }
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground) ||
         !data.ReadBool(abilitySessionInfo->isAtomicService) ||
         !data.ReadBool(abilitySessionInfo->isBackTransition) ||

@@ -99,6 +99,8 @@ public:
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
     WSError SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    WSError DoPendingSessionActivationOne(sptr<AAFwk::SessionInfo> abilitySessionInfo, MessageParcel &data)
+    WSError DoPendingSessionActivationTwo(sptr<AAFwk::SessionInfo> abilitySessionInfo, MessageParcel &data)
 };
 } // namespace OHOS::Rosen
 
