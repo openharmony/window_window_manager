@@ -112,10 +112,11 @@ WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteOb
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+    bool shouldBackToCaller)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token);
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
 }
 
 WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token)
