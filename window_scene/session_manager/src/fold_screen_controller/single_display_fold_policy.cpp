@@ -30,7 +30,6 @@ namespace OHOS::Rosen {
 namespace {
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
-const uint32_t CHANGE_MODE_TASK_NUM = 3;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const int32_t TP_TYPE_MAIN = 18;
@@ -61,6 +60,26 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
+void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
+{
+    if (status) {
+        pengdingTask_ = FOLD_TO_EXPAND_TASK_NUM;
+        startTimePoint_ = std::chrono::steady_clock::now();
+        displayModeChangeRunning_ = status;
+    } else {
+        pengdingTask_ --;
+        if (pengdingTask_ != 0) {
+            return;
+        }
+        displayModeChangeRunning_ = false;
+        endTimePoint_ = std::chrono::steady_clock::now();
+        if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
+            TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+            ChangeScreenDisplayMode(lastCachedisplayMode_.load());
+        }
+    }
+}
+
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
 {
     SetLastCacheDisplayMode(displayMode);
@@ -84,7 +103,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
-        SetdisplayModeChangeStatus(true, CHANGE_MODE_TASK_NUM);
+        SetdisplayModeChangeStatus(true);
         ReportFoldDisplayModeChange(displayMode);
         switch (displayMode) {
             case FoldDisplayMode::MAIN: {
