@@ -1205,12 +1205,13 @@ bool SessionStageProxy::ReadBigStringVectorFromParcel(
     MessageParcel& reply, std::vector<std::string>& infos)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "ReadBigStringVectorFromParcel entry");
-    size_t dataSize = static_cast<size_t>(reply.ReadInt32());
-    if (dataSize == 0) {
+    int32_t dataSizeInt = 0;
+    if (!reply.ReadInt32(dataSizeInt) || dataSizeInt == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read dataSize failed");
         return false;
     }
 
+    size_t dataSize = static_cast<size_t>(dataSizeInt);
     void *buffer = nullptr;
     if (!CopyBufferFromRawData(buffer, dataSize, reply.ReadRawData(dataSize))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read rawData failed, dataSize: %{public}zu", dataSize);
@@ -1223,7 +1224,12 @@ bool SessionStageProxy::ReadBigStringVectorFromParcel(
         return false;
     }
 
-    int32_t infoSize = tempParcel.ReadInt32();
+    int32_t infoSize = 0;
+    if (!tempParcel.ReadInt32(infoSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read infoSize failed");
+        return false;
+    }
+
     TLOGD(WmsLogTag::WMS_UIEXT, "ReadBigStringVectorFromParcel dataSize: %{public}zu,"
         " infoSize: %{public}d", dataSize, infoSize);
     if (infoSize >= MAX_INFOS_SIZE) {
