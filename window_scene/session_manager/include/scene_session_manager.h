@@ -224,6 +224,8 @@ public:
     WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
+    WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
+        std::vector<SCBAbilityInfo>& scbAbilityInfos);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
 
