@@ -345,6 +345,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
+        reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -531,7 +532,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadBool(abilitySessionInfo->isBackTransition) ||
         !data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition or needClearInNotShowRecent failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read some bool failed.");
         return ERR_INVALID_VALUE;
     }
     bool hasCallerToken = false;
@@ -549,6 +550,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (hasStartSetting) {
         abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
+    if (!data.ReadString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
+        return ERR_INVALID_VALUE;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
