@@ -211,16 +211,16 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
-bool WindowSceneSessionImpl::IsPcOrPadEnableActivation() const
+bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
     if (WindowHelper::IsMainWindow(GetType())) {
-        return WindowSessionImpl::IsPcOrPadEnableActivation();
+        return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
     }
     auto mainWindow = GetMainWindowWithContext(GetContext());
     if (mainWindow == nullptr) {
         return false;
     }
-    return mainWindow->IsPcOrPadEnableActivation();
+    return mainWindow->IsPcOrPadCapabilityEnabled();
 }
 
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
@@ -235,7 +235,7 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     }
 }
 
-WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
+WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
 {
     if (isToast) {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -249,7 +249,7 @@ WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentS
         return WMError::WM_ERROR_NULLPTR;
     }
     if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
-        !parentSession->IsPcOrPadEnableActivation()) {
+        !parentSession->IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -292,7 +292,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
         auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
-        if (ret != GetParentSessionAndVerify()) {
+        if (ret != WMError::WM_OK) {
             return ret;
         }
         // set parent persistentId
@@ -2180,7 +2180,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isValidWindow = isMainWindow || (IsPcOrPadEnableActivation() && (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);

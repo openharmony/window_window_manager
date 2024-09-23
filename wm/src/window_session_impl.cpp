@@ -213,7 +213,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
-bool WindowSessionImpl::IsPcOrPadEnableActivation() const
+bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
            property_->GetIsPcAppInPad();
@@ -222,7 +222,7 @@ bool WindowSessionImpl::IsPcOrPadEnableActivation() const
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    if (IsPcOrPadEnableActivation() && windowOption_ != nullptr) {
+    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -1100,7 +1100,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if (IsPcOrPadEnableActivation() && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true, false);
         return;
@@ -2395,7 +2395,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadEnableActivation()) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
