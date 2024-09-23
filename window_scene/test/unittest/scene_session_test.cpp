@@ -2046,7 +2046,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     property->SetDisplayId(-99);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetDefaultDisplayIdIfNeed();
-    EXPECT_NE(property->GetDisplayId(), SCREEN_ID_INVALID);
+    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
 }
 }
