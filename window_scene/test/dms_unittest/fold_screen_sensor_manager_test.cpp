@@ -30,7 +30,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
-constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 }
 
@@ -195,11 +194,11 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
-    mgr.globalHall = HALL_FOLDED_THRESHOLD;
+    mgr.registerPosture_ = false;
     mgr.TriggerDisplaySwitch();
     EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
 
-    mgr.globalHall = 10;
+    mgr.registerPosture_ = true;
     mgr.TriggerDisplaySwitch();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(mgr.globalAngle, 25);

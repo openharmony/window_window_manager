@@ -129,7 +129,7 @@ public:
      */
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     WSError UpdateOrientation() override;
@@ -257,6 +257,8 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
+    WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
@@ -264,6 +266,11 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
+
+    /*
+     * Multi Window
+     */
+    WSError SetSplitButtonVisible(bool isVisible) override;
 
 protected:
     WMError Connect();
@@ -292,6 +299,7 @@ protected:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
+    WMError NotifyMainWindowClose(bool& terminateCloseProcess);
     void NotifySwitchFreeMultiWindow(bool enable);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
@@ -311,6 +319,12 @@ protected:
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
 
+    /**
+     * Sub Window
+     */
+    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
+    void DestroySubWindow();
+
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
     std::shared_ptr<Ace::UIContent> uiContent_;
@@ -329,12 +343,6 @@ protected:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     // protect windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
-
-    /**
-     * Sub Window
-     */
-    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
-    void DestroySubWindow();
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -420,6 +428,8 @@ private:
     template<typename T>
     EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> GetListeners();
+    template<typename T>
     EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
@@ -437,7 +447,7 @@ private:
     std::string GetRestoredRouterStack();
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
@@ -467,6 +477,7 @@ private:
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex subWindowCloseListenersMutex_;
+    static std::mutex mainWindowCloseListenersMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
@@ -484,6 +495,7 @@ private:
         windowTitleButtonRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
+    static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
 
     // FA only
@@ -510,6 +522,11 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    /*
+     * Multi Window
+     */
+    bool isSplitButtonVisible_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

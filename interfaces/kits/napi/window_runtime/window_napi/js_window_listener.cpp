@@ -586,5 +586,32 @@ void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowRectListener::OnSubWindowClose",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
+
+void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
+{
+    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_]() mutable {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnMainWindowClose");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or env is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        bool value = terminateCloseProcess;
+        napi_value returnValue = thisListener->CallJsMethod(WINDOW_STAGE_CLOSE_CB.c_str(), nullptr, 0);
+        if (napi_get_value_bool(env, returnValue, &value) == napi_ok) {
+            terminateCloseProcess = value;
+        }
+        napi_close_handle_scope(env, scope);
+    };
+
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnMainWindowClose",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
 } // namespace Rosen
 } // namespace OHOS
