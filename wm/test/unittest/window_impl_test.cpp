@@ -1261,6 +1261,8 @@ HWTEST_F(WindowImplTest, SetBrightness01, Function | SmallTest | Level3)
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBrightness(2.0f)); // 2.0f: brightness
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBrightness(-0.5f)); // -0.5f: brightness
+    ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
