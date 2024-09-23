@@ -235,9 +235,9 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     }
 }
 
-WMError GetParentSessionAndVerify(bool isToastFlag, sptr<WindowSessionImpl>& parentSession)
+WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
 {
-    if (isToastFlag) {
+    if (isToast) {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
     } else {
@@ -2180,8 +2180,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isValidWindow = isMainWindow || (IsPcOrPadEnableActivation() &&
-                                          (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadEnableActivation() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
