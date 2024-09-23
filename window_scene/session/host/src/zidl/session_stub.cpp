@@ -520,7 +520,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>(););
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
         return ERR_INVALID_VALUE;
