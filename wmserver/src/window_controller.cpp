@@ -478,10 +478,11 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
                 }
             }
         };
-        const auto& keyboardAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationConfig_;
-        auto timingProtocol = WindowHelper::IsEmptyRect(occupiedArea) ? keyboardAnimationConfig.durationOut_ :
-            keyboardAnimationConfig.durationIn_;
-        RSNode::Animate(timingProtocol, keyboardAnimationConfig.curve_, setBoundsFun);
+
+        const AnimationConfig::KeyboardAnimation& animation = WindowHelper::IsEmptyRect(occupiedArea) ?
+            WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationOut_ :
+            WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationIn_;
+        RSNode::Animate(animation.duration_, animation.curve_, setBoundsFun);
     }
 
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
