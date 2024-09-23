@@ -237,7 +237,8 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -389,6 +390,7 @@ public:
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
+    WMError ReleaseForegroundSessionScreenLock() override;
 
     /*
      * Multi Window
@@ -425,7 +427,6 @@ public:
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
-    WMError ReleaseForegroundSessionScreenLock() override;
     WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
 

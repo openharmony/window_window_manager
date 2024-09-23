@@ -557,6 +557,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
@@ -714,6 +715,7 @@ int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
