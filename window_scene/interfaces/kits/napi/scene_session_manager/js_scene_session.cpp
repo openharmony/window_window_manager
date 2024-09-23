@@ -2844,13 +2844,14 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]BrokerStates not started");
             return nullptr;
         }
-        if (info.reuse) {
+        if (info.reuse || info.isAtomicService_) {
             TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
             } else {
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(info.bundleName_,
-                    info.moduleName_, info.abilityName_, info.appIndex_, info.appInstanceKey_, info.windowType_);
+                ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_};
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
             }
         }
         if (sceneSession == nullptr) {
