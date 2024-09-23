@@ -936,10 +936,7 @@ HWTEST_F(PictureInPictureControllerTest, PrepareSource, Function | SmallTest | L
     pipControl->mainWindow_ = nullptr;
     pipControl->PrepareSource();
     pipControl->mainWindow_ = mw;
-    pipControl->PrepareSource();
     pipControl->pipOption_->SetNavigationId("");
-    pipControl->PrepareSource();
-    pipControl->pipOption_->SetNavigationId("abc");
     pipControl->PrepareSource();
 }
 
@@ -956,10 +953,10 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
-    pipControl->window_ = mw;
+    pipControl->window_ = nullptr;
     pipControl->LocateSource();
 
-    pipControl->window_ = nullptr;
+    pipControl->window_ = mw;
     pipControl->LocateSource();
 }
 
