@@ -36,8 +36,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{   // Note that this method is NOT pair with "WriteAbilitySessionInfoBasic" in session_proxy.cpp.
-    // Compare with "WriteAbilitySessionInfoBasic" method, this method has NO want info at head and processOption info at tail.
+{   // Compare with "WriteAbilitySessionInfoBasic" method, 
+    // this method has NO want info at head and processOption info at tail.
     if (abilitySessionInfo == nullptr) {
         return ERR_INVALID_DATA;
     }
@@ -478,9 +478,8 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     abilitySessionInfo->processOptions =
-        std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
+        std::shared_ptr<AAFwk::ProcessOptions>(data.ReadParcelable<AAFwk::ProcessOptions>());
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
@@ -495,8 +494,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
-        auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        abilitySessionInfo->startSetting.reset(abilityStartSetting);
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
     bool visible = false;
     if (!data.ReadBool(visible)) {
@@ -522,8 +520,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    abilitySessionInfo->processOptions.reset(processOptions);
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>(););
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
         return ERR_INVALID_VALUE;
@@ -551,8 +548,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
-        auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        abilitySessionInfo->startSetting.reset(abilityStartSetting);
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
