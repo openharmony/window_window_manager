@@ -576,7 +576,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 
     if (!remoteExtSessionMap_.empty()) {
         for (auto item = remoteExtSessionMap_.begin(); item != remoteExtSessionMap_.end(); ++item) {
-            if ((item->first == nullptr) ||(item->second == nullptr)) {
+            if ((item->first == nullptr) || (item->second == nullptr)) {
                 continue;
             }
             int32_t persistentId = INVALID_SESSION_ID;
