@@ -77,6 +77,15 @@ bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
     return true;
 }
 
+ScreenId DualDisplayFoldPolicy::GetScreenIdByDisplayMode(FoldDisplayMode displayMode)
+{
+    ScreenId screenId = SCREEN_ID_MAIN;
+    if (displayMode == FoldDisplayMode::SUB) {
+        screenId = SCREEN_ID_SUB;
+    }
+    return screenId;
+}
+
 void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
 {
     SetLastCacheDisplayMode(displayMode);
@@ -86,10 +95,8 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, getFoldingElapsedMs());
-    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
-    if (displayMode == FoldDisplayMode::SUB) {
-        screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
-    }
+    ScreenId screenId = GetScreenIdByDisplayMode(displayMode);
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
@@ -122,7 +129,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
             }
         }
         if (currentDisplayMode_ != displayMode) {
-            TLOGI(WmsLogTag::DMS, "NotifyDisplayModeChanged displayMode = %{public}d", displayMode);
             ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
         }
         currentDisplayMode_ = displayMode;
