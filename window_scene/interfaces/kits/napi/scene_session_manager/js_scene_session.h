@@ -271,7 +271,7 @@ private:
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
     void PendingSessionToForeground(const SessionInfo& info);
-    void PendingSessionToBackgroundForDelegator(const SessionInfo& info);
+    void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);

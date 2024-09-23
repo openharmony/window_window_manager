@@ -151,31 +151,37 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRem
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+    bool shouldBackToCaller)
 {
-    WLOGFD("run SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator");
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteRemoteObject(token)) {
-        WLOGFE("Write token failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write shouldBackToCaller failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
