@@ -422,6 +422,21 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: SetParentWindowType
+ * @tc.desc: SetParentWindowType setter and getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetParentWindowType, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetParentWindowType(WindowType::WINDOW_TYPE_TOAST);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_TOAST, option->GetParentWindowType());
+    option->SetParentWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_COMPONENT, option->GetParentWindowType());
+}
+
+/**
  * @tc.name: UIExtensionUsage
  * @tc.desc: UIExtensionUsage setter and getter test
  * @tc.type: FUNC

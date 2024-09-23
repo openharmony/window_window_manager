@@ -305,17 +305,22 @@ struct SessionInfo {
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
     bool isSystemInput_ = false;
-    bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+
+    /*
+     * UIExtension
+     */
+    uint32_t uiExtensionUsage_ = 0;
+    bool isAsyncModalBinding_ = false;
+    uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
 };
 
 enum class SessionFlag : uint32_t {
