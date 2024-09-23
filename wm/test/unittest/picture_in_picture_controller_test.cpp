@@ -918,6 +918,32 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
 }
 
 /**
+ * @tc.name: PrepareSource
+ * @tc.desc: PrepareSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, PrepareSource, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->PrepareSource();
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->mainWindow_ = nullptr;
+    pipControl->PrepareSource();
+    pipControl->mainWindow_ = mw;
+    pipControl->PrepareSource();
+    pipControl->pipOption_->SetNavigationId("");
+    pipControl->PrepareSource();
+    pipControl->pipOption_->SetNavigationId("abc");
+    pipControl->PrepareSource();
+}
+
+/**
  * @tc.name: LocateSource
  * @tc.desc: LocateSource
  * @tc.type: FUNC
@@ -926,27 +952,14 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
-    auto mw1 = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw1);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->window_ = mw;
-    pipControl->mainWindow_ = nullptr;
     pipControl->LocateSource();
-    pipControl->mainWindow_ = mw;
-    pipControl->window_ = nullptr;
-    pipControl->LocateSource();
-    pipControl->mainWindow_ = nullptr;
-    pipControl->LocateSource();
-    pipControl->window_ = mw;
-    pipControl->mainWindow_ = mw1;
 
-    pipControl->pipOption_->SetNavigationId("");
-    pipControl->pipOption_->SetTypeNodeEnabled(false);
-    pipControl->LocateSource();
-    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->window_ = nullptr;
     pipControl->LocateSource();
 }
 

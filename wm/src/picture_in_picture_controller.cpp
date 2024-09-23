@@ -566,8 +566,16 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 void PictureInPictureController::PrepareSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (IsTypeNodeEnabled()) {
+        TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
+        return;
+    }
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindow is nullptr");
+        return;
+    }
     std::string navId = pipOption_->GetNavigationId();
-    if (navId != "" && !IsTypeNodeEnabled()) {
+    if (navId != "") {
         auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
         if (navController) {
             navController->PushInPIP(handleId_);
@@ -581,8 +589,8 @@ void PictureInPictureController::PrepareSource()
 void PictureInPictureController::LocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (mainWindow_ == nullptr || window_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "mainWindow or window is nullptr");
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr");
         return;
     }
     window_->SetTransparent(true);

@@ -287,6 +287,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::DoRestore();
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoActionClose();
+    PictureInPictureManager::DoPrepareSource();
     PictureInPictureManager::DoLocateSource();
     std::string actionName = "test";
     PictureInPictureManager::DoActionEvent(actionName, 0);
@@ -303,6 +304,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
     PictureInPictureManager::DoClose(true, true);
     PictureInPictureManager::DoClose(true, false);
     PictureInPictureManager::DoActionClose();
+    PictureInPictureManager::DoPrepareSource();
     PictureInPictureManager::DoLocateSource();
     const std::string ACTION_CLOSE = "close";
     const std::string ACTION_PRE_RESTORE = "pre_restore";
