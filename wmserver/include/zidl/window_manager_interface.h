@@ -249,6 +249,7 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) { return WMError::WM_OK; }
 };
 }
 }

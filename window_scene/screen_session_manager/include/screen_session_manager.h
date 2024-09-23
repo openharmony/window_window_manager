@@ -83,6 +83,8 @@ public:
     bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SuspendEnd() override;
+    ScreenId GetInternalScreenId() override;
+    bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;

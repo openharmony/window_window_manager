@@ -65,6 +65,7 @@ public:
     MOCK_METHOD0(CompatibleFullScreenRecover, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenMinimize, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
+    MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,

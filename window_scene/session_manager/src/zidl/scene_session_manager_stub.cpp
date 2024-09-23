@@ -134,6 +134,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRaiseWindowToTop(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID):
             return HandleGetTopWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_MAIN_WINDOW_ID):
+            return HandleGetParentMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE):
             return HandleNotifyWindowExtensionVisibilityChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER):
@@ -878,6 +880,24 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
     WMError ret = GetTopWindowId(mainWinId, topWinId);
     reply.WriteUint32(topWinId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t windowId = INVALID_SESSION_ID;
+    if (!data.ReadUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read windowId failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t mainWindowId = INVALID_SESSION_ID;
+    WMError errCode = GetParentMainWindowId(windowId, mainWindowId);
+    if (!reply.WriteUint32(mainWindowId)) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
