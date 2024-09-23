@@ -82,6 +82,7 @@ public:
     void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
+    void PrepareSource();
     void LocateSource();
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);

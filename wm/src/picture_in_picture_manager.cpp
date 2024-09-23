@@ -30,6 +30,7 @@ const std::string ACTION_CLOSE = "close";
 const std::string ACTION_PRE_RESTORE = "pre_restore";
 const std::string ACTION_RESTORE = "restore";
 const std::string ACTION_DESTROY = "destroy";
+const std::string ACTION_PREPARE_SOURCE = "prepare_source";
 const std::string ACTION_LOCATE_SOURCE = "locate_source";
 const std::string ACTION_BACKGROUND_AUTO_START = "background_auto_start";
 
@@ -37,6 +38,7 @@ const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
     {ACTION_CLOSE, PictureInPictureManager::DoActionClose},
     {ACTION_PRE_RESTORE, PictureInPictureManager::DoPreRestore},
     {ACTION_RESTORE, PictureInPictureManager::DoRestore},
+    {ACTION_PREPARE_SOURCE, PictureInPictureManager::DoPrepareSource},
     {ACTION_LOCATE_SOURCE, PictureInPictureManager::DoLocateSource},
     {ACTION_DESTROY, PictureInPictureManager::DoDestroy},
     {ACTION_BACKGROUND_AUTO_START, PictureInPictureManager::AutoStartPipWindow},
@@ -190,6 +192,16 @@ void PictureInPictureManager::DoRestore()
         return;
     }
     activeController_->RestorePictureInPictureWindow();
+}
+
+void PictureInPictureManager::DoPrepareSource()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!HasActiveController()) {
+        return;
+    }
+    activeController_->PrepareSource();
 }
 
 void PictureInPictureManager::DoLocateSource()
