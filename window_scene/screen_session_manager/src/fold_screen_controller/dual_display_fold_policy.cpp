@@ -121,40 +121,41 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode= %" PRIu64")", displayMode);
     {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (!CheckDisplayMode(displayMode)) {
             return;
         }
-        SetdisplayModeChangeStatus(true);
-        ReportFoldDisplayModeChange(displayMode);
-        switch (displayMode) {
-            case FoldDisplayMode::SUB: {
-                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
-                break;
-            }
-            case FoldDisplayMode::MAIN: {
-                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
-                break;
-            }
-            case FoldDisplayMode::COORDINATION: {
-                ChangeScreenDisplayModeToCoordination();
-                break;
-            }
-            default: {
-                TLOGI(WmsLogTag::DMS, "invalid displayMode: %{public}d", displayMode);
-                break;
-            }
+    }
+    SetdisplayModeChangeStatus(true);
+    ReportFoldDisplayModeChange(displayMode);
+    switch (displayMode) {
+        case FoldDisplayMode::SUB: {
+            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
+            break;
         }
-        if (currentDisplayMode_ != displayMode) {
-            ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+        case FoldDisplayMode::MAIN: {
+            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
+            break;
         }
+        case FoldDisplayMode::COORDINATION: {
+            ChangeScreenDisplayModeToCoordination();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    if (currentDisplayMode_ != displayMode) {
+        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
-        SetdisplayModeChangeStatus(false);
     }
+    SetdisplayModeChangeStatus(false);
 }
 
 void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
