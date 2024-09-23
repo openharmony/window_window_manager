@@ -315,7 +315,7 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
                 task.Resolve(env, CreateJsDisplayPhysicalArrayObject(env, displayPhysicalArray));
                 WLOGI("OnGetAllDisplayPhysicalResolution success");
             } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR),
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                     "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
             }
         };
