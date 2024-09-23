@@ -167,9 +167,7 @@ void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
         TLOGI(WmsLogTag::DMS, "CurrentDisplayMode is coordination, HalfFold no need to change displaympde");
         return;
     }
-    if (displayMode != currentDisplayMode_) {
-        ChangeScreenDisplayMode(displayMode);
-    }
+    ChangeScreenDisplayMode(displayMode);
 }
 
 sptr<FoldCreaseRegion> DualDisplayFoldPolicy::GetCurrentFoldCreaseRegion()
