@@ -1705,7 +1705,7 @@ public:
      *
      * @return True means pc window of app type, false means the opposite.
      */
-    virtual bool IsPcOrPadEnableActivation() const { return false; }
+    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
      * @brief Register transfer component data callback.
