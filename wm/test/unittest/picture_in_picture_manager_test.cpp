@@ -326,16 +326,16 @@ HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
     PictureInPictureManager::SetActiveController(pipController);
     ASSERT_EQ(true, PictureInPictureManager::HasActiveController());
-    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::DoClose(true, true);
     pipController->window_ = mw;
-    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
     PictureInPictureManager::DoClose(false, true);
     ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
+    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
 
 /**
