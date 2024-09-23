@@ -837,7 +837,6 @@ public:
      * @param x
      * @param y
      * @return WMError
-     * @note @window.layout
      */
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
     /**
@@ -846,7 +845,6 @@ public:
      * @param x
      * @param y
      * @return WMError
-     * @note @window.layout
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
@@ -855,7 +853,6 @@ public:
      * @param width
      * @param height
      * @return WMError
-     * @note @window.layout
      */
     virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
     /**
@@ -864,7 +861,6 @@ public:
      * @param width
      * @param height
      * @return WMError
-     * @note @window.layout
      */
     virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
