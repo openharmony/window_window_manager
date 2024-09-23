@@ -1218,7 +1218,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
     bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "status bar visible %{public}u, need notify %{public}u", isVisible, isNeedNotify);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] status bar visible %{public}u, need notify %{public}u",
+          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
     isStatusBarVisible_ = isVisible;
     if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
         specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
