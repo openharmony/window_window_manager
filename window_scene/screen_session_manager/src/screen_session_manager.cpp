@@ -173,7 +173,17 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
     }
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-    FoldScreenPowerInit();
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        SetFoldScreenPowerInit([&]() {
+            foldScreenController_->BootAnimationFinishPowerInit();
+            FixPowerStatus();
+            foldScreenController_->SetOnBootAnimation(false);
+            RegisterApplicationStateObserver();
+        });
+    } else {
+        // 后续其他设备rs上电规格将陆续迁移到BootAnimationFinishPowerInit中
+        FoldScreenPowerInit();
+    }
 }
 
 void ScreenSessionManager::FoldScreenPowerInit()
@@ -1466,6 +1476,54 @@ bool ScreenSessionManager::SuspendEnd()
     }
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END,
         PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+}
+
+ScreenId ScreenSessionManager::GetInternalScreenId()
+{
+    ScreenId screenId = SCREEN_ID_INVALID;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
+            screenId = sessionIt.first;
+            break;
+        }
+    }
+    return screenId;
+}
+
+bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return false;
+    }
+
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
+    ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
+            break;
+        }
+        default: {
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById state not support");
+            return false;
+        }
+    }
+
+    rsInterface_.SetScreenPowerStatus(screenId, status);
+    return true;
 }
 
 bool ScreenSessionManager::IsPreBrightAuthFail(void)
@@ -4959,10 +5017,12 @@ void ScreenSessionManager::SetClientInner()
             TLOGE(WmsLogTag::DMS, "clientProxy is null");
             return;
         }
-        if (iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
-            clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
-                iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
+        if (iter.second->GetIsExtend() && iter.second->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            TLOGI(WmsLogTag::DMS, "current screen is extend and mirror, return before OnScreenConnectionChanged");
+            continue;
         }
+        clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
+            iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
     }
 }
 

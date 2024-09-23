@@ -255,9 +255,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
     EXPECT_NE(data.WriteParcelable(&options), false);
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_PROCESS_POINT_DOWN_SESSION), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
@@ -329,6 +326,47 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest06
+ * @tc.desc: sessionStub ProcessRemoteRequestTest06
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    AAFwk::Want want;
+    data.WriteParcelable(&want);
+    data.WriteBool(true);
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    AAFwk::Want options;
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteString("HandleSessionException"), false);
+    EXPECT_NE(data.WriteParcelable(&options), false);
+    ASSERT_EQ(data.WriteUint64(2), true);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(1), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -356,8 +394,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     }
     res = session_->HandleMarkProcessed(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    res = session_->HandleSetGlobalMaximizeMode(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetGlobalMaximizeMode(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleNeedAvoid(data, reply);
@@ -369,8 +405,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     session_->HandleTransferAbilityResult(data, reply);
-    res = session_->HandleTransferExtensionData(data, reply);
-    ASSERT_EQ(ERR_INVALID_VALUE, res);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
@@ -379,6 +413,24 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: sessionStubTest03
+ * @tc.desc: sessionStub sessionStubTest03
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    ASSERT_EQ(data.WriteUint32(1), true);
+    auto res = session_->HandleSetGlobalMaximizeMode(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    res = session_->HandleTransferExtensionData(data, reply);
+    ASSERT_EQ(ERR_INVALID_VALUE, res);
 }
 
 /**

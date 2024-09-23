@@ -1261,6 +1261,34 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: RegisterListener03
+ * @tc.desc: RegisterListener and UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterListener03");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    sptr<IMainWindowCloseListener> listener12 = nullptr;
+    WMError res = window->RegisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
+}
+
+/**
  * @tc.name: NotifyDisplayMove
  * @tc.desc: NotifyDisplayMove
  * @tc.type: FUNC

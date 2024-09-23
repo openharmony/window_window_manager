@@ -358,6 +358,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, Function | SmallTest |
     ASSERT_EQ(dumper->fd_, 1);
 }
 
+#ifndef IS_RELEASE_VERSION
 /**
  * @tc.name: ShowNotifyFoldStatusChangedInfo
  * @tc.desc: test function : ShowNotifyFoldStatusChangedInfo
@@ -663,6 +664,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent07, Function | SmallTe
     dumper ->MockSendCastPublishEvent("-publishcastevent,7");
     ASSERT_EQ(true, true);
 }
+#endif
 }
 }
 }

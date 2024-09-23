@@ -85,6 +85,7 @@ using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
+using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 
 class ILifecycleListener {
 public:
@@ -192,6 +193,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
@@ -315,6 +317,7 @@ public:
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    WSError SetCompatibleModeEnableInPad(bool enable);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -352,6 +355,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+    void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
     /*
      * Multi Window
@@ -486,6 +490,7 @@ public:
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
+    void SetAppInstanceKey(const std::string& appInstanceKey);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -594,6 +599,7 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
@@ -646,6 +652,7 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    int32_t GetRotateAnimationDuration();
 
     /*
      * Window Property
