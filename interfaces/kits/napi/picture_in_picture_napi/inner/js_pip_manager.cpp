@@ -211,7 +211,7 @@ napi_value JsPipManager::OnMarkPipNodeType(napi_env env, napi_callback_info info
         XComponentControllerErrorCode ret =
             XComponentController::SetSurfaceCallbackMode(env, typeNode, markPip ?
                 SurfaceCallbackMode::PIP : SurfaceCallbackMode::DEFAULT);
-        TLOGI(WmsLogTag::WMS_PIP, "reset to DEFAULT, ret: %{public}u, %{public}u",
+        TLOGI(WmsLogTag::WMS_PIP, "set surface mode, ret: %{public}u, isPip: %{public}d",
             static_cast<uint32_t>(ret), static_cast<uint32_t>(markPip));
     }
     return NapiGetUndefined(env);
