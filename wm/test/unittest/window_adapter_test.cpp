@@ -644,4 +644,3 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
 }
 }
 }
-
