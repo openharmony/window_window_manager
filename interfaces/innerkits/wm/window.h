@@ -523,6 +523,15 @@ public:
      * @return sptr<Window> Return the window instance founded
      */
     static sptr<Window> Find(const std::string& windowName);
+
+    /**
+     * @brief Get parent main windowId, which is used for mainWindow,subWindow or dialog
+     *
+     * @param windowId window id that need to get parent main window
+     * @return uint32_t Return the parent main window id
+     */
+    static uint32_t GetParentMainWindowId(uint32_t windowId);
+
     /**
      * @brief Get the final show window by context. Its implemented in api8
      *
@@ -2118,12 +2127,33 @@ public:
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /*
+     * @brief Get the parent window type of UIExtension
+     *
+     * @return Parent window type of UIExtension
+     */
+    virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
     /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+    /**
+     * @brief Get IsUIExtensionFlag of window.
+     *
+     * @return true - is UIExtension window, flase - is not UIEXtension window.
+     */
+    virtual bool GetIsUIExtensionFlag() const { return false; }
+
+    /**
+     * @brief Get IsUIExtensionSubWindowFlag of window.
+     *
+     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     */
+    virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
 };
 }
 }

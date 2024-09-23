@@ -269,6 +269,16 @@ bool WindowOption::GetOnlySupportSceneBoard() const
     return onlySupportSceneBoard_;
 }
 
+void WindowOption::SetParentWindowType(WindowType parentWindowType)
+{
+    parentWindowType_ = parentWindowType;
+}
+
+WindowType WindowOption::GetParentWindowType() const
+{
+    return parentWindowType_;
+}
+
 void WindowOption::SetExtensionTag(bool isExtensionTag)
 {
     isExtensionTag_ = isExtensionTag;
@@ -296,6 +306,16 @@ uint32_t WindowOption::GetUIExtensionUsage() const
 void WindowOption::SetDialogDecorEnable(bool decorEnable)
 {
     dialogDecorEnable_ = decorEnable;
+}
+
+void WindowOption::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+}
+
+bool WindowOption::GetIsUIExtensionSubWindowFlag() const
+{
+    return isUIExtensionSubWindowFlag_;
 }
 
 bool WindowOption::GetDialogDecorEnable() const
