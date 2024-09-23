@@ -981,8 +981,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
@@ -1179,7 +1177,6 @@ WSError Session::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1216,7 +1213,6 @@ WSError Session::Disconnect(bool isFromClient)
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
     }
-    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1895,12 +1891,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFW("InputTracking id:%{public}d, The pointerEvent does not report normally,"
-            "bundleName:%{public}s not reponse, pid:%{public}d, persistentId:%{public}d",
-            pointerEvent->GetId(), callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -1943,12 +1933,6 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
 {
     WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, "
-            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
-            callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -2741,14 +2725,6 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
-}
-
-WSError Session::MarkProcessed(int32_t eventId)
-{
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("InputTracking persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
-    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)

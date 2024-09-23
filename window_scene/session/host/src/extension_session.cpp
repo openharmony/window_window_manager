@@ -455,7 +455,6 @@ WSError ExtensionSession::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 

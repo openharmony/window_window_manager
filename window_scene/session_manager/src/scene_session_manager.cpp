@@ -8949,7 +8949,6 @@ void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInf
         WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
         return;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
 }
 
 void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
@@ -8959,7 +8958,6 @@ void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo
         WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
         return;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 
 void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams)
