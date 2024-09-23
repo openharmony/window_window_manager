@@ -41,7 +41,7 @@ const std::string MAIN_TP = "0";
 const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 1;
-const uint32_t CHANGE_MODE_TASK_NUM = 4;
+const uint32_t CHANGE_MODE_TASK_NUM = 3;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
