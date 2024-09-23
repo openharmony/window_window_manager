@@ -205,6 +205,29 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
+static void SetWindowSize(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+{
+    auto abilityInfo = session->GetSessionInfo().abilityInfo;
+    if (!abilityInfo) {
+        return;
+    }
+    uint32_t value = 0;
+    auto metadata = abilityInfo->metadata;
+    for (auto item : metadata) {
+        if (item.name == "ohos.ability.window.width") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.width = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.height") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.height = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
+            }
+        }
+    }
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
     napi_value objValue = nullptr;
@@ -231,6 +254,9 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
+    napi_set_named_property(env, objValue, "appInstanceKey",
+        CreateJsValue(env, session->GetSessionInfo().appInstanceKey_));
+    SetWindowSize(env, objValue, session);
 
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
@@ -2823,8 +2849,8 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
             } else {
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_, info.windowType_);
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(info.bundleName_,
+                    info.moduleName_, info.abilityName_, info.appIndex_, info.appInstanceKey_, info.windowType_);
             }
         }
         if (sceneSession == nullptr) {

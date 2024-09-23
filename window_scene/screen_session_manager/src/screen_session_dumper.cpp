@@ -30,16 +30,18 @@ constexpr int LINE_WIDTH = 30;
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
-constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_FOLD_STATUS = "-f";
+#ifndef IS_RELEASE_VERSION
+constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
-const std::string ARG_DUMP_FOLD_STATUS = "-f";
 const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
 const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
 const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
+#endif
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -112,7 +114,16 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         ShowAllScreenInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
-    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
+    } else {
+        ExcuteInjectCmd();
+    }
+    OutputDumpInfo();
+}
+
+void ScreenSessionDumper::ExcuteInjectCmd()
+{
+#ifndef IS_RELEASE_VERSION
+    if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
         ShowNotifyFoldStatusChangedInfo();
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
         SetMotionSensorvalue(params_[0]);
@@ -121,72 +132,7 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
     }
-    OutputDumpInfo();
-}
-
-void ScreenSessionDumper::SetMotionSensorvalue(std::string input)
-{
-    size_t commaPos = input.find_last_of(',');
-    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_SENSOR)) {
-        std::string valueStr = input.substr(commaPos + 1, MOTION_SENSOR_PARAM_SIZE);
-        if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
-            return;
-        }
-        if (valueStr.size() == MOTION_SENSOR_PARAM_SIZE && valueStr != "-1") {
-            return;
-        }
-        int32_t value = std::stoi(valueStr);
-        if (value <  static_cast<int32_t>(DeviceRotation::INVALID) ||
-            value > static_cast<int32_t>(DeviceRotation::ROTATION_LANDSCAPE_INVERTED)) {
-            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
-            return;
-        }
-        ScreenRotationProperty::HandleSensorEventInput(static_cast<DeviceRotation>(value));
-        TLOGI(WmsLogTag::DMS, "mock motion sensor: %{public}d", value);
-    }
-}
-
-void ScreenSessionDumper::SetRotationLockedvalue(std::string input)
-{
-    size_t commaPos = input.find_last_of(',');
-    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_LOCK)) {
-        std::string valueStr = input.substr(commaPos + 1);
-        if (valueStr.size() != 1) {
-            return;
-        }
-        if (!std::isdigit(valueStr[0])) {
-            return;
-        }
-        int32_t value = std::stoi(valueStr);
-        ScreenSessionManager::GetInstance().SetScreenRotationLocked(static_cast<bool>(value));
-        TLOGI(WmsLogTag::DMS, "mock rotation locked: %{public}d", value);
-    }
-}
-
-void ScreenSessionDumper::MockSendCastPublishEvent(std::string input)
-{
-    std::ostringstream oss;
-    oss << "-------------- DMS SEND CAST PUBLISH EVENT --------------" << std::endl;
-    size_t commaPos = input.find_last_of(',');
-    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_PUBLISH_CAST_EVENT)) {
-        std::string valueStr = input.substr(commaPos + 1);
-        if (valueStr.size() != 1) {
-            oss << std::left << "[error]: " << "the value is too long" << std::endl;
-            dumpInfo_.append(oss.str());
-            return;
-        }
-        if (!std::isdigit(valueStr[0])) {
-            oss << std::left << "[error]: " << "value is not a number" << std::endl;
-            dumpInfo_.append(oss.str());
-            return;
-        }
-        int32_t value = std::stoi(valueStr);
-        ScreenSessionManager::GetInstance().NotifyCastWhenScreenConnectChange(static_cast<bool>(value));
-        oss << std::left << "[success]: " << "send cast publish event success" << std::endl;
-    } else {
-        oss << std::left << "[error]: " << "the command is invalid" << std::endl;
-    }
-    dumpInfo_.append(oss.str());
+#endif
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
@@ -517,6 +463,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
     dumpInfo_.append(oss.str());
 }
 
+#ifndef IS_RELEASE_VERSION
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
     TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", params_[0].c_str());
@@ -536,5 +483,71 @@ void ScreenSessionDumper::ShowIllegalArgsInfo()
 {
     dumpInfo_.append("The arguments are illegal and you can enter '-h' for help.");
 }
+
+void ScreenSessionDumper::SetMotionSensorvalue(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_SENSOR)) {
+        std::string valueStr = input.substr(commaPos + 1, MOTION_SENSOR_PARAM_SIZE);
+        if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        if (valueStr.size() == MOTION_SENSOR_PARAM_SIZE && valueStr != "-1") {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value <  static_cast<int32_t>(DeviceRotation::INVALID) ||
+            value > static_cast<int32_t>(DeviceRotation::ROTATION_LANDSCAPE_INVERTED)) {
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
+            return;
+        }
+        ScreenRotationProperty::HandleSensorEventInput(static_cast<DeviceRotation>(value));
+        TLOGI(WmsLogTag::DMS, "mock motion sensor: %{public}d", value);
+    }
+}
+
+void ScreenSessionDumper::SetRotationLockedvalue(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_LOCK)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        ScreenSessionManager::GetInstance().SetScreenRotationLocked(static_cast<bool>(value));
+        TLOGI(WmsLogTag::DMS, "mock rotation locked: %{public}d", value);
+    }
+}
+
+void ScreenSessionDumper::MockSendCastPublishEvent(std::string input)
+{
+    std::ostringstream oss;
+    oss << "-------------- DMS SEND CAST PUBLISH EVENT --------------" << std::endl;
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_PUBLISH_CAST_EVENT)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            oss << std::left << "[error]: " << "the value is too long" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            oss << std::left << "[error]: " << "value is not a number" << std::endl;
+            dumpInfo_.append(oss.str());
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        ScreenSessionManager::GetInstance().NotifyCastWhenScreenConnectChange(static_cast<bool>(value));
+        oss << std::left << "[success]: " << "send cast publish event success" << std::endl;
+    } else {
+        oss << std::left << "[error]: " << "the command is invalid" << std::endl;
+    }
+    dumpInfo_.append(oss.str());
+}
+#endif
 } // Rosen
 } // OHOS
