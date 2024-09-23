@@ -586,11 +586,9 @@ HWTEST_F(PictureInPictureControllerTest, UpdatePiPControlStatus, Function | Smal
     auto status = PiPControlStatus::ENABLED;
     pipControl->UpdatePiPControlStatus(controlType, status);
     ASSERT_EQ(1, pipControl->pipOption_->GetControlEnable().size());
-    // ASSERT_EQ(controlType, pipControl->pipOption_->pipControlEnableInfoList_[0]);
     status = PiPControlStatus::PLAY;
     pipControl->UpdatePiPControlStatus(controlType, status);
     ASSERT_EQ(1, pipControl->pipOption_->GetControlStatus().size());
-    // ASSERT_EQ(status, pipControl->pipOption_->pipControlEnableInfoList_[0]);
     pipControl->window_ = nullptr;
     pipControl->UpdatePiPControlStatus(controlType, status);
     pipControl->window_ = mw;
@@ -855,9 +853,6 @@ HWTEST_F(PictureInPictureControllerTest, IsPullPiPAndHandleNavigation, Function 
     pipControl->mainWindow_ = nullptr;
     ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
     pipControl->mainWindow_ = mw;
-    // auto ret = pipControl->pipOption_->GetNavigationId();
-    // NavigationController::GetNavigationController(nullptr, ret);
-    // ASSERT_EQ(false, pipControl->IsPullPiPAndHandleNavigation());
 }
 
 /**
