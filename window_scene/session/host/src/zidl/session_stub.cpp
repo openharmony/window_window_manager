@@ -525,8 +525,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
     abilitySessionInfo->processOptions.reset(processOptions);
-    auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
-    abilitySessionInfo->startWindowOption.reset(startWindowOption);
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground) ||
         !data.ReadBool(abilitySessionInfo->isAtomicService) ||
         !data.ReadBool(abilitySessionInfo->isBackTransition) ||
@@ -554,6 +552,15 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (!data.ReadString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_VALUE;
+    }
+    bool hasStartWindowOption = false;
+    if (!data.ReadBool(hasStartWindowOption)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartWindowOption) {
+        auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+        abilitySessionInfo->startWindowOption.reset(startWindowOption);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

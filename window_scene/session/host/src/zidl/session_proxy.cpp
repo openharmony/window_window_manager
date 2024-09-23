@@ -456,6 +456,10 @@ WSError SessionProxy::DoPendingSessionActivationTwo(sptr<AAFwk::SessionInfo> abi
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (abilitySessionInfo->startWindowOption) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
             WLOGFE("Write startWindowOption failed");
@@ -466,10 +470,6 @@ WSError SessionProxy::DoPendingSessionActivationTwo(sptr<AAFwk::SessionInfo> abi
                 return WSError::WS_ERROR_IPC_FAILED;
             }
         }
-    }
-    if (!data.WriteString(abilitySessionInfo->instanceKey)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
-        return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
 }
