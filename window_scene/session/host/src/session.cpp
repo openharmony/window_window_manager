@@ -858,7 +858,10 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     }
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        int32_t rotateAnimationDuration = GetRotateAnimationDuration();
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
+            .animationDuration_ = rotateAnimationDuration };
+        sessionStage_->UpdateRect(rect, reason, config);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
@@ -1996,6 +1999,25 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
+void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
+{
+    if (func == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "func is nullptr");
+        return;
+    }
+    acquireRotateAnimationConfigFunc_ = func;
+}
+
+int32_t Session::GetRotateAnimationDuration()
+{
+    if (acquireRotateAnimationConfigFunc_) {
+        RotateAnimationConfig rotateAnimationConfig;
+        acquireRotateAnimationConfigFunc_(rotateAnimationConfig);
+        return rotateAnimationConfig.duration_;
+    }
+    return ROTATE_ANIMATION_DURATION;
+}
+
 void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
@@ -2019,6 +2041,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
