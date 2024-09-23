@@ -30,6 +30,7 @@ namespace OHOS::Rosen {
 namespace {
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const int32_t TP_TYPE_MAIN = 18;
