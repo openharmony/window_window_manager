@@ -96,37 +96,38 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
+
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
     {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
-        SetdisplayModeChangeStatus(true);
-        ReportFoldDisplayModeChange(displayMode);
-        switch (displayMode) {
-            case FoldDisplayMode::MAIN: {
-                ChangeScreenDisplayModeToMain(screenSession);
-                break;
-            }
-            case FoldDisplayMode::FULL: {
-                ChangeScreenDisplayModeToFull(screenSession);
-                break;
-            }
-            case FoldDisplayMode::UNKNOWN: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
-                break;
-            }
-            default: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
-                break;
-            }
+    }
+    SetdisplayModeChangeStatus(true);
+    ReportFoldDisplayModeChange(displayMode);
+    switch (displayMode) {
+        case FoldDisplayMode::MAIN: {
+            ChangeScreenDisplayModeToMain(screenSession);
+            break;
         }
-        if (currentDisplayMode_ != displayMode) {
-            ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+        case FoldDisplayMode::FULL: {
+            ChangeScreenDisplayModeToFull(screenSession);
+            break;
         }
+        case FoldDisplayMode::UNKNOWN: {
+            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
+            break;
+        }
+        default: {
+            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
+            break;
+        }
+    }
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
