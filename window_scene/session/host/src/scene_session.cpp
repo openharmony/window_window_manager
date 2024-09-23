@@ -52,6 +52,7 @@
 #include "screen.h"
 #include "singleton_container.h"
 #include "fold_screen_state_internel.h"
+#include "session/host/include/multi_instance_manager.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -3155,6 +3156,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
+    info.appInstanceKey_ = abilitySessionInfo->instanceKey;
 
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -3169,10 +3171,10 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d "
-        "needClearInNotShowRecent:%{public}u",
+        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
-        info.windowMode, info.callerPersistentId_, info.needClearInNotShowRecent_);
+        info.windowMode, info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str());
     return info;
 }
 
@@ -3212,6 +3214,16 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session->GetPersistentId());
+        if (session->systemConfig_.IsPcWindow()) {
+            int32_t maxInstanceCount = MultiInstanceManager::GetInstance().GetMaxInstanceCount(info.bundleName_);
+            TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d",
+                session->GetPersistentId(), maxInstanceCount);
+            if (maxInstanceCount > 0 && !session->CheckInstanceKey(abilitySessionInfo, info)) {
+                TLOGI(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
+                    session->GetPersistentId(), info.appInstanceKey_.c_str());
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+        }
         session->HandleCastScreenConnection(info, session);
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
@@ -4838,5 +4850,20 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
         return;
     }
     customDecorHeight_ = height;
+}
+
+bool SceneSession::CheckInstanceKey(const sptr<AAFwk::SessionInfo> abilitySessionInfo, SessionInfo& info)
+{
+    if (info.appInstanceKey_.empty()) {
+        if (abilitySessionInfo->persistentId != 0) {
+            TLOGD(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
+                abilitySessionInfo->persistentId);
+            return false;
+        }
+    } else if (!MultiInstanceManager::GetInstance().IsValidInstanceKey(info.bundleName_, info.appInstanceKey_)) {
+        TLOGD(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

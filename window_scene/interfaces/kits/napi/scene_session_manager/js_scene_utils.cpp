@@ -298,6 +298,32 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
+bool IsJsIsNewAppInstanceUndefined(napi_env env, napi_value jsIsNewAppInstance, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsNewAppInstance) != napi_undefined) {
+        bool isNewAppInstance = false;
+        if (!ConvertFromJsValue(env, jsIsNewAppInstance, isNewAppInstance)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isNewAppInstance");
+            return false;
+        }
+        sessionInfo.isNewAppInstance_ = isNewAppInstance;
+    }
+    return true;
+}
+
+bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsInstanceKey) != napi_undefined) {
+        std::string instanceKey;
+        if (!ConvertFromJsValue(env, jsInstanceKey, instanceKey)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to instanceKey");
+            return false;
+        }
+        sessionInfo.appInstanceKey_ = instanceKey;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -316,6 +342,10 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
     napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
+    napi_value jsIsNewAppInstance = nullptr;
+    napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
+    napi_value jsInstanceKey = nullptr;
+    napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -337,7 +367,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
         return false;
     }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
+    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+        !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
         return false;
     }
     return true;

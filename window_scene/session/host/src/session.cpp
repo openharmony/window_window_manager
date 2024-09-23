@@ -291,6 +291,11 @@ void Session::SetScreenId(uint64_t screenId)
     }
 }
 
+void Session::SetAppInstanceKey(const std::string& appInstanceKey)
+{
+    sessionInfo_.appInstanceKey_ = appInstanceKey;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
