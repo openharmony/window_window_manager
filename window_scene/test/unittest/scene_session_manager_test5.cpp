@@ -186,20 +186,72 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPageFromResource, Function | SmallT
 }
 
 /**
- * @tc.name: GetStartupPage
- * @tc.desc: GetStartupPage
+ * @tc.name: GetStartupPage01
+ * @tc.desc: GetStartupPage when resourceMgr is nullptr
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest5, GetStartupPage, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, GetStartupPage01, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    /**
+     * @tc.steps: step1. Build input parameter.
+     */
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_ = nullptr;
-    std::string path = "path";
-    uint32_t bgColor = 1;
+    std::string path;
+    uint32_t bgColor = 0x00000000;
+    /**
+     * @tc.steps: step2. Set bundleMgr_ to nullptr.
+     */
+    sptr<AppExecFwk::IBundleMgr> tempBundleMgr = ssm_->bundleMgr_;
+    ssm_->bundleMgr_ = nullptr;
+    /**
+     * @tc.steps: step3. Test and check result.
+     */
     ssm_->GetStartupPage(info, path, bgColor);
+    ssm_->bundleMgr_ = tempBundleMgr;
+    EXPECT_EQ("", path);
+    EXPECT_EQ(0x00000000, bgColor);
+}
+
+/**
+ * @tc.name: GetStartupPage02
+ * @tc.desc: GetStartupPage when info is cached
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    /**
+     * @tc.steps: step1. Build input parameter.
+     */
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.bundleName_ = "bundleName";
+    uint32_t bgColor = 0x00000000;
+    std::string path;
+    /**
+     * @tc.steps: step2. Cache info.
+     */
+    const uint32_t cachedlColor = 0xff000000;
+    const std::string cachedlPath = "cachedlPath";
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    StartingWindowInfo startingWindowInfo = {
+        .startingWindowBackgroundId_ = 0,
+        .startingWindowIconId_ = 0,
+        .startingWindowBackgroundColor_ = cachedlColor,
+        .startingWindowIconPath_ = cachedlPath,
+    };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
+    /**
+     * @tc.steps: step3. Test and check result.
+     */
+    ssm_->GetStartupPage(sessionInfo, path, bgColor);
+    EXPECT_EQ(path, cachedlPath);
+    EXPECT_EQ(bgColor, cachedlColor);
 }
 
 /**
