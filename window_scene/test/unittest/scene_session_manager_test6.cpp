@@ -1286,7 +1286,7 @@ HWTEST_F(SceneSessionManagerTest6, RegisterAcquireRotateAnimationConfigFunc, Fun
     ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::ROTATION;
-    WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest6");
+    WSError result = sceneSession->UpdateRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 }
