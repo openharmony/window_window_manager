@@ -95,6 +95,8 @@ std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
+std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
+std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
@@ -447,6 +449,43 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
     return PreNotifyKeyEvent(keyEvent);
 }
 
+void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
+{
+    auto iter = subWindowSessionMap_.find(parentPersistentId);
+    if (iter == subWindowSessionMap_.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d has no child node", parentPersistentId);
+        return;
+    }
+    const auto& subWindows = iter->second;
+    if (subWindows.empty()) {
+        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
+        return;
+    }
+
+    // when parent window hide and subwindow whose state is shown should hide and notify user
+    if (newState == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
+                subwindow->state_ = WindowState::STATE_HIDDEN;
+                subwindow->NotifyAfterBackground();
+                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow background, id:%{public}d", subwindow->GetPersistentId());
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
+            }
+        }
+    // when parent window show and subwindow whose state is shown should show and notify user
+    } else if (newState == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
+                subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
+                subwindow->state_ = WindowState::STATE_SHOWN;
+                subwindow->NotifyAfterForeground();
+                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow foreground, id:%{public}d", subwindow->GetPersistentId());
+                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
+            }
+        }
+    }
+}
+
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
@@ -468,6 +507,7 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
@@ -491,10 +531,63 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
+    UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
     state_ = WindowState::STATE_HIDDEN;
     requestState_ = WindowState::STATE_HIDDEN;
     NotifyAfterBackground();
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::DestroySubWindow()
+{
+    int32_t parentPersistentId = property_->GetParentPersistentId();
+    const int32_t persistentId = GetPersistentId();
+    if (property_->GetExtensionFlag() == true) {
+        auto extensionWindow = FindExtensionWindowWithContext();
+        if (extensionWindow != nullptr) {
+            parentPersistentId = extensionWindow->GetPersistentId();
+        }
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d, parentId: %{public}d", persistentId, parentPersistentId);
+    // remove from subWindowMap_ when destroy sub window
+    auto subIter = subWindowSessionMap_.find(parentPersistentId);
+    if (subIter != subWindowSessionMap_.end()) {
+        auto& subWindows = subIter->second;
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
+            if ((*iter) == nullptr) {
+                continue;
+            }
+            if ((*iter)->GetPersistentId() == persistentId) {
+                TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
+                subWindows.erase(iter);
+                break;
+            } else {
+                TLOGD(WmsLogTag::WMS_SUB, "Exists other sub window, persistentId: %{public}d", persistentId);
+            }
+        }
+    }
+    // remove from subWindowMap_ when destroy parent window
+    auto mainIter = subWindowSessionMap_.find(persistentId);
+    if (mainIter != subWindowSessionMap_.end()) {
+        auto& subWindows = mainIter->second;
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
+            if ((*iter) == nullptr) {
+                TLOGW(WmsLogTag::WMS_SUB, "Destroy sub window which is nullptr");
+                subWindows.erase(iter);
+                continue;
+            }
+            bool isExtDestroyed = (*iter)->property_ != nullptr && (*iter)->property_->GetExtensionFlag();
+            TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
+                (*iter)->GetPersistentId(), isExtDestroyed);
+            auto ret = (*iter)->Destroy(isExtDestroyed);
+            if (ret != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", (*iter)->GetPersistentId());
+                subWindows.erase(iter);
+            }
+        }
+        mainIter->second.clear();
+        subWindowSessionMap_.erase(mainIter);
+    }
 }
 
 WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
@@ -517,6 +610,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
+    DestroySubWindow();
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -723,6 +817,20 @@ void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> paren
         useUniqueDensity_ = parentWindow->useUniqueDensity_;
         virtualPixelRatio_ = parentWindow->virtualPixelRatio_;
     }
+}
+
+sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
+{
+    if (context_ == nullptr) {
+        return nullptr;
+    }
+    std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& window : windowExtensionSessionSet_) {
+        if (window && context_.get() == window->GetContext().get()) {
+            return window;
+        }
+    }
+    return nullptr;
 }
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)

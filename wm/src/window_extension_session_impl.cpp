@@ -55,9 +55,6 @@ constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
         }                                                                      \
     } while (false)
 
-std::set<sptr<WindowSessionImpl>> WindowExtensionSessionImpl::windowExtensionSessionSet_;
-std::shared_mutex WindowExtensionSessionImpl::windowExtensionSessionMutex_;
-
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
     if (property_ == nullptr) {
@@ -186,6 +183,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
+    DestroySubWindow();
     {
         TLOGI(WmsLogTag::WMS_LIFE, "Reset state, id: %{public}d.", GetPersistentId());
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
@@ -725,6 +723,7 @@ WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bo
     WSError ret = hostSession->Background();
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
