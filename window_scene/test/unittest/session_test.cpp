@@ -183,6 +183,20 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    bool enable = true;
+    property->SetCompatibleModeEnableInPad(enable);
+    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: update rect
  * @tc.type: FUNC

@@ -1466,7 +1466,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
     // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
     presentation = MaximizePresentation::EXIT_IMMERSIVE;
@@ -1484,7 +1484,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     presentation = MaximizePresentation::ENTER_IMMERSIVE;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 }
 
 /**

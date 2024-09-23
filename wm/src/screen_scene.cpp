@@ -183,6 +183,7 @@ void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     frameLayoutFinishCb_ = callback;
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+        frameLayoutFinishCb_ = nullptr;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetFrameLayoutFinishCallback end");
 }

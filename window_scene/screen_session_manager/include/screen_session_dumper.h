@@ -54,11 +54,17 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
+    void ExcuteInjectCmd();
+/*
+    hidumper 命令注入隔离
+*/
+#ifndef IS_RELEASE_VERSION
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
     void MockSendCastPublishEvent(std::string input);
+#endif
 
 private:
     int fd_;
