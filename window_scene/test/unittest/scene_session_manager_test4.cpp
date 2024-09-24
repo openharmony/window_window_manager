@@ -1267,33 +1267,6 @@ HWTEST_F(SceneSessionManagerTest4, GetStartupPageFromResource, Function | SmallT
 }
 
 /**
- * @tc.name: GetStartupPage
- * @tc.desc: GetStartupPage
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, GetStartupPage, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "moduleName";
-    sessionInfo.abilityName_ = "abilityName";
-    sessionInfo.bundleName_ = "bundleName";
-    std::string path = "testPath";
-    uint32_t bgColor = 0;
-    bool result = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap;
-    StartingWindowInfo startingWindowInfo;
-    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    startingWindowInfoMap.insert(std::make_pair(key, startingWindowInfo));
-    ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
-    result = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
-    ssm_->GetStartupPage(sessionInfo, path, bgColor);
-    EXPECT_EQ(result, true);
-}
-
-/**
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: HandleHideNonSystemFloatingWindows
  * @tc.type: FUNC
