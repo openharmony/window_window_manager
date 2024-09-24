@@ -256,10 +256,10 @@ public:
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
-    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea> &avoidAreas) override;
+    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
-    WSError UpdateAvoidArea(const sptr<AvoidArea> &avoidArea, AvoidAreaType type) override;
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
