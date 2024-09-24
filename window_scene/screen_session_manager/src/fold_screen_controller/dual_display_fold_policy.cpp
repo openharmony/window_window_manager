@@ -40,7 +40,8 @@ const int32_t TP_TYPE = 12;
 const std::string MAIN_TP = "0";
 const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
-const int32_t ADD_DISPLAY_NODE = 0;
+const int32_t ADD_DISPLAY_NODE = 1;
+const uint32_t CHANGE_MODE_TASK_NUM = 3;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
@@ -63,6 +64,26 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
 }
 
+void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
+{
+    if (status) {
+        pengdingTask_ = CHANGE_MODE_TASK_NUM;
+        startTimePoint_ = std::chrono::steady_clock::now();
+        displayModeChangeRunning_ = status;
+    } else {
+        pengdingTask_ --;
+        if (pengdingTask_ != 0) {
+            return;
+        }
+        displayModeChangeRunning_ = false;
+        endTimePoint_ = std::chrono::steady_clock::now();
+        if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
+            TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+            ChangeScreenDisplayMode(lastCachedisplayMode_.load());
+        }
+    }
+}
+
 bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
 {
     if (displayMode == FoldDisplayMode::COORDINATION && !IS_COORDINATION_SUPPORT) {
@@ -76,55 +97,65 @@ bool DualDisplayFoldPolicy::CheckDisplayMode(FoldDisplayMode displayMode)
     return true;
 }
 
+ScreenId DualDisplayFoldPolicy::GetScreenIdByDisplayMode(FoldDisplayMode displayMode)
+{
+    ScreenId screenId = SCREEN_ID_MAIN;
+    if (displayMode == FoldDisplayMode::SUB) {
+        screenId = SCREEN_ID_SUB;
+    }
+    return screenId;
+}
+
 void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode = %{public}d", displayMode);
-    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
-    if (displayMode == FoldDisplayMode::SUB) {
-        screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_SUB);
-    }
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ChangeScreenDisplayMode default screenSession is null");
+    SetLastCacheDisplayMode(displayMode);
+    if (GetModeChangeRunningStatus()) {
+        TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
         return;
     }
+    TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
+        displayMode, getFoldingElapsedMs());
+    ScreenId screenId = GetScreenIdByDisplayMode(displayMode);
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return;
+    }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode= %" PRIu64")", displayMode);
     {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (!CheckDisplayMode(displayMode)) {
             return;
         }
-        ReportFoldDisplayModeChange(displayMode);
-        switch (displayMode) {
-            case FoldDisplayMode::SUB: {
-                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
-                break;
-            }
-            case FoldDisplayMode::MAIN: {
-                ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
-                break;
-            }
-            case FoldDisplayMode::COORDINATION: {
-                ChangeScreenDisplayModeToCoordination();
-                break;
-            }
-            case FoldDisplayMode::UNKNOWN: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
-                break;
-            }
-            default: {
-                TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
-                break;
-            }
+    }
+    SetdisplayModeChangeStatus(true);
+    ReportFoldDisplayModeChange(displayMode);
+    switch (displayMode) {
+        case FoldDisplayMode::SUB: {
+            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
+            break;
         }
-        if (currentDisplayMode_ != displayMode) {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode NotifyDisplayModeChanged displayMode = %{public}d",
-                displayMode);
-            ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+        case FoldDisplayMode::MAIN: {
+            ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_SUB, SCREEN_ID_MAIN);
+            break;
         }
+        case FoldDisplayMode::COORDINATION: {
+            ChangeScreenDisplayModeToCoordination();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    if (currentDisplayMode_ != displayMode) {
+        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
+    SetdisplayModeChangeStatus(false);
 }
 
 void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
@@ -137,9 +168,7 @@ void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
         TLOGI(WmsLogTag::DMS, "CurrentDisplayMode is coordination, HalfFold no need to change displaympde");
         return;
     }
-    if (displayMode != currentDisplayMode_) {
-        ChangeScreenDisplayMode(displayMode);
-    }
+    ChangeScreenDisplayMode(displayMode);
 }
 
 sptr<FoldCreaseRegion> DualDisplayFoldPolicy::GetCurrentFoldCreaseRegion()
@@ -291,6 +320,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
+        SetdisplayModeChangeStatus(false);
     };
     if (screenPowerTaskScheduler_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
@@ -309,6 +339,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
+        SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
     AddOrRemoveDisplayNodeToTree(onScreenId, ADD_DISPLAY_NODE);
@@ -333,6 +364,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
+        SetdisplayModeChangeStatus(false);
     };
     if (screenPowerTaskScheduler_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenPowerTaskScheduler_ is nullpter");
@@ -347,6 +379,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
             ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_SUB,
                 ScreenPowerStatus::POWER_STATUS_ON);
         }
+        SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnSub, "taskScreenOnSub");
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_SUB, ADD_DISPLAY_NODE);
