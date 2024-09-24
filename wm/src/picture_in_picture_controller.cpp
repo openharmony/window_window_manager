@@ -372,7 +372,6 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
-    curState_ = PiPWindowState::STATE_STOPPED;
     PictureInPictureManager::RemoveActiveController(this);
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
@@ -380,6 +379,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStop();
     }
+    curState_ = PiPWindowState::STATE_STOPPED;
     std::string navId = pipOption_ == nullptr ? "" : pipOption_->GetNavigationId();
     if (!navId.empty() && mainWindow_ && !IsTypeNodeEnabled()) {
         auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
