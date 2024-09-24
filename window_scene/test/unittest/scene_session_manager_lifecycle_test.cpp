@@ -316,17 +316,19 @@ HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, Function | SmallT
     info.windowType_ = 1001;
     sptr<SceneSession> getSceneSession2 = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, getSceneSession2);
-    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession2->GetWindowtype());
+    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession2->GetWindowType());
 
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    info.windowType_ = 2105;
     sptr<SceneSession> getSceneSession3 = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, getSceneSession3);
-    ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, getSceneSession3->GetWindowtype());
+    ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, getSceneSession3->GetWindowType());
 
     property->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    info.windowType_ = 2500;
     sptr<SceneSession> getSceneSession4 = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, getSceneSession4);
-    ASSERT_EQ(WindowType::SYSTEM_SUB_WINDOW_BASE, getSceneSession4->GetWindowtype());
+    ASSERT_EQ(WindowType::SYSTEM_SUB_WINDOW_BASE, getSceneSession4->GetWindowType());
 
     ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
     info.persistentId_ = 0;
