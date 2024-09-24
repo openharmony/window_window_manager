@@ -504,7 +504,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByName, Function | SmallTest |
     std::string moduleName1 = "test2";
     std::string abilityName1 = "test3";
     int32_t appIndex1 = 10;
-    ComparedSessionInfo compareSessionInfo = { bundleName1, moduleName1, abilityName1, appIndex1};
+    ComparedSessionInfo compareSessionInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
     ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     std::string bundleName2 = "test11";
