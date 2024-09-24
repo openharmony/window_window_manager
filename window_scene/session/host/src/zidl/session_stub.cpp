@@ -42,7 +42,6 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_VALUE;
     }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->want = *localWant;
     if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read requestCode failed.");
@@ -472,6 +471,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
@@ -505,6 +505,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
