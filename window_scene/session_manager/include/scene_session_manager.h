@@ -70,6 +70,15 @@ struct SCBAbilityInfo {
     uint32_t sdkVersion_;
     std::string codePath_;
 };
+struct ComparedSessionInfo {
+    std::string bundleName_;
+    std::string moduleName_;
+    std::string abilityName_;
+    int32_t appIndex_ = 0;
+    std::string instanceKey_;
+    uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    bool isAtomicService_ = false;
+};
 class SceneSession;
 struct SecSurfaceInfo;
 class RSUIExtensionData;
@@ -154,9 +163,7 @@ public:
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
-    sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, const int32_t appIndex, const std::string instanceKey = "",
-        const uint32_t windowType = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
+    sptr<SceneSession> GetSceneSessionByName(const ComparedSessionInfo& info);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -549,13 +556,18 @@ private:
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
+    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+
+    /**
+     * Window Immersive
+     */
     bool UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
-    void UpdateAvoidArea(const int32_t persistentId);
-    void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
-    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+    void UpdateAvoidArea(int32_t persistentId);
+    void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -858,6 +870,7 @@ private:
      */
     void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
+    void ResetWant(sptr<SceneSession>& sceneSession);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 

@@ -1701,6 +1701,13 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
+     * @brief Is pc window of app type or not.
+     *
+     * @return True means pc window of app type, false means the opposite.
+     */
+    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.

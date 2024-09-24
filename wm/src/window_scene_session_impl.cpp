@@ -211,6 +211,18 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+    }
+    auto mainWindow = GetMainWindowWithContext(GetContext());
+    if (mainWindow == nullptr) {
+        return false;
+    }
+    return mainWindow->IsPcOrPadCapabilityEnabled();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
@@ -221,6 +233,27 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
     }
+}
+
+WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
+{
+    if (isToast) {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+    } else {
+        parentSession = FindParentSessionByParentId(property_->GetParentId());
+    }
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            property_->GetWindowName().c_str(), GetType());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
@@ -258,16 +291,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (isToastFlag) {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
-        } else {
-            parentSession = FindParentSessionByParentId(property_->GetParentId());
-        }
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                property_->GetWindowName().c_str(), type);
-            return WMError::WM_ERROR_NULLPTR;
+        auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -2162,10 +2188,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isValidWindow = isMainWindow ||
-            ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) &&
-             (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
