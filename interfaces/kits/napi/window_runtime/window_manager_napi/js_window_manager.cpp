@@ -156,10 +156,10 @@ napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnGetVisibleWindowInfo(env, info) : nullptr;
 }
 
-napi_value JsWindowManager::GetWindowFromPoint(napi_env env, napi_callback_info info)
+napi_value JsWindowManager::GetWindowsByCoordinate(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
-    return (me != nullptr) ? me->OnGetWindowFromPoint(env, info) : nullptr;
+    return (me != nullptr) ? me->OnGetWindowsByCoordinate(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -1202,7 +1202,7 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     return result;
 }
 
-napi_value JsWindowManager::OnGetWindowFromPoint(napi_env env, napi_callback_info info)
+napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
@@ -1227,29 +1227,31 @@ napi_value JsWindowManager::OnGetWindowFromPoint(napi_env env, napi_callback_inf
     }
     int32_t x = INVALID_COORDINATE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARGC_TWO], x)) {
-        x = -1;
+        x = INVALID_COORDINATE;
     }
     int32_t y = INVALID_COORDINATE;
     if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_THREE], y)) {
-        y = -1;
+        y = INVALID_COORDINATE;
     }
     napi_value result = nullptr;
-    NapiAsyncTask::CompleteCallback complete = [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-        std::vector<int32_t> windowIds;
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetWindowFromPoint(
-            static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
-        if (ret == WmErrorCode::WM_OK) {
-            std::vector<sptr<Window>> windows;
-            for (const auto& windowId: windowIds) {
-                sptr<Window> window = Window::GetWindowWithId(windowId);
-                windows.emplace_back(window);
+    NapiAsyncTask::CompleteCallback complete =
+        [displayId, windowNumber, x, y](napi_env env, NapiAsyncTask& task, int32_t status) {
+            std::vector<int32_t> windowIds;
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+                GetWindowIdsByCoordinate(static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
+            if (ret == WmErrorCode::WM_OK) {
+                std::vector<sptr<Window>> windows(windowIds.size());
+                for (size_t i = 0; i < windowIds.size(); i++) {
+                    auto windowId = windowIds[i];
+                    sptr<Window> window = Window::GetWindowWithId(windowId);
+                    windows[i] = window;
+                }
+                task.Resolve(env, CreateJsWindowArrayObject(env, windows));
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetWindowsByCoordinate failed"));
             }
-            task.Resolve(env, CreateJsWindowArrayObject(env, windows));
-        } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetWindowFromPoint failed"));
-        }
-    };
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetWindowFromPoint",
+        };
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetWindowsByCoordinate",
         env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
     return result;
 }
@@ -1300,7 +1302,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
-    BindNativeFunction(env, exportObj, "getWindowFromPoint", moduleName, JsWindowManager::GetWindowFromPoint);
+    BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

@@ -114,7 +114,7 @@ public:
         TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST,
         TRANS_ID_SET_PROCESS_WATERMARK,
-        TRANS_ID_GET_WINDOW_FROM_POINT,
+        TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -275,7 +275,7 @@ public:
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
-    WMError GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override
     {
         return WMError::WM_OK;
