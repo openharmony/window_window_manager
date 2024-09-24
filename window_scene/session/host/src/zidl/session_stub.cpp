@@ -36,7 +36,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{   
+{
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
