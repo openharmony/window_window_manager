@@ -690,10 +690,10 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
     startPos += GetObject<AvoidAreaType>(avoidAreaType, data + startPos, size - startPos);
-    startPos += (memcpy_s(&avoidArea.topRect_, sizeof(Rect), data, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
-    startPos += (memcpy_s(&avoidArea.leftRect_, sizeof(Rect), data, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
-    startPos += (memcpy_s(&avoidArea.rightRect_, sizeof(Rect), data, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
-    startPos += (memcpy_s(&avoidArea.bottomRect_, sizeof(Rect), data, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
+    startPos += (memcpy_s(&avoidArea.topRect_, sizeof(Rect), data + startPos, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
+    startPos += (memcpy_s(&avoidArea.leftRect_, sizeof(Rect), data + startPos, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
+    startPos += (memcpy_s(&avoidArea.rightRect_, sizeof(Rect), data + startPos, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
+    startPos += (memcpy_s(&avoidArea.bottomRect_, sizeof(Rect), data + startPos, sizeof(Rect)) == EOK ? sizeof(Rect) : 0);
     window->GetAvoidAreaByType(avoidAreaType, avoidArea);
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
     uint32_t invalidGravityPercent = 0;
