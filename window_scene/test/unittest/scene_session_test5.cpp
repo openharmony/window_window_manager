@@ -1080,6 +1080,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     EXPECT_EQ(brightness, property->GetBrightness());
     EXPECT_EQ(WSError::WS_OK, session3->SetBrightness(brightness));
     res = session3->HandleActionUpdateSetBrightness(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
     EXPECT_EQ(brightness, session3->GetBrightness());
 
     sptr<SceneSession> session4 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1088,7 +1089,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     property->SetBrightness(brightness);
     EXPECT_EQ(brightness, property->GetBrightness());
     res = session4->HandleActionUpdateSetBrightness(property, action);
-    EXPECT_EQ(WSError::WS_OK, res);
+    EXPECT_EQ(WMError::WM_OK, res);
     EXPECT_EQ(brightness, session4->GetBrightness());
     brightness = 1.0;
     EXPECT_EQ(WSError::WS_OK, session4->SetBrightness(brightness));
