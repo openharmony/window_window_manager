@@ -6820,7 +6820,7 @@ void SceneSessionManager::WindowLayerInfoChangeCallback(std::shared_ptr<RSOcclus
             visibilityChangeInfos = GetWindowVisibilityChangeInfo(currVisibleData);
         }
         if (visibilityChangeInfos.size() != 0) {
-            DealwithVisibilityChange(visibilityChangeInfos);
+            DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
             CacVisibleWindowNum();
         }
 
@@ -6863,7 +6863,8 @@ void SceneSessionManager::GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionDa
 void SceneSessionManager::UpdateSubWindowVisibility(const sptr<SceneSession>& session,
     WindowVisibilityState visibleState,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
-    std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo)
+    std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo,
+    const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
 {
     if (WindowHelper::IsMainWindow(session->GetWindowType()) &&
             visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -6878,13 +6879,36 @@ void SceneSessionManager::UpdateSubWindowVisibility(const sptr<SceneSession>& se
             if (subSession == nullptr) {
                 continue;
             }
-            if (session->GetCallingPid() != subSession->GetCallingPid() && subSession->IsSessionForeground()) {
+            if (session->GetCallingPid() != subSession->GetCallingPid() &&
+                (subSession->IsSessionForeground() || GetSessionRSVisible(subSession, currVisibleData))) {
                 TLOGI(WmsLogTag::DEFAULT, "Update subwindow visibility for winId: %{public}d",
                     subSession->GetWindowId());
                 SetSessionVisibilityInfo(subSession, visibleState, windowVisibilityInfos, visibilityInfo);
             }
         }
     }
+}
+
+bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
+    const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
+{
+    bool sessionRSVisible = false;
+    for (const auto& elem : currVisibleData) {
+        uint64_t surfaceId = elem.first;
+        WindowVisibilityState visibleState = elem.second;
+        bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+        sptr<SceneSession> visibilitySession = SelectSesssionFromMap(surfaceId);
+        if (visibilitySession == nullptr) {
+            continue;
+        }
+        if (session->GetWindowId() == visibilitySession->GetWindowId()) {
+            if (isVisible) {
+                sessionRSVisible = true;
+            }
+            break;
+        }
+    }
+    return sessionRSVisible;
 }
 
 void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& session,
@@ -6979,7 +7003,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
 }
 
 void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>&
-    visibilityChangeInfo)
+    visibilityChangeInfo, const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
 {
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
 #ifdef MEMMGR_WINDOW_ENABLE
@@ -6999,12 +7023,13 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
             session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && isVisible == true) {
             if (session->GetParentSession() != nullptr &&
                 !session->GetParentSession()->IsSessionForeground() &&
-                !session->GetParentSession()->GetVisible()) {
+                !GetSessionRSVisible(session->GetParentSession(), currVisibleData)) {
                 continue;
             }
         }
         SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
-        UpdateSubWindowVisibility(session, visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo);
+        UpdateSubWindowVisibility(session, visibleState, visibilityChangeInfo, windowVisibilityInfos,
+            visibilityInfo, currVisibleData);
 #ifdef MEMMGR_WINDOW_ENABLE
     memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
         session->GetCallingUid(), isVisible));
