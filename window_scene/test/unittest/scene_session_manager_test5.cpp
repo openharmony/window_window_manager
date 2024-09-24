@@ -235,14 +235,14 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Leve
     /**
      * @tc.steps: step2. Cache info.
      */
-    const uint32_t cachedlColor = 0xff000000;
-    const std::string cachedlPath = "cachedlPath";
+    const uint32_t cachedColor = 0xff000000;
+    const std::string cachedPath = "cachedPath";
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
     StartingWindowInfo startingWindowInfo = {
         .startingWindowBackgroundId_ = 0,
         .startingWindowIconId_ = 0,
-        .startingWindowBackgroundColor_ = cachedlColor,
-        .startingWindowIconPath_ = cachedlPath,
+        .startingWindowBackgroundColor_ = cachedColor,
+        .startingWindowIconPath_ = cachedPath,
     };
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
@@ -250,8 +250,8 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Leve
      * @tc.steps: step3. Test and check result.
      */
     ssm_->GetStartupPage(sessionInfo, path, bgColor);
-    EXPECT_EQ(path, cachedlPath);
-    EXPECT_EQ(bgColor, cachedlColor);
+    EXPECT_EQ(path, cachedPath);
+    EXPECT_EQ(bgColor, cachedColor);
 }
 
 /**
