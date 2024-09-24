@@ -447,7 +447,7 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck02, Function | SmallTest
 
     window->property_->SetWindowName("test1");
     window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(2, window)));
-    res1 = window->windowSessionCreateCheck();
+    res1 = window->WindowSessionCreateCheck();
     ASSERT_EQ(res1, WMError::WM_ERROR_REPEAT_OPERATION);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 end";
 }
