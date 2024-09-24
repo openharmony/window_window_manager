@@ -313,25 +313,6 @@ HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Background3
- * @tc.desc:  * @tc.name: Background
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, Background3, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background3";
-    info.bundleName_ = "Background3";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-
-    sceneSession->specificCallback_ = new (std::nothrow) SceneSession::SpecificSessionCallback();
-    WindowType windowType = WindowType::APP_MAIN_WINDOW_BASE;
-    OHOS::Rosen::WindowHelper::IsMainWindow(windowType);
-}
-
-/**
  * @tc.name: Background04
  * @tc.desc: normal function
  * @tc.type: FUNC
