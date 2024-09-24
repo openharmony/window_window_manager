@@ -1546,7 +1546,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(scensession->GetAspectRatio(ratio), ratio);
+    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
 }
 
 /**
@@ -1567,7 +1567,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
-    limits.maxWidth = 3000;
+    limits.maxWidth_ = 3000;
     limits.maxHeight_ = 3000;
     limits.minWidth_ = 2000;
     limits.minHeight_ = 2000;
@@ -1595,7 +1595,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
-    limits.maxWidth = 3000;
+    limits.maxWidth_ = 3000;
     limits.maxHeight_ = 3000;
     limits.minWidth_ = 2000;
     limits.minHeight_ = 2000;
@@ -1859,11 +1859,11 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     WSRect oldRect({1, 1, 1, 1});
     WSRect parentRect({10, 10, 1, 1});
 
-    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(parentSession, nullptr);
     scensession->SetParentSession(parentSession);
     EXPECT_NE(scensession->GetParentSession(), nullptr);
-    scensession->systemConfig_.uiType = UI_TYPE_PHONE;
+    scensession->systemConfig_.uiType_ = UI_TYPE_PHONE;
 
     bool isGlobal = true;
     WSError result = scensession->UpdateSessionRect(oldRect, reason, isGlobal);
