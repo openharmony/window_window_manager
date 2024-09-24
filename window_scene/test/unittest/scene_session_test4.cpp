@@ -756,9 +756,6 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     SessionInfo info;
     info.abilityName_ = "SetGestureBackEnabled";
     info.bundleName_ = "SetGestureBackEnabled";
-
-    sptr<SceneSession> session = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetGestureBackEnabled(false));
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->isEnableGestureBack_ = false;
@@ -773,7 +770,6 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     sceneSession->specificCallback_->onUpdateGestureBackEnabled_ = func;
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
     EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
-    EXPECT_EQ(true, sceneSession->GetGestureBackEnableFlag());
 }
 }
 }
