@@ -3228,8 +3228,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
 void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
     auto task = [this, isUserActive]() {
-        TLOGNI(WmsLogTag::WMS_MULTI_USER,
-            "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
+        TLOGNI(WmsLogTag::WMS_MULTI_USER, "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
             isUserActive, currentUserId_);
         isUserBackground_ = !isUserActive;
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
