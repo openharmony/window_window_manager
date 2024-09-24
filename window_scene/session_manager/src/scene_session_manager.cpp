@@ -2122,9 +2122,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         scnSession->GetCloseAbilityWantAndClean(scnSessionInfo->want);
-        if (scnSessionInfo->isClearSession) {
-            scnSessionInfo->resultCode = -1;
-        }
         if (scnSessionInfo->resultCode == -1) {
             OHOS::AAFwk::Want want;
             scnSessionInfo->want = want;
@@ -2192,6 +2189,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(
                 scnSession->SetSessionInfoWant(want);
             }
         }
+        scnSession->ResetSessionInfoResultCode();
     }
     if (listenerController_ != nullptr) {
         NotifySessionForCallback(scnSession, needRemoveSession);
