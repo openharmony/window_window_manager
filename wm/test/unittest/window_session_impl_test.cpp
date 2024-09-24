@@ -1996,7 +1996,7 @@ HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | Sma
     sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window2, nullptr);
     window2->AddSetUIContentTimeoutCheck();
-    ECPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window2->property_->GetWindowType());
+    EXPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window2->property_->GetWindowType());
 }
 
 /**
