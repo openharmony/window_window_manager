@@ -1434,6 +1434,5 @@ WMError WindowManager::ReleaseForegroundSessionScreenLock()
     }
     return ret;
 }
-
 } // namespace Rosen
 } // namespace OHOS
