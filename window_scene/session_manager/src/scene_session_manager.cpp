@@ -1316,10 +1316,10 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
         return this->GetSceneSessionVectorByType(type, displayId);
     };
-    specificCb->onUpdateAvoidArea_ = [this](const int32_t persistentId) {
+    specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
     };
-    specificCb->onUpdateAvoidAreaByType_ = [this](const int32_t persistentId, AvoidAreaType type) {
+    specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
