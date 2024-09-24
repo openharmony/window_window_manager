@@ -942,7 +942,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    sceneSession->SetSessionProPerty();
+    sceneSession->SetSessionProPerty(property);
 
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
     ASSERT_EQ(100, sceneSession->GetSessionInfo().screenId_);
@@ -1753,15 +1753,15 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
  */
 HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | Level3)
 {
-    SessionInfo Info1;
-    Info1.persistentId_ = 1;
-    Info1.isPersistentRecover_ = false;
+    SessionInfo info1;
+    info1.persistentId_ = 1;
+    info1.isPersistentRecover_ = false;
     auto windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
 
-    SessionInfo Info2;
-    Info2.abilityName_ = "RequestSceneSession";
-    Info2.bundleName_ = "RequestSceneSession";
-    Info2.persistentId_ = 1;
+    SessionInfo info2;
+    info2.abilityName_ = "RequestSceneSession";
+    info2.bundleName_ = "RequestSceneSession";
+    info2.persistentId_ = 1;
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(sceneSession, nullptr);
