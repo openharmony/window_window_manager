@@ -2118,8 +2118,13 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnableStatus, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ssm_->UpdateGestureBackEnableStatus(true);
     ASSERT_NE(callbackFunc_, nullptr);
+    ssm_->gestureNavigationEnabledChangeFunc_ = nullptr;
+    ssm_->UpdateGestureBackEnableStatus(true);
     ssm_->SetGestureNavigationEnabledChangeListener(callbackFunc_);
     ssm_->UpdateGestureBackEnableStatus(true);
+    ASSERT_EQ(true, gestureNavigationEnabled_);
+    ssm_->UpdateGestureBackEnableStatus(false);
+    ASSERT_EQ(false, gestureNavigationEnabled_);
 }
 
 /**
@@ -2130,22 +2135,41 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnableStatus, Function | Sma
 HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    ssm_->UpdateGestureBackEnabled(1);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "UpdateGestureBackEnabled";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<WindowSessionProperty> property; 
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, property);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
-    sceneSession->isEnableGestureBack_ =false;
-    sceneSession->isEnableGestureBackHadSet_ =true;
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sceneSession->persistentId_ = 1;
+    ASSERT_EQ(ssm_->GetSceneSession(1), sceneSession);
+    sceneSession->isEnableGestureBack_ = false;
+    sceneSession->isEnableGestureBackHadSet_ = false;
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(ssm_->lastGestureBackEnable_, true);
+    sceneSession->isEnableGestureBackHadSet_ = true;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    ssm_->SetFocusedSessionId(1);
+    ssm_->NotifyEnterRecent(false);
+    ASSERT_EQ(ssm_->enterRecent_.load(), false);
+    sceneSession->UpdateFocus(true);
+    ASSERT_EQ(sceneSession->IsFocused(), true);
     ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(ssm_->lastGestureBackEnable_, false);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(ssm_->lastGestureBackEnable_, true);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    ASSERT_EQ(ssm_->lastGestureBackEnable_, false);
+    ssm_->sceneSessionMap_.erase(1);
 }
 }
 } // namespace Rosen

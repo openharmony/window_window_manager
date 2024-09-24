@@ -1611,8 +1611,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetGestureBackEnabled");
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetGestureBackEnabled(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     window->state_ = WindowState::STATE_CREATED;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGestureBackEnabled(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);

@@ -33,6 +33,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
 void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
@@ -165,13 +166,17 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
-    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
-    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();

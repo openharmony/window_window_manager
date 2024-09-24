@@ -176,6 +176,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
+            return HandleGetWindowIdsByCoordinate(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -418,13 +420,18 @@ int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel& dat
 
 int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandlePendingSessionToBackground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToBackgroundForDelegator(token);
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1157,6 +1164,35 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
     }
     WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t displayId;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t windowNumber;
+    if (!data.ReadInt32(windowNumber)) {
+        TLOGE(WmsLogTag::DEFAULT, "read windowNumber failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t x;
+    int32_t y;
+    if (!data.ReadInt32(x) || !data.ReadInt32(y)) {
+        TLOGE(WmsLogTag::DEFAULT, "read coordinate failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> windowIds;
+    WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32Vector(windowIds);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

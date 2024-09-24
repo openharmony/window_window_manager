@@ -22,6 +22,7 @@
 #include "ws_common.h"
 
 namespace OHOS::Rosen {
+enum class SessionInterfaceCode;
 class SessionProxy : public IRemoteProxy<ISession> {
 public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}
@@ -102,6 +103,7 @@ public:
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
+    WSError SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
 

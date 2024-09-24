@@ -72,6 +72,7 @@ private:
     int HandleCloseTargetFloatWindow(MessageParcel& data, MessageParcel& reply);
     int HandleCloseTargetPiPWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRootMainWindowId(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
