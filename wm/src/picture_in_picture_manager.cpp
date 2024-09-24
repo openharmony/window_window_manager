@@ -196,7 +196,7 @@ void PictureInPictureManager::DoRestore()
 
 void PictureInPictureManager::DoPrepareSource()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
