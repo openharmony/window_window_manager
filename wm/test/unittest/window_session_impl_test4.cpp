@@ -1138,6 +1138,35 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: NotifyMainWindowClose01
+ * @tc.desc: NotifyMainWindowClose
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyMainWindowClose01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    bool terminateCloseProcess = false;
+    WMError res = window->NotifyMainWindowClose(terminateCloseProcess);
+    EXPECT_EQ(terminateCloseProcess, false);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    window->RegisterMainWindowCloseListeners(listener);
+    res = window->NotifyMainWindowClose(terminateCloseProcess);
+    EXPECT_EQ(terminateCloseProcess, false);
+    EXPECT_EQ(res, WMError::WM_OK);
+    window->UnregisterMainWindowCloseListeners(listener);
+}
+
+/**
  * @tc.name: SetWindowContainerColor01
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC

@@ -67,6 +67,7 @@
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
 #include "window_pid_visibility_info.h"
+#include "session/host/include/multi_instance_manager.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -275,6 +276,7 @@ void SceneSessionManager::Init()
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
+    MultiInstanceManager::GetInstance().Init(bundleMgr_);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -761,6 +763,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             visibleWindowCountMap_.erase(sceneSession->GetCallingPid());
             sceneSessionMap_.erase(persistentId);
+            MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
         }
     }
 }
@@ -1222,7 +1225,8 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string& bundleName,
-    const std::string& moduleName, const std::string& abilityName, const int32_t appIndex, const uint32_t windowType)
+    const std::string& moduleName, const std::string& abilityName, const int32_t appIndex,
+    const std::string instanceKey, const uint32_t windowType)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
@@ -1231,6 +1235,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
             sceneSession->GetSessionInfo().moduleName_ == moduleName &&
             sceneSession->GetSessionInfo().abilityName_ == abilityName &&
             sceneSession->GetSessionInfo().appIndex_ == appIndex &&
+            sceneSession->GetSessionInfo().appInstanceKey_ == instanceKey &&
             sceneSession->GetSessionInfo().windowType_ == windowType) {
             return sceneSession;
         }
@@ -1516,8 +1521,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 "abilityName: %{public}s, appIndex: %{public}d",
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
                 sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
-            auto sceneSession = GetSceneSessionByName(sessionInfo.bundleName_,
-                sessionInfo.moduleName_, sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.windowType_);
+            auto sceneSession = GetSceneSessionByName(sessionInfo.bundleName_, sessionInfo.moduleName_, 
+                sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_);
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
@@ -1541,6 +1546,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
+        if (systemConfig_.IsPcWindow()) {
+            MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
+        }
         InitSceneSession(sceneSession, sessionInfo, property);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
@@ -1560,6 +1568,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
         }
+        MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, type: %{public}d",
@@ -1722,6 +1731,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
             static_cast<int>(sessionProperty->GetDisplayId()));
     }
+    abilitySessionInfo->instanceKey = sessionInfo.appInstanceKey_;
     return abilitySessionInfo;
 }
 
@@ -2131,6 +2141,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     sceneSessionMap_.erase(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
+    MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
@@ -3154,6 +3165,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         }
         currentUserId_ = userId;
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+        MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
         RegisterSecSurfaceInfoListener();
         return WSError::WS_OK;
     };
@@ -3224,6 +3236,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+            MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
@@ -3559,6 +3572,42 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
         }
     }
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
+}
+
+static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap,
+    uint32_t windowId, uint32_t& mainWindowId)
+{
+    auto iter = sceneSessionMap.find(windowId);
+    if (iter == sceneSessionMap.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "not found scene session with id: %{public}d", windowId);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sptr<SceneSession> sceneSession = iter->second;
+    if (sceneSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_SUB, "not find parent session");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        mainWindowId = sceneSession->GetPersistentId();
+        return WMError::WM_OK;
+    }
+    if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsDialogWindow(sceneSession->GetWindowType())) {
+        return GetParentMainWindowIdInner(sceneSessionMap, sceneSession->GetParentPersistentId(), mainWindowId);
+    }
+    // not sub window, dialog, return invalid id
+    mainWindowId = INVALID_SESSION_ID;
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+{
+    if (windowId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    return GetParentMainWindowIdInner(sceneSessionMap_, windowId, mainWindowId);
 }
 
 void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
@@ -6806,17 +6855,16 @@ void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t per
         TLOGE(WmsLogTag::WMS_LIFE, "invalid pid");
         return;
     }
-    auto task = [this, pid, persistentId] {
-        int32_t ret = HiSysEventWrite(
-            HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-            "WINDOW_STATE_ERROR",
-            HiviewDFX::HiSysEvent::EventType::FAULT,
-            "PID", pid,
-            "PERSISTENT_ID", persistentId);
-        if (ret != 0) {
-            TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
-        }
-
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", pid,
+        "PERSISTENT_ID", persistentId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    auto task = [this, pid] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (!sceneSession || pid != sceneSession->GetCallingPid() ||
@@ -6831,7 +6879,8 @@ void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t per
             }
         }
     };
-    taskScheduler_->PostAsyncTask(task, "NotifyWindowStateErrorFromMMI");
+    // delay 2000ms, wait for hidumper
+    taskScheduler_->PostAsyncTask(task, __func__, 2000);
 }
 
 sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)
@@ -10863,4 +10912,23 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
+int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
+{
+    return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
+}
+
+int32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
+{
+    return MultiInstanceManager::GetInstance().GetInstanceCount(bundleName);
+}
+
+std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleName)
+{
+    return MultiInstanceManager::GetInstance().GetLastInstanceKey(bundleName);
+}
+
+void SceneSessionManager::PackageRemovedOrChanged(const std::string& bundleName)
+{
+    return MultiInstanceManager::GetInstance().RemoveAppInfo(bundleName);
+}
 } // namespace OHOS::Rosen

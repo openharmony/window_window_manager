@@ -1179,6 +1179,24 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    session_->property_ = nullptr;
+    bool enable = true;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
+
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+
+    enable = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+}
+
+/**
  * @tc.name: RectSizeCheckProcess01
  * @tc.desc: RectSizeCheckProcess Test
  * @tc.type: FUNC
