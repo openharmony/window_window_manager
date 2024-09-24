@@ -303,13 +303,9 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
             session->RegisterSessionChangeCallback(sessionchangeCallback);
         }
         sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove, int32_t persistentId) {
-            if (!needRemove) {
-                TLOGND(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
-                return;
-            }
             auto jsSceneSession = weakThis.promote();
             if (!jsSceneSession) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
+                TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
                 return;
             }
             jsSceneSession->ClearCbMap();
@@ -358,14 +354,13 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
-    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](
-        uint64_t displayId, uint32_t type, const SizeChangeReason reason) {
+    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](uint32_t type, const SizeChangeReason reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessWindowDragHotAreaRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnWindowDragHotArea(displayId, type, reason);
+        jsSceneSession->OnWindowDragHotArea(type, reason);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -635,12 +630,12 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         return;
     }
     auto task = [weakThis = wptr(this), persistentId]() {
+        TLOGI(WmsLogTag::WMS_LIFE, "clear callbackMap with persistent id, %{public}d", persistentId);
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
+            TLOGE(WmsLogTag::WMS_LIFE, "ClearCbMap jsSceneSession is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "clear callbackMap with persistent id, %{public}d", persistentId);
         {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession clear jsCbMap");
             std::unique_lock<std::shared_mutex> lock(jsSceneSession->jsCbMapMutex_);
@@ -648,7 +643,7 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
         }
         auto iter = jsSceneSessionMap_.find(persistentId);
         if (iter != jsSceneSessionMap_.end()) {
-            napi_delete_reference(env_, iter->second);
+            napi_delete_reference(jsSceneSession->env_, iter->second);
             jsSceneSessionMap_.erase(iter);
         } else {
             TLOGE(WmsLogTag::WMS_LIFE, "deleteRef failed , %{public}d", persistentId);
@@ -801,7 +796,7 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
-    NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
+    NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect, const SizeChangeReason& reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");
@@ -913,7 +908,7 @@ void JsSceneSession::ProcessSessionEventRegister()
 
 void JsSceneSession::ProcessTerminateSessionRegister()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     NotifyTerminateSessionFunc func = [weakThis = wptr(this)](const SessionInfo& info) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
@@ -2589,7 +2584,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
     napi_env& env_ref = env_;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env_ref = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env_ref] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionActivationInner jsSceneSession id:%{public}d has been destroyed",
