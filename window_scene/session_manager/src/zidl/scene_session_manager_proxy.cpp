@@ -2312,7 +2312,7 @@ WMError SceneSessionManagerProxy::SetProcessWatermark(int32_t pid, const std::st
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+WMError SceneSessionManagerProxy::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
     MessageParcel data;
@@ -2343,7 +2343,7 @@ WMError SceneSessionManagerProxy::GetWindowFromPoint(DisplayId displayId, int32_
         TLOGE(WmsLogTag::DEFAULT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_FROM_POINT),
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

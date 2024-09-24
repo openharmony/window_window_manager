@@ -174,8 +174,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_FROM_POINT):
-            return HandleGetWindowFromPoint(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
+            return HandleGetWindowIdsByCoordinate(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1144,12 +1144,28 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleGetWindowFromPoint(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t displayId = data.ReadUint64();
-    int32_t windowNumber = data.ReadInt32();
-    int32_t x = data.ReadInt32();
-    int32_t y = data.ReadInt32();
+    uint64_t displayId;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t windowNumber;
+    if (!data.ReadInt32(windowNumber)) {
+        TLOGE(WmsLogTag::DEFAULT, "read windowNumber failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t x;
+    if (!data.ReadInt32(x)) {
+        TLOGE(WmsLogTag::DEFAULT, "read x failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t y;
+    if (!data.ReadInt32(y)) {
+        TLOGE(WmsLogTag::DEFAULT, "read y failed");
+        return ERR_INVALID_DATA;
+    }
     std::vector<int32_t> windowIds;
-    WMError errCode = GetWindowFromPoint(displayId, windowNumber, x, y, windowIds);
+    WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "get window from point failed.");

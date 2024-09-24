@@ -10276,7 +10276,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
     TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
@@ -10285,47 +10285,44 @@ WMError SceneSessionManager::GetWindowFromPoint(DisplayId displayId, int32_t win
         TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    bool findAllWindow = false;
-    if (windowNumber <= 0) {
-        findAllWindow = true;
-    }
-    bool checkPoint = true;
-    if (x < 0 || y < 0) {
-        checkPoint = false;
-    }
+    bool findAllWindow = windowNumber <= 0;
+    bool checkPoint = (x >= 0 && y >= 0);
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
-    auto func = [this, displayId, callerBundleName, checkPoint, x, y,
-        findAllWindow, &windowNumber, &windowIds](sptr<SceneSession> session) {
-        if (session == nullptr) {
+    auto task = [this, displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+            findAllWindow, &windowNumber, &windowIds]() {
+        auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+                findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
+            if (session == nullptr) {
+                return false;
+            }
+            auto sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                return false;
+            }
+            if (!findAllWindow && windowNumber == 0) {
+                return true;
+            }
+            bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
+            bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
+            bool isRsVisible = session->GetRSVisible();
+            WSRect windowRect = session->GetSessionRect();
+            bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
+            TLOGD(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}lu "
+                  "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+                  session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+                  sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+            if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
+                return false;
+            }
+            windowIds.emplace_back(session->GetPersistentId());
+            windowNumber--;
             return false;
-        }
-        auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty == nullptr) {
-            return false;
-        }
-        if (!findAllWindow && windowNumber == 0) {
-            return true;
-        }
-        bool isSameBundleName = (session->GetSessionInfo().bundleName_ == callerBundleName);
-        bool isSameDisplayId = (sessionProperty->GetDisplayId() == displayId);
-        bool isRsVisible = session->GetRSVisible();
-        WSRect windowRect = session->GetSessionRect();
-        bool isPointInWindow = x > windowRect.posX_ && x < (windowRect.posX_ + windowRect.width_) &&
-                               y > windowRect.posY_ && y < (windowRect.posY_ + windowRect.height_);
-        TLOGND(WmsLogTag::DEFAULT, "PersistentId %{public}d bundleName_ %{public}s displayId %{public}llu "
-            "isRsVisible %{public}d checkPoint %{public}d isPointInWindow %{public}d",
-            session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
-            sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindow);
-        if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindow)) {
-            return false;
-        }
-        windowIds.emplace_back(session->GetPersistentId());
-        windowNumber--;
-        return false;
+        };
+        TraverseSessionTree(func, true);
+        TLOGD(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
+        return WMError::WM_OK;
     };
-    TraverseSessionTree(func, true);
-    TLOGD(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask(task, "GetWindowIdsByCoordinate");
 }
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)

@@ -812,7 +812,7 @@ public:
      * @param windowIds array of window id
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetWindowFromPoint(DisplayId displayId, int32_t windowNumber,
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
 private:

@@ -86,7 +86,7 @@ void SceneSessionManagerTest10::TearDown()
 void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
     int32_t windowId, int32_t zOrder, bool visible, WSRect rect)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetDisplayId(displayId);
     SessionInfo info;
     info.bundleName_ = "root";
@@ -250,23 +250,23 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
 }
 
 /**
- * @tc.name: GetWindowFromPoint01
- * @tc.desc: GetWindowFromPoint, displayId invalid
+ * @tc.name: GetWindowIdsByCoordinate01
+ * @tc.desc: GetWindowIdsByCoordinate, displayId invalid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate01, Function | SmallTest | Level3)
 {
     std::vector<int32_t> windowIds;
-    WMError result = ssm_->GetWindowFromPoint(DISPLAY_ID_INVALID, 0, 0, 0, windowIds);
+    WMError result = ssm_->GetWindowIdsByCoordinate(DISPLAY_ID_INVALID, 0, 0, 0, windowIds);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
- * @tc.name: GetWindowFromPoint02
- * @tc.desc: GetWindowFromPoint, windowNumber 0, x y invalid
+ * @tc.name: GetWindowIdsByCoordinate02
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 0, x y invalid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
     InitTestSceneSession(1, 101, 11, true, {100, 100, 200, 200});
@@ -289,7 +289,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint02, Function | SmallTest |
     InitTestSceneSession(1, 110, 12, true, {500, 500, 600, 600});
 
     std::vector<int32_t> windowIds;
-    WMError result = ssm_->GetWindowFromPoint(1, 0, -1, -1, windowIds);
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, -1, -1, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(5, windowIds.size());
     EXPECT_EQ(106, windowIds[0]);
@@ -301,11 +301,11 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint02, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetWindowFromPoint03
- * @tc.desc: GetWindowFromPoint, windowNumber 3, x y invalid
+ * @tc.name: GetWindowIdsByCoordinate03
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 3, x y invalid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
     InitTestSceneSession(1, 111, 11, true, {100, 100, 200, 200});
@@ -328,7 +328,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint03, Function | SmallTest |
     InitTestSceneSession(1, 120, 12, true, {500, 500, 600, 600});
 
     std::vector<int32_t> windowIds;
-    WMError result = ssm_->GetWindowFromPoint(1, 3, -1, -1, windowIds);
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, -1, -1, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(3, windowIds.size());
     EXPECT_EQ(116, windowIds[0]);
@@ -338,11 +338,11 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint03, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetWindowFromPoint04
- * @tc.desc: GetWindowFromPoint, windowNumber 0, x y effictive value
+ * @tc.name: GetWindowIdsByCoordinate04
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 0, x y effictive value
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
     InitTestSceneSession(1, 121, 11, true, {100, 100, 200, 200});
@@ -365,7 +365,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint04, Function | SmallTest |
     InitTestSceneSession(1, 130, 12, true, {500, 500, 600, 600});
 
     std::vector<int32_t> windowIds;
-    WMError result = ssm_->GetWindowFromPoint(1, 0, 180, 180, windowIds);
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, 180, 180, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(4, windowIds.size());
     EXPECT_EQ(126, windowIds[0]);
@@ -376,11 +376,11 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint04, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetWindowFromPoint05
- * @tc.desc: GetWindowFromPoint, windowNumber 3, x y effictive value
+ * @tc.name: GetWindowIdsByCoordinate05
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 3, x y effictive value
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
     InitTestSceneSession(1, 131, 11, true, {100, 100, 200, 200});
@@ -403,7 +403,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowFromPoint05, Function | SmallTest |
     InitTestSceneSession(1, 140, 12, true, {500, 500, 600, 600});
 
     std::vector<int32_t> windowIds;
-    WMError result = ssm_->GetWindowFromPoint(1, 3, 180, 180, windowIds);
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, 180, 180, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(3, windowIds.size());
     EXPECT_EQ(136, windowIds[0]);
