@@ -519,22 +519,22 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
-    
+
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
-    
+
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
-    
+
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_MODE);
-    
+
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
-    
+
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 
@@ -568,7 +568,8 @@ HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
-    ssm_->CheckRequestFocusImmdediately(sceneSession);
+    bool ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
+    ASSERT_EQ(ret, false);
 }
 
 /**

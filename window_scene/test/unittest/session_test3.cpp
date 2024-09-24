@@ -154,6 +154,7 @@ HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 
     result = session_->SetFocusable(false);
     EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(session_->GetFocusable(), false);
 }
 
 /**
@@ -181,7 +182,7 @@ HWTEST_F(WindowSessionTest3, CheckFocusable, Function | SmallTest | Level2)
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(session_->CheckFocusable(), true);
     session_->SetSystemFocusable(false);
-    ASSERT_EQ(session_->GetSystemFocusable(), false);
+    ASSERT_EQ(session_->CheckFocusable(), false);
 }
 
 /**
@@ -1009,7 +1010,7 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     EXPECT_EQ(result, WSError::WS_OK);
-    
+
     session_->state_ = SessionState::STATE_CONNECT;
     result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(result, WSError::WS_OK);
