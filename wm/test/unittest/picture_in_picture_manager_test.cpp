@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
+#include "scene_board_judgement.h"
 #include "window_scene_session_impl.h"
 #include "wm_common.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
