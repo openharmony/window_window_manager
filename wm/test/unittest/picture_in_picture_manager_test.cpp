@@ -276,8 +276,7 @@ HWTEST_F(PictureInPictureManagerTest, DoPreRestore, Function | SmallTest | Level
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
@@ -323,8 +322,7 @@ HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
@@ -347,8 +345,7 @@ HWTEST_F(PictureInPictureManagerTest, DoActionEvent, Function | SmallTest | Leve
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
@@ -393,8 +390,7 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, mw);
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipController =
-        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::activeController_ = nullptr;
