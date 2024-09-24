@@ -10894,6 +10894,30 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
+WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    const char* const where = __func__;
+    auto task = [this, persistentId, &hostWindowId, where]() {
+        hostWindowId = INVALID_WINDOW_ID;
+        sptr<Session> session = GetSceneSession(persistentId);
+        while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
+        {
+            session = session->GetParentSession();
+        }
+        if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
+            hostWindowId = session->GetPersistentId();
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: persistentId:%{public}d hostWindowId:%{public}d",
+            where, persistentId, hostWindowId);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, where);
+}
+
 int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
 {
     return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
