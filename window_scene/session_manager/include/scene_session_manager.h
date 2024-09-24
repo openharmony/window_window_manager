@@ -305,7 +305,8 @@ public:
     void UnregisterCreateSubSessionListener(int32_t persistentId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
-    void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos);
+    void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
@@ -407,7 +408,10 @@ private:
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
     void UpdateSubWindowVisibility(const sptr<SceneSession>& session, WindowVisibilityState visibleState,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
-        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
+        std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    bool GetSessionRSVisible(const sptr<Session>& session,
+        const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
