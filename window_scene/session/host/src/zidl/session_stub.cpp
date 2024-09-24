@@ -36,11 +36,14 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
-{   // Compare with "WriteAbilitySessionInfoBasic" method, 
-    // this method has NO want info at head and processOption info at tail.
-    if (abilitySessionInfo == nullptr) {
-        return ERR_INVALID_DATA;
+{   
+    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
+        return ERR_INVALID_VALUE;
     }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilitySessionInfo->want = *localWant;
     if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read requestCode failed.");
         return ERR_INVALID_DATA;
@@ -67,6 +70,7 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
     }
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     return ERR_NONE;
 }
 } // namespace
@@ -468,19 +472,10 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
-    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
-    if (localWant == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    abilitySessionInfo->want = *localWant;
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    abilitySessionInfo->processOptions =
-        std::shared_ptr<AAFwk::ProcessOptions>(data.ReadParcelable<AAFwk::ProcessOptions>());
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
@@ -510,18 +505,10 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
-    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
-    if (localWant == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    abilitySessionInfo->want = *localWant;
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
         return ERR_INVALID_VALUE;
