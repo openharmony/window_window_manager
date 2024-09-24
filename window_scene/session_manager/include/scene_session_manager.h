@@ -74,7 +74,7 @@ struct ComparedSessionInfo {
     std::string bundleName_;
     std::string moduleName_;
     std::string abilityName_;
-    int32_t appIndex_;
+    int32_t appIndex_ = 0;
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
@@ -858,6 +858,7 @@ private:
      */
     void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
+    void ResetWant(sptr<SceneSession>& sceneSession);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
