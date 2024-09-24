@@ -1537,7 +1537,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->RaiseAppMainWindowToTop();
+    WSError result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     bool status = true;
     sceneSession->OnNeedAvoid(status);
@@ -1547,7 +1548,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sceneSession->NotifyPropertyWhenConnect();
 
     sceneSession->focusedOnShow_ = false;
-    sceneSession->RaiseAppMainWindowToTop();
+    result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
 }
 
 /**
