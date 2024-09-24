@@ -171,7 +171,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode, Function | SmallTest |
 HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2)
 {
     float brightness = 0.02;
-    sqrt<WindowSessionProperty> property = sqrt<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetBrightness(brightness);
     ASSERT_EQ(brightness, property->GetBrightness());
@@ -941,7 +941,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
 {
-    sqrt<WindowSessionProperty> property = sqrt<WindowSessionProperty>::MakeSqrt();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSqrt();
     ASSERT_NE(nullptr, property);
     bool keepScreenOn = true;
     property->SetKeepScreenOn(keepScreenOn);
