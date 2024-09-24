@@ -3806,14 +3806,13 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
             if (!IsSessionVisibleForeground(sceneSession) || sceneSession->keepScreenLock_ == nullptr) {
                 continue;
             }
-
             auto res = sceneSession->keepScreenLock_->UnLock();
             if (res != ERR_OK) {
-                TLOGE(WmsLogTag::DEFAULT, "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
+                TLOGNE(WmsLogTag::DEFAULT, "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
                     persistentId, sceneSession->GetWindowName().c_str(), res);
                 return WMError::WM_ERROR_INVALID_OPERATION;
             }
-            TLOGI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
+            TLOGNI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
                 persistentId, sceneSession->GetWindowName().c_str());
         }
         return WMError::WM_OK;
@@ -10400,6 +10399,53 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     TraverseSessionTree(func, true);
 
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds)
+{
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
+          displayId, windowNumber, x, y);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool findAllWindow = windowNumber <= 0;
+    bool checkPoint = (x >= 0 && y >= 0);
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+        findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
+        if (session == nullptr) {
+            return false;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            return false;
+        }
+        if (!findAllWindow && windowNumber == 0) {
+            return true;
+        }
+        bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
+        bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
+        bool isRsVisible = session->GetRSVisible();
+        WSRect windowRect = session->GetSessionRect();
+        bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
+               "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+               session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+               sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+        if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
+            return false;
+        }
+        windowIds.emplace_back(session->GetPersistentId());
+        windowNumber--;
+        return false;
+    };
+    auto task = [this, func = std::move(func)] {
+        TraverseSessionTree(func, true);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
