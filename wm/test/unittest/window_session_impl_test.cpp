@@ -221,6 +221,21 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     ASSERT_NE(nullptr, window);
     WMError retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetResizeByDragEnabled02
+ * @tc.desc: SetResizeByDragEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetResizeByDragEnabled02");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
@@ -230,6 +245,53 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_EQ(true, window->GetResizeByDragEnabled());
+}
+
+/**
+ * @tc.name: SetResizeByDragEnabled02
+ * @tc.desc: SetResizeByDragEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetResizeByDragEnabled02");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
+    retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_EQ(true, window->property_->GetDragEnable());
+}
+
+/**
+ * @tc.name: SetResizeByDragEnabled03
+ * @tc.desc: SetResizeByDragEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetResizeByDragEnabled03");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
 
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
@@ -531,6 +593,11 @@ HWTEST_F(WindowSessionImplTest, UpdateRect01, Function | SmallTest | Level2)
     window->property_->SetWindowRect(rectW);
     res = window->UpdateRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);
+    Rect nowRect = window->property_->GetWindowRect();
+    EXPECT_EQ(nowRect.posX_, rect.posX_);
+    EXPECT_EQ(nowRect.posY_, rect.posY_);
+    EXPECT_EQ(nowRect.width_, rect.width_);
+    EXPECT_EQ(nowRect.height_, rect.height_);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRect01 end";
 }
 
@@ -561,7 +628,7 @@ HWTEST_F(WindowSessionImplTest, UpdateRect02, Function | SmallTest | Level2)
     rectW.width_ = 0;  // rectW - rect > 50
 
     window->property_->SetWindowRect(rectW);
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    SizeChangeReason reason = SizeChangeReason::ROTATION;
     WSError res = window->UpdateRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);
 
@@ -572,6 +639,11 @@ HWTEST_F(WindowSessionImplTest, UpdateRect02, Function | SmallTest | Level2)
     window->property_->SetWindowRect(rectW);
     res = window->UpdateRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);
+    Rect nowRect = window->property_->GetWindowRect();
+    EXPECT_EQ(nowRect.posX_, rect.posX_);
+    EXPECT_EQ(nowRect.posY_, rect.posY_);
+    EXPECT_EQ(nowRect.width_, rect.width_);
+    EXPECT_EQ(nowRect.height_, rect.height_);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRect02 end";
 }
 
@@ -652,14 +724,11 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
     rectW.width_ = 0;  // rectW - rect > 50
 
     WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
-    int32_t res = 0;
     window->UpdateViewportConfig(rectW, reason);
-    ASSERT_EQ(res, 0);
 
     DisplayId displayId = 1;
     window->property_->SetDisplayId(displayId);
     window->UpdateViewportConfig(rectW, reason);
-    ASSERT_EQ(res, 0);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateViewportConfig end";
 }
@@ -1569,16 +1638,16 @@ HWTEST_F(WindowSessionImplTest, NotifyKeyEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateProperty
+ * @tc.name: UpdateProperty01
  * @tc.desc: UpdateProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, UpdateProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest, UpdateProperty01, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty start";
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("UpdateProperty");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("UpdateProperty01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
                                "CreateTestAbility"};
@@ -1590,12 +1659,32 @@ HWTEST_F(WindowSessionImplTest, UpdateProperty, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     // session is null
-    window = new WindowSessionImpl(option);
+    window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
     res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty01 end";
+}
+
+/**
+ * @tc.name: UpdateProperty02
+ * @tc.desc: UpdateProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateProperty02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty02 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("UpdateProperty02");
+
+    // session is null
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
+    res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty02 end";
 }
 
 /**

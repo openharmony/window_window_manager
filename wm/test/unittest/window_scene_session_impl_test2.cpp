@@ -1267,13 +1267,12 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | 
     window->hostSession_ = session;
 
     WindowLimits windowLimits = {2000, 2000, 2000, 2000, 0.0f, 0.0f};
-    if (WMError::WM_OK == window->SetWindowLimits(windowLimits)) {
-        WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-        ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
-        ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
-    }
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits));
+    WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
+    ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
+    ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
+    ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
+    ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
 }
 
 /**

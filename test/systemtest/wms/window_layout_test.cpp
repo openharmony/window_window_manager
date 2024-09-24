@@ -54,9 +54,7 @@ void WindowLayoutTest::SetUpTestCase()
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
     sleep(2);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        return;
-    }
+    ASSERT_NE(display, nullptr);
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);
@@ -101,9 +99,7 @@ void WindowLayoutTest::InitAvoidArea()
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     window->Show();
     window->SetLayoutFullScreen(true);
     window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, WindowTestUtils::systemAvoidArea_);
@@ -154,9 +150,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(true, window != nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
@@ -184,9 +178,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -218,9 +210,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> appWin = Utils::CreateTestWindow(info);
-    if (appWin == nullptr) {
-        return;
-    }
+    ASSERT_NE(appWin, nullptr);
 
     activeWindows_.push_back(appWin);
 
@@ -256,9 +246,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
 HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
-    if (statBar == nullptr) {
-        return;
-    }
+    ASSERT_NE(statBar, nullptr);
+
     activeWindows_.push_back(statBar);
     sptr<Window> naviBar = Utils::CreateNavigationBarWindow();
     activeWindows_.push_back(naviBar);
@@ -377,9 +366,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -442,9 +430,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -475,9 +462,8 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     };
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -540,9 +526,8 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .needAvoid = true, .parentLimit = false, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
@@ -607,9 +592,8 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -637,9 +621,8 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -679,28 +662,28 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(-500, rect.posX_);
     EXPECT_EQ(-500, rect.posY_);
 
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(0, rect.posX_);
     EXPECT_EQ(0, rect.posY_);
 
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
 
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(20000, rect.posX_);
@@ -739,7 +722,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -747,7 +730,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -755,7 +738,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -795,7 +778,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -803,7 +786,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -811,7 +794,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -819,7 +802,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -859,7 +842,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -867,7 +850,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -875,7 +858,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -883,7 +866,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -920,21 +903,21 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 
     ret = window->Resize(-500, -500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(36000);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(36000);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.width_);
     EXPECT_EQ(500, rect.height_);
 
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(36000);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
@@ -1083,14 +1066,14 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(36000);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(36000);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);

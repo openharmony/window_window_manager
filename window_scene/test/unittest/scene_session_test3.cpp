@@ -69,9 +69,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio1, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio11";
     info.bundleName_ = "SetAspectRatio11";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
@@ -92,9 +89,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio12";
     info.bundleName_ = "SetAspectRatio12";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
@@ -103,9 +97,12 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     scensession->moveDragController_ = nullptr;
     auto result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
+
     scensession->moveDragController_ = new (std::nothrow) MoveDragController(0);
     result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
@@ -113,6 +110,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
 }
 
 /**
@@ -125,9 +123,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio15";
     info.bundleName_ = "SetAspectRatio15";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
@@ -141,13 +136,8 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     limits.maxHeight_ = 10;
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
-    scensession->SetAspectRatio(ratio);
-
-    limits.maxHeight_ = 0;
-    limits.minWidth_ = 10;
-    property->SetWindowLimits(limits);
-    scensession->SetAspectRatio(ratio);
-    EXPECT_NE(scensession, nullptr);
+    auto result = scensession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -177,9 +167,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
     auto result = scensession->SetAspectRatio(ratio);
-
-    ratio = 10;
-    result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 

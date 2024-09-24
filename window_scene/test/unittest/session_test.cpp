@@ -226,11 +226,15 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
         SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     ASSERT_EQ(rect, session_->winRect_);
 
+    rect = {0, 0, 200, 200};
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
+    ASSERT_EQ(rect, session_->winRect_);
 
+    rect = {0, 0, 300, 300};
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
+    ASSERT_EQ(rect, session_->winRect_);
 }
 
 /**
@@ -902,7 +906,9 @@ HWTEST_F(WindowSessionTest, SetAspectRatio, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(WSError::WS_OK, session_->SetAspectRatio(0.1f));
+    const float ratio = 0.1f
+    ASSERT_EQ(WSError::WS_OK, session_->SetAspectRatio(ratio));
+    ASSERT_EQ(ratio, session_->GetAspectRatio());
 }
 
 /**
