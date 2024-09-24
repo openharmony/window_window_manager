@@ -914,7 +914,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5;
-    window->hostSession_ = Session;
+    window->hostSession_ = session;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_OK);

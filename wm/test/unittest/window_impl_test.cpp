@@ -986,7 +986,7 @@ HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ASSERT_EQ(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
-    ASSERT(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
     uint32_t invalidColorSpace = 1234u;
     window->SetColorSpace(static_cast<ColorSpace>(invalidColorSpace));
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
