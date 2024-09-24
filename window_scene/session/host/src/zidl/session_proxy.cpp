@@ -41,9 +41,9 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
-        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
-        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->persistentId) ||
+        !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
+        !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
@@ -651,6 +651,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -1036,6 +1037,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::SetAspectRatio(float ratio)
 {
     MessageParcel data;
