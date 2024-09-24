@@ -2138,7 +2138,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTes
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "UpdateGestureBackEnabled";
-    sptr<WindowSessionProperty> property; 
+    sptr<WindowSessionProperty> property;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, property);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
