@@ -451,6 +451,7 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
