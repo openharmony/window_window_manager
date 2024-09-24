@@ -593,7 +593,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | Smal
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    property-SetParentPersistentId(2); 
+    property->SetParentPersistentId(2); 
     result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
     EXPECT_EQ(result, WSError::WS_OK);
 }
