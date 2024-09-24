@@ -206,7 +206,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionMovedToFront, Function |
 HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
 {
     WSError ret;
-    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
+    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 
     SessionInfo info;
@@ -214,7 +214,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegato
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
+    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 }
 
