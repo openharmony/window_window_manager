@@ -565,7 +565,7 @@ void PictureInPictureController::RestorePictureInPictureWindow()
 
 void PictureInPictureController::PrepareSource()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
         return;
@@ -588,7 +588,7 @@ void PictureInPictureController::PrepareSource()
 
 void PictureInPictureController::LocateSource()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr");
         return;
