@@ -803,7 +803,7 @@ public:
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
 
     /**
-     * @brief Get windows by coordinate.
+     * @brief Get window ids by coordinate.
      *
      * @param displayId display id
      * @param windowNumber indicates the number of query windows

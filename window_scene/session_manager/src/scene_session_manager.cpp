@@ -10355,9 +10355,9 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         WSRect windowRect = session->GetSessionRect();
         bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
         TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
-              "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
-              session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
-              sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+               "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+               session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+               sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
         if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
             return false;
         }
@@ -10365,9 +10365,8 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         windowNumber--;
         return false;
     };
-    auto task = [this, func = std::move(func), &windowIds] {
+    auto task = [this, func = std::move(func)] {
         TraverseSessionTree(func, true);
-        TLOGND(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);

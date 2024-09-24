@@ -1184,7 +1184,7 @@ int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data,
     WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "get windowIds by coordinate failed.");
+        TLOGE(WmsLogTag::DEFAULT, "failed.");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32Vector(windowIds);
