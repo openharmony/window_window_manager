@@ -40,6 +40,10 @@ config("for_libdm_public_config") {
       [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
 }
 
+config("libdm_ndk_public_config") {
+  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
+}
+
 ## Build libdm_static.a
 ohos_static_library("libdm_static") {
   branch_protector_ret = "pac_ret"
@@ -168,6 +172,8 @@ ohos_shared_library("libdm_ndk") {
   ]
 
   sources = [ "src/oh_display_manager.cpp" ]
+
+  public_configs = [ ":libdm_ndk_public_config" ]
 
   deps = [ ":libdm" ]
   innerapi_tags = [ "ndk" ]

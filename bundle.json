@@ -187,6 +187,15 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/dm:libdm_ndk",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/dm_lite:libdm_lite",
             "header": {
               "header_files": [
