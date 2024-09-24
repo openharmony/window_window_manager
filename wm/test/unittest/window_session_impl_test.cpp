@@ -445,6 +445,10 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck02, Function | SmallTest
     WMError res1 = window->WindowSessionCreateCheck();
     ASSERT_EQ(res1, WMError::WM_OK);
 
+    window->property_->SetWindowName("test1");
+    window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(2, window)));
+    res1 = window->windowSessionCreateCheck();
+    ASSERT_EQ(res1, WMError::WM_ERROR_REPEAT_OPERATION);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 end";
 }
 
@@ -1992,6 +1996,7 @@ HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | Sma
     sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window2, nullptr);
     window2->AddSetUIContentTimeoutCheck();
+    ECPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window2->property_->GetWindowType());
 }
 
 /**
