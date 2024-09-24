@@ -1538,10 +1538,12 @@ HWTEST_F(SceneSessionManagerTest4, CheckParentSessionVisible, Function | SmallTe
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     result = ssm_->CheckParentSessionVisible(sceneSession);
     EXPECT_EQ(result, true);
 
     sceneSession->property_->SetParentPersistentId(2);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
     result = ssm_->CheckParentSessionVisible(sceneSession);
     EXPECT_EQ(result, true);
 
