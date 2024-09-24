@@ -3777,31 +3777,33 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 
 WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
 {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
 #ifdef POWER_MANAGER_ENABLE
-    auto task = [this]() {
-        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [persistentId, scnSession] : sceneSessionMap_) {
-            if (!IsSessionVisibleForeground(scnSession) || scnSession->keepScreenLock_ == nullptr) {
+    auto task = [this] {
+        std::unique_lock<std::shared_lock> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+            if (!IsSessionVisibleForeground(sceneSession) || sceneSession->keepScreenLock_ == nullptr) {
                 continue;
             }
 
-            auto res = scnSession->keepScreenLock_->UnLock();
+            auto res = sceneSession->keepScreenLock_->UnLock();
             if (res != ERR_OK) {
-                WLOGFE("release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d]",
-                    persistentId, scnSession->GetWindowName().c_str(), res);
+                TLOGE(WmsLogTag::DEFAULT, "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
+                    persistentId, sceneSession->GetWindowName().c_str(), res);
                 return WMError::WM_ERROR_INVALID_OPERATION;
             }
-            WLOGFI("release screen lock success: window: [%{public}d, %{public}s]", persistentId,
-                scnSession->GetWindowName().c_str());
+            TLOGI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
+                persistentId, sceneSession->GetWindowName().c_str());
         }
         return WMError::WM_OK;
     };
-
-    return taskScheduler_->PostSyncTask(task, "ReleaseForegroundSessionScreenLock");
+    return taskScheduler_->PostSyncTask(task, __func__);
 #else
-    WLOGFD("Can not find the sub system of PowerMgr");
+    TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
 #endif
-
     return WMError::WM_OK;
 }
 

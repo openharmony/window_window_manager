@@ -389,7 +389,6 @@ public:
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
-    WMError ReleaseForegroundSessionScreenLock() override;
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId);
 
@@ -438,6 +437,11 @@ public:
     int32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void PackageRemovedOrChanged(const std::string& bundleName);
+
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
