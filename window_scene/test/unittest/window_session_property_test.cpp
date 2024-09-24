@@ -941,7 +941,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSqrt();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     bool keepScreenOn = true;
     property->SetKeepScreenOn(keepScreenOn);
