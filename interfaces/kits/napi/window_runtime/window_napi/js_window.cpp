@@ -5718,7 +5718,7 @@ napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, windows.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert window vector to jsArrayObject");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create napi array");
         return nullptr;
     }
     uint32_t index = 0;

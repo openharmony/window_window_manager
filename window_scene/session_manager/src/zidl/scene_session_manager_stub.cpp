@@ -1175,20 +1175,16 @@ int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     int32_t x;
-    if (!data.ReadInt32(x)) {
-        TLOGE(WmsLogTag::DEFAULT, "read x failed");
-        return ERR_INVALID_DATA;
-    }
     int32_t y;
-    if (!data.ReadInt32(y)) {
-        TLOGE(WmsLogTag::DEFAULT, "read y failed");
+    if (!data.ReadInt32(x) || !data.ReadInt32(y)) {
+        TLOGE(WmsLogTag::DEFAULT, "read coordinate failed");
         return ERR_INVALID_DATA;
     }
     std::vector<int32_t> windowIds;
     WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "get window from point failed.");
+        TLOGE(WmsLogTag::DEFAULT, "get windowIds by coordinate failed.");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32Vector(windowIds);

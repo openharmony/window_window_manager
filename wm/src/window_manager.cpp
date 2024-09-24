@@ -1432,7 +1432,7 @@ WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t win
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowIdsByCoordinate(
         displayId, windowNumber, x, y, windowIds);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "get window from point failed");
+        TLOGE(WmsLogTag::DEFAULT, "get windowIds by coordinate failed");
     }
     return ret;
 }

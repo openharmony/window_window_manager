@@ -10337,41 +10337,40 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
     bool findAllWindow = windowNumber <= 0;
     bool checkPoint = (x >= 0 && y >= 0);
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
-    auto task = [this, displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
-            findAllWindow, &windowNumber, &windowIds]() {
-        auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
-                findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
-            if (session == nullptr) {
-                return false;
-            }
-            auto sessionProperty = session->GetSessionProperty();
-            if (sessionProperty == nullptr) {
-                return false;
-            }
-            if (!findAllWindow && windowNumber == 0) {
-                return true;
-            }
-            bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
-            bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
-            bool isRsVisible = session->GetRSVisible();
-            WSRect windowRect = session->GetSessionRect();
-            bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
-            TLOGD(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
-                  "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
-                  session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
-                  sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
-            if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
-                return false;
-            }
-            windowIds.emplace_back(session->GetPersistentId());
-            windowNumber--;
+    auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+        findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
+        if (session == nullptr) {
             return false;
-        };
+        }
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            return false;
+        }
+        if (!findAllWindow && windowNumber == 0) {
+            return true;
+        }
+        bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
+        bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
+        bool isRsVisible = session->GetRSVisible();
+        WSRect windowRect = session->GetSessionRect();
+        bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
+              "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+              session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+              sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+        if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
+            return false;
+        }
+        windowIds.emplace_back(session->GetPersistentId());
+        windowNumber--;
+        return false;
+    };
+    auto task = [this, func = std::move(func), &windowIds] {
         TraverseSessionTree(func, true);
-        TLOGD(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
+        TLOGND(WmsLogTag::DEFAULT, "windowIds size %{public}u", windowIds.size());
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task, "GetWindowIdsByCoordinate");
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
