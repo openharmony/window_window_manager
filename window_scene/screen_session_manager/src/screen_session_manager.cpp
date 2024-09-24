@@ -66,25 +66,13 @@ const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 const int32_t CV_WAIT_SCBSWITCH_MS = 3000;
-const std::u16string DEFAULT_USTRING = u"error";
-const std::string DEFAULT_STRING = "error";
-const std::string ARG_DUMP_HELP = "-h";
-const std::string ARG_DUMP_ALL = "-a";
-const std::string ARG_DUMP_SCREEN = "-s";
-const std::string ARG_FOLD_DISPLAY_FULL = "-f";
-const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
-const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
-const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
-const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
-const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC_MAIN = 9;
-const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t INVALID_SCB_PID = -1;
@@ -5078,88 +5066,6 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNode(ScreenId scr
     return screenSession->GetDisplayNode();
 }
 
-void ScreenSessionManager::ShowHelpInfo(std::string& dumpInfo)
-{
-    dumpInfo.append("Usage:\n")
-        .append(" -h                             ")
-        .append("|help text for the tool\n")
-        .append(" -a                             ")
-        .append("|dump all screen information in the system\n")
-        .append(" -s {screen id}                 ")
-        .append("|dump specified screen information\n")
-        .append(" -f                             ")
-        .append("|switch the screen to full display mode\n")
-        .append(" -m                             ")
-        .append("|switch the screen to main display mode\n")
-        .append(" -l                             ")
-        .append("|lock the screen display status\n")
-        .append(" -u                             ")
-        .append("|unlock the screen display status\n")
-        .append(" -z                             ")
-        .append("|switch to fold half status\n")
-        .append(" -y                             ")
-        .append("|switch to expand status\n")
-        .append(" -p                             ")
-        .append("|switch to fold status\n");
-}
-
-void ScreenSessionManager::ShowIllegalArgsInfo(std::string& dumpInfo)
-{
-    dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
-}
-
-bool ScreenSessionManager::IsValidDigitString(const std::string& idStr) const
-{
-    if (idStr.empty()) {
-        return false;
-    }
-    for (char ch : idStr) {
-        if ((ch >= '0' && ch <= '9')) {
-            continue;
-        }
-        TLOGE(WmsLogTag::DMS, "invalid id");
-        return false;
-    }
-    return true;
-}
-
-int ScreenSessionManager::DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo)
-{
-    if (args.empty()) {
-        return -1;
-    }
-    if (args.size() == 1 && args[0] == ARG_DUMP_ALL) { // 1: params num
-        return DumpAllScreenInfo(dumpInfo);
-    } else if (args[0] == ARG_DUMP_SCREEN && IsValidDigitString(args[1])) {
-        ScreenId screenId = std::stoull(args[1]);
-        return DumpSpecifiedScreenInfo(screenId, dumpInfo);
-    } else {
-        return -1;
-    }
-}
-
-int ScreenSessionManager::DumpAllScreenInfo(std::string& dumpInfo)
-{
-    DumpAllScreensInfo(dumpInfo);
-    return 0;
-}
-
-int ScreenSessionManager::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo)
-{
-    DumpSpecialScreenInfo(screenId, dumpInfo);
-    return 0;
-}
-
-static std::string Str16ToStr8(const std::u16string& str)
-{
-    if (str == DEFAULT_USTRING) {
-        return DEFAULT_STRING;
-    }
-    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert(DEFAULT_STRING);
-    std::string result = convert.to_bytes(str);
-    return result == DEFAULT_STRING ? "" : result;
-}
-
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     TLOGI(WmsLogTag::DMS, "Dump begin");
@@ -5172,88 +5078,7 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     dumper->DumpEventTracker(screenEventTracker_);
     dumper->DumpMultiUserInfo(oldScbPids_, currentUserId_, currentScbPId_);
     dumper->ExcuteDumpCmd();
-
-    std::vector<std::string> params;
-    for (auto& arg : args) {
-        params.emplace_back(Str16ToStr8(arg));
-    }
-    std::string dumpInfo;
-    if (params.empty()) {
-        ShowHelpInfo(dumpInfo);
-    } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) {  // 1: params num
-        ShowHelpInfo(dumpInfo);
-    } else if (params.size() == 1 && IsValidDisplayModeCommand(params[0])) {
-        int errCode = SetFoldDisplayMode(params[0]);
-        if (errCode != 0) {
-            ShowIllegalArgsInfo(dumpInfo);
-        }
-    } else if (params.size() == 1 && (params[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
-                || params[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
-        int errCode = SetFoldStatusLocked(params[0]);
-        if (errCode != 0) {
-            ShowIllegalArgsInfo(dumpInfo);
-        }
-    } else {
-        int errCode = DumpScreenInfo(params, dumpInfo);
-        if (errCode != 0) {
-            ShowIllegalArgsInfo(dumpInfo);
-        }
-    }
     TLOGI(WmsLogTag::DMS, "dump end");
-    return 0;
-}
-
-bool ScreenSessionManager::IsValidDisplayModeCommand(std::string command)
-{
-    if (std::find(displayModeCommands.begin(), displayModeCommands.end(), command) != displayModeCommands.end()) {
-        return true;
-    }
-    return false;
-}
-
-int ScreenSessionManager::SetFoldDisplayMode(const std::string& modeParam)
-{
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "SetFoldDisplayMode permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return -1;
-    }
-    if (modeParam.empty()) {
-        return -1;
-    }
-    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
-    if (modeParam == ARG_FOLD_DISPLAY_FULL) {
-        displayMode = FoldDisplayMode::FULL;
-    } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
-        displayMode = FoldDisplayMode::MAIN;
-    } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
-        displayMode = FoldDisplayMode::SUB;
-    } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
-        displayMode = FoldDisplayMode::COORDINATION;
-    } else {
-        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
-        return -1;
-    }
-    SetFoldDisplayMode(displayMode);
-    return 0;
-}
-
-int ScreenSessionManager::SetFoldStatusLocked(const std::string& lockParam)
-{
-    if (lockParam.empty()) {
-        return -1;
-    }
-    bool lockDisplayStatus = false;
-    if (lockParam == ARG_LOCK_FOLD_DISPLAY_STATUS) {
-        lockDisplayStatus = true;
-    } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
-        lockDisplayStatus = false;
-    } else {
-        TLOGW(WmsLogTag::DMS, "SetFoldStatusLocked status not support");
-        return -1;
-    }
-    SetFoldStatusLocked(lockDisplayStatus);
     return 0;
 }
 
