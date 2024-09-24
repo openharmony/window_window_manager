@@ -960,8 +960,12 @@ HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sceneSession->SetSessionProPerty();
+
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
-    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+    ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetSessionInfo().screenId_);
 }
 
 /**
@@ -998,11 +1002,11 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | Sma
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> sceneSession = nullptr;
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
-    ssm_->RequestSceneSessionBackground(sceneSession, true, false, true);
-    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false, true));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
 }
 
 /**
@@ -1122,7 +1126,8 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
     ssm_->DestroyToastSession(sceneSession);
     ssm_->HandleCastScreenDisConnection(sceneSession->GetSessionInfo().screenId_);
     ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**
@@ -1146,9 +1151,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | S
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(123);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
     session->SetSessionInfoPersistentId(0);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, true));
 }
 
 /**
