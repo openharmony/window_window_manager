@@ -124,6 +124,8 @@ public:
     WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
 
 private:
     template<typename T>
