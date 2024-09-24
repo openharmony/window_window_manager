@@ -73,6 +73,8 @@ public:
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
+    // only main window, sub window, dialog window can use
+    static uint32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -138,6 +140,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    WSError NotifyCompatibleModeEnableInPad(bool enabled) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
@@ -151,6 +154,8 @@ public:
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
+    bool GetIsUIExtensionFlag() const override;
+    bool GetIsUIExtensionSubWindowFlag() const override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -176,6 +181,7 @@ protected:
 
 private:
     WMError DestroyInner(bool needNotifyServer);
+    WMError MainWindowCloseInner();
     WMError SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
@@ -190,7 +196,20 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem);
+        MMI::PointerEvent::PointerItem& pointerItem);
+    void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        MMI::PointerEvent::PointerItem& pointerItem);
+    void HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        MMI::PointerEvent::PointerItem& pointerItem);
+    void HandleMoveForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        MMI::PointerEvent::PointerItem& pointerItem);
+    void HandleUpForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        MMI::PointerEvent::PointerItem& pointerItem);
+    void ConvertPointForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        MMI::PointerEvent::PointerItem& pointerItem, int32_t transferX);
+    bool IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY);
+    bool CheckTouchSlop(int32_t pointerId, int32_t x, int32_t y, int32_t threshold);
+    void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
@@ -228,6 +247,11 @@ private:
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;
     sptr<IKeyboardPanelInfoChangeListener> keyboardPanelInfoChangeListeners_ = nullptr;
+    bool isOverTouchSlop_ = false;
+    bool isDown_ = false;
+    std::unordered_map<int32_t, std::vector<bool>> eventMapTriggerByDisplay_;
+    std::unordered_map<int32_t, std::vector<int32_t>> eventMapDeltaXByDisplay_;
+    std::unordered_map<int32_t, std::vector<PointInfo>> downPointerByDisplay_;
 };
 } // namespace Rosen
 } // namespace OHOS

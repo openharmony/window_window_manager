@@ -50,6 +50,7 @@ const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectCha
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
+const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -67,6 +68,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowStatusChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
+                         public IMainWindowCloseListener,
                          public ISubWindowCloseListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
@@ -103,6 +105,7 @@ public:
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
+    void OnMainWindowClose(bool& terminateCloseProcess) override;
 
 private:
     Rect currRect_ = {0, 0, 0, 0};
