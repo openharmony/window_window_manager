@@ -984,12 +984,12 @@ HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
-    ASSERT(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
-    Window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
     ASSERT(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
     uint32_t invalidColorSpace = 1234u;
     window->SetColorSpace(static_cast<ColorSpace>(invalidColorSpace));
-    ASSERT(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

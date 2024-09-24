@@ -914,7 +914,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5;
-    window->hostSession = Session;
+    window->hostSession_ = Session;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_OK);
@@ -1916,13 +1916,13 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
     rect1.posX_ = 1;
     rect1.posY_ = 2;
     rect1.height_ = 3;
-    rect1.width = 4;
+    rect1.width_ = 4;
     window->property_->SetWindowRect(rect1);
     auto rect2 = window->GetRect();
     ASSERT_EQ(1, rect2.posX_);
     ASSERT_EQ(2, rect2.posY_);
     ASSERT_EQ(3, rect2.height_);
-    ASSERT_EQ(4, rect2.width);
+    ASSERT_EQ(4, rect2.width_);
 
     window->UpdateDensity();
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDensitytest01 end";
