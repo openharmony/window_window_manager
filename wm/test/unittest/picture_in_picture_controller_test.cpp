@@ -929,7 +929,7 @@ HWTEST_F(PictureInPictureControllerTest, PrepareSource, Function | SmallTest | L
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-
+    ASSERT_NE(nullptr, pipControl);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     pipControl->PrepareSource();
     pipControl->pipOption_->SetTypeNodeEnabled(false);
@@ -952,7 +952,7 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-
+    ASSERT_NE(nullptr, pipControl);
     pipControl->window_ = nullptr;
     pipControl->LocateSource();
 
