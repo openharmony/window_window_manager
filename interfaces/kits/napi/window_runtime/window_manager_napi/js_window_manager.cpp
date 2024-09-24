@@ -1208,7 +1208,6 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE || argc > ARGC_FOUR) { // min param num 1, max param num 4
-        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
@@ -1242,8 +1241,7 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
             if (ret == WmErrorCode::WM_OK) {
                 std::vector<sptr<Window>> windows(windowIds.size());
                 for (size_t i = 0; i < windowIds.size(); i++) {
-                    auto windowId = windowIds[i];
-                    sptr<Window> window = Window::GetWindowWithId(windowId);
+                    sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
                     windows[i] = window;
                 }
                 task.Resolve(env, CreateJsWindowArrayObject(env, windows));
