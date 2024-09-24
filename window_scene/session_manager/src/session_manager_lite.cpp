@@ -235,11 +235,14 @@ void SessionManagerLite::OnWMSConnectionChanged(
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         lastUserId = currentWMSUserId_;
         lastScreenId = currentScreenId_;
-        isWMSConnected_ = isConnected;
         isCallbackRegistered = wmsConnectionChangedFunc_ != nullptr;
         if (isConnected) {
             currentWMSUserId_ = userId;
             currentScreenId_ = screenId;
+        }
+        // isWMSConnected_ only represent the wms connection status of the foreground user
+        if (currentWMSUserId_ == userId) {
+            isWMSConnected_ = isConnected;
         }
     }
     TLOGI(WmsLogTag::WMS_MULTI_USER,
@@ -452,7 +455,7 @@ void SessionManagerLite::OnWMSConnectionChangedCallback(
             screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     } else {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "Lite WMS CallbackFunc is null.");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite WMS CallbackFunc is null.");
     }
 }
 
