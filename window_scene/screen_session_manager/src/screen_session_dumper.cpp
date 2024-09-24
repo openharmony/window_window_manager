@@ -41,6 +41,13 @@ const std::string STATUS_FOLD = "-p";
 const std::string ARG_SET_ROTATION_SENSOR = "-motion"; // rotation event inject
 const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
 const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
+const std::string ARG_FOLD_DISPLAY_FULL = "-f";
+const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
+const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
+const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
+const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
+const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 #endif
 }
 
@@ -114,9 +121,8 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         ShowAllScreenInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
-    } else {
-        ExcuteInjectCmd();
     }
+    ExcuteInjectCmd();
     OutputDumpInfo();
 }
 
@@ -131,6 +137,17 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         SetRotationLockedvalue(params_[0]);
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
+    } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
+        int errCode = SetFoldDisplayMode();
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
+    } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
+                || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
+        int errCode = SetFoldStatusLocked();
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
     }
 #endif
 }
@@ -546,6 +563,56 @@ void ScreenSessionDumper::MockSendCastPublishEvent(std::string input)
         oss << std::left << "[error]: " << "the command is invalid" << std::endl;
     }
     dumpInfo_.append(oss.str());
+}
+
+bool ScreenSessionDumper::IsValidDisplayModeCommand(std::string command)
+{
+    if (std::find(displayModeCommands.begin(), displayModeCommands.end(), command) != displayModeCommands.end()) {
+        return true;
+    }
+    return false;
+}
+
+int ScreenSessionDumper::SetFoldDisplayMode()
+{
+    std::string modeParam = params_[0];
+    if (modeParam.empty()) {
+        return -1;
+    }
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    if (modeParam == ARG_FOLD_DISPLAY_FULL) {
+        displayMode = FoldDisplayMode::FULL;
+    } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
+        displayMode = FoldDisplayMode::MAIN;
+    } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
+        displayMode = FoldDisplayMode::SUB;
+    } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
+        displayMode = FoldDisplayMode::COORDINATION;
+    } else {
+        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
+        return -1;
+    }
+    ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
+    return 0;
+}
+
+int ScreenSessionDumper::SetFoldStatusLocked()
+{
+    std::string lockParam = params_[0];
+    if (lockParam.empty()) {
+        return -1;
+    }
+    bool lockDisplayStatus = false;
+    if (lockParam == ARG_LOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = true;
+    } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = false;
+    } else {
+        TLOGW(WmsLogTag::DMS, "SetFoldStatusLocked status not support");
+        return -1;
+    }
+    ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
+    return 0;
 }
 #endif
 } // Rosen

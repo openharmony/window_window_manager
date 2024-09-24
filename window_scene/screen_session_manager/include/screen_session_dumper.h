@@ -64,6 +64,9 @@ private:
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
     void MockSendCastPublishEvent(std::string input);
+    bool IsValidDisplayModeCommand(std::string command);
+    int SetFoldDisplayMode();
+    int SetFoldStatusLocked();
 #endif
 
 private:
