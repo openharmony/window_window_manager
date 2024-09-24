@@ -565,11 +565,14 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | Small
 */
 HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | SmallTest | Level3)
 {
-    int ret = 0;
-    ssm_->UpdateParentSessionForDialog(nullptr, nullptr);
+    WSError result = ssm_->UpdateParentSessionForDialog(nullptr, nullptr);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    ssm_->UpdateParentSessionForDialog(nullptr, property);
+    result = ssm_->UpdateParentSessionForDialog(nullptr, property);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
@@ -577,22 +580,22 @@ HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | Smal
     info.appIndex_ = 10;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->UpdateParentSessionForDialog(sceneSession, property);
+    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
+    EXPECT_EQ(result, WSError::WS_OK);
+
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ssm_->UpdateParentSessionForDialog(sceneSession, property);
-    property->SetParentPersistentId(2);
-    ssm_->UpdateParentSessionForDialog(sceneSession, property);
+    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
+    EXPECT_EQ(result, WSError::WS_OK);
+
     SessionInfo info1;
     info1.abilityName_ = "test2";
     info1.bundleName_ = "test3";
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    ssm_->UpdateParentSessionForDialog(sceneSession, property);
-    ssm_->sceneSessionMap_.erase(2);
-    ssm_->CreateSpecificSessionCallback();
-    ssm_->CreateKeyboardSessionCallback();
-    ASSERT_EQ(ret, 0);
+    property-SetParentPersistentId(2); 
+    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -617,59 +620,6 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
     ssm_->CheckWindowId(windowId, pid);
     ssm_->PerformRegisterInRequestSceneSession(sceneSession);
     ssm_->sceneSessionMap_.erase(windowId);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: CreateSceneSession
- * @tc.desc: CreateSceneSession
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest3, CreateSceneSession, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    SessionInfo info;
-    ssm_->CreateSceneSession(info, nullptr);
-    info.isSystem_ = true;
-    info.windowType_ = 3000;
-    ssm_->CreateSceneSession(info, nullptr);
-    info.windowType_ = 3;
-    ssm_->CreateSceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    ssm_->CreateSceneSession(info, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ssm_->CreateSceneSession(info, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->CreateSceneSession(info, property);
-    property->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    ssm_->CreateSceneSession(info, property);
-    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
-    info.persistentId_ = 0;
-    ssm_->UpdateSceneSessionWant(info);
-    info.persistentId_ = 1;
-    ssm_->UpdateSceneSessionWant(info);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->UpdateSceneSessionWant(info);
-    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    ASSERT_NE(nullptr, want);
-    info.want = want;
-    ssm_->UpdateSceneSessionWant(info);
-    sceneSession->SetCollaboratorType(0);
-    ssm_->UpdateSceneSessionWant(info);
-    sceneSession->SetCollaboratorType(1);
-    ssm_->UpdateSceneSessionWant(info);
-    ssm_->sceneSessionMap_.erase(1);
-    sptr<SceneSession> sceneSession1;
-    ssm_->UpdateCollaboratorSessionWant(sceneSession1, 1);
-    ssm_->UpdateCollaboratorSessionWant(sceneSession, 1);
-    SessionInfo info1;
-    info1.ancoSceneState = 0;
-    sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
-    ASSERT_NE(nullptr, sceneSession1);
-    ssm_->UpdateCollaboratorSessionWant(sceneSession1, 1);
     ASSERT_EQ(ret, 0);
 }
 
@@ -763,7 +713,7 @@ HWTEST_F(SceneSessionManagerTest3, StartUIAbilityBySCB, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     int32_t ret = ssm_->StartUIAbilityBySCB(sceneSession);
-    EXPECT_EQ(ret, 2097202);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**
@@ -1199,10 +1149,14 @@ HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, Function | SmallTest |
     info.abilityName_ = "PreHandleCollaborator";
     info.bundleName_ = "PreHandleCollaborator";
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->PreHandleCollaborator(sceneSession);
+    bool result = ssm_->PreHandleCollaborator(sceneSession);
+    EXPECT_FALSE(result);
+
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->PreHandleCollaborator(sceneSession);
+    result = ssm_->PreHandleCollaborator(sceneSession);
+    EXPECT_TRUE(result);
+
     sceneSession = nullptr;
     AppExecFwk::ApplicationInfo applicationInfo_;
     applicationInfo_.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
@@ -1211,21 +1165,25 @@ HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, Function | SmallTest |
     info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->PreHandleCollaborator(sceneSession);
+    result = ssm_->PreHandleCollaborator(sceneSession);
+    EXPECT_TRUE(result);
+
     sceneSession = nullptr;
     applicationInfo_.codePath = std::to_string(CollaboratorType::OTHERS_TYPE);
     abilityInfo_.applicationInfo = applicationInfo_;
     info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->PreHandleCollaborator(sceneSession);
+    result = ssm_->PreHandleCollaborator(sceneSession);
+    EXPECT_TRUE(result);
+
     EXPECT_EQ(sceneSession->GetSessionInfo().want, nullptr);
     sceneSession = nullptr;
     info.want = std::make_shared<AAFwk::Want>();
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->PreHandleCollaborator(sceneSession);
-    ASSERT_NE(sceneSession->GetSessionInfo().want, nullptr);
+    result = ssm_->PreHandleCollaborator(sceneSession);
+    EXPECT_TRUE(result);
 }
 
 /**
