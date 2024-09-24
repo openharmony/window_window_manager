@@ -211,15 +211,15 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemSizeLimits01, Function | SmallTes
 }
 
 /**
- * @tc.name: CalculateNewLimitsByRatio
+ * @tc.name: CalculateNewLimitsByRatio01
  * @tc.desc: CalculateNewLimitsByRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, CalculateNewLimitsByRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, CalculateNewLimitsByRatio01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("CalculateNewLimitsByRatio");
+    option->SetWindowName("CalculateNewLimitsByRatio01");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
@@ -235,9 +235,32 @@ HWTEST_F(WindowSceneSessionImplTest4, CalculateNewLimitsByRatio, Function | Smal
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_END);
     auto ret = windowSceneSessionImpl->UpdateAnimationFlagProperty(true);
     EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: CalculateNewLimitsByRatio02
+ * @tc.desc: CalculateNewLimitsByRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, CalculateNewLimitsByRatio02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("CalculateNewLimitsByRatio02");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    WindowLimits newLimits = {0, 0, 0, 0, 0.0, 0.0};
+    WindowLimits customizedLimits = {3, 3, 3, 3, 0.0, 0.0};
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    newLimits = {500, 500, 500, 500, 0.0, 0.0};
+    customizedLimits = {3, 3, 3, 3, 2.0, 2.0};
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
+    customizedLimits = {3, 3, 3, 3, 1.0, 1.0};
+    windowSceneSessionImpl->CalculateNewLimitsByRatio(newLimits, customizedLimits);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
-    ret = windowSceneSessionImpl->UpdateAnimationFlagProperty(true);
+    auto ret = windowSceneSessionImpl->UpdateAnimationFlagProperty(true);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
@@ -312,9 +335,13 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateWindowModeImmediately, Function | Sm
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     auto ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, windowSceneSessionImpl->property_->GetWindowMode());
+
     windowSceneSessionImpl->state_ = WindowState::STATE_HIDDEN;
     ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, windowSceneSessionImpl->property_->GetWindowMode());
+    
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_FLOATING);
@@ -327,11 +354,16 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateWindowModeImmediately, Function | Sm
     windowSceneSessionImpl->hostSession_ = session;
     ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowSceneSessionImpl->property_->GetWindowMode());
+    
     ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowSceneSessionImpl->property_->GetWindowMode());
+    
     windowSceneSessionImpl->state_ = WindowState::STATE_UNFROZEN;
     ret = windowSceneSessionImpl->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowSceneSessionImpl->property_->GetWindowMode());
 }
 
 /**
@@ -568,49 +600,38 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
 HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    ASSERT_NE(option, nullptr);
     option->SetWindowName("MoveToAsync02");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->property_->SetPersistentId(998);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
 
-    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, subOption);
-    subOption->SetWindowName("subMoveToAsync02");
-    subOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
-    ASSERT_NE(nullptr, subWindow);
-    subWindow->property_->SetPersistentId(999);
-    SessionInfo subSessionInfo = { "subCreateTestBundle", "subCreateTestModule", "subCreateTestAbility" };
-    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
-    ASSERT_NE(nullptr, subSession);
-    subWindow->hostSession_ = subSession;
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    window->property_->SetPersistentId(10001);
 
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Create(abilityContext_, subSession));
-    subWindow->windowSessionMap_.insert(std::make_pair("MoveToAsync02", std::make_pair(998, window)));
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    Rect request = { 100, 100, 100, 100 };
-    subWindow->property_->SetRequestRect(request);
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    subWindow->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    Rect rect;
+    WMError ret;
+    ret = window->Create(abilityContext_, nullptr);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = window->Show();
+    EXPECT_EQ(WMError::WM_OK, ret);
+
     subWindow->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ret = window->MoveTo(500, 500);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rect = window->property_->GetWindowRect();
+    EXPECT_EQ(500, rect.posX_);
+    EXPECT_EQ(500, rect.posY_);
+
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    ret = window->MoveTo(20000, 20000);
+    usleep(36000);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rect = window->property_->GetWindowRect();
+    EXPECT_EQ(20000, rect.posX_);
+    EXPECT_EQ(20000, rect.posY_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
@@ -639,49 +660,39 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
 HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    ASSERT_NE(option, nullptr);
     option->SetWindowName("ResizeAsync02");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->property_->SetPersistentId(991);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
 
-    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, subOption);
-    subOption->SetWindowName("subResizeAsync02");
-    subOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
-    ASSERT_NE(nullptr, subWindow);
-    subWindow->property_->SetPersistentId(992);
-    SessionInfo subSessionInfo = { "subCreateTestBundle", "subCreateTestModule", "subCreateTestAbility" };
-    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
-    ASSERT_NE(nullptr, subSession);
-    subWindow->hostSession_ = subSession;
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    Rect rect;
+    WMError ret;
+    ret = window->Create(abilityContext_, nullptr);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    window->property_->SetPersistentId(10012);
+    ret = window->Show();
+    EXPECT_EQ(WMError::WM_OK, ret);
 
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Create(abilityContext_, subSession));
-    subWindow->windowSessionMap_.insert(std::make_pair("ResizeAsync02", std::make_pair(998, window)));
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    Rect request = { 100, 100, 600, 600 };
-    subWindow->property_->SetRequestRect(request);
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    subWindow->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    WindowLimits windowLimits;
+    ret = window->GetWindowLimits(windowLimits);
+
     subWindow->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    rect = window->property_->GetWindowRect();
+    EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
+    EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
+
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    usleep(36000);
+    rect = window->property_->GetWindowRect();
+    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
+    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
@@ -1032,6 +1043,29 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    /**
+ * @tc.name: SetWindowMode02
+ * @tc.desc: SetWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("SetWindowMode02");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1007);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetModeSupportInfo(0);
+    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WINDOW_MODE_FLOATING, ret);
 }
 
 /**

@@ -177,14 +177,12 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
-    sceneSession->HandleActionUpdateDragenabled(property, action);
+    WSError res = sceneSession->HandleActionUpdateDragenabled(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, res);
 
     session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateDragenabled(property, action);
-
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateDragenabled(property, action);
+    res = sceneSession->HandleActionUpdateDragenabled(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**

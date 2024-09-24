@@ -23,6 +23,7 @@
 #include "window_scene_session_impl.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "session/host/include/scene_session.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -368,7 +369,7 @@ HWTEST_F(WindowSceneSessionImplTest, InvalidWindow, Function | SmallTest | Level
     option->SetWindowName("InvalidWindow");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveTo(0, 0));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Resize(0, 0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Resize(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(false));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Show(2, false));
@@ -821,27 +822,44 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
 }
 
 /*
- * @tc.name: SetAspectRatio
+ * @tc.name: SetAspectRatio01
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("SetAspectRatio");
+    option->SetWindowName("SetAspectRatio01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
+}
+
+/*
+ * @tc.name: SetAspectRatio02
+ * @tc.desc: SetAspectRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetAspectRatio02");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
 
     window->property_->SetPersistentId(1);
-    window->property_->SetDisplayId(3);
-    WindowLimits windowLimits = { 3, 3, 3, 3, 2.0, 2.0 };
+    window->property_->SetDisplayId(0);
+    WindowLimits windowLimits = { 3000, 3000, 2000, 2000, 2.0, 2.0 };
     window->property_->SetWindowLimits(windowLimits);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.1));
+    session->GetSessionProperty()->SetWindowLimits(windowLimits);
+    const float ratio = 1.2;
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(ratio));
+    ASSERT_EQ(ratio, window->GetAspectRatio());
 }
 
 /*
@@ -860,6 +878,7 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
+    ASSERT_EQ(0, window->GetAspectRatio());
 }
 
 /*
@@ -1519,15 +1538,15 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, Function | Sm
 }
 
 /*
- * @tc.name: SetLayoutFullScreen
+ * @tc.name: SetLayoutFullScreen01
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    window->property_->SetWindowName("SetLayoutFullScreen");
+    window->property_->SetWindowName("SetLayoutFullScreen01");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     window->SetLayoutFullScreen(false);
 
@@ -1536,8 +1555,27 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen, Function | SmallTest |
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
+    WMError res = window->SetLayoutFullScreen(false);
+    ASSERT_EQ(WMError::WM_OK, res);
     ASSERT_EQ(false, window->IsLayoutFullScreen());
+}
+
+/*
+ * @tc.name: SetLayoutFullScreen02
+ * @tc.desc: SetLayoutFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->property_->SetWindowName("SetLayoutFullScreen02");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->SetLayoutFullScreen(false);
+
+    window->hostSession_ = nullptr;
+    WMError res = window->SetLayoutFullScreen(false);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 }
 
 /*
