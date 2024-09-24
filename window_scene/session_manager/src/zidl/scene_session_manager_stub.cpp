@@ -888,14 +888,14 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t windowId = INVALID_SESSION_ID;
-    if (!data.ReadUint32(windowId)) {
+    int32_t windowId = INVALID_SESSION_ID;
+    if (!data.ReadInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read windowId failed");
         return ERR_INVALID_DATA;
     }
-    uint32_t mainWindowId = INVALID_SESSION_ID;
+    int32_t mainWindowId = INVALID_SESSION_ID;
     WMError errCode = GetParentMainWindowId(windowId, mainWindowId);
-    if (!reply.WriteUint32(mainWindowId)) {
+    if (!reply.WriteInt32(mainWindowId)) {
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
