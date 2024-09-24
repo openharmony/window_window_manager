@@ -1162,7 +1162,7 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowFromPoint(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t displayId;
     if (!data.ReadUint64(displayId)) {
