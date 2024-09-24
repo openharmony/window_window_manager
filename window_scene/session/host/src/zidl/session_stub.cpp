@@ -40,7 +40,7 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     abilitySessionInfo->want = *localWant;
     if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
@@ -512,19 +512,19 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->isAtomicService)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read needClearInNotShowRecent failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
@@ -544,7 +544,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
