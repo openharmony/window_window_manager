@@ -843,7 +843,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | 
 
     window->uiContent_ = nullptr;
     window->UpdateDecorEnableToAce(false);
-    window->Destroy();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
