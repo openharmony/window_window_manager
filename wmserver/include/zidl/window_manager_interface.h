@@ -244,6 +244,8 @@ public:
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) { return WMError::WM_OK; }
+    virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
     virtual WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) { return WMError::WM_OK; }
     virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
 };

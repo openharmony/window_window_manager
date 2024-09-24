@@ -803,6 +803,19 @@ public:
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
 
     /**
+     * @brief Get window ids by coordinate.
+     *
+     * @param displayId display id
+     * @param windowNumber indicates the number of query windows
+     * @param x x-coordinate of the window
+     * @param y y-coordinate of the window
+     * @param windowIds array of window id
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
+
+    /**
      * @brief Release screen lock of foreground sessions.
      *
      * @return WM_OK means release success, others means failed.
