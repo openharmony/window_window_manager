@@ -8117,7 +8117,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
             sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN ||
             (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
              sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) ||
-            enterRecent_.load() || !sceneSession->IsFocused) {
+            enterRecent_.load() || !sceneSession->IsFocused()) {
             needEnableGestureBack = true;
         }
         if (needEnableGestureBack == lastGestureBackEnable_) { 
