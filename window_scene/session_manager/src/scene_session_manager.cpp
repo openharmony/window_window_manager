@@ -10356,7 +10356,7 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
             bool isRsVisible = session->GetRSVisible();
             WSRect windowRect = session->GetSessionRect();
             bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
-            TLOGD(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}lu "
+            TLOGD(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
                   "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
                   session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
                   sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
