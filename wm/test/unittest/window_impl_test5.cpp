@@ -1012,6 +1012,9 @@ HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
+    window->state_ = WindowState::STATE_INITIAL;
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_ERROR_INVALID_WINDOW);
+
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
 
@@ -1019,13 +1022,14 @@ HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
 
     window->state_ = WindowState::STATE_SHOWN;
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_ERROR_INVALID_OPERATION);
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->Resize(10, 10);
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
