@@ -41,7 +41,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapterLite)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return ret;                                                   \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 #define CHECK_PROXY_RETURN_IF_NULL(proxy)                                 \
     do {                                                                  \
@@ -49,7 +49,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapterLite)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return;                                                       \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 WMError WindowAdapterLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)

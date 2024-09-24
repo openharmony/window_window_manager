@@ -3460,12 +3460,12 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return oriPosYBeforeRaisedBykeyboard_;
+    return oriPosYBeforeRaisedByKeyboard_;
 }
 
 void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    oriPosYBeforeRaisedBykeyboard_ = posY;
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)

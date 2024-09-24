@@ -120,7 +120,6 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
             NapiAsyncTask &task, int32_t status) {
-            
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");
@@ -406,6 +405,25 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
+{
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
+        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("This listener or eng is nullptr");
+                return;
+            }
+            napi_value argv[] = { CreateJsValue(eng, isVisible) };
+            thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
+        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsWindowListener::SetTimeout(int64_t timeout)
 {
     noInteractionTimeout_ = timeout;
@@ -459,26 +477,6 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowStatusChange",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
-{
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask &task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("This listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = { CreateJsValue(eng, isVisible) };
-            thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)

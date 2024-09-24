@@ -595,6 +595,11 @@ uint32_t WindowSessionProperty::GetCallingSessionId() const
     return callingSessionId_;
 }
 
+void WindowSessionProperty::SetSessionPropertyChangeCallback(std::function<void()>&& callback)
+{
+    touchHotAreasChangeCallback_ = std::move(callback);
+}
+
 void WindowSessionProperty::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
@@ -871,16 +876,6 @@ int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
     return compatibleInPcLandscapeHeight_;
 }
 
-void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
-{
-    isPcAppInPad_ = isPcAppInPad;
-}
-
-bool WindowSessionProperty::GetIsPcAppInPad() const
-{
-    return isPcAppInPad_;
-}
-
 void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
 {
     subWindowLevel_ = subWindowLevel;
@@ -889,6 +884,16 @@ void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
 uint32_t WindowSessionProperty::GetSubWindowLevel() const
 {
     return subWindowLevel_;
+}
+
+void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
+{
+    isPcAppInPad_ = isPcAppInPad;
+}
+
+bool WindowSessionProperty::GetIsPcAppInPad() const
+{
+    return isPcAppInPad_;
 }
 
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
@@ -957,11 +962,12 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSystemCalling_) &&
         parcel.WriteUint32(static_cast<uint32_t>(sessionGravity_)) && parcel.WriteUint32(sessionGravitySizePercent_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteBool(isExtensionFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(compatibleModeInPc_) &&
@@ -1019,12 +1025,13 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetKeyboardSessionGravity(static_cast<SessionGravity>(parcel.ReadUint32()), parcel.ReadUint32());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
-    property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
     property->SetCallingSessionId(parcel.ReadUint32());
+    property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetExtensionFlag(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
+    property->SetParentWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
     sptr<KeyboardLayoutParams> keyboardLayoutParams = parcel.ReadParcelable<KeyboardLayoutParams>();
     if (keyboardLayoutParams == nullptr) {
@@ -1379,11 +1386,6 @@ double WindowSessionProperty::GetTextFieldPositionY() const
 double WindowSessionProperty::GetTextFieldHeight() const
 {
     return textFieldHeight_;
-}
-
-void WindowSessionProperty::SetSessionPropertyChangeCallback(std::function<void()>&& callback)
-{
-    touchHotAreasChangeCallback_ = std::move(callback);
 }
 
 bool WindowSessionProperty::IsLayoutFullScreen() const
