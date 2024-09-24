@@ -1961,6 +1961,9 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         (isVerticalOrientation || property_->GetRequestedOrientation() == Orientation::UNSPECIFIED)) {
         enable = false;
     }
+    if (isCompatibleModeInPc&& GetMode() == WINDOWMODE::WINDOW_MODE_FULLSCREEN) {
+        enable = false;
+    }
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
         enable = true;
     }
