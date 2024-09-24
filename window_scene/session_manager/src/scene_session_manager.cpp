@@ -1326,8 +1326,11 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
         return this->GetSceneSessionVectorByType(type, displayId);
     };
-    specificCb->onUpdateAvoidArea_ = [this](const int32_t persistentId) {
+    specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
+    };
+    specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
+        this->UpdateAvoidAreaByType(persistentId, type);
     };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
@@ -8040,9 +8043,9 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
     return taskScheduler_->PostAsyncTask(task);
 }
 
-void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
+void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
 {
-    auto task = [this, persistentId]() {
+    auto task = [this, persistentId] {
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -8062,6 +8065,32 @@ void SceneSessionManager::UpdateAvoidArea(const int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
+}
+
+void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type)
+{
+    auto task = [this, persistentId, type] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
+            return;
+        }
+        if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
+            return;
+        }
+        if (sceneSession->IsImmersiveType()) {
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
+            return;
+        }
+        auto avoidArea = sceneSession->GetAvoidAreaByType(type);
+        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
+            isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
+            return;
+        }
+        UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateAvoidAreaByType:PID:" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
