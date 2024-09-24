@@ -381,7 +381,6 @@ public:
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
  
     virtual bool GetGestureBackEnabled() const { return true; }
-
 };
 }
 }
