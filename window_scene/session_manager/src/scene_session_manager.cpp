@@ -3227,8 +3227,9 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
 
 void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
-    auto task = [this, isUserActive]() {
-        TLOGNI(WmsLogTag::WMS_MULTI_USER, "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
+    const char* const where = __func__;
+    auto task = [this, isUserActive, where]() {
+        TLOGNI(WmsLogTag::WMS_MULTI_USER, "%{public}s: IsUserActive=%{public}u, currentUserId=%{public}d", where,
             isUserActive, currentUserId_);
         isUserBackground_ = !isUserActive;
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
@@ -3248,7 +3249,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
-                TLOGNE(WmsLogTag::WMS_MULTI_USER, "session is null");
+                TLOGNE(WmsLogTag::WMS_MULTI_USER, "%{public}s: session is null", where);
                 continue;
             }
             if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {

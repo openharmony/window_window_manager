@@ -240,7 +240,7 @@ void SessionManagerLite::OnWMSConnectionChanged(
             currentWMSUserId_ = userId;
             currentScreenId_ = screenId;
         }
-        // isWMSConnected_ only represents the wms connection status of the foreground user
+        // isWMSConnected_ only represents the wms connection status of the active user
         if (currentWMSUserId_ == userId) {
             isWMSConnected_ = isConnected;
         }
