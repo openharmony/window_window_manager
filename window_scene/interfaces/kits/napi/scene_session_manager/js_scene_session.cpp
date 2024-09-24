@@ -308,7 +308,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
                 TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
                 return;
             }
-            jsSceneSession->ClearCbMap();
+            jsSceneSession->ClearCbMap(needRemove, persistentId);
         };
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
@@ -354,7 +354,7 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]ProcessWindowDragHotAreaRegister");
-    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](uint32_t type, const SizeChangeReason reason) {
+    NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](uint32_t type, const SizeChangeReason& reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessWindowDragHotAreaRegister jsSceneSession is null");
