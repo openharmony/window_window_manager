@@ -219,7 +219,8 @@ HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByName01, Function | SmallTest
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ASSERT_NE(ssm_->GetSceneSessionByName(bundleName, moduleName, abilityName, appIndex), nullptr);
+    ComparedSessionInfo compareSessionInfo = { bundleName, moduleName, abilityName, appIndex };
+    ASSERT_NE(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
 }
 
 /**

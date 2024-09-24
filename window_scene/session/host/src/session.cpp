@@ -1617,12 +1617,13 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     pendingSessionToBackgroundForDelegatorFunc_ = func;
 }
 
-WSError Session::PendingSessionToBackgroundForDelegator()
+WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), shouldBackToCaller);
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(info);
+        pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
     }
     return WSError::WS_OK;
 }
@@ -2553,6 +2554,7 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+/** @note @window.layout */
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
@@ -2580,6 +2582,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     }
 }
 
+/** @note @window.layout */
 void Session::RectCheckProcess()
 {
     if (!(IsSessionForeground() || isVisible_)) {
@@ -2622,6 +2625,7 @@ void Session::RectCheckProcess()
     }
 }
 
+/** @note @window.layout */
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2633,6 +2637,7 @@ void Session::SetSessionRect(const WSRect& rect)
     RectCheckProcess();
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
@@ -2646,11 +2651,13 @@ WSRect Session::GetSessionGlobalRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetLastLayoutRect() const
 {
     return lastLayoutRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetLayoutRect() const
 {
     return layoutRect_;

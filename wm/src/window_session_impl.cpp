@@ -659,6 +659,7 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const SceneAnimationConfig& config)
 {
@@ -997,6 +998,7 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
     return displayInfo->GetVirtualPixelRatio();
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
@@ -1384,6 +1386,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
     }
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
 {
     {
@@ -2819,6 +2822,7 @@ void WindowSessionImpl::NotifyScreenshot()
     }
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     {
@@ -3759,6 +3763,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
     return windowStatus;
 }
 
+/** @note @window.layout */
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
     auto windowStatus = GetWindowStatusInner(mode);

@@ -40,7 +40,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token, bool shouldBackToCaller) override
     {
         return WSError::WS_OK;
     }
@@ -186,6 +186,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bundleName = "test";
         return WMError::WM_OK;
     }
+    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -242,6 +246,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
         SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
     EXPECT_EQ(IPC_STUB_UNKNOW_TRANS_ERR, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    data.WriteString("OnRemoteRequest UT Testing.");
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_NONE, res);
@@ -745,6 +752,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetCurrentPiPWindowInfo, Functio
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetRootMainWindowId
+ * @tc.desc: test function : HandleGetRootMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

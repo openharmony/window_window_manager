@@ -677,6 +677,7 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
     auto task = [weakThis = wptr(this), ratio]() {
@@ -717,6 +718,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     return PostSyncTask(task, "SetAspectRatio");
 }
 
+/** @note @window.layout */
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -1028,6 +1030,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
     PostTask(task, __func__);
 }
 
+/** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason)
 {
     auto newWinRect = winRect_;
@@ -1071,6 +1074,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
         newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
+/** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
@@ -2028,6 +2032,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 }
 #endif // DEVICE_STATUS_ENABLE
 
+/** @note @window.layout */
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     const SizeChangeReason reason, const DisplayId DisplayId)
 {
