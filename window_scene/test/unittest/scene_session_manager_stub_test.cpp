@@ -1259,7 +1259,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, 
 {
     MessageParcel data;
     MessageParcel reply;
-
     int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
