@@ -177,7 +177,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 
-    WSError res = sceneSession->HandleActionUpdateDragenabled(property, action);
+    WMError res = sceneSession->HandleActionUpdateDragenabled(property, action);
     ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, res);
 
     session.property_ = new WindowSessionProperty();

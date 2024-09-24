@@ -853,13 +853,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio02, Function | SmallTest | Le
     WindowLimits windowLimits = { 3000, 3000, 2000, 2000, 2.0, 2.0 };
     window->property_->SetWindowLimits(windowLimits);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    ASSERT_NE(session, nullptr);
     window->hostSession_ = session;
     session->GetSessionProperty()->SetWindowLimits(windowLimits);
     const float ratio = 1.2;
     ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(ratio));
-    ASSERT_EQ(ratio, window->GetAspectRatio());
+    ASSERT_EQ(ratio, session->GetAspectRatio());
 }
 
 /*
@@ -878,7 +878,7 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
-    ASSERT_EQ(0, window->GetAspectRatio());
+    ASSERT_EQ(0, session->GetAspectRatio());
 }
 
 /*

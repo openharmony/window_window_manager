@@ -906,7 +906,7 @@ HWTEST_F(WindowSessionTest, SetAspectRatio, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    const float ratio = 0.1f
+    const float ratio = 0.1f;
     ASSERT_EQ(WSError::WS_OK, session_->SetAspectRatio(ratio));
     ASSERT_EQ(ratio, session_->GetAspectRatio());
 }
