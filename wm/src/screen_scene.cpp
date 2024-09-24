@@ -23,7 +23,6 @@
 #include "singleton.h"
 #include "singleton_container.h"
 
-#include "anr_manager.h"
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 
