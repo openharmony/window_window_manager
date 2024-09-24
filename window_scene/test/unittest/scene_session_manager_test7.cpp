@@ -1042,6 +1042,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, Function | SmallTest | Le
 HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | SmallTest | Level3)
 {
     std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilitychangeInfos;
     currVisibleData.emplace_back(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     currVisibleData.emplace_back(4, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
     currVisibleData.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
@@ -1052,7 +1053,8 @@ HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | Sma
     ssm_->lastVisibleData_.emplace_back(4, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
     ssm_->lastVisibleData_.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
-    ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    visibilitychangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilitychangeInfos.size(), 2);
 }
 
 /**

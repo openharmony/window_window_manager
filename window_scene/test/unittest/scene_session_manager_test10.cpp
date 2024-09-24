@@ -275,6 +275,51 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 }
+
+/**
+ * @tc.name: GetAllSceneSessionForAccessibility
+ * @tc.desc: GetAllSceneSessionForAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetAllSceneSessionForAccessibility, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ASSERT_EQ(sceneSessionList.size(), 0);
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = 1;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = 1;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    SessionInfo info3;
+    info3.abilityName_ = "test3";
+    info3.bundleName_ = "test3";
+    info3.windowType_ = 1;
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    ASSERT_NE(nullptr, sceneSession3);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession1);
+    ssm_->sceneSessionMap_.emplace(2, sceneSession2);
+    ssm_->sceneSessionMap_.emplace(3, sceneSession3);
+    SceneSession1->isScbCoreEnabled_ = false;
+    SceneSession2->isScbCoreEnabled_ = false;
+    SceneSession3->isScbCoreEnabled_ = false;
+    sceneSession1->isVisibleForAccessibility_ = true;
+    sceneSession2->isVisibleForAccessibility_ = false;
+    sceneSession3->isVisibleForAccessibility_ = true;
+    SceneSession1->isVisible_ = true;
+    SceneSession2->isVisible_ = false;
+    SceneSession3->isVisible_ = true;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+}
+
 }  // namespace
 }
 }

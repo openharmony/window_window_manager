@@ -457,11 +457,11 @@ HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: UnregisterListener
- * @tc.desc: UnregisterListener | RegisterListener desc
+ * @tc.name: RegisterListener01
+ * @tc.desc: Run successfully
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RegisterListener01, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -473,8 +473,71 @@ HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
     sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener2, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(listener2);
-    window->RegisterOccupiedAreaChangeListener(nullptr);
+    ASSERT_EQ(window->RegisterOccupiedAreaChangeListener(listener2), WMError::WM_OK);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: RegisterListener02
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, RegisterListener02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    ASSERT_EQ(window->RegisterOccupiedAreaChangeListener(nullptr), WMError::WM_INVALID_PARAM);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: UnregisterListener01
+ * @tc.desc: Run successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UnregisterListener01, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    window->RegisterOccupiedAreaChangeListener(listener2);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(listener2),WMError::WM_OK);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: UnregisterListener02
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UnregisterListener02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(nullptr),WMError::WM_INVALID_PARAM);
     window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
 }
 
