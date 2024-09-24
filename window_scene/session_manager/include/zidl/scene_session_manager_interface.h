@@ -278,11 +278,8 @@ public:
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
-    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
-        int32_t x, int32_t y, std::vector<int32_t>& windowIds) override
-    {
-        return WMError::WM_OK;
-    }
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
+        std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
