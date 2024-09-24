@@ -80,13 +80,15 @@ public:
         TRANS_ID_CLOSE_TARGET_PIP_WINDOW,
         TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO,
         TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID,
+        TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
-    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;

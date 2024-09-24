@@ -104,7 +104,8 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
         new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
 
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy_->PendingSessionToBackgroundForDelegator(token));
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED,
+        sceneSessionManagerProxy_->PendingSessionToBackgroundForDelegator(token, true));
     sceneSessionManagerProxy_ = nullptr;
 }
 

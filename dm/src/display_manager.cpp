@@ -759,8 +759,86 @@ sptr<Display> DisplayManager::GetDefaultDisplay()
     return pImpl_->GetDefaultDisplay();
 }
 
-sptr<Display> DisplayManager::GetDefaultDisplaySync()
+void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemoteObject>& abilityToken)
 {
+    if (abilityToken == nullptr || displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("abilityToken is nullptr or display id invalid.");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(displayOperateMutex_);
+    auto iter = std::find_if(displayIdList_.begin(), displayIdList_.end(),
+        [displayId, abilityToken](const auto &item) -> bool {
+            return item.first == abilityToken && item.second == displayId;
+    });
+    if (iter != displayIdList_.end()) {
+        WLOGFI("abilityToken and display has been added.");
+    } else {
+        displayIdList_.push_back(std::make_pair(abilityToken, displayId));
+    }
+    ShowDisplayIdList();
+}
+
+void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
+{
+    if (abilityToken == nullptr) {
+        WLOGFE("abilityToken is nullptr.");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(displayOperateMutex_);
+    if (displayIdList_.empty()) {
+        WLOGFI("displayIdList_ is empty.");
+        return;
+    }
+    auto iter = std::find_if(displayIdList_.begin(), displayIdList_.end(),
+        [abilityToken](const auto &item) -> bool {
+            return item.first == abilityToken;
+    });
+    if (iter != displayIdList_.end()) {
+        displayIdList_.erase(iter);
+    }
+    ShowDisplayIdList();
+}
+
+DisplayId DisplayManager::GetCallingAbilityDisplayId()
+{
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    std::lock_guard<std::mutex> lock(displayOperateMutex_);
+    if (displayIdList_.empty()) {
+        WLOGFI("displayIdList is empty.");
+        return displayId;
+    }
+    int displayCount = 0;
+    for (const auto &iter : displayIdList_) {
+        if (displayId == DISPLAY_ID_INVALID || displayId != iter.second) {
+            displayCount++;
+        }
+        displayId = iter.second;
+        if (displayCount > 1) {
+            break;
+        }
+    }
+    ShowDisplayIdList();
+    return displayCount == 1 ? displayId : DISPLAY_ID_INVALID;
+}
+
+void DisplayManager::ShowDisplayIdList()
+{
+    std::ostringstream oss;
+    oss << "current display id list:[";
+    for (const auto &iter : displayIdList_) {
+        oss << iter.second << ",";
+    }
+    WLOGFD("%{public}s", oss.str().c_str());
+}
+
+sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
+{
+    if (isFromNapi) {
+        DisplayId displayId = GetCallingAbilityDisplayId();
+        if (displayId != DISPLAY_ID_INVALID) {
+            return pImpl_->GetDisplayById(displayId);
+        }
+    }
     return pImpl_->GetDefaultDisplaySync();
 }
 

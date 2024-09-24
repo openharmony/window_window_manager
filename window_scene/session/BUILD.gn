@@ -50,6 +50,7 @@ ohos_shared_library("scene_session") {
     "host/src/keyboard_session.cpp",
     "host/src/main_session.cpp",
     "host/src/move_drag_controller.cpp",
+    "host/src/multi_instance_manager.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scb_system_session.cpp",
     "host/src/scene_persistence.cpp",
@@ -79,6 +80,8 @@ ohos_shared_library("scene_session") {
   external_deps = [
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",

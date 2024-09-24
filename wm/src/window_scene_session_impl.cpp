@@ -211,6 +211,18 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+    }
+    auto mainWindow = GetMainWindowWithContext(GetContext());
+    if (mainWindow == nullptr) {
+        return false;
+    }
+    return mainWindow->IsPcOrPadCapabilityEnabled();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
@@ -221,6 +233,27 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
     }
+}
+
+WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
+{
+    if (isToast) {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+    } else {
+        parentSession = FindParentSessionByParentId(property_->GetParentId());
+    }
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            property_->GetWindowName().c_str(), GetType());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
@@ -258,16 +291,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (isToastFlag) {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
-        } else {
-            parentSession = FindParentSessionByParentId(property_->GetParentId());
-        }
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                property_->GetWindowName().c_str(), type);
-            return WMError::WM_ERROR_NULLPTR;
+        auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -838,6 +864,7 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     return systemLimits;
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio)
 {
@@ -890,6 +917,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     }
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits)
 {
     newLimits.maxRatio_ = customizedLimits.maxRatio_;
@@ -937,6 +965,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByRatio(WindowLimits& newLimits, 
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateWindowSizeLimits()
 {
     WindowLimits customizedLimits;
@@ -1325,6 +1354,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     return WMError::WM_OK;
 }
 
+/** @note @window.layout */
 WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
@@ -1434,6 +1464,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     height = static_cast<uint32_t>(width * hwRatio);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const
 {
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
@@ -1476,6 +1507,7 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     WLOGFD("After limit by customize config: %{public}u %{public}u", width, height);
 }
 
+/** @note @window.layout */
 void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
 {
     float vpr = 0.0f;
@@ -1489,6 +1521,7 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 }
 
+/** @note @window.layout */
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
@@ -2049,7 +2082,8 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        if (windowSystemConfig_.IsPcWindow() && surfaceNode_ != nullptr) {
+        if (surfaceNode_ != nullptr &&
+            (windowSystemConfig_.IsPcWindow() || GetFreeMultiWindowModeEnabledState())) {
             surfaceNode_->SetFrameGravity(Gravity::RESIZE);
         }
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
@@ -2154,10 +2188,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isValidWindow = isMainWindow ||
-            ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) &&
-             (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);

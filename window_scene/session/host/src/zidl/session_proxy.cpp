@@ -40,9 +40,9 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
-        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
-        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->persistentId) ||
+        !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
+        !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
@@ -429,18 +429,11 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("remote is null");
+    if (!data.WriteString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return SendRequest(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION, data, reply, option);
 }
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
@@ -620,6 +613,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -1005,6 +999,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::SetAspectRatio(float ratio)
 {
     MessageParcel data;
@@ -1856,6 +1851,21 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
         TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
         return;
     }
+}
+
+WSError SessionProxy::SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null, code:%{public}d", static_cast<uint32_t>(code));
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(code), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed, code:%{public}d", static_cast<uint32_t>(code));
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
 }
 
 WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
