@@ -390,6 +390,7 @@ public:
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
+    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId);
 
     /*
      * Multi Window
