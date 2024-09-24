@@ -3676,7 +3676,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
             notifyAll = !forceHideFloatOld;
-        } else if (property->IsFloatingWindowAppType()) {
+        } else if (property->IsFloatingWindowAppType() && !property->GetSystemCalling()) {
             nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
             if (forceHideFloatOld) {
                 sceneSession->NotifyForceHideChange(true);
@@ -3686,7 +3686,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.erase(persistentId);
             notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
-        } else if (property->IsFloatingWindowAppType()) {
+        } else if (property->IsFloatingWindowAppType() && !property->GetSystemCalling()) {
             nonSystemFloatSceneSessionMap_.erase(persistentId);
             if (property->GetForceHide()) {
                 sceneSession->NotifyForceHideChange(false);
