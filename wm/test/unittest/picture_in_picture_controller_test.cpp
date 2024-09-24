@@ -41,6 +41,7 @@ public:
     MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
+    MOCK_METHOD1(SetAutoStartPiP, void(bool isAutoStart));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
@@ -427,30 +428,6 @@ HWTEST_F(PictureInPictureControllerTest, GetPipWindow, Function | SmallTest | Le
  * @tc.desc: SetAutoStartEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled01, Function | SmallTest | Level2)
-{
-    bool enable = true;
-    sptr<MockWindow> mw = new (std::nothrow) MockWindow();
-    ASSERT_NE(nullptr, mw);
-    sptr<PipOption> option = new (std::nothrow) PipOption();
-    ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-
-    pipControl->mainWindow_ = nullptr;
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->mainWindow_ = mw;
-    pipControl->isAutoStartEnabled_ = enable;
-    ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
-    pipControl->pipOption_ = option;
-    pipControl->pipOption_->SetTypeNodeEnabled(true);
-}
-
-/**
- * @tc.name: SetAutoStartEnabled
- * @tc.desc: SetAutoStartEnabled
- * @tc.type: FUNC
- */
 HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTest | Level2)
 {
     bool enable = true;
@@ -461,28 +438,32 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
 
-    pipControl->isAutoStartEnabled_ = enable;
-    ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_->SetNavigationId("navId");
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
-
     pipControl->mainWindow_ = mw;
+    pipControl->isAutoStartEnabled_ = enable;
+    ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
+    EXPECT_CALL(*(mw), SetAutoStartPiP()).WillRepeatedly(Return());
+    pipControl->SetAutoStartEnabled(enable);
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
-    pipControl->pipOption_->SetTypeNodeEnabled(false);
-    pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
+    ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
+    EXPECT_CALL(*(mw), SetAutoStartPiP()).WillRepeatedly(Return());
+    pipControl->SetAutoStartEnabled(enable);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
+    EXPECT_CALL(*(mw), SetAutoStartPiP()).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_ = nullptr;
+    EXPECT_CALL(*(mw), SetAutoStartPiP()).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_ = option;
-
     pipControl->pipOption_->SetNavigationId("");
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_->SetNavigationId("navId");
+    ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
     pipControl->SetAutoStartEnabled(enable);
 }
 
