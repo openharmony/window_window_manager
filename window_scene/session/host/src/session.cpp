@@ -27,7 +27,6 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
-#include "anr_manager.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "util.h"

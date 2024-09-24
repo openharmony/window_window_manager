@@ -18,7 +18,6 @@
 #include "ipc_skeleton.h"
 
 #include "window_manager_hilog.h"
-#include "anr_manager.h"
 
 namespace OHOS::Rosen {
 namespace {

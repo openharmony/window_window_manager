@@ -29,7 +29,6 @@
 #include "singleton.h"
 #include "singleton_container.h"
 
-#include "anr_manager.h"
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
 

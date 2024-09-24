@@ -41,7 +41,6 @@
 #endif
 #include "scene_system_ability_listener.h"
 
-#include "anr_manager.h"
 #include "color_parser.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
@@ -60,7 +59,6 @@
 #include "distributed_client.h"
 #include "softbus_bus_center.h"
 #include "perform_reporter.h"
-#include "anr_manager.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "res_type.h"
