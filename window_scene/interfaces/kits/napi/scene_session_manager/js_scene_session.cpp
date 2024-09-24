@@ -2905,9 +2905,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isSceneBoardBundle = SessionPermission::IsSameAppAsCalling("", "");
-        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-            isSceneBoardBundle);
+        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()));
         TLOGI(WmsLogTag::WMS_SCB,
             "isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
