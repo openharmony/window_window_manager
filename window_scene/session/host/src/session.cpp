@@ -1123,6 +1123,7 @@ WSError Session::Disconnect(bool isFromClient)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
+    isDirty_ = false;
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
@@ -1217,6 +1218,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
+        }
+        if (!isAttach && session->state_ == SessionState::STATE_DISCONNECT) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d clear the dirty flag "
+                "when session is detached and disconnected.", session->GetPersistentId());
+            session->isDirty_ = false;
         }
         if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
             !session->IsFocused() && session->GetFocusable()) {
