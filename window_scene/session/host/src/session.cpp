@@ -1475,11 +1475,16 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating = true;
-        SessionInfo info = GetSessionInfo();
-        if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+    auto task = [weakThis = wptr(this), needStartCaller]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->isTerminating_ = true;
+        SessionInfo info = session->GetSessionInfo();
+        if (session->terminateSessionFuncNew_) {
+            session->terminateSessionFuncNew_(info, needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
