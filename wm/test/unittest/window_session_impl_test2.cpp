@@ -1075,8 +1075,14 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
     auto window = GetTestWindowImpl("GetVirtualPixelRatio");
     ASSERT_NE(nullptr, window);
     sptr<DisplayInfo> displayInfo = new (std::nothrow) DisplayInfo();
+    float density = 2.0f;
+    displayInfo->SetVirtualPixelRatio(density);
     float vpr = window->GetVirtualPixelRatio(displayInfo);
-    ASSERT_EQ(1.0, vpr);
+    ASSERT_EQ(density, vpr);
+
+    window->useUniqueDensity_ = true;
+    vpr = window->GetVirtualPixelRatio(displayInfo);
+    ASSERT_EQ(window->virtualPixelRatio_, vpr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetVirtualPixelRatio end";
 }
 
