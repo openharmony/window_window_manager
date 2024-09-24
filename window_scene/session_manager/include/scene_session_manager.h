@@ -75,7 +75,7 @@ struct ComparedSessionInfo {
     std::string moduleName_;
     std::string abilityName_;
     int32_t appIndex_;
-    std::string instanceKey_ = "";
+    std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
 };
