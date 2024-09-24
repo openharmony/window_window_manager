@@ -7431,9 +7431,7 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
 {
     bool sessionRSVisible = false;
-    for (const auto& elem : currVisibleData) {
-        uint64_t surfaceId = elem.first;
-        WindowVisibilityState visibleState = elem.second;
+    for (const auto& [surfaceId, visibleState] : currVisibleData) {
         bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
         sptr<SceneSession> visibilitySession = SelectSesssionFromMap(surfaceId);
         if (visibilitySession == nullptr) {
