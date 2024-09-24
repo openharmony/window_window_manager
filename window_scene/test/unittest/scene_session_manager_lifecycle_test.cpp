@@ -354,7 +354,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, Function | SmallT
     sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
     ssm_->UpdateCollaboratorSessionWant(sceneSession1, 1);
-    ASSERT_EQ(CollaboratorType::DEFAULT_TYPE, sceneSession1);
+    ASSERT_EQ(CollaboratorType::DEFAULT_TYPE, sceneSession1->GetCollaboratorType());
 }
 
 /**
@@ -364,11 +364,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, Function | SmallT
 */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground, Function | SmallTest | Level3)
 {
-    int ret = 0;
     sptr<SceneSession> sceneSession;
     ssm_->RequestSceneSessionActivation(sceneSession, true);
     SessionInfo info;
-    ret++;
     sptr<AAFwk::SessionInfo> abilitySessionInfo;
     ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
     ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false));
@@ -586,7 +584,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession02, Function | Sma
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     sptr<SceneSession> getSceneSession = ssm_->RequestSceneSession(info2, windowSessionProperty);
-    ASSERT_NE(getSceneSession->GetSessionInfo().bundleName.c_str(), "");
+    ASSERT_NE(getSceneSession->GetSessionInfo().bundleName_, info2.bundleName_);
 }
 /**
  * @tc.name: RequestSceneSession03
