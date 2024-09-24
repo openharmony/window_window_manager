@@ -1430,7 +1430,7 @@ WMError WindowManager::ReleaseForegroundSessionScreenLock()
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "release screen lock of foreground session failed");
+        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
     }
     return ret;
 }

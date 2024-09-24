@@ -157,7 +157,8 @@ HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
 HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    windowAdapter.ReleaseForegroundSessionScreenLock();
+    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }

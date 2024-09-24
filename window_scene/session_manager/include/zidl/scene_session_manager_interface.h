@@ -113,9 +113,9 @@ public:
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
         TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
-        TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST,
         TRANS_ID_SET_PROCESS_WATERMARK,
+        TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -273,13 +273,14 @@ public:
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
 
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override { return WMError::WM_OK; }
-    WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
     
     virtual WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) = 0;
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
+
+    WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

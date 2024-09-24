@@ -785,13 +785,6 @@ public:
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
 
     /**
-     * @brief Release screen locks of foreground sessions.
-     *
-     * @return WM_OK means release success, others means failed.
-     */
-    WMError ReleaseForegroundSessionScreenLock();
-
-    /**
      * @brief Get window style type.
      *
      * @param windowStyleType WindowType
@@ -808,6 +801,13 @@ public:
      * @return @return WM_OK means set process watermark success, others means failed.
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
+
+    /**
+     * @brief Release screen lock of foreground sessions.
+     *
+     * @return WM_OK means release success, others means failed.
+     */
+    WMError ReleaseForegroundSessionScreenLock();
 
 private:
     WindowManager();
