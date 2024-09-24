@@ -142,11 +142,11 @@ HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, Function | Sma
 }
 
 /**
- * @tc.name: HandleUpdateDensity
+ * @tc.name: HandleUpdateDensity01
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity01, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -155,6 +155,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateDensity02
+ * @tc.desc: test function : HandleUpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateDensity(data, reply));
 }
 
 /**

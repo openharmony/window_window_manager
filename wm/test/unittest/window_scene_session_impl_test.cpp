@@ -1392,34 +1392,64 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
 }
 
 /*
- * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode test
+ * @tc.name: SetPrivacyMode01
+ * @tc.desc: SetPrivacyMode as true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->property_->SetWindowName("SetPrivacyMode");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(true));
+    ASSERT_EQ(true, window->IsPrivacyMode());
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(true));
+}
+
+/*
+ * @tc.name: SetPrivacyMode02
+ * @tc.desc: SetPrivacyMode as false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->property_->SetWindowName("SetPrivacyMode");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
+    ASSERT_EQ(false, window->IsPrivacyMode());
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
+}
+
+/*
+ * @tc.name: SetPrivacyMode03
+ * @tc.desc: Window is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetPrivacyMode");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetPrivacyMode(false));
-
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    if (WMError::WM_OK == window->SetPrivacyMode(false)) {
-        ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
-        ASSERT_EQ(false, window->IsPrivacyMode());
-    } else if (WMError::WM_DO_NOTHING == window->SetPrivacyMode(false)) {
-        ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
-    }
 }
 
 /*
  * @tc.name: IsPrivacyMode
- * @tc.desc: IsPrivacyMode test
+ * @tc.desc: Set window privacy mode as true and false
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Level3)
@@ -1428,12 +1458,19 @@ HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Leve
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("IsPrivacyModec");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->SetPrivacyMode(true);
+    SSERT_EQ(true, window->IsPrivacyMode());
     window->SetPrivacyMode(false);
+    ASSERT_EQ(false, window->IsPrivacyMode());
 }
 
 /*
  * @tc.name: SetSystemPrivacyMode
- * @tc.desc: SetSystemPrivacyMode test
+ * @tc.desc: Set Ststemwindow privacy mode as true and false
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, SetSystemPrivacyMode, Function | SmallTest | Level3)
@@ -1442,6 +1479,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemPrivacyMode, Function | SmallTest 
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetSystemPrivacyMode");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->SetSystemPrivacyMode(true);
+    ASSERT_EQ(true, window->property_->GetSystemPrivacyMode());
     window->SetSystemPrivacyMode(false);
     ASSERT_EQ(false, window->property_->GetSystemPrivacyMode());
 }

@@ -191,6 +191,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange, Function | SmallTes
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession1->GetWindowType());
     ssm_->sceneSessionMap_.emplace(2, sceneSession);
     ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), false);
 }
 
 /**
@@ -225,6 +226,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange1, Function | SmallTe
     sceneSession1->SetParentSession(sceneSession1);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), false);
 }
 
 /**

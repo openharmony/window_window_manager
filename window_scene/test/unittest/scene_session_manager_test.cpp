@@ -276,16 +276,32 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowStatesByPid, Function | SmallTest
 }
 
 /**
- * @tc.name: CheckIsRemote
- * @tc.desc: SceneSesionManager check is remote
+ * @tc.name: CheckIsRemote01
+ * @tc.desc: DeviceId is empty
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, CheckIsRemote, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote01, Function | SmallTest | Level3)
 {
     std::string deviceId;
+    EXPECT_EQ(deviceId.empty(), true);
     bool result = ssm_->CheckIsRemote(deviceId);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: CheckIsRemote02
+ * @tc.desc: SceneSesionManager check is remote
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, Function | SmallTest | Level3)
+{
+    std::string deviceId;
+    deviceId = "abc";
+    EXPECT_EQ(deviceId.empty(), false);
+    bool result = ssm_->CheckIsRemote(deviceId);
+    EXPECT_FALSE(result);
+}
+
 
 /**
  * @tc.name: AnonymizeDeviceId
