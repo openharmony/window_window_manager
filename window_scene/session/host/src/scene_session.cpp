@@ -3138,7 +3138,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
 }
 
 static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
-    int32_t persistentId)
+    sptr<SceneSession> session)
 {
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
@@ -3147,7 +3147,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
     info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
     info.persistentId_ = abilitySessionInfo->persistentId;
-    info.callerPersistentId_ = persistentId;
+    info.callerPersistentId_ = session->GetPersistentId();
     info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
@@ -3159,12 +3159,13 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.callingTokenId_ = abilitySessionInfo->callingTokenId;
     info.reuse = abilitySessionInfo->reuse;
     info.processOptions = abilitySessionInfo->processOptions;
-    info.startWindowOption = abilitySessionInfo->startWindowOption;
     info.isAtomicService_ = abilitySessionInfo->isAtomicService;
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
     info.appInstanceKey_ = abilitySessionInfo->instanceKey;
-
+    if(session->IsPcOrPadEnableActivation()) {
+        info.startWindowOption = abilitySessionInfo->startWindowOption;
+    }
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
         info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -3220,7 +3221,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             }
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
-        SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session->GetPersistentId());
+        SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session);
         if (session->systemConfig_.IsPcWindow()) {
             int32_t maxInstanceCount = MultiInstanceManager::GetInstance().GetMaxInstanceCount(info.bundleName_);
             TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d",
