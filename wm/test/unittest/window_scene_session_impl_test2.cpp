@@ -291,9 +291,9 @@ HWTEST_F(WindowSceneSessionImplTest2, DestroySubWindow01, Function | SmallTest |
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
 
     ASSERT_NE(nullptr, windowSceneSession);
-    int ret = 0;
+    
     windowSceneSession->DestroySubWindow();
-    ASSERT_EQ(0, ret);
+    ASSERT_EQ(INVALID_SESSION_ID, windowSceneSession->property_->GetParentPersistentId());
 }
 
 /**

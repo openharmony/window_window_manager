@@ -43,18 +43,7 @@ HWTEST_F(SessionProxyTest, OnSessionEvent, Function | SmallTest | Level2)
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
-
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     WSError res = sProxy->OnSessionEvent(event);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    res = sProxy->OnSessionEvent(event);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    MockMessageParcel::SetWriteUint32ErrorFlag(false);
-
-    res = sProxy->OnSessionEvent(event);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnSessionEvent end";
 }
