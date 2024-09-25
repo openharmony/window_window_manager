@@ -1062,9 +1062,13 @@ HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | Sm
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     property->SetWindowFlags(123);
-    ssm_->CheckSessionPropertyOnRecovery(property, false);
+    WSError result = ssm_->CheckSessionPropertyOnRecovery(property, false);
+    ASSERT_EQ(result, WSError::WS_ERROR_NOT_SYSTEM_APP);
+
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetParentPersistentId(111);
+    result = ssm_->CheckSessionPropertyOnRecovery(property, true);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
     ssm_->CheckSessionPropertyOnRecovery(property, true);
 }
 
