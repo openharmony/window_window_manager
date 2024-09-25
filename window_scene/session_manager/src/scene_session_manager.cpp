@@ -7432,13 +7432,12 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
 {
     bool sessionRSVisible = false;
     for (const auto& [surfaceId, visibleState] : currVisibleData) {
-        bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
         sptr<SceneSession> visibilitySession = SelectSesssionFromMap(surfaceId);
         if (visibilitySession == nullptr) {
             continue;
         }
         if (session->GetWindowId() == visibilitySession->GetWindowId()) {
-            if (isVisible) {
+            if (visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
                 sessionRSVisible = true;
             }
             break;
