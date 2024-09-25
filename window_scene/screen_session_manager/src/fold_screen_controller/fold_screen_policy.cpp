@@ -71,6 +71,10 @@ void FoldScreenPolicy::ClearState()
 
 void FoldScreenPolicy::ExitCoordination() {};
 
+void FoldScreenPolicy::ChangeOnTentMode(FoldStatus currentState) {}
+
+void FoldScreenPolicy::ChangeOffTentMode() {}
+
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {
     auto currentTime = std::chrono::steady_clock::now();
