@@ -443,7 +443,7 @@ public:
      * Gesture Back
      */
     bool GetGestureBackEnabled();
-    bool GetGestureBackEnableFlag();
+    bool GetEnableGestureBackHadSet();
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,

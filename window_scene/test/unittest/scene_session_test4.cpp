@@ -731,7 +731,7 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
  * @tc.name: SetGestureBackEnabled
  * @tc.desc: SetGestureBackEnabled
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2)
 {
     SessionInfo info;
@@ -745,7 +745,7 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
-    auto func = [sceneSession](const int32_t persistentId) {
+    auto func = [sceneSession](int32_t persistentId) {
         return;
     };
     sceneSession->specificCallback_->onUpdateGestureBackEnabled_ = func;

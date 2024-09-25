@@ -243,7 +243,7 @@ private:
     /*
      * Gesture Back
      */
-    bool enableGestureBack_ = true;
+    bool gestureBackEnabled_ = true;
 
     /*
      * Window Property.

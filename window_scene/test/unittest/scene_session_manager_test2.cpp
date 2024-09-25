@@ -2109,25 +2109,6 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
 }
 
 /**
- * @tc.name: UpdateGestureBackEnableStatus
- * @tc.desc: UpdateGestureBackEnableStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnableStatus, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->UpdateGestureBackEnableStatus(true);
-    ASSERT_NE(callbackFunc_, nullptr);
-    ssm_->gestureNavigationEnabledChangeFunc_ = nullptr;
-    ssm_->UpdateGestureBackEnableStatus(true);
-    ssm_->SetGestureNavigationEnabledChangeListener(callbackFunc_);
-    ssm_->UpdateGestureBackEnableStatus(true);
-    ASSERT_EQ(true, gestureNavigationEnabled_);
-    ssm_->UpdateGestureBackEnableStatus(false);
-    ASSERT_EQ(false, gestureNavigationEnabled_);
-}
-
-/**
  * @tc.name: UpdateGestureBackEnabled
  * @tc.desc: UpdateGestureBackEnabled
  * @tc.type: FUNC
@@ -2149,7 +2130,6 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTes
     sceneSession->isEnableGestureBackHadSet_ = false;
     ssm_->UpdateGestureBackEnabled(1);
     sleep(WAIT_SLEEP_TIME);
-    ASSERT_EQ(ssm_->lastGestureBackEnable_, true);
     sceneSession->isEnableGestureBackHadSet_ = true;
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -2160,15 +2140,12 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTes
     ASSERT_EQ(sceneSession->IsFocused(), true);
     ssm_->UpdateGestureBackEnabled(1);
     sleep(WAIT_SLEEP_TIME);
-    ASSERT_EQ(ssm_->lastGestureBackEnable_, false);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ssm_->UpdateGestureBackEnabled(1);
     sleep(WAIT_SLEEP_TIME);
-    ASSERT_EQ(ssm_->lastGestureBackEnable_, true);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->UpdateGestureBackEnabled(1);
     sleep(WAIT_SLEEP_TIME);
-    ASSERT_EQ(ssm_->lastGestureBackEnable_, false);
     ssm_->sceneSessionMap_.erase(1);
 }
 }

@@ -4080,11 +4080,11 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "property is null or this window is not supported");
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
-    enableGestureBack_ = enable;
+    gestureBackEnabled_ = enable;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
@@ -4092,13 +4092,16 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
  
 bool WindowSceneSessionImpl::GetGestureBackEnabled() const
 {
+    if (windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "property is null or this window is not supported");
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
         return true;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, GetGestureBackEnabled = %{public}u",
-        GetWindowId(), enableGestureBack_);
-    return enableGestureBack_;
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
+        GetWindowId(), gestureBackEnabled_);
+    return gestureBackEnabled_;
 }
 
 } // namespace Rosen
