@@ -307,15 +307,15 @@ HWTEST_F(SceneSessionManagerTest10, GetAllSceneSessionForAccessibility, Function
     ssm_->sceneSessionMap_.emplace(1, sceneSession1);
     ssm_->sceneSessionMap_.emplace(2, sceneSession2);
     ssm_->sceneSessionMap_.emplace(3, sceneSession3);
-    SceneSession1->isScbCoreEnabled_ = false;
-    SceneSession2->isScbCoreEnabled_ = false;
-    SceneSession3->isScbCoreEnabled_ = false;
+    sceneSession1->isScbCoreEnabled_ = false;
+    sceneSession2->isScbCoreEnabled_ = false;
+    sceneSession3->isScbCoreEnabled_ = false;
     sceneSession1->isVisibleForAccessibility_ = true;
     sceneSession2->isVisibleForAccessibility_ = false;
     sceneSession3->isVisibleForAccessibility_ = true;
-    SceneSession1->isVisible_ = true;
-    SceneSession2->isVisible_ = false;
-    SceneSession3->isVisible_ = true;
+    sceneSession1->isVisible_ = true;
+    sceneSession2->isVisible_ = false;
+    sceneSession3->isVisible_ = true;
     ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
     ASSERT_EQ(sceneSessionList.size(), 1);
 }
