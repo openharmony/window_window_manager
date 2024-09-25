@@ -4003,7 +4003,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             count = newIsVisible ? beforeCount + 1 : beforeCount - 1;
         }
         if (beforeCount == 0 && count == 1) {
-            LOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
+            TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
             windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
             visibleWindowCountMap_[pid] = count;
             SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
