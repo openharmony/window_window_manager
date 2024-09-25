@@ -195,10 +195,10 @@ napi_value JsPipManager::SetPipNodeType(napi_env env, napi_callback_info info)
 napi_value JsPipManager::OnSetPipNodeType(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 4; // 4: arg number
+    napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < NUMBER_TWO) {
+    if (argc != NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
         return NapiGetUndefined(env);
     }
