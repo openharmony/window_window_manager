@@ -1837,7 +1837,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
 
 /**
  * @tc.name: UpdateSessionRect3
- * @tc.desc: normal function
+ * @tc.desc: test for isGlobal is true
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
@@ -1851,8 +1851,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
 
     scensession->SetSessionProperty(property);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -1863,6 +1862,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     EXPECT_NE(parentSession, nullptr);
     scensession->SetParentSession(parentSession);
     EXPECT_NE(scensession->GetParentSession(), nullptr);
+    parentSession->SetSessionRect(parentRect);
     scensession->systemConfig_.uiType_ = UI_TYPE_PHONE;
 
     bool isGlobal = true;
