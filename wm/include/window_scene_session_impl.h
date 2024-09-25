@@ -91,6 +91,8 @@ public:
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
+    // only main window, sub window, dialog window can use
+    static uint32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -164,9 +166,10 @@ public:
     virtual bool GetImmersiveModeEnabledState() const override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
+    bool GetIsUIExtensionFlag() const override;
+    bool GetIsUIExtensionSubWindowFlag() const override;
 
 protected:
-    void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
     WMError RecoverAndConnectSpecificSession();
@@ -175,7 +178,6 @@ protected:
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
-    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
     void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
@@ -187,6 +189,8 @@ protected:
     void GetConfigurationFromAbilityInfo();
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
+    using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
+    sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -227,6 +231,11 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type);
+
+    /**
+     * Sub Window
+     */
+    void AddSubWindowMapForExtensionWindow();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

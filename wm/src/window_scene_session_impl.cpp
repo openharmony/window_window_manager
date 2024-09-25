@@ -120,6 +120,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
+using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -164,6 +165,27 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap)
+{
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
+        return nullptr;
+    }
+    for (const auto& [_, pair] : sessionMap) {
+        auto& window = pair.second;
+        if (window && window->GetWindowId() == parentId) {
+            if (WindowHelper::IsMainWindow(window->GetType()) ||
+                (WindowHelper::IsSystemWindow(window->GetType()) && window->GetParentId() == INVALID_SESSION_ID)) {
+                TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
+                return window;
+            }
+            return FindParentMainSession(window->GetParentId(), sessionMap);
+        }
+    }
+    TLOGW(WmsLogTag::WMS_SUB, "don't find main session, parentId:%{public}u", parentId);
+    return nullptr;
+}
+
 bool WindowSceneSessionImpl::IsSessionMainWindow(uint32_t parentId)
 {
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -203,6 +225,18 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
     return nullptr;
 }
 
+void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
+{
+    // update subWindowSessionMap_
+    auto extensionWindow = FindExtensionWindowWithContext();
+    if (extensionWindow != nullptr) {
+        subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
+            property_->GetWindowName().c_str());
+    }
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -227,8 +261,25 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
         property_->SetSessionInfo(info);
     }
-    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
-        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+
+    bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    bool isUiExtSubWindowFlag = property_->GetIsUIExtensionSubWindowFlag();
+
+    bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && !isUiExtSubWindowFlag;
+    bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) &&
+        !property_->GetExtensionFlag() && isUiExtSubWindowFlag && !isToastFlag;
+    bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag && isToastFlag;
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag();
+
+    if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
+        sptr<WindowSessionImpl> parentSession = nullptr;
+        if (isToastFlag) {
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+        } else {
+            parentSession = FindParentSessionByParentId(property_->GetParentId());
+        }
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
                 property_->GetWindowName().c_str(), type);
@@ -243,11 +294,12 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
-    } else if (property_->GetExtensionFlag() == true) {
+    } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
         property_->SetParentPersistentId(property_->GetParentId());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+        AddSubWindowMapForExtensionWindow();
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -612,10 +664,9 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
-    bool isPcOrFreeWindow = (windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode());
     AreaType dragType = AreaType::UNDEFINED;
     if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect, isPcOrFreeWindow);
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     WindowType windowType = property_->GetWindowType();
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
@@ -927,43 +978,6 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     property_->SetLastLimitsVpr(virtualPixelRatio);
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState)
-{
-    auto iter = subWindowSessionMap_.find(parentPersistentId);
-    if (iter == subWindowSessionMap_.end()) {
-        TLOGD(WmsLogTag::WMS_SUB, "main window: %{public}d has no child node", parentPersistentId);
-        return;
-    }
-    const auto& subWindows = iter->second;
-    if (subWindows.empty()) {
-        TLOGD(WmsLogTag::WMS_SUB, "main window: %{public}d, its subWindowMap is empty", parentPersistentId);
-        return;
-    }
-
-    // when main window hide and subwindow whose state is shown should hide and notify user
-    if (newState == WindowState::STATE_HIDDEN) {
-        for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->state_ = WindowState::STATE_HIDDEN;
-                subwindow->NotifyAfterBackground();
-                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow background, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
-            }
-        }
-    // when main window show and subwindow whose state is shown should show and notify user
-    } else if (newState == WindowState::STATE_SHOWN) {
-        for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
-                subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->state_ = WindowState::STATE_SHOWN;
-                subwindow->NotifyAfterForeground();
-                TLOGD(WmsLogTag::WMS_SUB, "Notify subWindow foreground, id:%{public}d", subwindow->GetPersistentId());
-                UpdateSubWindowStateAndNotify(subwindow->GetPersistentId(), newState);
-            }
-        }
-    }
-}
-
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1052,10 +1066,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         ret = WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (ret == WMError::WM_OK) {
-        // update sub window state if this is main window
-        if (WindowHelper::IsMainWindow(type)) {
-            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
-        }
+        // update sub window state
+        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, WindowHelper::IsMainWindow(type));
@@ -1161,9 +1173,7 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
 
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
-    if (WindowHelper::IsMainWindow(type)) {
-        UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
-    }
+    UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
     if (WindowHelper::IsSubWindow(type)) {
         if (state_ == WindowState::STATE_SHOWN) {
             NotifyAfterBackground();
@@ -1218,56 +1228,6 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         }
         default:
             break;
-    }
-}
-
-void WindowSceneSessionImpl::DestroySubWindow()
-{
-    const int32_t& parentPersistentId = property_->GetParentPersistentId();
-    const int32_t& persistentId = GetPersistentId();
-
-    TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d, parentId: %{public}d", persistentId, parentPersistentId);
-
-    // remove from subWindowMap_ when destroy sub window
-    auto subIter = subWindowSessionMap_.find(parentPersistentId);
-    if (subIter != subWindowSessionMap_.end()) {
-        auto& subWindows = subIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end();) {
-            if ((*iter) == nullptr) {
-                iter++;
-                continue;
-            }
-            if ((*iter)->GetPersistentId() == persistentId) {
-                TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
-                subWindows.erase(iter);
-                break;
-            } else {
-                TLOGD(WmsLogTag::WMS_SUB, "Exists other sub window, persistentId: %{public}d", persistentId);
-                iter++;
-            }
-        }
-    }
-
-    // remove from subWindowMap_ when destroy main window
-    auto mainIter = subWindowSessionMap_.find(persistentId);
-    if (mainIter != subWindowSessionMap_.end()) {
-        auto& subWindows = mainIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
-            if ((*iter) == nullptr) {
-                TLOGW(WmsLogTag::WMS_SUB, "Destroy sub window which is nullptr");
-                subWindows.erase(iter);
-                continue;
-            }
-            TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", (*iter)->GetPersistentId());
-            auto ret = (*iter)->Destroy(false);
-            if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "Destroy sub window failed. persistentId: %{public}d",
-                    (*iter)->GetPersistentId());
-                subWindows.erase(iter);
-            }
-        }
-        mainIter->second.clear();
-        subWindowSessionMap_.erase(mainIter);
     }
 }
 
@@ -2583,6 +2543,55 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
+static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint32_t windowId, uint32_t& mainWindowId)
+{
+    for (const auto& [_, pair] : sessionMap) {
+        const auto& window = pair.second;
+        if (window == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (window->GetWindowId() != windowId) {
+            continue;
+        }
+
+        if (WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
+            mainWindowId = window->GetWindowId();
+            return WMError::WM_OK;
+        }
+        if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
+            return GetParentMainWindowIdInner(sessionMap, window->GetParentId(), mainWindowId);
+        }
+        // not main window, sub window, dialog, set invalid id
+        mainWindowId = INVALID_SESSION_ID;
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_PARENT;
+}
+
+uint32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
+{
+    if (windowId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
+        return INVALID_SESSION_ID;
+    }
+    uint32_t mainWindowId = INVALID_SESSION_ID;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
+        if (findRet == WMError::WM_OK) {
+            return mainWindowId;
+        }
+    }
+    // can't find in client, need to find in server find
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetParentMainWindowId(windowId, mainWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "cant't find main window id, err:%{public}d", static_cast<uint32_t>(ret));
+        return INVALID_SESSION_ID;
+    }
+    return mainWindowId;
+}
+
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     enableDefaultAnimation_= needDefaultAnimation;
@@ -3757,6 +3766,16 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = GetWindowStatusInner(GetMode());
     TLOGD(WmsLogTag::DEFAULT, "WinId:%{public}u, WindowStatus:%{public}u", GetWindowId(), windowStatus);
     return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionFlag() const
+{
+    return property_->GetExtensionFlag();
+}
+
+bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
+{
+    return property_->GetIsUIExtensionSubWindowFlag();
 }
 } // namespace Rosen
 } // namespace OHOS

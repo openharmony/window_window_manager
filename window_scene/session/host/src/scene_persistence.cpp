@@ -62,9 +62,9 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
     return true;
 }
 
-ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t& persistentId)
+ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persistentId)
+    : bundleName_(bundleName), persistentId_(persistentId)
 {
-    bundleName_ = bundleName;
     if (IsAstcEnabled()) {
         snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
             std::to_string(persistentId) + ASTC_IMAGE_SUFFIX;
@@ -80,6 +80,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, const int32_t&
 
 ScenePersistence::~ScenePersistence()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed, persistentId: %{public}d", persistentId_);
     remove(snapshotPath_.c_str());
 }
 

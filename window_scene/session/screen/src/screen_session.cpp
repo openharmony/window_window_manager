@@ -1167,15 +1167,15 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     ScreenId screenId = smsScreen->screenId_;
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
     smsScreen->groupSmsId_ = SCREEN_ID_INVALID;
-    if (smsScreen->GetDisplayNode() != nullptr) {
-        smsScreen->GetDisplayNode()->SetDisplayOffset(0, 0);
-        smsScreen->GetDisplayNode()->RemoveFromTree();
-        auto transactionProxy = RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
+    std::shared_ptr<RSDisplayNode> displayNode = smsScreen->GetDisplayNode();
+    if (displayNode != nullptr) {
+        displayNode->SetDisplayOffset(0, 0);
+        displayNode->RemoveFromTree();
         smsScreen->ReleaseDisplayNode();
     }
+    displayNode = nullptr;
+    // attention: make sure reference count 0
+    RSTransaction::FlushImplicitTransaction();
     return screenSessionMap_.erase(screenId);
 }
 

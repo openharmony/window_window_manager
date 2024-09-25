@@ -1870,9 +1870,9 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    KeyboardAnimationConfig config;
+    KeyboardAnimationCurve curve;
     auto ret = window->GetKeyboardAnimationConfig();
-    ASSERT_EQ(true, ret.durationIn_ == config.durationIn_);
+    ASSERT_EQ(true, ret.curveIn.duration_ == curve.duration_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2092,16 +2092,16 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
 
 /**
  * @tc.name: Marshalling
- * @tc.desc: keyboardAnimationConfig marshalling
+ * @tc.desc: keyboardAnimationCurve marshalling
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, KeyboardAnimationConfigMarshalling, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, Function | SmallTest | Level3)
 {
     MessageParcel data;
-    KeyboardAnimationConfig config;
-    auto ret = data.WriteParcelable(&config);
+    KeyboardAnimationCurve curveConfig;
+    auto ret = data.WriteParcelable(&curveConfig);
     Parcel parcel;
-    config.Unmarshalling(parcel);
+    curveConfig.Unmarshalling(parcel);
     ASSERT_EQ(true, ret);
 }
 

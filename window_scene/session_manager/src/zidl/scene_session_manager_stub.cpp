@@ -139,6 +139,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRaiseWindowToTop(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID):
             return HandleGetTopWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_MAIN_WINDOW_ID):
+            return HandleGetParentMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_WINDOW_EXTENSION_VISIBILITY_CHANGE):
             return HandleNotifyWindowExtensionVisibilityChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER):
@@ -147,14 +149,14 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleShiftAppWindowFocus(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
-            return HandleAddExtensionWindowStageToSCB(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB):
-            return HandleRemoveExtensionWindowStageFromSCB(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_MODALEXTENSION_RECT_TO_SCB):
             return HandleUpdateModalExtensionRect(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB):
             return HandleProcessModalExtensionPointDown(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
+            return HandleAddExtensionWindowStageToSCB(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB):
+            return HandleRemoveExtensionWindowStageFromSCB(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_OR_REMOVE_SECURE_SESSION):
             return HandleAddOrRemoveSecureSession(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS):
@@ -167,10 +169,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetCallingWindowRect(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
             return HandleGetWindowModeType(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
-            return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE):
+            return HandleGetWindowStyleType(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -838,6 +840,24 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t windowId = INVALID_SESSION_ID;
+    if (!data.ReadUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read windowId failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t mainWindowId = INVALID_SESSION_ID;
+    WMError errCode = GetParentMainWindowId(windowId, mainWindowId);
+    if (!reply.WriteUint32(mainWindowId)) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
 {
     int32_t persistentId = data.ReadInt32();
@@ -993,19 +1013,6 @@ int SceneSessionManagerStub::HandleGetWindowModeType(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
-{
-    WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    WMError errCode = GetWindowStyleType(windowStyleType);
-    TLOGI(WmsLogTag::WMS_LIFE, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
-    if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to WriteBool");
-        return ERR_INVALID_DATA;
-    }
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = data.ReadInt32();
@@ -1015,6 +1022,19 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
     WMError errCode = GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
         TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds fail.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
+{
+    WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+    WMError errCode = GetWindowStyleType(windowStyleType);
+    TLOGI(WmsLogTag::WMS_LIFE, "windowStyleType:%{public}d!", static_cast<int32_t>(windowStyleType));
+    if (!reply.WriteUint32(static_cast<int32_t>(windowStyleType))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));

@@ -28,7 +28,7 @@ public:
 
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD3(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction));
+        const SceneAnimationConfig& config));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
     MOCK_METHOD0(HandleBackEvent, WSError(void));

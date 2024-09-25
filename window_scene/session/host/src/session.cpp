@@ -858,7 +858,10 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     }
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateRect(rect, reason, rsTransaction);
+        int32_t rotateAnimationDuration = GetRotateAnimationDuration();
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
+            .animationDuration_ = rotateAnimationDuration };
+        sessionStage_->UpdateRect(rect, reason, config);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
@@ -1123,6 +1126,7 @@ WSError Session::Disconnect(bool isFromClient)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
+    isDirty_ = false;
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
@@ -1217,6 +1221,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
+        }
+        if (!isAttach && session->state_ == SessionState::STATE_DISCONNECT) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d clear the dirty flag "
+                "when session is detached and disconnected.", session->GetPersistentId());
+            session->isDirty_ = false;
         }
         if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
             !session->IsFocused() && session->GetFocusable()) {
@@ -1996,6 +2005,25 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
+void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
+{
+    if (func == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "func is nullptr");
+        return;
+    }
+    acquireRotateAnimationConfigFunc_ = func;
+}
+
+int32_t Session::GetRotateAnimationDuration()
+{
+    if (acquireRotateAnimationConfigFunc_) {
+        RotateAnimationConfig rotateAnimationConfig;
+        acquireRotateAnimationConfigFunc_(rotateAnimationConfig);
+        return rotateAnimationConfig.duration_;
+    }
+    return ROTATE_ANIMATION_DURATION;
+}
+
 void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
@@ -2019,6 +2047,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 

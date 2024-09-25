@@ -538,7 +538,8 @@ HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, Function | SmallTest | L
     window->property_->SetWindowRect(preRect);
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
     std::shared_ptr<RSTransaction> rsTransaction;
-    window->UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
 
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     auto res = window->UpdateRect(rect, reason);

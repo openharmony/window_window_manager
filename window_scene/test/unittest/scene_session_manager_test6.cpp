@@ -158,6 +158,163 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetWindowVisibilityChangeInfo01
+ * @tc.desc: GetWindowVisibilityChangeInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    currVisibleData.push_back(std::make_pair(3, WindowVisibilityState::WINDOW_LAYER_STATE_MAX));
+    ssm_->lastVisibleData_.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 3);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo02
+ * @tc.desc: GetWindowVisibilityChangeInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    ssm_->lastVisibleData_.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 2);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo03
+ * @tc.desc: GetWindowVisibilityChangeInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 1);
+}
+
+/**
+ * @tc.name: DealwithVisibilityChange01
+ * @tc.desc: DealwithVisibilityChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession2->GetPersistentId(), sceneSession2));
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode1 = RSSurfaceNode::Create(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode2 = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode1);
+    ASSERT_NE(nullptr, surfaceNode2);
+    surfaceNode1->SetId(1);
+    surfaceNode2->SetId(2);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->surfaceNode_ = surfaceNode1;
+    sceneSession1->SetCallingPid(1);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetParentSession(sceneSession1);
+    sceneSession2->surfaceNode_ = surfaceNode2;
+    sceneSession2->SetCallingPid(2);
+    ASSERT_NE(nullptr, sceneSession1->property_);
+    ASSERT_NE(nullptr, sceneSession2->property_);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession1->property_->SetWindowName("visibility1");
+    sceneSession2->property_->SetWindowName("visibility2");
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    visibilityChangeInfos.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetVisible(), true);
+    ASSERT_EQ(sceneSession2->GetVisible(), true);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession1->SetVisible(false);
+    sceneSession2->SetVisible(false);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetVisible(), true);
+    ASSERT_EQ(sceneSession2->GetVisible(), false);
+}
+
+/**
+ * @tc.name: DealwithVisibilityChange02
+ * @tc.desc: DealwithVisibilityChange02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession2->GetPersistentId(), sceneSession2));
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode1 = RSSurfaceNode::Create(config);
+    std::shared_ptr<RSSurfaceNode> surfaceNode2 = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode1);
+    ASSERT_NE(nullptr, surfaceNode2);
+    surfaceNode1->SetId(1);
+    surfaceNode2->SetId(2);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->surfaceNode_ = surfaceNode1;
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetParentSession(sceneSession1);
+    sceneSession2->surfaceNode_ = surfaceNode2;
+    ASSERT_NE(nullptr, sceneSession1->property_);
+    ASSERT_NE(nullptr, sceneSession2->property_);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession1->property_->SetWindowName("visibility1");
+    sceneSession2->property_->SetWindowName("visibility2");
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    visibilityChangeInfos.push_back(std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.push_back(std::make_pair(3, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    sceneSession1->SetVisible(true);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
+    ASSERT_EQ(sceneSession2->GetVisible(), true);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession1->SetVisible(false);
+    sceneSession2->SetVisible(false);
+    sceneSession1->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
+    ASSERT_EQ(sceneSession2->GetVisible(), false);
+}
+
+/**
  * @tc.name: UpdateWindowMode
  * @tc.desc: UpdateWindowMode
  * @tc.type: FUNC
@@ -1243,6 +1400,51 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
+}
+
+/**
+ * @tc.name: UpdateRotateAnimationConfig
+ * @tc.desc: UpdateRotateAnimationConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateRotateAnimationConfig, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    RotateAnimationConfig config = { 400 };
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
+
+    config.duration_ = 600;
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
+}
+
+/**
+ * @tc.name: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.desc: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RegisterAcquireRotateAnimationConfigFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.persistentId_ = 1;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(sessionInfo.abilityInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
+    WSRect rect({1, 1, 1, 1});
+    SizeChangeReason reason = SizeChangeReason::ROTATION;
+    WSError result = sceneSession->UpdateRect(rect, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 }
 } // namespace Rosen

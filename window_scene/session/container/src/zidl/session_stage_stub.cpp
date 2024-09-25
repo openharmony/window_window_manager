@@ -100,10 +100,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
-            return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
+            return HandleSetUniqueVirtualPixelRatio(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -131,10 +131,12 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
             WLOGFE("transaction unMarsh failed");
             return -1;
         }
-        WSError errCode = UpdateRect(rect, reason, transaction);
+        SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     } else {
-        WSError errCode = UpdateRect(rect, reason);
+        SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     }
     return ERR_NONE;
