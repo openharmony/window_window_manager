@@ -1947,8 +1947,8 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SubscribeContainerModalButtonsRectChange(
-            [vpr, weak = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
-            auto window = weak.promote();
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
             if (!window) {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
                 return;
