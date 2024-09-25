@@ -180,7 +180,7 @@ sptr<Window> Window::Find(const std::string& windowName)
 uint32_t Window::GetParentMainWindowId(uint32_t windowId)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return WindowSceneSessionImpl::GetParentMainWindowId(windowId);
+        return static_cast<uint32_t>(WindowSceneSessionImpl::GetParentMainWindowId(windowId));
     } else {
         return INVALID_SESSION_ID;
     }
