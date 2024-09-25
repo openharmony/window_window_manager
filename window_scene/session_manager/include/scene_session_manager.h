@@ -365,6 +365,11 @@ public:
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
 
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();

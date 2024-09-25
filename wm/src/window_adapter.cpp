@@ -942,5 +942,12 @@ sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
     return windowManagerServiceProxy_;
 }
 
+WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->ReleaseForegroundSessionScreenLock();
+}
 } // namespace Rosen
 } // namespace OHOS

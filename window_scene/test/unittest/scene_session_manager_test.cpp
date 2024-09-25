@@ -1722,6 +1722,17 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
     ASSERT_EQ(config.mode_, 0);
     ASSERT_EQ(config.homePage_, "");
 }
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
