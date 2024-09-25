@@ -83,7 +83,8 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
-using UpdateGestureBackEnabledCallback = std::function<void(const int32_t persistentId)>;
+using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
+
 class SceneSession : public Session {
 public:
     friend class HidumpController;

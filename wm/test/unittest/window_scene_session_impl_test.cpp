@@ -1602,11 +1602,13 @@ HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | 
  */
 HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetGestureBackEnabled");
