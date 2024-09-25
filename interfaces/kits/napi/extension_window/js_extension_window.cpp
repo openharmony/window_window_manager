@@ -853,40 +853,6 @@ napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info inf
     return CreateJsExtensionWindowPropertiesObject(env, window);
 }
 
-static void SetWindowOption(sptr<Rosen::WindowOption>& windowOption)
-{
-    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    windowOption->SetOnlySupportSceneBoard(true);
-    windowOption->SetExtensionTag(true);
-}
-
-static void CreateSubWindowWithOptionsTask(std::shared_ptr<Rosen::ExtensionWindow>& extensionWindow,
-    std::string windowName, sptr<WindowOption>& windowOption, napi_env env, NapiAsyncTask& task)
-{
-    if (extensionWindow == nullptr) {
-        task.Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ is null"));
-    }
-    SetWindowOption(windowOption);
-    auto extWindow = extensionWindow->GetWindow();
-    if (extWindow == nullptr) {
-        task.Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
-    }
-    auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
-    if (window == nullptr) {
-        task.Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
-        return;
-    }
-    if (!window->IsTopmost()) {
-        extWindow->NotifyModalUIExtensionMayBeCovered(false);
-    }
-    task.Resolve(env, CreateJsWindowObject(env, window));
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Create sub window %{public}s end", windowName.c_str());
-}
-
 napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -910,10 +876,36 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     option->SetParentId(hostWindowId_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [extensionWindow = extensionWindow_, windowName, windowOption = option](napi_env env, NapiAsyncTask& task,
-        int32_t status) mutable {
-            CreateSubWindowWithOptionsTask(extensionWindow, windowName, windowOption, env, task);
+        [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
+            windowOption = option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        if (extensionWindow == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
+        }
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetOnlySupportSceneBoard(true);
+        windowOption->SetExtensionTag(true);
+        auto extWindow = extensionWindow->GetWindow();
+        if (extWindow == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
+        }
+        auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
+        if (window == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
+            return;
+        }
+        if (!window->IsTopmost()) {
+            extWindow->NotifyModalUIExtensionMayBeCovered(false);
+        }
+        task.Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_UIEXT,
+            "%{public}s [NAPI]Create sub window %{public}s end",
+            where, windowName.c_str());
         };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;

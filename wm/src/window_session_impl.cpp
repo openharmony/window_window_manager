@@ -1719,15 +1719,15 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    WMError modalRet = (isModal ?
+    WMError modalRet = isModal ?
         AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
-        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL));
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     if (modalRet != WMError::WM_OK) {
         return modalRet;
     }
-    modalRet = (isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
+    modalRet = isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
         AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL) :
-        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL));
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     return modalRet;
 }
 

@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,10 +294,10 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
     if (property != nullptr && property->IsTopmost()) {
         isTopmostModalSubWindow = true;
     }
-    SubWindowModalType modalType = session->GetSubWindowModalType();
     if (auto iter = dialogMap.find(mainSession->GetPersistentId());
         iter != dialogMap.end() && iter->second != nullptr) {
         auto& targetSession = iter->second;
+        SubWindowModalType modalType = session->GetSubWindowModalType();
         SubWindowModalType targetModalType = targetSession->GetSubWindowModalType();
         if (modalType == targetModalType) {
             if (targetSession->GetSessionProperty() &&
@@ -319,32 +319,32 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
 }
 
 static void UpdateCallingPidMapItem(const sptr<SceneSession>& session,
-    std::map<int32_t, sptr<SceneSession>>& callingPidMap)
+    std::unordered_map<int32_t, sptr<SceneSession>>& callingPidMap)
 {
     auto sessionPid = session->GetCallingPid();
-    auto targetSession = session->GetParentSession();
-    while (targetSession) {
-        auto targetSessionPid = targetSession->GetCallingPid();
-        if (sessionPid != targetSessionPid) {
-            callingPidMap[targetSessionPid] = session;
+    auto parentSession = session->GetParentSession();
+    while (parentSession) {
+        auto parentSessionPid = parentSession->GetCallingPid();
+        if (sessionPid != parentSessionPid) {
+            callingPidMap[parentSessionPid] = session;
         }
-        targetSession = targetSession->GetParentSession();
+        parentSession = parentSession->GetParentSession();
     }
 }
 
 static void AddCallingPidMapItem(const sptr<SceneSession>& session,
-    std::map<int32_t, sptr<SceneSession>>& callingPidMap)
+    std::unordered_map<int32_t, sptr<SceneSession>>& callingPidMap)
 {
     auto sessionCallingPid = session->GetCallingPid();
-    auto callingPid = callingPidMap.find(sessionCallingPid);
-    if (callingPid == callingPidMap.end()) {
+    auto iter = callingPidMap.find(sessionCallingPid);
+    if (iter == callingPidMap.end()) {
         callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
         UpdateCallingPidMapItem(session, callingPidMap);
         TLOGD(WmsLogTag::WMS_DIALOG,
             "Add callingPid session, sessionCallingPid: %{public}d, sessionId: %{public}d",
             sessionCallingPid, session->GetPersistentId());
     } else {
-        if (callingPid->second->GetZOrder() < session->GetZOrder()) {
+        if (iter->second->GetZOrder() < session->GetZOrder()) {
             callingPidMap[sessionCallingPid] = session;
             UpdateCallingPidMapItem(session, callingPidMap);
             TLOGD(WmsLogTag::WMS_DIALOG,
@@ -354,20 +354,21 @@ static void AddCallingPidMapItem(const sptr<SceneSession>& session,
     }
 }
 
-static void UpdateDialogSessionMap(const std::map<int32_t, sptr<SceneSession>>& sessionMap,
-    std::map<int32_t, sptr<SceneSession>>& callingPidMap, std::map<int32_t, sptr<SceneSession>>& dialogMap)
+static void UpdateDialogSessionMap(
+    const std::map<int32_t, sptr<SceneSession>>& sessionMap,
+    const std::unordered_map<int32_t, sptr<SceneSession>>& callingPidMap,
+    std::map<int32_t, sptr<SceneSession>>& dialogMap)
 {
-    for (const auto& elem: sessionMap) {
-        const auto& session = elem.second;
+    for (const auto& [_, session] : sessionMap) {
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
-        auto callingPid = callingPidMap.find(session->GetCallingPid());
-        if (callingPid != callingPidMap.end()) {
-            dialogMap[session->GetPersistentId()] = callingPid->second;
+        auto iter = callingPidMap.find(session->GetCallingPid());
+        if (iter != callingPidMap.end()) {
+            dialogMap[session->GetPersistentId()] = iter->second;
             TLOGD(WmsLogTag::WMS_DIALOG,
                 "Update dialog session, sessionId: %{public}d, callingPidSessionId: %{public}d",
-                session->GetPersistentId(), callingPid->second->GetPersistentId());
+                session->GetPersistentId(), iter->second->GetPersistentId());
         }
     }
 }
@@ -376,10 +377,9 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
     const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
 {
     std::map<int32_t, sptr<SceneSession>> dialogMap;
-    std::map<int32_t, sptr<SceneSession>> callingPidMap;
-    bool modalUpdateFlag = false;
-    for (const auto& elem: sessionMap) {
-        const auto& session = elem.second;
+    std::unordered_map<int32_t, sptr<SceneSession>> callingPidMap;
+    bool hasModalApplication = false;
+    for (const auto& [_, session] : sessionMap) {
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
@@ -387,19 +387,15 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
         if (modalType == SubWindowModalType::TYPE_DIALOG ||
             modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
             AddDialogSessionMapItem(session, dialogMap);
-        }
-        if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
+        } else if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
             AddDialogSessionMapItem(session, dialogMap);
-            modalUpdateFlag = true;
+            hasModalApplication = true;
             AddCallingPidMapItem(session, callingPidMap);
         }
     }
-
-    if (!modalUpdateFlag) {
-        return dialogMap;
+    if (hasModalApplication) {
+        UpdateDialogSessionMap(sessionMap, callingPidMap, dialogMap);
     }
-    UpdateDialogSessionMap(sessionMap, callingPidMap, dialogMap);
-
     return dialogMap;
 }
 
