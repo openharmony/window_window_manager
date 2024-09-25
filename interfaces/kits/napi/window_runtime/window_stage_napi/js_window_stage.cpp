@@ -648,26 +648,30 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
 
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            auto weakScene = weak.lock();
-            if (weakScene == nullptr) {
-                WLOGFE("[NAPI]Window scene is null");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
-            option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-            option->SetOnlySupportSceneBoard(true);
-            auto window = weakScene->CreateWindow(windowName, option);
-            if (window == nullptr) {
-                WLOGFE("[NAPI]Get window failed");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "Get window failed"));
-                return;
-            }
-            task.Resolve(env, CreateJsWindowObject(env, window));
-            WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
+        [where, weak = windowScene_, windowName = std::move(windowName), option]
+            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        auto windowScene = weak.lock();
+        if (windowScene == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s [NAPI]Window scene is null", where);
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        option->SetOnlySupportSceneBoard(true);
+        auto window = windowScene->CreateWindow(windowName, option);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s [NAPI]Get window failed", where);
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Get window failed"));
+            return;
+        }
+        task.Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_SUB,
+            "%{public}s [NAPI]Create sub window %{public}s end",
+            where, windowName.c_str());
         };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;

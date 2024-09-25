@@ -5934,39 +5934,8 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
-static void SetSubWindowModalTask(const sptr<Window>& window, bool isModal,
-    ModalityType modalityType, napi_env env, NapiAsyncTask& task)
-{
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "CreateSubWindowModalTask window is nullptr");
-        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-        task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr."));
-        return;
-    }
-    if (!WindowHelper::IsSubWindow(window->GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "CreateSubWindowModalTask invalid call, type:%{public}d", window->GetType());
-        WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
-        task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "invalid window type."));
-        return;
-    }
-    WMError ret = window->SetSubWindowModal(isModal, modalityType);
-    if (ret == WMError::WM_OK) {
-        task.Resolve(env, NapiGetUndefined(env));
-    } else {
-        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-        TLOGE(WmsLogTag::WMS_SUB, "CreateSubWindowModalTask set failed, ret is %{public}d", wmErrorCode);
-        task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set subwindow modal failed"));
-    }
-    TLOGI(WmsLogTag::WMS_SUB,
-        "CreateSubWindowModalTask id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}d",
-        window->GetWindowId(), window->GetWindowName().c_str(), isModal, modalityType);
-}
-
 napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
 {
-    bool isModal = false;
-    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
-    uint32_t type = 0;
     size_t argc = 4;
     napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -5974,17 +5943,21 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to isModal");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
+    using T = std::underlying_type_t<ModalityType>;
+    T type = 0;
     if (argc == 2 && ConvertFromJsValue(env, argv[INDEX_ONE], type)) { // 2: the param num
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
-        if (type >= static_cast<uint32_t>(ApiModalityType::BEGIN) &&
-            type <= static_cast<uint32_t>(ApiModalityType::END)) {
+        if (type >= static_cast<T>(ApiModalityType::BEGIN) &&
+            type <= static_cast<T>(ApiModalityType::END)) {
             modalityType = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(type));
         } else {
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
@@ -5992,10 +5965,37 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
         }
     }
 
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [windowToken = windowToken_, isModal, modalityType](napi_env env, NapiAsyncTask& task,
+        [where, window = windowToken_, isModal, modalityType](napi_env env, NapiAsyncTask& task,
             int32_t status) {
-            SetSubWindowModalTask(windowToken, isModal, modalityType, env, task);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr."));
+            return;
+        }
+        if (!WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_SUB,
+                "%{public}s invalid call, type:%{public}d",
+                where, window->GetType());
+            WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "invalid window type."));
+            return;
+        }
+        WMError ret = window->SetSubWindowModal(isModal, modalityType);
+        if (ret == WMError::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            TLOGNE(WmsLogTag::WMS_SUB,
+                "%{public}s set failed, ret is %{public}d",
+                where, wmErrorCode);
+            task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set subwindow modal failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_SUB,
+            "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), isModal, modalityType);
         };
     napi_value lastParam = nullptr;
     napi_value result = nullptr;

@@ -270,14 +270,14 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
-enum class ApiModalityType : uint32_t {
+enum class ApiModalityType : uint8_t {
     BEGIN = 0,
     WINDOW_MODALITY = BEGIN,
     APPLICATION_MODALITY,
     END = APPLICATION_MODALITY,
 };
 
-const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_MAP {
+inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_MAP {
     { ApiModalityType::WINDOW_MODALITY,         ModalityType::WINDOW_MODALITY      },
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };

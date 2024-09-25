@@ -1077,14 +1077,14 @@ napi_value ModalityTypeInit(napi_env env)
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
-    napi_set_named_property(env, objValue, "WINDOW_MODALITY", CreateJsValue(env,
-        static_cast<uint32_t>(ApiModalityType::WINDOW_MODALITY)));
-    napi_set_named_property(env, objValue, "APPLICATION_MODALITY", CreateJsValue(env,
-        static_cast<uint32_t>(ApiModalityType::APPLICATION_MODALITY)));
+    napi_set_named_property(env, objValue, "WINDOW_MODALITY",
+        CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
+    napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
+        CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
     return objValue;
 }
 
-static bool ParseModalityRelevantParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     bool isModal = false;
     if (ParseJsValue(jsObject, env, "isModal", isModal)) {
@@ -1100,14 +1100,15 @@ static bool ParseModalityRelevantParam(napi_env env, napi_value jsObject, const 
         }
         windowOption->SetWindowTopmost(isTopmost);
     }
-    uint32_t modalityType = 0;
+    using T = std::underlying_type_t<ModalityType>;
+    T modalityType = 0;
     if (ParseJsValue(jsObject, env, "modalityType", modalityType)) {
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return false;
         }
-        if (modalityType >= static_cast<uint32_t>(ApiModalityType::BEGIN) &&
-            modalityType <= static_cast<uint32_t>(ApiModalityType::END)) {
+        if (modalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
+            modalityType <= static_cast<T>(ApiModalityType::END)) {
             TLOGI(WmsLogTag::WMS_SUB, "Normal subwindow modalityType: %{public}u", modalityType);
             auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(modalityType));
             if (type == ModalityType::APPLICATION_MODALITY) {
@@ -1140,7 +1141,7 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
-    return ParseModalityRelevantParam(env, jsObject, windowOption);
+    return ParseModalityParam(env, jsObject, windowOption);
 }
 
 } // namespace Rosen
