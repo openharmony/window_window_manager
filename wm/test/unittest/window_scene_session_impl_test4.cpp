@@ -131,6 +131,7 @@ HWTEST_F(WindowSceneSessionImplTest4, RegisterSessionRecoverListener, Function |
     windowSceneSessionImpl->RegisterSessionRecoverListener(true);
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->RegisterSessionRecoverListener(true);
+    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
 }
 
 /**
