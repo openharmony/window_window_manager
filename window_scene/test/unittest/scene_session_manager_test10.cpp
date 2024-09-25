@@ -84,6 +84,51 @@ void SceneSessionManagerTest10::TearDown()
 
 namespace {
 /**
+ * @tc.name: UpdateRotateAnimationConfig
+ * @tc.desc: UpdateRotateAnimationConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, UpdateRotateAnimationConfig, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    RotateAnimationConfig config = { 400 };
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
+
+    config.duration_ = 600;
+    ssm_->UpdateRotateAnimationConfig(config);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
+}
+
+/**
+ * @tc.name: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.desc: RegisterAcquireRotateAnimationConfigFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterAcquireRotateAnimationConfigFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.persistentId_ = 1;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(sessionInfo.abilityInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
+    WSRect rect({1, 1, 1, 1});
+    SizeChangeReason reason = SizeChangeReason::ROTATION;
+    WSError result = sceneSession->UpdateRect(rect, reason);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: CheckLastFocusedAppSessionFocus
  * @tc.desc: CheckLastFocusedAppSessionFocus
  * @tc.type: FUNC
