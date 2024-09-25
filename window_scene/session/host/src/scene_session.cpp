@@ -3351,19 +3351,17 @@ WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
 {
     auto task = [weakThis = wptr(this), isEnabled] {
         auto sceneSession = weakThis.promote();
-        if (!sceneSession)
-        {
+        if (!sceneSession) {
             TLOGE(WmsLogTag::WMS_IMMS, "session is invalid");
             return;
         }
-        if (isEnableGestureBack_ == isEnabled)
-        {
+        if (sceneSession->isEnableGestureBack_ == isEnabled) {
             TLOGD(WmsLogTag::WMS_IMMS, "isEnabled equals last.");
             return;
         }
         TLOGNI(WmsLogTag::WMS_IMMS, "id: %{public}d, isEnabled: %{public}d", GetPersistentId(), isEnabled);
-        isEnableGestureBack_ = isEnabled;
-        isEnableGestureBackHadSet_ = true;
+        sceneSession->isEnableGestureBack_ = isEnabled;
+        sceneSession->isEnableGestureBackHadSet_ = true;
         UpdateGestureBackEnabled();
     };
     PostTask(task, "SetGestureBackEnabled");

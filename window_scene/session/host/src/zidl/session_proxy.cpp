@@ -1886,7 +1886,7 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return;
     }
-    if (Remote()->SendRequest(
+    if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
