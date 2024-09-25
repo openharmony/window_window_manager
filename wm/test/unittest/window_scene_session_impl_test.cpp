@@ -1438,7 +1438,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Le
  * @tc.desc: Window is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode03, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -1463,7 +1463,7 @@ HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Leve
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->SetPrivacyMode(true);
-    SSERT_EQ(true, window->IsPrivacyMode());
+    ASSERT_EQ(true, window->IsPrivacyMode());
     window->SetPrivacyMode(false);
     ASSERT_EQ(false, window->IsPrivacyMode());
 }
