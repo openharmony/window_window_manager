@@ -5123,17 +5123,17 @@ napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info 
     }
 
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("OnGetTransitionController is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->GetNapiValue() == nullptr) {
         WmErrorCode ret = CreateTransitionController(env);
         if (ret != WmErrorCode::WM_OK) {
-            WLOGFE("Window GetTransitionController failed");
+            TLOGE(WmsLogTag::WMS_SYSTEM, "CreateTransitionController failed, error code:%{public}d", ret);
             napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         }
     }
