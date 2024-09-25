@@ -1391,6 +1391,8 @@ HWTEST_F(WindowImplTest2, BackgroundColor, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
 
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetBackgroundColor(0));
+
     MockAceAbilityHandler* aceAbilityHandler = new MockAceAbilityHandler();
     window->aceAbilityHandler_ = aceAbilityHandler;
     EXPECT_CALL(*aceAbilityHandler, SetBackgroundColor(_));

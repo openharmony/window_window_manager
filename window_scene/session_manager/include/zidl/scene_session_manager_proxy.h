@@ -98,7 +98,7 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) override;
+    WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
@@ -126,6 +126,7 @@ public:
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
+    WMError ReleaseForegroundSessionScreenLock() override;
 
 private:
     template<typename T>

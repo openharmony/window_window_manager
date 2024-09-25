@@ -127,8 +127,10 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
     info.bundleName_ = "SetBrightness1";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    WSError result = ssm_->SetBrightness(sceneSession, 0.5);
+    float brightness = 0.5;
+    WSError result = ssm_->SetBrightness(sceneSession, brightness);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_NE(brightness, ssm_->GetDisplayBrightness());
 }
 
 /**
@@ -1854,6 +1856,17 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     auto result = ssm_->GetRootMainWindowId(sceneSession2->GetPersistentId(), hostWindowId);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 }
 } // namespace Rosen
