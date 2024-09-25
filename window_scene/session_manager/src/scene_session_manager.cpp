@@ -8969,7 +8969,8 @@ void SceneSessionManager::PostProcessFocus()
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
                 ret = RequestSessionFocusImmediately(session->GetPersistentId());
             } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::RECENT) {
-                ret = RequestSessionFocus(session->GetPersistentId(), session->GetPostProcessFocusState().byForeground_,
+                ret = RequestSessionFocus(session->GetPersistentId(),
+                                          session->GetPostProcessFocusState().byForeground_,
                                           session->GetPostProcessFocusState().reason_);
             } else {
                 ret = RequestSessionFocus(session->GetPersistentId(), true,
