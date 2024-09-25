@@ -690,10 +690,10 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
     startPos += GetObject<AvoidAreaType>(avoidAreaType, data + startPos, size - startPos);
-    startPos += GetObject<Rect>(avoidArea.topRect_, data + startPos, size - startPos);
-    startPos += GetObject<Rect>(avoidArea.leftRect_, data + startPos, size - startPos);
-    startPos += GetObject<Rect>(avoidArea.rightRect_, data + startPos, size - startPos);
-    startPos += GetObject<Rect>(avoidArea.bottomRect_, data + startPos, size - startPos);
+    startPos += GetObject<OHOS::Rosen::Rect>(avoidArea.topRect_, data + startPos, size - startPos);
+    startPos += GetObject<OHOS::Rosen::Rect>(avoidArea.leftRect_, data + startPos, size - startPos);
+    startPos += GetObject<OHOS::Rosen::Rect>(avoidArea.rightRect_, data + startPos, size - startPos);
+    startPos += GetObject<OHOS::Rosen::Rect>(avoidArea.bottomRect_, data + startPos, size - startPos);
     window->GetAvoidAreaByType(avoidAreaType, avoidArea);
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
     uint32_t invalidGravityPercent = 0;
