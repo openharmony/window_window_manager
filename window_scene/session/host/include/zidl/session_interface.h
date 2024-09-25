@@ -77,6 +77,13 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
+
+    /**
      * @brief Raise the application subwindow to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.

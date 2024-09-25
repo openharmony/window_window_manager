@@ -68,6 +68,7 @@ const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
+const std::string RESTORE_WINDOW_CB = "restoreMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 constexpr int ARG_COUNT_3 = 3;
@@ -126,6 +127,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
+    {RESTORE_WINDOW_CB,                     ListenerFuncType::RESTORE_WINDOW_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -644,6 +646,39 @@ void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnLayoutFullScreenChange");
+}
+
+void JsSceneSession::ProcessRestoreMainWindowRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onRestoreMainWindowFunc_ = [this]() {
+        this->RestoreMainWindow();
+    };
+    TLOGI(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::RestoreMainWindow()
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "RestoreMainWindow jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_WINDOW_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "RestoreMainWindow jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnRestoreMainWindow");
 }
 
 void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
@@ -1923,6 +1958,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
     switch (static_cast<uint32_t>(listenerFuncType)) {
         case static_cast<uint32_t>(ListenerFuncType::PENDING_SCENE_CB):
             ProcessPendingSceneSessionActivationRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::RESTORE_WINDOW_CB):
+            ProcessRestoreMainWindowRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
             ProcessChangeSessionVisibilityWithStatusBarRegister();
