@@ -664,10 +664,9 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
-    bool isPcOrFreeWindow = (windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode());
     AreaType dragType = AreaType::UNDEFINED;
     if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect, isPcOrFreeWindow);
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     WindowType windowType = property_->GetWindowType();
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
