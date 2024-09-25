@@ -266,7 +266,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             session->specificCallback_->onWindowInfoUpdate_(
                 persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
-            UpdateGestureBackEnabled();
+            session->UpdateGestureBackEnabled();
         } else {
             TLOGI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
         }
@@ -342,7 +342,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
-            UpdateGestureBackEnabled();
+            session->UpdateGestureBackEnabled();
         }
         return WSError::WS_OK;
     };
@@ -411,7 +411,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
-            UpdateGestureBackEnabled();
+            session->UpdateGestureBackEnabled();
         }
         return WSError::WS_OK;
     },
@@ -3362,7 +3362,7 @@ WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
         TLOGNI(WmsLogTag::WMS_IMMS, "id: %{public}d, isEnabled: %{public}d", GetPersistentId(), isEnabled);
         sceneSession->isEnableGestureBack_ = isEnabled;
         sceneSession->isEnableGestureBackHadSet_ = true;
-        UpdateGestureBackEnabled();
+        sceneSession->UpdateGestureBackEnabled();
     };
     PostTask(task, "SetGestureBackEnabled");
     return WMError::WM_OK;
