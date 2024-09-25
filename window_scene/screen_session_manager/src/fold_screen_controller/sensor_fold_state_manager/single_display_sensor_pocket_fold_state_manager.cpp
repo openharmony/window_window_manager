@@ -28,6 +28,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
 constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
@@ -38,6 +39,8 @@ constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
+constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
 } // namespace
 
 SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager() {}
@@ -46,6 +49,9 @@ SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateMa
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    if (IsTentMode()) {
+        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
+    }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -53,6 +59,9 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    if (IsTentMode()) {
+        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
+    }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -112,4 +121,50 @@ FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float ang
 }
 
 void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver() {}
+
+void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    bool isNotRepeated = isTent ^ IsTentMode();
+    if (!isNotRepeated) {
+        WLOGI("Repeat reporting tent mode:%{public}s, no processing", (isTent == true) ? "on" : "off");
+    }
+
+    SetTentMode(isTent);
+    if (foldScreenPolicy == nullptr) {
+        WLOGE("foldScreenPolicy is nullptr");
+        return;
+    }
+
+    if (isTent) {
+        FoldStatus currentState = GetCurrentState();
+        foldScreenPolicy->ChangeOnTentMode(currentState);
+    } else {
+        foldScreenPolicy->ChangeOffTentMode();
+    }
+}
+
+bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int hall)
+{
+    if (hall == HALL_FOLDED_THRESHOLD) {
+        WLOGI("Exit tent mode due to hall sensor report folded");
+        return true;
+    }
+    
+    if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
+        WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
+        return true;
+    }
+
+    return false;
+}
+
+void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float angle, int hall,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    if (TriggerTentExit(angle, hall)) {
+        FoldStatus nextState = GetNextFoldState(angle, hall);
+        HandleSensorChange(nextState, angle, foldScreenPolicy);
+        SetTentMode(false);
+    }
+}
 } // namespace OHOS::Rosen
