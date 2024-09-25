@@ -1251,19 +1251,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function 
 }
 
 /**
- * @tc.name: HandleReleaseForegroundSessionScreenLock
- * @tc.desc: test HandleReleaseForegroundSessionScreenLock
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleGetFocusSessionInfo
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC
@@ -2107,6 +2094,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleName
     data.WriteInt32(userId);
     data.WriteStringVector(bundleNameList);
     int res = stub_->HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleReleaseForegroundSessionScreenLock
+ * @tc.desc: test HandleReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }
