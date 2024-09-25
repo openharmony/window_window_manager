@@ -1129,6 +1129,9 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio02, Function | SmallTe
     displayInfo->SetDefaultVirtualPixelRatio(defautDensity);
     displayInfo->SetVirtualPixelRatio(density);
     ASSERT_EQ(density, window->GetVirtualPixelRatio(displayInfo));
+
+    window->useUniqueDensity_ = true;
+    ASSERT_EQ(window->virtualPixelRatio_, window->GetVirtualPixelRatio(displayInfo));
 }
 
 /**
@@ -1389,6 +1392,9 @@ HWTEST_F(WindowSceneSessionImplTest2, SetGrayScale03, Function | SmallTest | Lev
     ASSERT_NE(nullptr, session);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetGrayScale(0.5));
+
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
     std::vector<WindowType> types = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
