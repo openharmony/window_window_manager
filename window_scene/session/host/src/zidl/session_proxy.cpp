@@ -1884,7 +1884,7 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE),
