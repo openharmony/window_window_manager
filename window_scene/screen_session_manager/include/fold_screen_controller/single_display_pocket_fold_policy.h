@@ -40,6 +40,8 @@ public:
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
@@ -50,6 +52,8 @@ private:
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
     void SetdisplayModeChangeStatus(bool status) override;
+    void ChangeOnTentMode(FoldStatus currentState) override;
+    void ChangeOffTentMode() override;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
