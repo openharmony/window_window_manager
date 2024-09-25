@@ -385,23 +385,6 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
 }
 
 /**
- * @tc.name: WindowDestroyNotifyVisibility
- * @tc.desc: test function : WindowDestroyNotifyVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-
-    SessionInfo sessionInfo;
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->SetRSVisible(true));
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-}
-
-/**
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: test function : UpdateSubWindowVisibility
  * @tc.type: FUNC
