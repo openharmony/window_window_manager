@@ -27,6 +27,7 @@ class SessionPermission {
 public:
     static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
+    static bool IsSystemAppCall();
     static bool VerifySessionPermission();
     static bool JudgeCallerIsAllowedToUseSystemAPI();
     static bool IsShellCall();
