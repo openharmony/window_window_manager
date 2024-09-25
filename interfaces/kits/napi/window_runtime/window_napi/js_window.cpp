@@ -165,6 +165,7 @@ napi_value JsWindow::Recover(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRecover(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -172,6 +173,7 @@ napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveTo(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -179,6 +181,7 @@ napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveWindowTo(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
@@ -186,6 +189,7 @@ napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveWindowToAsync(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 {
     WLOGD("Resize");
@@ -193,6 +197,7 @@ napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnResize(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("Resize");
@@ -200,6 +205,7 @@ napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
@@ -214,6 +220,7 @@ napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowType(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::SetWindowMode(napi_env env, napi_callback_info info)
 {
     WLOGI("SetWindowMode");
@@ -784,6 +791,7 @@ napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnEnableDrag(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]GetWindowLimits");
@@ -791,6 +799,7 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowLimits");
@@ -1332,6 +1341,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1385,6 +1395,7 @@ napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1471,6 +1482,7 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
     };
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1509,6 +1521,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResize(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1564,6 +1577,7 @@ napi_value JsWindow::OnResize(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1656,6 +1670,7 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
     };
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1756,6 +1771,7 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -5713,6 +5729,26 @@ __attribute__((no_sanitize("cfi")))
     return objValue;
 }
 
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, windows.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create napi array");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < windows.size(); i++) {
+        auto window = windows[i];
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::DEFAULT, "window is null");
+        } else {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowObject(env, window));
+        }
+    }
+    return arrayValue;
+}
+
 bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
     uint32_t data = 0;
@@ -5823,6 +5859,7 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
     return complete;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5875,6 +5912,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6627,6 +6665,16 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
 
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "window is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

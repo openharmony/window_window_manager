@@ -676,6 +676,7 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
     auto task = [weakThis = wptr(this), ratio]() {
@@ -716,6 +717,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     return PostSyncTask(task, "SetAspectRatio");
 }
 
+/** @note @window.layout */
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -1027,6 +1029,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
     PostTask(task, __func__);
 }
 
+/** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason)
 {
     auto newWinRect = winRect_;
@@ -1070,6 +1073,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
         newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
 }
 
+/** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
@@ -1207,16 +1211,24 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ &&
-        specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
         SetIsDisplayStatusBarTemporarily(false);
-        isStatusBarVisible_ = true;
-        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
     return WSError::WS_OK;
+}
+
+void SceneSession::SetIsStatusBarVisible(bool isVisible)
+{
+    bool isNeedNotify = isStatusBarVisible_ != isVisible;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, need notify %{public}u",
+          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+    isStatusBarVisible_ = isVisible;
+    if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
+        specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+    }
 }
 
 void SceneSession::NotifyPropertyWhenConnect()
@@ -2027,6 +2039,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 }
 #endif // DEVICE_STATUS_ENABLE
 
+/** @note @window.layout */
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     const SizeChangeReason reason, const DisplayId DisplayId)
 {

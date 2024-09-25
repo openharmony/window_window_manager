@@ -70,7 +70,8 @@ using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconP
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
-using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
+    bool shouldBackToCaller)>;
 using NotifyClickModalSpecificWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
@@ -278,7 +279,6 @@ public:
     void SetSnapshotScale(const float snapshotScale);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     virtual WSError ProcessBackEvent(); // send back event to session_stage
-    WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
@@ -295,7 +295,7 @@ public:
     WSError PendingSessionToForeground();
     void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
         func);
-    WSError PendingSessionToBackgroundForDelegator();
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func);
