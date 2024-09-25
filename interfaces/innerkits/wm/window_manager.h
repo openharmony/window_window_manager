@@ -815,6 +815,13 @@ public:
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
+    /**
+     * @brief Release screen lock of foreground sessions.
+     *
+     * @return WM_OK means release success, others means failed.
+     */
+    WMError ReleaseForegroundSessionScreenLock();
+
 private:
     WindowManager();
     ~WindowManager();
