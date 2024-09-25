@@ -92,6 +92,7 @@ public:
         TRANS_ID_RECOVER_AND_RECONNECT_SCENE_SESSION,
 		TRANS_ID_RECOVER_AND_CONNECT_SPECIFIC_SESSION,
         TRANS_ID_GET_TOP_WINDOW_ID,
+        TRANS_ID_GET_PARENT_MAIN_WINDOW_ID,
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
@@ -108,8 +109,8 @@ public:
         TRANS_ID_GET_WINDOW_RECT,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO,
-        TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
+        TRANS_ID_GET_WINDOW_STYLE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
@@ -168,6 +169,8 @@ public:
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override { return WMError::WM_OK; }
+    // only main window,sub window and dialog window can use
+    WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) override { return WMError::WM_OK; }
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override {}
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override {}
@@ -254,10 +257,10 @@ public:
     }
     WMError GetWindowModeType(WindowModeType& windowModeType) override { return WMError::WM_OK; }
 
-    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
-
     virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
+
+    WMError GetWindowStyleType(WindowStyleType& windowStyleType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

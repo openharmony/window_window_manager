@@ -749,6 +749,21 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
     return true;
 }
 
+bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
+{
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, value, "duration", &jsDuration);
+    if (GetType(env, jsDuration) != napi_undefined) {
+        int32_t duration = ROTATE_ANIMATION_DURATION;
+        if (!ConvertFromJsValue(env, jsDuration, duration)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
+            return false;
+        }
+        config.duration_ = duration;
+    }
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
 {
     if (array == nullptr) {
@@ -1179,6 +1194,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_DIALOG)));
     napi_set_named_property(env, objValue, "TYPE_WINDOW_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
+    napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;

@@ -509,6 +509,8 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
     hdmiScreenCount_ = hdmiScreenCount_ > 0 ? hdmiScreenCount_ - 1 : 0;
     NotifyCaptureStatusChanged();
     displayNode->RemoveFromTree();
+    mirrorSession->ReleaseDisplayNode();
+    displayNode = nullptr;
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");

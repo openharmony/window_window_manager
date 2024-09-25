@@ -469,6 +469,15 @@ int SceneSessionManagerLiteStub::HandleGetWindowModeType(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
+{
+    auto persistentId = data.ReadInt32();
+    WSError errCode = RaiseWindowToTop(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+
 int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetMainWinodowInfo lite");
@@ -498,6 +507,31 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    sptr<IRemoteObject> collaboratorObject = data.ReadRemoteObject();
+    if (collaboratorObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaboratorObject is null.");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(collaboratorObject);
+    WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    WSError ret = UnregisterIAbilityManagerCollaborator(type);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
@@ -534,39 +568,6 @@ int SceneSessionManagerLiteStub::HandleClearMainSessions(MessageParcel& data, Me
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
-{
-    auto persistentId = data.ReadInt32();
-    WSError errCode = RaiseWindowToTop(persistentId);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "called.");
-    int32_t type = data.ReadInt32();
-    sptr<IRemoteObject> collaboratorObject = data.ReadRemoteObject();
-    if (collaboratorObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "collaboratorObject is null.");
-        return ERR_NULL_OBJECT;
-    }
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
-        iface_cast<AAFwk::IAbilityManagerCollaborator>(collaboratorObject);
-    WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "called.");
-    int32_t type = data.ReadInt32();
-    WSError ret = UnregisterIAbilityManagerCollaborator(type);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

@@ -1160,7 +1160,7 @@ void WindowImpl::SetSystemConfig()
 
 KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 {
-    return windowSystemConfig_.keyboardAnimationConfig_;
+    return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
 }
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)

@@ -112,7 +112,7 @@ public:
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
     void UpdateDensity() override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     WSError UpdateOrientation() override;
@@ -269,12 +269,19 @@ protected:
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void RegisterFrameLayoutCallback();
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
+    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+
+    /**
+     * Sub Window
+     */
+    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
+    void DestroySubWindow();
 
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
@@ -291,6 +298,9 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
+    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
+    // protect windowExtensionSessionSet_
+    static std::shared_mutex windowExtensionSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -373,7 +383,7 @@ private:
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
