@@ -243,7 +243,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled02, Function | SmallTest |
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     WMError retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_OK);
-    ASSERT_EQ(true, window->property_->GetDragEnable());
+    ASSERT_EQ(true, window->property_->GetDragEnabled());
 }
 
 /**
@@ -1633,6 +1633,8 @@ HWTEST_F(WindowSessionImplTest, UpdateProperty01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     WMError res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
