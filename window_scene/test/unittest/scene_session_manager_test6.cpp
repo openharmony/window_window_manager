@@ -1853,7 +1853,8 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     bool needRemoveSession = true;
     bool isSaveSnapshot = true;
     bool isForceClean = true;
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
@@ -1861,7 +1862,8 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
 }
 
 /**
