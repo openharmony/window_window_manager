@@ -1178,7 +1178,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, Function | SmallTest 
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pc";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1187,7 +1187,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, Function | SmallTest 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_OK, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pc";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1213,7 +1213,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcSubWindow, Function | SmallTest |
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pc";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1222,7 +1222,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcSubWindow, Function | SmallTest |
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pc";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1248,7 +1248,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadMainWindow, Function | SmallTest
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1257,7 +1257,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadMainWindow, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1266,7 +1266,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadMainWindow, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
@@ -1293,7 +1293,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadSubWindow, Function | SmallTest 
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1302,7 +1302,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadSubWindow, Function | SmallTest 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
@@ -1311,7 +1311,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadSubWindow, Function | SmallTest 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
@@ -1338,7 +1338,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingMainWindow, Function | S
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1348,7 +1348,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingMainWindow, Function | S
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1358,7 +1358,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingMainWindow, Function | S
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1386,7 +1386,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingSubWindow, Function | Sm
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1396,7 +1396,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingSubWindow, Function | Sm
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
@@ -1406,7 +1406,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingSubWindow, Function | Sm
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WindowSceneSessionImpl->windowSystemConfig_.uiType_ = "pad";
     WindowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
