@@ -8099,7 +8099,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
     auto task = [this, persistentId] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetGestureBackEnableFlag()) {
-            TLOGN(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
+            TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
@@ -8117,7 +8117,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
             needEnableGestureBack = true;
         }
         if (needEnableGestureBack == lastGestureBackEnable_) { 
-            TLOGN(WmsLogTag::WMS_IMMS, "gestureback enable equals last. Id: %{public}d, status: %{public}d", 
+            TLOGNI(WmsLogTag::WMS_IMMS, "gestureback enable equals last. Id: %{public}d, status: %{public}d", 
                 persistentId, needEnableGestureBack);
             return;
         }
