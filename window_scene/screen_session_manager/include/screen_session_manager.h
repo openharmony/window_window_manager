@@ -218,6 +218,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    bool GetTentMode();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -232,6 +233,7 @@ public:
     int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
+    void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterExtendSettingDpiObserver();
     void RegisterSettingRotationObserver();

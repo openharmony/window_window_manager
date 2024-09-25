@@ -29,12 +29,15 @@ public:
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void RegisterApplicationStateObserver() override;
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
     int allowUserSensorForLargeFoldDevice = 0;
+    bool TriggerTentExit(float angle, int hall);
+    void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
 };
 } // namespace Rosen
 } // namespace OHOS

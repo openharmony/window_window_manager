@@ -1280,8 +1280,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
             return nullptr;
         }
     }
-    ScreenId rsId = screenId;
-    screenIdManager_.UpdateScreenId(rsId, screenId);
+    screenIdManager_.UpdateScreenId(screenId, screenId);
 
     ScreenProperty property;
     CreateScreenProperty(screenId, property);
@@ -1298,6 +1297,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         /* folder screen outer screenId is 5 */
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
+            ScreenSensorConnector::SubscribeTentSensor();
         }
         if (screenId == SCREEN_ID_MAIN && !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             return nullptr;
@@ -4575,6 +4575,18 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
     return foldScreenController_->GetFoldStatus();
 }
 
+bool ScreenSessionManager::GetTentMode()
+{
+    if (!g_foldScreenFlag) {
+        return false;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
+        return false;
+    }
+    return foldScreenController_->GetTentMode();
+}
+
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
     if (!g_foldScreenFlag) {
@@ -5525,5 +5537,14 @@ void ScreenSessionManager::OnScreenExtendChange(ScreenId mainScreenId, ScreenId 
         return;
     }
     clientProxy_->OnScreenExtendChanged(mainScreenId, extendScreenId);
+}
+
+void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
+{
+    if (!foldScreenController_) {
+        TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
+        return;
+    }
+    foldScreenController_->OnTentModeChanged(isTentMode);
 }
 } // namespace OHOS::Rosen
