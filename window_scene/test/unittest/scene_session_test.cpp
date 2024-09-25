@@ -746,7 +746,6 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     scensession->surfaceNode_ = surfaceNode;
-    EXPEXT_EQ(scensession->Getsessionproperty(), nullptr);
     scensession->SetPrivacyMode(false);
     ASSERT_EQ(false, scensession->property_->GetPrivacyMode());
     ASSERT_EQ(false, scensession->property_->GetSystemPrivacyMode());
@@ -773,7 +772,6 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     scensession->surfaceNode_ = surfaceNode;
-    EXPEXT_EQ(scensession->Getsessionproperty(), nullptr);
     scensession->SetPrivacyMode(true);
     ASSERT_EQ(true, scensession->property_->GetPrivacyMode());
     ASSERT_EQ(true, scensession->property_->GetSystemPrivacyMode());
