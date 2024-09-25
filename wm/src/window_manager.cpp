@@ -1328,5 +1328,13 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
+WMError WindowManager::ReleaseForegroundSessionScreenLock()
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS
