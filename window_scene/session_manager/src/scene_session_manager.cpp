@@ -10454,7 +10454,7 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
     SetSystemAnimatedScenes(enterRecent ?
         SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
     auto task = [this] {
-        for (auto persistentId : gestureBackEnableListenerSet_) {
+        for (auto persistentId : gestureBackEnableWindowIdSet_) {
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
                 continue;
