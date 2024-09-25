@@ -1255,7 +1255,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePadMainWindow, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    ret = windowSceneSessionImpl->Restore();
+    auto ret = windowSceneSessionImpl->Restore();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     WindowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
