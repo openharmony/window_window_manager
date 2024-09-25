@@ -63,11 +63,12 @@ export struct PiPContent {
       return;
     }
     this.useNode = true;
-    if (this.xComponent.getParent() === null || this.xComponent.getParent() === undefined) {
+    let parent: FrameNode | null = this.xComponent.getParent();
+    if (parent === null || parent === undefined) {
       pip.setPipNodeType(this.xComponent, false);
     } else {
       pip.setPipNodeType(this.xComponent, true);
-      this.xComponent.getParent().removeChild(this.xComponent);
+      parent.removeChild(this.xComponent);
     }
     pip.setTypeNodeEnabled();
     this.mXCNodeController = new XCNodeController(this.xComponent);
