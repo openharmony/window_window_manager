@@ -462,6 +462,50 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetDialogSessionMap02
+ * @tc.desc: GetDialogSessionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTest | Level2)
+{
+    std::map<int32_t, sptr<SceneSession>> sessionMap;
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    if (!sceneSession) {
+        GTEST_LOG_(INFO) << "sceneSession is nullptr";
+        return;
+    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    if (!property) {
+        GTEST_LOG_(INFO) << "property is nullptr";
+        return;
+    }
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sceneSession->SetSessionProperty(property);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    if (!session) {
+        GTEST_LOG_(INFO) << "session is nullptr";
+        return;
+    }
+    sceneSession->SetParentSession(session);
+    sessionMap.emplace(1, sceneSession);
+    auto sessionList = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(1, sessionList.size());
+    sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
+    auto sessionList1 = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(1, sessionList1.size());
+    sceneSession->SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->SetParentSession(nullptr);
+    auto sessionList2 = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(0, sessionList2.size());
+}
+
+/**
  * @tc.name: UpdatePointerAreas
  * @tc.desc: UpdatePointerAreas
  * @tc.type: FUNC

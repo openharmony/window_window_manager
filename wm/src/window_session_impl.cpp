@@ -1712,15 +1712,23 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
-        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    WMError modalRet = (isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    modalRet = (isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL));
+    return modalRet;
 }
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)

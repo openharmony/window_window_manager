@@ -557,7 +557,11 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
-        modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+        if (WindowHelper::IsApplicationModalSubWindow(windowType, property->GetWindowFlags())) {
+            modalType = SubWindowModalType::TYPE_APPLICATION_MODALITY;
+        } else {
+            modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+        }
     } else if (WindowHelper::IsSubWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_NORMAL;
     }

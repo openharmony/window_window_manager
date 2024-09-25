@@ -294,15 +294,22 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
     if (property != nullptr && property->IsTopmost()) {
         isTopmostModalSubWindow = true;
     }
+    SubWindowModalType modalType = session->GetSubWindowModalType();
     if (auto iter = dialogMap.find(mainSession->GetPersistentId());
         iter != dialogMap.end() && iter->second != nullptr) {
         auto& targetSession = iter->second;
-        if (targetSession->GetSessionProperty() &&
-            targetSession->GetSessionProperty()->IsTopmost() &&
-            !isTopmostModalSubWindow) {
-            return;
-        }
-        if (targetSession->GetZOrder() > session->GetZOrder()) {
+        SubWindowModalType targetModalType = targetSession->GetSubWindowModalType();
+        if (modalType == targetModalType) {
+            if (targetSession->GetSessionProperty() &&
+                targetSession->GetSessionProperty()->IsTopmost() &&
+                !isTopmostModalSubWindow) {
+                return;
+            }
+            if (targetSession->GetZOrder() > session->GetZOrder()) {
+                return;
+            }
+        } else if (modalType == SubWindowModalType::TYPE_WINDOW_MODALITY &&
+                   targetModalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
             return;
         }
     }
@@ -311,24 +318,88 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
         session->GetPersistentId(), mainSession->GetPersistentId());
 }
 
-std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSessionMap(
-    const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
+static void UpdateCallingPidMapItem(const sptr<SceneSession>& session,
+    std::map<int32_t, sptr<SceneSession>>& callingPidMap)
 {
-    std::map<int32_t, sptr<SceneSession>> dialogMap;
+    auto sessionPid = session->GetCallingPid();
+    auto targetSession = session->GetParentSession();
+    while (targetSession) {
+        auto targetSessionPid = targetSession->GetCallingPid();
+        if (sessionPid != targetSessionPid) {
+            callingPidMap[targetSessionPid] = session;
+        }
+        targetSession = targetSession->GetParentSession();
+    }
+}
+
+static void AddCallingPidMapItem(const sptr<SceneSession>& session,
+    std::map<int32_t, sptr<SceneSession>>& callingPidMap)
+{
+    auto sessionCallingPid = session->GetCallingPid();
+    auto callingPid = callingPidMap.find(sessionCallingPid);
+    if (callingPid == callingPidMap.end()) {
+        callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
+        UpdateCallingPidMapItem(session, callingPidMap);
+        TLOGD(WmsLogTag::WMS_DIALOG,
+            "Add callingPid session, sessionCallingPid: %{public}d, sessionId: %{public}d",
+            sessionCallingPid, session->GetPersistentId());
+    } else {
+        if (callingPid->second->GetZOrder() < session->GetZOrder()) {
+            callingPidMap[sessionCallingPid] = session;
+            UpdateCallingPidMapItem(session, callingPidMap);
+            TLOGD(WmsLogTag::WMS_DIALOG,
+                "Update callingPid session, sessionCallingPid: %{public}d, sessionId: %{public}d",
+                sessionCallingPid, session->GetPersistentId());
+        }
+    }
+}
+
+static void UpdateDialogSessionMap(const std::map<int32_t, sptr<SceneSession>>& sessionMap,
+    std::map<int32_t, sptr<SceneSession>>& callingPidMap, std::map<int32_t, sptr<SceneSession>>& dialogMap)
+{
     for (const auto& elem: sessionMap) {
         const auto& session = elem.second;
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
-        bool isModalSubWindow = false;
-        const auto& property = session->GetSessionProperty();
-        if (property != nullptr) {
-            isModalSubWindow = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-        }
-        if (isModalSubWindow || session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            AddDialogSessionMapItem(session, dialogMap);
+        auto callingPid = callingPidMap.find(session->GetCallingPid());
+        if (callingPid != callingPidMap.end()) {
+            dialogMap[session->GetPersistentId()] = callingPid->second;
+            TLOGD(WmsLogTag::WMS_DIALOG,
+                "Update dialog session, sessionId: %{public}d, callingPidSessionId: %{public}d",
+                session->GetPersistentId(), callingPid->second->GetPersistentId());
         }
     }
+}
+
+std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSessionMap(
+    const std::map<int32_t, sptr<SceneSession>>& sessionMap) const
+{
+    std::map<int32_t, sptr<SceneSession>> dialogMap;
+    std::map<int32_t, sptr<SceneSession>> callingPidMap;
+    bool modalUpdateFlag = false;
+    for (const auto& elem: sessionMap) {
+        const auto& session = elem.second;
+        if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+            continue;
+        }
+        SubWindowModalType modalType = session->GetSubWindowModalType();
+        if (modalType == SubWindowModalType::TYPE_DIALOG ||
+            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
+            AddDialogSessionMapItem(session, dialogMap);
+        }
+        if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
+            AddDialogSessionMapItem(session, dialogMap);
+            modalUpdateFlag = true;
+            AddCallingPidMapItem(session, callingPidMap);
+        }
+    }
+
+    if (!modalUpdateFlag) {
+        return dialogMap;
+    }
+    UpdateDialogSessionMap(sessionMap, callingPidMap, dialogMap);
+
     return dialogMap;
 }
 
