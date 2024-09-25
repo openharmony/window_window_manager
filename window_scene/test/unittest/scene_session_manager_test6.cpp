@@ -1755,7 +1755,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
     SessionInfo info1;
     info1.persistentId_ = 1;
     info1.isPersistentRecover_ = false;
-    auto windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
 
     SessionInfo info2;
     info2.abilityName_ = "RequestSceneSession";
