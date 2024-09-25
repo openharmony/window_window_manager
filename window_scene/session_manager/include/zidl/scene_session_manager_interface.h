@@ -115,13 +115,15 @@ public:
         TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST,
         TRANS_ID_SET_PROCESS_WATERMARK,
+        TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
-    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
 
@@ -277,6 +279,8 @@ public:
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
+        std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
