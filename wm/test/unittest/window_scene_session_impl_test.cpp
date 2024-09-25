@@ -1260,20 +1260,18 @@ HWTEST_F(WindowSceneSessionImplTest, CheckParmAndPermission, Function | SmallTes
  */
 HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlurStyle, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetBackdropBlurStyle");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     window->property_->SetDisplayId(3);
-
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    } else {
-        ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
-    }
+    
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
+    window->Destroy(true);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
+    window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
 }
 
 /*
@@ -1304,18 +1302,15 @@ HWTEST_F(WindowSceneSessionImplTest, SetTurnScreenOn, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetBlur");
-
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    } else {
-        window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
-        ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
-    }
+    
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(0.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBlur(1.0));
 }
 
 /*
@@ -1521,16 +1516,31 @@ HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, Function | SmallTest | Level
  */
 HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetShadowOffsetX");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
-    }
+
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowOffsetX(1.0));
+}
+
+/*
+ * @tc.name: SetShadowOffsetY
+ * @tc.desc: SetShadowOffsetY test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetShadowOffsetY");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowOffsetY(1.0));
 }
 
 /*
