@@ -3417,6 +3417,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowMask(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
             return HandleActionUpdateTopmost(property, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
+            return HandleActionUpdateMainWindowTopmost(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateModeSupportInfo(property, action);
         default:
@@ -3714,6 +3716,18 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     }
 
     SetTopmost(property->IsTopmost());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    SetMainWindowTopmost(property->IsMainWindowTopmost());
     return WMError::WM_OK;
 }
 
@@ -4815,6 +4829,7 @@ void SceneSession::UnregisterSessionChangeListeners()
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
+            session->sessionChangeCallback_->onSessionMainWindowTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;

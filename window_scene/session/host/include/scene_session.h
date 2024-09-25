@@ -111,6 +111,7 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
+        NotifySessionTopmostChangeFunc onSessionMainWindowTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
@@ -246,6 +247,8 @@ public:
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
+    virtual WSError SetMainWindowTopmost(bool mainWindowTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual bool IsMainWindowTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
 
     /**
@@ -559,6 +562,8 @@ private:
     WMError HandleActionUpdateWindowMask(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
+    WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

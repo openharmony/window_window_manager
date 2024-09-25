@@ -81,6 +81,8 @@ public:
     void SetWindowFlags(uint32_t flags);
     void SetTopmost(bool topmost);
     bool IsTopmost() const;
+    void SetMainWindowTopmost(bool mainWindowTopmost);
+    bool IsMainWindowTopmost() const;
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
@@ -237,6 +239,7 @@ private:
     bool WriteActionUpdateTextfieldAvoidInfo(Parcel& parcel);
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
+    bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateModeSupportInfo(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
@@ -260,6 +263,7 @@ private:
     void ReadActionUpdateTextfieldAvoidInfo(Parcel& parcel);
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
+    void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
@@ -275,6 +279,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool topmost_ = false;
+    bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };

@@ -473,6 +473,14 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
+napi_value JsWindow::SetMainWindowTopmost(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetMainWindowTopmost");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetMainWindowTopmost(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WLOGI("SetKeepScreenOn");
@@ -3572,6 +3580,60 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTopmost",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetMainWindowTopmost(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]SetMainWindowTopmost is not allowed since window is not main window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY,
+            "Argc is invalid: %{public}zu. Failed to convert parameter to main window topmost", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool mainWindowTopmost = false;
+    napi_get_value_bool(env, argv[0], &mainWindowTopmost);
+
+    wptr<Window> weakToken(windowToken_);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, mainWindowTopmost, errCodePtr]() {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(mainWindowTopmost));
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set main window topmost end",
+            window->GetWindowId(), window->GetWindowName().c_str());
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            if (*errCodePtr == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Window set main window topmost failed"));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetMainWindowTopmost",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -6771,6 +6833,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setBrightness", moduleName, JsWindow::SetBrightness);
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
+    BindNativeFunction(env, object, "setMainWindowTopmost", moduleName, JsWindow::SetMainWindowTopmost);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);
