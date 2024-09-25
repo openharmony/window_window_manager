@@ -390,23 +390,6 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    WSError result = DoPendingSessionActivationOne(abilitySessionInfo, data);
-    if (result != WSError::WS_OK) {
-        return result;
-    }
-    result = DoPendingSessionActivationTwo(abilitySessionInfo, data);
-    if (result != WSError::WS_OK) {
-        return result;
-    }
-    return SendRequest(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION, data, reply, option);
-}
-
-WSError SessionProxy::DoPendingSessionActivationOne(sptr<AAFwk::SessionInfo> abilitySessionInfo, MessageParcel &data)
-{
-    if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -436,15 +419,6 @@ WSError SessionProxy::DoPendingSessionActivationOne(sptr<AAFwk::SessionInfo> abi
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    return WSError::WS_OK;
-}
-
-WSError SessionProxy::DoPendingSessionActivationTwo(sptr<AAFwk::SessionInfo> abilitySessionInfo, MessageParcel &data)
-{
-    if (abilitySessionInfo == nullptr) {
-        WLOGFE("abilitySessionInfo is null");
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (abilitySessionInfo->startSetting) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startSetting.get())) {
             WLOGFE("Write startSetting failed");
@@ -471,7 +445,7 @@ WSError SessionProxy::DoPendingSessionActivationTwo(sptr<AAFwk::SessionInfo> abi
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    return WSError::WS_OK;
+    return SendRequest(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION, data, reply, option);
 }
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)

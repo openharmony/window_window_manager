@@ -511,14 +511,21 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    abilitySessionInfo->processOptions.reset(processOptions);
-    if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground) ||
-        !data.ReadBool(abilitySessionInfo->isAtomicService) ||
-        !data.ReadBool(abilitySessionInfo->isBackTransition) ||
-        !data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read some bool failed.");
-        return ERR_INVALID_VALUE;
+    if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->isAtomicService)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearInNotShowRecent failed.");
+        return ERR_INVALID_DATA;
     }
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
