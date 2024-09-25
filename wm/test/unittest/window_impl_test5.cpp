@@ -516,7 +516,7 @@ HWTEST_F(WindowImplTest5, UnregisterListener01, Function | SmallTest | Level1)
     sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener2, nullptr);
     window->RegisterOccupiedAreaChangeListener(listener2);
-    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(listener2),WMError::WM_OK);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(listener2), WMError::WM_OK);
     window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
 }
 
@@ -537,7 +537,7 @@ HWTEST_F(WindowImplTest5, UnregisterListener02, Function | SmallTest | Level1)
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
     sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener2, nullptr);
-    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(nullptr),WMError::WM_INVALID_PARAM);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(nullptr), WMError::WM_INVALID_PARAM);
     window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
 }
 
