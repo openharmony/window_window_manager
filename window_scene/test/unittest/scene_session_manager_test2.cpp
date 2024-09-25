@@ -2154,7 +2154,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTes
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    ssm_->NotifyEnterRecent(false);
+    ssm_->NotifyEnterRecentTask(false);
     ASSERT_EQ(ssm_->enterRecent_.load(), false);
     sceneSession->UpdateFocus(true);
     ASSERT_EQ(sceneSession->IsFocused(), true);
