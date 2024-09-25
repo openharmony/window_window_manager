@@ -356,8 +356,7 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::str
 void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName,
     GestureBackType type)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s type:%{public}u",
-        enable, bundleName.c_str(), type);
+    TLOGI(WmsLogTag::WMS_MAIN, "enable: %{public}d bundleName: %{public}s", enable, bundleName.c_str());
     auto task =
         [enable, bundleName, type, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
