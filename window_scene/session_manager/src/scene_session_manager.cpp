@@ -8115,7 +8115,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
             enterRecent_.load() || !sceneSession->IsFocused()) {
             needEnableGestureBack = true;
         }
-        bool bundleName = session->GetSessionInfo().bundleName_;
+        auto bundleName = sceneSession->GetSessionInfo().bundleName_;
         if (gestureNavigationEnabledChangeFunc_ != nullptr) {
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack, bundleName, GestureBackType::GESTURE_SIDE);
         } else {

@@ -4077,6 +4077,7 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
@@ -4093,7 +4094,8 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 bool WindowSceneSessionImpl::GetGestureBackEnabled() const
 {
     if (windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return true;
     }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
