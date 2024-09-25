@@ -468,7 +468,7 @@ WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     return wmsProxy->GetTopWindowId(mainWinId, topWinId);
 }
 
-WMError WindowAdapter::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+WMError WindowAdapter::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
