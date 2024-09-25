@@ -1566,17 +1566,6 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: release screen lock of foreground session
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
-{
-    auto result = ssm_->ReleaseForegroundSessionScreenLock();
-    ASSERT_EQ(result, WMError::WM_OK);
-}
-
-/**
  * @tc.name: SkipSnapshotForAppProcess
  * @tc.desc: add or cancel snapshot skip for app process
  * @tc.type: FUNC
@@ -1867,6 +1856,17 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     auto result = ssm_->GetRootMainWindowId(sceneSession2->GetPersistentId(), hostWindowId);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 }
 } // namespace Rosen

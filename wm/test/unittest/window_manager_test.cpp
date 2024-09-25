@@ -824,17 +824,6 @@ HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: check ReleaseForegroundSessionScreenLock
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
-{
-    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
-    ASSERT_EQ(ret, WMError::WM_OK);
-}
-
-/**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC
@@ -1460,6 +1449,17 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTe
     sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
     WindowManager::GetInstance().NotifyWindowPidVisibilityChanged(info);
     ASSERT_NE(info, nullptr);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 } // namespace Rosen
