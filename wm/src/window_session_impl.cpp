@@ -1914,7 +1914,6 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
     if (listener == nullptr) {
