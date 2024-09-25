@@ -10367,7 +10367,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
-    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}" PRIu64 " windowNumber %{public}d x %{public}d y %{public}d",
           displayId, windowNumber, x, y);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
@@ -10393,8 +10393,8 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         bool isRsVisible = session->GetRSVisible();
         WSRect windowRect = session->GetSessionRect();
         bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
-        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
-               "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}" PRIu64
+               " isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
                session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
                sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
         if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
