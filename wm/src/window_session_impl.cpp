@@ -1499,6 +1499,25 @@ bool WindowSessionImpl::IsTopmost() const
     return property_->IsTopmost();
 }
 
+/** @note @window.hierarchy */
+WMError WindowSessionImpl::SetMainWindowTopmost(bool mainWindowTopmost)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", mainWindowTopmost);
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetMainWindowTopmost(mainWindowTopmost);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
+}
+
+bool WindowSessionImpl::IsMainWindowTopmost() const
+{
+    return property_->IsMainWindowTopmost();
+}
+
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     WLOGFD("%{public}d", dragEnabled);
