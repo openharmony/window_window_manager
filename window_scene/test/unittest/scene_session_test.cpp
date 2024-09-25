@@ -1852,7 +1852,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     scensession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
 
     scensession->SetSessionProperty(property);
