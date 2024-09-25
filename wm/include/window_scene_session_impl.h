@@ -74,7 +74,7 @@ public:
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     // only main window, sub window, dialog window can use
-    static uint32_t GetParentMainWindowId(int32_t windowId);
+    static int32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
