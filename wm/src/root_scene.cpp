@@ -29,7 +29,6 @@
 #include "singleton.h"
 #include "singleton_container.h"
 
-#include "anr_manager.h"
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
 
@@ -100,29 +99,6 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     RegisterInputEventListener();
-    DelayedSingleton<ANRManager>::GetInstance()->Init();
-    DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
-        WLOGFD("Receive anr notice enter");
-        AppExecFwk::AppFaultDataBySA faultData;
-        faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
-        faultData.pid = pid;
-        faultData.errorObject.name = AppExecFwk::AppFreezeType::APP_INPUT_BLOCK;
-        faultData.errorObject.message = "User input does not respond normally, report by sceneBoard.";
-        faultData.errorObject.stack = "";
-        if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
-            ret != 0) {
-            WLOGFE("NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
-        }
-        WLOGFD("Receive anr notice leave");
-    }));
-    DelayedSingleton<ANRManager>::GetInstance()->SetAppInfoGetter(
-        [](int32_t pid, std::string& bundleName, int32_t uid) {
-            int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetBundleNameByPid(
-                pid, bundleName, uid);
-            if (ret != 0) {
-                WLOGFE("GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
-            }
-        });
 }
 
 void RootScene::SetDisplayOrientation(int32_t orientation)
