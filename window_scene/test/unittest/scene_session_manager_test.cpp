@@ -127,8 +127,10 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
     info.bundleName_ = "SetBrightness1";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    WSError result = ssm_->SetBrightness(sceneSession, 0.5);
+    float brightness = 0.5;
+    WSError result = ssm_->SetBrightness(sceneSession, brightness);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_NE(brightness, ssm_->GetDisplayBrightness());
 }
 
 /**

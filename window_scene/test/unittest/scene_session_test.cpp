@@ -416,10 +416,12 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
+    ASSERT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    ASSERT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(true));
+    ASSERT_EQ(true, scensession->IsKeepScreenOn());
     ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(false));
     ASSERT_EQ(false, scensession->IsKeepScreenOn());
 }
