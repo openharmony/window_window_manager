@@ -453,11 +453,6 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
 
-    /*
-     * Gesture Back
-     */
-    void UpdateGestureBackEnableStatus(bool enable);
-
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -663,9 +658,8 @@ private:
     /*
      * Gesture Back
      */
-    void UpdateGestureBackEnabled(const int32_t persistentId);
-    std::set<int32_t> gestureBackEnableListenerSet_;
-    bool lastGestureBackEnable_{true};
+    void UpdateGestureBackEnabled(int32_t persistentId);
+    std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;

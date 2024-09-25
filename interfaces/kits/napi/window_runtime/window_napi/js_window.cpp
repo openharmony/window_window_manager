@@ -6621,8 +6621,8 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     bool enable = true;
-    napi_get_value_bool(env, argv[0], &enable);
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]enable: %{public}d", static_cast<int32_t>(enable));
+    napi_get_value_bool(env, argv[INDEX_ZERO], &enable);
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]enable: %{public}d", enable);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
