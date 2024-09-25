@@ -170,6 +170,8 @@ public:
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
     static void UnmarshallingWindowMask(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingMainWindowTopmost(Parcel& parcel) const;
+    static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
 
