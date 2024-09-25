@@ -3138,7 +3138,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
 }
 
 static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
-    sptr<SceneSession> session)
+    const sptr<SceneSession>& session)
 {
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();

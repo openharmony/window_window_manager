@@ -24,10 +24,10 @@
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "start_window_option.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
