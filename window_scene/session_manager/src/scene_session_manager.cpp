@@ -3806,7 +3806,8 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
             }
             auto res = sceneSession->keepScreenLock_->UnLock();
             if (res != ERR_OK) {
-                TLOGNE(WmsLogTag::DEFAULT, "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
+                TLOGNE(WmsLogTag::DEFAULT,
+                    "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
                     persistentId, sceneSession->GetWindowName().c_str(), res);
                 return WMError::WM_ERROR_INVALID_OPERATION;
             }
@@ -3818,8 +3819,8 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
     return taskScheduler_->PostSyncTask(task, __func__);
 #else
     TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
-#endif
     return WMError::WM_OK;
+#endif
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
