@@ -1528,6 +1528,14 @@ public:
      * @return WMError
      */
     virtual WMError Recover() { return WMError::WM_OK; }
+
+    /**
+     * @brief restore the main window. It is called by ACE when restore button is clicked.
+     *
+     * @return WMError
+     */
+    virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *

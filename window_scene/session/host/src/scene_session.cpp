@@ -4365,6 +4365,23 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnRestoreMainWindow()
+{
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
+            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnRestoreMainWindow");
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetForceHideState(ForceHideState forceHideState)
 {
     forceHideState_ = forceHideState;
@@ -4822,6 +4839,7 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
+            session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();
     };
