@@ -6604,28 +6604,28 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
+    size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
+    if (argc != INDEX_ONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]set gesture back enable is not allowed since invalid window type");
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]set failed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     bool enable = true;
     napi_get_value_bool(env, argv[0], &enable);
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]set gesture back enable to %{public}d", static_cast<int32_t>(enable));
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]enable: %{public}d", static_cast<int32_t>(enable));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Window gesture back set enabled failed, ret = %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     return NapiGetUndefined(env);
@@ -6634,12 +6634,12 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
 napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI] enable is not allowed since invalid window type");
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI] get failed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     bool isEnabled = windowToken_->GetGestureBackEnabled();
