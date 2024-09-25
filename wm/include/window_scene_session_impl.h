@@ -145,6 +145,7 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    bool IsPcOrPadCapabilityEnabled() const override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
@@ -242,6 +243,7 @@ private:
      * Sub Window
      */
     void AddSubWindowMapForExtensionWindow();
+    WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

@@ -42,9 +42,6 @@ ohos_shared_library("intention_event_anr_manager") {
     "../dfx/src/dfx_hisysevent.cpp",
     "../framework/anr_handler/src/anr_handler.cpp",
     "../utils/src/util.cpp",
-    "anr_manager/src/anr_manager.cpp",
-    "event_stage/src/event_stage.cpp",
-    "timer_manager/src/timer_manager.cpp",
   ]
 
   public_configs = [ ":intention_event_public_config" ]
