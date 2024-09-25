@@ -56,6 +56,7 @@ WSError ScbDumpSubscriber::Publish(const std::string& cmd)
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSticky(false);
     publishInfo.SetOrdered(false);
+    publishInfo.SetBundleName("com.ohos.sceneboard");
 
     // publish the common event
     bool ret = EventFwk::CommonEventManager::PublishCommonEvent(commonEventData, publishInfo, nullptr);
@@ -71,6 +72,7 @@ std::shared_ptr<ScbDumpSubscriber> ScbDumpSubscriber::Subscribe()
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("com.ohos.sceneboard.debug.event.response");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPublisherBundleName("com.ohos.sceneboard");
     auto scbSubscriber = std::make_shared<ScbDumpSubscriber>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(scbSubscriber);
     return scbSubscriber;

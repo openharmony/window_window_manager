@@ -27,7 +27,6 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
-#include "anr_manager.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "util.h"
@@ -981,8 +980,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
@@ -1179,7 +1176,6 @@ WSError Session::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1216,7 +1212,6 @@ WSError Session::Disconnect(bool isFromClient)
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
     }
-    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1617,12 +1612,13 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     pendingSessionToBackgroundForDelegatorFunc_ = func;
 }
 
-WSError Session::PendingSessionToBackgroundForDelegator()
+WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), shouldBackToCaller);
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(info);
+        pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
     }
     return WSError::WS_OK;
 }
@@ -1895,12 +1891,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFW("InputTracking id:%{public}d, The pointerEvent does not report normally,"
-            "bundleName:%{public}s not reponse, pid:%{public}d, persistentId:%{public}d",
-            pointerEvent->GetId(), callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -1943,12 +1933,6 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
 {
     WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, "
-            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
-            callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -2553,6 +2537,7 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+/** @note @window.layout */
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
@@ -2580,6 +2565,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     }
 }
 
+/** @note @window.layout */
 void Session::RectCheckProcess()
 {
     if (!(IsSessionForeground() || isVisible_)) {
@@ -2622,6 +2608,7 @@ void Session::RectCheckProcess()
     }
 }
 
+/** @note @window.layout */
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2633,6 +2620,7 @@ void Session::SetSessionRect(const WSRect& rect)
     RectCheckProcess();
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
@@ -2646,11 +2634,13 @@ WSRect Session::GetSessionGlobalRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetLastLayoutRect() const
 {
     return lastLayoutRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetLayoutRect() const
 {
     return layoutRect_;
@@ -2741,14 +2731,6 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
-}
-
-WSError Session::MarkProcessed(int32_t eventId)
-{
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("InputTracking persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
-    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)

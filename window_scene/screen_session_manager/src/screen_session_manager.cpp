@@ -3119,7 +3119,11 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
     }
     ScreenId uniqueScreenId = screenIds[0];
     auto uniqueScreen = GetScreenSession(uniqueScreenId);
-    if (uniqueScreen != nullptr && uniqueScreen->GetVirtualScreenFlag() == VirtualScreenFlag::CAST) {
+    if (uniqueScreen != nullptr) {
+        if (uniqueScreen->GetSourceMode() == ScreenSourceMode::SCREEN_UNIQUE) {
+            TLOGI(WmsLogTag::DMS, "make unique ignore");
+            return DMError::DM_OK;
+        }
         return MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
     }
     for (auto screenId : screenIds) {
