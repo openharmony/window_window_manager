@@ -3722,7 +3722,9 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
 WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
+    uint32_t accessTokenId = property->GetAccessTokenId();
+    if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
+        PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }

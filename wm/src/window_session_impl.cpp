@@ -1509,7 +1509,11 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool mainWindowTopmost)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    
     property_->SetMainWindowTopmost(mainWindowTopmost);
+    uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    property_->SetAccessTokenId(accessTokenId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Create camera float window, TokenId = %{private}u", accessTokenId);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 }
 

@@ -851,6 +851,23 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     }
 }
 
+bool WindowSessionProperty::MarshallingMainWindowTopmost(Parcel& parcel) const
+{
+    if (!parcel.WriteBool(mainWindowTopmost_)) {
+        return false;
+    }
+    if (!parcel.WriteUint32(accessTokenId_)) {
+        return false;
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property)
+{
+    property->SetMainWindowTopmost(parcel.ReadBool());
+    property->SetAccessTokenId(parcel.ReadUint32());
+}
+
 bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
 {
     if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
@@ -1289,7 +1306,7 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
 
 bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
 {
-    return parcel.WriteBool(mainWindowTopmost_);
+    return MarshallingMainWindowTopmost(parcel);
 }
 
 bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
@@ -1425,7 +1442,7 @@ void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 
 void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
 {
-    SetMainWindowTopmost(parcel.ReadBool());
+    UnmarshallingMainWindowTopmost(parcel, this);
 }
 
 void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
