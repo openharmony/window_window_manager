@@ -635,32 +635,31 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    WindowOption option;
+    sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
         WLOGFE("[NAPI]get invalid options param");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
 
-    if (option.GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
         return NapiGetUndefined(env);
     }
 
     NapiAsyncTask::CompleteCallback complete =
-        [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             auto weakScene = weak.lock();
             if (weakScene == nullptr) {
                 WLOGFE("[NAPI]Window scene is null");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption(option);
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-            windowOption->SetOnlySupportSceneBoard(true);
-            auto window = weakScene->CreateWindow(windowName, windowOption);
+            option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+            option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            option->SetOnlySupportSceneBoard(true);
+            auto window = weakScene->CreateWindow(windowName, option);
             if (window == nullptr) {
                 WLOGFE("[NAPI]Get window failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
@@ -675,49 +674,6 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     NapiAsyncTask::Schedule("JsWindowStage::OnCreateSubWindowWithOptions",
         env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
-}
-
-bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
-{
-    if (jsObject == nullptr) {
-        WLOGFW("jsObject is null");
-        return true;
-    }
-
-    std::string title;
-    if (ParseJsValue(jsObject, env, "title", title)) {
-        option.SetSubWindowTitle(title);
-    } else {
-        WLOGFE("Failed to convert parameter to title");
-        return false;
-    }
-
-    bool decorEnabled;
-    if (ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
-        option.SetSubWindowDecorEnable(decorEnabled);
-    } else {
-        WLOGFE("Failed to convert parameter to decorEnabled");
-        return false;
-    }
-
-    bool isModal = false;
-    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        TLOGI(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
-        if (isModal) {
-            option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-        }
-    }
-
-    bool isTopmost = false;
-    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
-        if (!isModal && isTopmost) {
-            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
-            return false;
-        }
-        option.SetWindowTopmost(isTopmost);
-    }
-
-    return true;
 }
 
 napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene)

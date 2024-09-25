@@ -299,7 +299,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_IS_MODAL = 1 << 5,
     WINDOW_FLAG_HANDWRITING = 1 << 6,
     WINDOW_FLAG_IS_TOAST = 1 << 7,
-    WINDOW_FLAG_END = 1 << 8,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
+    WINDOW_FLAG_END = 1 << 9,
 };
 
 /**
@@ -1203,11 +1204,17 @@ struct SystemWindowOptions {
     int32_t windowType = -1;
 };
 
+enum class ModalityType : uint32_t {
+    WINDOW_MODALITY,
+    APPLICATION_MODALITY,
+};
+
 struct SubWindowOptions {
     std::string title;
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 
 struct ExtensionWindowConfig {

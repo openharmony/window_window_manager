@@ -48,6 +48,12 @@ public:
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
     }
 
+    static inline bool IsApplicationModalSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsModalSubWindow(type, windowFlags) && (windowFlags &
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL));
+    }
+
     static inline bool IsToastSubWindow(WindowType type, uint32_t windowFlags)
     {
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));

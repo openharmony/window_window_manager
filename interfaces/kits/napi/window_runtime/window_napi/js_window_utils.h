@@ -270,6 +270,18 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
+enum class ApiModalityType : uint32_t {
+    BEGIN = 0,
+    WINDOW_MODALITY = BEGIN,
+    APPLICATION_MODALITY,
+    END = APPLICATION_MODALITY,
+};
+
+const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_MAP {
+    { ApiModalityType::WINDOW_MODALITY,         ModalityType::WINDOW_MODALITY      },
+    { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
+};
+
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
@@ -322,6 +334,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
+    napi_value ModalityTypeInit(napi_env env);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
@@ -330,6 +343,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback>&& execute,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback>&& complete, napi_value* result);
+    bool ParseSubWindowOptions(napi_env env, napi_value JsObject, const sptr<WindowOption>& WindowOption);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
