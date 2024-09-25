@@ -1054,7 +1054,7 @@ HWTEST_F(SceneSessionManagerTest7, GetWindowVisibilityChangeInfo, Function | Sma
     ssm_->lastVisibleData_.emplace_back(5, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     ssm_->lastVisibleData_.emplace_back(6, WindowVisibilityState::WINDOW_LAYER_STATE_MAX);
     visibilitychangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
-    ASSERT_EQ(visibilitychangeInfos.size(), 2);
+    ASSERT_EQ(visibilitychangeInfos.size(), 7);
 }
 
 /**

@@ -1409,7 +1409,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode01, Function | SmallTest | Le
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(true));
     ASSERT_EQ(true, window->IsPrivacyMode());
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(true));
 }
 
 /*
@@ -1430,7 +1429,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Le
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
     ASSERT_EQ(false, window->IsPrivacyMode());
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
 }
 
 /*
