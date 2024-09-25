@@ -426,7 +426,7 @@ HWTEST_F(SceneSessionTest5, OnRestoreMainWindow, Function | SmallTest | Level2)
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    EXPECT_EQ(WSError::WS_ok,session->OnRestoreMainWindow());
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         sptr<SceneSession::SessionChangeCallback>::MakeSptr();
