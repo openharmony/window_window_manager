@@ -283,7 +283,7 @@ public:
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) override;
+    WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -447,7 +447,12 @@ public:
     int32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void PackageRemovedOrChanged(const std::string& bundleName);
-    
+
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+
     /*
      * Gesture Back
      */

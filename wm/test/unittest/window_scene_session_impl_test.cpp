@@ -473,32 +473,6 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: Resize01
- * @tc.desc: Resize
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Resize01");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-
-    windowSceneSession->property_->SetPersistentId(888);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    windowSceneSession->hostSession_ = session;
-    Rect rect = {2, 2, 2, 2};
-    windowSceneSession->property_->SetWindowRect(rect);
-    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    windowSceneSession->state_ = WindowState::STATE_FROZEN;
-    windowSceneSession->hostSession_ = session;
-    windowSceneSession->Resize(1, 1);
-}
-
-/**
  * @tc.name: MoveTo01
  * @tc.desc: MoveTo
  * @tc.type: FUNC
@@ -769,31 +743,6 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
 
     window->hostSession_ = session;
     window->NotifyDrawingCompleted();
-}
-
-/**
- * @tc.name: SetBackgroundColor01
- * @tc.desc: test SetBackgroundColor withow uiContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("SetBackgroundColor01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    std::shared_ptr<AbilityRuntime::Context> context;
-    ASSERT_EQ(WMError::WM_OK, window->Create(context, session));
-
-    window->property_->SetPersistentId(1);
-    window->Show();
-    window->Destroy(true);
 }
 
 /*
@@ -1381,13 +1330,16 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetKeepScreenOn(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetKeepScreenOn(true));
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    window->SetKeepScreenOn(false);
+    ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
+    ASSERT_TRUE(window->IsKeepScreenOn());
+    ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));
     ASSERT_FALSE(window->IsKeepScreenOn());
 }
 

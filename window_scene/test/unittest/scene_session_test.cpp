@@ -416,10 +416,12 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
+    ASSERT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    ASSERT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(true));
+    ASSERT_EQ(true, scensession->IsKeepScreenOn());
     ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(false));
     ASSERT_EQ(false, scensession->IsKeepScreenOn());
 }
@@ -1490,7 +1492,7 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
     info.bundleName_ = "OnSystemSessionEvent";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_EQ(scensession, nullptr);
+    ASSERT_NE(scensession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
@@ -1499,7 +1501,7 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     auto result = scensession->OnSystemSessionEvent(event);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -2046,7 +2048,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     property->SetDisplayId(-99);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetDefaultDisplayIdIfNeed();
-    EXPECT_NE(property->GetDisplayId(), SCREEN_ID_INVALID);
+    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
 }
 }

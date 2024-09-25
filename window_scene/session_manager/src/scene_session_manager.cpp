@@ -41,7 +41,6 @@
 #endif
 #include "scene_system_ability_listener.h"
 
-#include "anr_manager.h"
 #include "color_parser.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
@@ -60,7 +59,6 @@
 #include "distributed_client.h"
 #include "softbus_bus_center.h"
 #include "perform_reporter.h"
-#include "anr_manager.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -576,7 +574,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 
     if (!remoteExtSessionMap_.empty()) {
         for (auto item = remoteExtSessionMap_.begin(); item != remoteExtSessionMap_.end(); ++item) {
-            if ((item->first == nullptr) ||(item->second == nullptr)) {
+            if ((item->first == nullptr) || (item->second == nullptr)) {
                 continue;
             }
             int32_t persistentId = INVALID_SESSION_ID;
@@ -2166,7 +2164,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        HandleCastScreenDisConnection(scnSession->GetSessionInfo().screenId_);
         auto persistentId = scnSession->GetPersistentId();
         TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
@@ -3214,13 +3211,12 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Create Ability info failed, id %{public}d", persistentId);
         return WSError::WS_ERROR_NULLPTR;
     }
-    int32_t errCode = ERR_OK;
     if (!isUserActive) {
         TLOGI(WmsLogTag::WMS_MULTI_USER,
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
-        errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode == ERR_OK) {
             sceneSession->SetMinimizedFlagByUserSwitch(true);
@@ -3233,7 +3229,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         sceneSession->SetMinimizedFlagByUserSwitch(false);
         bool isColdStart = false;
-        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
@@ -3249,9 +3245,9 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
 
 void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
-    auto task = [this, isUserActive]() {
-        TLOGI(WmsLogTag::WMS_MULTI_USER,
-            "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
+    const char* const where = __func__;
+    auto task = [this, isUserActive, where]() {
+        TLOGNI(WmsLogTag::WMS_MULTI_USER, "%{public}s: IsUserActive=%{public}u, currentUserId=%{public}d", where,
             isUserActive, currentUserId_);
         isUserBackground_ = !isUserActive;
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
@@ -3271,7 +3267,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_MULTI_USER, "session is null");
+                TLOGNE(WmsLogTag::WMS_MULTI_USER, "%{public}s: session is null", where);
                 continue;
             }
             if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
@@ -3596,7 +3592,7 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
 }
 
 static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap,
-    uint32_t windowId, uint32_t& mainWindowId)
+    int32_t windowId, int32_t& mainWindowId)
 {
     auto iter = sceneSessionMap.find(windowId);
     if (iter == sceneSessionMap.end()) {
@@ -3621,7 +3617,7 @@ static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSess
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+WMError SceneSessionManager::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
@@ -9032,7 +9028,6 @@ void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInf
         WLOGFE("AppAnrListener OnAppDebugStarted debugInfos is empty");
         return;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
 }
 
 void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
@@ -9042,7 +9037,6 @@ void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo
         WLOGFE("AppAnrListener OnAppDebugStoped debugInfos is empty");
         return;
     }
-    DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(true);
 }
 
 void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams)
@@ -10411,7 +10405,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
-    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}" PRIu64 " windowNumber %{public}d x %{public}d y %{public}d",
           displayId, windowNumber, x, y);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
@@ -10437,8 +10431,8 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         bool isRsVisible = session->GetRSVisible();
         WSRect windowRect = session->GetSessionRect();
         bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
-        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
-               "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}" PRIu64
+               " isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
                session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
                sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
         if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
@@ -11045,6 +11039,38 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
 void SceneSessionManager::PackageRemovedOrChanged(const std::string& bundleName)
 {
     return MultiInstanceManager::GetInstance().RemoveAppInfo(bundleName);
+}
+
+WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+#ifdef POWER_MANAGER_ENABLE
+    auto task = [this] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+            if (!IsSessionVisibleForeground(sceneSession) || sceneSession->keepScreenLock_ == nullptr) {
+                continue;
+            }
+            auto res = sceneSession->keepScreenLock_->UnLock();
+            if (res != ERR_OK) {
+                TLOGNE(WmsLogTag::DEFAULT,
+                    "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
+                    persistentId, sceneSession->GetWindowName().c_str(), res);
+                return WMError::WM_ERROR_INVALID_OPERATION;
+            }
+            TLOGNI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
+                persistentId, sceneSession->GetWindowName().c_str());
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+#else
+    TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
+    return WMError::WM_OK;
+#endif
 }
 
 void SceneSessionManager::UpdateGestureBackEnableStatus(bool enable)
