@@ -632,15 +632,23 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->SetDisplayBrightness(3.14f);
     std::shared_ptr<AppExecFwk::EventHandler> pipeEventHandler = nullptr;
     ssm_->eventHandler_ = pipeEventHandler;
-    EXPECT_EQ(nullptr, ssm_->eventHandler_);
-    ssm_->SetBrightness(sceneSession, 3.15f);
+    ASSERT_EQ(nullptr, ssm_->eventHandler_);
+    auto ret = ssm_->SetBrightness(sceneSession, 3.15f);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     ssm_->Init();
-    EXPECT_NE(nullptr, ssm_->eventHandler_);
+    ASSERT_NE(nullptr, ssm_->eventHandler_);
 
     ssm_->SetFocusedSessionId(2024);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
-    ssm_->SetBrightness(sceneSession, 3.15f);
+
+    ret = ssm_->SetBrightness(sceneSession, 3.15f);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(3.15f, ssm_->GetDisplayBrightness());
+
+    ret = ssm_->SetBrightness(sceneSession, UNDEFINED_BRIGHTNESS);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(UNDEFINED_BRIGHTNESS, ssm_->GetDisplayBrightness());
 }
 
 /**
