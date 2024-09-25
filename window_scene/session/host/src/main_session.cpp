@@ -183,6 +183,37 @@ bool MainSession::IsTopmost() const
     return GetSessionProperty()->IsTopmost();
 }
 
+WSError MainSession::SetMainWindowTopmost(bool mainWindowTopmost)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetMainWindowTopmost id: %{public}d, main window topmost: %{public}d",
+        GetPersistentId(), mainWindowTopmost);
+    auto task = [weakThis = wptr(this), mainWindowTopmost]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
+            return;
+        }
+        auto property = session->GetSessionProperty();
+        if (property) {
+            TLOGI(WmsLogTag::WMS_HIERARCHY,
+                "Notify session main window topmost change, id: %{public}d, topmost: %{public}u",
+                session->GetPersistentId(), mainWindowTopmost);
+            property->SetMainWindowTopmost(mainWindowTopmost);
+            if (session->sessionChangeCallback_ &&
+                session->sessionChangeCallback_->onSessionMainWindowTopmostChange_) {
+                session->sessionChangeCallback_->onSessionMainWindowTopmostChange_(mainWindowTopmost);
+            }
+        }
+    };
+    PostTask(task, "SetMainWindowTopmost");
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsMainWindowTopmost() const
+{
+    return GetSessionProperty()->IsMainWindowTopmost();
+}
+
 void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
