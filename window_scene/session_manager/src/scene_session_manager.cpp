@@ -8099,7 +8099,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
     auto task = [this, persistentId] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetGestureBackEnableFlag()) {
-            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
+            TLOGN(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
@@ -8117,7 +8117,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
             needEnableGestureBack = true;
         }
         if (needEnableGestureBack == lastGestureBackEnable_) { 
-            TLOGI(WmsLogTag::WMS_IMMS, "gestureback enable equals last. Id : %{public}d, status: %{public}d", 
+            TLOGN(WmsLogTag::WMS_IMMS, "gestureback enable equals last. Id: %{public}d, status: %{public}d", 
                 persistentId, needEnableGestureBack);
             return;
         }
@@ -11076,7 +11076,7 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
 void SceneSessionManager::UpdateGestureBackEnableStatus(bool enable)
 {
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
-    TLOGI(WmsLogTag::WMS_IMMS, "enable:%{public}d name:%{public}s", enable, callerBundleName.c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "enable: %{public}d name: %{public}s", enable, callerBundleName.c_str());
     if (gestureNavigationEnabledChangeFunc_ != nullptr) {
         gestureNavigationEnabledChangeFunc_(enable, callerBundleName, GestureBackType::GESTURE_SIDE);
     } else {
