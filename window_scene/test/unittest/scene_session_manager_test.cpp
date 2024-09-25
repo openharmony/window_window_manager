@@ -1857,6 +1857,17 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
 }
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
