@@ -435,7 +435,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(Display displayId, uint32_t type, const SizeChangeReason reason)
+void JsSceneSession::OnWindowDragHotArea(DisplayId displayId, uint32_t type, const SizeChangeReason reason)
 {
     WLOGFI("[NAPI]");
 
