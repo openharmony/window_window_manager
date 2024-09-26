@@ -1046,7 +1046,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
-            WMError ret = weakWindow->Show(0, false);
+            WMError ret = weakWindow->Show(0, false, true);
             WLOGI("Window [%{public}u, %{public}s] show with ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret == WMError::WM_OK) {
