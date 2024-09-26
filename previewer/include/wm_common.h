@@ -803,7 +803,7 @@ struct SystemWindowOptions {
     int32_t windowType = -1;
 };
 
-enum class ModalityType : uint32_t {
+enum class ModalityType : uint8_t {
     WINDOW_MODALITY,
     APPLICATION_MODALITY,
 };
