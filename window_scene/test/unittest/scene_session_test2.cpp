@@ -84,6 +84,16 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     WSError result = sceneSession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
 
+    sceneSession->callingPid_ = 1;
+    sptr<SceneSession> tempSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(tempSession, nullptr);
+    tempSession->persistentId_ = 1;
+    tempSession->callingPid_ = 2;
+    sceneSession->subSession_.push_back(tempSession);
+    result = sceneSession->RaiseAboveTarget(1);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+    tempSession->callingPid_ = 1;
+
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;

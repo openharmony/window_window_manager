@@ -433,17 +433,29 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     auto result = scensession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
 
+    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(parentSession, nullptr);
+    scensession->SetParentSession(parentSession);
     sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
         new (std::nothrow) SceneSession::SessionChangeCallback();
     EXPECT_NE(scensessionchangeCallBack, nullptr);
     scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
     result = scensession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(parentSession->GetUIStateDirty());
 
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     NotifyRaiseToTopFunc onRaiseToTop_ = []() {};
     scensessionchangeCallBack->onRaiseToTop_ = onRaiseToTop_;
     result = scensession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_TRUE(parentSession->GetUIStateDirty());
+    parentSession->SetUIStateDirty(false);
+
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    result = scensession->RaiseToAppTop();
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(parentSession->GetUIStateDirty());
 }
 
 /**
