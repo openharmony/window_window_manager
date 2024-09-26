@@ -436,7 +436,7 @@ public:
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
-    WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    WMError SkipSnapshotByUserIdAndBundleNames(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
 
     /*
@@ -881,7 +881,7 @@ private:
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
-    std::unordered_set<std::string> snapshotBundleNameSet_;
+    std::unordered_set<std::string> snapshotSkipBundleNameSet_; // ONLY Accessed on OS_sceneSession thread
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;

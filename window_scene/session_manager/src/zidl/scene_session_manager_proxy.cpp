@@ -2291,7 +2291,7 @@ WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool sk
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+WMError SceneSessionManagerProxy::SkipSnapshotByUserIdAndBundleNames(const int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
@@ -2315,7 +2315,7 @@ WMError SceneSessionManagerProxy::SetSnapshotSkipByUserIdAndBundleNameList(const
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
