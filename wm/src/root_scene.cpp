@@ -19,6 +19,7 @@
 #include <event_handler.h>
 #include <input_manager.h>
 #include <iremote_stub.h>
+#include <transaction/rs_interfaces.h>
 #include <ui_content.h>
 #include <viewport_config.h>
 
@@ -148,6 +149,15 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
     if (uiContent_) {
         WLOGFD("notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
+        if (configuration == nullptr) {
+            return;
+        }
+        std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+        bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+        if (ret == false) {
+            WLOGFE("SetGlobalDarkColorMode fail with colorMode : %{public}s", colorMode.c_str());
+        }
     }
 }
 
