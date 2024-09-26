@@ -360,7 +360,7 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const 
     auto task =
         [enable, bundleName, type, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            TLOGNE("[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MAIN, "jsCallBack is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName), CreateJsValue(env, type)};
