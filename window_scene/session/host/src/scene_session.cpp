@@ -3365,7 +3365,7 @@ WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
         sceneSession->isEnableGestureBackHadSet_ = true;
         sceneSession->UpdateGestureBackEnabled();
     };
-    PostTask(task, "SetGestureBackEnabled");
+    PostTask(task, __func__);
     return WMError::WM_OK;
 }
 

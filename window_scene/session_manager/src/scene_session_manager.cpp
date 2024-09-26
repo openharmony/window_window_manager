@@ -8115,9 +8115,9 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
             enterRecent_.load() || !sceneSession->IsFocused()) {
             needEnableGestureBack = true;
         }
-        auto bundleName = sceneSession->GetSessionInfo().bundleName_;
         if (gestureNavigationEnabledChangeFunc_ != nullptr) {
-            gestureNavigationEnabledChangeFunc_(needEnableGestureBack, bundleName, GestureBackType::GESTURE_SIDE);
+            gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
+                sceneSession->GetSessionInfo().bundleName_,GestureBackType::GESTURE_SIDE);
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "callback func is null");
         }
