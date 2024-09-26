@@ -132,7 +132,7 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
 
 /**
  * @tc.name: GetWindowLayerChangeInfo
- * @tc.desc: GetWindowLayerChangeInfo
+ * @tc.desc: Simulate window Layer change
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTest | Level3)
@@ -156,6 +156,8 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTes
     ASSERT_NE(nullptr, occlusionDataPtr);
     ASSERT_NE(nullptr, ssm_);
     ssm_->GetWindowLayerChangeInfo(occlusionDataPtr, currVisibleData, currDrawingContentData);
+    ASSERT_EQ(currVisibleData.size(), 7);
+    ASSERT_EQ(currDrawingContentData.size(), 4);
 }
 
 /**
