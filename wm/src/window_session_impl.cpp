@@ -575,10 +575,11 @@ void WindowSessionImpl::DestroySubWindow()
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 continue;
             }
-            if ((*iter)->GetPersistentId() == persistentId) {
+            if (subWindow->GetPersistentId() == persistentId) {
                 TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
                 subWindows.erase(iter);
                 break;
@@ -592,17 +593,18 @@ void WindowSessionImpl::DestroySubWindow()
     if (mainIter != subWindowSessionMap_.end()) {
         auto& subWindows = mainIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 TLOGW(WmsLogTag::WMS_SUB, "Destroy sub window which is nullptr");
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = (*iter)->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
-                (*iter)->GetPersistentId(), isExtDestroyed);
-            auto ret = (*iter)->Destroy(isExtDestroyed);
+                subWindow->GetPersistentId(), isExtDestroyed);
+            auto ret = subWindow->Destroy(isExtDestroyed);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", (*iter)->GetPersistentId());
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", subWindow->GetPersistentId());
                 subWindows.erase(iter);
             }
         }
