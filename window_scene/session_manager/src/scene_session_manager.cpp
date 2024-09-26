@@ -8093,7 +8093,7 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidAreaByType:PID:" + std::to_string(persistentId));
 }
 
-void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
+void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
 {
     auto task = [this, persistentId] {
         auto sceneSession = GetSceneSession(persistentId);
@@ -8116,7 +8116,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(const int32_t persistentId)
         }
         if (gestureNavigationEnabledChangeFunc_ != nullptr) {
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
-                sceneSession->GetSessionInfo().bundleName_,GestureBackType::GESTURE_SIDE);
+                sceneSession->GetSessionInfo().bundleName_, GestureBackType::GESTURE_SIDE);
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "callback func is null");
         }
