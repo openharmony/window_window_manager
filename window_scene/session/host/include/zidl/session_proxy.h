@@ -98,7 +98,6 @@ public:
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
-    WSError SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
 

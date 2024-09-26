@@ -119,6 +119,7 @@ public:
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
     static napi_value PackageRemovedOrChanged(napi_env env, napi_callback_info info);
+    
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
