@@ -52,7 +52,6 @@
 #include "screen.h"
 #include "singleton_container.h"
 #include "fold_screen_state_internel.h"
-#include "start_window_option.h"
 #include "session/host/include/multi_instance_manager.h"
 
 #ifdef POWER_MANAGER_ENABLE
