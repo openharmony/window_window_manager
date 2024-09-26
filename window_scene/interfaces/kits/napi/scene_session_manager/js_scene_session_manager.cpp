@@ -2156,11 +2156,6 @@ static napi_value CreateJsWindowVisibilityInfoArray(napi_env env,
 napi_value JsSceneSessionManager::OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info)
 {
     auto windowVisibilityInfos = std::make_shared<std::vector<std::pair<int32_t, uint32_t>>>();
-    if (windowVisibilityInfos == nullptr) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-            "failed to create window visiblity infos"));
-        return NapiGetUndefined(env);
-    }
 
     auto execute = [infos = windowVisibilityInfos]() {
         SceneSessionManager::GetInstance().GetAllWindowVisibilityInfos(*infos);
@@ -2915,9 +2910,10 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     };
     NapiAsyncTask::CompleteCallback complete =
         [persistentId, scaleParam, pixelPtr](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!pixelPtr) {
+            if (pixelPtr == nullptr) {
                 WLOGE("[NAPI] pixelMap ptr not exist");
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
             }
             napi_value nativeData = nullptr;
             if (*pixelPtr) {

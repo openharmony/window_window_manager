@@ -574,7 +574,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 
     if (!remoteExtSessionMap_.empty()) {
         for (auto item = remoteExtSessionMap_.begin(); item != remoteExtSessionMap_.end(); ++item) {
-            if ((item->first == nullptr) ||(item->second == nullptr)) {
+            if ((item->first == nullptr) || (item->second == nullptr)) {
                 continue;
             }
             int32_t persistentId = INVALID_SESSION_ID;
@@ -1874,7 +1874,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             if (scnSession->IsVisibleForeground()) {
                 RequestSessionFocusImmediately(persistentId);
             } else {
-                PostProcessFocusState state = { true, true, FocusChangeReason::SCB_START_APP };
+                PostProcessFocusState state = { true, true, true, FocusChangeReason::SCB_START_APP };
                 scnSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -4587,7 +4587,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (reason == FocusChangeReason::MOVE_UP) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
                 return;
@@ -4598,7 +4598,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (RequestSessionFocus(persistentId, byForeground, reason) != WSError::WS_OK) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
             }
@@ -5718,7 +5718,7 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             if (IsSessionVisibleForeground(sceneSession)) {
                 RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
             } else {
-                PostProcessFocusState state = {true, true, FocusChangeReason::APP_FOREGROUND};
+                PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
                 sceneSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -7243,7 +7243,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-    
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
@@ -9143,6 +9142,10 @@ void SceneSessionManager::PostProcessFocus()
         if (session->GetPostProcessFocusState().isFocused_) {
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
                 ret = RequestSessionFocusImmediately(session->GetPersistentId());
+            } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::RECENT) {
+                ret = RequestSessionFocus(session->GetPersistentId(),
+                                          session->GetPostProcessFocusState().byForeground_,
+                                          session->GetPostProcessFocusState().reason_);
             } else {
                 ret = RequestSessionFocus(session->GetPersistentId(), true,
                                           session->GetPostProcessFocusState().reason_);
@@ -9526,12 +9529,19 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
-        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
-            "parentId=%{public}d, Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
+            "parentId=%{public}d, rect:[%{public}d %{public}d %{public}d %{public}d]",
             pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            ExtensionWindowEventInfo extensionInfo {persistentId, pid, rect};
+            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetSessionRect().posX_;
+            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetSessionRect().posY_;
+            Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect };
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid: %{public}d, persistentId: %{public}d, "
+                "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
+                pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
+                parentSession->GetSessionGlobalRect().ToString().c_str());
             parentSession->UpdateModalUIExtension(extensionInfo);
         }
     };
@@ -10367,7 +10377,7 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
 WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {
-    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}llu windowNumber %{public}d x %{public}d y %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}" PRIu64 " windowNumber %{public}d x %{public}d y %{public}d",
           displayId, windowNumber, x, y);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
@@ -10393,8 +10403,8 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         bool isRsVisible = session->GetRSVisible();
         WSRect windowRect = session->GetSessionRect();
         bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
-        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}llu "
-               "isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}" PRIu64
+               " isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
                session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
                sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
         if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
@@ -10991,5 +11001,37 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
 void SceneSessionManager::PackageRemovedOrChanged(const std::string& bundleName)
 {
     return MultiInstanceManager::GetInstance().RemoveAppInfo(bundleName);
+}
+
+WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+#ifdef POWER_MANAGER_ENABLE
+    auto task = [this] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+            if (!IsSessionVisibleForeground(sceneSession) || sceneSession->keepScreenLock_ == nullptr) {
+                continue;
+            }
+            auto res = sceneSession->keepScreenLock_->UnLock();
+            if (res != ERR_OK) {
+                TLOGNE(WmsLogTag::DEFAULT,
+                    "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
+                    persistentId, sceneSession->GetWindowName().c_str(), res);
+                return WMError::WM_ERROR_INVALID_OPERATION;
+            }
+            TLOGNI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
+                persistentId, sceneSession->GetWindowName().c_str());
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+#else
+    TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
+    return WMError::WM_OK;
+#endif
 }
 } // namespace OHOS::Rosen
