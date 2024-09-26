@@ -93,8 +93,8 @@ private:
      * window snapshot skip
      */
     sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
-    WMError RecoverSCBSnapshotSkipByUserId(int32_t userId);
-    WMError NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+    int32_t RecoverSCBSnapshotSkipByUserId(int32_t userId);
+    int32_t NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
 
     static void WriteStringToFile(int32_t pid, const char* str);
@@ -120,7 +120,7 @@ private:
     /*
      * window snapshot skip
      */
-    std::shared_mutex userIdBundleNamesMapLock_;
+    std::mutex userIdBundleNamesMapLock_;
     std::unordered_map<int32_t, std::vector<std::string>> userIdBundleNamesMap_;
 
     int32_t currentWMSUserId_;

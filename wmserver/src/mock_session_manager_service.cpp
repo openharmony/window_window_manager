@@ -797,7 +797,7 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(in
     return remoteObject;
 }
 
-WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
+int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
 {
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
     auto iter = userIdBundleNamesMap_.find(userId);
@@ -811,15 +811,16 @@ WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, iter->second, remoteObject);
 }
 
-WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject)
 {
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
     WMError ret = sceneSessionManagerProxy->SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed!");
+        return ERR_TRANSACTION_FAILED;
     }
-    return ret;
+    return ERR_NONE;
 }
 
 int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
@@ -837,12 +838,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
         std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
         userIdBundleNamesMap_[userId] = bundleNameList;
     }
-    WMError ret = NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed!");
-        return ERR_TRANSACTION_FAILED;
-    }
-    return ERR_NONE;
+    return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
 }
 
 int32_t MockSessionManagerService::SetSnapshotSkipByMap(
@@ -862,10 +858,10 @@ int32_t MockSessionManagerService::SetSnapshotSkipByMap(
         if (!remoteObject) {
             return ERR_NULL_OBJECT;
         }
-        WMError ret = NotifySCBSnapshotSkipByUserIdAndBundleNames(it->first, it->second, remoteObject);
-        if (ret != WMError::WM_OK) {
+        int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleNames(it->first, it->second, remoteObject);
+        if (err != ERR_NONE) {
             TLOGE(WmsLogTag::DEFAULT, "failed!");
-            return ERR_TRANSACTION_FAILED;
+            return err;
         }
     }
     return ERR_NONE;
