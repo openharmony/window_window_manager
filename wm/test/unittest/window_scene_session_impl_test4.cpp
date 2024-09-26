@@ -618,14 +618,14 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     ret = window->Show();
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    subWindow->state_ = WindowState::STATE_SHOWN;
+    window->state_ = WindowState::STATE_SHOWN;
     ret = window->MoveTo(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
 
-    subWindow->state_ = WindowState::STATE_HIDDEN;
+    window->state_ = WindowState::STATE_HIDDEN;
     ret = window->MoveTo(20000, 20000);
     usleep(36000);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -679,14 +679,14 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
 
-    subWindow->state_ = WindowState::STATE_SHOWN;
+    window->state_ = WindowState::STATE_SHOWN;
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
 
-    subWindow->state_ = WindowState::STATE_HIDDEN;
+    window->state_ = WindowState::STATE_HIDDEN;
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_OK, ret);
     usleep(36000);
