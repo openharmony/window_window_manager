@@ -533,15 +533,15 @@ private:
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
-        bool isSupportDragInPcCompatibleMode);
+        bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
     void HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
-        bool isSupportDragInPcCompatibleMode);
+        bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBounds(const WSRect& rect);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal = false, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
