@@ -558,6 +558,7 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
+    mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -720,7 +721,6 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
-    mutable std::mutex globalRectMutex_;
 };
 } // namespace OHOS::Rosen
 
