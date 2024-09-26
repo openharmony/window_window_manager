@@ -612,7 +612,7 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     FoldStatus status = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
-    WLOGI("[NAPI]" PRIu64 ", getFoldStatus = %{public}u", status);
+    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
