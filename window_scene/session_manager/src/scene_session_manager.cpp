@@ -10873,7 +10873,7 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(const int32_t us
     auto task = [this, userId, bundleNameList] {
         snapshotSkipBundleNameSet_.clear();
         for (auto& bundleName : bundleNameList) {
-            snapshotBundleNameSet_.insert(std::move(bundleName));
+            snapshotSkipBundleNameSet_.insert(std::move(bundleName));
         }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -10883,7 +10883,7 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(const int32_t us
             const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
             if (snapshotSkipBundleNameSet_.find(bundleName) != snapshotSkipBundleNameSet_.end()) {
                 TLOGNI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
-                    name.c_str());
+                    bundleName.c_str());
                 sceneSession->SetSnapshotSkip(true);
                 continue;
             }
