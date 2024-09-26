@@ -167,7 +167,7 @@ FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float ang
 
 void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver()
 {
-    applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
+    applicationStateObserver_ = new (std::nothrow) ApplicationStatePocketObserver();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (applicationStateObserver_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "applicationStateObserver_ is nullptr.");
