@@ -1294,5 +1294,6 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
     session_->SetMainSessionUIStateDirty(true);
     EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
+}
 } // namespace Rosen
 } // namespace OHOS
