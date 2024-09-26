@@ -1083,7 +1083,7 @@ int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");
         return ERR_INVALID_DATA;
     }
-    WSError ret = RequestFocus(isFocusableOnShow);
+    WSError ret = SetFocusableOnShow(isFocusableOnShow);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
