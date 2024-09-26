@@ -727,7 +727,7 @@ napi_value JsSceneSessionManager::GetWindowSceneConfig(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateRotateAnimationConfig(env, info) : nullptr;
 }

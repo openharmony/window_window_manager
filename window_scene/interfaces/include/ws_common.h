@@ -606,7 +606,6 @@ struct RotateAnimationConfig {
     int32_t duration_ = ROTATE_ANIMATION_DURATION;
 };
 
-
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
