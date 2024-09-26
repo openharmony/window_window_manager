@@ -484,7 +484,8 @@ HWTEST_F(WindowSceneSessionImplTest3, AddWindowFlag03, Function | SmallTest | Le
 
     auto ret = windowSceneSessionImpl->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) & windowSceneSessionImpl->GetWindowFlags());
+    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE)
+        &windowSceneSessionImpl->GetWindowFlags());
 }
 
 /**
