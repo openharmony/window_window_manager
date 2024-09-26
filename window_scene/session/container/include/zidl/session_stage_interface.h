@@ -43,6 +43,9 @@ public:
 
     /**
      * @brief update the window rect
+     * 
+     * This function provides the ability for applications to update window rect.
+     * 
      * @param rect the position and size of the window
      * @param reason the update reason
      * @param rsTransaction the handle of animation synchronization
@@ -71,6 +74,9 @@ public:
 
     /**
      * @brief update the focus
+     * 
+     * Notify window session to update focus status.
+     * 
      * @param isFocused set isFocused
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */

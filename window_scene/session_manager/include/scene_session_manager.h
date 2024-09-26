@@ -220,6 +220,9 @@ public:
 
     /**
      * @brief request focus status
+     * 
+     * This function provides the ability for window to change focus status.
+     * 
      * @param persistentId window ID
      * @param isFocused is Focused
      * @param byForeground byForeground
@@ -257,7 +260,6 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
         
@@ -374,8 +376,8 @@ public:
 
     /**
      * @brief shift App window focus
-     * @param sourcePersistentId  source persistent Id
-     * @param targetPersistentId  target persistent Id
+     * @param sourcePersistentId source persistent Id
+     * @param targetPersistentId target persistent Id
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
