@@ -476,6 +476,18 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
+void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
+{
+    HoverStatusChange(hoverStatus);
+}
+
+void ScreenSession::HoverStatusChange(int32_t hoverStatus)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnHoverStatusChange(hoverStatus, screenId_);
+    }
+}
+
 void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
