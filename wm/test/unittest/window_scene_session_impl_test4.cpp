@@ -1066,7 +1066,8 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
     subWindow->hostSession_ = subSession;
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, subWindow->GetMode());
 }
 
 /**
