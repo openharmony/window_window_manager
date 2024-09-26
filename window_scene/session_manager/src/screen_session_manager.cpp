@@ -538,6 +538,38 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
+void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    if (isConnected) {
+        auto task = [this]() {
+            SendCastEvent(true);
+            ScreenSessionPublish::GetInstance().PublishCastPlugInEvent();
+        };
+        taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
+        TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventTrue");
+    } else {
+        auto task = [this]() {
+            SendCastEvent(false);
+            ScreenSessionPublish::GetInstance().PublishCastPlugOutEvent();
+        };
+        taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
+        TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
+    }
+}
+
+void ScreenSessionManager::PhyMirrorConnectWakeupScreen()
+{
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
+        TLOGI(WmsLogTag::DMS, "Connect to an external screen to wakeup the phone screen");
+        FixPowerStatus();
+    }
+}
+
 void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
@@ -566,8 +598,8 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (phyMirrorEnable) {
-            auto task = [this]() { SendCastEvent(true); };
-            taskScheduler_->PostAsyncTask(task, "SendCastEventTrue");
+            NotifyCastWhenScreenConnectChange(true);
+            PhyMirrorConnectWakeupScreen();
         }
         if (foldScreenController_ != nullptr) {
             if (screenId == 0 && clientProxy_) {
@@ -586,15 +618,10 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             isPhyScreenConnected_ = true;
         }
         return;
-    }
-    if (screenEvent == ScreenEvent::DISCONNECTED) {
+    } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
-            auto task = [this]() { SendCastEvent(false); };
-            taskScheduler_->PostAsyncTask(task, "SendCastEventFalse");
-            TLOGI(WmsLogTag::DMS, "PostAsyncTask SendCastEventFalse");
-        }
-        if (phyMirrorEnable) {
+            NotifyCastWhenScreenConnectChange(false);
             FreeDisplayMirrorNodeInner(screenSession);
             isPhyScreenConnected_ = false;
         }
@@ -1883,13 +1910,11 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    // screenId要在rotation前进行设置
-    int32_t settingScreenId = static_cast<int32_t>(displayInfo->GetScreenId());
-    int32_t settingRotation = static_cast<int32_t>(displayInfo->GetRotation());
-    auto task = [settingScreenId, settingRotation]() {
-        TLOGI(WmsLogTag::DMS, "update screen rotation property in datebase");
-        ScreenSettingHelper::SetSettingRotationScreenId(settingScreenId);
-        ScreenSettingHelper::SetSettingRotation(settingRotation);
+    // 异步发送屏幕旋转公共事件
+    auto task = [=]() {
+        TLOGI(WmsLogTag::DMS, "publish dms rotation event");
+        ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
+            displayInfo->GetScreenId(), displayInfo->GetRotation());
     };
     taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
 }
