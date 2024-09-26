@@ -460,7 +460,7 @@ HWTEST_F(WindowSceneSessionImplTest3, AddWindowFlag02, Function | SmallTest | Le
 
     auto ret = windowSceneSessionImpl->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID) & windowSceneSessionImpl->GetWindowFlag());
+    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID) & windowSceneSessionImpl->GetWindowFlags());
 }
 
 /**
@@ -484,7 +484,7 @@ HWTEST_F(WindowSceneSessionImplTest3, AddWindowFlag03, Function | SmallTest | Le
 
     auto ret = windowSceneSessionImpl->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) & windowSceneSessionImpl->GetWindowFlag());
+    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) & windowSceneSessionImpl->GetWindowFlags());
 }
 
 /**
@@ -508,7 +508,7 @@ HWTEST_F(WindowSceneSessionImplTest3, AddWindowFlag04, Function | SmallTest | Le
 
     auto ret = windowSceneSessionImpl->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING) & windowSceneSessionImpl->GetWindowFlag());
+    EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING) & windowSceneSessionImpl->GetWindowFlags());
 }
 
 /**
@@ -533,7 +533,7 @@ HWTEST_F(WindowSceneSessionImplTest3, AddWindowFlag05, Function | SmallTest | Le
     auto ret = windowSceneSessionImpl->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_TRUE(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)
-        &windowSceneSessionImpl->GetWindowFlag());
+        &windowSceneSessionImpl->GetWindowFlags());
 }
 
 /**
@@ -760,7 +760,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits01, Function | SmallTest | 
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
     auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
 /**
