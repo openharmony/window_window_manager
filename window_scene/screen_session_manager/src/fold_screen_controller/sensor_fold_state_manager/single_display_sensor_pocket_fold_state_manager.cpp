@@ -165,8 +165,26 @@ FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float ang
     return state;
 }
 
-void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver() {}
-
+void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver()
+{
+    applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
+    auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (applicationStateObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "applicationStateObserver_ is nullptr.");
+        return;
+    }
+    if (appMgrClient_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
+    } else {
+        auto flag = static_cast<int32_t>(
+            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, hallSwitchPackageNameList_));
+        if (flag != ERR_OK) {
+            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
+        } else {
+            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
+        }
+    }
+}
 void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     bool isNotRepeated = isTent ^ IsTentMode();
