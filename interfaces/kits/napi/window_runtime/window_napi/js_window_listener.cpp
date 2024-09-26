@@ -177,7 +177,6 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_value argv[] = { objValue };
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
-        napi_close_handle_scope(env, scope);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
