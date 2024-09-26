@@ -94,6 +94,7 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
 
 private:

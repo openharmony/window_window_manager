@@ -203,6 +203,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW):
+            return HandleSetFocusableOnShow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         default:
@@ -1069,6 +1071,19 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    bool isFocusableOnShow = true;
+    if (!data.ReadBool(isFocusableOnShow)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RequestFocus(isFocusableOnShow);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

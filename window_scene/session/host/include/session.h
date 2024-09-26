@@ -325,12 +325,14 @@ public:
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
+    bool IsFocusableOnShow() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
@@ -689,6 +691,7 @@ private:
 
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
+    std::atomic_bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
