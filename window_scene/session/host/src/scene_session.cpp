@@ -540,8 +540,6 @@ uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t ty
         return type;
     }
     for (const auto& [key, rect] : windowDragHotAreaMap_[displayId]) {
-        uint32_t key = it->first;
-        WSRect rect = it->second;
         if (rect.IsInRegion(pointerX, pointerY)) {
             type |= key;
         }
