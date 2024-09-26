@@ -434,7 +434,7 @@ HWTEST_F(SceneSessionTest5, OnRestoreMainWindow, Function | SmallTest | Level2)
     sessionChangeCallback->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyLayoutFullScreenChangeFunc func = []() {
+    NotifyRestoreMainWindowFunc func = []() {
         return;
     };
     sessionChangeCallback->onRestoreMainWindowFunc_ = func;
