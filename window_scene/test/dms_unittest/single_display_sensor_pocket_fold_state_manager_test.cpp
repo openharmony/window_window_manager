@@ -190,6 +190,75 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Func
     auto result8 = manager.GetNextFoldState(angel, hall);
     EXPECT_EQ(static_cast<int>(result8), 2);
 }
+
+/**
+ * @tc.name: TriggerTentExit
+ * @tc.desc: test function : TriggerTentExit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TriggerTentExit, Function | SmallTest | Level1)
+{
+    float angle = 0.0F;
+    int hall;
+    bool result;
+    SingleDisplaySensorPocketFoldStateManager mgr;
+
+    hall = 0;
+    result = mgr.TriggerTentExit(angle, hall);
+    EXPECT_EQ(result, true);
+
+    hall = 1;
+    angle = 176.0F;
+    result = mgr.TriggerTentExit(angle, hall);
+    EXPECT_EQ(result, true);
+
+    hall = 1;
+    angle = 4.0F;
+    result = mgr.TriggerTentExit(angle, hall);
+    EXPECT_EQ(result, true);
+
+    hall = 1;
+    angle = 90.0F;
+    result = mgr.TriggerTentExit(angle, hall);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: HandleTentChange
+ * @tc.desc: test function : HandleTentChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, Function | SmallTest | Level1)
+{
+    SingleDisplaySensorPocketFoldStateManager mgr;
+    
+    ASSERT_EQ(mgr.IsTentMode(), false);
+
+    mgr.HandleTentChange(true, nullptr);
+    ASSERT_EQ(mgr.IsTentMode(), true);
+
+    mgr.HandleTentChange(true, nullptr);
+    ASSERT_EQ(mgr.IsTentMode(), true);
+
+    mgr.HandleTentChange(false, nullptr);
+    ASSERT_EQ(mgr.IsTentMode(), false);
+
+    mgr.HandleTentChange(false, nullptr);
+    ASSERT_EQ(mgr.IsTentMode(), false);
+}
+
+/**
+ * @tc.name: TentModeHandleSensorChange
+ * @tc.desc: test function : TentModeHandleSensorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChange, Function | SmallTest | Level1)
+{
+    SingleDisplaySensorPocketFoldStateManager stateManager;
+    
+    stateManager.SetTentMode(true);
+    stateManager.TentModeHandleSensorChange(4.0F, 0, nullptr);
+    ASSERT_EQ(stateManager.IsTentMode(), false);
 }
 }
 }

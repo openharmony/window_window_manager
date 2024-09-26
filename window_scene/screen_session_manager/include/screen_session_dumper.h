@@ -45,6 +45,7 @@ private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
     void DumpFoldStatus();
+    void DumpTentMode();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
@@ -63,7 +64,11 @@ private:
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
+    void SetEnterOrExitTentMode(std::string input);
     void MockSendCastPublishEvent(std::string input);
+    bool IsValidDisplayModeCommand(std::string command);
+    int SetFoldDisplayMode();
+    int SetFoldStatusLocked();
 #endif
 
 private:

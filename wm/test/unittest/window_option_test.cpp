@@ -360,6 +360,13 @@ HWTEST_F(WindowOptionTest, Brightness, Function | SmallTest | Level3)
     ASSERT_EQ(MINIMUM_BRIGHTNESS, option->GetBrightness());
     option->SetBrightness(MAXIMUM_BRIGHTNESS);
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, option->GetBrightness());
+
+    float brightness = -0.5;
+    option->SetBrightness(brightness);
+    ASSERT_EQ(brightness, option->GetBrightness());
+    brightness = 2.0;
+    option->SetBrightness(brightness);
+    ASSERT_EQ(brightness, option->GetBrightness());
 }
 
 /**

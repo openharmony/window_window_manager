@@ -481,7 +481,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->moveDragController_->InitCrossDisplayProperty(displayId, parentId);
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
-                    session->lastSafeRect);
+                    session->GetSessionRequestRect());
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
@@ -1211,16 +1211,24 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetSystemBarProperty(type, systemBarProperty);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ &&
-        specificCallback_ && specificCallback_->onUpdateAvoidArea_) {
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
         SetIsDisplayStatusBarTemporarily(false);
-        isStatusBarVisible_ = true;
-        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
         sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
     return WSError::WS_OK;
+}
+
+void SceneSession::SetIsStatusBarVisible(bool isVisible)
+{
+    bool isNeedNotify = isStatusBarVisible_ != isVisible;
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, need notify %{public}u",
+          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+    isStatusBarVisible_ = isVisible;
+    if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
+        specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+    }
 }
 
 void SceneSession::NotifyPropertyWhenConnect()
@@ -2601,7 +2609,7 @@ void SceneSession::NotifyPrivacyModeChange()
     TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, curExtPrivacyMode:%{public}d, session property privacyMode:%{public}d"
         ", old privacyMode:%{public}d",
         GetPersistentId(), curExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
-    
+
     if (curPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = curPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
@@ -3226,9 +3234,15 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d",
                 session->GetPersistentId(), maxInstanceCount);
             if (maxInstanceCount > 0 && !session->CheckInstanceKey(abilitySessionInfo, info)) {
-                TLOGI(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
+                TLOGE(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
                     session->GetPersistentId(), info.appInstanceKey_.c_str());
                 return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            if (maxInstanceCount > 0 &&
+                !MultiInstanceManager::GetInstance().IsInstanceKeyExist(info.bundleName_, info.appInstanceKey_)) {
+                TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, create not exist instanceKey:%{public}s",
+                    session->GetPersistentId(), info.appInstanceKey_.c_str());
+                MultiInstanceManager::GetInstance().CreateNewInstanceKey(info.bundleName_, info.appInstanceKey_);
             }
         }
         session->HandleCastScreenConnection(info, session);
@@ -4661,14 +4675,14 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
             GetPersistentId(), uiParam.rect_.ToString().c_str());
         return false;
     }
-    globalRect_ = uiParam.rect_;
-    WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
-        uiParam.rect_.width_, uiParam.rect_.height_ };
+    SetSessionGlobalRect(uiParam.rect_);
     if (!uiParam.needSync_) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect not sync rectAfter:%{public}s preRect:%{public}s",
-            GetPersistentId(), rect.ToString().c_str(), winRect_.ToString().c_str());
+            GetPersistentId(), uiParam.rect_.ToString().c_str(), winRect_.ToString().c_str());
         return false;
     }
+    WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
+        uiParam.rect_.width_, uiParam.rect_.height_ };
     if (winRect_ == rect) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s!",
             GetPersistentId(), rect.ToString().c_str());
@@ -4863,14 +4877,17 @@ bool SceneSession::CheckInstanceKey(const sptr<AAFwk::SessionInfo> abilitySessio
 {
     if (info.appInstanceKey_.empty()) {
         if (abilitySessionInfo->persistentId != 0) {
-            TLOGD(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
+            TLOGE(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
                 abilitySessionInfo->persistentId);
             return false;
         }
+        info.isNewAppInstance_ = true;
+        return true;
     } else if (!MultiInstanceManager::GetInstance().IsValidInstanceKey(info.bundleName_, info.appInstanceKey_)) {
-        TLOGD(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
         return false;
     }
+    info.isNewAppInstance_ = false;
     return true;
 }
 } // namespace OHOS::Rosen

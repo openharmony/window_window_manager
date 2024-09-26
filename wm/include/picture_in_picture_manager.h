@@ -49,6 +49,7 @@ public:
     static void DoRestore();
     static void DoClose(bool destroyWindow, bool needAnim);
     static void DoActionClose();
+    static void DoPrepareSource();
     static void DoLocateSource();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
