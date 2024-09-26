@@ -7243,7 +7243,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
