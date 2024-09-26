@@ -230,7 +230,7 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList
 }
 
 int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
-    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+    const std::unordered_map<int32_t, std::vector<std::string>> &userIdAndBunldeNames)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -239,8 +239,8 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
         TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
         return ERR_TRANSACTION_FAILED;
     }
-    data.WriteInt32(idBundlesMap.size());
-    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
+    data.WriteInt32(userIdAndBunldeNames.size());
+    for (auto it = userIdAndBunldeNames.begin(); it != userIdAndBunldeNames.end(); ++it) {
         if (!data.WriteInt32(it->first)) {
             TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
             return ERR_INVALID_DATA;

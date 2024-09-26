@@ -784,47 +784,45 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(co
         WLOGFE("sessionManagerService is nullptr");
         return nullptr;
     }
-    sptr<ISessionManagerService> sessionManagerServiceProxy = iface_cast<ISessionManagerService>(sessionManagerService);
+    sptr<ISessionManagerService> sessionManagerServiceProxy =
+        iface_cast<ISessionManagerService>(sessionManagerService);
     if (sessionManagerServiceProxy == nullptr) {
         WLOGFE("sessionManagerServiceProxy is nullptr");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy->GetSceneSessionManager();
     if (remoteObject == nullptr) {
-        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
-        return sptr<IRemoteObject>(nullptr);
+        WLOGFW("Get scene session manager proxy failed");
     }
     return remoteObject;
 }
 
-int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t userId)
+WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t userId)
 {
-    std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
-    auto iter = userIdBundleNameListMap_.find(currentWMSUserId_);
-    if (iter == userIdBundleNameListMap_.end()) {
+    std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
+    auto iter = userIdBundleNamesMap_.find(userId);
+    if (iter == userIdBundleNamesMap_.end()) {
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
     if (!remoteObject) {
         return ERR_NULL_OBJECT;
     }
-    int err = NotifySCBSnapshotSkipByUserIdAndBundleName(userId, iter->second, remoteObject);
-    return err;
+    return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, iter->second, remoteObject);
 }
 
-int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleName(const int32_t userId,
+WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
     const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject)
 {
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
-    WMError ret = sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    WMError ret = sceneSessionManagerProxy->SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "Set SnapShotSkip By userId And BundleNameList failed!");
-        return ERR_TRANSACTION_FAILED;
+        TLOGE(WmsLogTag::DEFAULT, "failed!");
     }
-    return ERR_NONE;
+    return ret;
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
@@ -832,34 +830,37 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNameList(cons
         return ERR_NULL_OBJECT;
     }
     {
-        std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
-        userIdBundleNameListMap_[userId] = bundleNameList;
+        std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
+        userIdBundleNamesMap_[userId] = bundleNameList;
     }
-    int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleName(userId, bundleNameList, remoteObject);
-    return err;
+    WMError ret = NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
 }
 
 int32_t MockSessionManagerService::SetSnapshotSkipByMap(
-    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+    const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
-    std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
-    userIdBundleNameListMap_.clear();
-    int32_t flag = ERR_NONE;
-    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
-        userIdBundleNameListMap_[it->first] = it->second;
+    std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
+    userIdBundleNamesMap_.clear();
+    for (auto it = userIdAndBunldeNames.begin(); it != userIdAndBunldeNames.end(); ++it) {
+        userIdBundleNamesMap_[it->first] = it->second;
     }
-    for (auto it = userIdBundleNameListMap_.begin(); it != userIdBundleNameListMap_.end(); ++it) {
+    for (auto it = userIdBundleNamesMap_.begin(); it != userIdBundleNamesMap_.end(); ++it) {
         sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(it->first);
         if (!remoteObject) {
-            flag =  ERR_NULL_OBJECT;
-            break;
+            return ERR_NULL_OBJECT;
         }
-        int32_t errCode = NotifySCBSnapshotSkipByUserIdAndBundleName(it->first, it->second, remoteObject);
-        if (errCode != ERR_NONE) {
-            flag = errCode;
+        WMError ret = NotifySCBSnapshotSkipByUserIdAndBundleNames(it->first, it->second, remoteObject);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "failed!");
+            return ERR_TRANSACTION_FAILED;
         }
     }
-    return flag;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

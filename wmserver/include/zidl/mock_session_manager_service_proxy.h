@@ -33,9 +33,9 @@ public:
     void UnregisterSMSRecoverListener() override;
     void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSLiteRecoverListener() override;
-    int32_t SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
-    int32_t SetSnapshotSkipByMap(const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap) override;
+    int32_t SetSnapshotSkipByMap(const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames) override;
 
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
