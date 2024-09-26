@@ -3247,7 +3247,7 @@ napi_value JsSceneSessionManager::OnGetMaxInstanceCount(napi_env env, napi_callb
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
-    napi_create_int32(env, SceneSessionManager::GetInstance().GetMaxInstanceCount(bundleName), &result);
+    napi_create_uint32(env, SceneSessionManager::GetInstance().GetMaxInstanceCount(bundleName), &result);
     return result;
 }
 
@@ -3270,7 +3270,7 @@ napi_value JsSceneSessionManager::OnGetInstanceCount(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
-    napi_create_int32(env, SceneSessionManager::GetInstance().GetInstanceCount(bundleName), &result);
+    napi_create_uint32(env, SceneSessionManager::GetInstance().GetInstanceCount(bundleName), &result);
     return result;
 }
 
