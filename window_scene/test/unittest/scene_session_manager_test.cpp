@@ -1739,15 +1739,9 @@ HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, Function | S
     SessionInfo info;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     sceneSession->SetCallingPid(1);
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
-
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
-
+    ASSERT_FALSE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
     ssm_->processWatermarkPidMap_.insert({1, "test"});
-    ssm_->SetSessionWatermarkForAppProcess(sceneSession);
-
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+    ASSERT_TRUE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
     ssm_->processWatermarkPidMap_.erase(1);
 }
 
