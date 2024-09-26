@@ -197,7 +197,7 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
     }
 }
 
-int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
@@ -221,7 +221,7 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList
         return ERR_NULL_OBJECT;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
         return ERR_TRANSACTION_FAILED;
