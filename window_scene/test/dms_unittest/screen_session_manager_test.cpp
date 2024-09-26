@@ -2531,6 +2531,146 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayModeChanged, Function | SmallTes
     ASSERT_NE(ssm, nullptr);
     ssm->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
 }
+
+/**
+ * @tc.name: SetMultiScreenMode
+ * @tc.desc: MultiScreenMode::SCREEN_EXTEND
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    MultiScreenMode screenMode = MultiScreenMode::SCREEN_EXTEND;
+
+    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetMultiScreenMode
+ * @tc.desc: MultiScreenMode::SCREEN_MIRROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    MultiScreenMode screenMode = MultiScreenMode::SCREEN_MIRROR;
+
+    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: SetMultiScreenMode
+ * @tc.desc: operate mode error
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    uint32_t testNum = 2;
+    auto ret = ssm_->SetMultiScreenMode(0, screenId, static_cast<MultiScreenMode>(testNum));
+    ASSERT_EQ(ret, DMError::DM_OK);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: SetMultiScreenRelativePosition
+ * @tc.desc: ScreenSession is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId testId = 2060;
+    ScreenId testId1 = 3060;
+    MultiScreenPositionOptions mainScreenOptions = {testId, 100, 100};
+    MultiScreenPositionOptions secondScreenOption = {testId1, 100, 100};
+    auto ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetMultiScreenRelativePosition
+ * @tc.desc: SetMultiScreenRelativePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent1, nullptr);
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
+
+    MultiScreenPositionOptions mainScreenOptions = {screenId, 100, 100};
+    MultiScreenPositionOptions secondScreenOption = {screenId1, 100, 100};
+    auto ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    ssm_->DestroyVirtualScreen(screenId);
+    ssm_->DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: SetMultiScreenRelativePosition
+ * @tc.desc: DisplayNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent1, nullptr);
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
+
+    MultiScreenPositionOptions mainScreenOptions = {screenId, 100, 100};
+    MultiScreenPositionOptions secondScreenOption = {screenId1, 100, 100};
+
+    sptr<ScreenSession> secondScreenSession = ssm_->GetScreenSession(screenId1);
+    secondScreenSession->ReleaseDisplayNode();
+    auto ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    sptr<ScreenSession> firstScreenSession = ssm_->GetScreenSession(screenId);
+    firstScreenSession->ReleaseDisplayNode();
+    ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+
+    ssm_->DestroyVirtualScreen(screenId);
+    ssm_->DestroyVirtualScreen(screenId1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
