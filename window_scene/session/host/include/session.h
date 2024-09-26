@@ -215,6 +215,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
@@ -557,6 +558,7 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
+    mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
