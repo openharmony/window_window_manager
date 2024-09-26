@@ -2629,12 +2629,21 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
+}
+
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    globalRect_ = rect;
 }
 
 /** @note @window.layout */

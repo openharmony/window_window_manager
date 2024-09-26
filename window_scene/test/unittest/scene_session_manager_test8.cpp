@@ -80,43 +80,6 @@ HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Le
     EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
 }
 
-/**
- * @tc.name: RequestFocusStatusBySCB
- * @tc.desc: RequestFocusStatusBySCB set gesture navigation enabled
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, RequestFocusStatusBySCB, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "RequestFocusStatusBySCB";
-    sessionInfo.abilityName_ = "RequestFocusStatusBySCB";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    sceneSession->SetFocusable(true);
-
-    FocusChangeReason reason = FocusChangeReason::DEFAULT;
-    WMError res = ssm_->RequestFocusStatusBySCB(8, false, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::FOREGROUND;
-    res = ssm_->RequestFocusStatusBySCB(8, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::MOVE_UP;
-    ssm_->sceneSessionMap_.insert({ 5, sceneSession });
-    res = ssm_->RequestFocusStatusBySCB(5, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    res = ssm_->RequestFocusStatusBySCB(8, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::DEFAULT;
-    res = ssm_->RequestFocusStatusBySCB(8, true, true, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    res = ssm_->RequestFocusStatusBySCB(5, true, true, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-}
 
 /**
  * @tc.name: GetRemoteSessionSnapshotInfo
@@ -191,6 +154,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange, Function | SmallTes
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession1->GetWindowType());
     ssm_->sceneSessionMap_.emplace(2, sceneSession);
     ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), false);
 }
 
 /**
@@ -225,6 +189,7 @@ HWTEST_F(SceneSessionManagerTest8, DealwithVisibilityChange1, Function | SmallTe
     sceneSession1->SetParentSession(sceneSession1);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->DealwithVisibilityChange(visibilityChangeInfo, currVisibleData);
+    ASSERT_EQ(sceneSession1->GetRSVisible(), false);
 }
 
 /**

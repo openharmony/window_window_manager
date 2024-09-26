@@ -78,18 +78,16 @@ namespace {
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetBackdropBlur");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
-        ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1.0));
-    }
+    
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(0.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlur(1.0));
 }
 
 /*
@@ -99,19 +97,16 @@ HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Le
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetShadowColor");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
-        ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
-        ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
-    }
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowColor("#ff22ee44"));
 }
 
 /*
@@ -121,17 +116,14 @@ HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetCornerRadius");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
-    } else {
-        ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
-    }
+    
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
 }
 
 /*
@@ -141,18 +133,16 @@ HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Le
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetShadowRadius, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetShadowRadius");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
-    auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
-        ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
-    }
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowRadius(1.0));
 }
 
 /**

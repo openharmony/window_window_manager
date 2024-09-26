@@ -1877,7 +1877,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             if (scnSession->IsVisibleForeground()) {
                 RequestSessionFocusImmediately(persistentId);
             } else {
-                PostProcessFocusState state = { true, true, FocusChangeReason::SCB_START_APP };
+                PostProcessFocusState state = { true, true, true, FocusChangeReason::SCB_START_APP };
                 scnSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -4590,7 +4590,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (reason == FocusChangeReason::MOVE_UP) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
                 return;
@@ -4601,7 +4601,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             if (RequestSessionFocus(persistentId, byForeground, reason) != WSError::WS_OK) {
                 auto session = GetSceneSession(persistentId);
                 if (session && !session->IsFocused()) {
-                    PostProcessFocusState state = { true, true, reason };
+                    PostProcessFocusState state = { true, true, byForeground, reason };
                     session->SetPostProcessFocusState(state);
                 }
             }
@@ -5721,7 +5721,7 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             if (IsSessionVisibleForeground(sceneSession)) {
                 RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
             } else {
-                PostProcessFocusState state = {true, true, FocusChangeReason::APP_FOREGROUND};
+                PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
                 sceneSession->SetPostProcessFocusState(state);
             }
         } else {
@@ -7246,7 +7246,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:PID:" + std::to_string(persistentId));
-    
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
@@ -9179,6 +9178,10 @@ void SceneSessionManager::PostProcessFocus()
         if (session->GetPostProcessFocusState().isFocused_) {
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
                 ret = RequestSessionFocusImmediately(session->GetPersistentId());
+            } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::RECENT) {
+                ret = RequestSessionFocus(session->GetPersistentId(),
+                                          session->GetPostProcessFocusState().byForeground_,
+                                          session->GetPostProcessFocusState().reason_);
             } else {
                 ret = RequestSessionFocus(session->GetPersistentId(), true,
                                           session->GetPostProcessFocusState().reason_);
@@ -9562,12 +9565,19 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
-        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
-            "parentId=%{public}d, Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
+            "parentId=%{public}d, rect:[%{public}d %{public}d %{public}d %{public}d]",
             pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            ExtensionWindowEventInfo extensionInfo {persistentId, pid, rect};
+            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetSessionRect().posX_;
+            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetSessionRect().posY_;
+            Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect };
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid: %{public}d, persistentId: %{public}d, "
+                "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
+                pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
+                parentSession->GetSessionGlobalRect().ToString().c_str());
             parentSession->UpdateModalUIExtension(extensionInfo);
         }
     };
