@@ -3997,8 +3997,6 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
             if (visibleWindowCountMap_.find(pid) != visibleWindowCountMap_.end()) {
                 beforeCount = visibleWindowCountMap_[pid];
-            } else {
-                beforeCount = 0;
             }
             count = newIsVisible ? beforeCount + 1 : beforeCount - 1;
         }
