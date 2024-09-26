@@ -825,6 +825,10 @@ WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(c
 int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
+        return ERR_UNKNOWN_TRANSACTION;
+    }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
     if (!remoteObject) {
         return ERR_NULL_OBJECT;
@@ -844,6 +848,10 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(const i
 int32_t MockSessionManagerService::SetSnapshotSkipByMap(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
+        return ERR_UNKNOWN_TRANSACTION;
+    }
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
     userIdBundleNamesMap_.clear();
     for (auto it = userIdAndBunldeNames.begin(); it != userIdAndBunldeNames.end(); ++it) {
