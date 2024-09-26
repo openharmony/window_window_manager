@@ -5729,6 +5729,26 @@ __attribute__((no_sanitize("cfi")))
     return objValue;
 }
 
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, windows.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create napi array");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < windows.size(); i++) {
+        auto window = windows[i];
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::DEFAULT, "window is null");
+        } else {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowObject(env, window));
+        }
+    }
+    return arrayValue;
+}
+
 bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
     uint32_t data = 0;
@@ -6645,6 +6665,16 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
 
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "window is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
