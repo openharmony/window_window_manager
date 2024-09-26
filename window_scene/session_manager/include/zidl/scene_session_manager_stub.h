@@ -82,6 +82,7 @@ private:
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
@@ -101,6 +102,8 @@ private:
     int HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply);
     int HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply);
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
+    int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

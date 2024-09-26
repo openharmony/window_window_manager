@@ -132,7 +132,7 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
     session_->SetContextTransparentFunc(contextTransparentFunc);
     session_->NotifyContextTransparent();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -288,7 +288,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogBackground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -326,7 +326,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogForeground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -450,7 +450,7 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->property_->SetFocusable(false);
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -481,7 +481,7 @@ HWTEST_F(WindowSessionTest3, HandlePointDownDialog, Function | SmallTest | Level
     session_->dialogVec_.push_back(dialogSession4);
     session_->HandlePointDownDialog();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -1108,6 +1108,28 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAcquireRotateAnimationConfigFunc
+ * @tc.desc: SetAcquireRotateAnimationConfigFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetAcquireRotateAnimationConfigFunc(nullptr);
+    ASSERT_EQ(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    int32_t duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
+
+    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) {
+        config.duration_ = 800;
+    };
+    session_->SetAcquireRotateAnimationConfigFunc(func);
+    ASSERT_NE(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, 800);
+}
+
+/**
  * @tc.name: SetIsPcAppInPad
  * @tc.desc: SetIsPcAppInPad Test
  * @tc.type: FUNC
@@ -1154,6 +1176,29 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Lev
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->property_ = nullptr;
+    bool enable = true;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
+
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+
+    enable = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 }
 
 /**

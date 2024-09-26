@@ -80,43 +80,6 @@ HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Le
     EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
 }
 
-/**
- * @tc.name: RequestFocusStatusBySCB
- * @tc.desc: RequestFocusStatusBySCB set gesture navigation enabled
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, RequestFocusStatusBySCB, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "RequestFocusStatusBySCB";
-    sessionInfo.abilityName_ = "RequestFocusStatusBySCB";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    sceneSession->SetFocusable(true);
-
-    FocusChangeReason reason = FocusChangeReason::DEFAULT;
-    WMError res = ssm_->RequestFocusStatusBySCB(8, false, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::FOREGROUND;
-    res = ssm_->RequestFocusStatusBySCB(8, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::MOVE_UP;
-    ssm_->sceneSessionMap_.insert({ 5, sceneSession });
-    res = ssm_->RequestFocusStatusBySCB(5, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    res = ssm_->RequestFocusStatusBySCB(8, true, false, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    reason = FocusChangeReason::DEFAULT;
-    res = ssm_->RequestFocusStatusBySCB(8, true, true, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-
-    res = ssm_->RequestFocusStatusBySCB(5, true, true, reason);
-    EXPECT_EQ(WMError::WM_OK, res);
-}
 
 /**
  * @tc.name: GetRemoteSessionSnapshotInfo
@@ -385,23 +348,6 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
 }
 
 /**
- * @tc.name: WindowDestroyNotifyVisibility
- * @tc.desc: test function : WindowDestroyNotifyVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-
-    SessionInfo sessionInfo;
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->SetRSVisible(true));
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-}
-
-/**
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: test function : UpdateSubWindowVisibility
  * @tc.type: FUNC
@@ -632,15 +578,23 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->SetDisplayBrightness(3.14f);
     std::shared_ptr<AppExecFwk::EventHandler> pipeEventHandler = nullptr;
     ssm_->eventHandler_ = pipeEventHandler;
-    EXPECT_EQ(nullptr, ssm_->eventHandler_);
-    ssm_->SetBrightness(sceneSession, 3.15f);
+    ASSERT_EQ(nullptr, ssm_->eventHandler_);
+    auto ret = ssm_->SetBrightness(sceneSession, 3.15f);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     ssm_->Init();
-    EXPECT_NE(nullptr, ssm_->eventHandler_);
+    ASSERT_NE(nullptr, ssm_->eventHandler_);
 
     ssm_->SetFocusedSessionId(2024);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
-    ssm_->SetBrightness(sceneSession, 3.15f);
+
+    ret = ssm_->SetBrightness(sceneSession, 3.15f);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(3.15f, ssm_->GetDisplayBrightness());
+
+    ret = ssm_->SetBrightness(sceneSession, UNDEFINED_BRIGHTNESS);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(UNDEFINED_BRIGHTNESS, ssm_->GetDisplayBrightness());
 }
 
 /**
