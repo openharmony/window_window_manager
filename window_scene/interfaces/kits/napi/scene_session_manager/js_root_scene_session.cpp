@@ -323,10 +323,9 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isCalledRightlyByCallerId = info.callerToken_ == callerSession->GetAbilityToken();
         TLOGI(WmsLogTag::WMS_SCB,
-            "root isCalledRightlyByCallerId: %{public}d", isCalledRightlyByCallerId);
-        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+            "root isCalledRightlyByCallerId: %{public}d", false);
+        info.isCalledRightlyByCallerId_ = false;
     }
 }
 
