@@ -166,7 +166,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, Function | SmallTest | Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleUpdateDensity(data, reply));
 }
 
