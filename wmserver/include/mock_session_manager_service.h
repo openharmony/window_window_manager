@@ -92,9 +92,9 @@ private:
     /*
      * window snapshot skip
      */
-    sptr<IRemoteObject> GetSceneSessionManagerByUserId(const int32_t userId);
-    WMError RecoverSCBSnapshotSkipByUserId(const int32_t userId);
-    WMError NotifySCBSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
+    sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
+    WMError RecoverSCBSnapshotSkipByUserId(int32_t userId);
+    WMError NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
 
     static void WriteStringToFile(int32_t pid, const char* str);
