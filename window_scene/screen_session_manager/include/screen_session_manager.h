@@ -293,6 +293,8 @@ public:
         const std::string& secondaryScreenMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);
+    DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate) override;
 
 protected:
     ScreenSessionManager();
