@@ -22,6 +22,8 @@
 #include "screen_scene_config.h"
 
 #include "window_manager_hilog.h"
+#include "app_mgr_client.h"
+#include "screen_session_manager/include/screen_rotation_property.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -60,6 +62,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     SetCameraFoldStrategy(angle);
+    SetCameraStatusChange(angle);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
         return;
@@ -74,6 +77,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    SetCameraStatusChange(angle);
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
@@ -117,6 +121,26 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angl
         if (isInCameraFoldStrategy_ != true) {
             isInCameraFoldStrategy_ = true;
             TLOGI(WmsLogTag::DMS, "Enable CameraFoldStrategy.");
+        }
+    }
+}
+
+void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angle)
+{
+    std::string CameraApp = "com.huawei.hmos.camera";
+    if (applicationStateObserver_ == nullptr) {
+        return;
+    }
+    if ((angle > ANGLE_MIN_VAL) && (angle < CAMERA_MAX_VAL) &&
+        (applicationStateObserver_->GetForegroundApp() == cameraApp)) {
+        if (!isCameraStatus_) {
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
+            isCameraStatus_ = true;
+        }
+    } else {
+        if (isCameraStatus_) {
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
         }
     }
 }
