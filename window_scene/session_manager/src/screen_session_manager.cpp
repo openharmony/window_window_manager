@@ -538,6 +538,28 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
+void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
+{
+    TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
+    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
+        return;
+    }
+    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
+        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
+        ScreenCastConnection::GetInstance().CastDisconnectExtension();
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (isPlugIn) {
+        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_START, data, reply);
+    } else {
+        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_STOP, data, reply);
+    }
+    ScreenCastConnection::GetInstance().CastDisconnectExtension();
+}
+
 void ScreenSessionManager::NotifyCastWhenScreenConnectChange(bool isConnected)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -568,28 +590,6 @@ void ScreenSessionManager::PhyMirrorConnectWakeupScreen()
         TLOGI(WmsLogTag::DMS, "Connect to an external screen to wakeup the phone screen");
         FixPowerStatus();
     }
-}
-
-void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
-{
-    TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
-    if (!ScreenCastConnection::GetInstance().CastConnectExtension()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
-        return;
-    }
-    if (!ScreenCastConnection::GetInstance().IsConnectedSync()) {
-        TLOGE(WmsLogTag::DMS, "CastConnectionExtension connected failed");
-        ScreenCastConnection::GetInstance().CastDisconnectExtension();
-        return;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    if (isPlugIn) {
-        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_START, data, reply);
-    } else {
-        ScreenCastConnection::GetInstance().SendMessageToCastService(CAST_WIRED_PROJECTION_STOP, data, reply);
-    }
-    ScreenCastConnection::GetInstance().CastDisconnectExtension();
 }
 
 void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
@@ -1958,7 +1958,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-    
+
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
