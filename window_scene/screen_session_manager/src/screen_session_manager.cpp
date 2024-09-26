@@ -1491,9 +1491,9 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
     ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
 
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     sptr<ScreenSession> internalSession;
     sptr<ScreenSession> externalSession;
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -1535,19 +1535,14 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
 
 void ScreenSessionManager::SetMultiScreenStatus(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession)
 {
-    TLOGI(WmsLogTag::DMS, "SetMultiScreenStatus start");
-    if (firstSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "first screen is null");
-        return;
-    }
-    if (secondarySession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "second screen is null");
+    if (firstSession == nullptr || secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "first or second screen is null");
         return;
     }
 
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId mainScreenId = SCREEN_ID_INVALID;
     std::string status = SCREEN_UNKNOWN;
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -1561,8 +1556,10 @@ void ScreenSessionManager::SetMultiScreenStatus(sptr<ScreenSession> firstSession
                 TLOGI(WmsLogTag::DMS, "found main screen");
             } else if (screenCombination == ScreenCombination::SCREEN_MIRROR) {
                 status = SCREEN_MIRROR;
+                TLOGI(WmsLogTag::DMS, "found mirror screen");
             } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
                 status = SCREEN_EXTEND;
+                TLOGI(WmsLogTag::DMS, "found extend screen");
             } else {
                 TLOGE(WmsLogTag::DMS, "screen id or status error");
             }

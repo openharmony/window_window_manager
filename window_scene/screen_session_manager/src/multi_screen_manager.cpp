@@ -490,8 +490,6 @@ void MultiScreenManager::DoFirstExtendChange(sptr<ScreenSession> firstSession, s
 
 void MultiScreenManager::SetMultiScreenStatus(ScreenId mainScreenId, const std::string& status)
 {
-    TLOGI(WmsLogTag::DMS, "input mainScreenId = %{public}" PRIu64 ", status = %{public}s",
-        mainScreenId, status.c_str());
     multiScreenStatus_.first = mainScreenId;
     multiScreenStatus_.second = status;
     TLOGI(WmsLogTag::DMS, "Set multiScreenStatus_ done, mainScreenId = %{public}" PRIu64 ", status = %{public}s",
@@ -501,12 +499,8 @@ void MultiScreenManager::SetMultiScreenStatus(ScreenId mainScreenId, const std::
 void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSession,
     sptr<ScreenSession> externalSession)
 {
-    if (internalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "internal screen is null!");
-        return;
-    }
-    if (externalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "external screen is null!");
+    if (internalSession == nullptr || externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internal or external screen is null!");
         return;
     }
 
@@ -547,21 +541,17 @@ void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSess
 void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSession,
     sptr<ScreenSession> externalSession)
 {
-    if (internalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "internal screen is null!");
-        return;
-    }
-    if (externalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "external screen is null!");
+    if (internalSession == nullptr || externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internal or external screen is null!");
         return;
     }
 
-    ScreenSessionManager::GetInstance().SetMultiScreenStatus(internalSession, externalSession);
     sptr<IScreenSessionManagerClient> scbClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (scbClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "scbClient null");
         return;
     }
+    ScreenSessionManager::GetInstance().SetMultiScreenStatus(internalSession, externalSession);
     ScreenId mainScreenId = multiScreenStatus_.first;
     std::string status = multiScreenStatus_.second;
     TLOGI(WmsLogTag::DMS, "restored mainScreenId = %{public}" PRIu64 ", status = %{public}s",
