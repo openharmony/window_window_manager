@@ -51,7 +51,7 @@ SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateMan
 {
     auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
     if (stringListConfig.count("hallSwitchApp") != 0) {
-        packageNames_ = stringListConfig["hallSwitchApp"];
+        hallSwitchPackageNameList_ = stringListConfig["hallSwitchApp"];
     }
 }
 SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateManager() {}
