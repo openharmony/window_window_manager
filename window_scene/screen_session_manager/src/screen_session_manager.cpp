@@ -4788,6 +4788,16 @@ void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId
     clientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
 }
 
+void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " hoverStatus: %{public}d", screenId, hoverStatus);
+    if (!clientProxy_) {
+        TLOGI(WmsLogTag::DMS, "OnHoverStatusChange clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus);
+}
+
 void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenOrientation: %{public}f", screenId, screenOrientation);
@@ -5567,6 +5577,11 @@ void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
         return;
     }
     foldScreenController_->OnTentModeChanged(isTentMode);
+    if (isTentMode) {
+        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
+    } else {
+        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
+    }
 }
 
 void ScreenSessionManager::SetCoordinationFlag(bool isCoordinationFlag)

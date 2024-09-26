@@ -35,6 +35,7 @@ public:
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override;
+    void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;

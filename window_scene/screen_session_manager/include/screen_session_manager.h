@@ -245,6 +245,7 @@ public:
     void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
+    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
 
