@@ -376,6 +376,9 @@ public:
 
     /**
      * @brief shift App window focus
+     * 
+     * This function provides the ability for applications to shift focus in application.
+     * 
      * @param sourcePersistentId source persistent Id
      * @param targetPersistentId target persistent Id
      * @return Returns WSError::WS_OK if called success, otherwise failed.
