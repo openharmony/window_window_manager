@@ -30,10 +30,7 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
 const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
-namespace {
-constexpr int32_t MIN_DECOR_HEIGHT = 37;
-constexpr int32_t MAX_DECOR_HEIGHT = 112;
-}
+
 class SceneSession;
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
