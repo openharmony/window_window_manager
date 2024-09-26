@@ -178,6 +178,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetProcessWatermark(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
             return HandleGetWindowIdsByCoordinate(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
+            return HandleReleaseForegroundSessionScreenLock(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1193,6 +1195,13 @@ int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32Vector(windowIds);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
+{
+    WMError errCode = ReleaseForegroundSessionScreenLock();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

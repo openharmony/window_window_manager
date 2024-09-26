@@ -48,6 +48,8 @@ const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const std::string ARG_SET_ON_TENT_MODE = "-ontent";
+const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 #endif
 }
 
@@ -148,6 +150,9 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         if (errCode != 0) {
             ShowIllegalArgsInfo();
         }
+    } else if (params_[0].find(ARG_SET_ON_TENT_MODE) != std::string::npos ||
+        params_[0].find(ARG_SET_OFF_TENT_MODE) != std::string::npos) {
+        SetEnterOrExitTentMode(params_[0]);
     }
 #endif
 }
@@ -214,6 +219,7 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         oss << "---------------- Screen ID: " << screenId << " ----------------" << std::endl;
         dumpInfo_.append(oss.str());
         DumpFoldStatus();
+        DumpTentMode();
         DumpScreenSessionById(screenId);
         DumpRsInfoById(screenId);
         DumpCutoutInfoById(screenId);
@@ -246,6 +252,21 @@ void ScreenSessionDumper::DumpFoldStatus()
         }
     }
     oss << std::left << std::setw(LINE_WIDTH) << "FoldStatus: "
+        << status << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpTentMode()
+{
+    std::ostringstream oss;
+    bool isTentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    std::string status = "";
+    if (isTentMode) {
+        status = "TRUE";
+    } else {
+        status = "FALSE";
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "TentMode: "
         << status << std::endl;
     dumpInfo_.append(oss.str());
 }
@@ -613,6 +634,15 @@ int ScreenSessionDumper::SetFoldStatusLocked()
     }
     ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
     return 0;
+}
+
+void ScreenSessionDumper::SetEnterOrExitTentMode(std::string input)
+{
+    if (input == ARG_SET_ON_TENT_MODE) {
+        ScreenSessionManager::GetInstance().OnTentModeChanged(true);
+    } else if (input == ARG_SET_OFF_TENT_MODE) {
+        ScreenSessionManager::GetInstance().OnTentModeChanged(false);
+    }
 }
 #endif
 } // Rosen
