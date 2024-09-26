@@ -7952,10 +7952,7 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
     }
     auto diff =
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    if (isVisible && diff <= 1) {
-        return true;
-    }
-    return false;
+    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
