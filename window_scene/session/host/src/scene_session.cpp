@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <climits>
 #include <hitrace_meter.h>
+#include <type_traits>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -1199,7 +1200,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, status bar rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -1239,12 +1240,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, keyboard rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, input method bar rect %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s input method %{public}s",
                   rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
@@ -1277,7 +1278,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, cutout area rect %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
@@ -1304,7 +1305,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window rect %{public}s, AI navigation bar rect %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
@@ -1447,6 +1448,44 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
+{
+    if (!CheckGetAvoidAreaAvailable(type)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "check false, can not get avoid area. persistentId:%{public}d type:%{public}u",
+            GetPersistentId(), type);
+        return {};
+    }
+
+    AvoidArea avoidArea;
+    WSRect rect = GetSessionRect();
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            GetSystemAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_CUTOUT: {
+            GetCutoutAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            GetKeyboardAvoidArea(rect, avoidArea);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            GetAINavigationBarArea(rect, avoidArea);
+            return avoidArea;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
+                type, GetPersistentId());
+            return avoidArea;
+        }
+    }
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
@@ -1455,43 +1494,29 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
-
-        if (!session->CheckGetAvoidAreaAvailable(type)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "check false, can not get avoid area. persistentId:%{public}d type:%{public}u",
-                session->GetPersistentId(), type);
-            return {};
-        }
-
-        AvoidArea avoidArea;
-        WSRect rect = session->GetSessionRect();
-        switch (type) {
-            case AvoidAreaType::TYPE_SYSTEM: {
-                session->GetSystemAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_CUTOUT: {
-                session->GetCutoutAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_KEYBOARD: {
-                session->GetKeyboardAvoidArea(rect, avoidArea);
-                return avoidArea;
-            }
-            case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                session->GetAINavigationBarArea(rect, avoidArea);
-                return avoidArea;
-            }
-            default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find avoidAreaType:%{public}u, id:%{public}d",
-                    type, session->GetPersistentId());
-                return avoidArea;
-            }
-        }
+        return session->GetAvoidAreaByTypeInner(type);
     };
     return PostSyncTask(task, "GetAvoidAreaByType");
+}
+
+WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    auto task = [weakThis = wptr(this), &avoidAreas] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_IMMS, "session is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_SYSTEM);
+            avoidType <= static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR); avoidType++) {
+            auto type = static_cast<AvoidAreaType>(avoidType);
+            avoidAreas[type] = session->GetAvoidAreaByTypeInner(type);
+        }
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, "GetAllAvoidAreas");
 }
 
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
