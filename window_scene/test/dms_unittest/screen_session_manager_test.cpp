@@ -1436,57 +1436,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenColorTransform, Function | SmallTest
 }
 
 /**
- * @tc.name: IsValidDisplayModeCommand
- * @tc.desc: IsValidDisplayModeCommand test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, IsValidDisplayModeCommand, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(true, ssm_->IsValidDisplayModeCommand("-f"));
-    ASSERT_EQ(true, ssm_->IsValidDisplayModeCommand("-m"));
-    ASSERT_EQ(true, ssm_->IsValidDisplayModeCommand("-sub"));
-    ASSERT_EQ(true, ssm_->IsValidDisplayModeCommand("-coor"));
-    ASSERT_EQ(false, ssm_->IsValidDisplayModeCommand("-a"));
-}
-
-/**
- * @tc.name: SetFoldDisplayMode
- * @tc.desc: SetFoldDisplayMode test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetFoldDisplayMode, Function | SmallTest | Level3)
-{
-    std::string modeParam = "";
-    ASSERT_EQ(-1, ssm_->SetFoldDisplayMode(modeParam));
-    std::string displayFull = "-f";
-    std::string displayMain = "-m";
-    std::string displaySub = "-sub";
-    std::string displayCoor = "-coor";
-    ASSERT_EQ(0, ssm_->SetFoldDisplayMode(displayFull));
-    ASSERT_EQ(0, ssm_->SetFoldDisplayMode(displayMain));
-    ASSERT_EQ(0, ssm_->SetFoldDisplayMode(displaySub));
-    ASSERT_EQ(0, ssm_->SetFoldDisplayMode(displayCoor));
-    ASSERT_EQ(-1, ssm_->SetFoldDisplayMode("-a"));
-}
-
-/**
- * @tc.name: SetFoldStatusLocked
- * @tc.desc: SetFoldStatusLocked test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetFoldStatusLocked, Function | SmallTest | Level3)
-{
-    std::string lockParam;
-    ASSERT_EQ(-1, ssm_->SetFoldStatusLocked(lockParam));
-    std::string lockStatus = "-l";
-    std::string unLockStatus = "-u";
-    lockParam = "-a";
-    ASSERT_EQ(0, ssm_->SetFoldStatusLocked(lockStatus));
-    ASSERT_EQ(0, ssm_->SetFoldStatusLocked(unLockStatus));
-    ASSERT_EQ(-1, ssm_->SetFoldStatusLocked(lockParam));
-}
-
-/**
  * @tc.name: SetScreenRotationLocked
  * @tc.desc: SetScreenRotationLocked virtual screen
  * @tc.type: FUNC
@@ -2441,25 +2390,6 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
 }
 
 /**
- * @tc.name: SetVirtualScreenStatus
- * @tc.desc: SetVirtualScreenStatus test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, Function | SmallTest | Level3)
-{
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
-    ScreenId screenId = 1050;
-    auto ret = ssm->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE);
-    ASSERT_FALSE(ret);
-    ScreenId rsScreenId = SCREEN_ID_INVALID;
-    ScreenId rsScreenId1 = 1060;
-    ssm->screenIdManager_.sms2RsScreenIdMap_[screenId] = rsScreenId1;
-    ASSERT_TRUE(ssm->ConvertScreenIdToRsScreenId(screenId, rsScreenId));
-    ssm->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE);
-}
-
-/**
  * @tc.name: PhyMirrorConnectWakeupScreen
  * @tc.desc: PhyMirrorConnectWakeupScreen test
  * @tc.type: FUNC
@@ -2470,6 +2400,25 @@ HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | Smal
     ssm_->PhyMirrorConnectWakeupScreen();
     ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
     ssm_->PhyMirrorConnectWakeupScreen();
+}
+
+/**
+ * @tc.name: SetVirtualScreenStatus
+ * @tc.desc: SetVirtualScreenStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_FALSE(ssm_->SetVirtualScreenStatus(SCREEN_ID_INVALID, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE));
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    ASSERT_TRUE(ssm_->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE));
+    EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
 }
 
 /**
