@@ -415,7 +415,7 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
  * @tc.desc: UpdateSessionPropertyByAction function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, UpdateSessionRectInner01 , Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, UpdateSessionRectInner01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateSessionRectInner01";

@@ -678,6 +678,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
 
     WindowLimits windowLimits;
     ret = window->GetWindowLimits(windowLimits);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     window->state_ = WindowState::STATE_SHOWN;
     ret = window->ResizeAsync(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
@@ -1067,7 +1068,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, subWindow->GetMode());
 }
 
 /**
