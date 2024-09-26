@@ -215,6 +215,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
@@ -719,6 +720,7 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+    mutable std::mutex globalRectMutex_;
 };
 } // namespace OHOS::Rosen
 
