@@ -45,6 +45,7 @@ private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
     void DumpFoldStatus();
+    void DumpTentMode();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
@@ -54,11 +55,21 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
+    void ExcuteInjectCmd();
+/*
+    hidumper 命令注入隔离
+*/
+#ifndef IS_RELEASE_VERSION
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
+    void SetEnterOrExitTentMode(std::string input);
     void MockSendCastPublishEvent(std::string input);
+    bool IsValidDisplayModeCommand(std::string command);
+    int SetFoldDisplayMode();
+    int SetFoldStatusLocked();
+#endif
 
 private:
     int fd_;

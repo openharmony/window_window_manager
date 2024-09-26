@@ -62,6 +62,8 @@ public:
     virtual bool WakeUpEnd() override;
     virtual bool SuspendBegin(PowerStateChangeReason reason) override;
     virtual bool SuspendEnd() override;
+    virtual ScreenId GetInternalScreenId() override;
+    virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;

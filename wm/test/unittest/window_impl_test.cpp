@@ -984,6 +984,12 @@ HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+    uint32_t invalidColorSpace = 1234u;
+    window->SetColorSpace(static_cast<ColorSpace>(invalidColorSpace));
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -1260,6 +1266,8 @@ HWTEST_F(WindowImplTest, SetBrightness01, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBrightness(2.0f)); // 2.0f: brightness
+    ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBrightness(-0.5f)); // -0.5f: brightness
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));

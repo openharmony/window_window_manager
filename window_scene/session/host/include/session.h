@@ -70,7 +70,8 @@ using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconP
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
-using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
+    bool shouldBackToCaller)>;
 using NotifyClickModalSpecificWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
@@ -85,6 +86,7 @@ using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
+using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 
 class ILifecycleListener {
 public:
@@ -192,6 +194,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
@@ -212,6 +215,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
@@ -276,7 +280,6 @@ public:
     void SetSnapshotScale(const float snapshotScale);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     virtual WSError ProcessBackEvent(); // send back event to session_stage
-    WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
@@ -293,7 +296,7 @@ public:
     WSError PendingSessionToForeground();
     void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
         func);
-    WSError PendingSessionToBackgroundForDelegator();
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func);
@@ -315,6 +318,7 @@ public:
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    WSError SetCompatibleModeEnableInPad(bool enable);
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
@@ -352,6 +356,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+    void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
     /*
      * Multi Window
@@ -381,8 +386,14 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+
+    /*
+     * Window ZOrder
+     */
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
+    uint32_t GetLastZOrder() const;
+
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
@@ -480,6 +491,7 @@ public:
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
+    void SetAppInstanceKey(const std::string& appInstanceKey);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -546,6 +558,7 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
+    mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -588,12 +601,19 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+    AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    /*
+     * Window ZOrder
+     */
     uint32_t zOrder_ = 0;
+    uint32_t lastZOrder_ = 0;
+
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     bool blockingFocus_ {false};
@@ -634,6 +654,7 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    int32_t GetRotateAnimationDuration();
 
     /*
      * Window Property

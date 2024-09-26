@@ -34,6 +34,8 @@ struct AbilityInfo;
 }
 
 namespace OHOS::Rosen {
+class RSTransaction;
+constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 
 enum class WSError : int32_t {
@@ -254,13 +256,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
@@ -344,6 +350,12 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
+
+    /*
+     * Multi instance
+     */
+    bool isNewAppInstance_ = false;
+    std::string appInstanceKey_;
 };
 
 enum class SessionFlag : uint32_t {
@@ -585,6 +597,16 @@ struct DeviceScreenConfig {
     bool isRightPowerButton_ = true;
 };
 
+struct SceneAnimationConfig {
+    std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
+    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+};
+
+struct RotateAnimationConfig {
+    int32_t duration_ = ROTATE_ANIMATION_DURATION;
+};
+
+
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
@@ -669,12 +691,14 @@ enum class SessionUIDirtyFlag {
 struct PostProcessFocusState {
     bool enabled_ { false };
     bool isFocused_ { false };
+    bool byForeground_ { true };
     FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
 
     void Reset()
     {
         enabled_ = false;
         isFocused_ = false;
+        byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
