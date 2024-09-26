@@ -1009,7 +1009,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     uiContent->PreLayout();
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
@@ -1066,6 +1066,15 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             ", id: %{public}d", static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
         return ret;
     }
+    if (!withFocus) {
+        ret = static_cast<WMError>(hostSession->SetFocusableOnShow(withFocus));
+        if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "set focusableOnShow failed, ret: %{public}d, name: %{public}s"
+            ", id: %{public}d, focusableOnShow: %{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId(), withFocus);
+        }
+    }
+    
     UpdateTitleButtonVisibility();
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
@@ -4071,5 +4080,21 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 {
     return property_->GetIsUIExtensionSubWindowFlag();
 }
-} // namespace Rosen
+
+bool WindowSceneSessionImpl::SetIsFocusableOnShow(bool isFocusableOnShow) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    WMError ret =static_cast<WMError>(hostSession->SetFocusableOnShow(isFocusableOnShow));
+    if (ret != WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "failed with errcode: %{public}d, id:%{public}d",
+            static_cast<int32_t>(ret), GetPersistentId());
+    }
+    return WMError::WM_OK;
+}  
+} // namespace Rosen 
 } // namespace OHOS

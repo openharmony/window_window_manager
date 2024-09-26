@@ -834,9 +834,13 @@ public:
      *
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param isFocusableOnShow True means window can get focus when it show to foreground, false means the opposite;
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) { return WMError::WM_OK; }
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true)
+    {
+        return WMError::WM_OK;
+    }
     /**
      * @brief Hide window
      *
