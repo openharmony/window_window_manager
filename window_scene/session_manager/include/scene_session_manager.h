@@ -793,7 +793,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
-    
+
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
     std::atomic_bool processingFlushUIParams_ { false };
@@ -871,7 +871,7 @@ private:
     /*
      * Window Watermark
      */
-    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
     void ResetWant(sptr<SceneSession>& sceneSession);
 
