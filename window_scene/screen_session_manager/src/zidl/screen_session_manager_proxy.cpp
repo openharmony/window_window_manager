@@ -3154,4 +3154,38 @@ bool ScreenSessionManagerProxy::SetVirtualScreenStatus(ScreenId screenId, Virtua
     return reply.ReadBool();
 }
 
+DMError ScreenSessionManagerProxy::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    WLOGFI("ENTER");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(id))) {
+        WLOGFE("WriteUnit64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(refreshRate)) {
+        WLOGFE("WriteUnit32 width failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_MAX_REFRESHRATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    actualRefreshRate = reply.ReadUint32();
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
