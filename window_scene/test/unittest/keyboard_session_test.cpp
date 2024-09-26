@@ -1211,6 +1211,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
         return callingSession;
     };
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = true;
     auto callingOriPosY = 0;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
