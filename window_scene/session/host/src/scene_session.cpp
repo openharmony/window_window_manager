@@ -476,13 +476,15 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
             uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
-            session->moveDragController_->InitMoveDragProperty();
             auto sessionProperty = session->GetSessionProperty();
             if (!sessionProperty) {
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
             DisplayId displayId = sessionProperty->GetDisplayId();
             session->moveDragController_->InitCrossDisplayProperty(displayId, parentId);
+            auto windowType = sessionProperty->GetWindowType();
+            session->moveDragController_->SetAsSystemWindow(WindowHelper::IsSystemWindow(windowType));
+            session->moveDragController_->InitMoveDragProperty();
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
@@ -2221,7 +2223,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
 }
 
 void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
-    bool isSupportDragInPcCompatibleMode)
+    bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush)
 {
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
@@ -2231,13 +2233,13 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     if (reason != SizeChangeReason::MOVE) {
         HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
-        SetSurfaceBounds(rect);
+        SetSurfaceBounds(rect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
     }
 }
 
 void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
-    bool isSupportDragInPcCompatibleMode)
+    bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush)
 {
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
@@ -2259,14 +2261,14 @@ void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason
             rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
         rect.width_ = compatibleInPcPortraitWidth;
         rect.height_ = compatibleInPcPortraitHeight;
-        SetSurfaceBounds(rect);
+        SetSurfaceBounds(rect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
         UpdateRect(rect, reason, "compatibleInPcPortrait");
     } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
         rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
         rect.width_ = compatibleInPcLandscapeWidth;
         rect.height_ = compatibleInPcLandscapeHeight;
-        SetSurfaceBounds(rect);
+        SetSurfaceBounds(rect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
         UpdateRect(rect, reason, "compatibleInPcLandscape");
     } else if (isSupportDragInPcCompatibleMode) {
@@ -2279,12 +2281,12 @@ void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason
         }
         rect.posX_ = windowRect.posX_;
         rect.posY_ = windowRect.posY_;
-        SetSurfaceBounds(rect);
+        SetSurfaceBounds(rect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
     } else {
         rect.posX_ = windowRect.posX_;
         rect.posY_ = windowRect.posY_;
-        SetSurfaceBounds(rect);
+        SetSurfaceBounds(rect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
     }
 }
@@ -2312,9 +2314,38 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
     }
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
-    WSRect rect = moveDragController_->GetTargetRect();
-    WSRect globalRect = moveDragController_->GetTargetRect(true);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d "
+    if (reason == SizeChangeReason::DRAG_START) {
+        auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+        if (!movedSurfaceNode || !movedSurfaceNode->GetParent()) {
+            return;
+        }
+        uint64_t parentId = movedSurfaceNode->GetParent()->GetId();
+        auto sessionProperty = GetSessionProperty();
+        if (!sessionProperty) {
+            return;
+        }
+        DisplayId displayId = sessionProperty->GetDisplayId();
+        moveDragController_->InitCrossDisplayProperty(displayId, parentId);
+        auto windowType = sessionProperty->GetWindowType();
+        moveDragController_->SetAsSystemWindow(WindowHelper::IsSystemWindow(windowType));
+    }
+    WSRect rect;
+    WSRect globalRect;
+    bool isGlobal = true;
+    bool needFlush = true;
+    if (reason == SizeChangeReason::DRAG_END) {
+        isGlobal = false;
+        needFlush = false;
+        rect = moveDragController_->GetTargetRect(
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
+        globalRect = moveDragController_->GetTargetRect(
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
+    } else {
+        rect = moveDragController_->GetTargetRect();
+        globalRect = moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d", rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason, isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
     HandleMoveDragSurfaceNode(reason);
@@ -2324,12 +2355,12 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode);
+        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
     } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     } else {
-        SetSurfaceBounds(globalRect);
+        SetSurfaceBounds(globalRect, isGlobal, needFlush);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
             UpdateRect(rect, reason, "OnMoveDragCallback");
@@ -2340,11 +2371,13 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
-        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId()) {
+        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+            moveDragController_->IsSystemWindow()) {
             NotifySessionRectChange(rect, reason);
         } else {
             NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
         }
+        moveDragController_->ResetCrossMoveDragProperty();
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
     if (reason == SizeChangeReason::DRAG_START) {
@@ -2361,10 +2394,13 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
+            if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
+                continue;
+            }
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             if (screenSession == nullptr) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
-                return;
+                continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
             screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
@@ -2374,7 +2410,7 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             if (screenSession == nullptr) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
-                return;
+                continue;
             }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
                 movedSurfaceNode, moveDragController_->GetInitParentNodeId());
@@ -2415,38 +2451,43 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
-void SceneSession::SetSurfaceBounds(const WSRect& rect)
+void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
 {
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
+    if (rsTransaction && needFlush) {
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (surfaceNode_ && leashWinSurfaceNode) {
+        leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         leashWinSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
     } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
         TLOGD(WmsLogTag::WMS_PIP, "PipWindow setSurfaceBounds");
+        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
         WLOGFD("subwindow setSurfaceBounds");
+        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
+        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
         TLOGD(WmsLogTag::WMS_SYSTEM, "systemwindow setSurfaceBounds");
+        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
-    if (rsTransaction) {
+    if (rsTransaction && needFlush) {
         RSTransaction::FlushImplicitTransaction();
         rsTransaction->Commit();
     }
