@@ -903,10 +903,9 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             extWindow->NotifyModalUIExtensionMayBeCovered(false);
         }
         task.Resolve(env, CreateJsWindowObject(env, window));
-        TLOGNI(WmsLogTag::WMS_UIEXT,
-            "%{public}s [NAPI]Create sub window %{public}s end",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [NAPI]Create sub window %{public}s end",
             where, windowName.c_str());
-        };
+    };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsExtensionWindow::OnCreateSubWindowWithOptions",

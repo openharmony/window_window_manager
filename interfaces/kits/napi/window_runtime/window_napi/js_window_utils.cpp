@@ -1100,7 +1100,7 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
         }
         windowOption->SetWindowTopmost(isTopmost);
     }
-    using T = std::underlying_type_t<ModalityType>;
+    using T = std::underlying_type_t<ApiModalityType>;
     T modalityType = 0;
     if (ParseJsValue(jsObject, env, "modalityType", modalityType)) {
         if (!isModal) {
