@@ -95,7 +95,7 @@ void SingleDisplaySensorPocketFoldStateManager::UpdateSwitchScreenBoundaryForLar
     }
 }
 
-FoldStatus SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
+void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
 {
     FoldStatus currentState = GetCurrentState();
     std::string cameraApp = "com.huawei.hmos.camera";
