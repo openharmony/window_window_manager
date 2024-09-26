@@ -392,6 +392,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToBackgroundForDelega
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
+    data.WriteString("TransIdPendingSessionToBackgroundForDelegator UT Testing");
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR);
 
