@@ -2630,7 +2630,7 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
     auto task = [weakThis = wptr(this), reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
         auto window = weakThis.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
         if (rsTransaction) {
@@ -2713,7 +2713,7 @@ void WindowImpl::PerformBack()
     auto task = [weakThis = wptr(this)]() {
         auto window = weakThis.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
         if (!WindowHelper::IsMainWindow(window->property_->GetWindowType())) {
