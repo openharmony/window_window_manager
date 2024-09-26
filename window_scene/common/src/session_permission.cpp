@@ -237,23 +237,21 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     std::string callingBundleName;
     bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
     if (callingBundleName != bundleName) {
-        TLOGE(WmsLogTag::DEFAULT,
-            "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-            callingBundleName.c_str(), bundleName.c_str());
+        TLOGE(WmsLogTag::DEFAULT, "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
+              callingBundleName.c_str(), bundleName.c_str());
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
     AppExecFwk::BundleInfo bundleInfo;
     int userId = uid / 200000; // 200000 use uid to caculate userId
-    bool ret = bundleManagerServiceProxy->GetBundleInfoV9(callingBundleName,
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
+    bool ret = bundleManagerServiceProxy->GetBundleInfoV9(
+        callingBundleName, static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
         bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
 
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DEFAULT,
-            "failed to query app info, callingBundleName:%{public}s, userId:%{public}d",
-            callingBundleName.c_str(), userId);
+        TLOGE(WmsLogTag::DEFAULT, "failed to query app info, callingBundleName:%{public}s, userId:%{public}d",
+              callingBundleName.c_str(), userId);
         return false;
     }
 
@@ -262,9 +260,8 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
         return true;
     }
 
-    TLOGE(WmsLogTag::DEFAULT,
-        "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-        callingBundleName.c_str(), bundleName.c_str());
+    TLOGE(WmsLogTag::DEFAULT, "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
+          callingBundleName.c_str(), bundleName.c_str());
     return false;
 }
 
