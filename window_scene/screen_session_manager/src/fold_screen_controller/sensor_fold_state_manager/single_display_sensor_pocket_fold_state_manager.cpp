@@ -98,7 +98,7 @@ void SingleDisplaySensorPocketFoldStateManager::UpdateSwitchScreenBoundaryForLar
 FoldStatus SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
 {
     FoldStatus currentState = GetCurrentState();
-    std::string CameraApp = "com.huawei.hmos.camera";
+    std::string cameraApp = "com.huawei.hmos.camera";
 
     if (angle >= CAMERA_MAX_VAL) {
         if (isInCameraFoldStrategy_ != false) {
@@ -113,7 +113,7 @@ FoldStatus SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(floa
     if (applicationStateObserver_->GetForegroundApp().empty()) {
         return;
     }
-    if (applicationStateObserver_->GetForegroundApp() == CameraApp && currentState == FoldStatus::FOLDED) {
+    if (applicationStateObserver_->GetForegroundApp() == cameraApp && currentState == FoldStatus::FOLDED) {
         if (isInCameraFoldStrategy_ != true) {
             isInCameraFoldStrategy_ = true;
             TLOGI(WmsLogTag::DMS, "Enable CameraFoldStrategy.");
