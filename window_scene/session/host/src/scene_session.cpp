@@ -3232,9 +3232,15 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d",
                 session->GetPersistentId(), maxInstanceCount);
             if (maxInstanceCount > 0 && !session->CheckInstanceKey(abilitySessionInfo, info)) {
-                TLOGI(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
+                TLOGE(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
                     session->GetPersistentId(), info.appInstanceKey_.c_str());
                 return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            if (maxInstanceCount > 0 &&
+                !MultiInstanceManager::GetInstance().IsInstanceKeyExist(info.bundleName_, info.appInstanceKey_)) {
+                TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, create not exist instanceKey:%{public}s",
+                    session->GetPersistentId(), info.appInstanceKey_.c_str());
+                MultiInstanceManager::GetInstance().CreateNewInstanceKey(info.bundleName_, info.appInstanceKey_);
             }
         }
         session->HandleCastScreenConnection(info, session);
@@ -4869,14 +4875,17 @@ bool SceneSession::CheckInstanceKey(const sptr<AAFwk::SessionInfo> abilitySessio
 {
     if (info.appInstanceKey_.empty()) {
         if (abilitySessionInfo->persistentId != 0) {
-            TLOGD(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
+            TLOGE(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
                 abilitySessionInfo->persistentId);
             return false;
         }
+        info.isNewAppInstance_ = true;
+        return true;
     } else if (!MultiInstanceManager::GetInstance().IsValidInstanceKey(info.bundleName_, info.appInstanceKey_)) {
-        TLOGD(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
         return false;
     }
+    info.isNewAppInstance_ = false;
     return true;
 }
 } // namespace OHOS::Rosen
