@@ -1459,7 +1459,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode03, Function | SmallTest | Le
 HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetWindowName("IsPrivacyModec");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
@@ -1480,7 +1482,9 @@ HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Leve
 HWTEST_F(WindowSceneSessionImplTest, SetSystemPrivacyMode, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetWindowName("SetSystemPrivacyMode");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
