@@ -151,7 +151,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] () {
+    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
