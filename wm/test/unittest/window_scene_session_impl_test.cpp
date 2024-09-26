@@ -770,6 +770,41 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
 }
 
 /*
+ * @tc.name: GetTopwindowWithId
+ * @tc.desc: GetTopwindowWithId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetTopwindowWithId, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetTopwindowWithId");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> session = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, session);
+    WindowSessionImpl::windowSessionMap_.insert(
+        std::make_pair("test", std::pair<int32_t, sptr<WindowSessionImpl>>(1, session)));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(0),
+        Return(WMError::WM_DO_NOTHING)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(1));
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(1),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(1));
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(4),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(0));
+}
+
+/*
  * @tc.name: SetAspectRatio
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
