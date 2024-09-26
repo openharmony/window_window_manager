@@ -19,6 +19,7 @@
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
+#include "screen_scene_config.h"
 
 #include "window_manager_hilog.h"
 
@@ -27,6 +28,8 @@
 #endif
 
 namespace OHOS::Rosen {
+using OHOS::AppExecFwk::AppStateData;
+using OHOS::AppExecFwk::ApplicationState;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 constexpr float ANGLE_MIN_VAL = 0.0F;
@@ -35,6 +38,7 @@ constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
 constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
 constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
 constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
+constexpr float CAMERA_MAX_VAL = 100.0F;
 constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
@@ -43,12 +47,23 @@ constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
 } // namespace
 
-SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager() {}
+SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager()
+{
+    auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
+    if (stringListConfig.count("hallSwitchApp") != 0) {
+        packageNames_ = stringListConfig["hallSwitchApp"];
+    }
+}
 SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateManager() {}
 
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    SetCameraFoldStrategy(angle);
+    if (isInCameraFoldStrategy_) {
+        HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        return;
+    }
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
@@ -59,6 +74,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    SetCameraFoldStrategy(angle);
+    if (isInCameraFoldStrategy_) {
+        HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        return;
+    }
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
@@ -75,6 +95,31 @@ void SingleDisplaySensorPocketFoldStateManager::UpdateSwitchScreenBoundaryForLar
     }
 }
 
+FoldStatus SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
+{
+    FoldStatus currentState = GetCurrentState();
+    std::string CameraApp = "com.huawei.hmos.camera";
+
+    if (angle >= CAMERA_MAX_VAL) {
+        if (isInCameraFoldStrategy_ != false) {
+            isInCameraFoldStrategy_ = false;
+            TLOGI(WmsLogTag::DMS, "Disable CameraFoldStrategy.");
+        }
+        return;
+    }
+    if (applicationStateObserver_ == nullptr) {
+        return;
+    }
+    if (applicationStateObserver_->GetForegroundApp().empty()) {
+        return;
+    }
+    if (applicationStateObserver_->GetForegroundApp() == CameraApp && currentState == FoldStatus::FOLDED) {
+        if (isInCameraFoldStrategy_ != true) {
+            isInCameraFoldStrategy_ = true;
+            TLOGI(WmsLogTag::DMS, "Enable CameraFoldStrategy.");
+        }
+    }
+}
 
 FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float angle, int hall)
 {
@@ -166,5 +211,23 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
         HandleSensorChange(nextState, angle, foldScreenPolicy);
         SetTentMode(false);
     }
+}
+
+ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}
+
+void ApplicationStatePocketObserver::OnForegroundApplicationChanged(const AppStateData &appStateData)
+{
+    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND)) {
+        foregroundBundleName_ = appStateData.bundleName;
+    }
+    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_BACKGROUND)
+        && foregroundBundleName_.compare(appStateData.bundleName) == 0) {
+        foregroundBundleName_ = "" ;
+    }
+}
+
+std::string ApplicationStatePocketObserver::GetForegroundApp()
+{
+    return foregroundBundleName_;
 }
 } // namespace OHOS::Rosen
