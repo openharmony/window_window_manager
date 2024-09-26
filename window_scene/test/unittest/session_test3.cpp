@@ -1216,7 +1216,7 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
 /**
  * @tc.name: GetSurfaceNodeForMoveDrag
  * @tc.desc: GetSurfaceNodeForMoveDrag Test
- * @tc.type: FUNC                
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | Level2)
 {
