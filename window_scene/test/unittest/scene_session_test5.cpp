@@ -438,7 +438,7 @@ HWTEST_F(SceneSessionTest5, OnRestoreMainWindow, Function | SmallTest | Level2)
         return;
     };
     sessionChangeCallback->onRestoreMainWindowFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->onRestoreMainWindowFunc_());
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
 
 /**
