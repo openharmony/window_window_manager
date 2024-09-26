@@ -736,10 +736,6 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
     info.abilityName_ = "Background01";
     info.bundleName_ = "SetPrivacyMode";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
@@ -762,12 +758,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
     info.abilityName_ = "Background02";
     info.bundleName_ = "SetPrivacyMode";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
