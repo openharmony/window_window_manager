@@ -34,7 +34,7 @@ namespace OHOS::Rosen {
 
 using MoveDragCallback = std::function<void(const SizeChangeReason)>;
 
-using NotifyWindowDragHotAreaFunc = std::function<void(uint64_t displayId, uint32_t type,
+using NotifyWindowDragHotAreaFunc = std::function<void(DisplayId displayId, uint32_t type,
     const SizeChangeReason reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
@@ -80,7 +80,7 @@ public:
     uint64_t GetInitParentNodeId() const;
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag();
     std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
-    void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentNodeId);
+    void InitCrossDisplayProperty(DisplayId displayId, uint64_t parentNodeId);
     WSRect GetScreenRectById(DisplayId displayId);
 
 private:
@@ -146,7 +146,7 @@ private:
     /*
      * Cross Display Move Drag
      */
-    std::pair<int32_t, int32_t> CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    std::pair<int32_t, int32_t> CalcUnifiedTranslate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
@@ -207,14 +207,15 @@ private:
     /*
      * Cross Display Move Drag
      */
-    uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t initParentNodeId_ = -1ULL;
-    std::mutex displayIdSetDuringMoveDragMutex_;
-    std::set<uint64_t> displayIdSetDuringMoveDrag_;
-    uint64_t hotAreaDisplayId_ = 0;
+    DisplayId hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
     int32_t originalDisplayOffsetY_ = 0;
+    std::mutex displayIdSetDuringMoveDragMutex_;
+    std::set<uint64_t> displayIdSetDuringMoveDrag_;
+    // Above guarded by displayIdSetDuringMoveDragMutex_
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
