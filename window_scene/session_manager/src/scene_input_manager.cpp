@@ -444,6 +444,28 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
 }
 
+void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos)
+{
+    int displayListSize = static_cast<int>(displayInfos.size());
+    std::string displayList = "";
+    static std::string lastDisplayList = "";
+    for (auto& displayInfo : displayInfos) {
+        displayList += std::to_string(displayInfo.id) + "|" +
+            std::to_string(displayInfo.x) + "|" +
+            std::to_string(displayInfo.y) + "|" +
+            std::to_string(displayInfo.width) + "|" +
+            std::to_string(displayInfo.height) + "|" +
+            std::to_string(static_cast<int32_t>(displayInfo.direction)) + "|" +
+            std::to_string(static_cast<int32_t>(displayInfo.displayDirection)) + "|" +
+            std::to_string(static_cast<int32_t>(displayInfo.displayMode));
+        displayList += ",";
+    }
+    if (lastDisplayList != displayList) {
+        TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,displayList:%{public}s", displayListSize, displayList.c_str());
+        lastDisplayList = displayList;
+    }
+}
+
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
@@ -510,10 +532,11 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList(lastWindowInfoList_);
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
+        PrintDisplayInfo(displayInfos);
         PrintWindowInfo(windowInfoList);
         if (windowInfoList.size() == 0) {
             FlushFullInfoToMMI(displayInfos, windowInfoList);

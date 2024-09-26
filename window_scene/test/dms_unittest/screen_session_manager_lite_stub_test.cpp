@@ -18,7 +18,7 @@
 #include <message_parcel.h>
 #include <common/rs_rect.h>
 #include <transaction/rs_marshalling_helper.h>
-#include "session_manager/include/screen_session_manager_lite.h"
+#include "screen_session_manager/include/screen_session_manager_lite.h"
 #include "dm_common.h"
 #include "zidl/screen_session_manager_lite_stub.h"
 #include "display_manager.h"

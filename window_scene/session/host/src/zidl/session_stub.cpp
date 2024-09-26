@@ -37,9 +37,12 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Sessio
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo == nullptr) {
+    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
+    if (localWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
         return ERR_INVALID_DATA;
     }
+    abilitySessionInfo->want = *localWant;
     if (!data.ReadInt32(abilitySessionInfo->requestCode)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read requestCode failed.");
         return ERR_INVALID_DATA;
@@ -66,6 +69,7 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
     }
+    abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     return ERR_NONE;
 }
 } // namespace
@@ -151,6 +155,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetStartMoveFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
             return HandleSetSystemEnableDrag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
+            return HandleUpdateClientRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY):
             return HandleSetKeyboardSessionGravity(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
@@ -183,6 +189,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS):
             return HandleUpdatePiPControlStatus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
+            return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -193,6 +201,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         default:
@@ -338,6 +348,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
+        reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -460,20 +471,11 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
-    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
-    if (localWant == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
-        return ERR_INVALID_VALUE;
-    }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    abilitySessionInfo->want = *localWant;
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    abilitySessionInfo->processOptions =
-        std::shared_ptr<AAFwk::ProcessOptions>(processOptions);
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
@@ -488,8 +490,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
-        auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        abilitySessionInfo->startSetting.reset(abilityStartSetting);
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }
     bool visible = false;
     if (!data.ReadBool(visible)) {
@@ -504,30 +505,26 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
-    sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
-    if (localWant == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
-        return ERR_INVALID_VALUE;
-    }
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    abilitySessionInfo->want = *localWant;
     int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
     if (readResult == ERR_INVALID_DATA) {
         return ERR_INVALID_DATA;
     }
-    auto processOptions = data.ReadParcelable<AAFwk::ProcessOptions>();
-    abilitySessionInfo->processOptions.reset(processOptions);
     if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->isAtomicService)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearInNotShowRecent failed.");
+        return ERR_INVALID_DATA;
     }
     bool hasCallerToken = false;
     if (!data.ReadBool(hasCallerToken)) {
@@ -543,14 +540,18 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     if (hasStartSetting) {
-        auto abilityStartSetting = data.ReadParcelable<AAFwk::AbilityStartSetting>();
-        abilitySessionInfo->startSetting.reset(abilityStartSetting);
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
+    if (!data.ReadString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
@@ -577,6 +578,24 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
+        return ERR_INVALID_DATA;
+    }
+    WSRect rect = { posX, posY, width, height };
+    WSError errCode = UpdateClientRect(rect);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -640,7 +659,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    if (!data.ReadUint32(mode) || mode >= static_cast<uint32_t>(MaximizeMode::MODE_END)) {
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
@@ -690,6 +709,7 @@ int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+/** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
@@ -861,6 +881,19 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     }
 }
 
+int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    bool isAutoStart = false;
+    if (!data.ReadBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart);
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = data.ReadBool();
@@ -903,7 +936,6 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 
 int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleGetStartMoveFlag!");
     bool isMoving = false;
     WSError errCode = GetStartMoveFlag(isMoving);
     reply.WriteBool(isMoving);
@@ -1024,6 +1056,19 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     TLOGD(WmsLogTag::WMS_DIALOG, "called");
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

@@ -583,7 +583,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
-    ASSERT_FALSE(ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -714,12 +718,11 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, Function | Sma
  */
 HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | Level2)
 {
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(0, 100);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    VirtualScreenOption defaultOption = {"virtualScreen02", 480, 320, 2.0, nullptr, 0};
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(id, 100);
+    ASSERT_EQ(err, DMError::DM_OK);
+    SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 
 /**
@@ -729,12 +732,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | 
  */
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
 {
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(0, 0);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    VirtualScreenOption defaultOption = {"virtualScreen03", 480, 320, 2.0, nullptr, 0};
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(id, 0);
+    ASSERT_EQ(err, DMError::DM_OK);
+    SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 
 /**
@@ -744,12 +746,15 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest |
  */
 HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2)
 {
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(0, 70, 100, 50);
+    VirtualScreenOption defaultOption = {"virtualScreen04", 480, 320, 2.0, nullptr, 0};
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(id, 70, 100, 1);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+        ASSERT_EQ(err, DMError::DM_OK);
     }
+    SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 
 /**

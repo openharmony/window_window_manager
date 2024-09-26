@@ -14,7 +14,7 @@
  */
 #include "screen_session.h"
 #include <gtest/gtest.h>
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "scene_board_judgement.h"
 
 // using namespace FRAME_TRACE;

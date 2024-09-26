@@ -342,8 +342,17 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     option->SetWindowName("GetTitleButtonArea");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WSError res = window->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(10000));
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(window->FindWindowById(1), nullptr);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
@@ -560,7 +569,8 @@ HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, Function | SmallTest | L
     window->property_->SetWindowRect(preRect);
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
     std::shared_ptr<RSTransaction> rsTransaction;
-    window->UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
 
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     auto res = window->UpdateRect(rect, reason);
@@ -1080,6 +1090,29 @@ HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: SetAutoStartPiP
+ * @tc.desc: SetAutoStartPiP
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetAutoStartPiP");
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "SetAutoStartPiP", "SetAutoStartPiP", "SetAutoStartPiP" };
+    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    bool isAutoStart = true;
+    window->SetAutoStartPiP(isAutoStart);
+    window->hostSession_ = nullptr;
+    window->SetAutoStartPiP(isAutoStart);
+}
+
+/**
  * @tc.name: NotifyWindowVisibility01
  * @tc.desc: NotifyWindowVisibility
  * @tc.type: FUNC
@@ -1102,6 +1135,127 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
     window->RegisterWindowVisibilityChangeListener(listener);
     window->NotifyWindowVisibility(false);
     window->UnregisterWindowVisibilityChangeListener(listener);
+}
+
+/**
+ * @tc.name: NotifyMainWindowClose01
+ * @tc.desc: NotifyMainWindowClose
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyMainWindowClose01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    bool terminateCloseProcess = false;
+    WMError res = window->NotifyMainWindowClose(terminateCloseProcess);
+    EXPECT_EQ(terminateCloseProcess, false);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    window->RegisterMainWindowCloseListeners(listener);
+    res = window->NotifyMainWindowClose(terminateCloseProcess);
+    EXPECT_EQ(terminateCloseProcess, false);
+    EXPECT_EQ(res, WMError::WM_OK);
+    window->UnregisterMainWindowCloseListeners(listener);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor01
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor02
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor03
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 end";
+}
+ 
+/**
+ * @tc.name: SetWindowContainerColor04
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::string activeColor = "color";
+    std::string inactiveColor = "123";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
 }
 }
 } // namespace Rosen

@@ -25,6 +25,9 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageStub"};
+constexpr size_t MAX_PARCEL_CAPACITY = 100 * 1024 * 1024; // 100M
+constexpr size_t CAPACITY_THRESHOLD = 8 * 100 * 1024; // 800k
+constexpr size_t RESERVED_SPACE = 4 * 1024; // 4k
 }
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -108,12 +111,16 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleCompatibleFullScreenMinimize(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
             return HandleCompatibleFullScreenClose(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE):
+            return HandleNotifyCompatibleModeEnableInPad(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
             return HandleNotifyDumpInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE):
+            return HandleSetSplitButtonVisible(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -141,10 +148,12 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
             WLOGFE("transaction unMarsh failed");
             return -1;
         }
-        WSError errCode = UpdateRect(rect, reason, transaction);
+        SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     } else {
-        WSError errCode = UpdateRect(rect, reason);
+        SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = data.ReadInt32() };
+        WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     }
     return ERR_NONE;
@@ -510,6 +519,14 @@ int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply)
+{
+    bool enable = data.ReadBool();
+    WSError errCode = NotifyCompatibleModeEnableInPad(enable);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
@@ -519,20 +536,109 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+bool SessionStageStub::CalculateDataSize(const std::vector<std::string>& infos)
+{
+    size_t dataSize = 0;
+    for (const auto& info : infos) {
+        auto infoSize = info.length();
+        if (MAX_PARCEL_CAPACITY - dataSize < infoSize) {
+            return false;
+        }
+
+        dataSize += info.length();
+    }
+
+    return dataSize + RESERVED_SPACE <= CAPACITY_THRESHOLD;
+}
+
+bool SessionStageStub::WriteSmallStringVector(
+    const std::vector<std::string>& infos, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "WriteSmallStringVector entry");
+    reply.SetMaxCapacity(CAPACITY_THRESHOLD);
+    if (!reply.WriteStringVector(infos)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write infos failed");
+        return false;
+    }
+
+    return true;
+}
+
+bool SessionStageStub::WriteBigStringVector(
+    const std::vector<std::string>& infos, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "WriteBigStringVector entry");
+    Parcel tempParcel;
+    tempParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
+    if (!tempParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write infosSize failed");
+        return false;
+    }
+
+    for (const auto& info : infos) {
+        if (!tempParcel.WriteString(info)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "write info failed");
+            return false;
+        }
+    }
+
+    size_t dataSize = tempParcel.GetDataSize();
+    TLOGD(WmsLogTag::WMS_UIEXT, "write big data, dataSize: %{public}zu", dataSize);
+    if (!reply.WriteInt32(static_cast<int32_t>(dataSize))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write dataSize failed");
+        return false;
+    }
+
+    if (!reply.WriteRawData(
+        reinterpret_cast<uint8_t *>(tempParcel.GetData()), dataSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write rawData failed");
+        return false;
+    }
+
+    return true;
+}
+
 int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo!");
+    TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo!");
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read string vector");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to read string vector");
         return ERR_INVALID_VALUE;
     }
-    std::vector<std::string> info;
-    WSError errCode = NotifyDumpInfo(params, info);
-    if (!reply.WriteStringVector(info) || !reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::DEFAULT, "HandleNotifyDumpInfo write info failed");
+    std::vector<std::string> infos;
+    WSError errCode = NotifyDumpInfo(params, infos);
+    bool isSmallData = CalculateDataSize(infos);
+    if (!reply.WriteBool(isSmallData)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isSmallData failed");
         return ERR_TRANSACTION_FAILED;
     }
+
+    bool writeResult = true;
+    if (isSmallData) {
+        writeResult = WriteSmallStringVector(infos, reply);
+    } else {
+        writeResult = WriteBigStringVector(infos, reply);
+    }
+
+    if (!writeResult) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write data failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write errCode failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool isVisible = data.ReadBool();
+    SetSplitButtonVisible(isVisible);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -165,6 +165,7 @@ napi_value JsWindow::Recover(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRecover(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -172,6 +173,7 @@ napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveTo(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -179,6 +181,7 @@ napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveWindowTo(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
@@ -186,6 +189,7 @@ napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMoveWindowToAsync(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 {
     WLOGD("Resize");
@@ -193,6 +197,7 @@ napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnResize(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("Resize");
@@ -200,6 +205,7 @@ napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
@@ -214,6 +220,7 @@ napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowType(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::SetWindowMode(napi_env env, napi_callback_info info)
 {
     WLOGI("SetWindowMode");
@@ -784,6 +791,7 @@ napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnEnableDrag(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]GetWindowLimits");
@@ -791,6 +799,7 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowLimits");
@@ -854,6 +863,13 @@ napi_value JsWindow::SetTitleButtonVisible(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnSetTitleButtonVisible(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTitleButtonVisible(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowGrayScale");
@@ -887,6 +903,13 @@ napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsFocused(env, info) : nullptr;
+}
+
+napi_value JsWindow::RequestFocus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRequestFocus(env, info) : nullptr;
 }
 
 napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
@@ -1318,6 +1341,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1371,6 +1395,7 @@ napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1457,6 +1482,7 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
     };
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1495,6 +1521,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResize(napi_env env, napi_callback_info info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1550,6 +1577,7 @@ napi_value JsWindow::OnResize(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1642,6 +1670,7 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
     };
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1742,6 +1771,7 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -1866,7 +1896,7 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
     if (uicontent == nullptr) {
         WLOGFW("uicontent is nullptr");
     } else {
-        uicontent->GetAppPaintSize(drawableRect);
+        uicontent->GetWindowPaintSize(drawableRect);
     }
     auto objValue = CreateJsWindowPropertiesObject(env, window, drawableRect);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
@@ -5699,6 +5729,26 @@ __attribute__((no_sanitize("cfi")))
     return objValue;
 }
 
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, windows.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create napi array");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < windows.size(); i++) {
+        auto window = windows[i];
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::DEFAULT, "window is null");
+        } else {
+            napi_set_element(env, arrayValue, index++, CreateJsWindowObject(env, window));
+        }
+    }
+    return arrayValue;
+}
+
 bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits)
 {
     uint32_t data = 0;
@@ -5809,6 +5859,7 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
     return complete;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -5861,6 +5912,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     return result;
 }
 
+/** @note @window.layout */
 napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6146,6 +6198,42 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) { // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMaximizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMaximizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMinimizeVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isMaximizeVisible,
+        true);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+        "Window [%{public}u, %{public}s] [%{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6387,6 +6475,74 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isFocused);
 }
 
+static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
+    wptr<Window> weakToken, bool isFocused)
+{
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    execute = [weakToken, errCodePtr, isFocused] {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        if (*errCodePtr != WmErrorCode::WM_OK) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RequestFocusByClient(isFocused));
+        TLOGI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+    };
+    complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (errCodePtr == nullptr) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnRequestFocus failed"));
+        }
+    };
+}
+
+napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    size_t argc = 4; // number of arg
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) { // 1: maximum params num
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    bool isFocused = false;
+    napi_status retCode = napi_get_value_bool(env, argv[0], &isFocused);
+    if (retCode != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetRequestFocusTask(execute, complete, weakToken, isFocused);
+    // only return promise<void>
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRequestFocus",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -6509,6 +6665,16 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
 
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "window is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -6663,6 +6829,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
+    BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
@@ -6670,6 +6837,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getWindowStatus", moduleName, JsWindow::GetWindowStatus);
     BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
+    BindNativeFunction(env, object, "requestFocus", moduleName, JsWindow::RequestFocus);
     BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
 }
 }  // namespace Rosen

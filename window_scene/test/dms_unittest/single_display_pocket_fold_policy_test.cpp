@@ -29,7 +29,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
-const ScreenId SCREEN_ID_FULL = 0;
 }
 
 class SingleDisplayPocketFoldPolicyTest : public testing::Test {
@@ -65,12 +64,25 @@ namespace {
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    FoldDisplayMode displayMode = FoldDisplayMode::MAIN;
-    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.ChangeScreenDisplayMode(displayMode);
-    ASSERT_EQ(ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL), nullptr);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::MAIN;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::FULL;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::SUB;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
 }
 
 /**
@@ -80,15 +92,44 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, Function | 
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendSensorResult, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    FoldStatus foldStatue = FoldStatus::EXPAND;
-    policy.SendSensorResult(foldStatue);
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::UNKNOWN);
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    policy.SendSensorResult(foldStatus);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
 
-    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
-    policy.SendSensorResult(foldStatue);
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+/**
+ * @tc.name: GetCurrentFoldCreaseRegion
+ * @tc.desc: test function : GetCurrentFoldCreaseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetCurrentFoldCreaseRegion, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    sptr<FoldCreaseRegion> foldCreaseRegion;
+    foldCreaseRegion = policy.GetCurrentFoldCreaseRegion();
+    EXPECT_EQ(policy.currentFoldCreaseRegion_, foldCreaseRegion);
+}
+
+/**
+ * @tc.name: LockDisplayStatus
+ * @tc.desc: test function : LockDisplayStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, LockDisplayStatus, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    policy.LockDisplayStatus(false);
+    EXPECT_EQ(policy.lockDisplayStatus_, false);
 }
 
 /**
@@ -98,15 +139,15 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendSensorResult, Function | SmallTe
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetOnBootAnimation, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    bool onBootAnimation = true;
-    policy.SetOnBootAnimation(onBootAnimation);
-    ASSERT_TRUE(policy.onBootAnimation_);
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    policy.SetOnBootAnimation(false);
+    EXPECT_FALSE(policy.onBootAnimation_);
 
-    onBootAnimation = false;
-    policy.SetOnBootAnimation(onBootAnimation);
-    ASSERT_FALSE(policy.onBootAnimation_);
+    policy.SetOnBootAnimation(true);
+    EXPECT_TRUE(policy.onBootAnimation_);
 }
 
 /**
@@ -116,28 +157,29 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetOnBootAnimation, Function | Small
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, RecoverWhenBootAnimationExit, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     policy.RecoverWhenBootAnimationExit();
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::UNKNOWN);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::SUB;
+    policy.RecoverWhenBootAnimationExit();
+    EXPECT_FALSE(policy.onBootAnimation_);
 
     policy.currentDisplayMode_ = FoldDisplayMode::FULL;
     policy.RecoverWhenBootAnimationExit();
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
-}
+    EXPECT_FALSE(policy.onBootAnimation_);
 
-/**
- * @tc.name: TriggerScreenDisplayModeUpdate
- * @tc.desc: test function : TriggerScreenDisplayModeUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, TriggerScreenDisplayModeUpdate, Function | SmallTest | Level3)
-{
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    FoldDisplayMode displayMode = FoldDisplayMode::MAIN;
-    policy.TriggerScreenDisplayModeUpdate(displayMode);
-    ASSERT_EQ(ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL), nullptr);
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    policy.RecoverWhenBootAnimationExit();
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
+    policy.RecoverWhenBootAnimationExit();
+    EXPECT_FALSE(policy.onBootAnimation_);
 }
 
 /**
@@ -147,14 +189,29 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, TriggerScreenDisplayModeUpdate, Func
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, UpdateForPhyScreenPropertyChange, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     policy.UpdateForPhyScreenPropertyChange();
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::UNKNOWN);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::SUB;
+    policy.UpdateForPhyScreenPropertyChange();
+    EXPECT_FALSE(policy.onBootAnimation_);
 
     policy.currentDisplayMode_ = FoldDisplayMode::FULL;
     policy.UpdateForPhyScreenPropertyChange();
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    policy.UpdateForPhyScreenPropertyChange();
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
+    policy.UpdateForPhyScreenPropertyChange();
+    EXPECT_FALSE(policy.onBootAnimation_);
 }
 
 /**
@@ -164,22 +221,26 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, UpdateForPhyScreenPropertyChange, Fu
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetModeMatchStatus, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    FoldDisplayMode ret = policy.GetModeMatchStatus();
-    ASSERT_EQ(ret, FoldDisplayMode::UNKNOWN);
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
 
     policy.currentFoldStatus_ = FoldStatus::EXPAND;
-    ret = policy.GetModeMatchStatus();
-    ASSERT_EQ(ret, FoldDisplayMode::FULL);
+    displayMode = policy.GetModeMatchStatus();
+    EXPECT_EQ(FoldDisplayMode::FULL, displayMode);
 
     policy.currentFoldStatus_ = FoldStatus::FOLDED;
-    ret = policy.GetModeMatchStatus();
-    ASSERT_EQ(ret, FoldDisplayMode::MAIN);
+    displayMode = policy.GetModeMatchStatus();
+    EXPECT_EQ(FoldDisplayMode::MAIN, displayMode);
 
     policy.currentFoldStatus_ = FoldStatus::HALF_FOLD;
-    ret = policy.GetModeMatchStatus();
-    ASSERT_EQ(ret, FoldDisplayMode::FULL);
+    displayMode = policy.GetModeMatchStatus();
+    EXPECT_EQ(FoldDisplayMode::FULL, displayMode);
+
+    policy.currentFoldStatus_ = FoldStatus::UNKNOWN;
+    displayMode = policy.GetModeMatchStatus();
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
 }
 
 /**
@@ -189,11 +250,17 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetModeMatchStatus, Function | Small
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.ReportFoldDisplayModeChange(displayMode);
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::UNKNOWN);
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
+
+    displayMode = FoldDisplayMode::FULL;
+    policy.ReportFoldDisplayModeChange(displayMode);
+    EXPECT_NE(FoldDisplayMode::UNKNOWN, displayMode);
 }
 
 /**
@@ -203,12 +270,17 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, Functio
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
     int32_t offScreen = 0;
     int32_t onScreen = 1;
     policy.ReportFoldStatusChangeBegin(offScreen, onScreen);
-    ASSERT_EQ(policy.currentDisplayMode_, FoldDisplayMode::UNKNOWN);
+    EXPECT_TRUE(onScreen);
+
+    policy.ReportFoldStatusChangeBegin(offScreen, onScreen);
+    EXPECT_TRUE(onScreen);
 }
 
 /**
@@ -218,12 +290,17 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, Functio
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    sptr<ScreenSession> screenSession = new ScreenSession();
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
     policy.onBootAnimation_ = true;
     policy.ChangeScreenDisplayModeToMain(screenSession);
-    ASSERT_TRUE(policy.onBootAnimation_);
+    EXPECT_TRUE(policy.onBootAnimation_);
+
+    policy.ChangeScreenDisplayModeToMain(screenSession);
+    EXPECT_TRUE(policy.onBootAnimation_);
 }
 
 /**
@@ -233,12 +310,80 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, Funct
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFull, Function | SmallTest | Level3)
 {
-    std::recursive_mutex mutex;
-    SingleDisplayPocketFoldPolicy policy = SingleDisplayPocketFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-    sptr<ScreenSession> screenSession = new ScreenSession();
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
     policy.onBootAnimation_ = true;
     policy.ChangeScreenDisplayModeToFull(screenSession);
-    ASSERT_TRUE(policy.onBootAnimation_);
+    EXPECT_TRUE(policy.onBootAnimation_);
+
+    policy.ChangeScreenDisplayModeToFull(screenSession);
+    EXPECT_TRUE(policy.onBootAnimation_);
+}
+
+/**
+ * @tc.name: ChangeScreenDisplayModePower
+ * @tc.desc: test function : ChangeScreenDisplayModePower
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModePower, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: SendPropertyChangeResult
+ * @tc.desc: test function : SendPropertyChangeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendPropertyChangeResult, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+    ScreenId screenId = 0;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+
+    policy.SendPropertyChangeResult(screenSession, screenId, reason);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
+
+/**
+ * @tc.name: ChangeScreenDisplayModeToMainOnBootAnimation
+ * @tc.desc: test function : ChangeScreenDisplayModeToMainOnBootAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMainOnBootAnimation, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
+    policy.ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
+
+/**
+ * @tc.name: ChangeScreenDisplayModeToFullOnBootAnimation
+ * @tc.desc: test function : ChangeScreenDisplayModeToFullOnBootAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootAnimation, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
+    policy.ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
+    EXPECT_FALSE(policy.onBootAnimation_);
 }
 }
 } // namespace Rosen

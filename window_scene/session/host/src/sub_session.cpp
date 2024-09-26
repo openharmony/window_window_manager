@@ -32,8 +32,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    if (moveDragController_ != nullptr && specificCallback != nullptr &&
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }

@@ -1870,9 +1870,9 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    KeyboardAnimationConfig config;
+    KeyboardAnimationCurve curve;
     auto ret = window->GetKeyboardAnimationConfig();
-    ASSERT_EQ(true, ret.durationIn_ == config.durationIn_);
+    ASSERT_EQ(true, ret.curveIn.duration_ == curve.duration_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2092,16 +2092,16 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
 
 /**
  * @tc.name: Marshalling
- * @tc.desc: keyboardAnimationConfig marshalling
+ * @tc.desc: keyboardAnimationCurve marshalling
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, KeyboardAnimationConfigMarshalling, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, Function | SmallTest | Level3)
 {
     MessageParcel data;
-    KeyboardAnimationConfig config;
-    auto ret = data.WriteParcelable(&config);
+    KeyboardAnimationCurve curveConfig;
+    auto ret = data.WriteParcelable(&curveConfig);
     Parcel parcel;
-    config.Unmarshalling(parcel);
+    curveConfig.Unmarshalling(parcel);
     ASSERT_EQ(true, ret);
 }
 
@@ -2342,7 +2342,7 @@ HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Le
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->RegisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2357,7 +2357,7 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->UnregisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2667,6 +2667,36 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
     auto ret = window->GetWindowStatus(windowStatus);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: RegisterMainWindowCloseListeners
+ * @tc.desc: RegisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    auto ret = window->RegisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterMainWindowCloseListeners
+ * @tc.desc: UnregisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    auto ret = window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen

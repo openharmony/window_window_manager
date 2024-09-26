@@ -126,14 +126,30 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetDefaultRequestedOrientation
+ * @tc.desc: SetDefaultRequestedOrientation test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
+{
+    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
+    WindowSessionProperty *property = new WindowSessionProperty();
+    property->SetDefaultRequestedOrientation(orientation);
+    Orientation ret = property->GetDefaultRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+}
+
+/**
  * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode test
+ * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetPrivacyMode(), false);
+    property->SetPrivacyMode(true);
+    ASSERT_EQ(property->GetPrivacyMode(), true);
     property->SetPrivacyMode(false);
     ASSERT_EQ(property->GetPrivacyMode(), false);
 }
@@ -157,10 +173,10 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode, Function | SmallTest |
 HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2)
 {
     float brightness = 0.02;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetBrightness(brightness);
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetBrightness(), 0);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetBrightness(brightness);
+    ASSERT_EQ(brightness, property->GetBrightness());
 }
 
 /**
@@ -927,14 +943,14 @@ HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
-    bool keepScreenOn = false;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool keepScreenOn = true;
     property->SetKeepScreenOn(keepScreenOn);
-    ASSERT_EQ(property->keepScreenOn_, keepScreenOn);
-    delete property;
+    ASSERT_EQ(keepScreenOn, property->IsKeepScreenOn());
+    keepScreenOn = false;
+    property->SetKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsKeepScreenOn());
 }
 
 /**

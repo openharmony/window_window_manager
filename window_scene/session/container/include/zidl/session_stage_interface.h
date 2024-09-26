@@ -49,7 +49,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
 
@@ -147,6 +147,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
 
@@ -192,6 +196,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

@@ -148,17 +148,6 @@ HWTEST_F(SCBSystemSessionTest, UpdateWindowMode, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: RegisterBufferAvailableCallback
- * @tc.desc: check func RegisterBufferAvailableCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, RegisterBufferAvailableCallback, Function | SmallTest | Level3)
-{
-    ASSERT_NE(scbSystemSession_, nullptr);
-    scbSystemSession_->RegisterBufferAvailableCallback([]() {});
-}
-
-/**
  * @tc.name: BindKeyboardSession01
  * @tc.desc: check func BindKeyboardSession
  * @tc.type: FUNC

@@ -71,6 +71,17 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+WSError GetIntValueFromString(const std::string& str, uint32_t& value)
+{
+    char* end;
+    value = strtoul(str.c_str(), &end, 10); // 10 number convert base
+    if (*end == '\0' && value != 0) {
+        return WSError::WS_OK;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsBundleName) != napi_undefined) {
@@ -287,15 +298,28 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
-bool IsJsRequestOrientationUndefined(napi_env env, napi_value jsRequestOrientation, SessionInfo& sessionInfo)
+bool IsJsIsNewAppInstanceUndefined(napi_env env, napi_value jsIsNewAppInstance, SessionInfo& sessionInfo)
 {
-    if (GetType(env, jsRequestOrientation) != napi_undefined) {
-        uint32_t requestOrientation = 0;
-        if (!ConvertFromJsValue(env, jsRequestOrientation, requestOrientation)) {
-            TLOGI(WmsLogTag::DEFAULT, "Failed to convert parameter to requestOrientation");
+    if (GetType(env, jsIsNewAppInstance) != napi_undefined) {
+        bool isNewAppInstance = false;
+        if (!ConvertFromJsValue(env, jsIsNewAppInstance, isNewAppInstance)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isNewAppInstance");
             return false;
         }
-        sessionInfo.requestOrientation_ = requestOrientation;
+        sessionInfo.isNewAppInstance_ = isNewAppInstance;
+    }
+    return true;
+}
+
+bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsInstanceKey) != napi_undefined) {
+        std::string instanceKey;
+        if (!ConvertFromJsValue(env, jsInstanceKey, instanceKey)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to instanceKey");
+            return false;
+        }
+        sessionInfo.appInstanceKey_ = instanceKey;
     }
     return true;
 }
@@ -318,8 +342,10 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "windowInputType", &jsWindowInputType);
     napi_value jsFullScreenStart = nullptr;
     napi_get_named_property(env, jsObject, "fullScreenStart", &jsFullScreenStart);
-    napi_value jsRequestOrientation = nullptr;
-    napi_get_named_property(env, jsObject, "requestOrientation", &jsRequestOrientation);
+    napi_value jsIsNewAppInstance = nullptr;
+    napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
+    napi_value jsInstanceKey = nullptr;
+    napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -341,10 +367,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
         return false;
     }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsRequestOrientationUndefined(env, jsRequestOrientation, sessionInfo)) {
+    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+        !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
         return false;
     }
     return true;
@@ -811,6 +836,21 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
     return true;
 }
 
+bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
+{
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, value, "duration", &jsDuration);
+    if (GetType(env, jsDuration) != napi_undefined) {
+        int32_t duration = ROTATE_ANIMATION_DURATION;
+        if (!ConvertFromJsValue(env, jsDuration, duration)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
+            return false;
+        }
+        config.duration_ = duration;
+    }
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
@@ -891,6 +931,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isAtomicService_));
     napi_set_named_property(env, objValue, "isBackTransition",
         CreateJsValue(env, sessionInfo.isBackTransition_));
+    napi_set_named_property(env, objValue, "needClearInNotShowRecent",
+        CreateJsValue(env, sessionInfo.needClearInNotShowRecent_));
     if (sessionInfo.processOptions != nullptr) {
         napi_set_named_property(env, objValue, "processOptions",
             CreateJsProcessOption(env, sessionInfo.processOptions));
@@ -1217,6 +1259,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 
     napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
+    napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
+    napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     return objValue;
 }
 
@@ -1241,6 +1285,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_DIALOG)));
     napi_set_named_property(env, objValue, "TYPE_WINDOW_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
+    napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;

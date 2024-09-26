@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "parameters.h"
 

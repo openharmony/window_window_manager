@@ -141,6 +141,7 @@ enum class SubWindowModalType : uint32_t {
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
+    TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
 };
 
@@ -270,6 +271,12 @@ enum class SystemBarSettingFlag : uint32_t {
     ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
     FOLLOW_SETTING = 1 << 2
 };
+
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
+    using T = std::underlying_type_t<SystemBarSettingFlag>;
+    return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
 
 /**
  * @brief Enumerates flag of multiWindowUIType.
@@ -816,6 +823,7 @@ enum class MaximizeMode : uint32_t {
     MODE_AVOID_SYSTEM_BAR,
     MODE_FULL_FILL,
     MODE_RECOVER,
+    MODE_END,
 };
 
 /**
@@ -1098,12 +1106,14 @@ struct TitleButtonRect {
 /*
  * Config of keyboard animation
  */
-class KeyboardAnimationConfig : public Parcelable {
+class KeyboardAnimationCurve : public Parcelable {
 public:
-    std::string curveType_ = "";
-    std::vector<float> curveParams_ = {};
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    KeyboardAnimationCurve() = default;
+    KeyboardAnimationCurve(const std::string& curveType, const std::vector<float>& curveParams, uint32_t duration)
+        : curveType_(curveType), duration_(duration)
+    {
+        curveParams_.assign(curveParams.begin(), curveParams.end());
+    }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -1127,26 +1137,48 @@ public:
             }
         }
 
-        if (!parcel.WriteUint32(durationIn_) || !parcel.WriteUint32(durationOut_)) {
+        if (!parcel.WriteUint32(duration_)) {
             return false;
         }
         return true;
     }
 
-    static KeyboardAnimationConfig* Unmarshalling(Parcel& parcel)
+    static KeyboardAnimationCurve* Unmarshalling(Parcel& parcel)
     {
-        KeyboardAnimationConfig* config = new KeyboardAnimationConfig;
-        config->curveType_ = parcel.ReadString();
-        auto paramSize = parcel.ReadUint32();
-        if (paramSize == 4) { // 4: param size
+        KeyboardAnimationCurve* config = new KeyboardAnimationCurve;
+        uint32_t paramSize = 0;
+        if (!parcel.ReadString(config->curveType_) || !parcel.ReadUint32(paramSize)) {
+            delete config;
+            return nullptr;
+        }
+
+        if (paramSize == 4) { // 4: paramSize
             for (uint32_t i = 0; i < paramSize; i++) {
-                config->curveParams_.push_back(parcel.ReadFloat());
+                float param = 0.0f;
+                if (!parcel.ReadFloat(param)) {
+                    delete config;
+                    return nullptr;
+                } else {
+                    config->curveParams_.push_back(param);
+                }
             }
         }
-        config->durationIn_ = parcel.ReadUint32();
-        config->durationOut_ = parcel.ReadUint32();
+
+        if (!parcel.ReadUint32(config->duration_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
+
+    std::string curveType_ = "";
+    std::vector<float> curveParams_ = {};
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn;
+    KeyboardAnimationCurve curveOut;
 };
 
 enum class CaseType {

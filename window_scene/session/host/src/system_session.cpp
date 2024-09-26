@@ -34,8 +34,8 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
-    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    if (moveDragController_  != nullptr && specificCallback != nullptr &&
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
     }
