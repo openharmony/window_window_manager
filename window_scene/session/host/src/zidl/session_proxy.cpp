@@ -1864,21 +1864,6 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     }
 }
 
-WSError SessionProxy::SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null, code:%{public}d", static_cast<uint32_t>(code));
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(code), data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed, code:%{public}d", static_cast<uint32_t>(code));
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
-}
-
 WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
 {
     MessageParcel data;
