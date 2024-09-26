@@ -111,6 +111,9 @@ public:
 
     /**
      * @brief Notify transform
+     * 
+     * Notify transform when window changed.
+     * 
      * @param transform transform to change
      */
     virtual void NotifyTransformChange(const Transform& transform) = 0;

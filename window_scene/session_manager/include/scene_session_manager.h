@@ -248,6 +248,9 @@ public:
 
     /**
      * @brief get the focused window info
+     * 
+     * This function provides the ability for other services to get the focused window info.
+     * 
      * @param focusInfo the focused session info
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
@@ -265,6 +268,9 @@ public:
         
     /**
      * @brief get focus session token
+     * 
+     * This function provides the ability for other services to get the focused session token.
+     * 
      * @param token  the object of token
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
