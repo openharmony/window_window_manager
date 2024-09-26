@@ -1043,8 +1043,9 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+}
 
-    /**
+/**
  * @tc.name: SetWindowMode02
  * @tc.desc: SetWindowMode
  * @tc.type: FUNC
@@ -1065,7 +1066,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
     subWindow->hostSession_ = subSession;
     subWindow->property_->SetModeSupportInfo(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    EXPECT_EQ(WMError::WINDOW_MODE_FLOATING, ret);
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, ret);
 }
 
 /**
