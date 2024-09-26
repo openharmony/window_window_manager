@@ -62,6 +62,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
+constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -476,7 +477,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             if (!sessionProperty) {
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
-            uint64_t displayId = sessionProperty->GetDisplayId();
+            DisplayId displayId = sessionProperty->GetDisplayId();
             session->moveDragController_->InitCrossDisplayProperty(displayId, parentId);
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
@@ -530,11 +531,14 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
     return PostSyncTask(task, "OnSystemSessionEvent");
 }
 
-uint32_t SceneSession::GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
+uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
 {
     std::shared_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
-    auto& hotAreaMap = windowDragHotAreaMap_[displayId];
-    for (auto it = hotAreaMap.begin(); it != hotAreaMap.end(); ++it) {
+    if (windowDragHotAreaMap_.find(displayId) == windowDragHotAreaMap_.end()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Display is invalid.");
+        return type;
+    }
+    for (const auto& [key, rect] : windowDragHotAreaMap_[displayId]) {
         uint32_t key = it->first;
         WSRect rect = it->second;
         if (rect.IsInRegion(pointerX, pointerY)) {
@@ -544,13 +548,10 @@ uint32_t SceneSession::GetWindowDragHotAreaType(uint64_t displayId, uint32_t typ
     return type;
 }
 
-void SceneSession::AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area)
+void SceneSession::AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area)
 {
     std::unique_lock<std::shared_mutex> lock(windowDragHotAreaMutex_);
-    auto const result = windowDragHotAreaMap_[displayId].insert({type, area});
-    if (!result.second) {
-        result.first->second = area;
-    }
+    windowDragHotAreaMap_[displayId].insert_or_assign(type, area);
 }
 
 SubWindowModalType SceneSession::GetSubWindowModalType() const
@@ -948,7 +949,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            session->NotifySessionRectChange(rect, reason, DISPLAY_ID_INVALID);
+            session->sessionRectChangeFunc_(rect, reason, DISPLAY_ID_INVALID);
         }
         return WSError::WS_OK;
     };
@@ -1331,7 +1332,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         (sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID))) {
         return;
     }
-    uint64_t displayId = sessionProperty->GetDisplayId();
+    DisplayId displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
@@ -2029,7 +2030,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     const SizeChangeReason reason, const DisplayId displayId)
 {
-    auto task = [weakThis = wptr(this), rect, reason, displayId]() {
+    auto task = [weakThis = wptr(this), rect, reason, displayId] {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -2239,7 +2240,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect rect = moveDragController_->GetTargetRect();
     WSRect globalRect = moveDragController_->GetTargetRect(true);
-    WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d", rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason, isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
     HandleMoveDragSurfaceNode(reason);
@@ -2265,9 +2266,11 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
-        DisplayId changedDisplayId = moveDragController_->GetMoveDragEndDisplayId() ==
-            moveDragController_->GetMoveDragStartDisplayId() ? -1 : moveDragController_->GetMoveDragEndDisplayId();
-        NotifySessionRectChange(rect, reason, changedDisplayId);
+        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId()) {
+            NotifySessionRectChange(rect, reason);
+        } else {
+            NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
+        }
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
     }
     if (reason == SizeChangeReason::DRAG_START) {

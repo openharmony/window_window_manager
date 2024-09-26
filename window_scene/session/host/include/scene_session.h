@@ -33,7 +33,6 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 namespace {
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
-constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 }
 class SceneSession;
 using SpecificSessionCreateCallback =
@@ -41,7 +40,7 @@ using SpecificSessionCreateCallback =
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
-    WindowType type, uint64_t displayId)>;
+    WindowType type, DisplayId displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
@@ -372,8 +371,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
+    static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     int32_t GetCustomDecorHeight() override
     {
@@ -483,11 +482,11 @@ private:
      * Move Drag
      */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+    void OnMoveDragCallback(const SizeChangeReason reason);
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void OnMoveDragCallback(const SizeChangeReason reason);
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
