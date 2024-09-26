@@ -1560,7 +1560,7 @@ WSError Session::Clear(bool needStartCaller)
     auto task = [weakThis = wptr(this), needStartCaller]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->isTerminating_ = true;
