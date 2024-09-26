@@ -213,11 +213,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
+bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
+           property_->GetIsPcAppInPad();
+}
+
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -570,10 +575,11 @@ void WindowSessionImpl::DestroySubWindow()
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 continue;
             }
-            if ((*iter)->GetPersistentId() == persistentId) {
+            if (subWindow->GetPersistentId() == persistentId) {
                 TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
                 subWindows.erase(iter);
                 break;
@@ -587,17 +593,18 @@ void WindowSessionImpl::DestroySubWindow()
     if (mainIter != subWindowSessionMap_.end()) {
         auto& subWindows = mainIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 TLOGW(WmsLogTag::WMS_SUB, "Destroy sub window which is nullptr");
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = (*iter)->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
-                (*iter)->GetPersistentId(), isExtDestroyed);
-            auto ret = (*iter)->Destroy(isExtDestroyed);
+                subWindow->GetPersistentId(), isExtDestroyed);
+            auto ret = subWindow->Destroy(isExtDestroyed);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", (*iter)->GetPersistentId());
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", subWindow->GetPersistentId());
                 subWindows.erase(iter);
             }
         }
@@ -1095,11 +1102,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.IsPcWindow();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true, false);
         return;
@@ -2395,8 +2401,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};

@@ -218,6 +218,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    bool GetTentMode();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -232,6 +233,7 @@ public:
     int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
+    void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterExtendSettingDpiObserver();
     void RegisterSettingRotationObserver();
@@ -289,6 +291,8 @@ public:
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
         const std::string& secondaryScreenMode);
+    void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
+    void SetCoordinationFlag(bool isCoordinationFlag);
 
 protected:
     ScreenSessionManager();
@@ -304,7 +308,6 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
-    void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void RegisterRefreshRateChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
@@ -319,6 +322,7 @@ private:
     void SendCastEvent(const bool &isPlugIn);
     void PhyMirrorConnectWakeupScreen();
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
     void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
@@ -340,14 +344,6 @@ private:
     DMError CheckDisplayMangerAgentTypeAndPermission(
         const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ShowHelpInfo(std::string& dumpInfo);
-    void ShowIllegalArgsInfo(std::string& dumpInfo);
-    int DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo);
-    int DumpAllScreenInfo(std::string& dumpInfo);
-    int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
-    bool IsValidDigitString(const std::string& idStr) const;
-    int SetFoldDisplayMode(const std::string& modeParam);
-    int SetFoldStatusLocked(const std::string& lockParam);
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
@@ -423,6 +419,7 @@ private:
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
     bool isScreenShot_ = false;
+    bool isCoordinationFlag_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -488,7 +485,6 @@ private:
                                             float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
-    bool IsValidDisplayModeCommand(std::string command);
     bool IsDefaultMirrorMode(ScreenId screenId);
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);

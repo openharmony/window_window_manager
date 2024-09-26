@@ -34,6 +34,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void InitTestSceneSession(DisplayId displayId, int32_t windowId, int32_t zOrder, bool visible, WSRect rect);
 
     static sptr<SceneSessionManager> ssm_;
 private:
@@ -80,6 +81,24 @@ void SceneSessionManagerTest10::SetUp()
 void SceneSessionManagerTest10::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+}
+
+void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
+    int32_t windowId, int32_t zOrder, bool visible, WSRect rect)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(displayId);
+    SessionInfo info;
+    info.bundleName_ = "root";
+    info.persistentId_ = windowId;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetZOrder(zOrder);
+    sceneSession->SetRSVisible(visible);
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_EQ(windowId, sceneSession->GetPersistentId());
 }
 
 namespace {
@@ -231,6 +250,169 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
 }
 
 /**
+ * @tc.name: GetWindowIdsByCoordinate01
+ * @tc.desc: GetWindowIdsByCoordinate, displayId invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate01, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(DISPLAY_ID_INVALID, 0, 0, 0, windowIds);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetWindowIdsByCoordinate02
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 0, x y invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSession(1, 101, 11, true, {100, 100, 200, 200});
+    ssm_->sceneSessionMap_.insert({102, nullptr});
+    InitTestSceneSession(1, 103, 14, true, {120, 120, 220, 220});
+    InitTestSceneSession(1, 104, 12, true, {100, 100, 200, 200});
+    auto it1 = ssm_->sceneSessionMap_.find(104);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->SetSessionProperty(nullptr);
+    }
+    InitTestSceneSession(1, 105, 12, true, {100, 100, 200, 200});
+    auto it2 = ssm_->sceneSessionMap_.find(105);
+    if (it2 != ssm_->sceneSessionMap_.end()) {
+        it2->second->sessionInfo_.bundleName_ = "other";
+    }
+    InitTestSceneSession(1, 106, 15, true, {140, 140, 240, 240});
+    InitTestSceneSession(2, 107, 15, true, {150, 150, 250, 250});
+    InitTestSceneSession(1, 108, 13, false, {150, 150, 250, 250});
+    InitTestSceneSession(1, 109, 13, true, {160, 160, 260, 260});
+    InitTestSceneSession(1, 110, 12, true, {500, 500, 600, 600});
+
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, -1, -1, windowIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(5, windowIds.size());
+    EXPECT_EQ(106, windowIds[0]);
+    EXPECT_EQ(103, windowIds[1]);
+    EXPECT_EQ(109, windowIds[2]);
+    EXPECT_EQ(110, windowIds[3]);
+    EXPECT_EQ(101, windowIds[4]);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetWindowIdsByCoordinate03
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 3, x y invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSession(1, 111, 11, true, {100, 100, 200, 200});
+    ssm_->sceneSessionMap_.insert({102, nullptr});
+    InitTestSceneSession(1, 113, 14, true, {120, 120, 220, 220});
+    InitTestSceneSession(1, 114, 12, true, {100, 100, 200, 200});
+    auto it1 = ssm_->sceneSessionMap_.find(114);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->SetSessionProperty(nullptr);
+    }
+    InitTestSceneSession(1, 115, 12, true, {100, 100, 200, 200});
+    auto it2 = ssm_->sceneSessionMap_.find(115);
+    if (it2 != ssm_->sceneSessionMap_.end()) {
+        it2->second->sessionInfo_.bundleName_ = "other";
+    }
+    InitTestSceneSession(1, 116, 15, true, {140, 140, 240, 240});
+    InitTestSceneSession(2, 117, 15, true, {150, 150, 250, 250});
+    InitTestSceneSession(1, 118, 13, false, {150, 150, 250, 250});
+    InitTestSceneSession(1, 119, 13, true, {160, 160, 260, 260});
+    InitTestSceneSession(1, 120, 12, true, {500, 500, 600, 600});
+
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, -1, -1, windowIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(3, windowIds.size());
+    EXPECT_EQ(116, windowIds[0]);
+    EXPECT_EQ(113, windowIds[1]);
+    EXPECT_EQ(119, windowIds[2]);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetWindowIdsByCoordinate04
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 0, x y effictive value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSession(1, 121, 11, true, {100, 100, 200, 200});
+    ssm_->sceneSessionMap_.insert({102, nullptr});
+    InitTestSceneSession(1, 123, 14, true, {120, 120, 220, 220});
+    InitTestSceneSession(1, 124, 12, true, {100, 100, 200, 200});
+    auto it1 = ssm_->sceneSessionMap_.find(124);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->SetSessionProperty(nullptr);
+    }
+    InitTestSceneSession(1, 125, 12, true, {100, 100, 200, 200});
+    auto it2 = ssm_->sceneSessionMap_.find(125);
+    if (it2 != ssm_->sceneSessionMap_.end()) {
+        it2->second->sessionInfo_.bundleName_ = "other";
+    }
+    InitTestSceneSession(1, 126, 15, true, {140, 140, 240, 240});
+    InitTestSceneSession(2, 127, 15, true, {150, 150, 250, 250});
+    InitTestSceneSession(1, 128, 13, false, {150, 150, 250, 250});
+    InitTestSceneSession(1, 129, 13, true, {160, 160, 260, 260});
+    InitTestSceneSession(1, 130, 12, true, {500, 500, 600, 600});
+
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, 180, 180, windowIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(4, windowIds.size());
+    EXPECT_EQ(126, windowIds[0]);
+    EXPECT_EQ(123, windowIds[1]);
+    EXPECT_EQ(129, windowIds[2]);
+    EXPECT_EQ(121, windowIds[3]);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetWindowIdsByCoordinate05
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 3, x y effictive value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSession(1, 131, 11, true, {100, 100, 200, 200});
+    ssm_->sceneSessionMap_.insert({102, nullptr});
+    InitTestSceneSession(1, 133, 14, true, {120, 120, 220, 220});
+    InitTestSceneSession(1, 134, 12, true, {100, 100, 200, 200});
+    auto it1 = ssm_->sceneSessionMap_.find(134);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->SetSessionProperty(nullptr);
+    }
+    InitTestSceneSession(1, 135, 12, true, {100, 100, 200, 200});
+    auto it2 = ssm_->sceneSessionMap_.find(135);
+    if (it2 != ssm_->sceneSessionMap_.end()) {
+        it2->second->sessionInfo_.bundleName_ = "other";
+    }
+    InitTestSceneSession(1, 136, 15, true, {140, 140, 240, 240});
+    InitTestSceneSession(2, 137, 15, true, {150, 150, 250, 250});
+    InitTestSceneSession(1, 138, 13, false, {150, 150, 250, 250});
+    InitTestSceneSession(1, 139, 13, true, {160, 160, 260, 260});
+    InitTestSceneSession(1, 140, 12, true, {500, 500, 600, 600});
+
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, 180, 180, windowIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(3, windowIds.size());
+    EXPECT_EQ(136, windowIds[0]);
+    EXPECT_EQ(133, windowIds[1]);
+    EXPECT_EQ(139, windowIds[2]);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: ProcessFocusZOrderChange
  * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
@@ -275,6 +457,51 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 }
+
+/**
+ * @tc.name: GetAllSceneSessionForAccessibility
+ * @tc.desc: GetAllSceneSessionForAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetAllSceneSessionForAccessibility, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ASSERT_EQ(sceneSessionList.size(), 0);
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = 1;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = 1;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    SessionInfo info3;
+    info3.abilityName_ = "test3";
+    info3.bundleName_ = "test3";
+    info3.windowType_ = 1;
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    ASSERT_NE(nullptr, sceneSession3);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession1);
+    ssm_->sceneSessionMap_.emplace(2, sceneSession2);
+    ssm_->sceneSessionMap_.emplace(3, sceneSession3);
+    sceneSession1->isScbCoreEnabled_ = false;
+    sceneSession2->isScbCoreEnabled_ = false;
+    sceneSession3->isScbCoreEnabled_ = false;
+    sceneSession1->isVisibleForAccessibility_ = true;
+    sceneSession2->isVisibleForAccessibility_ = false;
+    sceneSession3->isVisibleForAccessibility_ = true;
+    sceneSession1->isVisible_ = true;
+    sceneSession2->isVisible_ = false;
+    sceneSession3->isVisible_ = true;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+}
+
 }  // namespace
 }
 }
