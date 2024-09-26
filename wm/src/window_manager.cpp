@@ -1408,5 +1408,42 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
+WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "skip failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, watermarkName, isEnabled);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowIdsByCoordinate(
+        displayId, windowNumber, x, y, windowIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get windowIds by coordinate failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::ReleaseForegroundSessionScreenLock()
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

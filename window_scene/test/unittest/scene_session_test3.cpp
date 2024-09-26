@@ -180,7 +180,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
 
     ratio = 10;
     result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -319,7 +319,7 @@ HWTEST_F(SceneSessionTest3, ClearSpecificSessionCbMap1, Function | SmallTest | L
 
     sptr<MainSession::SessionChangeCallback> sessionChangeCallback =
         new (std::nothrow) MainSession::SessionChangeCallback();
-    sessionChangeCallback->clearCallbackFunc_ = [](bool, int32_t) {};
+    sessionChangeCallback->clearCallbackFunc_ = [](bool) {};
     scensession->sessionChangeCallback_ = sessionChangeCallback;
     scensession->ClearSpecificSessionCbMap();
 }

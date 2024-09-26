@@ -24,7 +24,6 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "ability_info.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -35,6 +34,8 @@ struct AbilityInfo;
 }
 
 namespace OHOS::Rosen {
+class RSTransaction;
+constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 
 enum class WSError : int32_t {
@@ -107,24 +108,6 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
     { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-};
-
-const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
-    {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
-    {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
-    {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
-    {"follow_recent",                       OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT},
-    {"landscape_inverted",                  OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED},
-    {"portrait_inverted",                   OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED},
-    {"auto_rotation",                       OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION},
-    {"auto_rotation_landscape",             OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE},
-    {"auto_rotation_portrait",              OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT},
-    {"auto_rotation_restricted",            OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED},
-    {"auto_rotation_landscape_restricted",  OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
-    {"auto_rotation_portrait_restricted",   OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
-    {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
-    {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
-    {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
 enum class SessionState : uint32_t {
@@ -273,9 +256,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
+    /**
+     * select last focused app when requestSessionUnFocus.
+     */
+    LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
@@ -349,6 +340,7 @@ struct SessionInfo {
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
+    bool needClearInNotShowRecent_ = false;
 
     /*
      * UIExtension
@@ -358,6 +350,12 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
+
+    /*
+     * Multi instance
+     */
+    bool isNewAppInstance_ = false;
+    std::string appInstanceKey_;
 };
 
 enum class SessionFlag : uint32_t {
@@ -407,6 +405,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
+    EVENT_DRAG,
 };
 
 enum class BrokerStates: uint32_t {
@@ -479,6 +478,17 @@ struct WSRectT {
     {
         return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
+    }
+
+    inline bool IsOverlap(const WSRectT<T>& a) const
+    {
+        int32_t xStart = std::max(posX_, a.posX_);
+        int32_t xEnd = std::min(posX_ + static_cast<int32_t>(width_),
+            a.posX_ + static_cast<int32_t>(a.width_));
+        int32_t yStart = std::max(posY_, a.posY_);
+        int32_t yEnd = std::min(posY_ + static_cast<int32_t>(height_),
+            a.posY_ + static_cast<int32_t>(a.height_));
+        return yStart < yEnd && xStart < xEnd;
     }
 
     inline bool IsInvalid() const
@@ -587,9 +597,21 @@ struct DeviceScreenConfig {
     bool isRightPowerButton_ = true;
 };
 
+struct SceneAnimationConfig {
+    std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
+    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+};
+
+struct RotateAnimationConfig {
+    int32_t duration_ = ROTATE_ANIMATION_DURATION;
+};
+
+
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
+    int32_t sessionWidth_ = 0;
+    int32_t sessionHeight_ = 0;
 };
 
 /**
@@ -669,12 +691,14 @@ enum class SessionUIDirtyFlag {
 struct PostProcessFocusState {
     bool enabled_ { false };
     bool isFocused_ { false };
+    bool byForeground_ { true };
     FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
 
     void Reset()
     {
         enabled_ = false;
         isFocused_ = false;
+        byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
 };

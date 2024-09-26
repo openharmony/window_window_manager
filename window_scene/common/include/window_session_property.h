@@ -97,6 +97,7 @@ public:
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
+    void SetCompatibleModeEnableInPad(bool enable);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -155,6 +156,7 @@ public:
     bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
+    bool GetCompatibleModeEnableInPad() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -207,6 +209,8 @@ public:
     bool GetIsUIExtensionAbilityProcess() const;
     void SetParentWindowType(WindowType parentWindowType);
     WindowType GetParentWindowType() const;
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    bool GetIsUIExtensionSubWindowFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -332,6 +336,8 @@ private:
     bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
+    mutable std::mutex compatibleModeMutex_;
+    bool compatibleModeEnableInPad_ = false;
 
     /**
      * Sub Window
@@ -345,6 +351,7 @@ private:
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
     bool isExtensionFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
+    bool isUIExtensionSubWindowFlag_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 
@@ -415,7 +422,8 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    KeyboardAnimationConfig keyboardAnimationConfig_;
+    KeyboardAnimationCurve animationIn_;
+    KeyboardAnimationCurve animationOut_;
     // 1920: default max window size
     uint32_t maxFloatingWindowSize_ = 1920;
     // 320: default minWidth main window size
@@ -441,7 +449,7 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteParcelable(&keyboardAnimationConfig_) ||
+            !parcel.WriteParcelable(&animationIn_) || !parcel.WriteParcelable(&animationOut_) ||
             !parcel.WriteUint32(maxFloatingWindowSize_)) {
             return false;
         }
@@ -454,11 +462,11 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(backgroundswitch)) {
             return false;
         }
-        
+
         if (!parcel.WriteBool(freeMultiWindowEnable_)) {
             return false;
         }
-        
+
         if (!parcel.WriteBool(freeMultiWindowSupport_)) {
             return false;
         }
@@ -484,12 +492,18 @@ struct SystemSessionConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
-        if (keyboardConfig == nullptr) {
+        sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationIn == nullptr) {
             delete config;
             return nullptr;
         }
-        config->keyboardAnimationConfig_ = *keyboardConfig;
+        config->animationIn_ = *animationIn;
+        sptr<KeyboardAnimationCurve> animationOut = parcel.ReadParcelable<KeyboardAnimationCurve>();
+        if (animationOut == nullptr) {
+            delete config;
+            return nullptr;
+        }
+        config->animationOut_ = *animationOut;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
         config->miniWidthOfMainWindow_ = parcel.ReadUint32();
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
@@ -513,7 +527,7 @@ struct SystemSessionConfig : public Parcelable {
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
     }
-        
+
     bool IsPhoneWindow() const
     {
         return windowUIType_ == WindowUIType::PHONE_WINDOW;

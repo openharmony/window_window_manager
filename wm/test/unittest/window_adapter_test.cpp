@@ -135,6 +135,21 @@ HWTEST_F(WindowAdapterTest, CheckWindowId, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: WindowAdapter/SkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    bool skip = true;
+    WindowAdapter windowAdapter;
+    windowAdapter.SkipSnapshotForAppProcess(pid, skip);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
  * @tc.name: SetWindowAnimationController
  * @tc.desc: WindowAdapter/SetWindowAnimationController
  * @tc.type: FUNC
@@ -597,6 +612,35 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
 
+/**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: WindowAdapter/SetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    const std::string watermarkName = "SetProcessWatermarkName";
+    bool isEnabled = true;
+    WindowAdapter windowAdapter;
+    windowAdapter.SetProcessWatermark(pid, watermarkName, isEnabled);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 }
 }
 }

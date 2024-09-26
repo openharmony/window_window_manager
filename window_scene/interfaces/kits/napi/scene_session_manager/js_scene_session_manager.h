@@ -40,6 +40,7 @@ enum class ListenerFunctionType : uint32_t {
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
+    ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -64,6 +65,7 @@ public:
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
+    static napi_value UpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
@@ -110,6 +112,14 @@ public:
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
 
+    /*
+     * Multi instance
+     */
+    static napi_value GetMaxInstanceCount(napi_env env, napi_callback_info info);
+    static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
+    static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
+    static napi_value PackageRemovedOrChanged(napi_env env, napi_callback_info info);
+    
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
@@ -125,6 +135,7 @@ private:
     napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
+    napi_value OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
@@ -171,6 +182,14 @@ private:
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
 
+    /*
+     * multi instance
+     */
+    napi_value OnGetMaxInstanceCount(napi_env env, napi_callback_info info);
+    napi_value OnGetInstanceCount(napi_env env, napi_callback_info info);
+    napi_value OnGetLastInstanceKey(napi_env env, napi_callback_info info);
+    napi_value OnPackageRemovedOrChanged(napi_env env, napi_callback_info info);
+
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
@@ -198,6 +217,8 @@ private:
     void OnCloseTargetFloatWindow(const std::string& bundleName);
     void ProcessCloseTargetFloatWindow();
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ProcessAbilityManagerCollaboratorRegistered();
+    void OnAbilityManagerCollaboratorRegistered();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

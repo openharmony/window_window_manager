@@ -1128,7 +1128,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     WSRect rectResult = scensession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [scensession](int32_t type, const SizeChangeReason& reason) {
+    auto dragHotAreaFunc = [scensession](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1152,21 +1152,15 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetPipActionEvent";
     info.bundleName_ = "SetPipActionEvent";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    WSError res = scensession->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
-
-    property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    scensession->SetSessionProperty(property);
-    res = scensession->SetPipActionEvent("close", 0);
+    WSError res = sceneSession->SetPipActionEvent("close", 0);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    auto mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    res = sceneSession->SetPipActionEvent("close", 0);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /*
@@ -1454,6 +1448,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
+    sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
@@ -1463,8 +1458,9 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
-
     event = SessionEvent::EVENT_END_MOVE;
+    ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
+    event = SessionEvent::EVENT_DRAG_START;
     ASSERT_EQ(sceneSession->OnSessionEvent(event), WSError::WS_OK);
 }
 
@@ -1512,6 +1508,22 @@ HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function |
 }
 
 /**
+ * @tc.name: SetAutoStartPiPStatusChangeCallback
+ * @tc.desc: SetAutoStartPiPStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAutoStartPiPStatusChangeCallback";
+    info.bundleName_ = "SetAutoStartPiPStatusChangeCallback";
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyAutoStartPiPStatusChangeFunc func;
+    sceneSession->SetAutoStartPiPStatusChangeCallback(func);
+}
+
+/**
  * @tc.name: RaiseAppMainWindowToTop
  * @tc.desc:  * @tc.name: RaiseAppMainWindowToTop
  * @tc.type: FUNC
@@ -1525,7 +1537,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->RaiseAppMainWindowToTop();
+    WSError result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     bool status = true;
     sceneSession->OnNeedAvoid(status);
@@ -1535,7 +1548,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sceneSession->NotifyPropertyWhenConnect();
 
     sceneSession->focusedOnShow_ = false;
-    sceneSession->RaiseAppMainWindowToTop();
+    result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
 }
 
 /**
@@ -1654,14 +1668,13 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->SetPipActionEvent("pointerEvent", 0));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetPipActionEvent("pointerEvent", 0));
 
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
-
     sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
 /**
@@ -1912,9 +1925,9 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     WSRect rect = {0, 0, 10, 10};
-    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
-    sceneSession->AddOrUpdateWindowDragHotArea(1, rect);
-    auto type = sceneSession->GetWindowDragHotAreaType(1, 2, 2);
+    sceneSession->AddOrUpdateWindowDragHotArea(0, 1, rect);
+    sceneSession->AddOrUpdateWindowDragHotArea(0, 1, rect);
+    auto type = sceneSession->GetWindowDragHotAreaType(0, 1, 2, 2);
     ASSERT_EQ(type, 1);
 }
 

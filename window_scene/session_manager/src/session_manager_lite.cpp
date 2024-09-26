@@ -235,11 +235,14 @@ void SessionManagerLite::OnWMSConnectionChanged(
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         lastUserId = currentWMSUserId_;
         lastScreenId = currentScreenId_;
-        isWMSConnected_ = isConnected;
         isCallbackRegistered = wmsConnectionChangedFunc_ != nullptr;
         if (isConnected) {
             currentWMSUserId_ = userId;
             currentScreenId_ = screenId;
+        }
+        // isWMSConnected_ only represents the wms connection status of the active user
+        if (currentWMSUserId_ == userId) {
+            isWMSConnected_ = isConnected;
         }
     }
     TLOGI(WmsLogTag::WMS_MULTI_USER,
@@ -336,10 +339,6 @@ void SessionManagerLite::InitSceneSessionManagerLiteProxy()
     sceneSessionManagerLiteProxy_ = iface_cast<ISceneSessionManagerLite>(remoteObject);
     if (sceneSessionManagerLiteProxy_) {
         ssmDeath_ = sptr<SSMDeathRecipientLite>::MakeSptr();
-        if (!ssmDeath_) {
-            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
-            return;
-        }
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(ssmDeath_)) {
             WLOGFE("Failed to add death recipient");
             return;
@@ -456,7 +455,7 @@ void SessionManagerLite::OnWMSConnectionChangedCallback(
             screenId, isConnected);
         wmsConnectionChangedFunc_(userId, screenId, isConnected);
     } else {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "Lite WMS CallbackFunc is null.");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite WMS CallbackFunc is null.");
     }
 }
 

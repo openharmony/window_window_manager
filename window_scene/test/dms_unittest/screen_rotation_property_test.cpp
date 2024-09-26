@@ -19,7 +19,7 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 
-#include "session_manager/include/screen_rotation_property.h"
+#include "screen_session_manager/include/screen_rotation_property.h"
 
 using namespace testing;
 using namespace testing::ext;

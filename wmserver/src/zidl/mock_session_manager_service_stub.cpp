@@ -74,10 +74,45 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             UnregisterSMSLiteRecoverListener();
             break;
         }
+        case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST: {
+            return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+        }
+        case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP: {
+            return HandleSetSnapshotSkipByMap(data, reply);
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+    return ERR_NONE;
+}
+
+int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(
+    MessageParcel& data, MessageParcel& reply)
+{
+    int32_t userId = data.ReadInt32();
+    std::vector<std::string> bundleNameList;
+    if (!data.ReadStringVector(&bundleNameList)) {
+        WLOGFE("Fail to read bundleNameList");
+        return ERR_INVALID_DATA;
+    }
+    int32_t errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    reply.WriteInt32(errCode);
+    return ERR_NONE;
+}
+
+int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t mapSize = data.ReadInt32();
+    std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
+    for (int i = 0; i < mapSize; i++) {
+        int32_t userId = data.ReadInt32();
+        std::vector<std::string> bundleNameList;
+        data.ReadStringVector(&bundleNameList);
+        idBundlesMap[userId] = bundleNameList;
+    }
+    int32_t errCode = SetSnapshotSkipByMap(idBundlesMap);
+    reply.WriteInt32(errCode);
     return ERR_NONE;
 }
 } // namespace Rosen

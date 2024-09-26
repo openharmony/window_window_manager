@@ -436,6 +436,17 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             WLOGFW("transactionProxy is null");
         }
+        ScreenId screenId = iter.first;
+        sptr<ScreenSession> screenSession = iter.second;
+        if (screenSession == nullptr) {
+            WLOGFE("screenSession is null");
+            return;
+        }
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
+        RRect bounds = screenProperty.GetBounds();
+        float rotation = screenSession->ConvertRotationToFloat(screenSession->GetRotation());
+        screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+            ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
     }
     WLOGFI("switch user callback end");
 }

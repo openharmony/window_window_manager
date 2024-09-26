@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "session_manager/include/screen_setting_helper.h"
+#include "screen_session_manager/include/screen_setting_helper.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;

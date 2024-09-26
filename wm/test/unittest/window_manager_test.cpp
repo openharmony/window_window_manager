@@ -811,6 +811,19 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SkipSnapshotForAppProcess
+ * @tc.desc: check SkipSnapshotForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    bool skip = true;
+    auto ret = WindowManager::GetInstance().SkipSnapshotForAppProcess(pid, skip);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC
@@ -960,7 +973,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
- 
+
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     VisibleWindowNumInfo newInfo;
     newInfo.displayId = 0;
@@ -1290,15 +1303,41 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
 }
 
 /**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: check SetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
+{
+    int32_t pid = 1000;
+    const std::string watermarkName = "SetProcessWatermarkName";
+    bool isEnabled = true;
+    auto ret = WindowManager::GetInstance().SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: NotifyDisplayInfoChange01
- * @tc.desc: check NotifyDisplayInfoChange
+ * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
 {
-    WMError ret;
-    ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange02
+ * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> Token = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(Token, nullptr);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(Token, 1, 2, DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1422,6 +1461,17 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTe
     sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
     WindowManager::GetInstance().NotifyWindowPidVisibilityChanged(info);
     ASSERT_NE(info, nullptr);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 } // namespace Rosen

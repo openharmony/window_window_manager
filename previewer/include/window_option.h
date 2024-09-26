@@ -392,6 +392,19 @@ public:
     */
     bool GetWindowTopmost() const;
 
+    /**
+     * @brief Set whether this window is a sub window of the UIExtension.
+     *
+     * @return isUIExtensionSubWindowFlag.
+    */
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    /**
+     * @brief Get IsUIExtensionSubWindowFlag of window.
+     *
+     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     */
+    bool GetIsUIExtensionSubWindowFlag() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     std::string windowName_ { "" };

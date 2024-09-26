@@ -376,6 +376,24 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: SetAutoStartPiP
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool isAutoStartValid = true;
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid));
+    GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP end";
+}
+
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -424,6 +442,21 @@ HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallT
 }
 
 /**
+ * @tc.name: RequestFocus
+ * @tc.desc: RequestFocus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->RequestFocus(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
+}
+
+/**
  * @tc.name: NotifyExtensionEventAsync
  * @tc.desc: NotifyExtensionEventAsync test
  * @tc.type: FUNC
@@ -446,6 +479,24 @@ HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Lev
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyExtensionEventAsync(0);
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdateClientRect01
+ * @tc.desc: UpdateClientRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateClientRect01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSRect rect = { 200, 200, 200, 200 };
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
 }
 } // namespace
 } // namespace Rosen

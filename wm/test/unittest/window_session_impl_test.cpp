@@ -286,16 +286,30 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
     option->SetWindowName("ColorSpace");
     sptr<WindowSessionImpl> window =
         new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
     ColorSpace colorSpace = window->GetColorSpace();
     ASSERT_EQ(colorSpace, ColorSpace::COLOR_SPACE_DEFAULT);
 
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    window->surfaceNode_ = nullptr;
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ColorSpace colorSpace1 = window->GetColorSpace();
-    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_DEFAULT);
+
+    struct RSSurfaceNodeConfig config;
+    window->surfaceNode_ = RSSurfaceNode::Create(config);
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ColorSpace colorSpace2 = window->GetColorSpace();
+    ASSERT_EQ(colorSpace2, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: ColorSpace end";
 }
 
@@ -431,6 +445,10 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck02, Function | SmallTest
     WMError res1 = window->WindowSessionCreateCheck();
     ASSERT_EQ(res1, WMError::WM_OK);
 
+    window->property_->SetWindowName("test1");
+    window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(2, window)));
+    res1 = window->WindowSessionCreateCheck();
+    ASSERT_EQ(res1, WMError::WM_ERROR_REPEAT_OPERATION);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 end";
 }
 
@@ -581,6 +599,40 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus end";
+}
+
+/**
+ * @tc.name: RequestFocusByClient
+ * @tc.desc: RequestFocusByClient Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("WindowRequestFocusByClientCheck");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "RequestFocusByClient", "RequestFocusByClient", "RequestFocusByClient" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_INITIAL;
+    res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient end";
 }
 
 /**
@@ -855,19 +907,21 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
-    float brightness = -1.0; // brightness < 0
+    float brightness = -0.5; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
     brightness = 2.0; // brightness > 1
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5;
+    window->hostSession_ = session;
+    ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
@@ -889,16 +943,18 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     float brightness = 0.5;
     WMError res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
 
-    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     res = window->SetBrightness(brightness);
-    ASSERT_NE(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
 }
 
@@ -1213,6 +1269,34 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: RegisterListener03
+ * @tc.desc: RegisterListener and UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterListener03");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    sptr<IMainWindowCloseListener> listener12 = nullptr;
+    WMError res = window->RegisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
+}
+
+/**
  * @tc.name: NotifyDisplayMove
  * @tc.desc: NotifyDisplayMove
  * @tc.type: FUNC
@@ -1510,15 +1594,16 @@ HWTEST_F(WindowSessionImplTest, UpdateProperty, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
     WMError res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
-    // session is null
-    window = new WindowSessionImpl(option);
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+
+    window->hostSession_ = session;
+
     res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty end";
 }
 
@@ -1829,9 +1914,21 @@ HWTEST_F(WindowSessionImplTest, UpdateDensity, Function | SmallTest | Level2)
     option->SetWindowName("UpdateDensity");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    int ret = 0;
+    ASSERT_NE(window->property_, nullptr);
+
+    Rect rect1;
+    rect1.posX_ = 1;
+    rect1.posY_ = 2;
+    rect1.height_ = 3;
+    rect1.width_ = 4;
+    window->property_->SetWindowRect(rect1);
+    auto rect2 = window->GetRect();
+    ASSERT_EQ(1, rect2.posX_);
+    ASSERT_EQ(2, rect2.posY_);
+    ASSERT_EQ(3, rect2.height_);
+    ASSERT_EQ(4, rect2.width_);
+
     window->UpdateDensity();
-    ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDensitytest01 end";
 }
 
@@ -1916,6 +2013,7 @@ HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | Sma
     sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window2, nullptr);
     window2->AddSetUIContentTimeoutCheck();
+    EXPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window2->property_->GetWindowType());
 }
 
 /**

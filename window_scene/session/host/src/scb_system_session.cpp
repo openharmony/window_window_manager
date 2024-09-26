@@ -46,16 +46,6 @@ SCBSystemSession::~SCBSystemSession()
     WLOGD("~SCBSystemSession, id: %{public}d", GetPersistentId());
 }
 
-void SCBSystemSession::RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func)
-{
-    if (surfaceNode_) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Set buffer available callback");
-        surfaceNode_->SetBufferAvailableCallback(func);
-    } else {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "surfaceNode_ is null");
-    }
-}
-
 WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();

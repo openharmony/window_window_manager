@@ -799,41 +799,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsDecorEnable, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetDefaultDensityEnabled
- * @tc.desc: SetDefaultDensityEnabled
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetDefaultDensityEnabled, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("SetDefaultDensityEnabled");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(false);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
@@ -917,12 +882,18 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+
+    auto ret = windowSceneSessionImpl->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    auto ret = windowSceneSessionImpl->Resize(100, 100);
+    ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
@@ -1183,6 +1154,23 @@ HWTEST_F(WindowSceneSessionImplTest3, StartMove, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     windowSceneSessionImpl->StartMove();
+}
+
+/**
+ * @tc.name: GetStartMoveFlag
+ * @tc.desc: GetStartMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetStartMoveFlag");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    bool isMoving = windowSceneSessionImpl->GetStartMoveFlag();
+    EXPECT_EQ(false, isMoving);
 }
 
 /**
@@ -1634,6 +1622,56 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentSessionByParentId, Function | Sm
     ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetExtensionFlag(true);
     EXPECT_FALSE(nullptr != windowSceneSessionImpl->FindParentSessionByParentId(1));
+}
+/**
+ * @tc.name: FindParentMainSession
+ * @tc.desc: FindParentMainSession001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, FindParentMainSession001, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionImpl> parentSession;
+    sptr<WindowOption> toastSubWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, toastSubWindowOption);
+    toastSubWindowOption->SetWindowName("toastSubWindow");
+    toastSubWindowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    toastSubWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> toastSubWindow;
+
+    sptr<WindowOption> mainWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, mainWindowOption);
+    mainWindowOption->SetWindowName("mainWindow");
+    mainWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(mainWindowOption);
+    toastSubWindowOption->SetParentId(mainWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, subWindowOption);
+    subWindowOption->SetWindowName("subWindow");
+    subWindowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowOption->SetParentId(mainWindow->GetPersistentId());
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    toastSubWindowOption->SetParentId(subWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
+
+    sptr<WindowOption> dialogWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, dialogWindowOption);
+    dialogWindowOption->SetWindowName("dialogWindow");
+    dialogWindowOption->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    dialogWindowOption->SetParentId(mainWindow->GetPersistentId());
+    sptr<WindowSceneSessionImpl> dialogWindow = sptr<WindowSceneSessionImpl>::MakeSptr(dialogWindowOption);
+    toastSubWindowOption->SetParentId(dialogWindow->GetPersistentId());
+    toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(toastSubWindowOption);
+    parentSession = toastSubWindow->FindParentMainSession(toastSubWindow->GetParentId(),
+        toastSubWindow->windowSessionMap_);
+    ASSERT_EQ(parentSession->GetPersistentId(), mainWindow->GetPersistentId());
 }
 
 /**

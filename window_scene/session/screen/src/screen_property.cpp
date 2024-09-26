@@ -180,6 +180,16 @@ uint32_t ScreenProperty::GetRefreshRate() const
     return refreshRate_;
 }
 
+void ScreenProperty::SetPropertyChangeReason(std::string propertyChangeReason)
+{
+    propertyChangeReason_ = propertyChangeReason;
+}
+
+std::string ScreenProperty::GetPropertyChangeReason() const
+{
+    return propertyChangeReason_;
+}
+
 void ScreenProperty::SetVirtualPixelRatio(float virtualPixelRatio)
 {
     virtualPixelRatio_ = virtualPixelRatio;

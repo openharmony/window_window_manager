@@ -362,9 +362,10 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         << systemConfig.decorModeSupportInfo_ << "|"
         << systemConfig.isStretchable_ << "|"
         << static_cast<uint32_t>(systemConfig.defaultWindowMode_) << "|"
-        << "[" << systemConfig.keyboardAnimationConfig_.curveType_ << " "
-        << systemConfig.keyboardAnimationConfig_.durationIn_ << " "
-        << systemConfig.keyboardAnimationConfig_.durationOut_ << "]|"
+        << "[" << systemConfig.animationIn_.curveType_ << " "
+        << systemConfig.animationIn_.duration_ << "]|"
+        << "[" << systemConfig.animationOut_.curveType_ << " "
+        << systemConfig.animationOut_.duration_ << "]|"
         << systemConfig.maxFloatingWindowSize_ << "|"
         << static_cast<uint8_t>(systemConfig.windowUIType_) << "|"
         << std::endl
