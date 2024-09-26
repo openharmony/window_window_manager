@@ -161,7 +161,7 @@ void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t 
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     originalDisplayOffsetX_ = screenProperty.GetStartX();
     originalDisplayOffsetY_ = screenProperty.GetStartY();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}" PRIu64","
+    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}" PRIu64 ","
         "originalDisplayOffsetX: %{public}d, originalDisplayOffsetY: %{public}d",
         moveDragStartDisplayId_, originalDisplayOffsetX_, originalDisplayOffsetY_);
 }
