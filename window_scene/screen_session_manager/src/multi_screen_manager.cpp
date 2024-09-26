@@ -20,10 +20,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(MultiScreenManager)
 namespace {
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
+const std::string SCREEN_UNKNOWN = "unknown";
 }
 MultiScreenManager::MultiScreenManager()
 {
     TLOGI(WmsLogTag::DMS, "init multi screen manager");
+    multiScreenStatus_ = std::make_pair(SCREEN_ID_INVALID, SCREEN_UNKNOWN);
 }
 
 MultiScreenManager::~MultiScreenManager()
@@ -484,5 +486,105 @@ void MultiScreenManager::DoFirstExtendChange(sptr<ScreenSession> firstSession, s
     } else {
         TLOGE(WmsLogTag::DMS, "param error!");
     }
+}
+
+void MultiScreenManager::SetMultiScreenStatus(ScreenId mainScreenId, const std::string& status)
+{
+    TLOGI(WmsLogTag::DMS, "input mainScreenId = %{public}" PRIu64 ", status = %{public}s",
+        mainScreenId, status.c_str());
+    multiScreenStatus_.first = mainScreenId;
+    multiScreenStatus_.second = status;
+    TLOGI(WmsLogTag::DMS, "Set multiScreenStatus_ done, mainScreenId = %{public}" PRIu64 ", status = %{public}s",
+        multiScreenStatus_.first, multiScreenStatus_.second.c_str());
+}
+
+void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSession,
+    sptr<ScreenSession> externalSession)
+{
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internal screen is null!");
+        return;
+    }
+    if (externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "external screen is null!");
+        return;
+    }
+
+    sptr<IScreenSessionManagerClient> scbClient = ScreenSessionManager::GetInstance().GetClientProxy();
+    if (scbClient == nullptr) {
+        TLOGE(WmsLogTag::DMS, "scbClient null");
+        return;
+    }
+    ScreenId mainScreenId = multiScreenStatus_.first;
+    std::string status = multiScreenStatus_.second;
+
+    if (mainScreenId == SCREEN_ID_INVALID || status == SCREEN_UNKNOWN) {
+        TLOGW(WmsLogTag::DMS, "previous state not found, no mode change");
+        ScreenSessionManager::GetInstance().SetMultiScreenStatus(internalSession, externalSession);
+    } else {
+        TLOGI(WmsLogTag::DMS, "found previous state, recover from storage");
+        if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+        status == SCREEN_MIRROR) {
+            DoFirstMirrorChangeMirror(scbClient, internalSession, externalSession);
+            TLOGI(WmsLogTag::DMS, "5: external mirror to internal mirror");
+        } else if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+        status == SCREEN_EXTEND) {
+            DoFirstMirrorChangeExtend(scbClient, internalSession, externalSession);
+            TLOGI(WmsLogTag::DMS, "7: external mirror to internal extend");
+        } else if (mainScreenId != ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+        status == SCREEN_EXTEND) {
+            DoFirstMainChangeExtend(scbClient, externalSession, internalSession);
+            TLOGI(WmsLogTag::DMS, "6: external mirror to external extend");
+        } else {
+            TLOGE(WmsLogTag::DMS, "paramater error!");
+            return;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "current restored mainScreenId = %{public}" PRIu64 ", status = %{public}s",
+        multiScreenStatus_.first, multiScreenStatus_.second.c_str());
+}
+
+void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSession,
+    sptr<ScreenSession> externalSession)
+{
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internal screen is null!");
+        return;
+    }
+    if (externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "external screen is null!");
+        return;
+    }
+
+    ScreenSessionManager::GetInstance().SetMultiScreenStatus(internalSession, externalSession);
+    sptr<IScreenSessionManagerClient> scbClient = ScreenSessionManager::GetInstance().GetClientProxy();
+    if (scbClient == nullptr) {
+        TLOGE(WmsLogTag::DMS, "scbClient null");
+        return;
+    }
+    ScreenId mainScreenId = multiScreenStatus_.first;
+    std::string status = multiScreenStatus_.second;
+    TLOGI(WmsLogTag::DMS, "restored mainScreenId = %{public}" PRIu64 ", status = %{public}s",
+        multiScreenStatus_.first, multiScreenStatus_.second.c_str());
+
+    if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+    status == SCREEN_MIRROR) {
+        DoFirstMirrorChangeMirror(scbClient, externalSession, internalSession);
+        TLOGI(WmsLogTag::DMS, "3: internal mirror to external mirror");
+    } else if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+    status == SCREEN_EXTEND) {
+        DoFirstExtendChangeMirror(externalSession, internalSession);
+        TLOGI(WmsLogTag::DMS, "10: internal extend to external mirror");
+    } else if (mainScreenId != ScreenSessionManager::GetInstance().GetInternalScreenId() &&
+    status == SCREEN_EXTEND) {
+        DoFirstMainChangeMirror(scbClient, externalSession, internalSession);
+        TLOGI(WmsLogTag::DMS, "14: external extend to external mirror");
+    } else {
+        TLOGE(WmsLogTag::DMS, "paramater error!");
+        return;
+    }
+
+    TLOGI(WmsLogTag::DMS, "current mainScreenId = %{public}" PRIu64 ", status = %{public}s",
+        multiScreenStatus_.first, multiScreenStatus_.second.c_str());
 }
 } // namespace OHOS::Rosen
