@@ -1365,7 +1365,8 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
             }
-            WLOGI("Window [%{public}u] restore end, ret = %{public}d", weakWindow->GetWindowId(), ret);
+            TLOGNW(WmsLogTag::WMS_LIFE, "Window [%{public}u] restore end, ret = %{public}d",
+                weakWindow->GetWindowId(), ret);
         };
 
     size_t argc = 4;
