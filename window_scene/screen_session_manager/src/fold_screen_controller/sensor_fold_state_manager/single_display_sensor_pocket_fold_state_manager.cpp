@@ -127,7 +127,7 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angl
 
 void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angle)
 {
-    std::string CameraApp = "com.huawei.hmos.camera";
+    std::string cameraApp = "com.huawei.hmos.camera";
     if (applicationStateObserver_ == nullptr) {
         return;
     }
