@@ -777,7 +777,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     }
 }
 
-sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(const int32_t userId)
+sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(int32_t userId)
 {
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
@@ -797,7 +797,7 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(co
     return remoteObject;
 }
 
-WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t userId)
+WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
 {
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
     auto iter = userIdBundleNamesMap_.find(userId);
@@ -811,7 +811,7 @@ WMError MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t 
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, iter->second, remoteObject);
 }
 
-WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
+WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject)
 {
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
@@ -822,7 +822,7 @@ WMError MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(c
     return ret;
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
+int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSystemCalling()) {
