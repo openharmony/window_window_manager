@@ -623,7 +623,10 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             NotifyCastWhenScreenConnectChange(true);
         }
         if (foldScreenController_ != nullptr) {
-            if (screenId == 0 && clientProxy_) {
+            if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) &&
+                clientProxy_) {
+                TLOGI(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
+                    "name=%{public}s", screenId, screenSession->GetRSScreenId(), screenSession->GetName().c_str());
                 clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
                     screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
             }
@@ -640,31 +643,37 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         return;
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (phyMirrorEnable) {
-            NotifyScreenDisconnected(screenSession->GetScreenId());
-            NotifyCastWhenScreenConnectChange(false);
-            FreeDisplayMirrorNodeInner(screenSession);
-            isPhyScreenConnected_ = false;
-        }
-        if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
-            FreeDisplayMirrorNodeInner(screenSession);
-        }
-        if (clientProxy_) {
-            clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
-                screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
-        }
-        {
-            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-            screenSessionMap_.erase(screenId);
-        }
-        {
-            std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
-            phyScreenPropMap_.erase(screenId);
-        }
-        TLOGI(WmsLogTag::DMS, "DisconnectScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
+        HandleScreenDisconnectEvent(screenSession, screenId, screenEvent);
     }
 }
 
+void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession,
+    ScreenId screenId, ScreenEvent screenEvent)
+{
+    bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
+    if (phyMirrorEnable) {
+        NotifyScreenDisconnected(screenSession->GetScreenId());
+        NotifyCastWhenScreenConnectChange(false);
+        FreeDisplayMirrorNodeInner(screenSession);
+        isPhyScreenConnected_ = false;
+    }
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        FreeDisplayMirrorNodeInner(screenSession);
+    }
+    if (clientProxy_) {
+        clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+            screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMap_.erase(screenId);
+    }
+    if (!(screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        phyScreenPropMap_.erase(screenId);
+    }
+    TLOGI(WmsLogTag::DMS, "DisconnectScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
+}
 void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
 {
     GetDefaultScreenId();
@@ -1280,8 +1289,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
             return nullptr;
         }
     }
-    ScreenId rsId = screenId;
-    screenIdManager_.UpdateScreenId(rsId, screenId);
+    screenIdManager_.UpdateScreenId(screenId, screenId);
 
     ScreenProperty property;
     CreateScreenProperty(screenId, property);
@@ -1298,9 +1306,10 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         /* folder screen outer screenId is 5 */
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
-        }
-        if (screenId == SCREEN_ID_MAIN && !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-            return nullptr;
+            ScreenSensorConnector::SubscribeTentSensor();
+            if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() && isCoordinationFlag_ == false) {
+                return nullptr;
+            }
         }
     }
 
@@ -4575,6 +4584,18 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
     return foldScreenController_->GetFoldStatus();
 }
 
+bool ScreenSessionManager::GetTentMode()
+{
+    if (!g_foldScreenFlag) {
+        return false;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
+        return false;
+    }
+    return foldScreenController_->GetTentMode();
+}
+
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
     if (!g_foldScreenFlag) {
@@ -5525,5 +5546,20 @@ void ScreenSessionManager::OnScreenExtendChange(ScreenId mainScreenId, ScreenId 
         return;
     }
     clientProxy_->OnScreenExtendChanged(mainScreenId, extendScreenId);
+}
+
+void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
+{
+    if (!foldScreenController_) {
+        TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
+        return;
+    }
+    foldScreenController_->OnTentModeChanged(isTentMode);
+}
+
+void ScreenSessionManager::SetCoordinationFlag(bool isCoordinationFlag)
+{
+    TLOGI(WmsLogTag::DMS, "set coordination flag %{public}d", isCoordinationFlag);
+    isCoordinationFlag_ = isCoordinationFlag;
 }
 } // namespace OHOS::Rosen
