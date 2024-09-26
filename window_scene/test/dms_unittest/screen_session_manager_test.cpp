@@ -2417,7 +2417,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, Function | SmallTest 
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
 
-    ASSERT_TRUE(ssm->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE));
+    ASSERT_TRUE(ssm_->SetVirtualScreenStatus(screenId, VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE));
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
 }
 
