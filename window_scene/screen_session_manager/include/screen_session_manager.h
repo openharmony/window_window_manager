@@ -290,6 +290,7 @@ public:
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
         const std::string& secondaryScreenMode);
 
+    void SetMultiScreenStatus(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
