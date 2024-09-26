@@ -1226,6 +1226,15 @@ HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | L
     std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
     ASSERT_EQ(res, nullptr);
 }
+
+/**
+ * @tc.name: SetMainSessionUIStateDirty
+ * @tc.desc: SetMainSessionUIStateDirty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
 }
 } // namespace Rosen
 } // namespace OHOS
