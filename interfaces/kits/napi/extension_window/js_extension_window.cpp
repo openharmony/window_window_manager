@@ -457,7 +457,7 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
     NapiAsyncTask::CompleteCallback complete =
         [extwin = extensionWindow_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (extwin == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
                 task.Reject(env,
                     CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
@@ -510,7 +510,7 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
     NapiAsyncTask::CompleteCallback complete =
         [extwin = extensionWindow_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (extwin == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
                 task.Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
