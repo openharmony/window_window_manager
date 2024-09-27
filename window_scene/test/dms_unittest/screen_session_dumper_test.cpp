@@ -40,6 +40,7 @@ void ScreenSessionDumperTest::SetUpTestCase()
 
 void ScreenSessionDumperTest::TearDownTestCase()
 {
+    usleep(SLEEP_TIME_US);
 }
 
 void ScreenSessionDumperTest::SetUp()
