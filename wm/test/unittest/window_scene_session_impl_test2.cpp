@@ -1518,6 +1518,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerInputMethodF
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     window->RegisterSessionRecoverListener(false);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
  
 /**
@@ -1536,6 +1537,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerNonDefaultCo
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     window->RegisterSessionRecoverListener(false); // false is main window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
 
 /**
@@ -1554,6 +1556,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerNonDefaultCo
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
 
 /**
@@ -1571,6 +1574,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess01, F
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(false); // false is main window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 1);
+    SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
 }
 
 /**
@@ -1588,6 +1593,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess02, F
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 1);
+    SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
 }
 
 /**
