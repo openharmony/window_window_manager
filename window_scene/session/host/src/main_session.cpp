@@ -185,7 +185,7 @@ bool MainSession::IsTopmost() const
 
 WSError MainSession::SetMainWindowTopmost(bool mainWindowTopmost)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetMainWindowTopmost id: %{public}d, main window topmost: %{public}d",
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, main window topmost: %{public}d",
         GetPersistentId(), mainWindowTopmost);
     auto task = [weakThis = wptr(this), mainWindowTopmost]() {
         auto session = weakThis.promote();

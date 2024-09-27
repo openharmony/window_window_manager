@@ -476,7 +476,7 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetWindowTopmost");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
@@ -3602,12 +3602,12 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             "Argc is invalid: %{public}zu. Failed to convert parameter to main window topmost", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool mainWindowTopmost = false;
-    napi_get_value_bool(env, argv[0], &mainWindowTopmost);
+    bool isMainWindowTopmost = false;
+    napi_get_value_bool(env, argv[0], &isMainWindowTopmost);
 
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, mainWindowTopmost, errCodePtr]() {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isMainWindowTopmost, errCodePtr]() {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -3616,7 +3616,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(mainWindowTopmost));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(isMainWindowTopmost));
         TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set main window topmost end",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
