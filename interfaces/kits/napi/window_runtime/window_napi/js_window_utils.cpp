@@ -1072,5 +1072,79 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastPara
         return std::make_unique<NapiAsyncTask>(callbackRef, std::move(execute), std::move(complete));
     }
 }
+
+napi_value ModalityTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "WINDOW_MODALITY",
+        CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
+    napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
+        CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
+    return objValue;
+}
+
+static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+        if (isModal) {
+            windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+        }
+    }
+    bool isTopmost = false;
+    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
+        if (!isModal && isTopmost) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
+            return false;
+        }
+        windowOption->SetWindowTopmost(isTopmost);
+    }
+    ApiModalityType apiModalityType;
+    if (ParseJsValue(jsObject, env, "modalityType", apiModalityType)) {
+        if (!isModal) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
+            return false;
+        }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T modalityType = static_cast<T>(apiModalityType);
+        if (modalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
+            modalityType <= static_cast<T>(ApiModalityType::END)) {
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(apiModalityType);
+            if (type == ModalityType::APPLICATION_MODALITY) {
+                windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+            }
+        } else {
+            TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    if (jsObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "jsObject or windowOption is null");
+        return false;
+    }
+    std::string title;
+    if (!ParseJsValue(jsObject, env, "title", title)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+    bool decorEnabled = false;
+    if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to decorEnabled");
+        return false;
+    }
+
+    windowOption->SetSubWindowTitle(title);
+    windowOption->SetSubWindowDecorEnable(decorEnabled);
+    return ParseModalityParam(env, jsObject, windowOption);
+}
+
 } // namespace Rosen
 } // namespace OHOS

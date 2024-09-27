@@ -233,6 +233,27 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetSubWindowModal02
+ * @tc.desc: SetSubWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetSubWindowModal02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    WMError res = window->SetSubWindowModal(true, ModalityType::WINDOW_MODALITY);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 end";
+}
+
+/**
  * @tc.name: GetDecorHeight
  * @tc.desc: GetDecorHeight and check the retCode
  * @tc.type: FUNC
