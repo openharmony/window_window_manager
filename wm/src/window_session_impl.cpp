@@ -688,7 +688,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
-    layoutCallback_->OnUpdateSessionRect(rect);
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
+    }
 
     return WSError::WS_OK;
 }
