@@ -196,8 +196,8 @@ public:
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     void UpdateRotateAnimationConfig(const RotateAnimationConfig& config);
 
     WSError ProcessBackEvent();
@@ -622,8 +622,8 @@ private:
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
 
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     void RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession);
 
     void RegisterVisibilityChangedDetectFunc(const sptr<SceneSession>& sceneSession);
@@ -707,10 +707,10 @@ private:
     AppWindowSceneConfig appWindowSceneConfig_;
 
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     RotateAnimationConfig rotateAnimationConfig_;
-    
+
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;

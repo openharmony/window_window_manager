@@ -138,12 +138,12 @@ int SessionStageStub::HandleSetActive(MessageParcel& data, MessageParcel& reply)
 
 int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("UpdateRect!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t posX = 0;
     int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!(data.ReadInt32(posX)) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
         TLOGE(WmsLogTag::DEFAULT, "read rect failed");
         return -1;
     }
