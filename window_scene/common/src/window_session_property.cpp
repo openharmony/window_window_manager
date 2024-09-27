@@ -374,9 +374,9 @@ bool WindowSessionProperty::IsTopmost() const
     return topmost_;
 }
 
-void WindowSessionProperty::SetMainWindowTopmost(bool mainWindowTopmost)
+void WindowSessionProperty::SetMainWindowTopmost(bool isTopmost)
 {
-    mainWindowTopmost_ = mainWindowTopmost;
+    mainWindowTopmost_ = isTopmost;
 }
 
 bool WindowSessionProperty::IsMainWindowTopmost() const

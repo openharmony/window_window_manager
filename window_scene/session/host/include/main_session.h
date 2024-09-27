@@ -33,7 +33,7 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
-    WSError SetMainWindowTopmost(bool mainWindowTopmost) override;
+    WSError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;

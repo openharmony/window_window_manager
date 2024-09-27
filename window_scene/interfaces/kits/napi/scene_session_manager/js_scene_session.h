@@ -263,7 +263,7 @@ private:
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
-    void OnSessionMainWindowTopmostChange(bool mainWindowTopmost);
+    void OnSessionMainWindowTopmostChange(bool isTopmost);
     void OnClick(bool requestFocus);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);

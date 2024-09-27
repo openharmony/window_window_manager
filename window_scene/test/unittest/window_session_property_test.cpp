@@ -197,9 +197,9 @@ HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetMainWindowTopmost, Function | SmallTest | Level2)
 {
-    bool mainWindowTopmost = true;
+    bool isTopmost = true;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetMainWindowTopmost(mainWindowTopmost);
+    windowSessionProperty.SetMainWindowTopmost(isTopmost);
     ASSERT_TRUE(windowSessionProperty.IsMainWindowTopmost());
 }
 

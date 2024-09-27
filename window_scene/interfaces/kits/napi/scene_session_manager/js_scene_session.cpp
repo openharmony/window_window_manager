@@ -1164,26 +1164,21 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessSessionMainWindowTopmostChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onSessionMainWindowTopmostChange_ = [weakThis = wptr(this)](bool mainWindowTopmost) {
+    NotifyMainWindowTopmostChangeFunc func = [weakThis = wptr(this)](bool isTopmost) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnSessionMainWindowTopmostChange(mainWindowTopmost);
+        jsSceneSession->OnSessionMainWindowTopmostChange(isTopmost);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onSessionMainWindowTopmostChange_(session->IsMainWindowTopmost());
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "success");
+    sessionchangeCallback->SetMainWindowTopmostChangeCallback(func);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
@@ -2781,10 +2776,10 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 }
 
 /** @note @window.hierarchy */
-void JsSceneSession::OnSessionMainWindowTopmostChange(bool mainWindowTopmost)
+void JsSceneSession::OnSessionMainWindowTopmostChange(bool isTopmost)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", mainWindowTopmost);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, mainWindowTopmost, env = env_] {
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", isTopmost);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
@@ -2795,12 +2790,12 @@ void JsSceneSession::OnSessionMainWindowTopmostChange(bool mainWindowTopmost)
             TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionMainWindowTopmostObj = CreateJsValue(env, mainWindowTopmost);
+        napi_value jsSessionMainWindowTopmostObj = CreateJsValue(env, isTopmost);
         napi_value argv[] = {jsSessionMainWindowTopmostObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task,
-        "OnSessionMainWindowTopmostChange: state " + std::to_string(mainWindowTopmost));
+        "OnSessionMainWindowTopmostChange: state " + std::to_string(isTopmost));
 }
 
 void JsSceneSession::OnClick(bool requestFocus)
