@@ -157,8 +157,6 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
-    WMError SetFocusableOnShow(bool isFocusableOnShow) override;
-
     /*
      * Gesture Back
      */
