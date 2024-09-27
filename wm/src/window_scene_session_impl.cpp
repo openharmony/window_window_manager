@@ -24,7 +24,6 @@
 #include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "singleton_container.h"
@@ -1389,11 +1388,17 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = MoveTo(x, y);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetMoveToLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1552,15 +1557,21 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId: %{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId:%{public}u", GetWindowId());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = Resize(width, height);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetResizeLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetResizeAsyncResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetResizeAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
