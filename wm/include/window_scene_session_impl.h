@@ -157,6 +157,7 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
+
     /*
      * Gesture Back
      */
