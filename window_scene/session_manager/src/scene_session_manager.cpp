@@ -3129,11 +3129,11 @@ const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 
 void SceneSessionManager::UpdateRotateAnimationConfig(const RotateAnimationConfig& config)
 {
-    auto task = [this, config]() {
-        TLOGI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
+    auto task = [this, config] {
+        TLOGNI(WmsLogTag::DEFAULT, "update rotate animation config duration: %{public}d", config.duration_);
         rotateAnimationConfig_.duration_ = config.duration_;
     };
-    taskScheduler_->PostAsyncTask(task, "UpdateRotateAnimationConfig");
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 WSError SceneSessionManager::ProcessBackEvent()
@@ -4078,7 +4078,7 @@ void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<Sc
         config.duration_ = rotateAnimationConfig_.duration_;
     };
     sceneSession->SetAcquireRotateAnimationConfigFunc(acquireRotateAnimationConfigFunc);
-    TLOGD(WmsLogTag::DEFAULT, "Register acquire Rotate Animation config success, id: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "success, id: %{public}d",
         sceneSession->GetPersistentId());
 }
 
