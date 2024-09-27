@@ -82,8 +82,8 @@ public:
      * @param isLayoutFullScreen Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled = true,
-        bool isDockHoverShowEnabled = true)
+    virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true)
     {
         return WSError::WS_OK;
     }
@@ -257,6 +257,11 @@ public:
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

@@ -288,7 +288,7 @@ private:
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
-    void OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled = true, bool isDockHoverShowEnabled = true);
+    void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);

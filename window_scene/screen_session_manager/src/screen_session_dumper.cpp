@@ -48,6 +48,9 @@ const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const std::string ARG_SET_ON_TENT_MODE = "-ontent";
+const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
+const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
 #endif
 }
 
@@ -148,6 +151,11 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         if (errCode != 0) {
             ShowIllegalArgsInfo();
         }
+    } else if (params_[0].find(ARG_SET_ON_TENT_MODE) != std::string::npos ||
+        params_[0].find(ARG_SET_OFF_TENT_MODE) != std::string::npos) {
+        SetEnterOrExitTentMode(params_[0]);
+    } else if (params_[0].find(ARG_SET_HOVER_STATUS) != std::string::npos) {
+        SetHoverStatusChange(params_[0]);
     }
 #endif
 }
@@ -214,6 +222,7 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         oss << "---------------- Screen ID: " << screenId << " ----------------" << std::endl;
         dumpInfo_.append(oss.str());
         DumpFoldStatus();
+        DumpTentMode();
         DumpScreenSessionById(screenId);
         DumpRsInfoById(screenId);
         DumpCutoutInfoById(screenId);
@@ -246,6 +255,21 @@ void ScreenSessionDumper::DumpFoldStatus()
         }
     }
     oss << std::left << std::setw(LINE_WIDTH) << "FoldStatus: "
+        << status << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpTentMode()
+{
+    std::ostringstream oss;
+    bool isTentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    std::string status = "";
+    if (isTentMode) {
+        status = "TRUE";
+    } else {
+        status = "FALSE";
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "TentMode: "
         << status << std::endl;
     dumpInfo_.append(oss.str());
 }
@@ -613,6 +637,32 @@ int ScreenSessionDumper::SetFoldStatusLocked()
     }
     ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
     return 0;
+}
+
+void ScreenSessionDumper::SetEnterOrExitTentMode(std::string input)
+{
+    if (input == ARG_SET_ON_TENT_MODE) {
+        ScreenSessionManager::GetInstance().OnTentModeChanged(true);
+    } else if (input == ARG_SET_OFF_TENT_MODE) {
+        ScreenSessionManager::GetInstance().OnTentModeChanged(false);
+    }
+}
+
+void ScreenSessionDumper::SetHoverStatusChange(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        int32_t value = std::stoi(valueStr);
+        if ((value < static_cast<int32_t>(DeviceHoverStatus::INVALID)) ||
+            (value > static_cast<int32_t>(DeviceHoverStatus::CAMERA_STATUS_CANCEL))) {
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
+            return;
+        }
+        screenSession->HoverStatusChange(value);
+        TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
+    }
 }
 #endif
 } // Rosen

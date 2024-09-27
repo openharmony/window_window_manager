@@ -433,7 +433,18 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return SendRequest(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION, data, reply, option);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
@@ -613,7 +624,7 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled, bool isDockHoverShowEnabled)
+WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -622,7 +633,7 @@ WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled
         TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isTitleHoverShowEnabled) || !data.WriteBool(isDockHoverShowEnabled)) {
+    if (!data.WriteBool(isTitleHoverShown) || !data.WriteBool(isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Write isTitleAndDockHoverShow failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1880,18 +1891,31 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     }
 }
 
-WSError SessionProxy::SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
+WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
 {
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isEnabled)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write isEnabled failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null, code:%{public}d", static_cast<uint32_t>(code));
-        return WSError::WS_ERROR_IPC_FAILED;
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(code), data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed, code:%{public}d", static_cast<uint32_t>(code));
-        return WSError::WS_ERROR_IPC_FAILED;
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

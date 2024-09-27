@@ -78,13 +78,15 @@ using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutPa
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
-using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShowEnabled,
-    bool isDockHoverShowEnabled)>;
+using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
+    bool isDockHoverShown)>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
+using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
+
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -107,6 +109,7 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         PiPStateChangeCallback onPiPStateChange_;
+        UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
     };
 
     // callback for notify SceneBoard
@@ -176,8 +179,8 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
-    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled = true,
-        bool isDockHoverShowEnabled = true) override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     virtual void OpenKeyboardSyncTransaction() {};
@@ -441,6 +444,12 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
+    /*
+     * Gesture Back
+     */
+    bool GetGestureBackEnabled();
+    bool GetEnableGestureBackHadSet();
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
@@ -468,6 +477,11 @@ protected:
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled() override;
+
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
@@ -493,6 +507,11 @@ private:
     * Move Drag
     */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
@@ -649,6 +668,12 @@ private:
     
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
+
+    /*
+     * Gesture Back
+     */
+    bool isEnableGestureBack_ { true };
+    bool isEnableGestureBackHadSet_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

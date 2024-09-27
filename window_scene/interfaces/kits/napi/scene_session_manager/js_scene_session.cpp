@@ -655,28 +655,34 @@ void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()
         TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onTitleAndDockHoverShowChangeFunc_ = [this](
-        bool isTitleHoverShowEnabled, bool isDockHoverShowEnabled) {
-        this->OnTitleAndDockHoverShowChange(isTitleHoverShowEnabled, isDockHoverShowEnabled);
+    sessionchangeCallback->onTitleAndDockHoverShowChangeFunc_ = [weakThis = wptr(this)](
+        bool isTitleHoverShown, bool isDockHoverShown) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     };
-    TLOGI(WmsLogTag::WMS_IMMS, "Register success");
+    TLOGI(WmsLogTag::WMS_IMMS, "Register success, persistent id %{public}d", persistentId_);
 }
 
-void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShowEnabled, bool isDockHoverShowEnabled)
+void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
-    auto task = [this, persistentId = persistentId_, isTitleHoverShowEnabled, isDockHoverShowEnabled, env = env_] {
-        if (jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTitleHoverShown, isDockHoverShown, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
-        auto jsCallBack = this->GetJSCallback(TITLE_DOCK_HOVER_SHOW_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(TITLE_DOCK_HOVER_SHOW_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_IMMS, "jsCallBack is nullptr");
             return;
         }
-        napi_value paramsObjTitle = CreateJsValue(env, isTitleHoverShowEnabled);
-        napi_value paramsObjDock = CreateJsValue(env, isDockHoverShowEnabled);
+        napi_value paramsObjTitle = CreateJsValue(env, isTitleHoverShown);
+        napi_value paramsObjDock = CreateJsValue(env, isDockHoverShown);
         napi_value argv[] = {paramsObjTitle, paramsObjDock};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -2946,12 +2952,9 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isSceneBoardBundle = SessionPermission::IsSameAppAsCalling("", "");
-        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-            isSceneBoardBundle);
         TLOGI(WmsLogTag::WMS_SCB,
-            "isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
-        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+            "isCalledRightlyByCallerId result is: %{public}d", false);
+        info.isCalledRightlyByCallerId_ = false;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), sessionInfo] {

@@ -311,11 +311,11 @@ napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetTitleAndDockHoverShowEnabled(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetTitleAndDockHoverShown(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI] call");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetTitleAndDockHoverShow(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetTitleAndDockHoverShown(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
@@ -931,6 +931,20 @@ napi_value JsWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info
     TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetGestureBackEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetGestureBackEnabled(env, info) : nullptr;
+}
+ 
+napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetGestureBackEnabled(env, info) : nullptr;
 }
 
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -2441,39 +2455,52 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
     return result;
 }
 
-napi_value JsWindow::OnSetTitleAndDockHoverShow(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 4; // 4: arg numer
+    napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 2) { // 2: maximum params num
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool isTitleHoverShowEnabled = true;
-    bool isDockHoverShowEnabled = true;
-    if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShowEnabled)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShowEnabled parameter");
+    bool isTitleHoverShown = true;
+    bool isDockHoverShown = true;
+    if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShown)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShown parameter");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShowEnabled)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShowEnabled parameter");
+    if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    WMError errCode = windowToken_->SetTitleAndDockHoverShowEnabled(isTitleHoverShowEnabled, isDockHoverShowEnabled);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Set title and dock hover show failed!");
-        return NapiThrowError(env, ret);
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] [%{public}d, %{public}d]",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
-        isTitleHoverShowEnabled, isDockHoverShowEnabled);
-    return NapiGetUndefined(env);
+    const char* const funcName = __func__;
+    NapiAsyncTask::CompleteCallback complete =
+        [windowToken = windowToken_, isTitleHoverShown, isDockHoverShown, funcName](napi_env env,
+            NapiAsyncTask& task, int32_t status) {
+            if (windowToken == nullptr) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", funcName);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            WMError errCode = windowToken->SetTitleAndDockHoverShown(isTitleHoverShown, isDockHoverShown);
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set title and dock hover show failed!", funcName);
+                task.Reject(env, JsErrUtils::CreateJsError(env,
+                    ret, "Window OnSetTitleAndDockHoverShown failed."));
+            } else {
+                task.Resolve(env, NapiGetUndefined(env));
+            }
+            TLOGNI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] [%{public}d, %{public}d]",
+                windowToken->GetWindowId(), windowToken->GetWindowName().c_str(),
+                isTitleHoverShown, isDockHoverShown);
+        };
+    napi_value lastParam = (argc <= 2) ? nullptr : (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetTitleAndDockHoverShown",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
@@ -6630,6 +6657,52 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]set failed since invalid window type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    bool enable = true;
+    napi_get_value_bool(env, argv[INDEX_ZERO], &enable);
+    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]enable: %{public}d", enable);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return NapiGetUndefined(env);
+}
+ 
+napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI] get failed since invalid window type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    bool isEnabled = windowToken_->GetGestureBackEnabled();
+    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s], enable = %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
+    return CreateJsValue(env, isEnabled);
+}
+
 static bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& WindowOption)
 {
     if (jsObject == nullptr) {
@@ -6790,8 +6863,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setUIContent", moduleName, JsWindow::SetUIContent);
     BindNativeFunction(env, object, "setFullScreen", moduleName, JsWindow::SetFullScreen);
     BindNativeFunction(env, object, "setLayoutFullScreen", moduleName, JsWindow::SetLayoutFullScreen);
-    BindNativeFunction(env, object, "setTitleAndDockHoverShowEnabled",
-        moduleName, JsWindow::SetTitleAndDockHoverShowEnabled);
+    BindNativeFunction(env, object, "setTitleAndDockHoverShown",
+        moduleName, JsWindow::SetTitleAndDockHoverShown);
     BindNativeFunction(env, object, "setWindowLayoutFullScreen", moduleName, JsWindow::SetWindowLayoutFullScreen);
     BindNativeFunction(env, object, "setSystemBarEnable", moduleName, JsWindow::SetSystemBarEnable);
     BindNativeFunction(env, object, "setWindowSystemBarEnable", moduleName, JsWindow::SetWindowSystemBarEnable);
@@ -6883,6 +6956,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
     BindNativeFunction(env, object, "requestFocus", moduleName, JsWindow::RequestFocus);
     BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
+    BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
+    BindNativeFunction(env, object, "getGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS

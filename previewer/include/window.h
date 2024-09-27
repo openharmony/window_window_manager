@@ -163,7 +163,7 @@ public:
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError SetLayoutFullScreen(bool status) = 0;
-    virtual WMError SetTitleAndDockHoverShowEnabled(bool titleHoverShowEnabled = true,
+    virtual WMError SetTitleAndDockHoverShown(bool titleHoverShowEnabled = true,
         bool dockHoverShowEnabled = true)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -383,6 +383,19 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool GetGestureBackEnabled() const { return true; }
 };
 }
 }
