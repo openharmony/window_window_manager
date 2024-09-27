@@ -30,16 +30,14 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
 const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
-namespace {
-constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
-}
+
 class SceneSession;
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
-    WindowType type, uint64_t displayId)>;
+    WindowType type, DisplayId displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
@@ -381,8 +379,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
+    static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
 
     /*
@@ -447,7 +445,7 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -499,9 +497,10 @@ private:
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
     /*
-    * Move Drag
-    */
+     * Move Drag
+     */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+    void OnMoveDragCallback(const SizeChangeReason reason);
 
     /*
      * Gesture Back
@@ -511,7 +510,6 @@ private:
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void OnMoveDragCallback(const SizeChangeReason reason);
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
@@ -624,7 +622,6 @@ private:
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
@@ -659,6 +656,7 @@ private:
     /*
      * Move Drag
      */
+    static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
