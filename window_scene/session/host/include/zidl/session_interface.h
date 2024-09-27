@@ -258,6 +258,11 @@ public:
      */
     virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

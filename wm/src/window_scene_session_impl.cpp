@@ -4081,20 +4081,36 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
     return property_->GetIsUIExtensionSubWindowFlag();
 }
 
-bool WindowSceneSessionImpl::SetIsFocusableOnShow(bool isFocusableOnShow) const
+WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "session is invalid!");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    gestureBackEnabled_ = enable;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    WMError ret =static_cast<WMError>(hostSession->SetFocusableOnShow(isFocusableOnShow));
-    if (ret != WMError::WM_OK) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "failed with errcode: %{public}d, id:%{public}d",
-            static_cast<int32_t>(ret), GetPersistentId());
+    return hostSession->SetGestureBackEnabled(enable);
+}
+ 
+bool WindowSceneSessionImpl::GetGestureBackEnabled() const
+{
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return true;
     }
-    return WMError::WM_OK;
-}  
-} // namespace Rosen 
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return true;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
+        GetWindowId(), gestureBackEnabled_);
+    return gestureBackEnabled_;
+}
+} // namespace Rosen
 } // namespace OHOS

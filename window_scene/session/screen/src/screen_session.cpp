@@ -470,9 +470,23 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
-    currentSensorRotation_ = sensorRotation;
+    if (sensorRotation >= 0.0f) {
+        currentSensorRotation_ = sensorRotation;
+    }
     for (auto& listener : screenChangeListenerList_) {
         listener->OnSensorRotationChange(sensorRotation, screenId_);
+    }
+}
+
+void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
+{
+    HoverStatusChange(hoverStatus);
+}
+
+void ScreenSession::HoverStatusChange(int32_t hoverStatus)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnHoverStatusChange(hoverStatus, screenId_);
     }
 }
 
@@ -629,7 +643,8 @@ void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation
 
 void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 {
-    TLOGI(WmsLogTag::DMS, "ENTER!");
+    TLOGI(WmsLogTag::DMS, "foldToExpand: %{public}d, Rotation: %{public}f",
+        static_cast<int32_t>(foldToExpand), currentSensorRotation_);
     if (foldToExpand) {
         SensorRotationChange(currentSensorRotation_);
     }

@@ -37,6 +37,7 @@ const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChan
 const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
 const std::string ON_SCREEN_EXTEND_CHANGE = "screenExtendChange";
+const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -645,6 +646,46 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
         }
     } else {
         WLOGFE("OnScreenExtendChange: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+{
+    const std::string callbackType = ON_HOVER_STATUS_CHANGE_CALLBACK;
+    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+
+    auto jsCallbackRef = mCallback_[callbackType];
+    wptr<ScreenSession> screenSessionWeak(screenSession_);
+    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnHoverStatusChange");
+        if (jsCallbackRef == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            return;
+        }
+        auto screenSession = screenSessionWeak.promote();
+        if (screenSession == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, hoverStatus) };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnHoverStatusChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnHoverStatusChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

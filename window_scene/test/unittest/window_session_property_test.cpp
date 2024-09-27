@@ -141,13 +141,15 @@ HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | S
 
 /**
  * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode test
+ * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetPrivacyMode(), false);
+    property->SetPrivacyMode(true);
+    ASSERT_EQ(property->GetPrivacyMode(), true);
     property->SetPrivacyMode(false);
     ASSERT_EQ(property->GetPrivacyMode(), false);
 }
