@@ -358,8 +358,8 @@ public:
     bool NeedCheckContextTransparent() const;
     
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
     /*
@@ -608,8 +608,8 @@ protected:
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
 
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
@@ -665,8 +665,8 @@ private:
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
 
     /*
-    * Window Rotate Animation
-    */
+     * Window Rotate Animation
+     */
     int32_t GetRotateAnimationDuration();
 
     /*
