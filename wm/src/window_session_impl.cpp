@@ -1943,7 +1943,6 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -1953,7 +1952,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
-        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             WLOGFE("register failed");
             return ret;
@@ -1975,7 +1974,13 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+        uiContent->SubscribeContainerModalButtonsRectChange(
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -1983,10 +1988,10 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
             titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
             titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+            window->NotifyWindowTitleButtonRectChange(titleButtonRect);
         });
     }
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
