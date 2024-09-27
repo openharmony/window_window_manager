@@ -1086,7 +1086,7 @@ napi_value ModalityTypeInit(napi_env env)
     return objValue;
 }
 
-static bool ParseModalityParam(napi_env env, napi_value jsObject, sptr<WindowOption>& windowOption)
+static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     bool isModal = false;
     if (ParseJsValue(jsObject, env, "isModal", isModal)) {
