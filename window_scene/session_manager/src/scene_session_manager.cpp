@@ -1563,7 +1563,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
-            PreHandleCollaborator(sceneSession);
+            PreHandleCollaboratorSessionAffinity(sceneSession);
             const auto& sessionAffinity = sceneSession->GetSessionInfo().sessionAffinity;
             if (auto reusedSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity)) {
                 TLOGNI(WmsLogTag::WMS_LIFE,
@@ -1573,6 +1573,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 NotifySessionUpdate(reusedSceneSession->GetSessionInfo(), ActionType::SINGLE_START);
                 return reusedSceneSession;
             }
+            NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
+            sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
         }
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -8813,7 +8815,7 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
+bool SceneSessionManager::PreHandleCollaboratorSessionAffinity(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
         WLOGFI("sceneSession is null");
@@ -8842,6 +8844,14 @@ bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
             sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
         WLOGFI("sceneSession->GetSessionInfo().want is nullptr");
+    }
+    return true;
+}
+
+bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
+{
+    if (!PreHandleCollaboratorSessionAffinity(sceneSession, persistentId)) {
+        return false;
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
