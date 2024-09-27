@@ -34,6 +34,8 @@ struct AbilityInfo;
 }
 
 namespace OHOS::Rosen {
+class RSTransaction;
+constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 
 enum class WSError : int32_t {
@@ -254,13 +256,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
@@ -334,6 +340,7 @@ struct SessionInfo {
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
+    bool needClearInNotShowRecent_ = false;
 
     /*
      * UIExtension
@@ -343,6 +350,12 @@ struct SessionInfo {
     bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
+
+    /*
+     * Multi instance
+     */
+    bool isNewAppInstance_ = false;
+    std::string appInstanceKey_;
 };
 
 enum class SessionFlag : uint32_t {
@@ -467,6 +480,17 @@ struct WSRectT {
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
     }
 
+    inline bool IsOverlap(const WSRectT<T>& a) const
+    {
+        int32_t xStart = std::max(posX_, a.posX_);
+        int32_t xEnd = std::min(posX_ + static_cast<int32_t>(width_),
+            a.posX_ + static_cast<int32_t>(a.width_));
+        int32_t yStart = std::max(posY_, a.posY_);
+        int32_t yEnd = std::min(posY_ + static_cast<int32_t>(height_),
+            a.posY_ + static_cast<int32_t>(a.height_));
+        return yStart < yEnd && xStart < xEnd;
+    }
+
     inline bool IsInvalid() const
     {
         return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
@@ -573,6 +597,16 @@ struct DeviceScreenConfig {
     bool isRightPowerButton_ = true;
 };
 
+struct SceneAnimationConfig {
+    std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
+    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+};
+
+struct RotateAnimationConfig {
+    int32_t duration_ = ROTATE_ANIMATION_DURATION;
+};
+
+
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
@@ -657,12 +691,14 @@ enum class SessionUIDirtyFlag {
 struct PostProcessFocusState {
     bool enabled_ { false };
     bool isFocused_ { false };
+    bool byForeground_ { true };
     FocusChangeReason reason_ { FocusChangeReason::DEFAULT };
 
     void Reset()
     {
         enabled_ = false;
         isFocused_ = false;
+        byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
 };

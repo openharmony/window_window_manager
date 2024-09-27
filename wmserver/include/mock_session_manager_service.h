@@ -46,6 +46,9 @@ public:
     void NotifyNotKillService() {}
     void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
+    int32_t SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+        const std::vector<std::string>& bundleNameList) override;
+    int32_t SetSnapshotSkipByMap(const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap) override;
 
 protected:
     MockSessionManagerService();
@@ -81,6 +84,11 @@ private:
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
+    sptr<IRemoteObject> GetSceneSessionManagerByUserId(const int32_t userId);
+    int32_t RecoverSCBSnapshotSkipByUserId(const int32_t userId);
+    int32_t NotifySCBSnapshotSkipByUserIdAndBundleName(const int32_t userId,
+    const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
+
     static void WriteStringToFile(int32_t pid, const char* str);
 
     sptr<IRemoteObject> screenSessionManager_;
@@ -100,6 +108,9 @@ private:
 
     std::mutex wmsConnectionStatusLock_;
     std::map<int32_t, bool> wmsConnectionStatusMap_;
+
+    std::shared_mutex userIdBundleNameListMapLock_;
+    std::map<int32_t, std::vector<std::string>> userIdBundleNameListMap_;
 
     int32_t currentWMSUserId_;
     int32_t currentScreenId_;

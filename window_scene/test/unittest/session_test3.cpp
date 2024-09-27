@@ -132,7 +132,7 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
     session_->SetContextTransparentFunc(contextTransparentFunc);
     session_->NotifyContextTransparent();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -288,7 +288,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogBackground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -326,7 +326,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogForeground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -450,7 +450,7 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->property_->SetFocusable(false);
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -481,7 +481,7 @@ HWTEST_F(WindowSessionTest3, HandlePointDownDialog, Function | SmallTest | Level
     session_->dialogVec_.push_back(dialogSession4);
     session_->HandlePointDownDialog();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -960,6 +960,8 @@ HWTEST_F(WindowSessionTest3, NotifyFocusStatus, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_EQ(WSError::WS_OK, session_->NotifyFocusStatus(true));
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyFocusStatus(true));
 }
 
 /**
@@ -1011,6 +1013,10 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(result, WSError::WS_OK);
+
+    session_->sessionStage_ = nullptr;
+    result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1102,6 +1108,28 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAcquireRotateAnimationConfigFunc
+ * @tc.desc: SetAcquireRotateAnimationConfigFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetAcquireRotateAnimationConfigFunc(nullptr);
+    ASSERT_EQ(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    int32_t duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
+
+    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) {
+        config.duration_ = 800;
+    };
+    session_->SetAcquireRotateAnimationConfigFunc(func);
+    ASSERT_NE(session_->acquireRotateAnimationConfigFunc_, nullptr);
+    duration = session_->GetRotateAnimationDuration();
+    ASSERT_EQ(duration, 800);
+}
+
+/**
  * @tc.name: SetIsPcAppInPad
  * @tc.desc: SetIsPcAppInPad Test
  * @tc.type: FUNC
@@ -1151,6 +1179,29 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->property_ = nullptr;
+    bool enable = true;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
+
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+
+    enable = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+}
+
+/**
  * @tc.name: RectSizeCheckProcess01
  * @tc.desc: RectSizeCheckProcess Test
  * @tc.type: FUNC
@@ -1160,6 +1211,88 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
     session_->SetSessionProperty(nullptr);
     session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
     ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: GetSurfaceNodeForMoveDrag
+ * @tc.desc: GetSurfaceNodeForMoveDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->leashWinSurfaceNode_ = nullptr;
+    session_->surfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotPixelMap
+ * @tc.desc: GetSnapshotPixelMap Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, Function | SmallTest | Level2)
+{
+    session_->scenePersistence_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
+    EXPECT_NE(nullptr, session_->scenePersistence_);
+    session_->scenePersistence_->isSavingSnapshot_.store(true);
+    session_->snapshot_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+}
+
+/**
+ * @tc.name: ResetDirtyFlags
+ * @tc.desc: ResetDirtyFlags Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, ResetDirtyFlags, Function | SmallTest | Level2)
+{
+    session_->isVisible_ = false;
+    session_->dirtyFlags_ = 64;
+    session_->ResetDirtyFlags();
+    EXPECT_EQ(64, session_->dirtyFlags_);
+
+    session_->isVisible_ = true;
+    session_->dirtyFlags_ = 16;
+    session_->ResetDirtyFlags();
+    EXPECT_EQ(0, session_->dirtyFlags_);
+}
+
+/**
+ * @tc.name: SetMainSessionUIStateDirty
+ * @tc.desc: SetMainSessionUIStateDirty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | Level2)
+{
+    SessionInfo infoDirty;
+    infoDirty.abilityName_ = "SetMainSessionUIStateDirty";
+    infoDirty.moduleName_ = "SetMainSessionUIStateDirty";
+    infoDirty.bundleName_ = "SetMainSessionUIStateDirty";
+    infoDirty.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_END);
+    sptr<Session> sessionDirty = sptr<Session>::MakeSptr(infoDirty);
+    EXPECT_NE(nullptr, sessionDirty);
+
+    session_->parentSession_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetParentSession());
+    sessionDirty->SetUIStateDirty(false);
+    session_->SetMainSessionUIStateDirty(false);
+    EXPECT_EQ(false, sessionDirty->GetUIStateDirty());
+
+    session_->SetParentSession(sessionDirty);
+    EXPECT_EQ(sessionDirty, session_->GetParentSession());
+    session_->SetMainSessionUIStateDirty(false);
+    EXPECT_EQ(false, sessionDirty->GetUIStateDirty());
+
+    infoDirty.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<Session> sessionUIState = sptr<Session>::MakeSptr(infoDirty);
+    EXPECT_NE(nullptr, sessionUIState);
+    session_->SetParentSession(sessionUIState);
+    session_->SetMainSessionUIStateDirty(true);
+    EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
 }
 } // namespace Rosen

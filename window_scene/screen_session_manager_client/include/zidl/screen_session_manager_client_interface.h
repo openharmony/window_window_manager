@@ -44,6 +44,7 @@ public:
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM,
         TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE,
         TRANS_ID_ON_SCREEN_EXTEND_CHANGED,
+        TRANS_ID_ON_HOVER_STATUS_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -54,6 +55,7 @@ public:
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
     virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
+    virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
     virtual void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) = 0;

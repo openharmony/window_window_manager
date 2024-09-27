@@ -22,6 +22,7 @@
 #include "ws_common.h"
 
 namespace OHOS::Rosen {
+enum class SessionInterfaceCode;
 class SessionProxy : public IRemoteProxy<ISession> {
 public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}
@@ -47,7 +48,7 @@ public:
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -76,6 +77,7 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
+    WSError SetAutoStartPiP(bool isAutoStart) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError GetStartMoveFlag(bool& isMoving) override;
@@ -93,6 +95,11 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

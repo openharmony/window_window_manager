@@ -46,6 +46,8 @@ public:
         TRANS_ID_WAKE_UP_END,
         TRANS_ID_SUSPEND_BEGIN,
         TRANS_ID_SUSPEND_END,
+        TRANS_ID_GET_INTERNAL_SCREEN_ID,
+        TRANS_ID_SET_SCREEN_POWER_BY_ID,
         TRANS_ID_SET_SPECIFIED_SCREEN_POWER,
         TRANS_ID_SET_SCREEN_POWER_FOR_ALL,
         TRANS_ID_GET_SCREEN_POWER,
@@ -227,6 +229,11 @@ public:
     virtual bool WakeUpEnd() = 0;
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
+    virtual ScreenId GetInternalScreenId() { return SCREEN_ID_INVALID; }
+    virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+    {
+        return false;
+    }
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;

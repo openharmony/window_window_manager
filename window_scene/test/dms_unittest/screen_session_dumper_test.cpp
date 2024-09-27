@@ -358,6 +358,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, Function | SmallTest |
     ASSERT_EQ(dumper->fd_, 1);
 }
 
+#ifndef IS_RELEASE_VERSION
 /**
  * @tc.name: ShowNotifyFoldStatusChangedInfo
  * @tc.desc: test function : ShowNotifyFoldStatusChangedInfo
@@ -663,6 +664,24 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent07, Function | SmallTe
     dumper ->MockSendCastPublishEvent("-publishcastevent,7");
     ASSERT_EQ(true, true);
 }
+
+/**
+ * @tc.name: SetHoverStatusChange
+ * @tc.desc: test function : SetHoverStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper ->SetHoverStatusChange("-hoverStatus,-1");
+    dumper ->SetHoverStatusChange("-hoverStatus,-0");
+    dumper ->SetHoverStatusChange("-hoverStatus,1");
+    dumper ->SetHoverStatusChange("-hoverStatus,4");
+    ASSERT_EQ(true, true);
+}
+#endif
 }
 }
 }

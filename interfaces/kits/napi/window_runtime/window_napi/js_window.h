@@ -33,6 +33,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
 void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
@@ -159,6 +160,7 @@ public:
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
@@ -169,6 +171,12 @@ public:
      * Sub Window
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -235,6 +243,7 @@ private:
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
@@ -305,6 +314,12 @@ private:
      * Sub Window
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

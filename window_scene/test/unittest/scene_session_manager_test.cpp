@@ -127,8 +127,10 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
     info.bundleName_ = "SetBrightness1";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    WSError result = ssm_->SetBrightness(sceneSession, 0.5);
+    float brightness = 0.5;
+    WSError result = ssm_->SetBrightness(sceneSession, brightness);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_NE(brightness, ssm_->GetDisplayBrightness());
 }
 
 /**
@@ -276,17 +278,28 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowStatesByPid, Function | SmallTest
 }
 
 /**
- * @tc.name: CheckIsRemote
- * @tc.desc: SceneSesionManager check is remote
+ * @tc.name: CheckIsRemote01
+ * @tc.desc: DeviceId is empty
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, CheckIsRemote, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote01, Function | SmallTest | Level3)
 {
     std::string deviceId;
+    EXPECT_EQ(deviceId.empty(), true);
     bool result = ssm_->CheckIsRemote(deviceId);
     EXPECT_FALSE(result);
-    deviceId.assign("deviceId");
-    result = ssm_->CheckIsRemote(deviceId);
+}
+
+/**
+ * @tc.name: CheckIsRemote02
+ * @tc.desc: SceneSesionManager check is remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, Function | SmallTest | Level3)
+{
+    std::string deviceId = "abc";
+    EXPECT_EQ(deviceId.empty(), false);
+    bool result = ssm_->CheckIsRemote(deviceId);
     EXPECT_FALSE(result);
 }
 
@@ -1815,6 +1828,59 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
     auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(info1.abilityName_, bundleName);
+}
+
+/**
+ * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.desc: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string bundleName = "TestName";
+    auto ret = ssm_->SetSnapshotSkipByUserIdAndBundleNameList(100, {bundleName});
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetRootMainWindowId
+ * @tc.desc: SceneSesionManager GetRootMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    sceneSession2->SetParentSession(sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    int32_t hostWindowId = -1;
+    auto result = ssm_->GetRootMainWindowId(sceneSession2->GetPersistentId(), hostWindowId);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 }
 } // namespace Rosen

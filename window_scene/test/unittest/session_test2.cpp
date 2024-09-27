@@ -1602,9 +1602,9 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
 
-    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
     session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
-    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**

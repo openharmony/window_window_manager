@@ -40,9 +40,9 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
-        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
-        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->persistentId) ||
+        !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
+        !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
@@ -293,6 +293,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
         property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
+        property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
     }
     int32_t ret = reply.ReadInt32();
@@ -400,8 +401,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write canStartAbilityFromBackground failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(abilitySessionInfo->isAtomicService) || !data.WriteBool(abilitySessionInfo->isBackTransition)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write isAtomicService or isBackTransition failed");
+    if (!data.WriteBool(abilitySessionInfo->isAtomicService) ||
+        !data.WriteBool(abilitySessionInfo->isBackTransition) ||
+        !data.WriteBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isAtomicService or isBackTransition or needClearInNotShowRecent failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->callerToken) {
@@ -425,6 +428,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
             WLOGFE("Write has not startSetting failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
+    }
+    if (!data.WriteString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -617,7 +624,8 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal)
+/** @note @window.layout */
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -1002,6 +1010,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.layout */
 WSError SessionProxy::SetAspectRatio(float ratio)
 {
     MessageParcel data;
@@ -1398,6 +1407,34 @@ WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write isAutoStart failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1825,5 +1862,33 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
         TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
         return;
     }
+}
+
+WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isEnabled)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write isEnabled failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

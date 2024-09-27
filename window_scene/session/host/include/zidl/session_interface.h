@@ -93,7 +93,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
@@ -203,6 +203,15 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Update the auto start pip window status.
+     *
+     * @param isAutoStart Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetAutoStartPiP(bool isAutoStart) { return WSError::WS_OK; }
+
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     {
@@ -236,6 +245,11 @@ public:
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

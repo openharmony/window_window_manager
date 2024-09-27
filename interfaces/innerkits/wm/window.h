@@ -462,6 +462,21 @@ public:
 };
 
 /**
+ * @class IMainWindowCloseListener
+ *
+ * @brief IMainWindowCloseListener is used for preprocessing when the main window exits.
+ */
+class IMainWindowCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when main window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the main window close process.
+     */
+    virtual void OnMainWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
  * @class ISwitchFreeMultiWindowListener
  *
  * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
@@ -539,6 +554,15 @@ public:
      * @return sptr<Window> Return the window instance founded
      */
     static sptr<Window> Find(const std::string& windowName);
+
+    /**
+     * @brief Get parent main windowId, which is used for mainWindow,subWindow or dialog
+     *
+     * @param windowId window id that need to get parent main window
+     * @return uint32_t Return the parent main window id
+     */
+    static uint32_t GetParentMainWindowId(uint32_t windowId);
+
     /**
      * @brief Get the final show window by context. Its implemented in api8
      *
@@ -1677,6 +1701,13 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
+     * @brief Is pc window of app type or not.
+     *
+     * @return True means pc window of app type, false means the opposite.
+     */
+    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -1721,6 +1752,13 @@ public:
      * @param status pip control status.
      */
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
+
+    /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2043,6 +2081,24 @@ public:
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register switch free multi-window listener.
      *
      * @param listener ISwitchFreeMultiWindowListener.
@@ -2127,7 +2183,7 @@ public:
      */
     virtual WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -2138,7 +2194,7 @@ public:
      */
     virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -2262,6 +2318,34 @@ public:
      * @return * void
      */
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+
+    /**
+     * @brief Get IsUIExtensionFlag of window.
+     *
+     * @return true - is UIExtension window, flase - is not UIEXtension window.
+     */
+    virtual bool GetIsUIExtensionFlag() const { return false; }
+
+    /**
+     * @brief Get IsUIExtensionSubWindowFlag of window.
+     *
+     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     */
+    virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
+
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+ 
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool GetGestureBackEnabled() const { return true; }
 };
 }
 }

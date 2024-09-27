@@ -947,6 +947,18 @@ bool WindowSessionProperty::GetIsPcAppInPad() const
     return isPcAppInPad_;
 }
 
+void WindowSessionProperty::SetCompatibleModeEnableInPad(bool enable)
+{
+    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
+    compatibleModeEnableInPad_ = enable;
+}
+
+bool WindowSessionProperty::GetCompatibleModeEnableInPad() const
+{
+    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
+    return compatibleModeEnableInPad_;
+}
+
 void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
 {
     subWindowLevel_ = subWindowLevel;
@@ -1010,7 +1022,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_);
+        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1084,6 +1096,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
+    property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     return property;
 }
 
@@ -1467,6 +1480,16 @@ void WindowSessionProperty::SetIsUIExtensionAbilityProcess(bool isUIExtensionAbi
 bool WindowSessionProperty::GetIsUIExtensionAbilityProcess() const
 {
     return isUIExtensionAbilityProcess_;
+}
+
+void WindowSessionProperty::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+{
+    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionSubWindowFlag() const
+{
+    return isUIExtensionSubWindowFlag_;
 }
 
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)

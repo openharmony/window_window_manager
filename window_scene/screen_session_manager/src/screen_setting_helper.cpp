@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
+sptr<SettingObserver> ScreenSettingHelper::extendDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 
@@ -39,6 +40,21 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
     }
 }
 
+void ScreenSettingHelper::RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func)
+{
+    if (extendDpiObserver_) {
+        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is already registered");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    extendDpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY_EXTEND, func);
+    ErrCode ret = provider.RegisterObserver(extendDpiObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "register extend setting dpi observer failed, ret=%{public}d", ret);
+        extendDpiObserver_ = nullptr;
+    }
+}
+
 void ScreenSettingHelper::UnregisterSettingDpiObserver()
 {
     if (dpiObserver_ == nullptr) {
@@ -51,6 +67,20 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
         TLOGW(WmsLogTag::DMS, "unregister setting dpi observer failed, ret=%{public}d", ret);
     }
     dpiObserver_ = nullptr;
+}
+
+void ScreenSettingHelper::UnregisterExtendSettingDpiObserver()
+{
+    if (extendDpiObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "extendDpiObserver_ is nullptr, no need to unregister");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.UnregisterObserver(extendDpiObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "unregister extend setting dpi observer failed, ret=%{public}d", ret);
+    }
+    extendDpiObserver_ = nullptr;
 }
 
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)

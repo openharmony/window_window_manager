@@ -134,6 +134,24 @@ void FoldScreenController::SetFoldStatus(FoldStatus foldStatus)
     foldScreenPolicy_->SetFoldStatus(foldStatus);
 }
 
+bool FoldScreenController::GetTentMode()
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetTentMode: sensorFoldStateManager_ is null");
+        return false;
+    }
+    return sensorFoldStateManager_->IsTentMode();
+}
+
+void FoldScreenController::OnTentModeChanged(bool isTentMode)
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "OnTentModeChanged: sensorFoldStateManager_ is null");
+        return;
+    }
+    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_);
+}
+
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 {
     if (foldScreenPolicy_ == nullptr) {
@@ -150,6 +168,16 @@ ScreenId FoldScreenController::GetCurrentScreenId()
         return 0;
     }
     return foldScreenPolicy_->GetCurrentScreenId();
+}
+
+void FoldScreenController::BootAnimationFinishPowerInit()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->BootAnimationFinishPowerInit();
+    foldScreenPolicy_->currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
 }
 
 void FoldScreenController::SetOnBootAnimation(bool onBootAnimation)

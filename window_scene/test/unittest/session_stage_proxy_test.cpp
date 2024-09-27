@@ -103,7 +103,8 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, Function | SmallTest | Level1)
     WSError res = sessionStage_->UpdateRect(rect, reason);
     ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    res = sessionStage_->UpdateRect(rect, reason, rsTransaction);
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -414,6 +415,18 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: NotifyCompatibleModeEnableInPad
+ * @tc.desc: test function : NotifyCompatibleModeEnableInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyCompatibleModeEnableInPad(true);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: UpdateTitleInTargetPos
  * @tc.desc: test function : UpdateTitleInTargetPos
  * @tc.type: FUNC
@@ -581,7 +594,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     std::vector<std::string> params;
     std::vector<std::string> info;
     auto res = sessionStage_->NotifyDumpInfo(params, info);
-    ASSERT_EQ(WSError::WS_OK, res);
+    ASSERT_NE(WSError::WS_OK, res);
 
     MockMessageParcel::SetReadStringVectorErrorFlag(true);
     res = sessionStage_->NotifyDumpInfo(params, info);
@@ -590,10 +603,22 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     res = sessionStage_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
-    sptr<SessionStageProxy> sessionStage = new SessionStageProxy(nullptr);
-    res = sessionStage_->NotifyDumpInfo(params, info);
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetSplitButtonVisible
+ * @tc.desc: test function : SetSplitButtonVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetSplitButtonVisible(false);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 }
 }

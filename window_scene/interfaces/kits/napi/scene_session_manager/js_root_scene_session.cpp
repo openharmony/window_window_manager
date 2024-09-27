@@ -323,8 +323,9 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
+        bool isSceneBoardBundle = SessionPermission::IsSameAppAsCalling("", "");
         bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-          info.bundleName_ == "");
+            isSceneBoardBundle);
         TLOGI(WmsLogTag::WMS_SCB,
             "root isCalledRightlyByCallerId: %{public}d", isCalledRightlyByCallerId);
         info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
@@ -341,13 +342,14 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             return nullptr;
         }
 
-        if (info.reuse) {
+        if (info.reuse || info.isAtomicService_) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                    info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
+                ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
             }
         }
         if (sceneSession == nullptr) {
@@ -360,6 +362,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
+        sceneSession->SetDefaultDisplayIdIfNeed();
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {

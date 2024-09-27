@@ -21,6 +21,7 @@
 
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
+#include <shared_mutex>
 #include <ui/rs_display_node.h>
 
 #include "screen_property.h"
@@ -49,6 +50,7 @@ public:
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
+    virtual void OnHoverStatusChange(int32_t hoverStatus, ScreenId extendScreenId) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -153,6 +155,7 @@ public:
     DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
 
     void HandleSensorRotation(float sensorRotation);
+    void HandleHoverStatusChange(int32_t hoverStatus);
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     bool HasPrivateSessionForeground() const;
@@ -206,7 +209,7 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
-    bool isScreenLocked_ = true;
+    std::atomic<bool> isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
@@ -215,6 +218,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    void HoverStatusChange(int32_t hoverStatus);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
@@ -239,7 +243,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
-    std::recursive_mutex mutex_;
+    mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;

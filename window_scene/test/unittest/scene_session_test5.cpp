@@ -408,9 +408,6 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
         (nullptr, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
         (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
-        (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
 }
 
 /**
@@ -426,7 +423,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId newDisplayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -454,7 +451,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason& reason) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -1010,10 +1007,12 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
     info.abilityName_ = "HandleUpdatePropertyByAction";
     info.bundleName_ = "HandleUpdatePropertyByAction";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
     auto res = session->HandleUpdatePropertyByAction(nullptr, action);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
     res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_DO_NOTHING, res);
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
@@ -1050,7 +1049,9 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     info.isSystem_ = true;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
     auto res = session->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
@@ -1068,9 +1069,25 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
 
     sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
     session3->SetSessionState(SessionState::STATE_CONNECT);
-    property->SetBrightness(1.0);
+    float brightness = 1.0;
+    property->SetBrightness(brightness);
+    EXPECT_EQ(brightness, property->GetBrightness());
+    EXPECT_EQ(WSError::WS_OK, session3->SetBrightness(brightness));
     res = session3->HandleActionUpdateSetBrightness(property, action);
-    EXPECT_EQ(session3->GetBrightness(), 1.0);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(brightness, session3->GetBrightness());
+
+    sptr<SceneSession> session4 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session4->SetSessionState(SessionState::STATE_CONNECT);
+    brightness = 0.8;
+    property->SetBrightness(brightness);
+    EXPECT_EQ(brightness, property->GetBrightness());
+    res = session4->HandleActionUpdateSetBrightness(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(brightness, session4->GetBrightness());
+    brightness = 1.0;
+    EXPECT_EQ(WSError::WS_OK, session4->SetBrightness(brightness));
+    EXPECT_EQ(brightness, session4->GetBrightness());
 }
 
 /**
@@ -1130,28 +1147,6 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
 
     session->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, session->sessionStage_);
-}
-
-/**
- * @tc.name: HandleUpdatePropertyByAction02
- * @tc.desc: HandleUpdatePropertyByAction02 function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleUpdatePropertyByAction";
-    info.bundleName_ = "HandleUpdatePropertyByAction";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_RECT;
-    auto res = session->HandleUpdatePropertyByAction(nullptr, action);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    res = session->HandleUpdatePropertyByAction(property, action);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
-    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    res = session->HandleUpdatePropertyByAction(property, action);
-    EXPECT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1428,6 +1423,31 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     rect.height_ = 800;
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode
+ * @tc.desc: HandleMoveDragSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode";
+    info.bundleName_ = "HandleMoveDragSurfaceNode";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    EXPECT_NE(session->moveDragController_, nullptr);
+
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
 }
 }
 }
