@@ -1491,21 +1491,23 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
     ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
 
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     sptr<ScreenSession> internalSession;
     sptr<ScreenSession> externalSession;
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-            continue;
-        }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
-            TLOGI(WmsLogTag::DMS, "found internalSession, screenId = %{public}" PRIu64, sessionIt.first);
-            internalSession = screenSession;
-        } else {
-            TLOGI(WmsLogTag::DMS, "found externalSession, screenId = %{public}" PRIu64, sessionIt.first);
-            externalSession = screenSession;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
+                TLOGI(WmsLogTag::DMS, "found internalSession, screenId = %{public}" PRIu64, sessionIt.first);
+                internalSession = screenSession;
+            } else {
+                TLOGI(WmsLogTag::DMS, "found externalSession, screenId = %{public}" PRIu64, sessionIt.first);
+                externalSession = screenSession;
+            }
         }
     }
 
@@ -1540,28 +1542,30 @@ void ScreenSessionManager::SetMultiScreenStatus(sptr<ScreenSession> firstSession
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId mainScreenId = SCREEN_ID_INVALID;
     std::string status = SCREEN_UNKNOWN;
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGW(WmsLogTag::DMS, "screenSession is nullptr!");
-            continue;
-        }
-        if (screenSession == firstSession || screenSession == secondarySession) {
-            ScreenCombination screenCombination = screenSession->GetScreenCombination();
-            if (screenCombination == ScreenCombination::SCREEN_MAIN) {
-                mainScreenId = sessionIt.first;
-                TLOGI(WmsLogTag::DMS, "found main screen");
-            } else if (screenCombination == ScreenCombination::SCREEN_MIRROR) {
-                status = SCREEN_MIRROR;
-                TLOGI(WmsLogTag::DMS, "found mirror screen");
-            } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
-                status = SCREEN_EXTEND;
-                TLOGI(WmsLogTag::DMS, "found extend screen");
-            } else {
-                TLOGE(WmsLogTag::DMS, "screen id or status error");
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGW(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (screenSession == firstSession || screenSession == secondarySession) {
+                ScreenCombination screenCombination = screenSession->GetScreenCombination();
+                if (screenCombination == ScreenCombination::SCREEN_MAIN) {
+                    mainScreenId = sessionIt.first;
+                    TLOGI(WmsLogTag::DMS, "found main screen");
+                } else if (screenCombination == ScreenCombination::SCREEN_MIRROR) {
+                    status = SCREEN_MIRROR;
+                    TLOGI(WmsLogTag::DMS, "found mirror screen");
+                } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
+                    status = SCREEN_EXTEND;
+                    TLOGI(WmsLogTag::DMS, "found extend screen");
+                } else {
+                    TLOGE(WmsLogTag::DMS, "screen id or status error");
+                }
             }
         }
     }
