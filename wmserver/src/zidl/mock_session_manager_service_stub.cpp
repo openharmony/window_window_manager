@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceStub"};
+constexpr int32_t MAX_USER_SIZE = 5;
 }
 
 int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -105,6 +106,10 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel&
 {
     int32_t mapSize = data.ReadInt32();
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
+    if (mapSize > MAX_USER_SIZE) {
+        WLOGFI("Too many users!");
+        return ERR_INVALID_DATA;
+    }
     for (int i = 0; i < mapSize; i++) {
         int32_t userId = data.ReadInt32();
         std::vector<std::string> bundleNameList;
