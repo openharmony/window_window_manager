@@ -5958,7 +5958,7 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
         }
         if (type >= static_cast<T>(ApiModalityType::BEGIN) &&
             type <= static_cast<T>(ApiModalityType::END)) {
-            modalityType = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(type));
+            modalityType = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(type);
         } else {
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -6037,7 +6037,7 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
         WLOGFE("Set window decor height failed");
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}u",
+    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
     return NapiGetUndefined(env);
 }
