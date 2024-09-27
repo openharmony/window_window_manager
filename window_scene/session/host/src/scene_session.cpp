@@ -518,17 +518,17 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
         TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [weakThis = wptr(this), event, this]() {
+    auto task = [weakThis = wptr(this), event]() {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+            TLOGNW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
+            TLOGNW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        OnSessionEvent(event);
+        session->OnSessionEvent(event);
         return WSError::WS_OK;
     };
     return PostSyncTask(task, "OnSystemSessionEvent");
