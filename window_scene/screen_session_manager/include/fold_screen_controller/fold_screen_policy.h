@@ -38,6 +38,9 @@ public:
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();
     virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    virtual void BootAnimationFinishPowerInit() {};
+    virtual void ChangeOnTentMode(FoldStatus currentState);
+    virtual void ChangeOffTentMode();
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();

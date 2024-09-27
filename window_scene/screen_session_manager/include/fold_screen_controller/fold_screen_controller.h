@@ -37,11 +37,14 @@ public:
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     virtual ~FoldScreenController();
 
+    void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();
+    bool GetTentMode();
     void SetFoldStatus(FoldStatus foldStatus);
+    void OnTentModeChanged(bool isTentMode);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);

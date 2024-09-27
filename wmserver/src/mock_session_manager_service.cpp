@@ -205,6 +205,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
         std::unique_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
         sessionManagerServiceMap_[currentWMSUserId_] = sessionManagerService;
     }
+    RecoverSCBSnapshotSkipByUserId(currentWMSUserId_);
     auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
     if (!smsDeathRecipient) {
         smsDeathRecipient = new SMSDeathRecipient(currentWMSUserId_);
@@ -774,6 +775,91 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
     }
+}
+
+sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(const int32_t userId)
+{
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    if (sessionManagerService == nullptr) {
+        WLOGFE("sessionManagerService is nullptr");
+        return nullptr;
+    }
+    sptr<ISessionManagerService> sessionManagerServiceProxy = iface_cast<ISessionManagerService>(sessionManagerService);
+    if (sessionManagerServiceProxy == nullptr) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy->GetSceneSessionManager();
+    if (remoteObject == nullptr) {
+        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
+        return sptr<IRemoteObject>(nullptr);
+    }
+    return remoteObject;
+}
+
+int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(const int32_t userId)
+{
+    std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
+    auto iter = userIdBundleNameListMap_.find(currentWMSUserId_);
+    if (iter == userIdBundleNameListMap_.end()) {
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
+    if (!remoteObject) {
+        return ERR_NULL_OBJECT;
+    }
+    int err = NotifySCBSnapshotSkipByUserIdAndBundleName(userId, iter->second, remoteObject);
+    return err;
+}
+
+int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleName(const int32_t userId,
+    const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject)
+{
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
+    WMError ret = sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Set SnapShotSkip By userId And BundleNameList failed!");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    const std::vector<std::string>& bundleNameList)
+{
+    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
+    if (!remoteObject) {
+        return ERR_NULL_OBJECT;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
+        userIdBundleNameListMap_[userId] = bundleNameList;
+    }
+    int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleName(userId, bundleNameList, remoteObject);
+    return err;
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByMap(
+    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+{
+    std::unique_lock<std::shared_mutex> lock(userIdBundleNameListMapLock_);
+    userIdBundleNameListMap_.clear();
+    int32_t flag = ERR_NONE;
+    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
+        userIdBundleNameListMap_[it->first] = it->second;
+    }
+    for (auto it = userIdBundleNameListMap_.begin(); it != userIdBundleNameListMap_.end(); ++it) {
+        sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(it->first);
+        if (!remoteObject) {
+            flag =  ERR_NULL_OBJECT;
+            break;
+        }
+        int32_t errCode = NotifySCBSnapshotSkipByUserIdAndBundleName(it->first, it->second, remoteObject);
+        if (errCode != ERR_NONE) {
+            flag = errCode;
+        }
+    }
+    return flag;
 }
 } // namespace Rosen
 } // namespace OHOS

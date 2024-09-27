@@ -272,6 +272,12 @@ enum class SystemBarSettingFlag : uint32_t {
     FOLLOW_SETTING = 1 << 2
 };
 
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
+    using T = std::underlying_type_t<SystemBarSettingFlag>;
+    return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
 /**
  * @brief Enumerates flag of multiWindowUIType.
  */
@@ -426,6 +432,15 @@ enum class BackupAndRestoreType : int32_t {
 enum class WindowStyleType : uint8_t {
     WINDOW_STYLE_DEFAULT = 0,
     WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
+};
+
+/**
+ * @brief Disable Gesture Back Type
+ */
+enum class GestureBackType : uint8_t {
+    GESTURE_SIDE = 0,
+    GESTURE_SWIPE_UP = 1,
+    GESTURE_ALL = 2,
 };
 
 /**

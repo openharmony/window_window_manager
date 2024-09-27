@@ -54,6 +54,7 @@ private:
     void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
     bool CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
         const std::vector<MMI::WindowInfo>& windowInfoList);
+    void PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
     void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
         std::vector<MMI::WindowInfo> windowInfoList);

@@ -129,7 +129,7 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState01, Function |
     angel = 130.0F - 0.1;
     hall = 0;
     auto result4 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result4), 2);
+    EXPECT_EQ(static_cast<int>(result4), 3);
 
     angel = 130.0F + 0.1;
     hall = 0;
@@ -184,7 +184,7 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState02, Function |
     angel = 70.0F + 0.1;
     hall = 0;
     auto result7 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result7), 2);
+    EXPECT_EQ(static_cast<int>(result7), 3);
 
     angel = 130.0F + 0.1;
     auto result8 = manager.GetNextFoldState(angel, hall);

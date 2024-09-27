@@ -491,6 +491,11 @@ ohos_unittest("ws_screen_session_dumper_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 ohos_unittest("ws_session_display_power_controller_test") {

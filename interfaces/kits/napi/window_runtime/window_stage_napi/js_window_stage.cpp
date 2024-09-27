@@ -265,7 +265,12 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
-    g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+    auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        return NapiGetUndefined(env);
+    }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());
 
@@ -290,11 +295,6 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    if (eventString.compare("windowStageEvent") != 0) {
-        WLOGFE("[NAPI]Envent %{public}s is invalid", eventString.c_str());
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
-    }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
@@ -303,15 +303,21 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     napi_value value = nullptr;
+    WmErrorCode ret = WmErrorCode::WM_OK;
     if (argc == 1) {
-        g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
+        ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
     } else {
         value = argv[1];
         if (value != nullptr && GetType(env, value) == napi_function) {
-            g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+            ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
         } else {
-            g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
+            ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
         }
+    }
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        return NapiGetUndefined(env);
     }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());

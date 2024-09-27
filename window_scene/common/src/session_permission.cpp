@@ -239,24 +239,21 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     if (callingBundleName != bundleName) {
         TLOGE(WmsLogTag::DEFAULT,
             "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-            callingBundleName.c_str(),
-            bundleName.c_str());
+            callingBundleName.c_str(), bundleName.c_str());
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
     AppExecFwk::BundleInfo bundleInfo;
     int userId = uid / 200000; // 200000 use uid to caculate userId
-    bool ret = bundleManagerServiceProxy->GetBundleInfo(callingBundleName,
+    bool ret = bundleManagerServiceProxy->GetBundleInfoV9(callingBundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
-        bundleInfo,
-        userId);
+        bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
 
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DEFAULT,
             "failed to query app info, callingBundleName:%{public}s, userId:%{public}d",
-            callingBundleName.c_str(),
-            userId);
+            callingBundleName.c_str(), userId);
         return false;
     }
 
@@ -267,8 +264,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
 
     TLOGE(WmsLogTag::DEFAULT,
         "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-        callingBundleName.c_str(),
-        bundleName.c_str());
+        callingBundleName.c_str(), bundleName.c_str());
     return false;
 }
 

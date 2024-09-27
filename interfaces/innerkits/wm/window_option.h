@@ -475,6 +475,19 @@ public:
      */
     virtual WindowType GetParentWindowType() const;
 
+    /**
+     * @brief Set whether this window is a sub window of the UIExtension.
+     *
+     * @return isUIExtensionSubWindowFlag.
+    */
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    /**
+     * @brief Get IsUIExtensionSubWindowFlag of window.
+     *
+     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     */
+    bool GetIsUIExtensionSubWindowFlag() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -512,6 +525,7 @@ private:
     int32_t realParentId_ = INVALID_WINDOW_ID;
     uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
     bool isExtensionTag_ = false;
+    bool isUIExtensionSubWindowFlag_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 } // namespace Rosen
