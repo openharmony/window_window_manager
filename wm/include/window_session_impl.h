@@ -257,7 +257,8 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     static sptr<Window> FindWindowById(uint32_t winId);

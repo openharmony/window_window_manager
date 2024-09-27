@@ -53,6 +53,7 @@ public:
         const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
+    virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
