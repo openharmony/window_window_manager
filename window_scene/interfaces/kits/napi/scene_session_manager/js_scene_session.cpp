@@ -2217,7 +2217,7 @@ napi_value JsSceneSession::OnSetFocusableOnShow(napi_env env, napi_callback_info
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool isFocusableOnShow = false;
+    bool isFocusableOnShow = true;
     if (!ConvertFromJsValue(env, argv[0], isFocusableOnShow)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[NAPI]Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
