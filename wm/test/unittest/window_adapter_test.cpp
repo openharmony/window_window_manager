@@ -257,6 +257,55 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RegisterSessionRecoverCallbackFunc
+ * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    auto testFunc = [] {
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
+}
+
+/**
+ * @tc.name: WindowManagerAndSessionRecover
+ * @tc.desc: WindowAdapter/WindowManagerAndSessionRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    int32_t ret = 0;
+    auto testFunc = [&ret] {
+        ret = 1;
+        return WMError::WM_DO_NOTHING;
+    };
+
+    auto testFunc2 = [&ret] {
+        ret = 2;
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    windowAdapter.WindowManagerAndSessionRecover();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, 1);
+    }
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
+    windowAdapter.WindowManagerAndSessionRecover();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, 2);
+    } else {
+        ASSERT_EQ(ret, 0);
+    }
+}
+
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: WindowAdapter/GetUnreliableWindowInfo
  * @tc.type: FUNC

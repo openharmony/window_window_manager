@@ -1117,7 +1117,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Fu
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
-    stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    int res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_STATE);
 
     data.WriteRemoteObject(sessionStage->AsObject());
     data.WriteRemoteObject(eventChannel->AsObject());
@@ -1131,7 +1132,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Fu
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
-    int res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_STATE);
 }
 
