@@ -4112,5 +4112,6 @@ bool WindowSceneSessionImpl::GetGestureBackEnabled() const
         GetWindowId(), gestureBackEnabled_);
     return gestureBackEnabled_;
 }
+
 } // namespace Rosen
 } // namespace OHOS
