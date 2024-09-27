@@ -1277,6 +1277,117 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest
         ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     }
 }
+
+/**
+ * @tc.name: SetVirtualScreenMaxRefreshRate01
+ * @tc.desc: Create a virtual screen and set its refresh rate to 0
+ * @tc.type: FUNC
+ * @tc.require: issueIATA2N
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate01, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+
+    std::vector<ScreenId> screenIds;
+    screenIds.push_back(virtualScreenId);
+    ScreenManager::GetInstance().MakeUniqueScreen(screenIds);
+    sleep(TEST_SLEEP_S);
+    uint32_t refreshRate = 0;
+    uint32_t actualRefreshRate = 0;
+    DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
+        refreshRate, actualRefreshRate);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: SetVirtualScreenMaxRefreshRate02
+ * @tc.desc: Create a virtual screen and set its refresh rate to 31
+ * @tc.type: FUNC
+ * @tc.require: issueIATA2N
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate02, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+
+    std::vector<ScreenId> screenIds;
+    screenIds.push_back(virtualScreenId);
+    ScreenManager::GetInstance().MakeUniqueScreen(screenIds);
+    sleep(TEST_SLEEP_S);
+    uint32_t refreshRate = 31;
+    uint32_t actualRefreshRate = 0;
+    DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
+        refreshRate, actualRefreshRate);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_OK, res);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: SetVirtualScreenMaxRefreshRate03
+ * @tc.desc: Create a virtual screen and set its refresh rate to 120
+ * @tc.type: FUNC
+ * @tc.require: issueIATA2N
+ */
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate03, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
+
+    CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    sleep(TEST_SLEEP_S);
+
+    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
+    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SLEEP_S);
+
+    std::vector<ScreenId> screenIds;
+    screenIds.push_back(virtualScreenId);
+    ScreenManager::GetInstance().MakeUniqueScreen(screenIds);
+    sleep(TEST_SLEEP_S);
+    uint32_t refreshRate = 120;
+    uint32_t actualRefreshRate = 0;
+    DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
+        refreshRate, actualRefreshRate);
+    sleep(TEST_SLEEP_S);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
