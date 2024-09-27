@@ -1565,11 +1565,16 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
-        SessionInfo info = GetSessionInfo();
-        if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+    auto task = [weakThis = wptr(this), needStartCaller]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->isTerminating_ = true;
+        SessionInfo info = session->GetSessionInfo();
+        if (session->terminateSessionFuncNew_) {
+            session->terminateSessionFuncNew_(info, needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -2310,6 +2315,7 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    UpdateGestureBackEnabled();
     // notify scb arkui focus
     if (!isFocused) {
         NotifyUILostFocus();
@@ -2485,6 +2491,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property->SetWindowMode(mode);
         property->SetIsNeedUpdateWindowMode(true);
+        UpdateGestureBackEnabled();
     } else {
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -2495,6 +2502,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         } else {
             surfaceNode_->MarkUifirstNode(true);
         }
+        UpdateGestureBackEnabled();
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2634,12 +2642,21 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
+}
+
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    globalRect_ = rect;
 }
 
 /** @note @window.layout */

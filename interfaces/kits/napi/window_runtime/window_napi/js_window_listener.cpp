@@ -151,18 +151,17 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] () {
+    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
             return;
         }
+        HandleScope handleScope(env);
         napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
         if (avoidAreaValue == nullptr) {
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
         if (thisListener->isDeprecatedInterface_) {
             napi_value argv[] = { avoidAreaValue };
             thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
@@ -178,14 +177,9 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_value argv[] = { objValue };
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
-        napi_close_handle_scope(env, scope);
     };
-
-    if (eventHandler_) {
-        eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnAvoidAreaChanged", 0,
-            AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    } else {
-        WLOGFE("get main event handler failed!");
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
 
