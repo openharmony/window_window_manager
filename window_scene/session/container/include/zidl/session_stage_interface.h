@@ -43,7 +43,7 @@ public:
 
     /**
      * @brief update the window rect
-     * 
+     *
      * This function provides the ability for applications to update window rect.
      * 
      * @param rect the position and size of the window

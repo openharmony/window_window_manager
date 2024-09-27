@@ -220,7 +220,7 @@ public:
 
     /**
      * @brief request focus status
-     * 
+     *
      * This function provides the ability for window to change focus status.
      * 
      * @param persistentId window ID
