@@ -38,7 +38,7 @@ class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
+    MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
     MOCK_METHOD1(SetAutoStartPiP, void(bool isAutoStart));
