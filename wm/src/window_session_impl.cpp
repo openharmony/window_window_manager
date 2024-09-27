@@ -1500,9 +1500,9 @@ bool WindowSessionImpl::IsTopmost() const
 }
 
 /** @note @window.hierarchy */
-WMError WindowSessionImpl::SetMainWindowTopmost(bool mainWindowTopmost)
+WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", mainWindowTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", isTopmost);
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1510,7 +1510,7 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool mainWindowTopmost)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     
-    property_->SetMainWindowTopmost(mainWindowTopmost);
+    property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
     TLOGI(WmsLogTag::WMS_HIERARCHY, "TokenId = %{private}u", accessTokenId);

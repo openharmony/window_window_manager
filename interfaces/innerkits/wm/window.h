@@ -751,10 +751,10 @@ public:
     /**
      * @brief Set whether the main window is topmost
      *
-     * @param mainWindowTopmost whether main window is topmost
+     * @param isTopmost whether main window is topmost
      * @return WMError
      */
-    virtual WMError SetMainWindowTopmost(bool mainWindowTopmost) { return WMError::WM_OK; }
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
     /**
      * @brief Get whether main window is topmost
      *

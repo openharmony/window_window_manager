@@ -83,6 +83,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
+using NotifyMainWindowTopmostChangeFunc = std::functin<void(bool isTopmost)>;
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -219,6 +220,7 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
+    void SetMainWindowTopmostChangeCallback(cosnt NotifyMainWindowTopmostChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
 
@@ -247,7 +249,7 @@ public:
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
-    virtual WSError SetMainWindowTopmost(bool mainWindowTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
 
@@ -472,6 +474,7 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
+    NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

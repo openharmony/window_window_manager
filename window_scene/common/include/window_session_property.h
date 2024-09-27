@@ -81,7 +81,7 @@ public:
     void SetWindowFlags(uint32_t flags);
     void SetTopmost(bool topmost);
     bool IsTopmost() const;
-    void SetMainWindowTopmost(bool mainWindowTopmost);
+    void SetMainWindowTopmost(bool isTopmost);
     bool IsMainWindowTopmost() const;
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
@@ -281,7 +281,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool topmost_ = false;
-    bool mainWindowTopmost_ = false;
+    bool isTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };

@@ -958,6 +958,20 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->mainWindowTopmostChangeFunc_ = func;
+        return WSError::WS_OK;
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
