@@ -48,8 +48,8 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
-constexpr float HOVER_STATUS_EXIT_MIN_THRESHOHLD = 5.0F;
-constexpr float HOVER_STATUS_EXIT_MAX_THRESHOHLD = 175.0F;
+constexpr float HOVER_STATUS_EXIT_MIN_THRESHOLD = 5.0F;
+constexpr float HOVER_STATUS_EXIT_MAX_THRESHOLD = 175.0F;
 } // namespace
 
 SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager()
