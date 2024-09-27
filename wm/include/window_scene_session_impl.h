@@ -170,7 +170,6 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const override;
 
 protected:
-    void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
     WMError RecoverAndConnectSpecificSession();
@@ -179,7 +178,6 @@ protected:
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
-    void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState& newState);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
     void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
@@ -233,6 +231,11 @@ private:
     uint32_t getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type);
+
+    /**
+     * Sub Window
+     */
+    void AddSubWindowMapForExtensionWindow();
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
