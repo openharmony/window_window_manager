@@ -243,8 +243,6 @@ void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
 {
     TLOGI(WmsLogTag::WMS_PIPELINE, "change isNeedSyncGlobalPos from %{public}d to %{public}d",
         isNeedSyncGlobalPos_, needSync);
-    if (isNeedSyncGlobalPos_ != needSync) {
-        isNeedSyncGlobalPos_ = needSync;
-    }
+    isNeedSyncGlobalPos_ = needSync;
 }
 } // namespace OHOS::Rosen
