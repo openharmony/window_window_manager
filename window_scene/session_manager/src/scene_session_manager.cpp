@@ -3148,7 +3148,8 @@ WSError SceneSessionManager::ProcessBackEvent()
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
             WLOGFD("RequestSessionBack when start session");
-            session->RequestSessionBack(false);
+            session->RequestSessionBack(session->GetSessionInfo().abilityInfo != nullptr &&
+                session->GetSessionInfo().abilityInfo->unclearableMission);
             return WSError::WS_OK;
         }
         if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
