@@ -144,32 +144,40 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     uint32_t width = 0;
     uint32_t height = 0;
     if (!(data.ReadInt32(posX)) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
-        WLOGFE("read rect failed");
+        TLOGE(WmsLogTag::DEFAULT, "read rect failed");
         return -1;
     }
     WSRect rect = { posX, posY, width, height };
     uint32_t reasonType = 0;
     if (!data.ReadUint32(reasonType) || reasonType > static_cast<uint32_t>(SizeChangeReason::END)) {
-        WLOGFE("read reasonType failed");
+        TLOGE(WmsLogTag::DEFAULT, "read reasonType failed");
         return -1;
     }
     SizeChangeReason reason = static_cast<SizeChangeReason>(reasonType);
-    bool hasRSTransaction = data.ReadBool();
-    uint32_t animationDuration = 0;
-    if (!data.ReadInt32(animationDuration)) {
-        WLOGFE("read animationDuration failed");
+    bool hasRSTransaction = false;
+    if (!data.ReadBool(hasRSTransaction)) {
+        TLOGE(WmsLogTag::DEFAULT, "read hasRSTransaction failed.");
         return -1;
     }
+    int32_t animationDuration = 0;
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
         if (!transaction) {
             WLOGFE("transaction unMarsh failed");
             return -1;
         }
+        if (!data.ReadInt32(animationDuration)) {
+            TLOGE(WmsLogTag::DEFAULT, "read animationDuration failed");
+            return -1;
+        }
         SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = animationDuration };
         WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
     } else {
+        if (!data.ReadInt32(animationDuration)) {
+            TLOGE(WmsLogTag::DEFAULT, "read animationDuration failed");
+            return -1;
+        }
         SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = animationDuration };
         WSError errCode = UpdateRect(rect, reason, config);
         reply.WriteUint32(static_cast<uint32_t>(errCode));
