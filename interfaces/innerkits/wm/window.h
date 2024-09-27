@@ -1449,7 +1449,7 @@ public:
      * @return WMError
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
-
+    
     /**
      * @brief maximize window with presentation enum.
      *
@@ -1652,7 +1652,7 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) { return WMError::WM_OK; }
-
+    
     /**
      * @brief Transfer accessibility event data
      *
@@ -1733,7 +1733,7 @@ public:
      * @return WMError.
      */
     virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
+    
     /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
      *
@@ -1801,7 +1801,7 @@ public:
     {
         return WMError::WM_OK;
     }
-
+    
     /**
      * @brief Get System Bar(include status bar and nav bar) Properties
      *
@@ -2118,7 +2118,7 @@ public:
      * @return true means the immersive mode is enabled, and false means the opposite.
      */
     virtual bool GetImmersiveModeEnabledState() const { return true; }
-
+    
     /**
      * @brief Get the window status of current window.
      *
