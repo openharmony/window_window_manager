@@ -166,6 +166,7 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angl
         }
     }
 }
+
 FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float angle, int hall)
 {
     UpdateSwitchScreenBoundaryForLargeFoldDevice(angle, hall);
@@ -230,6 +231,7 @@ void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver
         }
     }
 }
+
 void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     bool isNotRepeated = isTent ^ IsTentMode();
