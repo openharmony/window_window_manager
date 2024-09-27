@@ -47,6 +47,7 @@ private:
     int HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply);
     int HandleOnFoldStatusChangedReportUE(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenExtendChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

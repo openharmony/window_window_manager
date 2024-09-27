@@ -238,20 +238,6 @@ namespace {
     }
 
     /**
-     * @tc.name: RecoverWhenBootAnimationExit
-     * @tc.desc: RecoverWhenBootAnimationExit
-     * @tc.type: FUNC
-     */
-    HWTEST_F(DualDisplayFoldPolicyTest, RecoverWhenBootAnimationExit, Function | SmallTest | Level3)
-    {
-        std::recursive_mutex mutex;
-        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        dualDisplayFoldPolicy.RecoverWhenBootAnimationExit();
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
-    }
-
-    /**
      * @tc.name: UpdateForPhyScreenPropertyChange
      * @tc.desc: UpdateForPhyScreenPropertyChange
      * @tc.type: FUNC
@@ -369,6 +355,104 @@ namespace {
         dualDisplayFoldPolicy.AddOrRemoveDisplayNodeToTree(screenId, command);
         FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
         ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+    }
+
+    /**
+     * @tc.name: SetdisplayModeChangeStatus01
+     * @tc.desc: SetdisplayModeChangeStatus
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        bool status = true;
+        dualDisplayFoldPolicy.SetdisplayModeChangeStatus(status);
+        ASSERT_EQ(dualDisplayFoldPolicy.pengdingTask_, 3);
+    }
+
+    /**
+     * @tc.name: SetdisplayModeChangeStatus02
+     * @tc.desc: SetdisplayModeChangeStatus
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        bool status = false;
+        dualDisplayFoldPolicy.SetdisplayModeChangeStatus(status);
+        ASSERT_NE(dualDisplayFoldPolicy.pengdingTask_, 3);
+    }
+
+    /**
+     * @tc.name: CheckDisplayMode01
+     * @tc.desc: CheckDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+        auto ret = dualDisplayFoldPolicy.CheckDisplayMode(displayMode);
+        ASSERT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.name: CheckDisplayMode02
+     * @tc.desc: CheckDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        FoldDisplayMode displayMode = FoldDisplayMode::COORDINATION;
+        auto ret = dualDisplayFoldPolicy.CheckDisplayMode(displayMode);
+        ASSERT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.name: CheckDisplayMode03
+     * @tc.desc: CheckDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode03, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+        auto ret = dualDisplayFoldPolicy.CheckDisplayMode(displayMode);
+        ASSERT_EQ(ret, true);
+    }
+
+    /**
+     * @tc.name: ChangeScreenDisplayMode03
+     * @tc.desc: ChangeScreenDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode03, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::UNKNOWN);
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::SUB);
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
+
+        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::COORDINATION);
+        ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
     }
 }
 } // namespace Rosen

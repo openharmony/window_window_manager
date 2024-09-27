@@ -26,6 +26,7 @@
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
 #include <pointer_event.h>
+#include <ui/rs_surface_node.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -727,26 +728,46 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode
+ * @tc.name: SetPrivacyMode01
+ * @tc.desc: Set PrivacyMode as false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "SetPrivacyMode";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    int ret = 0;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    scensession->surfaceNode_ = surfaceNode;
     scensession->SetPrivacyMode(false);
-    ASSERT_EQ(0, ret);
+    ASSERT_EQ(false, scensession->property_->GetPrivacyMode());
+    ASSERT_EQ(false, scensession->property_->GetSystemPrivacyMode());
+}
+
+/**
+ * @tc.name: SetPrivacyMode02
+ * @tc.desc: Set PrivacyMode as true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background02";
+    info.bundleName_ = "SetPrivacyMode";
+    info.windowType_ = 1;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    scensession->surfaceNode_ = surfaceNode;
+    scensession->SetPrivacyMode(true);
+    ASSERT_EQ(true, scensession->property_->GetPrivacyMode());
+    ASSERT_EQ(true, scensession->property_->GetSystemPrivacyMode());
 }
 
 /**
@@ -1474,6 +1495,7 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->moveDragController_->hasPointDown_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
@@ -1955,7 +1977,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
@@ -2013,7 +2035,7 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     sceneSession->moveDragController_ = nullptr;
     sceneSession->SetMoveDragCallback();
 }
@@ -2071,6 +2093,22 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     sceneSession->SetDefaultDisplayIdIfNeed();
     EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect test = { 100, 100, 100, 100 };
+    sceneSession->SetSessionGlobalRect(test);
+    sceneSession->SetScbCoreEnabled(true);
+    EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
 }
-}
-}
+} // namespace
+} // Rosen
+} // OHOS

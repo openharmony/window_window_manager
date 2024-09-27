@@ -34,6 +34,7 @@ public:
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
+    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -2192,6 +2193,56 @@ HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
     EXPECT_EQ(session.property_.GetPivotY(), pivotY);
     EXPECT_EQ(session.property_.GetTranslateX(), translateX);
     EXPECT_EQ(session.property_.GetTranslateY(), translateY);
+}
+
+/**
+ * @tc.name: HoverStatusChange01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, HoverStatusChange01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "HoverStatusChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int32_t HoverStatus = 0;
+    screenSession->HoverStatusChange(HoverStatus);
+    GTEST_LOG_(INFO) << "HoverStatusChange end";
+}
+
+/**
+ * @tc.name: HoverStatusChange02
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, HoverStatusChange02, Function | SmallTest | Level2)
+{
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    session->RegisterScreenChangeListener(screenChangeListener);
+    int32_t hoverStatus = 0;
+    session->HoverStatusChange(hoverStatus);
+}
+
+/**
+ * @tc.name: HandleHoverStatusChange01
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, Function | SmallTest | Level2)
+{
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    session->RegisterScreenChangeListener(screenChangeListener);
+    int32_t hoverStatus = 0;
+    session->HandleHoverStatusChange(hoverStatus);
 }
 } // namespace
 } // namespace Rosen

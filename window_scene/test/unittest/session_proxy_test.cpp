@@ -366,9 +366,9 @@ HWTEST_F(SessionProxyTest, OnTitleAndDockHoverShowChange, Function | SmallTest |
     GTEST_LOG_(INFO) << "SessionProxyTest: OnTitleAndDockHoverShowChange start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    bool isTitleHoverShowEnabled = true;
-    bool isDockHoverShowEnabled = true;
-    WSError res = sProxy->OnTitleAndDockHoverShowChange(isTitleHoverShowEnabled, isDockHoverShowEnabled);
+    bool isTitleHoverShown = true;
+    bool isDockHoverShown = true;
+    WSError res = sProxy->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     EXPECT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnTitleAndDockHoverShowChange end";
 }
