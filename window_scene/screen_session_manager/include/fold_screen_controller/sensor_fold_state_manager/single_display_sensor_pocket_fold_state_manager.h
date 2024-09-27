@@ -58,7 +58,7 @@ private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
     void SetCameraFoldStrategy(float angle);
-    void SetCameraStatusChange(float angle);
+    void SetCameraStatusChange(float angle, int hall);
     sptr<ApplicationStatePocketObserver> applicationStateObserver_;
     bool isInCameraFoldStrategy_ = false;
     bool isCameraStatus_ = false;
