@@ -22,6 +22,7 @@
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "want.h"
 #include "key_event.h"
 #include "pointer_event.h"
@@ -432,6 +433,17 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     if (!data.WriteString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (abilitySessionInfo->startWindowOption) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Write startWindowOption failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Write has not startWindowOption failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
