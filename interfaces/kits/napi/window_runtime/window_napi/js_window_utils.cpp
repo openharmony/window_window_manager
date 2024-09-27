@@ -1086,7 +1086,7 @@ napi_value ModalityTypeInit(napi_env env)
     return objValue;
 }
 
-static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+static bool ParseModalityParam(napi_env env, napi_value jsObject, sptr<WindowOption>& windowOption)
 {
     bool isModal = false;
     if (ParseJsValue(jsObject, env, "isModal", isModal)) {
@@ -1102,17 +1102,17 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
         }
         windowOption->SetWindowTopmost(isTopmost);
     }
-    using T = std::underlying_type_t<ApiModalityType>;
-    T modalityType = 0;
-    if (ParseJsValue(jsObject, env, "modalityType", modalityType)) {
+    ApiModalityType apiModalityType;
+    if (ParseJsValue(jsObject, env, "modalityType", apiModalityType)) {
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return false;
         }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T modalityType = static_cast<T>(apiModalityType);
         if (modalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
             modalityType <= static_cast<T>(ApiModalityType::END)) {
-            TLOGI(WmsLogTag::WMS_SUB, "Normal subwindow modalityType: %{public}u", modalityType);
-            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(modalityType);
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(apiModalityType);
             if (type == ModalityType::APPLICATION_MODALITY) {
                 windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
             }

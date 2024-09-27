@@ -6008,16 +6008,17 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
-    using T = std::underlying_type_t<ApiModalityType>;
-    T type = 0;
-    if (argc == 2 && ConvertFromJsValue(env, argv[INDEX_ONE], type)) { // 2: the param num
+    ApiModalityType apiModalityType;
+    if (argc == 2 && ConvertFromJsValue(env, argv[INDEX_ONE], apiModalityType)) { // 2: the param num
         if (!isModal) {
             TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support modalityType");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
+        using T = std::underlying_type_t<ApiModalityType>;
+        T type = static_cast<T>(apiModalityType);
         if (type >= static_cast<T>(ApiModalityType::BEGIN) &&
             type <= static_cast<T>(ApiModalityType::END)) {
-            modalityType = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(type);
+            modalityType = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(apiModalityType);
         } else {
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -6045,12 +6046,11 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s set failed, ret is %{public}d",
-                where, wmErrorCode);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s set failed, ret is %{public}d", where, wmErrorCode);
             task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set subwindow modal failed"));
         }
         TLOGNI(WmsLogTag::WMS_SUB,
-            "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}u",
+            "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}hhu",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isModal, modalityType);
     };
     napi_value lastParam = nullptr;
