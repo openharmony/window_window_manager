@@ -1865,7 +1865,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     scensession->SetParentSession(parentSession);
     EXPECT_NE(scensession->GetParentSession(), nullptr);
     parentSession->SetSessionRect(parentRect);
-    scensession->systemConfig_.uiType_ = UI_TYPE_PHONE;
+    scensession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
 
     bool isGlobal = true;
     WSError result = scensession->UpdateSessionRect(oldRect, reason, isGlobal);
