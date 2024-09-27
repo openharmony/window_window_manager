@@ -33,6 +33,7 @@ namespace OHOS::Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
+const std::string CAMERA_NAME = "camera";
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
@@ -47,6 +48,8 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
+constexpr float HOVER_STATUS_EXIT_MIN_THRESHOHLD = 5.0F;
+constexpr float HOVER_STATUS_EXIT_MAX_THRESHOHLD = 175.0F;
 } // namespace
 
 SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager()
@@ -62,7 +65,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     SetCameraFoldStrategy(angle);
-    SetCameraStatusChange(angle);
+    SetCameraStatusChange(angle, hall);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
         return;
@@ -77,8 +80,8 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    SetCameraStatusChange(angle);
     SetCameraFoldStrategy(angle);
+    SetCameraStatusChange(angle, hall);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
         return;
@@ -102,7 +105,6 @@ void SingleDisplaySensorPocketFoldStateManager::UpdateSwitchScreenBoundaryForLar
 void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
 {
     FoldStatus currentState = GetCurrentState();
-    std::string cameraApp = "com.huawei.hmos.camera";
 
     if (angle >= CAMERA_MAX_VAL) {
         if (isInCameraFoldStrategy_ != false) {
@@ -117,7 +119,8 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angl
     if (applicationStateObserver_->GetForegroundApp().empty()) {
         return;
     }
-    if (applicationStateObserver_->GetForegroundApp() == cameraApp && currentState == FoldStatus::FOLDED) {
+    if (applicationStateObserver_->GetForegroundApp().find(CAMERA_NAME) != std::string::npos &&
+        currentState == FoldStatus::FOLDED) {
         if (isInCameraFoldStrategy_ != true) {
             isInCameraFoldStrategy_ = true;
             TLOGI(WmsLogTag::DMS, "Enable CameraFoldStrategy.");
@@ -125,26 +128,44 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angl
     }
 }
 
-void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angle)
+void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angle, int hall)
 {
-    std::string cameraApp = "com.huawei.hmos.camera";
+    if (hall == HALL_FOLDED_THRESHOLD) {
+        if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "hall is %{public}d, exit cemera status", hall);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
+        }
+    }
+
+    if ((std::isless(angle, HOVER_STATUS_EXIT_MIN_THRESHOLD)) ||
+        (std::isgreater(angle, HOVER_STATUS_EXIT_MAX_THRESHOLD))) {
+        if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f, exit camera status", angle);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
+        }
+    }
+    
     if (applicationStateObserver_ == nullptr) {
         return;
     }
+
     if ((angle > ANGLE_MIN_VAL) && (angle < CAMERA_MAX_VAL) &&
-        (applicationStateObserver_->GetForegroundApp() == cameraApp)) {
+        (applicationStateObserver_->GetForegroundApp().find(CAMERA_NAME) != std::string::npos)) {
         if (!isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
             isCameraStatus_ = true;
         }
     } else {
         if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f or is not camera app, exit camera status", angle);
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
             isCameraStatus_ = false;
         }
     }
 }
-
 FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float angle, int hall)
 {
     UpdateSwitchScreenBoundaryForLargeFoldDevice(angle, hall);
