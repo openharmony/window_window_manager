@@ -414,12 +414,12 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
             [weakThis = wptr(this), isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent,
                 bool consumed) {
-                auto promoteThis = weakThis.promote();
-                if (promoteThis == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_UIEXT, "promoteThis is nullptr");
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
                     return;
                 }
-                promoteThis->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+                window->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
             });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
