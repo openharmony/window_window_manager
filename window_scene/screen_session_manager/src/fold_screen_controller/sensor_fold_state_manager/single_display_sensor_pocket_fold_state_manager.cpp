@@ -65,11 +65,12 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     SetCameraFoldStrategy(angle);
-    SetCameraStatusChange(angle, hall);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        SetCameraStatusChange(angle, hall);
         return;
     }
+    SetCameraStatusChange(angle, hall);
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
@@ -81,11 +82,12 @@ void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, in
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     SetCameraFoldStrategy(angle);
-    SetCameraStatusChange(angle, hall);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        SetCameraStatusChange(angle, hall);
         return;
     }
+    SetCameraStatusChange(angle, hall);
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
