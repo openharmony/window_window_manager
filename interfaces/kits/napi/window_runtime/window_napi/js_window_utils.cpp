@@ -1110,7 +1110,7 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
         if (modalityType >= static_cast<T>(ApiModalityType::BEGIN) &&
             modalityType <= static_cast<T>(ApiModalityType::END)) {
             TLOGI(WmsLogTag::WMS_SUB, "Normal subwindow modalityType: %{public}u", modalityType);
-            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(static_cast<ApiModalityType>(modalityType));
+            auto type = JS_TO_NATIVE_MODALITY_TYPE_MAP.at(modalityType);
             if (type == ModalityType::APPLICATION_MODALITY) {
                 windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
             }
