@@ -172,6 +172,12 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
+    /*
+     * Gesture Back
+     */
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -308,6 +314,12 @@ private:
      * Sub Window
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
