@@ -107,7 +107,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel&
     int32_t mapSize = data.ReadInt32();
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
     if (mapSize > MAX_USER_SIZE) {
-        WLOGFI("Too many users!");
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "Too many users!");
         return ERR_INVALID_DATA;
     }
     for (int i = 0; i < mapSize; i++) {
