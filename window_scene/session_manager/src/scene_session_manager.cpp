@@ -9183,7 +9183,7 @@ void SceneSessionManager::PostProcessFocus()
         if (!session->IsFocusableOnShow() &&
             (session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND ||
             session->GetPostProcessFocusState().reason_ == FocusChangeReason::APP_FOREGROUND)) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus when foreground", session->GetPersistentId());
+            TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus", session->GetPersistentId());
             session->ResetPostProcessFocusState();
             session->SetFocusableOnShow(true);
             continue; 
