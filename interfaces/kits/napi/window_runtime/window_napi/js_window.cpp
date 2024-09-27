@@ -474,11 +474,11 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.hierarchy */
-napi_value JsWindow::SetMainWindowTopmost(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetMainWindowTopmost");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetWindowTopmost");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetMainWindowTopmost(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
@@ -3584,13 +3584,13 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetMainWindowTopmost(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]SetMainWindowTopmost is not allowed since window is not main window");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]SetWindowTopmost is not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -3633,7 +3633,7 @@ napi_value JsWindow::OnSetMainWindowTopmost(napi_env env, napi_callback_info inf
             }
         };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetMainWindowTopmost",
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowTopmost",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -6833,7 +6833,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setBrightness", moduleName, JsWindow::SetBrightness);
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
-    BindNativeFunction(env, object, "setMainWindowTopmost", moduleName, JsWindow::SetMainWindowTopmost);
+    BindNativeFunction(env, object, "setWindowTopmost", moduleName, JsWindow::SetWindowTopmost);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);

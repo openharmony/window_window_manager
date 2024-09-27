@@ -1513,7 +1513,7 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool mainWindowTopmost)
     property_->SetMainWindowTopmost(mainWindowTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "Create camera float window, TokenId = %{private}u", accessTokenId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "TokenId = %{private}u", accessTokenId);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 }
 
