@@ -187,19 +187,14 @@ WSError MainSession::SetMainWindowTopmost(bool isTopmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, topmost: %{public}d",
         GetPersistentId(), isTopmost);
-    auto session = wptr(this).promote();
-    if (!session) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
-        return WSError::WS_ERROR_DESTROYED_OBJECT;
-    }
-    auto property = session->GetSessionProperty();
+    auto property = GetSessionProperty();
     if (property) {
         TLOGI(WmsLogTag::WMS_HIERARCHY,
             "Notify session topmost change, id: %{public}d, topmost: %{public}u",
-            session->GetPersistentId(), isTopmost);
+            GetPersistentId(), isTopmost);
         property->SetMainWindowTopmost(isTopmost);
-        if (session->mainWindowTopmostChangeFunc_) {
-            session->mainWindowTopmostChangeFunc_(isTopmost);
+        if (mainWindowTopmostChangeFunc_) {
+            mainWindowTopmostChangeFunc_(isTopmost);
         }
     }
     return WSError::WS_OK;
