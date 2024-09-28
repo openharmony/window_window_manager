@@ -281,7 +281,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool topmost_ = false;
-    bool isTopmost_ = false;
+    bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
