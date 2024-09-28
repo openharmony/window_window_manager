@@ -3587,7 +3587,7 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
@@ -3607,22 +3607,19 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[0], &isMainWindowTopmost);
 
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr(windowToken_), isMainWindowTopmost, errCodePtr]() {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr(windowToken_), isMainWindowTopmost, errCodePtr] {
         auto window = weakToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(isMainWindowTopmost));
-        TLOGD(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
+        TLOGND(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCodePtr == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
             if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {

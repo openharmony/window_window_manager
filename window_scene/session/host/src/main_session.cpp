@@ -185,14 +185,12 @@ bool MainSession::IsTopmost() const
 
 WSError MainSession::SetMainWindowTopmost(bool isTopmost)
 {
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, isTopmost: %{public}d",
-        GetPersistentId(), isTopmost);
     auto property = GetSessionProperty();
     if (property) {
+        property->SetMainWindowTopmost(isTopmost);
         TLOGD(WmsLogTag::WMS_HIERARCHY,
             "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
             GetPersistentId(), isTopmost);
-        property->SetMainWindowTopmost(isTopmost);
         if (mainWindowTopmostChangeFunc_) {
             mainWindowTopmostChangeFunc_(isTopmost);
         }

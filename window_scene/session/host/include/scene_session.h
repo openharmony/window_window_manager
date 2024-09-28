@@ -219,7 +219,6 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
-    void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
 
@@ -246,10 +245,16 @@ public:
     void SetLastSafeRect(WSRect rect);
     void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+
+    /*
+     * Window Hierarchy
+     */
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
+    void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
+    
     virtual bool IsModal() const { return false; }
 
     /**
@@ -473,6 +478,10 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
+
+    /*
+     * Window Hierarchy
+     */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
 
 private:
