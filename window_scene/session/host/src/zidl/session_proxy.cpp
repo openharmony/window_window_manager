@@ -1854,7 +1854,7 @@ WSError SessionProxy::SetFocusableOnShow(bool isFocusableOnShow)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
