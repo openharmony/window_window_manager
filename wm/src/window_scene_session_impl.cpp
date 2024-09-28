@@ -1321,10 +1321,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-	{
+    {
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
-	}
+    }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -1557,7 +1557,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId:%{public}u", GetWindowId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = Resize(width, height);
