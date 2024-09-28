@@ -82,7 +82,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
-using NotifyMainWindowTopmostChangeFunc = std::functin<void(bool isTopmost)>;
+using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 class SceneSession : public Session {
 public:
