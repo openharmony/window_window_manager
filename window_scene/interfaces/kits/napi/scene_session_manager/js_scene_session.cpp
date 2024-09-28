@@ -263,6 +263,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeMethodForKeyboard(env, objValue, moduleName);
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
     BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
+    BindNativeMethodForFocus(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -289,9 +290,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
-    BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
-    BindNativeFunction(env, objValue, "setFocusableOnShow", moduleName, JsSceneSession::SetFocusableOnShow);
-    BindNativeFunction(env, objValue, "setSystemFocusable", moduleName, JsSceneSession::SetSystemFocusable);
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
@@ -360,6 +358,13 @@ void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_valu
         JsSceneSession::SyncScenePanelGlobalPosition);
     BindNativeFunction(env, objValue, "unSyncScenePanelGlobalPosition", moduleName,
         JsSceneSession::UnSyncScenePanelGlobalPosition);
+}
+
+void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
+    BindNativeFunction(env, objValue, "setFocusableOnShow", moduleName, JsSceneSession::SetFocusableOnShow);
+    BindNativeFunction(env, objValue, "setSystemFocusable", moduleName, JsSceneSession::SetSystemFocusable);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
