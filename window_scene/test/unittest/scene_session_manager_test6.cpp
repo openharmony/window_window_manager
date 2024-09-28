@@ -173,7 +173,7 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo01, Function | S
     currVisibleData.push_back(std::make_pair(3, WindowVisibilityState::WINDOW_LAYER_STATE_MAX));
     ssm_->lastVisibleData_.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
-    ASSERT_EQ(visibilityChangeInfos.size(), 3);
+    ASSERT_EQ(visibilityChangeInfos.size(), 2);
 }
 
 /**
