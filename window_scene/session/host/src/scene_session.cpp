@@ -975,6 +975,24 @@ void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityC
     PostTask(task, "SetKeyboardGravityChangeCallback");
 }
 
+void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func)
+{
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session or gravityChangeFunc is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onRestoreMainWindowFunc_ = func;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "RestoreMainWindow id: %{public}d",
+            session->GetPersistentId());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetRestoreMainWindowCallback");
+}
+
 void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
@@ -4362,23 +4380,6 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         return WSError::WS_OK;
     };
     PostTask(task, "OnLayoutFullScreenChange");
-    return WSError::WS_OK;
-}
-
-WSError SceneSession::OnRestoreMainWindow()
-{
-    auto task = [weakThis = wptr(this)]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
-        }
-        return WSError::WS_OK;
-    };
-    PostTask(task, "OnRestoreMainWindow");
     return WSError::WS_OK;
 }
 

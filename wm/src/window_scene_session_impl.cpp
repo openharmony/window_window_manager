@@ -2116,25 +2116,20 @@ WMError WindowSceneSessionImpl::Restore()
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Restore fail, not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    bool isPcAppInPad = false;
-    bool isAppSupportPhoneInPc = false;
-    isPcAppInPad = property_->GetIsPcAppInPad();
-    isAppSupportPhoneInPc = property_->GetIsAppSupportPhoneInPc();
-    auto isPC = windowSystemConfig_.IsPcWindow();
-    if (!(isPC || isPcAppInPad)) {
+    if (!(windowSystemConfig_.IsPcWindow() || property_->GetIsPcAppInPad())) {
         TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad,The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (isAppSupportPhoneInPc) {
+    if (property_->GetIsAppSupportPhoneInPc()) {
         TLOGE(WmsLogTag::WMS_LIFE, "This is isAppSupportPhoneInPc,The device is not supported");
         return static_cast<WMError>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->OnRestoreMainWindow();
     return WMError::WM_OK;
 }
