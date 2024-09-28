@@ -26,12 +26,16 @@ namespace {
     constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
     constexpr int32_t MOTION_ACTION_PORTRAIT_INVERTED = 2;
     constexpr int32_t MOTION_ACTION_RIGHT_LANDSCAPE = 3;
+    constexpr int32_t MOTION_ACTION_TENT_MODE_OFF = 0;
+    constexpr int32_t MOTION_ACTION_TENT_MODE_ON = 1;
 #endif
 }
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 bool MotionSubscriber::isMotionSensorSubscribed_ = false;
 sptr<RotationMotionEventCallback> MotionSubscriber::motionEventCallback_ = nullptr;
+bool MotionTentSubscriber::isMotionSensorSubscribed_ = false;
+sptr<TentMotionEventCallback> MotionTentSubscriber::motionEventCallback_ = nullptr;
 #endif
 
 void ScreenSensorConnector::SubscribeRotationSensor()
@@ -49,6 +53,21 @@ void ScreenSensorConnector::UnsubscribeRotationSensor()
 {
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::UnsubscribeMotionSensor();
+#endif
+}
+
+void ScreenSensorConnector::SubscribeTentSensor()
+{
+    TLOGD(WmsLogTag::DMS, "dms: subscribe tent sensor");
+#ifdef WM_SUBSCRIBE_MOTION_ENABLE
+    MotionTentSubscriber::SubscribeMotionSensor();
+#endif
+}
+
+void ScreenSensorConnector::UnsubscribeTentSensor()
+{
+#ifdef WM_SUBSCRIBE_MOTION_ENABLE
+    MotionTentSubscriber::UnsubscribeMotionSensor();
 #endif
 }
 
@@ -112,6 +131,52 @@ void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
         }
     }
     ScreenRotationProperty::HandleSensorEventInput(motionRotation);
+}
+
+void MotionTentSubscriber::SubscribeMotionSensor()
+{
+    TLOGI(WmsLogTag::DMS, "dms: Subscribe tent motion Sensor");
+    if (isMotionSensorSubscribed_) {
+        TLOGE(WmsLogTag::DMS, "dms: tent motion sensor's already subscribed");
+        return;
+    }
+    sptr<TentMotionEventCallback> callback = new (std::nothrow) TentMotionEventCallback();
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::DMS, "dms: malloc tent motion callback failed");
+        return;
+    }
+    int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::MOTION_TYPE_TENT, callback);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "dms: SubscribeCallback type:%{public}d failed", OHOS::Msdp::MOTION_TYPE_TENT);
+        return;
+    }
+    motionEventCallback_ = callback;
+    isMotionSensorSubscribed_ = true;
+}
+
+void MotionTentSubscriber::UnsubscribeMotionSensor()
+{
+    if (!isMotionSensorSubscribed_) {
+        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe tent motion sensor");
+        return;
+    }
+    int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_TENT, motionEventCallback_);
+    if (ret != static_cast<int32_t>(OHOS::Msdp::MotionErrorCode::MOTION_SUCCESS)
+        && ret != static_cast<int32_t>(OHOS::Msdp::MotionErrorCode::MOTION_NO_SUBSCRIBE)) {
+        return;
+    }
+    isMotionSensorSubscribed_ = false;
+}
+
+void TentMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
+{
+    if (motionData.status == MOTION_ACTION_TENT_MODE_ON) {
+        ScreenTentProperty::HandleSensorEventInput(true);
+    } else if (motionData.status == MOTION_ACTION_TENT_MODE_OFF) {
+        ScreenTentProperty::HandleSensorEventInput(false);
+    } else {
+        TLOGI(WmsLogTag::DMS, "dms: tent motion:%{public}d invalid", motionData.status);
+    }
 }
 #endif
 } // Rosen

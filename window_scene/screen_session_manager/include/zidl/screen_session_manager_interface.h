@@ -170,6 +170,8 @@ public:
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
+    virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate) override { return DMError::DM_OK; }
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
     {
         return DMError::DM_OK;

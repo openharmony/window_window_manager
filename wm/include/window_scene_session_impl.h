@@ -75,7 +75,7 @@ public:
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     // only main window, sub window, dialog window can use
-    static uint32_t GetParentMainWindowId(int32_t windowId);
+    static int32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -146,6 +146,7 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    bool IsPcOrPadCapabilityEnabled() const override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
@@ -157,6 +158,12 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
+
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool enable) override;
+    bool GetGestureBackEnabled() const override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -235,6 +242,11 @@ private:
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
     /*
+     * Gesture Back
+     */
+    bool gestureBackEnabled_ = true;
+
+    /*
      * Window Property.
      */
     void InitSystemSessionDragEnable();
@@ -243,6 +255,7 @@ private:
      * Sub Window
      */
     void AddSubWindowMapForExtensionWindow();
+    WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

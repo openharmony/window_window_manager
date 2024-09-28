@@ -57,6 +57,7 @@ private:
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnScreenDensityChange();
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
+    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

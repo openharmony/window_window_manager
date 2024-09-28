@@ -47,7 +47,7 @@ public:
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
-    virtual WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId);
+    virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
@@ -136,6 +136,9 @@ public:
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip);
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
+    virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds);
+    virtual WMError ReleaseForegroundSessionScreenLock();
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

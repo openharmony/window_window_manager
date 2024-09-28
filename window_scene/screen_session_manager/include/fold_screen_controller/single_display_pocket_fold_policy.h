@@ -34,12 +34,16 @@ public:
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
-    void ExitCoordination() override {};
-    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
+    void ExitCoordination() override;
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
     void BootAnimationFinishPowerInit() override;
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToCoordination();
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
+    void ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
@@ -50,6 +54,9 @@ private:
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
     void SetdisplayModeChangeStatus(bool status) override;
+    void ChangeOnTentMode(FoldStatus currentState) override;
+    void ChangeOffTentMode() override;
+    void CloseCoordinationScreen();
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };

@@ -843,6 +843,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetVirtualScreenSecurityExemption(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_MAX_REFRESHRATE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t refreshRate = data.ReadUint32();
+            uint32_t actualRefreshRate;
+            DMError ret = SetVirtualScreenMaxRefreshRate(screenId, refreshRate, actualRefreshRate);
+            reply.WriteUint32(actualRefreshRate);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

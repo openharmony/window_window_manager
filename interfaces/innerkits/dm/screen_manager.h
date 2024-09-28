@@ -354,6 +354,17 @@ public:
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
 
     /**
+     * @brief Set virtual screen max refresh rate .
+     *
+     * @param screenId virtual screen id.
+     * @param refreshRate max refresh rate to be set.
+     * @param actualRefreshRate the actual refresh rate that is finally set.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate);
+
+    /**
      * @brief when casting the screen, Virtual screen playback and pause function.
      *
      * @param screenId screenId used in virtual screen.

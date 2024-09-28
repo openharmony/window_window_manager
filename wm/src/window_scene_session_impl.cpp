@@ -211,6 +211,18 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+    }
+    auto mainWindow = GetMainWindowWithContext(GetContext());
+    if (mainWindow == nullptr) {
+        return false;
+    }
+    return mainWindow->IsPcOrPadCapabilityEnabled();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
@@ -221,6 +233,27 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
     }
+}
+
+WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
+{
+    if (isToast) {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+    } else {
+        parentSession = FindParentSessionByParentId(property_->GetParentId());
+    }
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            property_->GetWindowName().c_str(), GetType());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
@@ -258,16 +291,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (isToastFlag) {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
-        } else {
-            parentSession = FindParentSessionByParentId(property_->GetParentId());
-        }
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                property_->GetWindowName().c_str(), type);
-            return WMError::WM_ERROR_NULLPTR;
+        auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -1956,9 +1982,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
     bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
-    bool isVerticalOrientation = IsVerticalOrientation(property_->GetRequestedOrientation());
-    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        (isVerticalOrientation || property_->GetRequestedOrientation() == Orientation::UNSPECIFIED)) {
+    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         enable = false;
     }
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
@@ -2187,10 +2211,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isValidWindow = isMainWindow ||
-            ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) &&
-             (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -2617,20 +2638,20 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
-static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint32_t windowId, uint32_t& mainWindowId)
+static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, int32_t windowId, int32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {
         const auto& window = pair.second;
         if (window == nullptr) {
             return WMError::WM_ERROR_NULLPTR;
         }
-        if (window->GetWindowId() != windowId) {
+        if (window->GetPersistentId() != windowId) {
             continue;
         }
 
         if (WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
-            mainWindowId = window->GetWindowId();
+            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetPersistentId());
+            mainWindowId = window->GetPersistentId();
             return WMError::WM_OK;
         }
         if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
@@ -2643,13 +2664,13 @@ static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint
     return WMError::WM_ERROR_INVALID_PARENT;
 }
 
-uint32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
+int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
         return INVALID_SESSION_ID;
     }
-    uint32_t mainWindowId = INVALID_SESSION_ID;
+    int32_t mainWindowId = INVALID_SESSION_ID;
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);
@@ -4075,5 +4096,38 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 {
     return property_->GetIsUIExtensionSubWindowFlag();
 }
+
+WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
+{
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    gestureBackEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetGestureBackEnabled(enable);
+}
+ 
+bool WindowSceneSessionImpl::GetGestureBackEnabled() const
+{
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return true;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return true;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
+        GetWindowId(), gestureBackEnabled_);
+    return gestureBackEnabled_;
+}
+
 } // namespace Rosen
 } // namespace OHOS

@@ -454,7 +454,7 @@ napi_value JsExtensionWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_
 napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 {
     NapiAsyncTask::CompleteCallback complete =
-        [this, extwin = extensionWindow_](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [extwin = extensionWindow_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (extwin == nullptr) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
                 task.Reject(env,
@@ -864,42 +864,48 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    WindowOption option;
+    sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Get invalid options param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    if (option.GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return NapiGetUndefined(env);
     }
+    option->SetParentId(hostWindowId_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weak = extensionWindow_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (weak == nullptr) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow_ is null"));
-            }
-            sptr<Rosen::WindowOption> windowOption = new WindowOption(option);
-            JsExtensionWindow::SetWindowOption(windowOption);
-            auto extWindow = weak->GetWindow();
-            if (extWindow == nullptr) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
-            }
-            auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
-            if (window == nullptr) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
-                return;
-            }
-            if (!window->IsTopmost()) {
-                extWindow->NotifyModalUIExtensionMayBeCovered(false);
-            }
-            task.Resolve(env, CreateJsWindowObject(env, window));
-            TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Create sub window %{public}s end", windowName.c_str());
-        };
+        [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
+            windowOption = option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        if (extensionWindow == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
+        }
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetOnlySupportSceneBoard(true);
+        windowOption->SetExtensionTag(true);
+        auto extWindow = extensionWindow->GetWindow();
+        if (extWindow == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
+        }
+        auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
+        if (window == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
+            return;
+        }
+        if (!window->IsTopmost()) {
+            extWindow->NotifyModalUIExtensionMayBeCovered(false);
+        }
+        task.Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [NAPI]Create sub window %{public}s end",
+            where, windowName.c_str());
+    };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsExtensionWindow::OnCreateSubWindowWithOptions",
@@ -907,50 +913,5 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     return result;
 }
 
-void JsExtensionWindow::SetWindowOption(sptr<Rosen::WindowOption> windowOption)
-{
-    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    windowOption->SetOnlySupportSceneBoard(true);
-    windowOption->SetExtensionTag(true);
-}
-
-bool JsExtensionWindow::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
-{
-    if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "jsObject is null");
-        return false;
-    }
-    std::string title;
-    if (!ParseJsValue(jsObject, env, "title", title)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to title");
-        return false;
-    }
-    bool decorEnabled = false;
-    if (!ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to decorEnabled");
-        return false;
-    }
-    bool isModal = false;
-    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "isModal:%{public}d", isModal);
-        if (isModal) {
-            option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-        }
-    }
-    bool isTopmost = false;
-    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
-        if (!isModal && isTopmost) {
-            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
-            return false;
-        }
-        option.SetWindowTopmost(isTopmost);
-    }
-
-    option.SetSubWindowTitle(title);
-    option.SetSubWindowDecorEnable(decorEnabled);
-    option.SetParentId(hostWindowId_);
-    return true;
-}
 }  // namespace Rosen
 }  // namespace OHOS

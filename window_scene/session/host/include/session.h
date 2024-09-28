@@ -48,7 +48,7 @@ class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
-    const SizeChangeReason reason, const DisplayId DisplayId)>;
+    const SizeChangeReason reason, const DisplayId displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -215,6 +215,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
@@ -279,7 +280,6 @@ public:
     void SetSnapshotScale(const float snapshotScale);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     virtual WSError ProcessBackEvent(); // send back event to session_stage
-    WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
@@ -356,6 +356,10 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+    
+    /*
+     * Window Rotate Animation
+     */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
     /*
@@ -492,6 +496,7 @@ public:
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
+    void GetAppInstanceKey(const std::string& appInstanceKey) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -510,6 +515,11 @@ protected:
     void NotifySessionStateChange(const SessionState& state);
     void UpdateSessionTouchable(bool touchable);
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
+
+    /*
+     * Gesture Back
+     */
+    virtual void UpdateGestureBackEnabled() {}
 
     WSRectF UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area);
     WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
@@ -554,10 +564,11 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRect winRect_;
-    WSRect clientRect_; // rect of client
+    WSRect clientRect_; // rect saved when prelayout or notify client to update rect
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
     WSRect globalRect_; // globalRect include translate
+    mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -600,6 +611,10 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+
+    /*
+     * Window Rotate Animation
+     */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
     SystemSessionConfig systemConfig_;
@@ -653,6 +668,10 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+
+    /*
+     * Window Rotate Animation
+     */
     int32_t GetRotateAnimationDuration();
 
     /*

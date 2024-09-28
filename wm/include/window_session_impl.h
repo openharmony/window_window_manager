@@ -100,6 +100,7 @@ public:
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
+    bool IsPcOrPadCapabilityEnabled() const override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
@@ -240,7 +241,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual WMError SetSubWindowModal(bool isModal) override;
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
