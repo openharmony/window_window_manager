@@ -1533,15 +1533,14 @@ HWTEST_F(SceneSessionTest, SetMainWindowTopmost, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetMainWindowTopmost";
     info.bundleName_ = "SetMainWindowTopmost";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
-    EXPECT_NE(scenesession, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) MainSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    scenesession->SetSessionProperty(property);
-    auto result = scenesession->SetMainWindowTopmost(false);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetMainWindowTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_FALSE(scenesession->IsMainWindowTopmost());
+    ASSERT_FALSE(sceneSession->IsMainWindowTopmost());
 }
 
 /**

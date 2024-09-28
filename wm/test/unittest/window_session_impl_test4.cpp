@@ -198,6 +198,7 @@ HWTEST_F(WindowSessionImplTest4, IsTopmost, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
@@ -226,6 +227,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
 HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
     option->SetWindowName("IsMainWindowTopmost");
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);

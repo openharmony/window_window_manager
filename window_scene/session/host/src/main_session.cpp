@@ -185,26 +185,23 @@ bool MainSession::IsTopmost() const
 
 WSError MainSession::SetMainWindowTopmost(bool isTopmost)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, main window topmost: %{public}d",
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, topmost: %{public}d",
         GetPersistentId(), isTopmost);
-    auto task = [weakThis = wptr(this), isTopmost]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
-            return;
+    auto session = wptr(this).promote();
+    if (!session) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
+        return WSError::WS_ERROR_DESTROYED_OBJECT;
+    }
+    auto property = session->GetSessionProperty();
+    if (property) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY,
+            "Notify session topmost change, id: %{public}d, topmost: %{public}u",
+            session->GetPersistentId(), isTopmost);
+        property->SetMainWindowTopmost(isTopmost);
+        if (session->mainWindowTopmostChangeFunc_) {
+            session->mainWindowTopmostChangeFunc_(isTopmost);
         }
-        auto property = session->GetSessionProperty();
-        if (property) {
-            TLOGI(WmsLogTag::WMS_HIERARCHY,
-                "Notify session main window topmost change, id: %{public}d, topmost: %{public}u",
-                session->GetPersistentId(), isTopmost);
-            property->SetMainWindowTopmost(isTopmost);
-            if (session->mainWindowTopmostChangeFunc_) {
-                session->mainWindowTopmostChangeFunc_(isTopmost);
-            }
-        }
-    };
-    PostTask(task, "SetMainWindowTopmost");
+    }
     return WSError::WS_OK;
 }
 
