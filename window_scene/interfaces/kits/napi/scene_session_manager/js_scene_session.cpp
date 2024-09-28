@@ -1167,7 +1167,7 @@ void JsSceneSession::ProcessSessionMainWindowTopmostChangeRegister()
     NotifyMainWindowTopmostChangeFunc func = [weakThis = wptr(this)](bool isTopmost) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionMainWindowTopmostChange(isTopmost);
