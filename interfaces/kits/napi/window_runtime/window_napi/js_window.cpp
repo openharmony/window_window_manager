@@ -1359,14 +1359,16 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Restore());
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
+            if (WindowHelper::IsMainWindow(weakToken->GetType())) {
+                WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Restore());
+                if (ret == WmErrorCode::WM_OK) {
+                    task.Resolve(env, NapiGetUndefined(env));
+                } else {
+                    task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
+                }
+                TLOGNW(WmsLogTag::WMS_LIFE, "Window [%{public}u] restore end, ret = %{public}d",
+                    weakWindow->GetWindowId(), ret);
             }
-            TLOGNW(WmsLogTag::WMS_LIFE, "Window [%{public}u] restore end, ret = %{public}d",
-                weakWindow->GetWindowId(), ret);
         };
 
     size_t argc = 4;

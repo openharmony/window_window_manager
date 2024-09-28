@@ -75,7 +75,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     PRIVACY_MODE_CHANGE_CB,
-    RESTORE_WINDOW_CB,
+    RESTORE_MAIN_WINDOW_CB,
 };
 
 class SceneSession;

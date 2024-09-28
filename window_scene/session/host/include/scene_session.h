@@ -173,7 +173,6 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
-    WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     virtual void OpenKeyboardSyncTransaction() {};
@@ -259,6 +258,7 @@ public:
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
+    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);

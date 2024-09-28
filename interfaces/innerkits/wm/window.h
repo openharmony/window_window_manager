@@ -1530,7 +1530,8 @@ public:
     virtual WMError Recover() { return WMError::WM_OK; }
 
     /**
-     * @brief restore the main window. It is called by ACE when restore button is clicked.
+     * @brief After the app main window is minimized, if the Ability is not in the backgroud state,
+     * you can restore app main window.
      *
      * @return WMError
      */

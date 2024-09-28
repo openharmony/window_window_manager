@@ -68,7 +68,7 @@ const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
-const std::string RESTORE_WINDOW_CB = "restoreMainWindow";
+const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 constexpr int ARG_COUNT_3 = 3;
@@ -126,8 +126,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
-    {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
-    {RESTORE_WINDOW_CB,                     ListenerFuncType::RESTORE_WINDOW_CB},
+    {PRIVACY_MODE_CHANGE_CB,                ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
+    {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -650,14 +650,20 @@ void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 
 void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onRestoreMainWindowFunc_ = [this]() {
-        this->RestoreMainWindow();
+    NotifyRestoreMainWindowFunc func = [weakThis = wptr(this)]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessRestoreMainWindowRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->RestoreMainWindow();
     };
+    session->SetRestoreMainWindowCallback(func);
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
@@ -670,7 +676,7 @@ void JsSceneSession::RestoreMainWindow()
                 persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_WINDOW_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_MAIN_WINDOW_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "RestoreMainWindow jsCallBack is nullptr");
             return;
@@ -1959,7 +1965,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::PENDING_SCENE_CB):
             ProcessPendingSceneSessionActivationRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::RESTORE_WINDOW_CB):
+        case static_cast<uint32_t>(ListenerFuncType::RESTORE_MAIN_WINDOW_CB):
             ProcessRestoreMainWindowRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
