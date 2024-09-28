@@ -1177,7 +1177,7 @@ void JsSceneSession::ProcessSessionMainWindowTopmostChangeRegister()
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->SetMainWindowTopmostChangeCallback(func);
+    session->SetMainWindowTopmostChangeCallback(func);
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
 }
 
@@ -2778,7 +2778,7 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 /** @note @window.hierarchy */
 void JsSceneSession::OnSessionMainWindowTopmostChange(bool isTopmost)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", isTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]State: %{public}u", isTopmost);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {

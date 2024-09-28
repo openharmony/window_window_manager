@@ -1511,7 +1511,7 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
     property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "TokenId = %{private}u, isTopmost = %{public}d", accessTokenId, isTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "TokenId = %{private}u, isTopmost = %{public}d", accessTokenId, isTopmost);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 }
 
