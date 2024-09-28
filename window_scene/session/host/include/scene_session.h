@@ -219,7 +219,7 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
-    void SetMainWindowTopmostChangeCallback(cosnt NotifyMainWindowTopmostChangeFunc& func);
+    void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
 
