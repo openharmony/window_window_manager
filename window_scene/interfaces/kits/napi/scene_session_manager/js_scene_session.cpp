@@ -2782,12 +2782,12 @@ void JsSceneSession::OnSessionMainWindowTopmostChange(bool isTopmost)
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsSessionMainWindowTopmostObj = CreateJsValue(env, isTopmost);
