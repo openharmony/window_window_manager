@@ -2184,14 +2184,14 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
         return;
     }
     if (reason != SizeChangeReason::MOVE) {
-        HandleCompatibleModeDrag(rect, isSupportDragInPcCompatibleMode);
+        HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
     }
 }
 
-void SceneSession::HandleCompatibleModeDrag(WSRect& rect, bool isSupportDragInPcCompatibleMode)
+void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason, bool isSupportDragInPcCompatibleMode)
 {
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
