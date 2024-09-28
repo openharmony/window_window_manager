@@ -1059,15 +1059,15 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
         UpdateDensityInner(displayInfo);
     }
- 
+
     WMError ret = UpdateAnimationFlagProperty(withAnimation);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, UpdateProperty failed, ret: %{public}d, name: %{public}s"
             ", id: %{public}d", static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
         return ret;
     }
-    UpdateFocusableOnShowFlag(withFocus);
     UpdateTitleButtonVisibility();
+    UpdateFocusableOnShowFlag(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
