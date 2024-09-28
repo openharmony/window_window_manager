@@ -112,7 +112,6 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
-        NotifySessionTopmostChangeFunc onSessionMainWindowTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;

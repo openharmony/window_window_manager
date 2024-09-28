@@ -3333,6 +3333,14 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST) {
+        uint32_t accessTokenId = property->GetAccessTokenId();
+        if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
+            PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
@@ -3736,13 +3744,6 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
 WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    uint32_t accessTokenId = property->GetAccessTokenId();
-    if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
-        PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-
     SetMainWindowTopmost(property->IsMainWindowTopmost());
     return WMError::WM_OK;
 }
@@ -4845,7 +4846,6 @@ void SceneSession::UnregisterSessionChangeListeners()
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
-            session->sessionChangeCallback_->onSessionMainWindowTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
