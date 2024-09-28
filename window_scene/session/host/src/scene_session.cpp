@@ -2210,8 +2210,7 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
             UpdateSizeChangeReason(reason);
             UpdateRect(rect, reason, "compatibleInPcLandscape");
         } else {
-            if (isSupportDragInPcCompatibleMode)
-            {
+            if (isSupportDragInPcCompatibleMode) {
                 if (windowWidth < windowHeight) {
                     rect.width_ = compatibleInPcPortraitWidth;
                     rect.height_ = compatibleInPcPortraitHeight;
