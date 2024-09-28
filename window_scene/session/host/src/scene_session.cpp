@@ -449,7 +449,7 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
             session->isActive_ = isActive;
             ret = WSError::WS_OK;
         }
-        WLOGFI("[WMSCom] UpdateActiveStatus, isActive: %{public}d, state: %{public}u",
+        WLOGFI("[WMSCom] isActive: %{public}d, state: %{public}u",
             session->isActive_, session->GetSessionState());
         return ret;
     };
@@ -465,7 +465,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             WLOGFE("[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
+        WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -692,7 +692,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "SetAspectRatio failed because property is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Set ratio failed, property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
