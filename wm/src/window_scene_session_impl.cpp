@@ -1059,22 +1059,14 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
         UpdateDensityInner(displayInfo);
     }
-
+ 
     WMError ret = UpdateAnimationFlagProperty(withAnimation);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, UpdateProperty failed, ret: %{public}d, name: %{public}s"
             ", id: %{public}d", static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
         return ret;
     }
-    if (!withFocus) {
-        ret = static_cast<WMError>(hostSession->SetFocusableOnShow(withFocus));
-        if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "set focusableOnShow failed, ret: %{public}d, name: %{public}s"
-            ", id: %{public}d, focusableOnShow: %{public}d",
-            static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId(), withFocus);
-        }
-    }
-    
+    UpdateFocusableOnShowFlag(withFocus);
     UpdateTitleButtonVisibility();
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
@@ -3060,6 +3052,23 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
     // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+}
+
+void WindowSceneSessionImpl::UpdateFocusableOnShowFlag(bool withFocus)
+{
+    if (withFocus) {
+        return; // default value of focusableOnShow
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed because of nullptr");
+        return;
+    }
+    auto ret = hostSession->SetFocusableOnShow(withFocus);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
+    }
 }
 
 WMError WindowSceneSessionImpl::SetAlpha(float alpha)

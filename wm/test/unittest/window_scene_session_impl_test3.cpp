@@ -1422,9 +1422,9 @@ HWTEST_F(WindowSceneSessionImplTest3, Show02, Function | SmallTest | Level2)
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    auto ret = windowSceneSessionImpl->Show(2, false, true);
+    auto ret = windowSceneSessionImpl->Show(0, false, true);
     EXPECT_EQ(WMError::WM_OK, ret);
-    auto ret = windowSceneSessionImpl->Show(2, false, false);
+    ret = windowSceneSessionImpl->Show(0, false, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
