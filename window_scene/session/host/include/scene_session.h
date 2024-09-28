@@ -30,17 +30,16 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
 const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
-namespace {
-constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
-}
+
 class SceneSession;
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
-    WindowType type, uint64_t displayId)>;
-using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
+    WindowType type, DisplayId displayId)>;
+using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
+using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
@@ -83,6 +82,8 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
+using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
+
 class SceneSession : public Session {
 public:
     friend class HidumpController;
@@ -94,6 +95,7 @@ public:
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
         UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
@@ -104,6 +106,7 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         PiPStateChangeCallback onPiPStateChange_;
+        UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
     };
 
     // callback for notify SceneBoard
@@ -191,10 +194,6 @@ public:
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
-    WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
-    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
@@ -251,8 +250,22 @@ public:
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
+
+    /**
+     * Window Immersive
+     */
+    WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
-    void SetIsStatusBarVisible(bool isVisible) { isStatusBarVisible_ = isVisible; }
+    void SetIsStatusBarVisible(bool isVisible);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    void UpdateRotationAvoidArea();
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    bool GetIsDisplayStatusBarTemporarily() const;
+    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
@@ -260,7 +273,6 @@ public:
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
     void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
-    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
@@ -311,18 +323,15 @@ public:
     bool IsDirtyWindow();
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
-    bool GetIsDisplayStatusBarTemporarily() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
     bool NeedStartingWindowExitAnimation() const override;
 
     void NotifyWindowVisibility();
-    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
     bool CheckOutTouchOutsideRegister();
     void UpdateNativeVisibility(bool visible);
-    void UpdateRotationAvoidArea();
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);
     WSError BindDialogSessionTarget(const sptr<SceneSession>& sceneSession);
@@ -373,8 +382,8 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
-    static uint32_t GetWindowDragHotAreaType(uint64_t displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
-    static void AddOrUpdateWindowDragHotArea(uint64_t displayId, uint32_t type, const WSRect& area);
+    static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
+    static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
 
     /*
@@ -387,7 +396,6 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
@@ -432,9 +440,15 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
+    /*
+     * Gesture Back
+     */
+    bool GetGestureBackEnabled();
+    bool GetEnableGestureBackHadSet();
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId DisplayId = DISPLAY_ID_INVALID);
+        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -459,6 +473,11 @@ protected:
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled() override;
+
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
@@ -481,14 +500,19 @@ private:
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
     /*
-    * Move Drag
-    */
+     * Move Drag
+     */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
+    void OnMoveDragCallback(const SizeChangeReason reason);
+
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void OnMoveDragCallback(const SizeChangeReason reason);
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
@@ -601,7 +625,6 @@ private:
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    static std::shared_mutex windowDragHotAreaMutex_;
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
@@ -636,10 +659,17 @@ private:
     /*
      * Move Drag
      */
+    static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
+
+    /*
+     * Gesture Back
+     */
+    bool isEnableGestureBack_ { true };
+    bool isEnableGestureBackHadSet_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

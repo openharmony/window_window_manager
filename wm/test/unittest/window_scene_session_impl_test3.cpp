@@ -799,41 +799,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsDecorEnable, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetDefaultDensityEnabled
- * @tc.desc: SetDefaultDensityEnabled
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetDefaultDensityEnabled, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("SetDefaultDensityEnabled");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(false);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = windowSceneSessionImpl->SetDefaultDensityEnabled(true);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
@@ -917,12 +882,18 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+
+    auto ret = windowSceneSessionImpl->Resize(0, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    auto ret = windowSceneSessionImpl->Resize(100, 100);
+    ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);

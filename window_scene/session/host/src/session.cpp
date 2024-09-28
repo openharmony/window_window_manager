@@ -27,7 +27,6 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
-#include "anr_manager.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "util.h"
@@ -906,8 +905,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
-            .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         sessionStage_->UpdateRect(rect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
@@ -981,8 +979,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
@@ -1179,7 +1175,6 @@ WSError Session::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1216,7 +1211,6 @@ WSError Session::Disconnect(bool isFromClient)
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
     }
-    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1562,11 +1556,16 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
-        SessionInfo info = GetSessionInfo();
-        if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+    auto task = [weakThis = wptr(this), needStartCaller]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->isTerminating_ = true;
+        SessionInfo info = session->GetSessionInfo();
+        if (session->terminateSessionFuncNew_) {
+            session->terminateSessionFuncNew_(info, needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -1896,12 +1895,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFW("InputTracking id:%{public}d, The pointerEvent does not report normally,"
-            "bundleName:%{public}s not reponse, pid:%{public}d, persistentId:%{public}d",
-            pointerEvent->GetId(), callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -1944,12 +1937,6 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
 {
     WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, "
-            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
-            callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -2155,7 +2142,6 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
-    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -2319,6 +2305,7 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    UpdateGestureBackEnabled();
     // notify scb arkui focus
     if (!isFocused) {
         NotifyUILostFocus();
@@ -2494,6 +2481,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property->SetWindowMode(mode);
         property->SetIsNeedUpdateWindowMode(true);
+        UpdateGestureBackEnabled();
     } else {
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -2504,6 +2492,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         } else {
             surfaceNode_->MarkUifirstNode(true);
         }
+        UpdateGestureBackEnabled();
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2643,12 +2632,21 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
+}
+
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    globalRect_ = rect;
 }
 
 /** @note @window.layout */
@@ -2748,14 +2746,6 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
-}
-
-WSError Session::MarkProcessed(int32_t eventId)
-{
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("InputTracking persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
-    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)

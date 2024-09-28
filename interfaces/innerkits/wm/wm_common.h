@@ -303,9 +303,10 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_IS_TOAST = 1 << 7,
-    WINDOW_FLAG_END = 1 << 8,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
+    WINDOW_FLAG_HANDWRITING = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_END = 1 << 9,
 };
 
 /**
@@ -431,6 +432,15 @@ enum class BackupAndRestoreType : int32_t {
 enum class WindowStyleType : uint8_t {
     WINDOW_STYLE_DEFAULT = 0,
     WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
+};
+
+/**
+ * @brief Disable Gesture Back Type
+ */
+enum class GestureBackType : uint8_t {
+    GESTURE_SIDE = 0,
+    GESTURE_SWIPE_UP = 1,
+    GESTURE_ALL = 2,
 };
 
 /**
@@ -894,19 +904,17 @@ public:
             ss << "empty";
             return ss.str();
         }
-
-        std::vector<std::pair<std::string, Rect>> rects = {
-            std::make_pair("top", topRect_),
-            std::make_pair("bottom", bottomRect_),
-            std::make_pair("left", leftRect_),
-            std::make_pair("right", rightRect_)
-        };
-        for (const auto& pair: rects) {
-            if (!pair.second.IsUninitializedRect()) {
-                auto rect = pair.second;
-                ss << pair.first << " [" << rect.posX_ << " " << rect.posY_ << " "
-                    << rect.width_ << " " << rect.height_ << "] ";
-            }
+        if (!topRect_.IsUninitializedRect()) {
+            ss << "top " << topRect_.ToString() << " ";
+        }
+        if (!bottomRect_.IsUninitializedRect()) {
+            ss << "bottom " << bottomRect_.ToString() << " ";
+        }
+        if (!leftRect_.IsUninitializedRect()) {
+            ss << "left " << leftRect_.ToString() << " ";
+        }
+        if (!rightRect_.IsUninitializedRect()) {
+            ss << "right " << rightRect_.ToString() << " ";
         }
         return ss.str();
     }
@@ -1209,11 +1217,17 @@ struct SystemWindowOptions {
     int32_t windowType = -1;
 };
 
+enum class ModalityType : uint8_t {
+    WINDOW_MODALITY,
+    APPLICATION_MODALITY,
+};
+
 struct SubWindowOptions {
     std::string title;
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 
 struct ExtensionWindowConfig {

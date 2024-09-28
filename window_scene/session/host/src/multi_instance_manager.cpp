@@ -70,9 +70,9 @@ uint32_t MultiInstanceManager::GetInstanceCount(const std::string& bundleName)
     std::shared_lock<std::shared_mutex> lock(mutex_);
     auto iter = bundleInstanceIdListMap_.find(bundleName);
     if (iter == bundleInstanceIdListMap_.end()) {
-        return 0;
+        return 0u;
     } else {
-        return iter->second.size();
+        return static_cast<uint32_t>(iter->second.size());
     }
 }
 
@@ -81,29 +81,61 @@ std::string MultiInstanceManager::GetLastInstanceKey(const std::string& bundleNa
     std::shared_lock<std::shared_mutex> lock(mutex_);
     auto iter = bundleInstanceIdListMap_.find(bundleName);
     if (iter == bundleInstanceIdListMap_.end() || iter->second.size() == 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "not found last instance key, bundleName:%{public}s", bundleName.c_str());
         return "";
     } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s instanceKey:app_instance_%{public}u",
+            bundleName.c_str(), iter->second.back());
         return APP_INSTANCE_KEY_PREFIX + std::to_string(iter->second.back());
     }
 }
 
-std::string MultiInstanceManager::CreateNewInstanceKey(const std::string& bundleName)
+std::string MultiInstanceManager::CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (!instanceKey.empty()) {
+        auto prefixSize = APP_INSTANCE_KEY_PREFIX.size();
+        auto instanceId = std::stoi(instanceKey.substr(prefixSize, instanceKey.size() - prefixSize));
+        auto iter = bundleInstanceIdListMap_.find(bundleName);
+        if (iter == bundleInstanceIdListMap_.end()) {
+            bundleInstanceIdListMap_.emplace(bundleName, std::vector{ static_cast<uint32_t>(instanceId) });
+        } else {
+            iter->second.push_back(static_cast<uint32_t>(instanceId));
+        }
+        return instanceKey;
+    }
+    auto instanceId = 0u;
     auto iter = bundleInstanceIdListMap_.find(bundleName);
     if (iter == bundleInstanceIdListMap_.end()) {
-        uint32_t instanceId = 0;
         bundleInstanceIdListMap_.emplace(bundleName, std::vector{ instanceId });
-        return APP_INSTANCE_KEY_PREFIX + std::to_string(instanceId);
     } else {
-        auto& instanceIdList = iter->second;
-        uint32_t instanceId = findMinimumAvailableInstanceId(instanceIdList);
-        instanceIdList.push_back(instanceId);
-        return APP_INSTANCE_KEY_PREFIX + std::to_string(instanceId);
+        uint32_t instanceId = findMinimumAvailableInstanceId(iter->second);
+        iter->second.push_back(instanceId);
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s instanceKey:app_instance_%{public}u",
+        bundleName.c_str(), instanceId);
+    return APP_INSTANCE_KEY_PREFIX + std::to_string(instanceId);
 }
 
 bool MultiInstanceManager::IsValidInstanceKey(const std::string& bundleName, const std::string& instanceKey)
+{
+    if (instanceKey.find(APP_INSTANCE_KEY_PREFIX) == -1ul) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleName:%{public}s with invalid instanceKey:%{public}s",
+            bundleName.c_str(), instanceKey.c_str());
+        return false;
+    }
+    auto maxInstanceCount = GetMaxInstanceCount(bundleName);
+    auto prefixSize = APP_INSTANCE_KEY_PREFIX.size();
+    auto instanceId = std::stoi(instanceKey.substr(prefixSize, instanceKey.size() - prefixSize));
+    if (instanceId < 0 || static_cast<uint32_t>(instanceId) >= maxInstanceCount) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleName:%{public}s with invalid instanceKey:%{public}s",
+            bundleName.c_str(), instanceKey.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool MultiInstanceManager::IsInstanceKeyExist(const std::string& bundleName, const std::string& instanceKey)
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     auto iter = bundleInstanceIdListMap_.find(bundleName);
@@ -136,7 +168,7 @@ bool MultiInstanceManager::RemoveInstanceKey(const std::string& bundleName, cons
     return false;
 }
 
-uint32_t MultiInstanceManager::findMinimumAvailableInstanceId(const std::vector<uint32_t>& instanceIdList)
+uint32_t MultiInstanceManager::findMinimumAvailableInstanceId(const std::vector<uint32_t>& instanceIdList) const
 {
     for (uint32_t i = 0; i < MAX_INSTANCE_COUNT; i++) {
         if (std::find(instanceIdList.begin(), instanceIdList.end(), i) == instanceIdList.end()) {
@@ -211,6 +243,10 @@ void MultiInstanceManager::FillInstanceKeyIfNeed(const sptr<SceneSession>& scene
 {
     if (!sceneSession) {
         TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        return;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGD(WmsLogTag::DEFAULT, "sceneSession is not main window");
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;

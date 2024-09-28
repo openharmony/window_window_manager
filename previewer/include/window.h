@@ -299,6 +299,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
+    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
@@ -345,9 +346,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -378,6 +380,19 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool GetGestureBackEnabled() const { return true; }
 };
 }
 }

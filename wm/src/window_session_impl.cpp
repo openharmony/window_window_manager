@@ -213,11 +213,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
+bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
+           property_->GetIsPcAppInPad();
+}
+
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -570,10 +575,11 @@ void WindowSessionImpl::DestroySubWindow()
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 continue;
             }
-            if ((*iter)->GetPersistentId() == persistentId) {
+            if (subWindow->GetPersistentId() == persistentId) {
                 TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
                 subWindows.erase(iter);
                 break;
@@ -587,17 +593,18 @@ void WindowSessionImpl::DestroySubWindow()
     if (mainIter != subWindowSessionMap_.end()) {
         auto& subWindows = mainIter->second;
         for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
-            if ((*iter) == nullptr) {
+            auto subWindow = *iter;
+            if (subWindow == nullptr) {
                 TLOGW(WmsLogTag::WMS_SUB, "Destroy sub window which is nullptr");
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = (*iter)->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
-                (*iter)->GetPersistentId(), isExtDestroyed);
-            auto ret = (*iter)->Destroy(isExtDestroyed);
+                subWindow->GetPersistentId(), isExtDestroyed);
+            auto ret = subWindow->Destroy(isExtDestroyed);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", (*iter)->GetPersistentId());
+                TLOGE(WmsLogTag::WMS_SUB, "Destroy failed. persistentId: %{public}d", subWindow->GetPersistentId());
                 subWindows.erase(iter);
             }
         }
@@ -674,7 +681,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ",duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
+        ", duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
         wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
         GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -1095,11 +1102,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.IsPcWindow();
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true, false);
         return;
@@ -1811,15 +1817,23 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
         RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    modalRet = isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    return modalRet;
 }
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
@@ -1937,7 +1951,6 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -1947,7 +1960,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
-        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             WLOGFE("register failed");
             return ret;
@@ -1969,7 +1982,13 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+        uiContent->SubscribeContainerModalButtonsRectChange(
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -1977,10 +1996,10 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
             titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
             titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+            window->NotifyWindowTitleButtonRectChange(titleButtonRect);
         });
     }
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
@@ -2395,8 +2414,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};

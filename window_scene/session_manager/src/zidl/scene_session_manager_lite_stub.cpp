@@ -120,6 +120,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleCloseTargetPiPWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO):
             return HandleGetCurrentPiPWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROOT_MAIN_WINDOW_ID):
+            return HandleGetRootMainWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -660,6 +662,27 @@ int SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(MessageParcel& da
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteString(bundleName)) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetRootMainWindowId(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "call");
+    int32_t persistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "Failed to readInt32 windowId");
+        return ERR_INVALID_DATA;
+    }
+    int32_t hostWindowId = INVALID_WINDOW_ID;
+    WMError errCode = GetRootMainWindowId(persistentId, hostWindowId);
+    if (errCode != WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_MAIN, "Failed to GetRootMainWindowId(%{public}d)", hostWindowId);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(hostWindowId)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "Failed to WriteInt32 hostWindowId");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
