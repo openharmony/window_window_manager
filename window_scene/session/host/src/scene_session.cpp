@@ -2191,7 +2191,8 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     }
 }
 
-void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason, bool isSupportDragInPcCompatibleMode)
+void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
+    bool isSupportDragInPcCompatibleMode)
 {
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
