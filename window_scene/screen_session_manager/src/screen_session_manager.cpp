@@ -101,6 +101,10 @@ constexpr float DEFAULT_SCALE = 1.0f;
 static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
 static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
 
+const std::string SCREEN_EXTEND = "extend";
+const std::string SCREEN_MIRROR = "mirror";
+const std::string SCREEN_UNKNOWN = "unknown";
+
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -1480,7 +1484,12 @@ ScreenId ScreenSessionManager::GetInternalScreenId()
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
+            TLOGI(WmsLogTag::DMS, "found screenId = %{public}" PRIu64, sessionIt.first);
             screenId = sessionIt.first;
             break;
         }
@@ -1500,15 +1509,37 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
     TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById: screen id:%{public}" PRIu64
     ", state:%{public}u, reason:%{public}u", screenId, state, static_cast<uint32_t>(reason));
 
+    sptr<ScreenSession> internalSession;
+    sptr<ScreenSession> externalSession;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
+                TLOGI(WmsLogTag::DMS, "found internalSession, screenId = %{public}" PRIu64, sessionIt.first);
+                internalSession = screenSession;
+            } else {
+                TLOGI(WmsLogTag::DMS, "found externalSession, screenId = %{public}" PRIu64, sessionIt.first);
+                externalSession = screenSession;
+            }
+        }
+    }
+
     ScreenPowerStatus status;
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             status = ScreenPowerStatus::POWER_STATUS_ON;
+            MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
             break;
         }
         case ScreenPowerState::POWER_OFF: {
             status = ScreenPowerStatus::POWER_STATUS_OFF;
+            MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
             break;
         }
@@ -1520,6 +1551,50 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
 
     rsInterface_.SetScreenPowerStatus(screenId, status);
     return true;
+}
+
+void ScreenSessionManager::SetMultiScreenStatus(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession)
+{
+    if (firstSession == nullptr || secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "first or second screen is null");
+        return;
+    }
+
+    ScreenId mainScreenId = SCREEN_ID_INVALID;
+    std::string status = SCREEN_UNKNOWN;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGW(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (screenSession == firstSession || screenSession == secondarySession) {
+                ScreenCombination screenCombination = screenSession->GetScreenCombination();
+                if (screenCombination == ScreenCombination::SCREEN_MAIN) {
+                    mainScreenId = sessionIt.first;
+                    TLOGI(WmsLogTag::DMS, "found main screen");
+                } else if (screenCombination == ScreenCombination::SCREEN_MIRROR) {
+                    status = SCREEN_MIRROR;
+                    TLOGI(WmsLogTag::DMS, "found mirror screen");
+                } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
+                    status = SCREEN_EXTEND;
+                    TLOGI(WmsLogTag::DMS, "found extend screen");
+                } else {
+                    TLOGE(WmsLogTag::DMS, "screen id or status error");
+                }
+            }
+        }
+    }
+
+    if (mainScreenId != SCREEN_ID_INVALID && status != SCREEN_UNKNOWN) {
+        MultiScreenManager::GetInstance().SetMultiScreenStatus(mainScreenId, status);
+        TLOGI(WmsLogTag::DMS, "Set multi screen status done, mainScreenId = %{public}" PRIu64
+            ", status = %{public}s", mainScreenId, status.c_str());
+    } else {
+        TLOGE(WmsLogTag::DMS, "Set multi screen status failed!");
+    }
 }
 
 bool ScreenSessionManager::IsPreBrightAuthFail(void)
