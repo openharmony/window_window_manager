@@ -3614,7 +3614,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(isMainWindowTopmost));
-        TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
+        TLOGD(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
