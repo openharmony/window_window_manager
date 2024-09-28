@@ -960,14 +960,13 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
 
 void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    auto task = [weakThis = wptr(this), func] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
         session->mainWindowTopmostChangeFunc_ = func;
-        return WSError::WS_OK;
     };
     PostTask(task, __func__);
 }
