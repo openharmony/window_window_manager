@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "future_callback.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -331,6 +332,13 @@ protected:
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+
+    /*
+     * Window Layout
+     */
+    sptr<FutureCallback> layoutCallback_ = nullptr;
+    void NotifyAfterLayout(const Rect& preRect, const Rect& rect, const Rect& requestRect,
+        WindowSizeChangeReason reason);
 
 private:
     //Trans between colorGamut and colorSpace

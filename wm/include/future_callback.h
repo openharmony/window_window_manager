@@ -13,27 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_FUTURE_CALLBACK_STUB_H
-#define OHOS_ROSEN_FUTURE_CALLBACK_STUB_H
+#ifndef OHOS_ROSEN_FUTURE_CALLBACK_H
+#define OHOS_ROSEN_FUTURE_CALLBACK_H
 
-#include "future_callback_interface.h"
-#include "iremote_stub.h"
+#include <future.h>
+#include "interfaces/include/ws_common.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
-class FutureCallbackStub : public IRemoteStub<IFutureCallback> {
+class FutureCallback : public RefBase {
 public:
-    FutureCallbackStub() = default;
-    ~FutureCallbackStub() = default;
-
-    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-        MessageOption& option) override;
+    WSError OnUpdateSessionRect(
+        const Rect& rect, const WindowSizeChangeReason& reason, int32_t persistentId);
+    Rect GetResizeAsyncResult(long timeOut);
+    Rect GetMoveToAsyncResult(long timeOut);
+    void ResetResizeLock();
+    void ResetMoveToLock();
 
 private:
-    int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
-
-    int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    RunnableFuture<Rect> resizeFuture_{};
+    RunnableFuture<Rect> moveToFuture_{};
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // OHOS_ROSEN_FUTURE_CALLBACK_STUB_H
+#endif // OHOS_ROSEN_FUTURE_CALLBACK_H

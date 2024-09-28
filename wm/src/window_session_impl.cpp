@@ -32,7 +32,6 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -60,6 +59,22 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+
+bool IsPositionEqual(const Rect& preRect, const Rect& rect)
+{
+    if (preRect.posX_ == rect.posX_ && preRect.posY_ == rect.posY_) {
+        return true;
+    }
+    return false;
+}
+
+bool IsSizeEqual(const Rect& preRect, const Rect& rect)
+{
+    if (preRect.width_ == rect.width_ && preRect.height_ == rect.height_) {
+        return true;
+    }
+    return false;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -171,8 +186,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    property_->SetLayoutCallback(layoutCallback);
+    layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -647,6 +661,21 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+void WindowSessionImpl::NotifyAfterLayout(const Rect& preRect, const Rect& rect, const Rect& requestRect,
+    WindowSizeChangeReason reason)
+{
+    if (reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(rect, reason, GetPersistentId());
+        return;
+    }
+    if (!IsPositionEqual(preRect, rect) || IsPositionEqual(requestRect, rect)) {
+        layoutCallback_->OnUpdateSessionRect(rect, WindowSizeChangeReason::MOVE, GetPersistentId());
+    }
+    if (!IsSizeEqual(preRect, rect) || IsSizeEqual(requestRect, rect)) {
+        layoutCallback_->OnUpdateSessionRect(rect, WindowSizeChangeReason::RESIZE, GetPersistentId());
+    }
+}
+
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const SceneAnimationConfig& config)
 {
@@ -654,6 +683,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
+    auto requestRect = property_->GetRequestRect();
     property_->SetWindowRect(wmRect);
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
@@ -682,10 +712,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         UpdateViewportConfig(wmRect, wmReason, config.rsTransaction_);
     }
-    sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-    if (layoutCallback) {
-        layoutCallback->OnUpdateSessionRect(rect);
-    }
+    NotifyAfterLayout(preRect, wmRect, requestRect, wmReason);
     return WSError::WS_OK;
 }
 
