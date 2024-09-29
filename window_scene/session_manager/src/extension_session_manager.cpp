@@ -222,7 +222,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestructionDone");
         if (extensionSessionMap_.count(persistentId) == 0) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "RequestExtensionSessionDestructionDone session is invalid! persistentId: "
-                "%{public}d", persistentId)
+                "%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
