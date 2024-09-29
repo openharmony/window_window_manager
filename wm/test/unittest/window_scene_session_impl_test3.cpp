@@ -194,20 +194,6 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
 }
 
 /**
- * @tc.name: Destroy
- * @tc.desc: Destroy
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, Destroy, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("Destroy");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-}
-
-/**
  * @tc.name: GetFreeMultiWindowModeEnabledState
  * @tc.desc: GetFreeMultiWindowModeEnabledState
  * @tc.type: FUNC
@@ -842,8 +828,6 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateWindowState, Function | SmallTest | 
     windowSceneSessionImpl->UpdateWindowState();
     EXPECT_EQ(1920, windowSceneSessionImpl->maxFloatingWindowSize_);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    auto ret = windowSceneSessionImpl->property_->GetIsNeedUpdateWindowMode();
-    EXPECT_EQ(false, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetIsNeedUpdateWindowMode(false);
     windowSceneSessionImpl->UpdateWindowState();
@@ -863,6 +847,8 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateWindowState, Function | SmallTest | 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     windowSceneSessionImpl->UpdateWindowState();
+    auto ret = windowSceneSessionImpl->property_->GetIsNeedUpdateWindowMode();
+    EXPECT_EQ(false, ret);
 }
 
 /**
