@@ -295,6 +295,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (ret != WMError::WM_OK) {
             return ret;
         }
+        property_->SetDisplayId(parentSession->GetDisplayId());
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
