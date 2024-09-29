@@ -171,6 +171,20 @@ HWTEST_F(WindowSessionTest3, SetSystemFocusable, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetFocusableOnShow
+ * @tc.desc: SetFocusableOnShow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetFocusableOnShow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(session_->IsFocusableOnShow(), true);
+    bool focusableOnShow = false;
+    session_->SetFocusableOnShow(focusableOnShow);
+    ASSERT_EQ(session_->IsFocusableOnShow(), focusableOnShow);
+}
+
+/**
  * @tc.name: CheckFocusable
  * @tc.desc: CheckFocusable Test
  * @tc.type: FUNC
