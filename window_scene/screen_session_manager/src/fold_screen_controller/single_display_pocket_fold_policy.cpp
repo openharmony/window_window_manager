@@ -157,7 +157,8 @@ void SingleDisplayPocketFoldPolicy::SendSensorResult(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "SendSensorResult FoldStatus: %{public}d", foldStatus);
     FoldDisplayMode displayMode = GetModeMatchStatus();
-    if (displayMode != currentDisplayMode_) {
+    if (displayMode != currentDisplayMode_ && !(currentDisplayMode_ == FoldDisplayMode::COORDINATION &&
+        displayMode == FoldDisplayMode::FULL)) {
         ChangeScreenDisplayMode(displayMode);
     }
 }
@@ -181,6 +182,9 @@ void SingleDisplayPocketFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
     if (!onBootAnimation_) {
         TLOGI(WmsLogTag::DMS, "SetOnBootAnimation when boot animation finished, change display mode");
         RecoverWhenBootAnimationExit();
+        NotifyRefreshRateEvent(false);
+    } else {
+        NotifyRefreshRateEvent(true);
     }
 }
 
@@ -503,6 +507,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination: screenIdMain ON.");
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+        NotifyRefreshRateEvent(true);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOn, "ScreenToCoordinationTask");
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, ADD_DISPLAY_NODE);
@@ -516,6 +521,7 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
     auto taskScreenOnMainOFF = [=] {
         TLOGI(WmsLogTag::DMS, "CloseCoordinationScreen: screenIdMain OFF.");
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+        NotifyRefreshRateEvent(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOFF, "CloseCoordinationScreenTask");
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
@@ -526,11 +532,26 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
 
 void SingleDisplayPocketFoldPolicy::ExitCoordination()
 {
-    CloseCoordinationScreen();
+    ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+    AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
+    ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
+    ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
+    NotifyRefreshRateEvent(false);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     currentDisplayMode_ = displayMode;
     lastDisplayMode_ = displayMode;
     TLOGI(WmsLogTag::DMS, "Exit coordination, current display mode:%{public}d", displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+}
+
+void SingleDisplayPocketFoldPolicy::NotifyRefreshRateEvent(bool isEventStatus)
+{
+    EventInfo eventInfo = {
+        .eventName = "VOTER_VIRTUALDISPLAY",
+        .eventStatus = isEventStatus,
+        .minRefreshRate = 60,
+        .maxRefreshRate = 60,
+    };
+    RSInterfaces::GetInstance().NotifyRefreshRateEvent(eventInfo);
 }
 } // namespace OHOS::Rosen
