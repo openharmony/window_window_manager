@@ -5094,11 +5094,11 @@ napi_value JsWindow::OnTranslate(napi_env env, napi_callback_info info)
 WmErrorCode JsWindow::CreateTransitionController(napi_env env)
 {
     if (windowToken_ == nullptr) {
-        WLOGFE("windowToken_ is nullptr not match");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("CreateTransitionController is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     napi_value objValue = nullptr;
@@ -5106,17 +5106,18 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     auto name = GetWindowName();
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(name);
     if (jsWindowObj == nullptr || jsWindowObj->GetNapiValue() == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "FindJsWindowObject failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<JsTransitionController> nativeController = new JsTransitionController(
         env, jsWindowObj, windowToken_);
     if (objValue == nullptr) {
-        WLOGFE("Failed to convert to TransitionController Object");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert to TransitionController Object");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     napi_wrap(env, objValue, new wptr<JsTransitionController>(nativeController),
         [](napi_env, void* data, void*) {
-            WLOGFE("Finalizer for wptr form native Transition Controller is called");
+            TLOGNI(WmsLogTag::WMS_SYSTEM, "Finalizer for wptr JsTransitionController called");
             delete static_cast<wptr<JsTransitionController>*>(data);
         }, nullptr, nullptr);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(nativeController));
@@ -5124,7 +5125,7 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     napi_create_reference(env, objValue, 1, &result);
     jsTransControllerObj_.reset(reinterpret_cast<NativeReference*>(result));
     nativeController->SetJsController(jsTransControllerObj_);
-    WLOGI("Window [%{public}u, %{public}s] CreateTransitionController end",
+    TLOGE(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] create success",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return ret;
 }
@@ -5137,17 +5138,17 @@ napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info 
     }
 
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("OnGetTransitionController is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->GetNapiValue() == nullptr) {
         WmErrorCode ret = CreateTransitionController(env);
         if (ret != WmErrorCode::WM_OK) {
-            WLOGFE("Window GetTransitionController failed");
+            TLOGE(WmsLogTag::WMS_SYSTEM, "CreateTransitionController failed, error code:%{public}d", ret);
             napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         }
     }
@@ -5157,7 +5158,7 @@ napi_value JsWindow::OnGetTransitionController(napi_env env, napi_callback_info 
 napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("set corner radius permission denied!");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
 
@@ -5165,37 +5166,38 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("SetCornerRadius is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetCornerRadius invalid radius due to nativeVal is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid radius due to nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
     napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
     if (statusCode != napi_ok) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "napi get radius value failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        WLOGFE("SetCornerRadius invalid radius");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid radius:%{public}f", radius);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetCornerRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetCornerRadius failed");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SetCornerRadius failed:%{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] SetCornerRadius end, radius = %{public}f",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] set success, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
 }
@@ -5263,37 +5265,38 @@ napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("SetBlur is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetBlur invalid radius due to nativeVal is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
     napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
     if (statusCode != napi_ok) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "napi get radius value failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        WLOGFE("SetBlur invalid radius");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid radius:%{public}f", radius);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBlur(radius));
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetBlur failed");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SetBlur failed:%{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
 }
@@ -5304,37 +5307,38 @@ napi_value JsWindow::OnSetBackdropBlur(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("SetBackdropBlur is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("SetBackdropBlur invalid radius due to nativeVal is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid radius due to nativeVal is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
     napi_status statusCode = napi_get_value_double(env, nativeVal, &radius);
     if (statusCode != napi_ok) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "napi get radius value failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        WLOGFE("SetBackdropBlur invalid radius");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid radius:%{public}f", radius);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlur(radius));
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetBackdropBlur failed");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SetBackdropBlur failed:%{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] SetBackdropBlur end, radius = %{public}f",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] set success, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
 }
@@ -5345,21 +5349,21 @@ napi_value JsWindow::OnSetBackdropBlurStyle(napi_env env, napi_callback_info inf
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("SetBackdropBlurStyle is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Unexpected window type:%{public}d", windowToken_->GetType());
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
     napi_value nativeMode = argv[0];
     if (nativeMode == nullptr) {
-        WLOGFE("SetBackdropBlurStyle Invalid window blur style due to nativeMode is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "nativeMode is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t resultValue = 0;
@@ -5368,17 +5372,17 @@ napi_value JsWindow::OnSetBackdropBlurStyle(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (resultValue > static_cast<uint32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)) {
-        WLOGFE("SetBackdropBlurStyle Invalid window blur style");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid window blur style:%{public}u", resultValue);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowBlurStyle style = static_cast<WindowBlurStyle>(resultValue);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlurStyle(style));
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window SetBackdropBlurStyle failed");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "set failed: %{public}d", ret);
         return NapiThrowError(env, ret);
     }
 
-    WLOGI("Window [%{public}u, %{public}s] SetBackdropBlurStyle end, style = %{public}u",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] set success, style = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), style);
     return NapiGetUndefined(env);
 }
