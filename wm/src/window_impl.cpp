@@ -2035,6 +2035,9 @@ WMError WindowImpl::RaiseToAppTop()
 
 WMError WindowImpl::DisableAppWindowDecor()
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
