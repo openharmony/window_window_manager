@@ -1563,7 +1563,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
-            PreHandleCollaboratorSessionAffinity(sceneSession);
+            PreHandleCollaboratorStartAbility(sceneSession);
             const auto& sessionAffinity = sceneSession->GetSessionInfo().sessionAffinity;
             if (auto reusedSceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(sessionAffinity)) {
                 TLOGNI(WmsLogTag::WMS_LIFE,
@@ -8815,42 +8815,42 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     }
 }
 
-bool SceneSessionManager::PreHandleCollaboratorSessionAffinity(sptr<SceneSession>& sceneSession, int32_t persistentId)
+bool SceneSessionManager::PreHandleCollaboratorStartAbility(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
-        TLOGI("sceneSession is null");
+        TLOGI(WmsLogTag::WMS_LIFE, "sceneSession is null");
         return false;
     }
     std::string sessionAffinity;
-    TLOGI("call NotifyStartAbility & NotifySessionCreate");
+    TLOGI(WmsLogTag::WMS_LIFE, "call NotifyStartAbility & NotifySessionCreate");
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sessionAffinity = sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     }
     if (sessionAffinity.empty()) {
-        TLOGI("Session affinity is empty");
+        TLOGI(WmsLogTag::WMS_LIFE, "Session affinity is empty");
         BrokerStates notifyReturn = NotifyStartAbility(
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
-            TLOGI("notifyReturn not BROKER_STARTED!");
+            TLOGI(WmsLogTag::WMS_LIFE, "notifyReturn not BROKER_STARTED!");
             return false;
         }
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sceneSession->SetSessionInfoAffinity(sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY));
-        TLOGI("ANCO_SESSION_ID: %{public}d, want affinity: %{public}s.",
+        TLOGI(WmsLogTag::WMS_LIFE, "ANCO_SESSION_ID: %{public}d, want affinity: %{public}s.",
             sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0),
             sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
-        TLOGI("sceneSession->GetSessionInfo().want is nullptr");
+        TLOGI(WmsLogTag::WMS_LIFE, "sceneSession->GetSessionInfo().want is nullptr");
     }
     return true;
 }
 
 bool SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
-    if (!PreHandleCollaboratorSessionAffinity(sceneSession, persistentId)) {
+    if (!PreHandleCollaboratorStartAbility(sceneSession, persistentId)) {
         return false;
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
