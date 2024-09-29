@@ -5103,7 +5103,7 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     }
     napi_wrap(env, objValue, new wptr<JsTransitionController>(nativeController),
         [](napi_env, void* data, void*) {
-            TLOGNI(WmsLogTag::WMS_SYSTEM, "%{public}s: Finalizer for wptr JsTransitionController called");
+            TLOGNI(WmsLogTag::WMS_SYSTEM, "Finalizer for wptr JsTransitionController called");
             delete static_cast<wptr<JsTransitionController>*>(data);
         }, nullptr, nullptr);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(nativeController));
