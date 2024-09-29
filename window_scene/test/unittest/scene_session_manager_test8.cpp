@@ -243,7 +243,6 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
     sessionInfo.bundleName_ = "PostProcessFocus01";
     sessionInfo.abilityName_ = "PostProcessFocus01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = 1;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;

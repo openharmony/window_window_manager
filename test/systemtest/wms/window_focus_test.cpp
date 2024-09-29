@@ -552,26 +552,20 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: WindowShowWithoutFocusTest
-* @tc.desc: add main window and sub window and show it to test focus
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowShowWithoutFocusTest
+ * @tc.desc: add main window and sub window and show it to test focus
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
     fullScreenAppInfo_.focusable_ = false;
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
-    if (window1 == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window1);
 
     floatAppInfo_.name = "WindowShowWithoutFocusTest_2";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& window2 = Utils::CreateTestWindow(floatAppInfo_);
-    if (window2 == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window2);
 
     subAppInfo_.name = "WindowShowWithoutFocusTest_3";
