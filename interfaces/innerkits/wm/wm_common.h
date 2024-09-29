@@ -1200,6 +1200,8 @@ enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set imersiveStateEnable
     EXIT_IMMERSIVE = 1,       // imersiveStateEnable will be set as false
     ENTER_IMMERSIVE = 2,       // imersiveStateEnable will be set as true
+    // imersiveStateEnable will be set as true, and title, statusbar and dockbar will be hide
+    ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 
 enum ForceHideState : uint32_t {

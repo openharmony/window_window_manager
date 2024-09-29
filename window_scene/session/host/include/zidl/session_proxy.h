@@ -47,6 +47,8 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;

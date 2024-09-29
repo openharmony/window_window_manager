@@ -1539,6 +1539,32 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen, Function | SmallTest |
 }
 
 /*
+ * @tc.name: SetTitleAndDockHoverShown
+ * @tc.desc: SetTitleAndDockHoverShown test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleAndDockHoverShown(true, true));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTitleAndDockHoverShown(true, true));
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
+}
+
+/*
  * @tc.name: SetFullScreen
  * @tc.desc: SetFullScreen test
  * @tc.type: FUNC
