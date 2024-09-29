@@ -659,7 +659,7 @@ void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGI(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     NotifyRestoreMainWindowFunc func = [weakThis = wptr(this)]() {
