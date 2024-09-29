@@ -1393,26 +1393,29 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId03, Function | SmallTest | Level3)
     option->SetWindowName("GetTopWindowWithId03");
     sptr<WindowImpl> window = new WindowImpl(option);
     uint32_t mainWinId = 0;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    ASSERT_NE(nullptr, m);
-    WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, window)));
+    uint32_t windowId = 1;
+    string winName = "test";
+    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
 
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(Return(WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
 
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
-        SetArgReferee<1>(1),
+        SetArgReferee<1>(windowId),
         Return(WMError::WM_OK)
     ));
     ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
     uint32_t topWinId = 1;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithId(mainWinId));
 
+    uint32_t tempWindowId = 3;
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
-        SetArgReferee<1>(3),
+        SetArgReferee<1>(tempWindowId),
         Return(WMError::WM_OK)
     ));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    WindowImpl::windowMap_.erase(winName);
 }
 
 /**
