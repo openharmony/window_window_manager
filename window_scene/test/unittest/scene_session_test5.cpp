@@ -1299,7 +1299,7 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, Function | SmallTest 
  */
 HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest | Level2)
 {
-    SessionInfo info; 
+    SessionInfo info;
     info.abilityName_ = "HandleActionUpdateTurnScreenOn";
     info.bundleName_ = "HandleActionUpdateTurnScreenOn";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
