@@ -5282,7 +5282,7 @@ napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_SYSTEM, "SetBlur failed:%{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
 }
