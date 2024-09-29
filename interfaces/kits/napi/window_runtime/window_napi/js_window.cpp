@@ -480,6 +480,14 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
+napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "in");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WLOGI("SetKeepScreenOn");
@@ -3641,6 +3649,54 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTopmost",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY,
+            "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isMainWindowTopmost = false;
+    napi_get_value_bool(env, argv[0], &isMainWindowTopmost);
+
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr(windowToken_), isMainWindowTopmost, errCodePtr] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(isMainWindowTopmost));
+        TLOGND(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
+            window->GetWindowId(), window->GetWindowName().c_str());
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*errCodePtr == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Window set main window topmost failed"));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowTopmost",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -6864,6 +6920,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setBrightness", moduleName, JsWindow::SetBrightness);
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
+    BindNativeFunction(env, object, "setWindowTopmost", moduleName, JsWindow::SetWindowTopmost);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);
