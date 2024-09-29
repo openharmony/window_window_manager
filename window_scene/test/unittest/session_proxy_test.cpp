@@ -66,6 +66,21 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Restore
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnRestoreMainWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->OnRestoreMainWindow();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow end";
+}
+
+/**
  * @tc.name: RaiseToAppTop
  * @tc.desc: normal function
  * @tc.type: FUNC
