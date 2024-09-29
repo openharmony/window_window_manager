@@ -19,7 +19,6 @@
 #include <hitrace_meter.h>
 #include <map>
 #include <set>
-#include <vector>
 
 #include "cutout_info.h"
 #include "display.h"
@@ -146,7 +145,7 @@ const std::map<ScreenHDRFormat, HDRFormat> NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP {
 }
 
 static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
-std::map<std::string, std::vector<std::pair<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>>> jsCbMap_;
+std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
 std::mutex mtx_;
 std::recursive_mutex g_mutex;
 
@@ -302,7 +301,7 @@ DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::stri
         return ret;
     }
     displayListener->AddCallback(type, value);
-    jsCbMap_[type].push_back(std::make_pair(std::move(callbackRef), displayListener));
+    jsCbMap_[type][std::move(callbackRef)] = displayListener;
     return DMError::DM_OK;
 }
 
@@ -354,8 +353,7 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
-    auto& listenerVec = jsCbMap_[type];
-    for (auto it = listenerVec.begin(); it != listenerVec.end(); ++it) {
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
@@ -363,9 +361,9 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
         } else {
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
+        jsCbMap_[type].erase(it++);
         WLOGFI("unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
     }
-    listenerVec.clear();
     jsCbMap_.erase(type);
     return ret;
 }
@@ -377,8 +375,7 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
-    auto& listenerVec = jsCbMap_[type];
-    for (auto it = listenerVec.begin(); it != listenerVec.end();) {
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         bool isEquals = false;
         napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
         if (isEquals) {
@@ -389,14 +386,14 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
             } else {
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
-            it = listenerVec.erase(it);
+            jsCbMap_[type].erase(it++);
             WLOGFI("unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
             break;
         } else {
             it++;
         }
     }
-    if (listenerVec.empty()) {
+    if (jsCbMap_[type].empty()) {
         jsCbMap_.erase(type);
     }
     return ret;
