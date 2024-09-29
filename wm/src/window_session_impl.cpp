@@ -148,7 +148,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return;                                                            \
         }                                                                      \
     } while (false)
-
+ 
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
     do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
@@ -156,7 +156,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return ret;                                                        \
         }                                                                      \
     } while (false)
-
+ 
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
