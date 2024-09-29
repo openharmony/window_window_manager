@@ -2671,6 +2671,20 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition03, Function | 
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(screenId1);
 }
+
+/**
+ * @tc.name: SetCoordinationFlag
+ * @tc.desc: SetCoordinationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ASSERT_EQ(ssm->isCoordinationFlag_, false);
+    ssm->SetCoordinationFlag(true);
+    ASSERT_EQ(ssm->isCoordinationFlag_, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
