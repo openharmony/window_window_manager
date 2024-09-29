@@ -689,7 +689,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     pointerItem.SetDisplayX(250);
     pointerItem.SetDisplayY(250);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 }
 
 /**

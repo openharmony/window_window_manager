@@ -73,6 +73,7 @@ public:
     static napi_value SetUIContent(napi_env env, napi_callback_info info);
     static napi_value SetFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     static napi_value SetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetSystemBarEnable(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
@@ -173,6 +174,12 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
+    /*
+     * Gesture Back
+     */
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -207,6 +214,7 @@ private:
     napi_value OnSetDialogBackGestureEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSystemBarEnable(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
@@ -310,6 +318,12 @@ private:
      * Sub Window
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

@@ -385,6 +385,67 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootA
     policy.ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
+
+/**
+ * @tc.name: SetdisplayModeChangeStatus01
+ * @tc.desc: test function : SetdisplayModeChangeStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus01, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    bool status = true;
+    policy.SetdisplayModeChangeStatus(status);
+    EXPECT_EQ(policy.pengdingTask_, 3);
+}
+
+/**
+ * @tc.name: SetdisplayModeChangeStatus02
+ * @tc.desc: test function : SetdisplayModeChangeStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus02, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    bool status = false;
+    policy.SetdisplayModeChangeStatus(status);
+    EXPECT_NE(policy.pengdingTask_, 3);
+}
+
+/**
+ * @tc.name: ChangeScreenDisplayMode02
+ * @tc.desc: test function : ChangeScreenDisplayMode02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode02, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+    
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::MAIN;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::FULL;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::SUB;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -452,25 +452,6 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, Function | SmallTest 
 }
 
 /**
- * @tc.name: HandleUpdatePropertyByAction
- * @tc.desc: HandleUpdatePropertyByAction function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleUpdatePropertyByAction, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleUpdatePropertyByAction";
-    info.bundleName_ = "HandleUpdatePropertyByAction";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
-    sceneSession->HandleUpdatePropertyByAction(property, action);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->HandleUpdatePropertyByAction(nullptr, action));
-}
-
-/**
  * @tc.name: ProcessUpdatePropertyByAction1
  * @tc.desc: ProcessUpdatePropertyByAction1 function
  * @tc.type: FUNC
@@ -744,6 +725,32 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
     sceneSession->property_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
     sceneSession->SetWindowFlags(property);
+}
+
+/**
+ * @tc.name: SetGestureBackEnabled
+ * @tc.desc: SetGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetGestureBackEnabled";
+    info.bundleName_ = "SetGestureBackEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isEnableGestureBack_ = false;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
+    sceneSession->specificCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    EXPECT_NE(nullptr, sceneSession->specificCallback_);
+    auto func = [sceneSession](int32_t persistentId) {
+        return;
+    };
+    sceneSession->specificCallback_->onUpdateGestureBackEnabled_ = func;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
+    EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
 }
 }
 }

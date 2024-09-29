@@ -62,7 +62,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest5::ssm_ = nullptr;
 bool SceneSessionManagerTest5::gestureNavigationEnabled_ = true;
 
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest5::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -106,7 +106,7 @@ namespace {
  * @tc.name: NotifySessionTouchOutside
  * @tc.desc: SceneSesionManager notify session touch outside
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -149,7 +149,7 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDisconnectSpecificSessionInner, Fun
  * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, DestroyAndDetachCallback, Function | SmallTest | Level3)
 {
     int32_t persistentId = 0;
@@ -170,7 +170,7 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDetachCallback, Function | SmallTes
  * @tc.name: GetStartupPageFromResource
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, GetStartupPageFromResource, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -189,7 +189,7 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPageFromResource, Function | SmallT
  * @tc.name: GetStartupPage01
  * @tc.desc: GetStartupPage when resourceMgr is nullptr
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, GetStartupPage01, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -219,7 +219,7 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage01, Function | SmallTest | Leve
  * @tc.name: GetStartupPage02
  * @tc.desc: GetStartupPage when info is cached
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -278,7 +278,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession, Function | SmallT
  * @tc.name: PrepareTerminate
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, Function | SmallTest | Level3)
 {
     int32_t persistentId = 1;
@@ -314,7 +314,7 @@ HWTEST_F(SceneSessionManagerTest5, IsKeyboardForeground, Function | SmallTest | 
  * @tc.name: RequestInputMethodCloseKeyboard
  * @tc.desc: RequestInputMethodCloseKeyboard
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function | SmallTest | Level3)
 {
     int32_t persistentId = -1;
@@ -329,7 +329,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
  * @tc.name: HandleSpecificSystemBarProperty
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -347,7 +347,7 @@ HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | S
  * @tc.name: UpdateBrightness
  * @tc.desc: UpdateBrightness
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -368,7 +368,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
  * @tc.name: UpdateSecSurfaceInfo
  * @tc.desc: UpdateSecSurfaceInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -385,7 +385,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateSecSurfaceInfo, Function | SmallTest | 
  * @tc.name: RegisterSessionSnapshotFunc
  * @tc.desc: RegisterSessionSnapshotFunc
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -408,7 +408,7 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | Small
  * @tc.name: RequestAllAppSessionUnfocus
  * @tc.desc: RequestAllAppSessionUnfocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -466,7 +466,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | 
  * @tc.name: RequestSessionFocus
  * @tc.desc: RequestSessionFocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -500,7 +500,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
  * @tc.name: SetShiftFocusListener
  * @tc.desc: SetShiftFocusListener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -531,7 +531,7 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest |
  * @tc.name: UpdateFocusStatus
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -554,7 +554,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Lev
  * @tc.name: RequestSessionUnfocus
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -586,7 +586,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
  * @tc.name: RequestFocusSpecificCheck
  * @tc.desc: RequestFocusSpecificCheck
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -610,7 +610,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, Function | SmallTe
  * @tc.name: NotifyFocusStatus
  * @tc.desc: NotifyFocusStatus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -631,7 +631,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Lev
  * @tc.name: NotifyFocusStatusByMission
  * @tc.desc: NotifyFocusStatusByMission
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -658,7 +658,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallT
  * @tc.name: UpdateFocus
  * @tc.desc: UpdateFocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, UpdateFocus, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -677,7 +677,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocus, Function | SmallTest | Level3)
  * @tc.name: RequestSessionFocusImmediately
  * @tc.desc: RequestSessionFocusImmediately
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -699,7 +699,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | Sm
  * @tc.name: CheckFocusIsDownThroughBlockingType
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -903,7 +903,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
  * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -960,15 +960,19 @@ HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sceneSession->SetSessionProperty(property);
+
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
-    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+    ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetSessionInfo().screenId_);
 }
 
 /**
  * @tc.name: PrepareTerminate
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -998,18 +1002,18 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | Sma
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> sceneSession = nullptr;
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
-    ssm_->RequestSceneSessionBackground(sceneSession, true, false, true);
-    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false, true));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
 }
 
 /**
  * @tc.name: AddClientDeathRecipient
  * @tc.desc: SceneSesionManager add client death recipient
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1027,7 +1031,7 @@ HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, Function | SmallTe
  * @tc.name: CheckModalSubWindowPermission
  * @tc.desc: CheckModalSubWindowPermission
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1047,7 +1051,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission, Function | Sma
  * @tc.name: CheckSessionPropertyOnRecovery
  * @tc.desc: CheckSessionPropertyOnRecovery
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1068,7 +1072,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | Sm
  * @tc.name: SetCreateKeyboardSessionListener
  * @tc.desc: SetCreateKeyboardSessionListener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, SetCreateKeyboardSessionListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1122,7 +1126,8 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
     ssm_->DestroyToastSession(sceneSession);
     ssm_->HandleCastScreenDisConnection(sceneSession->GetSessionInfo().screenId_);
     ssm_->StartUIAbilityBySCB(sceneSession);
-    ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**
@@ -1146,9 +1151,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | S
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(123);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
     session->SetSessionInfoPersistentId(0);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, true));
 }
 
 /**
@@ -1182,7 +1187,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1239,7 +1244,7 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
  * @tc.name: RequestSceneSessionByCall
  * @tc.desc: SceneSesionManager request scene session by call
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionByCall02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1256,7 +1261,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionByCall02, Function | Small
  * @tc.name: GetAllAbilityInfos
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1348,7 +1353,7 @@ HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos04, Function | SmallTest 
  * @tc.name: FindMainWindowWithToken
  * @tc.desc: SceneSesionManager find main window with token
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1414,7 +1419,7 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession02, Function | SmallTest |
  * @tc.name: CheckModalSubWindowPermission
  * @tc.desc: CheckModalSubWindowPermission
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);

@@ -36,24 +36,28 @@ public:
     static MultiInstanceManager& GetInstance();
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);
-    uint32_t GetMaxInstanceCount(const std::string& bundleName);
-    uint32_t GetInstanceCount(const std::string& bundleName);
-    std::string GetLastInstanceKey(const std::string& bundleName);
-    std::string CreateNewInstanceKey(const std::string& bundleName);
     bool IsValidInstanceKey(const std::string& bundleName, const std::string& instanceKey);
-    void RemoveAppInfo(const std::string& bundleName);
     void IncreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
     void DecreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
     void FillInstanceKeyIfNeed(const sptr<SceneSession>& sceneSession);
+
+    uint32_t GetMaxInstanceCount(const std::string& bundleName);
+    void RemoveAppInfo(const std::string& bundleName);
+
+    uint32_t GetInstanceCount(const std::string& bundleName);
+    std::string GetLastInstanceKey(const std::string& bundleName);
+    std::string CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey = "");
+    bool IsInstanceKeyExist(const std::string& bundleName, const std::string& instanceKey);
+
 private:
-    uint32_t findMinimumAvailableInstanceId(const std::vector<uint32_t>& instanceIdList);
+    uint32_t findMinimumAvailableInstanceId(const std::vector<uint32_t>& instanceIdList) const;
     bool RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     std::map<std::string, std::vector<uint32_t>> bundleInstanceIdListMap_;
     std::map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
     std::map<std::string, int32_t> bundleInstanceSessionCountMap_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     std::string uiType_;
-    int32_t userId_;
+    int32_t userId_ = 0;
     std::shared_mutex mutex_;
     std::shared_mutex appInfoMutex_;
 };
