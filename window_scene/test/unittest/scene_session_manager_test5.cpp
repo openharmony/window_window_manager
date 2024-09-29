@@ -456,13 +456,13 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
  * @tc.name: RequestFocusClient
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
     info.bundleName_ = "RequestFocusTest1";
-    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetFocusable(true);
@@ -474,11 +474,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->SetZOrder(1);
-
     SessionInfo info2;
     info2.abilityName_ = "RequestFocusTest2";
     info2.bundleName_ = "RequestFocusTest2";
-    sptr<SceneSession> scensession2 = nullptr;
+    sptr<SceneSession> sceneSession2 = nullptr;
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property2, nullptr);
     property2->SetFocusable(true);
@@ -490,21 +489,17 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     sceneSession2->isVisible_ = true;
     sceneSession2->state_ = SessionState::STATE_ACTIVE;
     sceneSession2->SetZOrder(2);
-
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionFocus(2, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 2);
-
     ssm_->RequestSessionUnfocus(2, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionUnfocus(1, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 0);
-
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -512,13 +507,13 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
  * @tc.name: RequestFocusClient
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
     info.bundleName_ = "RequestFocusTest1";
-    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetFocusable(true);
@@ -530,11 +525,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->SetZOrder(1);
-
     SessionInfo info2;
     info2.abilityName_ = "RequestFocusTest2";
     info2.bundleName_ = "RequestFocusTest2";
-    sptr<SceneSession> scensession2 = nullptr;
+    sptr<SceneSession> sceneSession2 = nullptr;
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property2, nullptr);
     property2->SetFocusable(true);
@@ -546,11 +540,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     sceneSession2->isVisible_ = true;
     sceneSession2->state_ = SessionState::STATE_ACTIVE;
     sceneSession2->SetZOrder(2);
-
     SessionInfo info3;
     info3.abilityName_ = "RequestFocusTest3";
     info3.bundleName_ = "RequestFocusTest3";
-    sptr<SceneSession> scensession3 = nullptr;
+    sptr<SceneSession> sceneSession3 = nullptr;
     sptr<WindowSessionProperty> property3 = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property3, nullptr);
     property3->SetFocusable(true);
@@ -563,11 +556,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     sceneSession3->state_ = SessionState::STATE_ACTIVE;
     sceneSession3->SetZOrder(3);
     sceneSession3->blockingFocus_ = true;
-
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
@@ -575,12 +566,10 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ASSERT_EQ(ssm_->focusedSessionId_, 3);
     ssm_->RequestSessionFocus(2, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 2);
-
     auto ret = ssm_->RequestSessionUnfocus(3, reason);
     ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
     ssm_->RequestSessionUnfocus(2, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
-
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -588,7 +577,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
  * @tc.name: SetShiftFocusListener
  * @tc.desc: SetShiftFocusListener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -790,7 +779,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | Sm
  * @tc.name: RequestFocusBasicCheck
  * @tc.desc: RequestFocusBasicCheck
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestFocusBasicCheck, Function | SmallTest | Level3)
 {
     ssm_->focusedSessionId_ = 1;
