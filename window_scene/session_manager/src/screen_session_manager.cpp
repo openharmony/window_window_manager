@@ -614,7 +614,7 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
             isPhyScreenConnected_ = true;
         }
         return;
-    } if (screenEvent == ScreenEvent::DISCONNECTED) {
+    } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
             NotifyCastWhenScreenConnectChange(false);
