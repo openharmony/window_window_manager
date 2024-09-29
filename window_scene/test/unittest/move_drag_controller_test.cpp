@@ -21,6 +21,9 @@
 #include "ui/rs_surface_node.h"
 #include "window_manager_hilog.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "screen_manager.h"
 
 
 using namespace testing;
@@ -643,7 +646,7 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
+    auto dragHotAreaFunc = [](DisplayId displayId, int32_t type, const SizeChangeReason reason) {
         type = 0;
     };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
@@ -1097,11 +1100,11 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function |
 }
 
 /**
- * @tc.name: CalcUnifiedTransform
- * @tc.desc: test function : CalcUnifiedTransform
+ * @tc.name: CalcUnifiedTranslate
+ * @tc.desc: test function : CalcUnifiedTranslate
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, CalcUnifiedTransform, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, CalcUnifiedTranslate, Function | SmallTest | Level1)
 {
     moveDragController->InitMoveDragProperty();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -1111,9 +1114,9 @@ HWTEST_F(MoveDragControllerTest, CalcUnifiedTransform, Function | SmallTest | Le
     pointerItem.SetDisplayX(10);
     pointerItem.SetDisplayY(30);
     pointerEvent->AddPointerItem(pointerItem);
-    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTransform(pointerEvent);
-    ASSERT_EQ(10, res.first);
-    ASSERT_EQ(30, res.second);
+    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    ASSERT_EQ(0, res.first);
+    ASSERT_EQ(0, res.second);
 }
 }
 }

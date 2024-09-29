@@ -1071,6 +1071,19 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSnapshotSkipByUserIdAndBundleNameList,
         userId, bundleNameList));
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
+}
 }  // namespace
 }
 }

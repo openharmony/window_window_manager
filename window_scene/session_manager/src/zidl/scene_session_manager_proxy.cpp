@@ -1735,7 +1735,7 @@ WMError SceneSessionManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& t
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+WMError SceneSessionManagerProxy::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1744,7 +1744,7 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(uint32_t windowId, uint3
         TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(windowId)) {
+    if (!data.WriteInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_SUB, "Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -1758,8 +1758,8 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(uint32_t windowId, uint3
         TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    uint32_t replyMainWindowId = INVALID_SESSION_ID;
-    if (!reply.ReadUint32(replyMainWindowId)) {
+    int32_t replyMainWindowId = INVALID_SESSION_ID;
+    if (!reply.ReadInt32(replyMainWindowId)) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -2394,5 +2394,22 @@ WMError SceneSessionManagerProxy::GetWindowIdsByCoordinate(DisplayId displayId, 
         reply.ReadInt32Vector(&windowIds);
     }
     return ret;
+}
+
+WMError SceneSessionManagerProxy::ReleaseForegroundSessionScreenLock()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

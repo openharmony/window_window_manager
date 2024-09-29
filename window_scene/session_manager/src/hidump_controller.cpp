@@ -15,6 +15,7 @@
 
 #include "session_manager/include/hidump_controller.h"
 #include "session_helper.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {

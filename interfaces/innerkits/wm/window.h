@@ -749,6 +749,19 @@ public:
      */
     virtual bool IsTopmost() const { return false; }
     /**
+     * @brief Set whether the main window is topmost
+     *
+     * @param isTopmost whether main window is topmost
+     * @return WMError
+     */
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    /**
+     * @brief Get whether main window is topmost
+     *
+     * @return True means main window is topmost
+     */
+    virtual bool IsMainWindowTopmost() const { return false; }
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
@@ -816,6 +829,18 @@ public:
      * @return WMError
      */
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
+    /**
+     * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
+     *
+     * @param isTitleHoverShown
+     * @param isDockHoverShown
+     * @return WMError
+     */
+    virtual WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     /**
      * @brief Set this window full screen, with hide status bar and nav bar
      *
@@ -2030,9 +2055,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2331,6 +2357,20 @@ public:
      * @return true - is UIExtension sub window, false - is not UIExtension sub window.
      */
     virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
+
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+ 
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool GetGestureBackEnabled() const { return true; }
 };
 }
 }

@@ -62,6 +62,8 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
+    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
@@ -74,7 +76,7 @@ public:
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     // only main window, sub window, dialog window can use
-    static uint32_t GetParentMainWindowId(int32_t windowId);
+    static int32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
@@ -158,6 +160,12 @@ public:
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
 
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool enable) override;
+    bool GetGestureBackEnabled() const override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -232,7 +240,14 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
+    bool titleHoverShowEnabled_ = true;
+    bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Gesture Back
+     */
+    bool gestureBackEnabled_ = true;
 
     /*
      * Window Property.

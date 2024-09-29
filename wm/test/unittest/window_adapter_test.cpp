@@ -628,6 +628,19 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
     ASSERT_EQ(true, ret);
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 }
 }
 }

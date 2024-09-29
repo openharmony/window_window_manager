@@ -599,9 +599,9 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
         for (auto& child : screenGroup->GetChildren()) {
             WLOGD("AddAsSuccedentScreenLocked. defaultScreen rotation:%d", child->rotation_);
             if (child->rotation_ == Rotation::ROTATION_90 || child->rotation_ == Rotation::ROTATION_270) {
-                point.posX_ += child->GetActiveScreenMode()->height_;
+                point.posX_ += static_cast<int32_t>(child->GetActiveScreenMode()->height_);
             } else {
-                point.posX_ += child->GetActiveScreenMode()->width_;
+                point.posX_ += static_cast<int32_t>(child->GetActiveScreenMode()->width_);
             }
         }
         WLOGD("AddAsSuccedentScreenLocked. point:[%d %d]", point.posX_, point.posY_);
@@ -804,7 +804,7 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
     });
     
     Point point;
-    int width = 0;
+    uint32_t width = 0;
     for (auto& screen : screens) {
         auto mode = screen->GetActiveScreenMode();
         if (!mode) {

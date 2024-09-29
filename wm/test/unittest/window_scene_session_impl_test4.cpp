@@ -131,6 +131,7 @@ HWTEST_F(WindowSceneSessionImplTest4, RegisterSessionRecoverListener, Function |
     windowSceneSessionImpl->RegisterSessionRecoverListener(true);
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->RegisterSessionRecoverListener(true);
+    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
 }
 
 /**
@@ -504,6 +505,229 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, Function | Small
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
     pointerEvent->SetPointerAction(2);
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: HandleEventForCompatibleMode
+ * @tc.desc: HandleEventForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, HandleEventForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("HandleEventForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(2);
+    windowSceneSessionImpl->HandleEventForCompatibleMode(pointerEvent, pointerItem);
+    pointerEvent->SetPointerAction(3);
+    windowSceneSessionImpl->HandleEventForCompatibleMode(pointerEvent, pointerItem);
+    pointerEvent->SetPointerAction(4);
+    windowSceneSessionImpl->HandleEventForCompatibleMode(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: HandleDownForCompatibleMode
+ * @tc.desc: HandleDownForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, HandleDownForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("HandleDownForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(2);
+    windowSceneSessionImpl->HandleDownForCompatibleMode(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: HandleMoveForCompatibleMode
+ * @tc.desc: HandleMoveForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, HandleMoveForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("HandleMoveForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(3);
+    windowSceneSessionImpl->HandleMoveForCompatibleMode(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: HandleUpForCompatibleMode
+ * @tc.desc: HandleUpForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, HandleUpForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("HandleUpForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(4);
+    windowSceneSessionImpl->HandleUpForCompatibleMode(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: ConvertPointForCompatibleMode
+ * @tc.desc: ConvertPointForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConvertPointForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("ConvertPointForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    int32_t transferX = 800;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(2);
+    windowSceneSessionImpl->ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+    pointerEvent->SetPointerAction(3);
+    windowSceneSessionImpl->ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+    pointerEvent->SetPointerAction(4);
+    windowSceneSessionImpl->ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+}
+
+/**
+ * @tc.name: IsInMappingRegionForCompatibleMode
+ * @tc.desc: IsInMappingRegionForCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsInMappingRegionForCompatibleMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("IsInMappingRegionForCompatibleMode");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->property_->SetWindowRect({ 880, 0, 800, 1600 });
+    int32_t displayX = 400;
+    int32_t displayY = 400;
+    bool ret = windowSceneSessionImpl->IsInMappingRegionForCompatibleMode(displayX, displayY);
+    EXPECT_EQ(true, ret);
+    displayX = 1000;
+    displayY = 1000;
+    ret = windowSceneSessionImpl->IsInMappingRegionForCompatibleMode(displayX, displayY);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckTouchSlop
+ * @tc.desc: CheckTouchSlop
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, CheckTouchSlop, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("CheckTouchSlop");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    int32_t pointerId = 0;
+    int32_t displayX = 400;
+    int32_t displayY = 400;
+    int32_t threshold = 50;
+    bool ret = windowSceneSessionImpl->CheckTouchSlop(pointerId, displayX, displayY, threshold);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: IgnoreClickEvent
+ * @tc.desc: IgnoreClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IgnoreClickEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("IgnoreClickEvent");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetPointerAction(3);
+    windowSceneSessionImpl->IgnoreClickEvent(pointerEvent);
+    pointerEvent->SetPointerAction(4);
+    windowSceneSessionImpl->IgnoreClickEvent(pointerEvent);
 }
 
 /**
