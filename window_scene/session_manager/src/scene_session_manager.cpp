@@ -8818,7 +8818,7 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
 bool SceneSessionManager::PreHandleCollaboratorStartAbility(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_LIFE, "sceneSession is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is null");
         return false;
     }
     std::string sessionAffinity;
