@@ -311,6 +311,13 @@ napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetTitleAndDockHoverShown(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI] call");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetTitleAndDockHoverShown(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen");
@@ -2444,6 +2451,54 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetLayoutFullScreen",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4; // 4: arg numer
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 2) { // 2: maximum params num
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isTitleHoverShown = true;
+    bool isDockHoverShown = true;
+    if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShown)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShown parameter");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    const char* const funcName = __func__;
+    NapiAsyncTask::CompleteCallback complete =
+        [windowToken = windowToken_, isTitleHoverShown, isDockHoverShown, funcName](napi_env env,
+            NapiAsyncTask& task, int32_t status) {
+            if (windowToken == nullptr) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", funcName);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                return;
+            }
+            WMError errCode = windowToken->SetTitleAndDockHoverShown(isTitleHoverShown, isDockHoverShown);
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set title and dock hover show failed!", funcName);
+                task.Reject(env, JsErrUtils::CreateJsError(env,
+                    ret, "Window OnSetTitleAndDockHoverShown failed."));
+            } else {
+                task.Resolve(env, NapiGetUndefined(env));
+            }
+            TLOGNI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] [%{public}d, %{public}d]",
+                windowToken->GetWindowId(), windowToken->GetWindowName().c_str(),
+                isTitleHoverShown, isDockHoverShown);
+        };
+    napi_value lastParam = (argc <= 2) ? nullptr : (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetTitleAndDockHoverShown",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -6784,6 +6839,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setUIContent", moduleName, JsWindow::SetUIContent);
     BindNativeFunction(env, object, "setFullScreen", moduleName, JsWindow::SetFullScreen);
     BindNativeFunction(env, object, "setLayoutFullScreen", moduleName, JsWindow::SetLayoutFullScreen);
+    BindNativeFunction(env, object, "setTitleAndDockHoverShown",
+        moduleName, JsWindow::SetTitleAndDockHoverShown);
     BindNativeFunction(env, object, "setWindowLayoutFullScreen", moduleName, JsWindow::SetWindowLayoutFullScreen);
     BindNativeFunction(env, object, "setSystemBarEnable", moduleName, JsWindow::SetSystemBarEnable);
     BindNativeFunction(env, object, "setWindowSystemBarEnable", moduleName, JsWindow::SetWindowSystemBarEnable);

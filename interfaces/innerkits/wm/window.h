@@ -817,6 +817,18 @@ public:
      */
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
     /**
+     * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
+     *
+     * @param isTitleHoverShown
+     * @param isDockHoverShown
+     * @return WMError
+     */
+    virtual WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
      * @brief Set this window full screen, with hide status bar and nav bar
      *
      * @param status if true, hide status bar and nav bar; Otherwise, show status bar and nav bar

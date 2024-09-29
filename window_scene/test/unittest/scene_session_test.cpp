@@ -1527,6 +1527,27 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnTitleAndDockHoverShowChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    scensession->SetSessionProperty(property);
+    auto result = scensession->OnTitleAndDockHoverShowChange(true, true);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetTopmost
  * @tc.desc: normal function
  * @tc.type: FUNC
