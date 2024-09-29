@@ -64,12 +64,12 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetAspectRatio1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetAspectRatio11, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio11";
     info.bundleName_ = "SetAspectRatio11";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     scensession->property_ = nullptr;
@@ -89,7 +89,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio12";
     info.bundleName_ = "SetAspectRatio12";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
@@ -123,7 +123,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio15";
     info.bundleName_ = "SetAspectRatio15";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
@@ -183,7 +183,7 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
