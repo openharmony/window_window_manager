@@ -2001,6 +2001,19 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, Function | S
         ASSERT_TRUE(allSize.empty());
     }
 }
+
+/**
+ * @tc.name: PhyMirrorConnectWakeupScreen
+ * @tc.desc: PhyMirrorConnectWakeupScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->PhyMirrorConnectWakeupScreen();
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
+    ssm_->PhyMirrorConnectWakeupScreen();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
