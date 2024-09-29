@@ -5477,7 +5477,7 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "set virtual screen status enter, screenId: %{public}" PRIu64 " screenStatus: %{public}d",
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 " screenStatus: %{public}d",
         screenId, static_cast<int32_t>(screenStatus));
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
