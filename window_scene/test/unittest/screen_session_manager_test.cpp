@@ -18,6 +18,7 @@
 #include "session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
+#include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
 
