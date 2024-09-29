@@ -42,6 +42,7 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
+    WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
     WmErrorCode StartMoveSystemWindow() override;
