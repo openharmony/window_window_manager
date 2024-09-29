@@ -843,4 +843,11 @@ bool ScreenManagerAdapter::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
     return displayManagerServiceProxy_->SetVirtualScreenStatus(screenId, screenStatus);
 }
 
+DMError ScreenManagerAdapter::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
+}
+
 } // namespace OHOS::Rosen
