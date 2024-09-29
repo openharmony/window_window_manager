@@ -1535,7 +1535,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio2";
     info.bundleName_ = "SetAspectRatio2";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
@@ -1543,7 +1543,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
     auto result = scensession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     scensession->SetSessionProperty(property);
     result = scensession->SetAspectRatio(ratio);
@@ -1561,12 +1561,12 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio3";
     info.bundleName_ = "SetAspectRatio3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
     float ratio = 2.5;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxWidth_ = 3000;
@@ -1589,12 +1589,12 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio4";
     info.bundleName_ = "SetAspectRatio4";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxWidth_ = 3000;
@@ -1617,12 +1617,12 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio5";
     info.bundleName_ = "SetAspectRatio5";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxHeight_ = 10;
@@ -1643,7 +1643,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
     info.bundleName_ = "SetAspectRatio6";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     scensession->SetSessionProperty(nullptr);
@@ -1663,12 +1663,12 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio7";
     info.bundleName_ = "SetAspectRatio7";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxHeight_ = 10;
@@ -1847,11 +1847,11 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateSessionRect";
     info.bundleName_ = "UpdateSessionRect";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
 
@@ -1860,7 +1860,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     WSRect oldRect({1, 1, 1, 1});
     WSRect parentRect({10, 10, 1, 1});
 
-    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(parentSession, nullptr);
     scensession->SetParentSession(parentSession);
     EXPECT_NE(scensession->GetParentSession(), nullptr);
