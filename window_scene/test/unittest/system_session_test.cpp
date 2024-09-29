@@ -856,6 +856,10 @@ HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1
     ASSERT_EQ(ret, false);
 }
 
+HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+{
+    int b =9;
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
