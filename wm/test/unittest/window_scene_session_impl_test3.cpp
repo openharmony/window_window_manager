@@ -1408,14 +1408,11 @@ HWTEST_F(WindowSceneSessionImplTest3, Show01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest3, Show02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("Show02");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
