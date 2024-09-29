@@ -146,14 +146,13 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, Function | SmallT
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("CreateAndConnectSpecificSession01");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
 
     windowSceneSession->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_ERROR_NULLPTR) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
-    }
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
     windowSceneSession->property_->SetPersistentId(102);
     windowSceneSession->property_->SetParentPersistentId(100);
     windowSceneSession->property_->SetParentId(100);
@@ -173,6 +172,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession02");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -185,14 +185,11 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
     windowSceneSession->property_->SetPersistentId(103);
     windowSceneSession->property_->SetParentPersistentId(102);
     windowSceneSession->property_->SetParentId(102);
-    windowSceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     windowSceneSession->hostSession_ = session;
 
     windowSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
 }
 
 /**
@@ -203,6 +200,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession03");
     option->SetExtensionTag(true);
@@ -216,14 +214,11 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
 
     windowSceneSession->property_->SetParentPersistentId(102);
     windowSceneSession->property_->SetParentId(102);
-    windowSceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     windowSceneSession->hostSession_ = session;
 
     windowSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
 }
 
 /**
@@ -234,6 +229,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession04");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -251,10 +247,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function
     windowSceneSession->hostSession_ = session;
 
     windowSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_OK,windowSceneSession->Destroy(true));
 }
 
 /**
@@ -265,6 +259,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession05");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -277,14 +272,11 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function
 
     windowSceneSession->property_->SetParentPersistentId(104);
     windowSceneSession->property_->SetParentId(104);
-    windowSceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     windowSceneSession->hostSession_ = session;
 
     windowSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_NE(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_NE(WMError::WM_ERROR_INVALID_TYPE, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_NE(WMError::WM_OK, windowSceneSession->Destroy(true));
 }
 
 /**
@@ -295,6 +287,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession05, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SYSTEM_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession06");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -308,14 +301,40 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession06, Function
     windowSceneSession->property_->SetPersistentId(105);
     windowSceneSession->property_->SetParentPersistentId(102);
     windowSceneSession->property_->SetParentId(102);
-    windowSceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     windowSceneSession->hostSession_ = session;
 
     windowSceneSession->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
-    if (windowSceneSession->CreateAndConnectSpecificSession() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession07
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowTag(WindowTag::SYSTEM_WINDOW);
+    option->SetWindowName("CreateAndConnectSpecificSession07");
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    
+    SessionInfo sessionInfo = { "CreateTestBundle7", "CreateTestModule7", "CreateTestAbility7" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    
+    windowSceneSession->property_->SetPersistentId(106);
+    windowSceneSession->property_->SetParentPersistentId(105);
+    windowSceneSession->property_->SetParentId(105);
+    windowSceneSession->hostSession_ = session;
+
+    windowSceneSession->property_->type_ = WindowType::SYSTEM_SUB_WINDOW_BASE;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
 }
 
 /**
