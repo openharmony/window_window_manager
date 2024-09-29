@@ -301,6 +301,8 @@ public:
     virtual WMError RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
     virtual bool IsTopmost() const { return false; }
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    virtual bool IsMainWindowTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }

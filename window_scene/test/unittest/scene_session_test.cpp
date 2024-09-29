@@ -1569,6 +1569,26 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainWindowTopmost";
+    info.bundleName_ = "SetMainWindowTopmost";
+    sptr<SceneSession> sceneSession = new (std::nothrow) MainSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetMainWindowTopmost(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(sceneSession->IsMainWindowTopmost());
+}
+
+/**
  * @tc.name: SetAspectRatio2
  * @tc.desc: normal function
  * @tc.type: FUNC
