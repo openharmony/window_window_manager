@@ -1187,9 +1187,16 @@ HWTEST_F(SceneSessionTest5, UpdateUIParam, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     session->isFocused_ = true;
-    session->isVisible_ = true;
+    session->isVisible_ = false;
     uint32_t res = session->UpdateUIParam();
-    ASSERT_EQ(1, res);
+    ASSERT_EQ(0, res);
+    ASSERT_EQ(false, session->postProcessFocusState_.enabled_);
+
+    session->isFocused_ = true;
+    session->isVisible_ = true;
+    uint32_t res1 = session->UpdateUIParam();
+    ASSERT_EQ(1, res1);
+    ASSERT_EQ(true, session->postProcessFocusState_.enabled_);
 }
 
 /**
