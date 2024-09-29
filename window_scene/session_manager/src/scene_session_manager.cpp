@@ -5480,10 +5480,15 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(displayId,
         !bundleListForNotify.empty() || specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
-    for (const auto& bundle : bundleListForNotify) {
-        TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
-              displayId, bundle.c_str());
+
+    std::ostringstream oss;
+    oss << "displayId: " << displayId << ", privacy bundles size: " << bundleListForNotify.size()
+        << ", privacy bundles:[ ";
+    for (auto bundle : bundleListForNotify) {
+        oss << bundle << " ";
     }
+    oss << "]";
+    TLOGI(WmsLogTag::WMS_MAIN, "%{public}s", oss.str().c_str());
 }
 
 void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
