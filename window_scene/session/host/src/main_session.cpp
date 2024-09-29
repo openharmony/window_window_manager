@@ -183,6 +183,26 @@ bool MainSession::IsTopmost() const
     return GetSessionProperty()->IsTopmost();
 }
 
+WSError MainSession::SetMainWindowTopmost(bool isTopmost)
+{
+    auto property = GetSessionProperty();
+    if (property) {
+        property->SetMainWindowTopmost(isTopmost);
+        TLOGD(WmsLogTag::WMS_HIERARCHY,
+            "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
+            GetPersistentId(), isTopmost);
+        if (mainWindowTopmostChangeFunc_) {
+            mainWindowTopmostChangeFunc_(isTopmost);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsMainWindowTopmost() const
+{
+    return GetSessionProperty()->IsMainWindowTopmost();
+}
+
 void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;

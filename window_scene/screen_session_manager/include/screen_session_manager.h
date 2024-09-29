@@ -305,6 +305,7 @@ public:
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
 
+    void SetMultiScreenStatus(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

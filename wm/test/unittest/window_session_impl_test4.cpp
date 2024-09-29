@@ -191,6 +191,51 @@ HWTEST_F(WindowSessionImplTest4, IsTopmost, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetMainWindowTopmost");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    WMError res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: IsMainWindowTopmost
+ * @tc.desc: IsMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("IsMainWindowTopmost");
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    bool res = window->IsMainWindowTopmost();
+    ASSERT_FALSE(res);
+}
+
+/**
  * @tc.name: SetDecorVisible
  * @tc.desc: SetDecorVisible and check the retCode
  * @tc.type: FUNC

@@ -970,6 +970,19 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
+            return;
+        }
+        session->mainWindowTopmostChangeFunc_ = func;
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func)
 {
     auto task = [weakThis = wptr(this), func]() {
@@ -3361,6 +3374,14 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST) {
+        uint32_t accessTokenId = property->GetAccessTokenId();
+        if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
+            PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+    }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
@@ -3491,6 +3512,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowMask(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
             return HandleActionUpdateTopmost(property, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
+            return HandleActionUpdateMainWindowTopmost(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateModeSupportInfo(property, action);
         default:
@@ -3788,6 +3811,13 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     }
 
     SetTopmost(property->IsTopmost());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    SetMainWindowTopmost(property->IsMainWindowTopmost());
     return WMError::WM_OK;
 }
 
@@ -4444,6 +4474,27 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         return WSError::WS_OK;
     };
     PostTask(task, "OnLayoutFullScreenChange");
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
+            isTitleHoverShown, isDockHoverShown);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_) {
+            session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_(
+                isTitleHoverShown, isDockHoverShown);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnTitleAndDockHoverShowChange");
     return WSError::WS_OK;
 }
 
