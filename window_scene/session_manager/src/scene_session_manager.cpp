@@ -8818,32 +8818,32 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
 bool SceneSessionManager::PreHandleCollaboratorSessionAffinity(sptr<SceneSession>& sceneSession, int32_t persistentId)
 {
     if (sceneSession == nullptr) {
-        WLOGFI("sceneSession is null");
+        TLOGI("sceneSession is null");
         return false;
     }
     std::string sessionAffinity;
-    WLOGFI("call NotifyStartAbility & NotifySessionCreate");
+    TLOGI("call NotifyStartAbility & NotifySessionCreate");
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sessionAffinity = sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
     }
     if (sessionAffinity.empty()) {
-        WLOGFI("Session affinity is empty");
+        TLOGI("Session affinity is empty");
         BrokerStates notifyReturn = NotifyStartAbility(
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
-            WLOGFI("notifyReturn not BROKER_STARTED!");
+            TLOGI("notifyReturn not BROKER_STARTED!");
             return false;
         }
     }
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sceneSession->SetSessionInfoAffinity(sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY));
-        WLOGFI("ANCO_SESSION_ID: %{public}d, want affinity: %{public}s.",
+        TLOGI("ANCO_SESSION_ID: %{public}d, want affinity: %{public}s.",
             sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0),
             sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
-        WLOGFI("sceneSession->GetSessionInfo().want is nullptr");
+        TLOGI("sceneSession->GetSessionInfo().want is nullptr");
     }
     return true;
 }

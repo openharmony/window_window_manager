@@ -502,6 +502,54 @@ HWTEST_F(SceneSessionManagerTest10, GetAllSceneSessionForAccessibility, Function
     ASSERT_EQ(sceneSessionList.size(), 1);
 }
 
+/**
+ * @tc.name: PreHandleCollaboratorSessionAffinity
+ * @tc.desc: PreHandleCollaboratorSessionAffinity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, PreHandleCollaboratorSessionAffinity, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "PreHandleCollaboratorSessionAffinity";
+    info.bundleName_ = "PreHandleCollaboratorSessionAffinity";
+    sptr<SceneSession> sceneSession = nullptr;
+    bool result = ssm_->PreHandleCollaboratorSessionAffinity(sceneSession);
+    EXPECT_FALSE(result);
+
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    result = ssm_->PreHandleCollaboratorSessionAffinity(sceneSession);
+    EXPECT_TRUE(result);
+
+    sceneSession = nullptr;
+    AppExecFwk::ApplicationInfo applicationInfo_;
+    applicationInfo_.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
+    AppExecFwk::AbilityInfo abilityInfo_;
+    abilityInfo_.applicationInfo = applicationInfo_;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    result = ssm_->PreHandleCollaboratorSessionAffinity(sceneSession);
+    EXPECT_TRUE(result);
+
+    sceneSession = nullptr;
+    applicationInfo_.codePath = std::to_string(CollaboratorType::OTHERS_TYPE);
+    abilityInfo_.applicationInfo = applicationInfo_;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    result = ssm_->PreHandleCollaboratorSessionAffinity(sceneSession);
+    EXPECT_TRUE(result);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().want, nullptr);
+    sceneSession = nullptr;
+    info.want = std::make_shared<AAFwk::Want>();
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    result = ssm_->PreHandleCollaboratorSessionAffinity(sceneSession);
+    EXPECT_TRUE(result);
+}
+
 }  // namespace
 }
 }
