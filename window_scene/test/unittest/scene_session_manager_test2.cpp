@@ -88,7 +88,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
 bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
 bool SceneSessionManagerTest2::statusBarEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 ProcessStatusBarEnabledChangeFunc SceneSessionManagerTest2::statusBarEnabledCallbackFunc_ = [](bool enable,
@@ -2106,6 +2106,47 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
     Info.bundleName_ = "testInfo1b";
     sptr<SceneSession> session = new (std::nothrow) SceneSession(Info, nullptr);
     ssm_->NotifyCreateToastSession(persistentId, session);
+}
+
+/**
+ * @tc.name: UpdateGestureBackEnabled
+ * @tc.desc: UpdateGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "UpdateGestureBackEnabled";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, property);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sceneSession->persistentId_ = 1;
+    ASSERT_EQ(ssm_->GetSceneSession(1), sceneSession);
+    sceneSession->isEnableGestureBack_ = false;
+    sceneSession->isEnableGestureBackHadSet_ = false;
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->isEnableGestureBackHadSet_ = true;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->NotifyEnterRecentTask(false);
+    ASSERT_EQ(ssm_->enterRecent_.load(), false);
+    sceneSession->UpdateFocus(true);
+    ASSERT_EQ(sceneSession->IsFocused(), true);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->UpdateGestureBackEnabled(1);
+    sleep(WAIT_SLEEP_TIME);
+    ssm_->sceneSessionMap_.erase(1);
 }
 }
 } // namespace Rosen

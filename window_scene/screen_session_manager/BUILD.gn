@@ -84,6 +84,7 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_session_dumper.cpp",
     "src/screen_session_manager.cpp",
     "src/screen_setting_helper.cpp",
+    "src/screen_tent_property.cpp",
     "src/session_display_power_controller.cpp",
     "src/setting_observer.cpp",
     "src/setting_provider.cpp",

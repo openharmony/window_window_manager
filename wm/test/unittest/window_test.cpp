@@ -461,6 +461,20 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetTitleAndDockHoverShown
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTitleAndDockHoverShown, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetTitleAndDockHoverShown(true, true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetFullScreen
  * @tc.desc: get
  * @tc.type: FUNC
@@ -2342,7 +2356,7 @@ HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Le
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->RegisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2357,7 +2371,7 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->UnregisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
