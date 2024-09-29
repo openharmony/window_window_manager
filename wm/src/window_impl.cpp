@@ -3970,6 +3970,10 @@ bool WindowImpl::IsFullScreen() const
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return;
+    }
     if (property_->GetRequestedOrientation() == orientation) {
         return;
     }
@@ -3981,6 +3985,10 @@ void WindowImpl::SetRequestedOrientation(Orientation orientation)
 
 Orientation WindowImpl::GetRequestedOrientation()
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return Orientation::UNSPECIFIED;
+    }
     return property_->GetRequestedOrientation();
 }
 
