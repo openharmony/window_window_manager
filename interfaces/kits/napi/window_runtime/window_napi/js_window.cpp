@@ -5101,10 +5101,9 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
         TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert to TransitionController Object");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    const char* const where = __func__;
     napi_wrap(env, objValue, new wptr<JsTransitionController>(nativeController),
-        [where](napi_env, void* data, void*) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: Finalizer for wptr JsTransitionController called", where);
+        [](napi_env, void* data, void*) {
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: Finalizer for wptr JsTransitionController called");
             delete static_cast<wptr<JsTransitionController>*>(data);
         }, nullptr, nullptr);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(nativeController));
