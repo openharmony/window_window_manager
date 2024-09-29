@@ -1005,13 +1005,13 @@ void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFun
     auto task = [weakThis = wptr(this), func]() {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session or gravityChangeFunc is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session or RestoreMainWindowFunc is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = func;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "RestoreMainWindow id: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "RestoreMainWindow id: %{public}d",
             session->GetPersistentId());
         return WSError::WS_OK;
     };

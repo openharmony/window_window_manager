@@ -2187,7 +2187,7 @@ WMError WindowSceneSessionImpl::Restore()
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (property_->GetIsAppSupportPhoneInPc()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is isAppSupportPhoneInPc,The device is not supported");
+        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc,The device is not supported");
         return static_cast<WMError>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     auto hostSession = GetHostSession();
