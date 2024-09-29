@@ -555,6 +555,20 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSensorRotationChanged02, Function | S
 }
 
 /**
+ * @tc.name: OnHoverStatusChanged01
+ * @tc.desc: OnHoverStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnHoverStatusChanged01, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    int32_t hoverStatus = 0;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->OnHoverStatusChanged(screenId, hoverStatus);
+}
+
+/**
  * @tc.name: OnScreenOrientationChanged01
  * @tc.desc: OnScreenOrientationChanged test
  * @tc.type: FUNC

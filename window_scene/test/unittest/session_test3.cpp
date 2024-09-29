@@ -1185,6 +1185,11 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
 {
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
     session_->property_ = nullptr;
     bool enable = true;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
@@ -1220,6 +1225,74 @@ HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, Function | SmallTest | L
     session_->surfaceNode_ = nullptr;
     std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
     ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotPixelMap
+ * @tc.desc: GetSnapshotPixelMap Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, Function | SmallTest | Level2)
+{
+    session_->scenePersistence_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
+    EXPECT_NE(nullptr, session_->scenePersistence_);
+    session_->scenePersistence_->isSavingSnapshot_.store(true);
+    session_->snapshot_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+}
+
+/**
+ * @tc.name: ResetDirtyFlags
+ * @tc.desc: ResetDirtyFlags Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, ResetDirtyFlags, Function | SmallTest | Level2)
+{
+    session_->isVisible_ = false;
+    session_->dirtyFlags_ = 64;
+    session_->ResetDirtyFlags();
+    EXPECT_EQ(64, session_->dirtyFlags_);
+
+    session_->isVisible_ = true;
+    session_->dirtyFlags_ = 16;
+    session_->ResetDirtyFlags();
+    EXPECT_EQ(0, session_->dirtyFlags_);
+}
+
+/**
+ * @tc.name: SetMainSessionUIStateDirty
+ * @tc.desc: SetMainSessionUIStateDirty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | Level2)
+{
+    SessionInfo infoDirty;
+    infoDirty.abilityName_ = "SetMainSessionUIStateDirty";
+    infoDirty.moduleName_ = "SetMainSessionUIStateDirty";
+    infoDirty.bundleName_ = "SetMainSessionUIStateDirty";
+    infoDirty.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_END);
+    sptr<Session> sessionDirty = sptr<Session>::MakeSptr(infoDirty);
+    EXPECT_NE(nullptr, sessionDirty);
+
+    session_->parentSession_ = nullptr;
+    EXPECT_EQ(nullptr, session_->GetParentSession());
+    sessionDirty->SetUIStateDirty(false);
+    session_->SetMainSessionUIStateDirty(false);
+    EXPECT_EQ(false, sessionDirty->GetUIStateDirty());
+
+    session_->SetParentSession(sessionDirty);
+    EXPECT_EQ(sessionDirty, session_->GetParentSession());
+    session_->SetMainSessionUIStateDirty(false);
+    EXPECT_EQ(false, sessionDirty->GetUIStateDirty());
+
+    infoDirty.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<Session> sessionUIState = sptr<Session>::MakeSptr(infoDirty);
+    EXPECT_NE(nullptr, sessionUIState);
+    session_->SetParentSession(sessionUIState);
+    session_->SetMainSessionUIStateDirty(true);
+    EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
 }
 } // namespace Rosen

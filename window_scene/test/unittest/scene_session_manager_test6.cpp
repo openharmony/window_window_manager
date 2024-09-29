@@ -56,7 +56,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest6::ssm_ = nullptr;
 
 bool SceneSessionManagerTest6::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -132,7 +132,7 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
 
 /**
  * @tc.name: GetWindowLayerChangeInfo
- * @tc.desc: GetWindowLayerChangeInfo
+ * @tc.desc: Simulate window Layer change
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTest | Level3)
@@ -156,6 +156,8 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, Function | SmallTes
     ASSERT_NE(nullptr, occlusionDataPtr);
     ASSERT_NE(nullptr, ssm_);
     ssm_->GetWindowLayerChangeInfo(occlusionDataPtr, currVisibleData, currDrawingContentData);
+    ASSERT_EQ(currVisibleData.size(), 7);
+    ASSERT_EQ(currDrawingContentData.size(), 4);
 }
 
 /**
@@ -932,6 +934,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
     sessionInfo.isBackTransition_ = false;
+    sessionInfo.screenId_ = 100;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
@@ -939,8 +942,11 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
-    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+    ASSERT_EQ(100, sceneSession->GetSessionInfo().screenId_);
 }
 
 /**
@@ -1704,15 +1710,16 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "WindowDestroyNotifyVisibility";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(false);
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
     sceneSession->SetRSVisible(true);
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
-    sceneSession->SetRSVisible(false);
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-    sceneSession = nullptr;
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    ASSERT_FALSE(sceneSession->GetRSVisible());
 }
 
 /**
@@ -1747,23 +1754,26 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
  */
 HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | Level3)
 {
-    SessionInfo sessionInfo;
-    sptr<WindowSessionProperty> property = nullptr;
-    ssm_->RequestSceneSession(sessionInfo, property);
+    SessionInfo info1;
+    info1.persistentId_ = 1;
+    info1.isPersistentRecover_ = false;
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
 
-    sessionInfo.persistentId_ = 1;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
+    SessionInfo info2;
+    info2.abilityName_ = "RequestSceneSession";
+    info2.bundleName_ = "RequestSceneSession";
+    info2.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->RequestSceneSession(sessionInfo, property);
+    sptr<SceneSession> getSceneSession1 = ssm_->RequestSceneSession(info1, windowSessionProperty);
+    ASSERT_EQ(info1.bundleName_, getSceneSession1->GetSessionInfo().bundleName_);
 
-    ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ssm_->RequestSceneSession(sessionInfo, property);
-
-    sessionInfo.persistentId_ = 0;
-    ssm_->RequestSceneSession(sessionInfo, property);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    sptr<SceneSession> getSceneSession2 = ssm_->RequestSceneSession(info2, windowSessionProperty);
+    ASSERT_NE(info2.bundleName_, getSceneSession2->GetSessionInfo().bundleName_);
 }
 
 /**
@@ -1816,7 +1826,8 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     sptr<Session> session = new Session(info);
     ASSERT_NE(session, nullptr);
     session->GetDialogVector().clear();
-    ssm_->DestroyDialogWithMainWindow(scnSession);
+    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     ASSERT_NE(sceneSession, nullptr);
@@ -1827,7 +1838,8 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
 
     WindowVisibilityInfo windowVisibilityInfo;
     windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
-    ssm_->DestroyDialogWithMainWindow(scnSession);
+    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1842,7 +1854,8 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     bool needRemoveSession = true;
     bool isSaveSnapshot = true;
     bool isForceClean = true;
-    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
@@ -1850,7 +1863,8 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
 }
 
 /**

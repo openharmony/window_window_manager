@@ -72,6 +72,22 @@ HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleHoverStatusEventInput
+ * @tc.desc: test function : HandleHoverStatusEventInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, HandleHoverStatusEventInput, Function | SmallTest | Level1)
+{
+    ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::INVALID);
+    ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
+    ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
+    ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
+    ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    ASSERT_EQ(screenSession, nullptr);
+}
+
+/**
  * @tc.name: ConvertDeviceToFloat
  * @tc.desc: test function : ConvertDeviceToFloat
  * @tc.type: FUNC
