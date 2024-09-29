@@ -428,16 +428,16 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     auto result = scensession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(parentSession, nullptr);
     scensession->SetParentSession(parentSession);
     sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     EXPECT_NE(scensessionchangeCallBack, nullptr);
     scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
     result = scensession->RaiseToAppTop();

@@ -776,32 +776,35 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSceneSessionImplTest, GetTopwindowWithId, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     option->SetWindowName("GetTopwindowWithId");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
-    sptr<WindowSessionImpl> session = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> session = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, session);
+    uint32_t windowId = 1;
+    string winName = "test";
     WindowSessionImpl::windowSessionMap_.insert(
-        std::make_pair("test", std::pair<int32_t, sptr<WindowSessionImpl>>(1, session)));
-    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
-        SetArgReferee<1>(0),
-        Return(WMError::WM_DO_NOTHING)
-    ));
-    ASSERT_EQ(nullptr, window->GetTopWindowWithId(1));
+        std::make_pair(winName, std::pair<int32_t, sptr<WindowSessionImpl>>(windowId, session)));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    uint32_t mainWinId = 1;
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
 
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
-        SetArgReferee<1>(1),
+        SetArgReferee<1>(windowId),
         Return(WMError::WM_OK)
     ));
-    ASSERT_NE(nullptr, window->GetTopWindowWithId(1));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
 
+    int32_t tempWinId = 3;
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
-        SetArgReferee<1>(4),
+        SetArgReferee<1>(tempWinId),
         Return(WMError::WM_OK)
     ));
-    ASSERT_EQ(nullptr, window->GetTopWindowWithId(0));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
 /*

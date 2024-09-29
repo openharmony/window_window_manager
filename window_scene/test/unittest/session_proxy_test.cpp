@@ -73,24 +73,24 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseToAppTop start";
-    sptr<MockIRemoteObject> remoteMocker = new MockIRemoteObject();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(nullptr, remoteMocker);
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(remoteMocker);
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(nullptr, sProxy);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     WSError res = sProxy->RaiseToAppTop();
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    SessionProxy* tempProxy = new(std::nothrow) SessionProxy(nullptr);
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(nullptr, tempProxy);
     res = tempProxy->RaiseToAppTop();
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 
-    remoteMocker->SetRequestResult(1);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     res = sProxy->RaiseToAppTop();
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    remoteMocker->SetRequestResult(0);
+    remoteMocker->SetRequestResult(ERR_NONE);
 
     res = sProxy->RaiseToAppTop();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -106,26 +106,27 @@ HWTEST_F(SessionProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, RaiseAboveTarget, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAboveTarget start";
-    sptr<MockIRemoteObject> remoteMocker = new MockIRemoteObject();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(nullptr, remoteMocker);
-    SessionProxy* proxy = new(std::nothrow) SessionProxy(remoteMocker);
+    sptr<SessionProxy> proxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(nullptr, proxy);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WSError res = proxy->RaiseAboveTarget(0);
+    int32_t subWindowId = 0;
+    WSError res = proxy->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    SessionProxy* tempProxy = new(std::nothrow) SessionProxy(nullptr);
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(nullptr, tempProxy);
-    res = tempProxy->RaiseAboveTarget(0);
+    res = tempProxy->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 
-    remoteMocker->SetRequestResult(1);
-    res = proxy->RaiseAboveTarget(0);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = proxy->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    remoteMocker->SetRequestResult(0);
+    remoteMocker->SetRequestResult(ERR_NONE);
 
-    res = proxy->RaiseAboveTarget(0);
+    res = proxy->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAboveTarget end";
