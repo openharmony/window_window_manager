@@ -1802,6 +1802,36 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     return ret;
 }
 
+WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
+    bool isTitleHoverShown, bool isDockHoverShown)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
+        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(),
+        static_cast<int32_t>(isTitleHoverShown), static_cast<int32_t>(isDockHoverShown));
+    if (WindowHelper::IsSystemWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    auto isPC = windowSystemConfig_.IsPcWindow();
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    WindowType winType = property_->GetWindowType();
+    if (!WindowHelper::IsMainWindow(winType)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is not main window");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    titleHoverShowEnabled_ = isTitleHoverShown;
+    dockHoverShowEnabled_ = isDockHoverShown;
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
+    }
+    return WMError::WM_OK;
+}
+
 bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 {
     WindowType winType = property_->GetWindowType();
@@ -2041,12 +2071,19 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    titleHoverShowEnabled_ = true;
+    dockHoverShowEnabled_ = true;
     switch (presentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
             enableImmersiveMode_ = true;
             break;
         case MaximizePresentation::EXIT_IMMERSIVE:
             enableImmersiveMode_ = false;
+            break;
+        case MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER:
+            enableImmersiveMode_ = true;
+            titleHoverShowEnabled_ = false;
+            dockHoverShowEnabled_ = false;
             break;
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;
@@ -2055,6 +2092,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+    hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_);
@@ -4071,5 +4109,38 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 {
     return property_->GetIsUIExtensionSubWindowFlag();
 }
+
+WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
+{
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    gestureBackEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetGestureBackEnabled(enable);
+}
+ 
+bool WindowSceneSessionImpl::GetGestureBackEnabled() const
+{
+    if (windowSystemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return true;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return true;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
+        GetWindowId(), gestureBackEnabled_);
+    return gestureBackEnabled_;
+}
+
 } // namespace Rosen
 } // namespace OHOS

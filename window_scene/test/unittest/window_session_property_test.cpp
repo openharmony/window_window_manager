@@ -193,6 +193,19 @@ HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    bool isTopmost = true;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetMainWindowTopmost(isTopmost);
+    ASSERT_TRUE(windowSessionProperty.IsMainWindowTopmost());
+}
+
+/**
  * @tc.name: GetParentId
  * @tc.desc: GetParentId test
  * @tc.type: FUNC
@@ -710,6 +723,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
@@ -751,6 +765,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }

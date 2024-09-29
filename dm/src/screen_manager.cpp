@@ -728,4 +728,10 @@ bool ScreenManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatu
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenStatus(screenId, screenStatus);
 }
 
+DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenMaxRefreshRate(id,
+        refreshRate, actualRefreshRate);
+}
 } // namespace OHOS::Rosen

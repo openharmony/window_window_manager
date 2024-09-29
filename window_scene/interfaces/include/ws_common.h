@@ -28,6 +28,7 @@
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
 class ProcessOptions;
+class StartWindowOption;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
@@ -307,6 +308,7 @@ struct SessionInfo {
     std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
+    std::shared_ptr<AAFwk::StartWindowOption> startWindowOption = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode = -1;
     int32_t requestCode = -1;
@@ -474,21 +476,21 @@ struct WSRectT {
         return false;
     }
 
-    inline bool IsInRegion(int32_t pointX, int32_t pointY)
+    inline bool IsInRegion(int32_t pointX, int32_t pointY) const
     {
         return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
     }
 
-    inline bool IsOverlap(const WSRectT<T>& a) const
+    inline bool IsOverlap(const WSRectT<T>& rect) const
     {
-        int32_t xStart = std::max(posX_, a.posX_);
+        int32_t xStart = std::max(posX_, rect.posX_);
         int32_t xEnd = std::min(posX_ + static_cast<int32_t>(width_),
-            a.posX_ + static_cast<int32_t>(a.width_));
-        int32_t yStart = std::max(posY_, a.posY_);
+            rect.posX_ + static_cast<int32_t>(rect.width_));
+        int32_t yStart = std::max(posY_, rect.posY_);
         int32_t yEnd = std::min(posY_ + static_cast<int32_t>(height_),
-            a.posY_ + static_cast<int32_t>(a.height_));
-        return yStart < yEnd && xStart < xEnd;
+            rect.posY_ + static_cast<int32_t>(rect.height_));
+        return (yStart < yEnd) && (xStart < xEnd);
     }
 
     inline bool IsInvalid() const
@@ -605,7 +607,6 @@ struct SceneAnimationConfig {
 struct RotateAnimationConfig {
     int32_t duration_ = ROTATE_ANIMATION_DURATION;
 };
-
 
 struct SessionEventParam {
     int32_t pointerX_ = 0;

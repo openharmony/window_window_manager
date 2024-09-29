@@ -163,6 +163,11 @@ public:
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError SetLayoutFullScreen(bool status) = 0;
+    virtual WMError SetTitleAndDockHoverShown(bool titleHoverShowEnabled = true,
+        bool dockHoverShowEnabled = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError Destroy() = 0;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
@@ -296,6 +301,8 @@ public:
     virtual WMError RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
     virtual bool IsTopmost() const { return false; }
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    virtual bool IsMainWindowTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
@@ -345,9 +352,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -378,6 +386,19 @@ public:
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool GetGestureBackEnabled() const { return true; }
 };
 }
 }

@@ -27,6 +27,7 @@
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "screen_rotation_property.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -65,6 +66,7 @@ private:
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
     void SetEnterOrExitTentMode(std::string input);
+    void SetHoverStatusChange(std::string input);
     void MockSendCastPublishEvent(std::string input);
     bool IsValidDisplayModeCommand(std::string command);
     int SetFoldDisplayMode();

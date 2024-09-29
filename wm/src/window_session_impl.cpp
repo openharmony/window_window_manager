@@ -681,7 +681,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ",duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
+        ", duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
         wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
         GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -1501,6 +1501,27 @@ bool WindowSessionImpl::IsTopmost() const
     return property_->IsTopmost();
 }
 
+/** @note @window.hierarchy */
+WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetMainWindowTopmost(isTopmost);
+    uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    property_->SetAccessTokenId(accessTokenId);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "tokenId = %{private}u, isTopmost = %{public}d", accessTokenId, isTopmost);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
+}
+
+bool WindowSessionImpl::IsMainWindowTopmost() const
+{
+    return property_->IsMainWindowTopmost();
+}
+
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     WLOGFD("%{public}d", dragEnabled);
@@ -1817,15 +1838,23 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
         RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    modalRet = isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    return modalRet;
 }
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
@@ -1943,7 +1972,6 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -1953,7 +1981,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
-        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             WLOGFE("register failed");
             return ret;
@@ -1975,7 +2003,13 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+        uiContent->SubscribeContainerModalButtonsRectChange(
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -1983,10 +2017,10 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
             titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
             titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+            window->NotifyWindowTitleButtonRectChange(titleButtonRect);
         });
     }
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
