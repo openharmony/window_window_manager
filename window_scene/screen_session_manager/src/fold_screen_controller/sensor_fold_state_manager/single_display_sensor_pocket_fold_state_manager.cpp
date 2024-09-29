@@ -138,6 +138,7 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angl
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
             isCameraStatus_ = false;
         }
+        return;
     }
 
     if ((std::isless(angle, HOVER_STATUS_EXIT_MIN_THRESHOLD)) ||
@@ -147,6 +148,7 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angl
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
             isCameraStatus_ = false;
         }
+        return;
     }
     
     if (applicationStateObserver_ == nullptr) {
