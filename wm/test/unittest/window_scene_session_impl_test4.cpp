@@ -1137,6 +1137,117 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard02, Function | SmallT
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
+static sptr<WindowSceneSessionImpl> CreateWindow(std::string windowName, WindowType type, int32_t id)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName(windowName);
+    option->SetWindowType(type);
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(id);
+    return window;
+}
+
+/**
+ * @tc.name: GetParentMainWindowId
+ * @tc.desc: GetParentMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetParentMainWindowId001, Function | SmallTest | Level2)
+{
+    using SessionPair = std::pair<uint64_t, sptr<WindowSessionImpl>>;
+    // toastSubWindow is function caller
+    sptr<WindowSceneSessionImpl> toastWindow = CreateWindow("toastWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 99);
+    toastWindow->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    toastWindow->windowSessionMap_["toastWindow"] = SessionPair(toastWindow->GetPersistentId(), toastWindow);
+    int32_t res = 0;
+    res = toastWindow->GetParentMainWindowId(0);
+    ASSERT_EQ(res, 0);
+
+    sptr<WindowSceneSessionImpl> mainWindow = CreateWindow("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 100);
+    ASSERT_NE(mainWindow, nullptr);
+    toastWindow->windowSessionMap_["mainWindow"] = SessionPair(mainWindow->GetPersistentId(), mainWindow);
+    toastWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    res = toastWindow->GetParentMainWindowId(toastWindow->GetPersistentId());
+    ASSERT_EQ(res, mainWindow->GetPersistentId());
+    res = 0;
+
+    sptr<WindowSceneSessionImpl> subWindow = CreateWindow("subWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 101);
+    ASSERT_NE(subWindow, nullptr);
+    subWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    toastWindow->property_->SetParentPersistentId(subWindow->GetPersistentId());
+    toastWindow->windowSessionMap_["subWindow"] = SessionPair(subWindow->GetPersistentId(), subWindow);
+    res = toastWindow->GetParentMainWindowId(toastWindow->GetPersistentId());
+    ASSERT_EQ(res, mainWindow->GetPersistentId());
+    res = 0;
+    
+    sptr<WindowSceneSessionImpl> dialogWindow = CreateWindow("dialogWindow", WindowType::WINDOW_TYPE_DIALOG, 102);
+    ASSERT_NE(dialogWindow, nullptr);
+    dialogWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    toastWindow->property_->SetParentPersistentId(dialogWindow->GetPersistentId());
+    toastWindow->windowSessionMap_["dialogWindow"] = SessionPair(dialogWindow->GetPersistentId(), dialogWindow);
+    res = toastWindow->GetParentMainWindowId(toastWindow->GetPersistentId());
+    ASSERT_EQ(res, mainWindow->GetPersistentId());
+    res = 0;
+
+    sptr<WindowSceneSessionImpl> pipWindow = CreateWindow("dialogWindow", WindowType::WINDOW_TYPE_PIP, 103);
+    ASSERT_NE(pipWindow, nullptr);
+    pipWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    toastWindow->property_->SetParentPersistentId(pipWindow->GetPersistentId());
+    toastWindow->windowSessionMap_.insert(std::make_pair("dialogWindow",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(pipWindow->GetPersistentId(), pipWindow)));
+    res = toastWindow->GetParentMainWindowId(toastWindow->GetPersistentId());
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: FindParentMainSession001
+ * @tc.desc: FindParentMainSession001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, FindParentMainSession001, Function | SmallTest | Level2)
+{
+    using SessionPair = std::pair<uint64_t, sptr<WindowSessionImpl>>;
+    // toastSubWindow is function caller
+    sptr<WindowSceneSessionImpl> toastWindow = CreateWindow("toastWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 99);
+    toastWindow->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    ASSERT_NE(toastWindow, nullptr);
+    toastWindow->windowSessionMap_["toastWindow"] = SessionPair(toastWindow->GetPersistentId(), toastWindow);
+    sptr<WindowSessionImpl> result = nullptr;
+
+    result = toastWindow->FindParentMainSession(0, toastWindow->windowSessionMap_);
+    ASSERT_EQ(result, nullptr);
+
+    // mainWindow need to be found
+    sptr<WindowSessionImpl> mainWindow = CreateWindow("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 100);
+    ASSERT_NE(mainWindow, nullptr);
+    toastWindow->windowSessionMap_["mainWindow"] = SessionPair(mainWindow->GetPersistentId(), mainWindow);
+    toastWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    result = toastWindow->FindParentMainSession(toastWindow->GetParentId(), toastWindow->windowSessionMap_);
+    ASSERT_EQ(result, mainWindow);
+    result = nullptr;
+
+    sptr<WindowSessionImpl> subWindow = CreateWindow("subWindow", WindowType::WINDOW_TYPE_APP_SUB_WINDOW, 101);
+    ASSERT_NE(subWindow, nullptr);
+    subWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    toastWindow->property_->SetParentPersistentId(subWindow->GetPersistentId());
+    toastWindow->windowSessionMap_["subWindow"] = SessionPair(subWindow->GetPersistentId(), subWindow);
+    result = toastWindow->FindParentMainSession(toastWindow->GetParentId(), toastWindow->windowSessionMap_);
+    ASSERT_EQ(result, mainWindow);
+    result = nullptr;
+
+    sptr<WindowSessionImpl> floatWindow = CreateWindow("floatWindow", WindowType::WINDOW_TYPE_FLOAT, 105);
+    ASSERT_NE(subWindow, nullptr);
+    toastWindow->property_->SetParentPersistentId(floatWindow->GetPersistentId());
+    floatWindow->property_->SetParentPersistentId(0);
+    toastWindow->windowSessionMap_["floatWindow"] = SessionPair(floatWindow->GetPersistentId(), floatWindow);
+    result = toastWindow->FindParentMainSession(toastWindow->GetParentId(), toastWindow->windowSessionMap_);
+    ASSERT_EQ(result, floatWindow);
+    result = nullptr;
+
+    floatWindow->property_->SetParentPersistentId(mainWindow->GetPersistentId());
+    result = toastWindow->FindParentMainSession(toastWindow->GetParentId(), toastWindow->windowSessionMap_);
+    ASSERT_EQ(result, mainWindow);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
