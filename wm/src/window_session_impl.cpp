@@ -148,7 +148,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return;                                                            \
         }                                                                      \
     } while (false)
- 
+
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
     do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
@@ -156,7 +156,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return ret;                                                        \
         }                                                                      \
     } while (false)
- 
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
@@ -2177,12 +2177,20 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
+        std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+        ClearUselessListeners(windowNoInteractionListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
-        subWindowCloseListeners_[GetPersistentId()] = nullptr;
+        ClearUselessListeners(subWindowCloseListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+        ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Clear successfully, id: %{public}d.", GetPersistentId());
 }
