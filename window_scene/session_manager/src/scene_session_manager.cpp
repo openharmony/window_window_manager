@@ -8822,7 +8822,7 @@ bool SceneSessionManager::PreHandleCollaboratorStartAbility(sptr<SceneSession>& 
         return false;
     }
     std::string sessionAffinity;
-    TLOGI(WmsLogTag::WMS_LIFE, "call NotifyStartAbility & NotifySessionCreate");
+    TLOGI(WmsLogTag::WMS_LIFE, "call");
     if (sceneSession->GetSessionInfo().want != nullptr) {
         sessionAffinity = sceneSession->GetSessionInfo().want
             ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
@@ -8832,7 +8832,7 @@ bool SceneSessionManager::PreHandleCollaboratorStartAbility(sptr<SceneSession>& 
         BrokerStates notifyReturn = NotifyStartAbility(
             sceneSession->GetCollaboratorType(), sceneSession->GetSessionInfo(), persistentId);
         if (notifyReturn != BrokerStates::BROKER_STARTED) {
-            TLOGI(WmsLogTag::WMS_LIFE, "notifyReturn not BROKER_STARTED!");
+            TLOGE(WmsLogTag::WMS_LIFE, "notifyReturn not BROKER_STARTED!");
             return false;
         }
     }
