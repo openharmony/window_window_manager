@@ -1289,8 +1289,8 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
     ASSERT_NE(nullptr, subSession);
     subWindow->hostSession_ = subSession;
-    subWindow->property_->SetModeSupportInfo(0);
-    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subWindow->property_->SetModeSupportInfo(1);
+    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

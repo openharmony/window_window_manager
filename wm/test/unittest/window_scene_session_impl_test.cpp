@@ -1566,7 +1566,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetLayoutFullScreen02");
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
 
     window->hostSession_ = nullptr;
     window->property_->SetCompatibleModeInPc(true);
