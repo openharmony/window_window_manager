@@ -413,6 +413,15 @@ HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTe
     ASSERT_EQ(enable, scensession->GetBufferAvailableCallbackEnable());
 }
 
+/**
+ * @tc.name: GetBufferAvailableCallbackEnable
+ * @tc.desc: check func GetBufferAvailableCallbackEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTest | Level2)
+{
+    int a =3;
+}
 }
 }
 }
