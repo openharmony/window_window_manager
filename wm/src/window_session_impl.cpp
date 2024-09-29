@@ -1501,6 +1501,27 @@ bool WindowSessionImpl::IsTopmost() const
     return property_->IsTopmost();
 }
 
+/** @note @window.hierarchy */
+WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetMainWindowTopmost(isTopmost);
+    uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    property_->SetAccessTokenId(accessTokenId);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "tokenId = %{private}u, isTopmost = %{public}d", accessTokenId, isTopmost);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
+}
+
+bool WindowSessionImpl::IsMainWindowTopmost() const
+{
+    return property_->IsMainWindowTopmost();
+}
+
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     WLOGFD("%{public}d", dragEnabled);

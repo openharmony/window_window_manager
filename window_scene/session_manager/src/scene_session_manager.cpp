@@ -3148,6 +3148,11 @@ WSError SceneSessionManager::ProcessBackEvent()
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
             WLOGFD("RequestSessionBack when start session");
+            if (session->GetSessionInfo().abilityInfo != nullptr &&
+                session->GetSessionInfo().abilityInfo->unclearableMission) {
+                TLOGI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
+                return WSError::WS_OK;
+            }
             session->RequestSessionBack(false);
             return WSError::WS_OK;
         }
@@ -7429,16 +7434,13 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData)
 {
     bool sessionRSVisible = false;
-    for (const auto& elem : currVisibleData) {
-        uint64_t surfaceId = elem.first;
-        WindowVisibilityState visibleState = elem.second;
-        bool isVisible = visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+    for (const auto& [surfaceId, visibleState] : currVisibleData) {
         sptr<SceneSession> visibilitySession = SelectSesssionFromMap(surfaceId);
         if (visibilitySession == nullptr) {
             continue;
         }
         if (session->GetWindowId() == visibilitySession->GetWindowId()) {
-            if (isVisible) {
+            if (visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
                 sessionRSVisible = true;
             }
             break;
@@ -7980,11 +7982,9 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
     if (avoidArea.bottomRect_.IsUninitializedRect()) {
         return true;
     }
-    if (isVisible &&
-        (avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) == sessionBottom)) {
-        return true;
-    }
-    return false;
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
