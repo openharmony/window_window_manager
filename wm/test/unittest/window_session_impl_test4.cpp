@@ -373,6 +373,19 @@ HWTEST_F(WindowSessionImplTest4, RegisterExtensionAvoidAreaChangeListener, Funct
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->RegisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    vector<sptr<IAvoidAreaChangedListener>> holder;
+    window->avoidAreaChangeListeners_[window->property_->GetPersistentId()] = holder;
+    res = window->RegisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+    holder = window->avoidAreaChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_NE(existsListener, holder.end());
+
+    // already registered
+    res = window->RegisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: RegisterExtensionAvoidAreaChangeListener end";
 }
 
@@ -392,6 +405,18 @@ HWTEST_F(WindowSessionImplTest4, UnregisterExtensionAvoidAreaChangeListener, Fun
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    vector<sptr<IAvoidAreaChangedListener>> holder;
+    window->avoidAreaChangeListeners_[window->property_->GetPersistentId()] = holder;
+    window->RegisterExtensionAvoidAreaChangeListener(listener);
+
+    res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    holder = window->avoidAreaChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_EQ(existsListener, holder.end());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UnregisterExtensionAvoidAreaChangeListener end";
 }
 
