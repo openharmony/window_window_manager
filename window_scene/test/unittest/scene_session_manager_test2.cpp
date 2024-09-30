@@ -1459,9 +1459,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallT
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     ssm_->sceneSessionMap_.erase(0);
@@ -2085,8 +2083,28 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
-    property->SetParentPersistentId(1);
+    int32_t parentPersistentId = 1;
+    property->SetParentPersistentId(parentPersistentId);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
+    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
+    ssm_->RecoverCachedSubSession(parentPersistentId);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
+}
+
+
+/**
+ * @tc.name: SetAlivePersistentIds
+ * @tc.desc: SetAlivePersistentIds
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
+    ssm_->SetAlivePersistentIds(recoveredPersistentIds);
+    ASSERT_EQ(ssm_->alivePersistentIds_, recoveredPersistentIds);
 }
 
 /**
