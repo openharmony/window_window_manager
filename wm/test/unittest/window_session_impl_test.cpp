@@ -704,7 +704,7 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
 
     displayId = 0;
     rectW.height_ = 500;
-    rectW.width_ = 500; 
+    rectW.width_ = 500;
     window->useUniqueDensity_ = false;
     window->property_->SetDisplayId(displayId);
     window->UpdateViewportConfig(rectW, reason);
