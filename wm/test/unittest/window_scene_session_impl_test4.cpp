@@ -43,7 +43,7 @@ public:
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
-    static constexpr uint32_t WAIT_SYANC_TWO_FRAME_US = 36000; // one frame is 18ms, get result at most two frame.
+    static constexpr uint32_t WAIT_SYANC_SERVERAL_FRAMES = 36000;
 };
 
 void WindowSceneSessionImplTest4::SetUpTestCase() {}
@@ -853,7 +853,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
 
     window->state_ = WindowState::STATE_HIDDEN;
     ret = window->MoveToAsync(20000, 20000);
-    usleep(WAIT_SYANC_TWO_FRAME_US);
+    usleep(WAIT_SYANC_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(20000, rect.posX_);
@@ -912,7 +912,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     window->state_ = WindowState::STATE_HIDDEN;
     ret = window->ResizeAsync(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SYANC_TWO_FRAME_US);
+    usleep(WAIT_SYANC_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
