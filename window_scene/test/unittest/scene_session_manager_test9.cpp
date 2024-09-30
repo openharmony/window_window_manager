@@ -575,11 +575,13 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, Function |
 
     sptr<ISession> session;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+    auto result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     property->SetPersistentId(0);
-    ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+    result = ssm_->RecoverAndReconnectSceneSession(nullptr, nullptr, nullptr, session, property, nullptr);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
