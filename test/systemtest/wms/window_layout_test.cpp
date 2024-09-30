@@ -23,6 +23,7 @@
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
 
+#define DELAY_TIME (36000) // one frame is 18ms, we can get result at most two frame
 
 using namespace testing;
 using namespace testing::ext;
@@ -660,28 +661,28 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = window->MoveTo(-500, -500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(-500, rect.posX_);
     EXPECT_EQ(-500, rect.posY_);
 
     ret = window->MoveTo(0, 0);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(0, rect.posX_);
     EXPECT_EQ(0, rect.posY_);
 
     ret = window->MoveTo(500, 500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
 
     ret = window->MoveTo(20000, 20000);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(20000, rect.posX_);
@@ -717,7 +718,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -725,7 +726,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -733,7 +734,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -770,7 +771,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -778,7 +779,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -786,7 +787,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -794,7 +795,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -831,7 +832,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -839,7 +840,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -847,7 +848,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -855,7 +856,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(36000);
+    usleep(DELAY_TIME);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -890,21 +891,21 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 
     ret = window->Resize(-500, -500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(36000);
+    usleep(DELAY_TIME);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(36000);
+    usleep(DELAY_TIME);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.width_);
     EXPECT_EQ(500, rect.height_);
 
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(36000);
+    usleep(DELAY_TIME);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
@@ -1042,14 +1043,14 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(36000);
+    usleep(DELAY_TIME);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(36000);
+    usleep(DELAY_TIME);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
