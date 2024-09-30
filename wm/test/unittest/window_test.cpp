@@ -15,12 +15,14 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
-#include "window.h"
-#include "mock_window_adapter.h"
-#include "singleton_mocker.h"
-#include "scene_board_judgement.h"
-#include "key_event.h"
 #include "accessibility_event_info.h"
+#include "key_event.h"
+#include "mock_window_adapter.h"
+#include "scene_board_judgement.h"
+#include "singleton_mocker.h"
+#include "window.h"
+#include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -199,6 +201,43 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetContext());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetTopWindowWithId
+ * @tc.desc: get top window with id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    ASSERT_NE(nullptr, m);
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    uint32_t mainWinId = 0;
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+    
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    string winName = "test";
+    int32_t winId = 1;
+    WindowSessionImpl::windowSessionMap_.insert(
+        std::make_pair(winName, pair<int32_t, sptr<WindowSessionImpl>>(winId, windowSession)));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    int32_t tempWinId = 3;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(tempWinId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
 /**
@@ -2412,10 +2451,42 @@ HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | Small
  */
 HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
 {
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    window->GetTopWindowWithContext(context);
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    winSession->property_->SetPersistentId(1);
+    string winName = "test";
+    int32_t winId = 1;
+    WindowSessionImpl::windowSessionMap_.insert(
+        make_pair(winName, std::pair<int32_t, sptr<WindowSessionImpl>>(winId, winSession)));
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_DO_NOTHING)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    int32_t tempWinId = 4;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(tempWinId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
 /**

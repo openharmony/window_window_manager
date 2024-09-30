@@ -520,7 +520,13 @@ HWTEST_F(WindowAdapterTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
     uint32_t windowId = 0;
+
+    windowAdapter.isProxyValid_ = true;
     auto ret = windowAdapter.RaiseToAppTop(windowId);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
+    windowAdapter.isProxyValid_ = false;
+
+    ret = windowAdapter.RaiseToAppTop(windowId);
     std::shared_ptr<MMI::KeyEvent> event = nullptr;
     windowAdapter.DispatchKeyEvent(windowId, event);
     ASSERT_EQ(WMError::WM_OK, ret);
