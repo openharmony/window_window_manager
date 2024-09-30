@@ -75,6 +75,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     PRIVACY_MODE_CHANGE_CB,
+    RESTORE_MAIN_WINDOW_CB,
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
 };
@@ -239,6 +240,7 @@ private:
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
+    void ProcessRestoreMainWindowRegister();
     void ProcessTitleAndDockHoverShowChangeRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
@@ -291,6 +293,7 @@ private:
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
+    void RestoreMainWindow();
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();

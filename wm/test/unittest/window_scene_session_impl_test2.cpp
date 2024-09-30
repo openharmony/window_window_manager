@@ -19,6 +19,7 @@
 #include "ability_context_impl.h"
 #include "mock_session.h"
 #include "window_session_impl.h"
+#include "wm_common.h"
 #include "mock_uicontent.h"
 #include "window_scene_session_impl.h"
 #include "mock_window_adapter.h"
@@ -719,6 +720,34 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
     auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
+
+    windowSceneSessionImpl->property_->SetParentPersistentId(1);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(1);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    WindowSessionImpl::subWindowSessionMap_.insert(
+        std::make_pair<int32_t, std::vector<sptr<WindowSessionImpl>>>(1, {winSession}));
+    winSession->property_->SetPersistentId(6);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    winSession->state_ = WindowState::STATE_CREATED;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    winSession->state_ = WindowState::STATE_SHOWN;
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSessionImpl->property_->SetPersistentId(3);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    WindowSessionImpl::subWindowSessionMap_.erase(1);
 }
 
 /**
@@ -1515,6 +1544,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerInputMethodF
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     window->RegisterSessionRecoverListener(false);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
  
 /**
@@ -1533,6 +1563,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerNonDefaultCo
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     window->RegisterSessionRecoverListener(false); // false is main window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
 
 /**
@@ -1551,6 +1582,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerNonDefaultCo
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 0);
 }
 
 /**
@@ -1568,6 +1600,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess01, F
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(false); // false is main window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 1);
+    SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
 }
 
 /**
@@ -1585,6 +1619,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess02, F
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 1);
+    SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
 }
 
 /**

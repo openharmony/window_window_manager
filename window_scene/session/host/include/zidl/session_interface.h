@@ -77,6 +77,13 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for processing full-screen layout changes.
      *
      * @param isLayoutFullScreen Indicates the {@link bool}

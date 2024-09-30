@@ -1553,6 +1553,15 @@ public:
      * @return WMError
      */
     virtual WMError Recover() { return WMError::WM_OK; }
+
+    /**
+     * @brief After the app main window is minimized, if the Ability is not in the backgroud state,
+     * you can restore app main window.
+     *
+     * @return WMError
+     */
+    virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -2028,6 +2037,13 @@ public:
      * @return True means use default density, window's layout not follow to system change, false means the opposite.
      */
     virtual bool GetDefaultDensityEnabled() { return false; }
+
+   /**
+    * @brief Get virtual pixel ratio.
+    *
+    * @return Value of PixelRatio obtained from displayInfo.
+    */
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.

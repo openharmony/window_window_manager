@@ -389,6 +389,121 @@ HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTe
     ASSERT_EQ(enable, scensession->GetBufferAvailableCallbackEnable());
 }
 
+/**
+ * @tc.name: NotifyClientToUpdateAvoidArea
+ * @tc.desc: check func NotifyClientToUpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateAvoidArea";
+    info.bundleName_ = "NotifyClientToUpdateAvoidArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    sceneSession->NotifyClientToUpdateAvoidArea();
+    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
+
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 6;
+    callback->onUpdateAvoidArea_ = nullptr;
+    sceneSession->NotifyClientToUpdateAvoidArea();
+
+    UpdateAvoidAreaCallback callbackFun = [&sceneSession](int32_t persistentId) {
+        sceneSession->RemoveToastSession(persistentId);
+        return;
+    };
+    callback->onUpdateAvoidArea_ = callbackFun;
+
+    callback->onUpdateOccupiedAreaIfNeed_ = nullptr;
+    UpdateOccupiedAreaIfNeedCallback updateCallbackFun = [&sceneSession](int32_t persistentId) {
+        sceneSession->RemoveToastSession(persistentId);
+        return;
+    };
+    callback->onUpdateOccupiedAreaIfNeed_ = updateCallbackFun;
+    sceneSession->NotifyClientToUpdateAvoidArea();
+    EXPECT_EQ(6, sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: UpdateScaleInner
+ * @tc.desc: check func UpdateScaleInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateScaleInner";
+    info.bundleName_ = "UpdateScaleInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    sceneSession->sessionStage_ = nullptr;
+    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
+    EXPECT_EQ(true, res);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    EXPECT_EQ(true, res);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    EXPECT_EQ(false, res);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    sceneSession->sessionStage_ = mockSessionStage;
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(true, res);
+}
+
+/**
+ * @tc.name: UpdateZOrderInner
+ * @tc.desc: check func UpdateZOrderInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateZOrderInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateZOrderInner";
+    info.bundleName_ = "UpdateZOrderInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    int res = sceneSession->UpdateZOrderInner(10);
+    EXPECT_EQ(true, res);
+
+    res = sceneSession->UpdateZOrderInner(10);
+    EXPECT_EQ(false, res);
+}
+
+/**
+ * @tc.name: CheckInstanceKey
+ * @tc.desc: check func CheckInstanceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, CheckInstanceKey, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckInstanceKey";
+    info.bundleName_ = "CheckInstanceKey";
+    info.appInstanceKey_ = "";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    EXPECT_NE(nullptr, abilitySessionInfo);
+    abilitySessionInfo->persistentId = 1;
+    bool res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
+    EXPECT_EQ(false, res);
+
+    abilitySessionInfo->persistentId = 0;
+    res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
+    EXPECT_EQ(true, res);
+
+    info.appInstanceKey_ = "OpenHarmony";
+    EXPECT_EQ(true, res);
+}
 }
 }
 }
