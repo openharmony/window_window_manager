@@ -796,8 +796,8 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: HandleNotifyDumpInfo
- * @tc.desc: test function : HandleNotifyDumpInfo
+ * @tc.name: HandleSetSplitButtonVisible
+ * @tc.desc: test function : HandleSetSplitButtonVisible
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest | Level1)
