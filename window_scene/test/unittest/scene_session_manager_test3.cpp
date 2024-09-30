@@ -31,7 +31,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-usning namaspace std;
+
 namespace OHOS {
 namespace Rosen {
 namespace {
