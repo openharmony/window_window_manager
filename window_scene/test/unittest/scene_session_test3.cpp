@@ -450,7 +450,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, Function | SmallTest 
     };
     callback->onUpdateOccupiedAreaIfNeed_ = updateCallbackFun;
     sceneSession->NotifyClientToUpdateAvoidArea();
-    EXPECT_EQ(6, scensession->GetPersistentId());
+    EXPECT_EQ(6, sceneSession->GetPersistentId());
 }
 
 /**
