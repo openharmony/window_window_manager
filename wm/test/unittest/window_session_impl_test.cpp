@@ -1495,12 +1495,10 @@ HWTEST_F(WindowSessionImplTest, NotifyBeforeDestroy, Function | SmallTest | Leve
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     std::string windowName = "NotifyBeforeDestroy";
     window->NotifyBeforeDestroy(windowName);
     window->handler_ = nullptr;
     window->NotifyBeforeDestroy(windowName);
-    ASSERT_EQ(res, 0);
 
     // uiContent!=nullptr
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;

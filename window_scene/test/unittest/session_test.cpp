@@ -429,22 +429,31 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->RaiseToAppTop();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->RaiseToAppTop();
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetParentSession(parentSession);
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(parentSession->GetUIStateDirty());
 
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     NotifyRaiseToTopFunc onRaiseToTop_ = []() {};
-    scensessionchangeCallBack->onRaiseToTop_ = onRaiseToTop_;
-    result = scensession->RaiseToAppTop();
+    sceneSessionChangeCallBack->onRaiseToTop_ = onRaiseToTop_;
+    result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_TRUE(parentSession->GetUIStateDirty());
+    parentSession->SetUIStateDirty(false);
+
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    result = sceneSession->RaiseToAppTop();
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(parentSession->GetUIStateDirty());
 }
 
 /**

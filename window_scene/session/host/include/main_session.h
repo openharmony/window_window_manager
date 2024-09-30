@@ -42,6 +42,7 @@ public:
 
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
+    WSError OnRestoreMainWindow() override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

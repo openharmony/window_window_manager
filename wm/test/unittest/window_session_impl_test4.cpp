@@ -373,6 +373,19 @@ HWTEST_F(WindowSessionImplTest4, RegisterExtensionAvoidAreaChangeListener, Funct
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->RegisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    vector<sptr<IAvoidAreaChangedListener>> holder;
+    window->avoidAreaChangeListeners_[window->property_->GetPersistentId()] = holder;
+    res = window->RegisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+    holder = window->avoidAreaChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_NE(existsListener, holder.end());
+
+    // already registered
+    res = window->RegisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: RegisterExtensionAvoidAreaChangeListener end";
 }
 
@@ -392,6 +405,18 @@ HWTEST_F(WindowSessionImplTest4, UnregisterExtensionAvoidAreaChangeListener, Fun
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    vector<sptr<IAvoidAreaChangedListener>> holder;
+    window->avoidAreaChangeListeners_[window->property_->GetPersistentId()] = holder;
+    window->RegisterExtensionAvoidAreaChangeListener(listener);
+
+    res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    holder = window->avoidAreaChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_EQ(existsListener, holder.end());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UnregisterExtensionAvoidAreaChangeListener end";
 }
 
@@ -1322,6 +1347,32 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, Function | SmallTest
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio
+ * @tc.desc: test GetVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    float vpr = 0;
+    window->property_->SetDisplayId(-1);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_EQ(vpr, 1.0);
+
+    window->property_->SetDisplayId(0);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_NE(vpr, 1.0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
 }
 }
 } // namespace Rosen
