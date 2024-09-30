@@ -856,9 +856,32 @@ HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1
     ASSERT_EQ(ret, false);
 }
 
-HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+/**
+ * @tc.name: UpdatePiPWindowStateChanged
+ * @tc.desc: test function : UpdatePiPWindowStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | Level1)
 {
-    int b =9;
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.moduleName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.bundleName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SystemSession> systemSession =
+        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    EXPECT_NE(nullptr, systemSession);
+    PiPStateChangeCallback callbackFun = [](const std::string& bundleName, bool isForeground) {
+        return;
+    };
+    callback->onPiPStateChange_ = callbackFun;
+    systemSession->UpdatePiPWindowStateChanged(true);
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    systemSession->UpdatePiPWindowStateChanged(true);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, systemSession->GetWindowType());
 }
 } // namespace
 } // namespace Rosen
