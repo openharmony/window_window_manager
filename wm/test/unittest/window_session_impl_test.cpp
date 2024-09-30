@@ -681,10 +681,8 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateViewportConfig start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     Rect rectW; // GetRect().IsUninitializedRect is true
     rectW.posX_ = 0;
@@ -692,13 +690,24 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
     rectW.height_ = 0; // rectW - rect > 50
     rectW.width_ = 0;  // rectW - rect > 50
 
+    window->virtualPixelRatio_ = -1.0;
+    window->useUniqueDensity_ = true;
     WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
     window->UpdateViewportConfig(rectW, reason);
+    ASSERT_EQ(window->virtualPixelRatio_, -1.0);
 
+    window->virtualPixelRatio_ = -2.0;
     DisplayId displayId = 1;
     window->property_->SetDisplayId(displayId);
     window->UpdateViewportConfig(rectW, reason);
+    ASSERT_EQ(window->virtualPixelRatio_, -2.0);
 
+    displayId = 0;
+    rectW.height_ = 500;
+    rectW.width_ = 500; 
+    window->useUniqueDensity_ = false;
+    window->property_->SetDisplayId(displayId);
+    window->UpdateViewportConfig(rectW, reason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateViewportConfig end";
 }
 
