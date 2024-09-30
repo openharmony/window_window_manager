@@ -651,7 +651,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest 
 
     mode = WindowMode::WINDOW_MODE_PIP;
     window->NotifyWindowStatusChange(mode);
-    window->Destroy();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
