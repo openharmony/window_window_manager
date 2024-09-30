@@ -33,7 +33,7 @@
 
 using namespace testing;
 using namespace testing::ext;
-usning namaspace std;
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -1590,10 +1590,15 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     bool skip = true;
     auto result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
     ASSERT_NE(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
+
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
 
     SessionInfo info;
@@ -1615,6 +1620,8 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
     ssm_->sceneSessionMap_.erase(-1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
+    usleep(WAIT_SYNC_IN_NS_TWO);
 }
 
 /**
