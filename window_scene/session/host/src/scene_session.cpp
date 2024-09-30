@@ -128,6 +128,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return ret;
         }
         session->NotifyPropertyWhenConnect();
+        session->isStatusBarVisible_ = true;
         return ret;
     };
     return PostSyncTask(task, "ConnectInner");
