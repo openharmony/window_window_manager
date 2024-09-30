@@ -428,32 +428,29 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->RaiseToAppTop();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(parentSession, nullptr);
-    scensession->SetParentSession(parentSession);
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
+    sceneSession->SetParentSession(parentSession);
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
         sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->RaiseToAppTop();
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(parentSession->GetUIStateDirty());
 
     parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     NotifyRaiseToTopFunc onRaiseToTop_ = []() {};
-    scensessionchangeCallBack->onRaiseToTop_ = onRaiseToTop_;
-    result = scensession->RaiseToAppTop();
+    sceneSessionChangeCallBack->onRaiseToTop_ = onRaiseToTop_;
+    result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_TRUE(parentSession->GetUIStateDirty());
     parentSession->SetUIStateDirty(false);
 
     parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    result = scensession->RaiseToAppTop();
+    result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(parentSession->GetUIStateDirty());
 }

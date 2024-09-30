@@ -736,7 +736,6 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, winSession);
     WindowSessionImpl::subWindowSessionMap_.insert(
         std::make_pair<int32_t, std::vector<sptr<WindowSessionImpl>>>(1, {winSession}));
     winSession->property_->SetPersistentId(6);
