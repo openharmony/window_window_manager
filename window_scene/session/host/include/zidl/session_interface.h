@@ -243,20 +243,23 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+
     /**
      * @brief Request to get focus or lose focus.
      *
-     * @param isFocused True means window wants to get focus, false measn the opposite.
+     * @param isFocused True means window wants to get focus, false means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
     /**
      * @brief Set focusable of window when show.
      *
-     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false measn the opposite.
+     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
+
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
 
     /*
