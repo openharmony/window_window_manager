@@ -248,7 +248,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession04, Function
 
     windowSceneSession->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
-    ASSERT_EQ(WMError::WM_OK,windowSceneSession->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
 }
 
 /**
