@@ -46,6 +46,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     Rosen::RSDisplayNodeConfig rsConfig;
+    bool isNeedCreateDisplayNode = true;
     switch (reason) {
         case ScreenSessionReason::CREATE_SESSION_FOR_CLIENT: {
             TLOGI(WmsLogTag::DMS, "create screen session for client. noting to do.");
@@ -67,12 +68,19 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
             rsConfig.screenId = screenId_;
             break;
         }
+        case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
+            TLOGI(WmsLogTag::DMS, "screen session no need create displayNode.");
+            isNeedCreateDisplayNode = false;
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::DMS, "invalid screen session config.");
             break;
         }
     }
-    CreateDisplayNode(rsConfig);
+    if (isNeedCreateDisplayNode) {
+        CreateDisplayNode(rsConfig);
+    }
 }
 
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
@@ -1193,20 +1201,20 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             break;
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
-                WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
+                WLOGI("SCREEN_MIRROR, config is not mirror");
                 break;
             }
             if (defaultScreenSession == nullptr) {
-                WLOGFE("AddChild fail, defaultScreenSession is nullptr");
+                WLOGFE("defaultScreenSession is nullptr");
                 break;
             }
             std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();
             if (displayNode == nullptr) {
-                WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
+                WLOGFE("displayNode is nullptr, cannot get DisplayNode");
                 break;
             }
             NodeId nodeId = displayNode->GetId();
-            WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
+            WLOGI("mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
                 mirrorScreenId_, screenSession->rsId_, nodeId);
             config = {screenSession->rsId_, true, nodeId, true};
             break;
