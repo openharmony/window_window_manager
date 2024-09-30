@@ -1419,6 +1419,9 @@ HWTEST_F(WindowSceneSessionImplTest2, SetGrayScale04, Function | SmallTest | Lev
     ASSERT_NE(nullptr, session);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetGrayScale(0.5));
+
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
     std::vector<WindowType> types = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
@@ -1427,7 +1430,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetGrayScale04, Function | SmallTest | Lev
     for (WindowType type : types) {
         window->SetWindowType(type);
         float grayScale = 1.0f / 3.0f;
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGrayScale(grayScale));
+        ASSERT_EQ(WMError::WM_OK, window->SetGrayScale(grayScale));
     }
 }
 
