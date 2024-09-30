@@ -68,6 +68,7 @@ const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_BUFFER_AVAILABLE_MS = 8 * 1000 * 1000;
 const int32_t CV_WAIT_SCBSWITCH_MS = 3000;
+const int64_t SWITCH_USER_DISPLAYMODE_CHANGE_DELAY = 500;
 const std::u16string DEFAULT_USTRING = u"error";
 const std::string DEFAULT_STRING = "error";
 const std::string ARG_DUMP_HELP = "-h";
@@ -4430,16 +4431,17 @@ void ScreenSessionManager::SwitchUser()
 
 void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid)
 {
-    NotifyFoldStatusChanged(GetFoldStatus());
-    NotifyDisplayModeChanged(GetFoldDisplayMode());
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
         return;
     }
-    if (g_foldScreenFlag) {
+    int64_t delayTime = 0;
+    if (g_foldScreenFlag && oldScbDisplayMode_ != GetFoldDisplayMode() &&
+        !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        delayTime = SWITCH_USER_DISPLAYMODE_CHANGE_DELAY;
         auto foldStatus = GetFoldStatus();
-        // fold device will be callback NotifyFoldToExpandCompletion to UpdateRotationAfterBoot
+        TLOGE(WmsLogTag::DMS, "old mode: %{public}u, cur mode: %{public}u", oldScbDisplayMode_, GetFoldDisplayMode());
         if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_FULL));
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -4454,7 +4456,14 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
     } else {
         screenSession->UpdateRotationAfterBoot(true);
     }
-    clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
+    auto task = [=] {
+        if (!clientProxy_) {
+            TLOGI(WmsLogTag::DMS, "ScbStatusRecoveryWhenSwitchUser clientProxy_ is null");
+            return;
+        }
+        clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
+    };
+    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged", delayTime);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -4532,6 +4541,7 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     currentUserId_ = newUserId;
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
+    oldScbDisplayMode_ = GetFoldDisplayMode();
 }
 
 void ScreenSessionManager::SetClientInner()
