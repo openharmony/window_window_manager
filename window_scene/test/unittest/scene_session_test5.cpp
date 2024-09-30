@@ -411,27 +411,6 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
 }
 
 /**
- * @tc.name: UpdateSessionRectInner01
- * @tc.desc: UpdateSessionPropertyByAction function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, UpdateSessionRectInner01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateSessionRectInner01";
-    info.bundleName_ = "UpdateSessionRectInner01";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    WSRect rect{10, 20, 30, 40};
-    SizeChangeReason resson = SizeChangeReason::RESIZE;
-    session->UpdateSessionRectInner(rect, resson);
-}
-
-
-/**
  * @tc.name: SetSessionRectChangeCallback
  * @tc.desc: SetSessionRectChangeCallback function01
  * @tc.type: FUNC

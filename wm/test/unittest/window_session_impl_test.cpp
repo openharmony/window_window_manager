@@ -233,11 +233,9 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled02, Function | SmallTest |
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled02");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
@@ -536,10 +534,8 @@ HWTEST_F(WindowSessionImplTest, UpdateRect01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRect01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateRect01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     WSRect rect;
     rect.posX_ = 0;
@@ -585,10 +581,8 @@ HWTEST_F(WindowSessionImplTest, UpdateRect02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRect02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateRect02");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     WSRect rect;
     rect.posX_ = 0;
@@ -1625,14 +1619,11 @@ HWTEST_F(WindowSessionImplTest, UpdateProperty01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("UpdateProperty01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
                                "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     ASSERT_NE(nullptr, window->property_);
@@ -1651,12 +1642,10 @@ HWTEST_F(WindowSessionImplTest, UpdateProperty02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateProperty02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("UpdateProperty02");
 
     // session is null
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
     WMError res = window->UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RECT);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);

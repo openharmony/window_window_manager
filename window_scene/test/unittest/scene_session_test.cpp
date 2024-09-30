@@ -1598,20 +1598,19 @@ HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio2";
     info.bundleName_ = "SetAspectRatio2";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.0001;
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
+    ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 }
 
 /**
@@ -1624,9 +1623,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio3";
     info.bundleName_ = "SetAspectRatio3";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 2.5;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1637,8 +1635,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     limits.minWidth_ = 2000;
     limits.minHeight_ = 2000;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
@@ -1652,9 +1650,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio4";
     info.bundleName_ = "SetAspectRatio4";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1665,8 +1662,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     limits.minWidth_ = 2000;
     limits.minHeight_ = 2000;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
@@ -1680,9 +1677,9 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio5";
     info.bundleName_ = "SetAspectRatio5";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1691,9 +1688,9 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     limits.maxHeight_ = 10;
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    scensession->SetAspectRatio(ratio);
-    EXPECT_NE(scensession, nullptr);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetAspectRatio(ratio);
+    EXPECT_NE(sceneSession, nullptr);
 }
 
 /**
@@ -1706,13 +1703,12 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
     info.bundleName_ = "SetAspectRatio6";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
-    scensession->SetSessionProperty(nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->SetSessionProperty(nullptr);
 
     float ratio = 0.1;
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1726,9 +1722,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio7";
     info.bundleName_ = "SetAspectRatio7";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1737,8 +1732,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     limits.maxHeight_ = 10;
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1910,31 +1905,29 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateSessionRect";
     info.bundleName_ = "UpdateSessionRect";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
 
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSRect oldRect({1, 1, 1, 1});
     WSRect parentRect({10, 10, 1, 1});
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(parentSession, nullptr);
-    scensession->SetParentSession(parentSession);
-    EXPECT_NE(scensession->GetParentSession(), nullptr);
+    sceneSession->SetParentSession(parentSession);
+    EXPECT_NE(sceneSession->GetParentSession(), nullptr);
     parentSession->SetSessionRect(parentRect);
-    scensession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
 
     bool isGlobal = true;
-    WSError result = scensession->UpdateSessionRect(oldRect, reason, isGlobal);
+    WSError result = sceneSession->UpdateSessionRect(oldRect, reason, isGlobal);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    WSRect newRect = scensession->GetSessionRect();
+    WSRect newRect = sceneSession->GetSessionRect();
     ASSERT_EQ(newRect.posX_, oldRect.posX_ - parentRect.posX_);
     ASSERT_EQ(newRect.posY_, oldRect.posY_ - parentRect.posY_);
 }

@@ -206,7 +206,6 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
 {
     sptr<ISession> sessionToken = nullptr;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
@@ -214,10 +213,8 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
         SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     sptr<WindowEventChannelMocker> mockEventChannel = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage);
-    EXPECT_NE(nullptr, mockEventChannel);
     SystemSessionConfig sessionConfig;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
             mockEventChannel, nullptr, sessionConfig, property));
 

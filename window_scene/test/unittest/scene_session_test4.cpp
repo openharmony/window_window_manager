@@ -171,11 +171,9 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest 
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     OHOS::Rosen::Session session(info);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     session.property_ = property;
 
     WMError res = sceneSession->HandleActionUpdateDragenabled(property, action);
