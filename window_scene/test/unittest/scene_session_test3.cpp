@@ -426,7 +426,6 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, Function | SmallTest 
     sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, scensession);
 
-    scensession->persistentId_ = 6;
     scensession->NotifyClientToUpdateAvoidArea();
     EXPECT_EQ(nullptr, scensession->specificCallback_);
 
@@ -434,6 +433,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, Function | SmallTest 
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     scensession = sptr<SceneSession>::MakeSptr(info, callback);
     EXPECT_NE(nullptr, scensession);
+    scensession->persistentId_ = 6;
     callback->onUpdateAvoidArea_ = nullptr;
     scensession->NotifyClientToUpdateAvoidArea();
 
