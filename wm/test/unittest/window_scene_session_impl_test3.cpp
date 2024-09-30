@@ -243,7 +243,7 @@ HWTEST_F(WindowSceneSessionImplTest3, CheckParmAndPermission01, Function | Small
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     windowSceneSessionImpl->surfaceNode_ = nullptr;
-    
+
     auto ret = windowSceneSessionImpl->CheckParmAndPermission();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ret = windowSceneSessionImpl->SetCornerRadius(1.0f);
@@ -1413,11 +1413,9 @@ HWTEST_F(WindowSceneSessionImplTest3, Show02, Function | SmallTest | Level2)
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     auto ret = windowSceneSessionImpl->Show(0, false, true);
     EXPECT_EQ(WMError::WM_OK, ret);

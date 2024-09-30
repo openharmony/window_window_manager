@@ -1067,7 +1067,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return ret;
     }
     UpdateTitleButtonVisibility();
-    UpdateFocusableOnShowFlag(withFocus);
+    UpdateFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
@@ -3054,20 +3054,19 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
 }
 
-void WindowSceneSessionImpl::UpdateFocusableOnShowFlag(bool withFocus)
+void WindowSceneSessionImpl::UpdateFocusableOnShow(bool withFocus)
 {
     if (withFocus) {
         return; // default value of focusableOnShow
     }
-    auto hostSession = GetHostSession();
-    if (hostSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed because of nullptr");
-        return;
-    }
-    auto ret = hostSession->SetFocusableOnShow(withFocus);
-    if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
+    if (auto hostSession = GetHostSession()) {
+        auto ret = hostSession->SetFocusableOnShow(withFocus);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed because of nullptr");
     }
 }
 
@@ -4106,7 +4105,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
 }
- 
+
 bool WindowSceneSessionImpl::GetGestureBackEnabled() const
 {
     if (windowSystemConfig_.IsPcWindow()) {
