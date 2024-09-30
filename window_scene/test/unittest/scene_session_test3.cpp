@@ -97,12 +97,12 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
-    sceneSession->moveDragController_ = new (std::nothrow) MoveDragController(0);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(0);
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -125,7 +125,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     sceneSession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -150,7 +150,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
