@@ -2508,11 +2508,15 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // type is not system
         return true;
     }
-    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
-        && SessionPermission::IsStartedByInputMethod()) {
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
-        WLOGFD("check create permission success, input method app create input method window.");
-        return true;
+        if (SessionPermission::IsStartedByInputMethod()) {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "check permission success, input method app create input method window.");
+            return true;
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "check permission failed.");
+            return false;
+        }
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
