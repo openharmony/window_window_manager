@@ -832,7 +832,7 @@ WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bo
 {
     CheckAndAddExtWindowFlags();
     UpdateSystemViewportConfig();
-    return this->WindowSessionImpl::Show(reason, withAnimation, withFocus);
+    return WindowSessionImpl::Show(reason, withAnimation, withFocus);
 }
 
 WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
