@@ -346,15 +346,15 @@ public:
     void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
-    bool GetBlockingFocus() const;
-    bool GetFocused() const;
     bool CheckFocusable() const;
     bool IsFocusableOnShow() const;
     bool IsFocused() const;
-    bool GetFocusable() const;
-    bool GetSystemFocusable() const;
     bool IsFocusedOnShow() const;
     void SetFocusedOnShow(bool focusedOnShow);
+    bool GetFocusable() const;
+    bool GetSystemFocusable() const;
+    bool GetBlockingFocus() const;
+    bool GetFocused() const;
     WSError SetFocusable(bool isFocusable);
     WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     WSError NotifyFocusStatus(bool isFocused);
