@@ -753,7 +753,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
  */
 HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetTransparent");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(true));
@@ -802,8 +802,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio02, Function | SmallTest | Le
     WindowLimits windowLimits = { 3000, 3000, 2000, 2000, 2.0, 2.0 };
     window->property_->SetWindowLimits(windowLimits);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SceneSession> session = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(session, nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     window->hostSession_ = session;
     session->GetSessionProperty()->SetWindowLimits(windowLimits);
     const float ratio = 1.2;
@@ -824,7 +823,6 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
     ASSERT_EQ(0, session->GetAspectRatio());

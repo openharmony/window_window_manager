@@ -69,12 +69,11 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio11, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio11";
     info.bundleName_ = "SetAspectRatio11";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
-    scensession->property_ = nullptr;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->property_ = nullptr;
     float ratio = 0.0001;
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -89,28 +88,27 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio12";
     info.bundleName_ = "SetAspectRatio12";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.0001;
-    scensession->moveDragController_ = nullptr;
-    auto result = scensession->SetAspectRatio(ratio);
+    sceneSession->moveDragController_ = nullptr;
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
+    ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
-    scensession->moveDragController_ = new (std::nothrow) MoveDragController(0);
-    result = scensession->SetAspectRatio(ratio);
+    sceneSession->moveDragController_ = new (std::nothrow) MoveDragController(0);
+    result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
+    ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(scensession->GetAspectRatio(), ratio);
+    ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 }
 
 /**
@@ -123,20 +121,19 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio15";
     info.bundleName_ = "SetAspectRatio15";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     WindowLimits limits;
     limits.maxHeight_ = 10;
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
@@ -150,23 +147,20 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio8, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio8";
     info.bundleName_ = "SetAspectRatio8";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
 
     float ratio = 0.1;
     WindowLimits limits;
     limits.maxHeight_ = 10;
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
@@ -180,33 +174,28 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateRect1";
     info.bundleName_ = "UpdateRect1";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
+    WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    scensession->winRect_ = rect;
-    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
+    sceneSession->winRect_ = rect;
+    result = sceneSession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    scensession->reason_ = SizeChangeReason::DRAG_END;
-    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
+    sceneSession->reason_ = SizeChangeReason::DRAG_END;
+    result = sceneSession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     WSRect rect2({0, 0, 0, 0});
-    result = scensession->UpdateRect(rect2, reason, "SceneSessionTest3");
+    result = sceneSession->UpdateRect(rect2, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
