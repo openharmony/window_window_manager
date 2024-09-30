@@ -534,6 +534,8 @@ private:
 #endif // DEVICE_STATUS_ENABLE
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode);
+    void HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
+        bool isSupportDragInPcCompatibleMode);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);

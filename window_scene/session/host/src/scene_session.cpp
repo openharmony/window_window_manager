@@ -2228,6 +2228,22 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
         TLOGE(WmsLogTag::WMS_SCB, "sessionProperty is null");
         return;
     }
+    if (reason != SizeChangeReason::MOVE) {
+        HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
+    } else {
+        SetSurfaceBounds(rect);
+        UpdateSizeChangeReason(reason);
+    }
+}
+
+void SceneSession::HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
+    bool isSupportDragInPcCompatibleMode)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_SCB, "sessionProperty is null");
+        return;
+    }
     WindowLimits windowLimits = sessionProperty->GetWindowLimits();
     const int32_t compatibleInPcPortraitWidth = sessionProperty->GetCompatibleInPcPortraitWidth();
     const int32_t compatibleInPcPortraitHeight = sessionProperty->GetCompatibleInPcPortraitHeight();
@@ -2238,36 +2254,36 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeRe
     auto windowWidth = windowRect.width_;
     auto windowHeight = windowRect.height_;
 
-    if (reason != SizeChangeReason::MOVE) {
-        if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
-            (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
-             rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
+    if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
+        (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
+            rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
+        rect.width_ = compatibleInPcPortraitWidth;
+        rect.height_ = compatibleInPcPortraitHeight;
+        SetSurfaceBounds(rect);
+        UpdateSizeChangeReason(reason);
+        UpdateRect(rect, reason, "compatibleInPcPortrait");
+    } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
+        rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
+        rect.width_ = compatibleInPcLandscapeWidth;
+        rect.height_ = compatibleInPcLandscapeHeight;
+        SetSurfaceBounds(rect);
+        UpdateSizeChangeReason(reason);
+        UpdateRect(rect, reason, "compatibleInPcLandscape");
+    } else if (isSupportDragInPcCompatibleMode) {
+        if (windowWidth < windowHeight) {
             rect.width_ = compatibleInPcPortraitWidth;
             rect.height_ = compatibleInPcPortraitHeight;
-            SetSurfaceBounds(rect);
-            UpdateSizeChangeReason(reason);
-            UpdateRect(rect, reason, "compatibleInPcPortrait");
-        } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
-            rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
+        } else {
             rect.width_ = compatibleInPcLandscapeWidth;
             rect.height_ = compatibleInPcLandscapeHeight;
-            SetSurfaceBounds(rect);
-            UpdateSizeChangeReason(reason);
-            UpdateRect(rect, reason, "compatibleInPcLandscape");
-        } else {
-            if (windowWidth < windowHeight) {
-                rect.width_ = compatibleInPcPortraitWidth;
-                rect.height_ = compatibleInPcPortraitHeight;
-            } else {
-                rect.width_ = compatibleInPcLandscapeWidth;
-                rect.height_ = compatibleInPcLandscapeHeight;
-            }
-            rect.posX_ = windowRect.posX_;
-            rect.posY_ = windowRect.posY_;
-            SetSurfaceBounds(rect);
-            UpdateSizeChangeReason(reason);
         }
+        rect.posX_ = windowRect.posX_;
+        rect.posY_ = windowRect.posY_;
+        SetSurfaceBounds(rect);
+        UpdateSizeChangeReason(reason);
     } else {
+        rect.posX_ = windowRect.posX_;
+        rect.posY_ = windowRect.posY_;
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
     }
