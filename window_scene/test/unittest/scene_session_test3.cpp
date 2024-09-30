@@ -423,33 +423,33 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, Function | SmallTest 
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateAvoidArea";
     info.bundleName_ = "NotifyClientToUpdateAvoidArea";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, scensession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
 
-    scensession->NotifyClientToUpdateAvoidArea();
-    EXPECT_EQ(nullptr, scensession->specificCallback_);
+    sceneSession->NotifyClientToUpdateAvoidArea();
+    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
 
     sptr<SceneSession::SpecificSessionCallback> callback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    scensession = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, scensession);
-    scensession->persistentId_ = 6;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 6;
     callback->onUpdateAvoidArea_ = nullptr;
-    scensession->NotifyClientToUpdateAvoidArea();
+    sceneSession->NotifyClientToUpdateAvoidArea();
 
-    UpdateAvoidAreaCallback callbackFun = [&scensession](int32_t persistentId) {
-        scensession->RemoveToastSession(persistentId);
+    UpdateAvoidAreaCallback callbackFun = [&sceneSession](int32_t persistentId) {
+        sceneSession->RemoveToastSession(persistentId);
         return;
     };
     callback->onUpdateAvoidArea_ = callbackFun;
 
     callback->onUpdateOccupiedAreaIfNeed_ = nullptr;
-    UpdateOccupiedAreaIfNeedCallback updateCallbackFun = [&scensession](int32_t persistentId) {
-        scensession->RemoveToastSession(persistentId);
+    UpdateOccupiedAreaIfNeedCallback updateCallbackFun = [&sceneSession](int32_t persistentId) {
+        sceneSession->RemoveToastSession(persistentId);
         return;
     };
     callback->onUpdateOccupiedAreaIfNeed_ = updateCallbackFun;
-    scensession->NotifyClientToUpdateAvoidArea();
+    sceneSession->NotifyClientToUpdateAvoidArea();
     EXPECT_EQ(6, scensession->GetPersistentId());
 }
 
@@ -463,22 +463,22 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateScaleInner";
     info.bundleName_ = "UpdateScaleInner";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, scensession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
 
-    scensession->sessionStage_ = nullptr;
-    bool res = scensession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
+    sceneSession->sessionStage_ = nullptr;
+    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
     EXPECT_EQ(true, res);
-    res = scensession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
-    res = scensession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
-    res = scensession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(true, res);
-    res = scensession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(false, res);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
-    scensession->sessionStage_ = mockSessionStage;
-    res = scensession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    sceneSession->sessionStage_ = mockSessionStage;
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
     EXPECT_EQ(true, res);
 }
 
@@ -492,13 +492,13 @@ HWTEST_F(SceneSessionTest3, UpdateZOrderInner, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "UpdateZOrderInner";
     info.bundleName_ = "UpdateZOrderInner";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, scensession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
 
-    int res = scensession->UpdateZOrderInner(10);
+    int res = sceneSession->UpdateZOrderInner(10);
     EXPECT_EQ(true, res);
 
-    res = scensession->UpdateZOrderInner(10);
+    res = sceneSession->UpdateZOrderInner(10);
     EXPECT_EQ(false, res);
 }
 
@@ -513,16 +513,16 @@ HWTEST_F(SceneSessionTest3, CheckInstanceKey, Function | SmallTest | Level2)
     info.abilityName_ = "CheckInstanceKey";
     info.bundleName_ = "CheckInstanceKey";
     info.appInstanceKey_ = "";
-    sptr<SceneSession> scensession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, scensession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     EXPECT_NE(nullptr, abilitySessionInfo);
     abilitySessionInfo->persistentId = 1;
-    bool res = scensession->CheckInstanceKey(abilitySessionInfo, info);
+    bool res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
     EXPECT_EQ(false, res);
 
     abilitySessionInfo->persistentId = 0;
-    res = scensession->CheckInstanceKey(abilitySessionInfo, info);
+    res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
     EXPECT_EQ(true, res);
 
     info.appInstanceKey_ = "OpenHarmony";
