@@ -85,7 +85,6 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     sptr<SceneSession> tempSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(tempSession, nullptr);
     int32_t persistentId = 1;
     tempSession->persistentId_ = persistentId;
     int32_t callingPid = 2;

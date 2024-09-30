@@ -211,7 +211,6 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_NE(nullptr, window);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     ASSERT_NE(nullptr, m);
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
@@ -219,9 +218,7 @@ HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
     
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSession);
     string winName = "test";
     int32_t winId = 1;
     WindowSessionImpl::windowSessionMap_.insert(
@@ -2441,13 +2438,10 @@ HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | Small
 HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, winSession);
     winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     winSession->property_->SetPersistentId(1);
     string winName = "test";

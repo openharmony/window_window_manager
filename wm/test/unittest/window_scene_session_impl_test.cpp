@@ -777,12 +777,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
 HWTEST_F(WindowSceneSessionImplTest, GetTopwindowWithId, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("GetTopwindowWithId");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     sptr<WindowSessionImpl> session = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, session);
     uint32_t windowId = 1;
     string winName = "test";
     WindowSessionImpl::windowSessionMap_.insert(
