@@ -526,6 +526,9 @@ HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function
 HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMode01, Function | SmallTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->SetPrivacyMode(false));
+    ASSERT_FALSE(window_->extensionWindowFlags_.privacyModeFlag);
+    ASSERT_EQ(WMError::WM_OK, window_->SetPrivacyMode(true));
+    ASSERT_TRUE(window_->extensionWindowFlags_.privacyModeFlag);
 }
 
 /**
@@ -1358,6 +1361,14 @@ HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, Function | SmallT
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_CUTOUT;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
 }
 
 /**
@@ -1368,11 +1379,27 @@ HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, Function | SmallT
 HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType02, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
-    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, window_->hostSession_);
+    sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(mockHostSession, nullptr);
+    window_->hostSession_ = mockHostSession;
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
+    EXPECT_CALL(*mockHostSession, GetAvoidAreaByType).Times(5);
     ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_CUTOUT;
+    ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
+    ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    avoidAreaType = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+
+    AvoidArea expectedAvoidArea;
+    expectedAvoidArea.topRect_ = {10, 20, 30, 40};
+    EXPECT_CALL(*mockHostSession, GetAvoidAreaByType).Times(1).WillOnce(Return(expectedAvoidArea));
+    ASSERT_EQ(WMError::WM_OK, window_->GetAvoidAreaByType(avoidAreaType, avoidArea));
+    ASSERT_EQ(avoidArea, expectedAvoidArea);
 }
 
 /**
@@ -1566,10 +1593,27 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(3);
 
     window_->hostDensityValue_ = densityValue;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    ASSERT_FALSE(window_->isDensityFollowHost_);
+
+    window_->hostDensityValue_ = 0.2f;
+    ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    ASSERT_TRUE(window_->isDensityFollowHost_);
+    ASSERT_EQ(window_->hostDensityValue_, densityValue);
+
+    densityValue = FLT_MAX;
+    ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    ASSERT_TRUE(window_->isDensityFollowHost_);
+    ASSERT_EQ(window_->hostDensityValue_, densityValue);
+
+    densityValue = FLT_MIN;
+    window_->isDensityFollowHost_ = false;
+    ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    ASSERT_TRUE(window_->isDensityFollowHost_);
+    ASSERT_EQ(window_->hostDensityValue_, densityValue);
 }
 
 /**
@@ -1633,6 +1677,9 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | Smal
 HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
+    ASSERT_FALSE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
+    ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
+    ASSERT_TRUE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
  
 /**
@@ -1704,6 +1751,9 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | Smal
 HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(false));
+    ASSERT_FALSE(window_->extensionWindowFlags_.waterMarkFlag);
+    ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
+    ASSERT_TRUE(window_->extensionWindowFlags_.waterMarkFlag);
 }
  
 /**
@@ -2033,10 +2083,14 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Fun
     window_->property_->uiExtensionUsage_ = UIExtensionUsage::MODAL;
     window_->extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     window_->NotifyModalUIExtensionMayBeCovered(true);
+    ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
+    ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
 
     window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
     window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
     window_->NotifyModalUIExtensionMayBeCovered(false);
+    ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
+    ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
 }
 
 /**

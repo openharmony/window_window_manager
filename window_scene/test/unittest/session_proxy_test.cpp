@@ -530,6 +530,58 @@ HWTEST_F(SessionProxyTest, UpdateClientRect01, Function | SmallTest | Level2)
     ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
 }
+
+/**
+ * @tc.name: TransferExtensionData
+ * @tc.desc: TransferExtensionData test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TransferExtensionData, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    AAFwk::WantParams wantParams;
+    auto res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_OK);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyAsyncOn
+ * @tc.desc: NotifyAsyncOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAsyncOn, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyAsyncOn();
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyAsyncOn();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyAsyncOn();
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
