@@ -474,6 +474,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->SetZOrder(1);
+
     SessionInfo info2;
     info2.abilityName_ = "RequestFocusTest2";
     info2.bundleName_ = "RequestFocusTest2";
@@ -492,6 +493,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionFocus(2, false, reason);
@@ -525,6 +527,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->SetZOrder(1);
+
     SessionInfo info2;
     info2.abilityName_ = "RequestFocusTest2";
     info2.bundleName_ = "RequestFocusTest2";
@@ -540,6 +543,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     sceneSession2->isVisible_ = true;
     sceneSession2->state_ = SessionState::STATE_ACTIVE;
     sceneSession2->SetZOrder(2);
+
     SessionInfo info3;
     info3.abilityName_ = "RequestFocusTest3";
     info3.bundleName_ = "RequestFocusTest3";
@@ -560,6 +564,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+    
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionFocus(3, false, reason);
