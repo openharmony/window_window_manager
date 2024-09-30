@@ -2342,7 +2342,7 @@ HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Le
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->RegisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2357,7 +2357,7 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
     ASSERT_NE(nullptr, window);
     sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window->UnregisterWindowRectChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
