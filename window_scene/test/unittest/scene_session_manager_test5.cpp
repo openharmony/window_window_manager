@@ -467,7 +467,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     ASSERT_NE(property, nullptr);
     property->SetFocusable(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_ = property;
     sceneSession->persistentId_ = 1;
@@ -483,7 +483,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     ASSERT_NE(property2, nullptr);
     property2->SetFocusable(true);
     property2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->property_ = property2;
     sceneSession2->persistentId_ = 2;
@@ -520,7 +520,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ASSERT_NE(property, nullptr);
     property->SetFocusable(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_ = property;
     sceneSession->persistentId_ = 1;
@@ -536,7 +536,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ASSERT_NE(property2, nullptr);
     property2->SetFocusable(true);
     property2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->property_ = property2;
     sceneSession2->persistentId_ = 2;
@@ -552,7 +552,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ASSERT_NE(property3, nullptr);
     property3->SetFocusable(true);
     property3->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
     ASSERT_NE(sceneSession3, nullptr);
     sceneSession3->property_ = property3;
     sceneSession3->persistentId_ = 3;
