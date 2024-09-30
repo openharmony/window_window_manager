@@ -663,7 +663,11 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
 int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    bool isVisible = data.ReadBool();
+    bool isVisible = true;
+    if (!data.ReadBool(isVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isVisible failed.");
+        return ERR_INVALID_DATA;
+    }
     SetSplitButtonVisible(isVisible);
     return ERR_NONE;
 }
