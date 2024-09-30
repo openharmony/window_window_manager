@@ -878,10 +878,15 @@ HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | 
         return;
     };
     callback->onPiPStateChange_ = callbackFun;
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, systemSession->GetWindowType());
     systemSession->UpdatePiPWindowStateChanged(true);
+
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
-    systemSession->UpdatePiPWindowStateChanged(true);
-    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, systemSession->GetWindowType());
+    sptr<SystemSession> system =
+        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    EXPECT_NE(nullptr, system);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, system->GetWindowType());
+    system->UpdatePiPWindowStateChanged(true);
 }
 } // namespace
 } // namespace Rosen
