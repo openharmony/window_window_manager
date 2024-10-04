@@ -24,6 +24,7 @@
 #include "common/include/window_session_property.h"
 #include "property/rs_properties_def.h"
 #include "window.h"
+#include "screen_manager.h"
 #include "ws_common_inner.h"
 
 namespace OHOS::MMI {
@@ -41,20 +42,31 @@ using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool 
 
 const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
-class MoveDragController : public RefBase {
+class MoveDragController : public ScreenManager::IScreenListener {
 public:
-    MoveDragController(int32_t persistentId);
+    MoveDragController(int32_t persistentId, bool isSystemWindow = false);
     ~MoveDragController() = default;
+
+    /*
+     * Cross Display Move Drag
+     */
+    enum class TargetRectCoordinate {
+        RELATED_TO_START_DISPLAY,
+        RELATED_TO_END_DISPLAY,
+        GLOBAL
+    };
 
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
+    void SetAsSystemWindow(bool isSystemWindow);
+    bool IsSystemWindow() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
-    WSRect GetTargetRect(bool needGlobalRect = false) const;
+    WSRect GetTargetRect(TargetRectCoordinate coordinate = TargetRectCoordinate::RELATED_TO_START_DISPLAY) const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -82,6 +94,15 @@ public:
     std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
     void InitCrossDisplayProperty(DisplayId displayId, uint64_t parentNodeId);
     WSRect GetScreenRectById(DisplayId displayId);
+    void MoveDragInterrupt();
+    void ResetCrossMoveDragProperty();
+
+    /*
+     * Monitor screen connection status
+     */
+    void OnConnect(ScreenId screenId) override;
+    void OnDisconnect(ScreenId screenId) override;
+    void OnChange(ScreenId screenId) override;
 
 private:
     struct MoveDragProperty {
@@ -118,6 +139,7 @@ private:
     constexpr static float NEAR_ZERO = 0.001f;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -207,6 +229,8 @@ private:
     /*
      * Cross Display Move Drag
      */
+    bool isSystemWindow_ = false;
+    bool moveDragIsInterrupted_ = false;
     DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t initParentNodeId_ = -1ULL;
