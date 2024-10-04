@@ -523,6 +523,10 @@ private:
      */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
     void OnMoveDragCallback(const SizeChangeReason reason);
+    void InitializeCrossMoveDrag();
+    void HandleMoveDrag(WSRect& rect, WSRect& globalRect, const SizeChangeReason reason,
+        bool isGlobal, bool needFlush);
+    void HandleMoveDragEnd(WSRect& rect, const SizeChangeReason reason);
 
     /*
      * Gesture Back
@@ -533,7 +537,7 @@ private:
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
     void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
-        bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
+        bool isSupportDragInPcCompatibleMode, bool isGlobal = false, bool needFlush = true);
     void HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
