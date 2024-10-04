@@ -44,7 +44,7 @@ const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
 class MoveDragController : public ScreenManager::IScreenListener {
 public:
-    MoveDragController(int32_t persistentId);
+    MoveDragController(int32_t persistentId, bool isSystemWindow = false);
     ~MoveDragController() = default;
 
     /*
@@ -139,6 +139,7 @@ private:
     constexpr static float NEAR_ZERO = 0.001f;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -228,7 +229,7 @@ private:
     /*
      * Cross Display Move Drag
      */
-    bool isSystemWindow_;
+    bool isSystemWindow_ = false;
     bool moveDragIsInterrupted_ = false;
     DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
