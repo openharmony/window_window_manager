@@ -274,7 +274,9 @@ void SceneSessionManager::Init()
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
-    MultiInstanceManager::GetInstance().Init(bundleMgr_);
+    if (systemConfig_.IsPcWindow()) {
+        MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
+    }
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -761,7 +763,10 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             visibleWindowCountMap_.erase(sceneSession->GetCallingPid());
             sceneSessionMap_.erase(persistentId);
-            MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
+            if (systemConfig_.IsPcWindow() &&
+                MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
+                MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
+            }
         }
     }
 }
@@ -1556,7 +1561,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        if (systemConfig_.IsPcWindow()) {
+        if (systemConfig_.IsPcWindow() &&
+            MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
         InitSceneSession(sceneSession, sessionInfo, property);
@@ -1580,7 +1586,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
         }
-        MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
+        if (systemConfig_.IsPcWindow() &&
+            MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
+            MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
+        }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, type: %{public}d",
@@ -2150,7 +2159,10 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     sceneSessionMap_.erase(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
-    MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
+    if (systemConfig_.IsPcWindow() &&
+        MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
+        MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
+    }
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
@@ -2554,12 +2566,14 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
                                     ? SessionState::STATE_ACTIVE
                                     : SessionState::STATE_BACKGROUND;
     sessionInfo.isPersistentRecover_ = true;
+    sessionInfo.appInstanceKey_ = property->GetAppInstanceKey();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
-        "windowState=%{public}u",
+        "windowState=%{public}u, appInstanceKey=%{public}s",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
-        sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_);
+        sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
+        sessionInfo.appInstanceKey_.c_str());
     return sessionInfo;
 }
 
@@ -3186,7 +3200,9 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         }
         currentUserId_ = userId;
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-        MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+        if (systemConfig_.IsPcWindow()) {
+            MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+        }
         RegisterSecSurfaceInfoListener();
         return WSError::WS_OK;
     };
@@ -3256,7 +3272,9 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-            MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+            if (systemConfig_.IsPcWindow()) {
+                MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+            }
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
@@ -11045,22 +11063,36 @@ WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int
 
 int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
+    if (systemConfig_.IsPcWindow()) {
+        return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
+    } else {
+        return 0;
+    }
 }
 
 int32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
 {
-    return MultiInstanceManager::GetInstance().GetInstanceCount(bundleName);
+    if (systemConfig_.IsPcWindow()) {
+        return MultiInstanceManager::GetInstance().GetInstanceCount(bundleName);
+    } else {
+        return 0;
+    }
 }
 
 std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleName)
 {
-    return MultiInstanceManager::GetInstance().GetLastInstanceKey(bundleName);
+    if (systemConfig_.IsPcWindow()) {
+        return MultiInstanceManager::GetInstance().GetLastInstanceKey(bundleName);
+    } else {
+        return "";
+    }
 }
 
 void SceneSessionManager::PackageRemovedOrChanged(const std::string& bundleName)
 {
-    return MultiInstanceManager::GetInstance().RemoveAppInfo(bundleName);
+    if (systemConfig_.IsPcWindow()) {
+        MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
+    }
 }
 
 WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()

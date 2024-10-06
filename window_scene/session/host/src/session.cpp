@@ -295,6 +295,11 @@ void Session::SetAppInstanceKey(const std::string& appInstanceKey)
     sessionInfo_.appInstanceKey_ = appInstanceKey;
 }
 
+std::string Session::GetAppInstanceKey() const
+{
+    return sessionInfo_.appInstanceKey_;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
