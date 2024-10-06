@@ -295,8 +295,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        property_->SetDisplayId(parentSession->GetDisplayId());
         // set parent persistentId
+        property_->SetDisplayId(parentSession->GetDisplayId());
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         property_->SetSubWindowLevel(parentSession->GetProperty()->GetSubWindowLevel() + 1);
@@ -307,6 +307,16 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
         property_->SetParentPersistentId(property_->GetParentId());
+        int32_t displayId = 0;
+        WMError errCode = SingletonContainer::Get<WindowAdapter>().GetDisplayIdByPersistentId(property_->GetParentId(),
+            displayId);
+        if (errCode == WMError::WM_OK) {
+            property_->SetDisplayId(displayId);
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "parent displayId get failed name: %{public}s, reason : %{public}d",
+                property_->GetWindowName().c_str(), errCode);
+            SetDefaultDisplayIdIfNeed();
+        }
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
@@ -316,6 +326,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
             return createSystemWindowRet;
+        }
+        WMError ret = SetSystemWindowDisplayId(type);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
@@ -337,6 +351,42 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s,id:%{public}d,parentId:%{public}d,type:%{public}u,"
         "touchable:%{public}d", property_->GetWindowName().c_str(), property_->GetPersistentId(),
         property_->GetParentPersistentId(), GetType(), property_->GetTouchable());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemWindowDisplayId(WindowType type)
+{
+    if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_FLOAT ||
+        (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST))) {
+        sptr<WindowSessionImpl> parentSession = nullptr;
+        if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST)) {
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            parentSession = FindParentMainSession(property_->GetParentPersistentId(), windowSessionMap_);
+        } else {
+            parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
+        }
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE,
+                "parent of system window is nullptr, name: %{public}s, type: %{public}d",
+                property_->GetWindowName().c_str(),
+                type);
+            SetDefaultDisplayIdIfNeed();
+        } else if (property_->GetDisplayId() == DISPLAY_ID_INVALID ||
+            property_->GetDisplayId() == parentSession->GetDisplayId()) {
+            property_->SetDisplayId(parentSession->GetDisplayId());
+            TLOGI(WmsLogTag::WMS_LIFE, "defaultDisplay Is Set");
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE,
+                "window displayId is not same with parent, windowName: %{public}s,"
+                "displayId: %{public}d, parent displayId: %{public}d",
+                property_->GetWindowName().c_str(),
+                static_cast<int>(property_->GetDisplayId()),
+                static_cast<int>(parentSession->GetDisplayId()));
+            return WMError::WM_ERROR_INVALID_DISPLAY;
+        }
+    } else {
+        SetDefaultDisplayIdIfNeed();
+    }
     return WMError::WM_OK;
 }
 
@@ -517,7 +567,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    SetDefaultDisplayIdIfNeed();
     // Since here is init of this window, no other threads will rw it.
     hostSession_ = iSession;
     context_ = context;
@@ -533,6 +582,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
     bool isSpecificSession = false;
     if (GetHostSession()) { // main window
+        SetDefaultDisplayIdIfNeed();
         ret = Connect();
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());

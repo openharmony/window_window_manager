@@ -444,6 +444,7 @@ public:
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
     WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
+    WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
 
     /*
      * Multi instance

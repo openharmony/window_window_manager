@@ -9970,6 +9970,25 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
     return true;
 }
 
+WMError SceneSessionManager::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+{
+    auto task = [this, persistentId, &displayId]() {
+        sptr<SceneSession> session = GetSceneSession(persistentId);
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "GetDisplayIdByPersistentId: session is nullptr");
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "GetDisplayIdByPersistentId: sessionProperty is nullptr");
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        displayId = static_cast<int32_t>(sessionProperty->GetDisplayId());
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByPersistentId");
+}
+
 void SceneSessionManager::CacVisibleWindowNum()
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
