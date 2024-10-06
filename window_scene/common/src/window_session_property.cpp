@@ -1054,7 +1054,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
+        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
+        parcel.WriteString(appInstanceKey_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1130,6 +1131,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
+    property->SetAppInstanceKey(parcel.ReadString());
     return property;
 }
 
@@ -1179,6 +1181,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
+    appInstanceKey_ = property->appInstanceKey_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1623,6 +1626,16 @@ bool WindowSessionProperty::GetFullScreenStart() const
 void WindowSessionProperty::SetFullScreenStart(bool fullScreenStart)
 {
     fullScreenStart_ = fullScreenStart;
+}
+
+void WindowSessionProperty::SetAppInstanceKey(const std::string& appInstanceKey)
+{
+    appInstanceKey_ = appInstanceKey;
+}
+
+std::string WindowSessionProperty::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
 }
 } // namespace Rosen
 } // namespace OHOS

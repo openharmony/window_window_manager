@@ -496,7 +496,7 @@ public:
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
-    void GetAppInstanceKey(const std::string& appInstanceKey) const;
+    std::string GetAppInstanceKey() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

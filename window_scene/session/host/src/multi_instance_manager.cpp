@@ -21,7 +21,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr uint32_t MAX_INSTANCE_COUNT = 50;
     const std::string APP_INSTANCE_KEY_PREFIX = "app_instance_";
 }
 
@@ -31,38 +30,74 @@ MultiInstanceManager& MultiInstanceManager::GetInstance()
     return instance;
 }
 
-void MultiInstanceManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
+void MultiInstanceManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr,
+    const std::shared_ptr<TaskScheduler>& taskScheduler)
 {
+    if (bundleMgr == nullptr || taskScheduler == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr or taskScheduler is nullptr");
+        return;
+    }
     bundleMgr_ = bundleMgr;
+    taskScheduler_ = taskScheduler;
 }
 
 void MultiInstanceManager::SetCurrentUserId(int32_t userId)
 {
     userId_ = userId;
+    if (taskScheduler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "taskScheduler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    auto task = [this, where] {
+        std::vector<AppExecFwk::ApplicationInfo> appInfos;
+        if (!bundleMgr_ ||
+            !bundleMgr_->GetApplicationInfos(AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfos)) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:get application infos fail", where);
+            return;
+        }
+        std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
+        appInfoMap_.clear();
+        for (auto& appInfo : appInfos) {
+            appInfoMap_[appInfo.bundleName] = appInfo;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s:application infos init", where);
+    };
+    taskScheduler_->PostAsyncTask(task, where);
+}
+
+bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
+{
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    auto iter = appInfoMap_.find(bundleName);
+    if (iter == appInfoMap_.end()) {
+        AppExecFwk::ApplicationInfo appInfo;
+        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(bundleName,
+            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
+            appInfoMap_[bundleName] = appInfo;
+            return appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+        }
+        TLOGE(WmsLogTag::WMS_LIFE, "App info not found, bundleName:%{public}s", bundleName.c_str());
+        return false;
+    }
+    return iter->second.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
 }
 
 uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
-    AppExecFwk::ApplicationInfo appInfo;
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
     auto iter = appInfoMap_.find(bundleName);
-    if (iter != appInfoMap_.end()) {
-        appInfo = iter->second;
-    } else {
-        if (bundleMgr_ && !bundleMgr_->GetApplicationInfo(bundleName,
+    if (iter == appInfoMap_.end()) {
+        AppExecFwk::ApplicationInfo appInfo;
+        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(bundleName,
             AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Get application info fail, bundleName:%{public}s", bundleName.c_str());
-            return 0;
+            appInfoMap_[bundleName] = appInfo;
+            return appInfo.multiAppMode.maxCount;
         }
-        appInfoMap_[bundleName] = appInfo;
-        TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s multiAppModeType:%{public}d maxCount:%{public}d",
-            bundleName.c_str(), static_cast<int32_t>(appInfo.multiAppMode.multiAppModeType),
-            appInfo.multiAppMode.maxCount);
+        TLOGE(WmsLogTag::WMS_LIFE, "App info not found, bundleName:%{public}s", bundleName.c_str());
+        return 0u;
     }
-    if (appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
-        return appInfo.multiAppMode.maxCount;
-    }
-    return 0;
+    return iter->second.multiAppMode.maxCount;
 }
 
 uint32_t MultiInstanceManager::GetInstanceCount(const std::string& bundleName)
@@ -92,28 +127,19 @@ std::string MultiInstanceManager::GetLastInstanceKey(const std::string& bundleNa
 
 std::string MultiInstanceManager::CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
-    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto maxInstanceCount = GetMaxInstanceCount(bundleName);
+    auto instanceId = 0u;
     if (!instanceKey.empty()) {
-        auto prefixSize = APP_INSTANCE_KEY_PREFIX.size();
-        auto instanceId = std::stoi(instanceKey.substr(prefixSize, instanceKey.size() - prefixSize));
-        auto iter = bundleInstanceIdListMap_.find(bundleName);
-        if (iter == bundleInstanceIdListMap_.end()) {
-            bundleInstanceIdListMap_.emplace(bundleName, std::vector{ static_cast<uint32_t>(instanceId) });
-        } else {
-            iter->second.push_back(static_cast<uint32_t>(instanceId));
+        if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId) || instanceId >= maxInstanceCount) {
+            TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
+                bundleName.c_str(), instanceKey.c_str());
+            return instanceKey;
         }
+        AddInstanceId(bundleName, instanceId);
         return instanceKey;
     }
-    auto instanceId = 0u;
-    auto iter = bundleInstanceIdListMap_.find(bundleName);
-    if (iter == bundleInstanceIdListMap_.end()) {
-        bundleInstanceIdListMap_.emplace(bundleName, std::vector{ instanceId });
-    } else {
-        uint32_t instanceId = findMinimumAvailableInstanceId(iter->second);
-        iter->second.push_back(instanceId);
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s instanceKey:app_instance_%{public}u",
-        bundleName.c_str(), instanceId);
+    instanceId = FindMinimumAvailableInstanceId(bundleName, maxInstanceCount);
+    AddInstanceId(bundleName, instanceId);
     return APP_INSTANCE_KEY_PREFIX + std::to_string(instanceId);
 }
 
@@ -125,10 +151,9 @@ bool MultiInstanceManager::IsValidInstanceKey(const std::string& bundleName, con
         return false;
     }
     auto maxInstanceCount = GetMaxInstanceCount(bundleName);
-    auto prefixSize = APP_INSTANCE_KEY_PREFIX.size();
-    auto instanceId = std::stoi(instanceKey.substr(prefixSize, instanceKey.size() - prefixSize));
-    if (instanceId < 0 || static_cast<uint32_t>(instanceId) >= maxInstanceCount) {
-        TLOGE(WmsLogTag::WMS_LIFE, "bundleName:%{public}s with invalid instanceKey:%{public}s",
+    auto instanceId = 0u;
+    if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId) || instanceId >= maxInstanceCount) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
             bundleName.c_str(), instanceKey.c_str());
         return false;
     }
@@ -140,72 +165,80 @@ bool MultiInstanceManager::IsInstanceKeyExist(const std::string& bundleName, con
     std::shared_lock<std::shared_mutex> lock(mutex_);
     auto iter = bundleInstanceIdListMap_.find(bundleName);
     if (iter == bundleInstanceIdListMap_.end()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "instanceIdList not found, bundleName:%{public}s instanceKey:%{public}s",
+            bundleName.c_str(), instanceKey.c_str());
         return false;
     }
-    const auto& instanceIdList = iter->second;
-    for (auto instanceId : instanceIdList) {
-        if (APP_INSTANCE_KEY_PREFIX + std::to_string(instanceId) == instanceKey) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool MultiInstanceManager::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
-{
-    std::unique_lock<std::shared_mutex> lock(mutex_);
-    auto iter = bundleInstanceIdListMap_.find(bundleName);
-    if (iter == bundleInstanceIdListMap_.end()) {
+    auto instanceId = 0u;
+    if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
+            bundleName.c_str(), instanceKey.c_str());
         return false;
     }
-    auto& instanceIdList = iter->second;
-    for (auto it = instanceIdList.begin(); it != instanceIdList.end(); ++it) {
-        if (APP_INSTANCE_KEY_PREFIX + std::to_string(*it) == instanceKey) {
-            instanceIdList.erase(it);
-            return true;
-        }
-    }
-    return false;
+    return std::find(iter->second.begin(), iter->second.end(), instanceId) != iter->second.end();
 }
 
-uint32_t MultiInstanceManager::findMinimumAvailableInstanceId(const std::vector<uint32_t>& instanceIdList) const
+void MultiInstanceManager::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
-    for (uint32_t i = 0; i < MAX_INSTANCE_COUNT; i++) {
-        if (std::find(instanceIdList.begin(), instanceIdList.end(), i) == instanceIdList.end()) {
+    auto instanceId = 0u;
+    if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
+            bundleName.c_str(), instanceKey.c_str());
+        return;
+    }
+    RemoveInstanceId(bundleName, instanceId);
+}
+
+uint32_t MultiInstanceManager::FindMinimumAvailableInstanceId(const std::string& bundleName,
+    uint32_t maxInstanceCount) const
+{
+    auto iter = bundleInstanceUsageMap_.find(bundleName);
+    if (iter == bundleInstanceUsageMap_.end()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "not found available instanceId");
+        return 0u;
+    }
+    for (auto i = 0u; i < maxInstanceCount; i++) {
+        if (iter->second[i] == 0) {
             return i;
         }
     }
-    TLOGE(WmsLogTag::DEFAULT, "Not found available instanceId");
-    return 0;
+    TLOGE(WmsLogTag::WMS_LIFE, "not found available instanceId");
+    return 0u;
 }
 
-void MultiInstanceManager::RemoveAppInfo(const std::string& bundleName)
+void MultiInstanceManager::RefreshAppInfo(const std::string& bundleName)
 {
     std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
-    appInfoMap_.erase(bundleName);
+    AppExecFwk::ApplicationInfo appInfo;
+    if (bundleMgr_ &&
+        bundleMgr_->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
+        appInfoMap_[bundleName] = appInfo;
+    } else {
+        appInfoMap_.erase(bundleName);
+    }
 }
 
 void MultiInstanceManager::IncreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession)
 {
     if (!sceneSession) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is not main window");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is not main window");
         return;
     }
     const auto& instanceKey = sceneSession->GetSessionInfo().appInstanceKey_;
     if (instanceKey.empty()) {
-        TLOGD(WmsLogTag::DEFAULT, "instanceKey is empty");
+        TLOGD(WmsLogTag::WMS_LIFE, "instanceKey is empty");
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
     const auto bundleInstanceKey = bundleName + instanceKey;
-    auto iter = bundleInstanceSessionCountMap_.find(bundleInstanceKey);
-    if (iter == bundleInstanceSessionCountMap_.end()) {
-        TLOGD(WmsLogTag::DEFAULT, "bundleInstanceKey not exist.");
-        bundleInstanceSessionCountMap_.emplace(bundleInstanceKey, 1);
+    auto iter = instanceKeyRefCountMap_.find(bundleInstanceKey);
+    if (iter == instanceKeyRefCountMap_.end()) {
+        TLOGD(WmsLogTag::WMS_LIFE, "bundleInstanceKey not exist.");
+        instanceKeyRefCountMap_.emplace(bundleInstanceKey, 1);
     } else {
         ++(iter->second);
     }
@@ -214,27 +247,27 @@ void MultiInstanceManager::IncreaseInstanceKeyRefCount(const sptr<SceneSession>&
 void MultiInstanceManager::DecreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession)
 {
     if (!sceneSession) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is not main window");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is not main window");
         return;
     }
     const auto& instanceKey = sceneSession->GetSessionInfo().appInstanceKey_;
     if (instanceKey.empty()) {
-        TLOGD(WmsLogTag::DEFAULT, "instanceKey is empty");
+        TLOGD(WmsLogTag::WMS_LIFE, "instanceKey is empty");
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
     const auto bundleInstanceKey = bundleName + instanceKey;
-    auto iter = bundleInstanceSessionCountMap_.find(bundleInstanceKey);
-    if (iter == bundleInstanceSessionCountMap_.end()) {
-        TLOGD(WmsLogTag::DEFAULT, "bundleInstanceKey not exist.");
+    auto iter = instanceKeyRefCountMap_.find(bundleInstanceKey);
+    if (iter == instanceKeyRefCountMap_.end()) {
+        TLOGD(WmsLogTag::WMS_LIFE, "bundleInstanceKey not exist.");
         return;
     }
     if (--(iter->second) <= 0) {
-        bundleInstanceSessionCountMap_.erase(bundleInstanceKey);
+        instanceKeyRefCountMap_.erase(bundleInstanceKey);
         RemoveInstanceKey(bundleName, instanceKey);
     }
 }
@@ -242,17 +275,17 @@ void MultiInstanceManager::DecreaseInstanceKeyRefCount(const sptr<SceneSession>&
 void MultiInstanceManager::FillInstanceKeyIfNeed(const sptr<SceneSession>& sceneSession)
 {
     if (!sceneSession) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
         return;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGD(WmsLogTag::DEFAULT, "sceneSession is not main window");
+        TLOGD(WmsLogTag::WMS_LIFE, "sceneSession is not main window");
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
     uint32_t maxInstanceCount = GetMaxInstanceCount(bundleName);
     if (maxInstanceCount <= 0) {
-        TLOGD(WmsLogTag::DEFAULT, "maxInstanceCount is not valid");
+        TLOGD(WmsLogTag::WMS_LIFE, "maxInstanceCount is not valid");
         return;
     }
     const auto& sessionInfo = sceneSession->GetSessionInfo();
@@ -263,6 +296,111 @@ void MultiInstanceManager::FillInstanceKeyIfNeed(const sptr<SceneSession>& scene
         } else {
             sceneSession->SetAppInstanceKey(GetLastInstanceKey(bundleName));
         }
+    } else if (!IsInstanceKeyExist(sessionInfo.bundleName_, sessionInfo.appInstanceKey_)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "create not exist instanceKey, bundleName:%{public}s instanceKey:%{public}s",
+            bundleName.c_str(), sessionInfo.appInstanceKey_.c_str());
+        CreateNewInstanceKey(sessionInfo.bundleName_, sessionInfo.appInstanceKey_);
     }
+}
+
+bool MultiInstanceManager::MultiInstancePendingSessionActivation(SessionInfo& info)
+{
+    auto maxInstanceCount = GetMaxInstanceCount(info.bundleName_);
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d", info.persistentId_, maxInstanceCount);
+    if (maxInstanceCount <= 0) {
+        return true;
+    }
+    if (info.appInstanceKey_.empty()) {
+        if (info.persistentId_ != 0) {
+            TLOGE(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d", info.persistentId_);
+            return false;
+        }
+        info.isNewAppInstance_ = true;
+        return true;
+    } else if (!IsValidInstanceKey(info.bundleName_, info.appInstanceKey_)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
+        return false;
+    } else if (!IsInstanceKeyExist(info.bundleName_, info.appInstanceKey_)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, create not exist instanceKey:%{public}s",
+            info.persistentId_, info.appInstanceKey_.c_str());
+        CreateNewInstanceKey(info.bundleName_, info.appInstanceKey_);
+    }
+    info.isNewAppInstance_ = false;
+    return true;
+}
+
+void MultiInstanceManager::AddInstanceId(const std::string& bundleName, uint32_t instanceId)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto iter = bundleInstanceIdListMap_.find(bundleName);
+    if (iter == bundleInstanceIdListMap_.end()) {
+        bundleInstanceIdListMap_.emplace(bundleName, std::vector{ instanceId });
+    } else {
+        iter->second.push_back(instanceId);
+    }
+    auto usageMapIter = bundleInstanceUsageMap_.find(bundleName);
+    if (usageMapIter == bundleInstanceUsageMap_.end()) {
+        std::bitset<MAX_INSTANCE_COUNT> bitset;
+        bitset.reset();
+        bitset[instanceId] = 1;
+        bundleInstanceUsageMap_.emplace(bundleName, bitset);
+    } else {
+        usageMapIter->second[instanceId] = 1;
+    }
+    std::ostringstream oss;
+    for (auto id : bundleInstanceIdListMap_.find(bundleName)->second) {
+        oss << id << ",";
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s instanceId:%{public}d idList:%{public}s",
+        bundleName.c_str(), instanceId, oss.str().c_str());
+}
+
+void MultiInstanceManager::RemoveInstanceId(const std::string& bundleName, uint32_t instanceId)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto iter = bundleInstanceIdListMap_.find(bundleName);
+    if (iter == bundleInstanceIdListMap_.end()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "instanceIdList not found, bundleName:%{public}s instanceId:%{public}d",
+            bundleName.c_str(), instanceId);
+        return;
+    }
+    auto& instanceIdList = iter->second;
+    for (auto it = instanceIdList.begin(); it != instanceIdList.end(); ++it) {
+        if (*it == instanceId) {
+            instanceIdList.erase(it);
+            break;
+        }
+    }
+    auto usageMapIter = bundleInstanceUsageMap_.find(bundleName);
+    if (usageMapIter == bundleInstanceUsageMap_.end()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "instanceUsage not found, bundleName:%{public}s instanceId:%{public}d",
+            bundleName.c_str(), instanceId);
+        return;
+    }
+    usageMapIter->second[instanceId] = 0;
+    std::ostringstream oss;
+    for (auto id : bundleInstanceIdListMap_.find(bundleName)->second) {
+        oss << id << ",";
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s instanceId:%{public}d idList:%{public}s",
+        bundleName.c_str(), instanceId, oss.str().c_str());
+}
+
+bool MultiInstanceManager::ConvertInstanceKeyToInstanceId(const std::string& instanceKey, uint32_t& instanceId) const
+{
+    if (instanceKey.empty() || instanceKey.find(APP_INSTANCE_KEY_PREFIX) == -1ul) {
+        return false;
+    }
+    auto prefixSize = APP_INSTANCE_KEY_PREFIX.size();
+    const auto& instanceIdStr = instanceKey.substr(prefixSize, instanceKey.size() - prefixSize);
+    if (!WindowHelper::IsNumber(instanceIdStr)) {
+        return false;
+    }
+    auto instanceIdNum = std::stoi(instanceIdStr);
+    if (instanceIdNum < 0) {
+        return false;
+    }
+    instanceId = static_cast<uint32_t>(instanceIdNum);
+    return true;
 }
 } // namespace OHOS::Rosen

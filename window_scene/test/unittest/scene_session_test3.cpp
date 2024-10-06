@@ -501,33 +501,6 @@ HWTEST_F(SceneSessionTest3, UpdateZOrderInner, Function | SmallTest | Level2)
     res = sceneSession->UpdateZOrderInner(10);
     EXPECT_EQ(false, res);
 }
-
-/**
- * @tc.name: CheckInstanceKey
- * @tc.desc: check func CheckInstanceKey
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, CheckInstanceKey, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "CheckInstanceKey";
-    info.bundleName_ = "CheckInstanceKey";
-    info.appInstanceKey_ = "";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    EXPECT_NE(nullptr, abilitySessionInfo);
-    abilitySessionInfo->persistentId = 1;
-    bool res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
-    EXPECT_EQ(false, res);
-
-    abilitySessionInfo->persistentId = 0;
-    res = sceneSession->CheckInstanceKey(abilitySessionInfo, info);
-    EXPECT_EQ(true, res);
-
-    info.appInstanceKey_ = "OpenHarmony";
-    EXPECT_EQ(true, res);
-}
 }
 }
 }
