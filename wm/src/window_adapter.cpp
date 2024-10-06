@@ -984,5 +984,14 @@ WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return wmsProxy->ReleaseForegroundSessionScreenLock();
 }
+
+WMError WindowAdapter::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetDisplayIdByPersistentId(persistentId, displayId);
+}
+
 } // namespace Rosen
 } // namespace OHOS
