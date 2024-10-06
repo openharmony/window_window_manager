@@ -264,6 +264,13 @@ public:
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+    /**
+     * @brief Callback for session modal type changes.
+     *
+     * @param subWindowModalType Indicates the {@link SubWindowModalType}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /*
      *  Gesture Back
