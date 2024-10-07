@@ -922,7 +922,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_OK);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
 
@@ -1157,6 +1157,9 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
 
     sptr<IWindowLifeCycle> listener = nullptr;
     WMError res = window->RegisterLifeCycleListener(listener);
@@ -1185,23 +1188,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterDialogTargetTouchListener(listener4);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     sptr<IWindowStatusChangeListener> listener5 = nullptr;
     res = window->RegisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
-    sptr<IDisplayMoveListener> listener6 = nullptr;
-    res = window->RegisterDisplayMoveListener(listener6);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterDisplayMoveListener(listener6);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
-    sptr<IWindowRectChangeListener> listener7 = nullptr;
-    res = window->RegisterWindowRectChangeListener(listener7);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
 
@@ -1216,12 +1208,14 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("RegisterListener02");
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
                                "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
 
     sptr<IScreenshotListener> listener5 = nullptr;
     WMError res = window->RegisterScreenshotListener(listener5);
@@ -1253,18 +1247,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    sptr<ISubWindowCloseListener> listener10 = nullptr;
-    res = window->RegisterSubWindowCloseListeners(listener10);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterSubWindowCloseListeners(listener10);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
-    sptr<ISwitchFreeMultiWindowListener> listener11 = nullptr;
-    res = window->RegisterSwitchFreeMultiWindowListener(listener11);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
@@ -1285,14 +1267,40 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+
+    sptr<IDisplayMoveListener> listener6 = nullptr;
+    WMError res = window->RegisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterDisplayMoveListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowRectChangeListener> listener7 = nullptr;
+    res = window->RegisterWindowRectChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<ISubWindowCloseListener> listener10 = nullptr;
+    res = window->RegisterSubWindowCloseListeners(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSubWindowCloseListeners(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<ISwitchFreeMultiWindowListener> listener11 = nullptr;
+    res = window->RegisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<IMainWindowCloseListener> listener12 = nullptr;
-    WMError res = window->RegisterMainWindowCloseListeners(listener12);
+    res = window->RegisterMainWindowCloseListeners(listener12);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterMainWindowCloseListeners(listener12);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
 }
 

@@ -933,6 +933,8 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight, Function | SmallTest | Level2)
 {
     auto window = GetTestWindowImpl("GetDecorHeight");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
     int32_t height = -1;
     ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
     
@@ -954,6 +956,8 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea, Function | SmallTest | Leve
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
     window->uiContent_ = std::move(uiContent);

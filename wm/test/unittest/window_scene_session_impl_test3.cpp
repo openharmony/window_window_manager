@@ -775,6 +775,12 @@ HWTEST_F(WindowSceneSessionImplTest3, IsDecorEnable, Function | SmallTest | Leve
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->hostSession_ = session;
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowSupport_ = true;
     windowSceneSessionImpl->DisableAppWindowDecor();
     auto ret = windowSceneSessionImpl->IsDecorEnable();
@@ -1433,6 +1439,12 @@ HWTEST_F(WindowSceneSessionImplTest3, DisableAppWindowDecor, Function | SmallTes
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->hostSession_ = session;
+
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     auto ret = windowSceneSessionImpl->DisableAppWindowDecor();
     EXPECT_EQ(WMError::WM_OK, ret);
