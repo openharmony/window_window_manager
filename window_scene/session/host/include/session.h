@@ -343,27 +343,27 @@ public:
     /*
      * Window Focus
      */
+    virtual WSError SetSystemSceneBlockingFocus(bool blocking);
+    bool GetBlockingFocus() const;
+    WSError SetFocusable(bool isFocusable);
+    bool GetFocusable() const;
+    void SetFocusedOnShow(bool focusedOnShow);
+    bool IsFocusedOnShow() const;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
+    bool IsFocusableOnShow() const;
+    virtual void SetSystemFocusable(bool systemFocusable);
+    bool GetSystemFocusable() const;
+    bool CheckFocusable() const;
+    bool IsFocused() const;
+    bool GetFocused() const;
+    virtual WSError UpdateFocus(bool isFocused);
+    virtual void PresentFocusIfPointDown();
+    WSError RequestFocus(bool isFocused) override;
     void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyUIRequestFocus();
-    bool CheckFocusable() const;
-    bool IsFocusableOnShow() const;
-    bool IsFocused() const;
-    bool IsFocusedOnShow() const;
-    void SetFocusedOnShow(bool focusedOnShow);
-    bool GetFocusable() const;
-    bool GetSystemFocusable() const;
-    bool GetBlockingFocus() const;
-    bool GetFocused() const;
-    WSError SetFocusable(bool isFocusable);
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
-    WSError NotifyFocusStatus(bool isFocused);
-    WSError RequestFocus(bool isFocused) override;
-    virtual void SetSystemFocusable(bool systemFocusable);
     virtual void NotifyUILostFocus();
-    virtual void PresentFocusIfPointDown();
-    virtual WSError UpdateFocus(bool isFocused);
-    virtual WSError SetSystemSceneBlockingFocus(bool blocking);
+    WSError NotifyFocusStatus(bool isFocused);
 
     /*
      * Multi Window
