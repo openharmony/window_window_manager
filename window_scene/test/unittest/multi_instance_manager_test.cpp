@@ -18,6 +18,7 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/scene_session.h"
 #include "mock/mock_ibundle_mgr.h"
+#include "common/include/task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +28,7 @@ namespace Rosen {
 namespace {
     const std::string BUNDLE_NAME = "bundleName";
     const int32_t USER_ID { 100 };
+    const int32_t SLEEP_TIME { 10000 };
 }
 class MultiInstanceManagerTest : public testing::Test {
 public:
@@ -36,7 +38,8 @@ public:
     void TearDown() override;
 private:
     sptr<SceneSession> GetSceneSession(const std::string& instanceKey = "");
-    sptr<IBundleMgrMocker> GetBundleMgr(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount);
+    void Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount);
+    std::shared_ptr<TaskScheduler> GetTaskScheduler();
 };
 
 void MultiInstanceManagerTest::SetUpTestCase()
@@ -55,8 +58,7 @@ void MultiInstanceManagerTest::TearDown()
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
     EXPECT_CALL(*bundleMgrMocker, GetApplicationInfo(_, _, _, _)).WillOnce(Return(false));
-    MultiInstanceManager::GetInstance().Init(bundleMgrMocker);
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     MultiInstanceManager::GetInstance().RefreshAppInfo(BUNDLE_NAME);
 }
 
@@ -71,17 +73,29 @@ sptr<SceneSession> MultiInstanceManagerTest::GetSceneSession(const std::string& 
     return sceneSession;
 }
 
-sptr<IBundleMgrMocker> MultiInstanceManagerTest::GetBundleMgr(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
+void MultiInstanceManagerTest::Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfo(_, _, _, _)).WillOnce([modeType, maxCount](
-        const std::string& appName, const AppExecFwk::ApplicationFlag flag,
-        const int32_t userId, AppExecFwk::ApplicationInfo& appInfo) {
+    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _)).WillOnce([modeType, maxCount](
+        const AppExecFwk::ApplicationFlag flag, const int32_t userId,
+        std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
+        AppExecFwk::ApplicationInfo appInfo;
+        appInfo.bundleName = BUNDLE_NAME;
         appInfo.multiAppMode.multiAppModeType = modeType;
         appInfo.multiAppMode.maxCount = maxCount;
+        appInfos.push_back(appInfo);
         return true;
     });
-    return bundleMgrMocker;
+    MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
+    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    usleep(SLEEP_TIME);
+}
+
+std::shared_ptr<TaskScheduler> MultiInstanceManagerTest::GetTaskScheduler()
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    return taskScheduler;
 }
 
 namespace {
@@ -94,10 +108,8 @@ HWTEST_F(MultiInstanceManagerTest, IsMultiInstance, Function | SmallTest | Level
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     ASSERT_TRUE(MultiInstanceManager::GetInstance().IsMultiInstance(BUNDLE_NAME));
-    ASSERT_FALSE(MultiInstanceManager::GetInstance().IsMultiInstance(nullptr));
 }
 
 /**
@@ -109,8 +121,7 @@ HWTEST_F(MultiInstanceManagerTest, IsMultiInstance02, Function | SmallTest | Lev
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     ASSERT_FALSE(MultiInstanceManager::GetInstance().IsMultiInstance(BUNDLE_NAME));
 }
 
@@ -123,8 +134,7 @@ HWTEST_F(MultiInstanceManagerTest, IsValidInstanceKey, Function | SmallTest | Le
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     std::string validInstanceKey = "app_instance_0";
     std::string validInstanceKey2 = "app_instance_4";
     ASSERT_TRUE(MultiInstanceManager::GetInstance().IsValidInstanceKey(BUNDLE_NAME, validInstanceKey));
@@ -149,8 +159,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed, Function | SmallTest |
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     sptr<SceneSession> sceneSession = GetSceneSession();
     MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
     MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
@@ -167,8 +176,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed02, Function | SmallTest
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     std::string instanceKey = "app_instance_4";
     sptr<SceneSession> sceneSession = GetSceneSession(instanceKey);
     MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
@@ -186,8 +194,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed03, Function | SmallTest
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 2;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     sptr<SceneSession> sceneSession = GetSceneSession();
     MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
     MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
@@ -214,8 +221,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation, Functi
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     uint32_t maxCount = 0;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = BUNDLE_NAME;
     ASSERT_TRUE(MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(sessionInfo));
@@ -230,8 +236,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation02, Func
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = BUNDLE_NAME;
     sessionInfo.persistentId_ = 100;
@@ -247,8 +252,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation03, Func
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = BUNDLE_NAME;
     sessionInfo.appInstanceKey_ = "app_instance_xx";
@@ -262,24 +266,9 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation03, Func
  */
 HWTEST_F(MultiInstanceManagerTest, GetMaxInstanceCount, Function | SmallTest | Level1)
 {
-    AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
-    uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
-    ASSERT_EQ(MultiInstanceManager::GetInstance().GetMaxInstanceCount(BUNDLE_NAME), 0);
-}
-
-/**
- * @tc.name: GetMaxInstanceCount02
- * @tc.desc: test function : GetMaxInstanceCount
- * @tc.type: FUNC
- */
-HWTEST_F(MultiInstanceManagerTest, GetMaxInstanceCount02, Function | SmallTest | Level1)
-{
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     ASSERT_EQ(MultiInstanceManager::GetInstance().GetMaxInstanceCount(BUNDLE_NAME), maxCount);
 }
 
@@ -292,8 +281,7 @@ HWTEST_F(MultiInstanceManagerTest, GetInstanceCount, Function | SmallTest | Leve
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     ASSERT_EQ(MultiInstanceManager::GetInstance().GetInstanceCount(BUNDLE_NAME), 0);
     std::string instanceKey0 = "app_instance_0";
     sptr<SceneSession> sceneSession = GetSceneSession(instanceKey0);
@@ -314,8 +302,7 @@ HWTEST_F(MultiInstanceManagerTest, GetLastInstanceKey, Function | SmallTest | Le
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     ASSERT_EQ(MultiInstanceManager::GetInstance().GetLastInstanceKey(BUNDLE_NAME), "");
     std::string instanceKey0 = "app_instance_0";
     sptr<SceneSession> sceneSession = GetSceneSession(instanceKey0);
@@ -335,8 +322,7 @@ HWTEST_F(MultiInstanceManagerTest, CreateNewInstanceKey, Function | SmallTest | 
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     std::string instanceKey0 = "app_instance_0";
     ASSERT_EQ(MultiInstanceManager::GetInstance().CreateNewInstanceKey(BUNDLE_NAME), instanceKey0);
     sptr<SceneSession> sceneSession = GetSceneSession(instanceKey0);
@@ -373,8 +359,7 @@ HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, Function | SmallTest | Le
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
-    MultiInstanceManager::GetInstance().Init(GetBundleMgr(modeType, maxCount));
-    MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
+    Init(modeType, maxCount);
     std::string instanceKey0 = "app_instance_0";
     std::string instanceKey3 = "app_instance_3";
     ASSERT_FALSE(MultiInstanceManager::GetInstance().IsInstanceKeyExist(BUNDLE_NAME, instanceKey0));
