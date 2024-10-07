@@ -1953,4 +1953,31 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+WSError SessionProxy::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(subWindowModalType))) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Write subWindowModalType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MODAL_TYPE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen

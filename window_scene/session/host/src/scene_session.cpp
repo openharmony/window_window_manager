@@ -546,6 +546,45 @@ void SceneSession::AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t ty
     windowDragHotAreaMap_[displayId].insert_or_assign(type, area);
 }
 
+WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), subWindowModalType, where]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s subWindowModalType: %{public}u",
+            where, static_cast<uint32_t>(subWindowModalType));
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionModalTypeChange_) {
+            session->sessionChangeCallback_->onSessionModalTypeChange_(subWindowModalType);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnSessionModalTypeChange");
+    return WSError::WS_OK;
+}
+
+void SceneSession::SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func, where]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onSessionModalTypeChange_ = func;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s SessionModalTypeChange id: %{public}d",
+            where, session->GetPersistentId());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetSessionModalTypeChangeCallback");
+}
+
 SubWindowModalType SceneSession::GetSubWindowModalType() const
 {
     SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
@@ -4995,6 +5034,7 @@ void SceneSession::UnregisterSessionChangeListeners()
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
+            session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
