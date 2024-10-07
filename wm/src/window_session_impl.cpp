@@ -2012,6 +2012,9 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto persistentId = GetPersistentId();
     WLOGFD("Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -2066,6 +2069,9 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start, id:%{public}d", persistentId);
@@ -2199,6 +2205,9 @@ EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> Window
 
 WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -2218,6 +2227,9 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
 
 WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
