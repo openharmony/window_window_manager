@@ -4959,6 +4959,10 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         TLOGE(WmsLogTag::DMS, "fail to get default screenSession");
         return;
     }
+    if (g_foldScreenFlag) {
+        NotifyFoldStatusChanged(GetFoldStatus());
+        NotifyDisplayModeChanged(GetFoldDisplayMode());
+    }
     int64_t delayTime = 0;
     if (g_foldScreenFlag && oldScbDisplayMode_ != GetFoldDisplayMode() &&
         !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
