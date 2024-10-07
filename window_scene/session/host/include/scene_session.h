@@ -52,6 +52,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySessionModalTypeChangeFunc = std::function<void(const SubWindowModalType subWindowModalType)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -116,6 +117,7 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
+        NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
@@ -264,6 +266,8 @@ public:
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
     
     virtual bool IsModal() const { return false; }
+    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func);
 
     /**
      * Window Immersive
