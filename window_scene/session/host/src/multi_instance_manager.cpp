@@ -22,6 +22,7 @@
 namespace OHOS::Rosen {
 namespace {
     const std::string APP_INSTANCE_KEY_PREFIX = "app_instance_";
+    constexpr uint32_t DEFAULT_INSTANCE_ID = 0u;
 }
 
 MultiInstanceManager& MultiInstanceManager::GetInstance()
@@ -51,8 +52,8 @@ void MultiInstanceManager::SetCurrentUserId(int32_t userId)
     const char* const where = __func__;
     auto task = [this, where] {
         std::vector<AppExecFwk::ApplicationInfo> appInfos;
-        if (!bundleMgr_ ||
-            !bundleMgr_->GetApplicationInfos(AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfos)) {
+        if (!bundleMgr_ || !bundleMgr_->GetApplicationInfos(
+            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfos)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:get application infos fail", where);
             return;
         }
@@ -72,8 +73,8 @@ bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
     auto iter = appInfoMap_.find(bundleName);
     if (iter == appInfoMap_.end()) {
         AppExecFwk::ApplicationInfo appInfo;
-        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(bundleName,
-            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
+        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(
+            bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
             appInfoMap_[bundleName] = appInfo;
             return appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
         }
@@ -89,8 +90,8 @@ uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName
     auto iter = appInfoMap_.find(bundleName);
     if (iter == appInfoMap_.end()) {
         AppExecFwk::ApplicationInfo appInfo;
-        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(bundleName,
-            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
+        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(
+            bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
             appInfoMap_[bundleName] = appInfo;
             return appInfo.multiAppMode.maxCount;
         }
@@ -128,7 +129,7 @@ std::string MultiInstanceManager::GetLastInstanceKey(const std::string& bundleNa
 std::string MultiInstanceManager::CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
     auto maxInstanceCount = GetMaxInstanceCount(bundleName);
-    auto instanceId = 0u;
+    uint32_t instanceId = DEFAULT_INSTANCE_ID;
     if (!instanceKey.empty()) {
         if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId) || instanceId >= maxInstanceCount) {
             TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
@@ -151,7 +152,7 @@ bool MultiInstanceManager::IsValidInstanceKey(const std::string& bundleName, con
         return false;
     }
     auto maxInstanceCount = GetMaxInstanceCount(bundleName);
-    auto instanceId = 0u;
+    auto instanceId = DEFAULT_INSTANCE_ID;
     if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId) || instanceId >= maxInstanceCount) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
             bundleName.c_str(), instanceKey.c_str());
@@ -169,7 +170,7 @@ bool MultiInstanceManager::IsInstanceKeyExist(const std::string& bundleName, con
             bundleName.c_str(), instanceKey.c_str());
         return false;
     }
-    auto instanceId = 0u;
+    auto instanceId = DEFAULT_INSTANCE_ID;
     if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
             bundleName.c_str(), instanceKey.c_str());
@@ -180,7 +181,7 @@ bool MultiInstanceManager::IsInstanceKeyExist(const std::string& bundleName, con
 
 void MultiInstanceManager::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
-    auto instanceId = 0u;
+    auto instanceId = DEFAULT_INSTANCE_ID;
     if (!ConvertInstanceKeyToInstanceId(instanceKey, instanceId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid instanceKey, bundleName:%{public}s instanceKey:%{public}s",
             bundleName.c_str(), instanceKey.c_str());
@@ -195,7 +196,7 @@ uint32_t MultiInstanceManager::FindMinimumAvailableInstanceId(const std::string&
     auto iter = bundleInstanceUsageMap_.find(bundleName);
     if (iter == bundleInstanceUsageMap_.end()) {
         TLOGE(WmsLogTag::WMS_LIFE, "not found available instanceId");
-        return 0u;
+        return DEFAULT_INSTANCE_ID;
     }
     for (auto i = 0u; i < maxInstanceCount; i++) {
         if (iter->second[i] == 0) {
@@ -203,15 +204,15 @@ uint32_t MultiInstanceManager::FindMinimumAvailableInstanceId(const std::string&
         }
     }
     TLOGE(WmsLogTag::WMS_LIFE, "not found available instanceId");
-    return 0u;
+    return DEFAULT_INSTANCE_ID;
 }
 
 void MultiInstanceManager::RefreshAppInfo(const std::string& bundleName)
 {
     std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
     AppExecFwk::ApplicationInfo appInfo;
-    if (bundleMgr_ &&
-        bundleMgr_->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
+    if (bundleMgr_ && bundleMgr_->GetApplicationInfo(
+        bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
         appInfoMap_[bundleName] = appInfo;
     } else {
         appInfoMap_.erase(bundleName);

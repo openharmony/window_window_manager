@@ -276,6 +276,7 @@ void SceneSessionManager::Init()
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
     if (systemConfig_.IsPcWindow()) {
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
+        MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
 }
 
@@ -1561,7 +1562,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        if (systemConfig_.IsPcWindow() &&
+        if (systemConfig_.IsPcWindow() && WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
@@ -11088,7 +11089,7 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
     }
 }
 
-void SceneSessionManager::PackageRemovedOrChanged(const std::string& bundleName)
+void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
 {
     if (systemConfig_.IsPcWindow()) {
         MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);

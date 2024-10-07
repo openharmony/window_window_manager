@@ -16,16 +16,16 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_MULTI_INSTANCE_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_MULTI_INSTANCE_MANAGER_H
 
+#include <bitset>
 #include <cstdint>
 #include <map>
-#include <vector>
 #include <string>
 #include <shared_mutex>
-#include <bitset>
+#include <vector>
 #include <refbase.h>
-#include "wm_common.h"
-#include "session/host/include/scene_session.h"
 #include "common/include/task_scheduler.h"
+#include "session/host/include/scene_session.h"
+#include "wm_common.h"
 
 namespace OHOS::AppExecFwk {
 class IBundleMgr;
