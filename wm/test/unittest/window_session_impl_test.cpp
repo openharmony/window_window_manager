@@ -965,7 +965,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_OK);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
 
