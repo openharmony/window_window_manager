@@ -216,6 +216,12 @@ public:
     void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
     bool GetIsUIExtensionSubWindowFlag() const;
 
+    /*
+     * Multi instance
+     */
+    void SetAppInstanceKey(const std::string& appInstanceKey);
+    std::string GetAppInstanceKey() const;
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -360,6 +366,11 @@ private:
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionSubWindowFlag_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+
+    /*
+     * Multi instance
+     */
+    std::string appInstanceKey_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

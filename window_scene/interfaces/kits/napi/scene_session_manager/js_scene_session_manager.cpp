@@ -205,8 +205,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetInstanceCount);
     BindNativeFunction(env, exportObj, "getLastInstanceKey", moduleName,
         JsSceneSessionManager::GetLastInstanceKey);
-    BindNativeFunction(env, exportObj, "packageRemovedOrChanged", moduleName,
-        JsSceneSessionManager::PackageRemovedOrChanged);
+    BindNativeFunction(env, exportObj, "refreshAppInfo", moduleName,
+        JsSceneSessionManager::RefreshAppInfo);
     return NapiGetUndefined(env);
 }
 
@@ -1022,7 +1022,7 @@ napi_value JsSceneSessionManager::GetLastInstanceKey(napi_env env, napi_callback
     return me->OnGetLastInstanceKey(env, info);
 }
 
-napi_value JsSceneSessionManager::PackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::RefreshAppInfo(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     if (me == nullptr) {
@@ -3317,7 +3317,7 @@ napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().PackageRemovedOrChanged(bundleName);
+    SceneSessionManager::GetInstance().RefreshAppInfo(bundleName);
     return NapiGetUndefined(env);
 }
 
