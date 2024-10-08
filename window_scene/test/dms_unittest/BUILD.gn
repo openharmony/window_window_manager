@@ -444,6 +444,7 @@ ohos_unittest("ws_screen_session_manager_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 
