@@ -93,6 +93,7 @@ constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
 constexpr int32_t INVALID_DPI = 0;
+constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -3133,7 +3134,13 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
         TLOGE(WmsLogTag::DMS, "SetVirtualScreenRefreshRate, rsInterface error: %{public}d", res);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+    // when skipFrameInterval > 10 means the skipFrameInterval is the virtual screen refresh rate
+    if (refreshInterval > IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD) {
+        screenSession->UpdateRefreshRate(refreshInterval);
+    } else {
+        screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+    }
+    TLOGI(WmsLogTag::DMS, "SetVirtualScreenRefreshRate, refreshInterval is %{public}d", refreshInterval);
     return DMError::DM_OK;
 }
 
