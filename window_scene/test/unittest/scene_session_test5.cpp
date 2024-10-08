@@ -1456,6 +1456,23 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Le
     session->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
 }
+
+/**
+ * @tc.name: SetNotifyVisibleChangeFunc
+ * @tc.desc: SetNotifyVisibleChangeFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->SetNotifyVisibleChangeFunc([](int32_t persistentId){})
+    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
+}
 }
 }
 }
