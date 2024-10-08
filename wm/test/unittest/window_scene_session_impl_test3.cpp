@@ -1166,7 +1166,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, Function | SmallTest 
     windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     ret = windowSceneSessionImpl->Restore();
-    EXPECT_EQ(static_cast<WMError>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 }
 
 HWTEST_F(WindowSceneSessionImplTest3, RestorePcSubWindow, Function | SmallTest | Level2)
