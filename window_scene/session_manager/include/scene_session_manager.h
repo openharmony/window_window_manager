@@ -222,7 +222,7 @@ public:
      * @brief request focus status
      *
      * This function provides the ability for window to change focus status.
-     * 
+     *
      * @param persistentId window ID
      * @param isFocused is Focused
      * @param byForeground byForeground
@@ -248,9 +248,9 @@ public:
 
     /**
      * @brief get the focused window info
-     * 
+     *
      * This function provides the ability for other services to get the focused window info.
-     * 
+     *
      * @param focusInfo the focused session info
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
@@ -268,9 +268,9 @@ public:
         
     /**
      * @brief get focus session token
-     * 
+     *
      * This function provides the ability for other services to get the focused session token.
-     * 
+     *
      * @param token  the object of token
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
@@ -382,9 +382,9 @@ public:
 
     /**
      * @brief shift App window focus
-     * 
+     *
      * This function provides the ability for applications to shift focus in application.
-     * 
+     *
      * @param sourcePersistentId source persistent Id
      * @param targetPersistentId target persistent Id
      * @return Returns WSError::WS_OK if called success, otherwise failed.
