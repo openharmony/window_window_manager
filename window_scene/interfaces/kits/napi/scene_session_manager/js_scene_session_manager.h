@@ -188,7 +188,7 @@ private:
     napi_value OnGetMaxInstanceCount(napi_env env, napi_callback_info info);
     napi_value OnGetInstanceCount(napi_env env, napi_callback_info info);
     napi_value OnGetLastInstanceKey(napi_env env, napi_callback_info info);
-    napi_value OnPackageRemovedOrChanged(napi_env env, napi_callback_info info);
+    napi_value OnRefreshAppInfo(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
