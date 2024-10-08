@@ -518,15 +518,15 @@ void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSess
     } else {
         TLOGI(WmsLogTag::DMS, "found previous state, recover from storage");
         if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-        status == SCREEN_MIRROR) {
+            status == SCREEN_MIRROR) {
             DoFirstMirrorChangeMirror(scbClient, internalSession, externalSession);
             TLOGI(WmsLogTag::DMS, "5: external mirror to internal mirror");
         } else if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-        status == SCREEN_EXTEND) {
+            status == SCREEN_EXTEND) {
             DoFirstMirrorChangeExtend(scbClient, internalSession, externalSession);
             TLOGI(WmsLogTag::DMS, "7: external mirror to internal extend");
         } else if (mainScreenId != ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-        status == SCREEN_EXTEND) {
+            status == SCREEN_EXTEND) {
             DoFirstMainChangeExtend(scbClient, externalSession, internalSession);
             TLOGI(WmsLogTag::DMS, "6: external mirror to external extend");
         } else {
@@ -558,15 +558,15 @@ void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSes
         multiScreenStatus_.first, multiScreenStatus_.second.c_str());
 
     if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-    status == SCREEN_MIRROR) {
+        status == SCREEN_MIRROR) {
         DoFirstMirrorChangeMirror(scbClient, externalSession, internalSession);
         TLOGI(WmsLogTag::DMS, "3: internal mirror to external mirror");
     } else if (mainScreenId == ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-    status == SCREEN_EXTEND) {
+        status == SCREEN_EXTEND) {
         DoFirstExtendChangeMirror(externalSession, internalSession);
         TLOGI(WmsLogTag::DMS, "10: internal extend to external mirror");
     } else if (mainScreenId != ScreenSessionManager::GetInstance().GetInternalScreenId() &&
-    status == SCREEN_EXTEND) {
+        status == SCREEN_EXTEND) {
         DoFirstMainChangeMirror(scbClient, externalSession, internalSession);
         TLOGI(WmsLogTag::DMS, "14: external extend to external mirror");
     } else {
