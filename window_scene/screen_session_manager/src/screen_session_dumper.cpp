@@ -22,6 +22,7 @@
 #include "screen_session_manager.h"
 #include "session_permission.h"
 #include "screen_rotation_property.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,7 +34,7 @@ constexpr int DUMPER_PARAM_INDEX_THREE = 3;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
-#ifndef IS_RELEASE_VERSION
+
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
@@ -51,7 +52,6 @@ const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
-#endif
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -131,7 +131,11 @@ void ScreenSessionDumper::ExcuteDumpCmd()
 
 void ScreenSessionDumper::ExcuteInjectCmd()
 {
-#ifndef IS_RELEASE_VERSION
+    bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
+    if (!isDebugMode) {
+        TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
+        return;
+    }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
         ShowNotifyFoldStatusChangedInfo();
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
@@ -157,7 +161,6 @@ void ScreenSessionDumper::ExcuteInjectCmd()
     } else if (params_[0].find(ARG_SET_HOVER_STATUS) != std::string::npos) {
         SetHoverStatusChange(params_[0]);
     }
-#endif
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
@@ -503,7 +506,9 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
     dumpInfo_.append(oss.str());
 }
 
-#ifndef IS_RELEASE_VERSION
+/*
+ * hidumper inject methods
+ */
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
     TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", params_[0].c_str());
@@ -664,6 +669,5 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
         TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
     }
 }
-#endif
 } // Rosen
 } // OHOS
