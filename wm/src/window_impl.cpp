@@ -504,6 +504,11 @@ const Transform& WindowImpl::GetZoomTransform() const
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
         WLOGFE("Only support add show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -518,6 +523,11 @@ WMError WindowImpl::AddWindowFlag(WindowFlag flag)
 
 WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
         WLOGFE("Only support remove show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1029,6 +1039,11 @@ WMError WindowImpl::SetAspectRatio(float ratio)
 
 WMError WindowImpl::ResetAspectRatio()
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFI("windowId: %{public}u", GetWindowId());
     if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
@@ -1745,6 +1760,11 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
@@ -2014,6 +2034,11 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 /** @note @window.hierarchy */
 WMError WindowImpl::RaiseToAppTop()
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
@@ -3287,6 +3312,10 @@ int64_t WindowImpl::GetVSyncPeriod()
 
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return;
+    }
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     isFocused_ = focused;
     if (focused) {
@@ -3309,6 +3338,10 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 
 bool WindowImpl::IsFocused() const
 {
+    if (!isWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return false;
+    }
     return isFocused_;
 }
 

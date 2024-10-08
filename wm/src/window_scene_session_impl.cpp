@@ -1449,6 +1449,11 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
 
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1654,6 +1659,11 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto hostSession = GetHostSession();
     if (hostSession == nullptr) {
         WLOGFE("failed, because of nullptr");
@@ -1671,6 +1681,11 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 
 WMError WindowSceneSessionImpl::ResetAspectRatio()
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return static_cast<WMError>(hostSession->SetAspectRatio(0.0f));
@@ -1679,6 +1694,11 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFI("id: %{public}d", GetPersistentId());
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
@@ -1704,6 +1724,11 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto parentId = GetParentId();
     auto currentWindowId = GetWindowId();
 
@@ -2556,6 +2581,11 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
 
 WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
@@ -2576,6 +2606,11 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 
 WMError WindowSceneSessionImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetWindowFlags(updateFlags);
 }
