@@ -23,7 +23,6 @@
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -42,6 +41,7 @@ public:
     static inline float virtualPixelRatio_ = 0.0;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
+    static constexpr uint32_t WAIT_SERVERAL_FRAMES = 36000;
     static constexpr uint32_t WAIT_SYANC_S = 1; // second;
     static void InitAvoidArea();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
@@ -54,9 +54,7 @@ void WindowLayoutTest::SetUpTestCase()
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
     sleep(2);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        return;
-    }
+    ASSERT_NE(display, nullptr);
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);
@@ -101,9 +99,7 @@ void WindowLayoutTest::InitAvoidArea()
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     window->Show();
     window->SetLayoutFullScreen(true);
     window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, WindowTestUtils::systemAvoidArea_);
@@ -154,9 +150,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(true, window != nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
@@ -184,9 +178,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -218,9 +210,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> appWin = Utils::CreateTestWindow(info);
-    if (appWin == nullptr) {
-        return;
-    }
+    ASSERT_NE(appWin, nullptr);
 
     activeWindows_.push_back(appWin);
 
@@ -256,9 +246,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
 HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
-    if (statBar == nullptr) {
-        return;
-    }
+    ASSERT_NE(statBar, nullptr);
+
     activeWindows_.push_back(statBar);
     sptr<Window> naviBar = Utils::CreateNavigationBarWindow();
     activeWindows_.push_back(naviBar);
@@ -377,9 +366,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -442,9 +430,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -475,9 +462,8 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     };
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -540,9 +526,8 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .needAvoid = true, .parentLimit = false, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
@@ -607,9 +592,8 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -637,9 +621,8 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
+
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -659,14 +642,12 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo01");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10001);
 
@@ -679,28 +660,28 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(-500, rect.posX_);
     EXPECT_EQ(-500, rect.posY_);
 
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(0, rect.posX_);
     EXPECT_EQ(0, rect.posY_);
 
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
 
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(20000, rect.posX_);
@@ -714,19 +695,16 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo02",
         "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
     Rect rectNow;
@@ -739,7 +717,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -747,7 +725,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -755,7 +733,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -769,21 +747,18 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10003);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo03",
         "moduleName_moveWindowTo03", "abilityName_moveWindowTo03" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
     Rect rectNow;
@@ -795,7 +770,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -803,7 +778,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -811,7 +786,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -819,7 +794,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -833,21 +808,18 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo04");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10004);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo04",
         "moduleName_moveWindowTo04", "abilityName_moveWindowTo04" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
     Rect rectNow;
@@ -859,7 +831,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(-500, -500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -867,7 +839,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(0, 0);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -875,7 +847,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(500, 500);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -883,7 +855,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
     rectOld = window->property_->GetWindowRect();
     ret = window->MoveTo(20000, 20000);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     rectNow = window->property_->GetWindowRect();
     EXPECT_EQ(rectOld.posX_, rectNow.posX_);
@@ -897,14 +869,12 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize01");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect rect;
     WMError ret;
@@ -920,21 +890,21 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 
     ret = window->Resize(-500, -500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(500, rect.width_);
     EXPECT_EQ(500, rect.height_);
 
     ret = window->Resize(20000, 20000);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
@@ -950,18 +920,15 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize02", "moduleName_resize02", "abilityName_resize02" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
@@ -987,18 +954,15 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize03", "moduleName_resize03", "abilityName_resize03" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
@@ -1024,18 +988,15 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize04");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize04", "moduleName_resize04", "abilityName_resize04" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
@@ -1061,14 +1022,12 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize05");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect rect;
     WMError ret;
@@ -1083,14 +1042,14 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 
     ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
 
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(100000);
+    usleep(WAIT_SERVERAL_FRAMES);
     rect = window->property_->GetWindowRect();
     EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
@@ -1103,18 +1062,15 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize06");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize06", "moduleName_resize06", "abilityName_resize06" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
@@ -1140,18 +1096,15 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize07");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize07", "moduleName_resize07", "abilityName_resize07" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);
@@ -1177,18 +1130,15 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize08");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize08", "moduleName_resize08", "abilityName_resize08" };
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     WMError ret;
     ret = window->Create(abilityContext_, sceneSession);

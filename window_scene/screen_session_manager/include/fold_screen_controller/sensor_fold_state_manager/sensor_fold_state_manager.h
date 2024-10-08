@@ -31,17 +31,21 @@ public:
 
     virtual void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
+    virtual void HandleTentChange(bool isTentMode, sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void RegisterApplicationStateObserver();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);
+    bool IsTentMode();
 
 protected:
     void HandleSensorChange(FoldStatus nextState, float angle, sptr<FoldScreenPolicy> foldScreenPolicy);
     FoldStatus GetCurrentState();
+    void SetTentMode(bool status);
     std::recursive_mutex mutex_;
 
 private:
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
     FoldStatus mState_ = FoldStatus::UNKNOWN;
+    bool isTentMode_ = false;
 
     std::chrono::time_point<std::chrono::system_clock> mLastStateClock_ = std::chrono::system_clock::now();
     void NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus, float postureAngle);

@@ -81,6 +81,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateTopmost),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
+        &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -138,6 +140,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateTopmost),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
+        &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -368,6 +372,16 @@ void WindowSessionProperty::SetTopmost(bool topmost)
 bool WindowSessionProperty::IsTopmost() const
 {
     return topmost_;
+}
+
+void WindowSessionProperty::SetMainWindowTopmost(bool isTopmost)
+{
+    mainWindowTopmost_ = isTopmost;
+}
+
+bool WindowSessionProperty::IsMainWindowTopmost() const
+{
+    return mainWindowTopmost_;
 }
 
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
@@ -837,6 +851,23 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
     }
 }
 
+bool WindowSessionProperty::MarshallingMainWindowTopmost(Parcel& parcel) const
+{
+    if (!parcel.WriteBool(mainWindowTopmost_)) {
+        return false;
+    }
+    if (!parcel.WriteUint32(accessTokenId_)) {
+        return false;
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property)
+{
+    property->SetMainWindowTopmost(parcel.ReadBool());
+    property->SetAccessTokenId(parcel.ReadUint32());
+}
+
 bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
 {
     if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
@@ -997,7 +1028,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) && parcel.WriteBool(topmost_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
+        parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1022,7 +1054,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
+        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
+        parcel.WriteString(appInstanceKey_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1059,6 +1092,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
     property->SetTopmost(parcel.ReadBool());
+    property->SetMainWindowTopmost(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1097,6 +1131,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
+    property->SetAppInstanceKey(parcel.ReadString());
     return property;
 }
 
@@ -1114,6 +1149,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
     topmost_ = property->topmost_;
+    mainWindowTopmost_ = property->mainWindowTopmost_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
@@ -1145,6 +1181,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
+    appInstanceKey_ = property->appInstanceKey_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1270,6 +1307,10 @@ bool WindowSessionProperty::WriteActionUpdateTopmost(Parcel& parcel)
     return parcel.WriteBool(topmost_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
+{
+    return MarshallingMainWindowTopmost(parcel);
+}
 
 bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
 {
@@ -1400,6 +1441,11 @@ void WindowSessionProperty::ReadActionUpdateWindowMask(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 {
     SetTopmost(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
+{
+    UnmarshallingMainWindowTopmost(parcel, this);
 }
 
 void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
@@ -1580,6 +1626,16 @@ bool WindowSessionProperty::GetFullScreenStart() const
 void WindowSessionProperty::SetFullScreenStart(bool fullScreenStart)
 {
     fullScreenStart_ = fullScreenStart;
+}
+
+void WindowSessionProperty::SetAppInstanceKey(const std::string& appInstanceKey)
+{
+    appInstanceKey_ = appInstanceKey;
+}
+
+std::string WindowSessionProperty::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
 }
 } // namespace Rosen
 } // namespace OHOS

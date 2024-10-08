@@ -64,7 +64,7 @@ private:
     sptr<ScreenManagerListener> screenManagerListener_;
     std::map<ScreenId, sptr<Screen>> screenMap_;
     std::map<ScreenId, sptr<ScreenGroup>> screenGroupMap_;
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     std::set<sptr<IScreenListener>> screenListeners_;
     std::set<sptr<IScreenGroupListener>> screenGroupListeners_;
     std::set<sptr<IVirtualScreenGroupListener>> virtualScreenGroupListeners_;
@@ -89,7 +89,7 @@ public:
             return;
         }
         pImpl_->NotifyScreenConnect(screenInfo);
-        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnConnect(screenInfo->GetScreenId());
         }
@@ -106,7 +106,7 @@ public:
             return;
         }
         pImpl_->NotifyScreenDisconnect(screenId);
-        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnDisconnect(screenId);
         }
@@ -124,7 +124,7 @@ public:
         }
         WLOGFD("OnScreenChange. event %{public}u", event);
         pImpl_->NotifyScreenChange(screenInfo);
-        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenListeners_) {
             listener->OnChange(screenInfo->GetScreenId());
         }
@@ -149,7 +149,7 @@ public:
                 screenIds.push_back(screenInfo->GetScreenId());
             }
         }
-        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenGroupListeners_) {
             listener->OnChange(screenIds, groupEvent);
         }
@@ -216,14 +216,14 @@ ScreenManager::~ScreenManager()
 
 ScreenManager::Impl::~Impl()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     UnregisterDisplayManagerAgent();
 }
 
 sptr<Screen> ScreenManager::Impl::GetScreen(ScreenId screenId)
 {
     auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(screenId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateScreenInfoLocked(screenInfo)) {
         screenMap_.erase(screenId);
         return nullptr;
@@ -239,7 +239,7 @@ sptr<Screen> ScreenManager::GetScreenById(ScreenId screenId)
 sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroup(ScreenId screenId)
 {
     auto screenGroupInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(screenId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenGroupInfo == nullptr) {
         WLOGFE("screenGroupInfo is null");
         screenGroupMap_.erase(screenId);
@@ -264,7 +264,7 @@ DMError ScreenManager::Impl::GetAllScreens(std::vector<sptr<Screen>>& screens)
 {
     std::vector<sptr<ScreenInfo>> screenInfos;
     DMError ret  = SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreenInfos(screenInfos);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto info: screenInfos) {
         if (UpdateScreenInfoLocked(info)) {
             screens.emplace_back(screenMap_[info->GetScreenId()]);
@@ -284,7 +284,7 @@ DMError ScreenManager::GetAllScreens(std::vector<sptr<Screen>>& screens)
 
 DMError ScreenManager::Impl::RegisterScreenListener(sptr<IScreenListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError regSucc = RegisterDisplayManagerAgent();
     if (regSucc == DMError::DM_OK) {
         screenListeners_.insert(listener);
@@ -303,7 +303,7 @@ DMError ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 
 DMError ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenListeners_.begin(), screenListeners_.end(), listener);
     if (iter == screenListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -324,7 +324,7 @@ DMError ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
 
 DMError ScreenManager::Impl::RegisterScreenGroupListener(sptr<IScreenGroupListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError regSucc = RegisterDisplayManagerAgent();
     if (regSucc == DMError::DM_OK) {
         screenGroupListeners_.insert(listener);
@@ -343,7 +343,7 @@ DMError ScreenManager::RegisterScreenGroupListener(sptr<IScreenGroupListener> li
 
 DMError ScreenManager::Impl::UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenGroupListeners_.begin(), screenGroupListeners_.end(), listener);
     if (iter == screenGroupListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -364,7 +364,7 @@ DMError ScreenManager::UnregisterScreenGroupListener(sptr<IScreenGroupListener> 
 
 DMError ScreenManager::Impl::RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError regSucc = RegisterDisplayManagerAgent();
     if (regSucc == DMError::DM_OK) {
         virtualScreenGroupListeners_.insert(listener);
@@ -383,7 +383,7 @@ DMError ScreenManager::RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGro
 
 DMError ScreenManager::Impl::UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(virtualScreenGroupListeners_.begin(), virtualScreenGroupListeners_.end(), listener);
     if (iter == virtualScreenGroupListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -636,26 +636,26 @@ DMError ScreenManager::IsScreenRotationLocked(bool& isLocked)
 
 void ScreenManager::Impl::NotifyScreenConnect(sptr<ScreenInfo> info)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     UpdateScreenInfoLocked(info);
 }
 
 void ScreenManager::Impl::NotifyScreenDisconnect(ScreenId screenId)
 {
     WLOGFI("screenId:%{public}" PRIu64".", screenId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenMap_.erase(screenId);
 }
 
 void ScreenManager::Impl::NotifyScreenChange(const sptr<ScreenInfo>& screenInfo)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     UpdateScreenInfoLocked(screenInfo);
 }
 
 void ScreenManager::Impl::NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto screenInfo : screenInfos) {
         UpdateScreenInfoLocked(screenInfo);
     }
@@ -713,8 +713,8 @@ void ScreenManager::Impl::OnRemoteDied()
         std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
         virtualScreenAgent_ = nullptr;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
 
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
 }
 
@@ -728,4 +728,10 @@ bool ScreenManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatu
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenStatus(screenId, screenStatus);
 }
 
+DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenMaxRefreshRate(id,
+        refreshRate, actualRefreshRate);
+}
 } // namespace OHOS::Rosen

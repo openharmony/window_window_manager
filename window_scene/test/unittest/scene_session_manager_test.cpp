@@ -278,13 +278,27 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowStatesByPid, Function | SmallTest
 }
 
 /**
- * @tc.name: CheckIsRemote
- * @tc.desc: SceneSesionManager check is remote
+ * @tc.name: CheckIsRemote01
+ * @tc.desc: DeviceId is empty
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, CheckIsRemote, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote01, Function | SmallTest | Level3)
 {
     std::string deviceId;
+    EXPECT_EQ(deviceId.empty(), true);
+    bool result = ssm_->CheckIsRemote(deviceId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckIsRemote02
+ * @tc.desc: SceneSesionManager check is remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, Function | SmallTest | Level3)
+{
+    std::string deviceId = "abc";
+    EXPECT_EQ(deviceId.empty(), false);
     bool result = ssm_->CheckIsRemote(deviceId);
     EXPECT_FALSE(result);
 }
@@ -1576,10 +1590,15 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     bool skip = true;
     auto result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
     ASSERT_NE(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
+
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
 
     SessionInfo info;
@@ -1601,6 +1620,8 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
     ssm_->sceneSessionMap_.erase(-1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
+    usleep(WAIT_SYNC_IN_NS_TWO);
 }
 
 /**

@@ -183,6 +183,26 @@ bool MainSession::IsTopmost() const
     return GetSessionProperty()->IsTopmost();
 }
 
+WSError MainSession::SetMainWindowTopmost(bool isTopmost)
+{
+    auto property = GetSessionProperty();
+    if (property) {
+        property->SetMainWindowTopmost(isTopmost);
+        TLOGD(WmsLogTag::WMS_HIERARCHY,
+            "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
+            GetPersistentId(), isTopmost);
+        if (mainWindowTopmostChangeFunc_) {
+            mainWindowTopmostChangeFunc_(isTopmost);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsMainWindowTopmost() const
+{
+    return GetSessionProperty()->IsMainWindowTopmost();
+}
+
 void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
@@ -216,4 +236,22 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         isClientInteractive_ = interactive;
     }
 }
+
+WSError MainSession::OnRestoreMainWindow()
+{
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
+            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnRestoreMainWindow");
+    return WSError::WS_OK;
+}
+
 } // namespace OHOS::Rosen

@@ -46,6 +46,9 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
         case ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED: {
             return HandleOnSensorRotationChanged(data, reply);
         }
+        case ScreenSessionManagerClientMessage::TRANS_ID_ON_HOVER_STATUS_CHANGED: {
+            return HandleOnHoverStatusChanged(data, reply);
+        }
         case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED: {
             return HandleOnScreenOrientationChanged(data, reply);
         }
@@ -253,6 +256,15 @@ int ScreenSessionManagerClientStub::HandleOnFoldStatusChangedReportUE(MessagePar
     std::vector<std::string> screenFoldInfo;
     data.ReadStringVector(&screenFoldInfo);
     OnFoldStatusChangedReportUE(screenFoldInfo);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnHoverStatusChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto hoverStatus = data.ReadInt32();
+    OnHoverStatusChanged(screenId, hoverStatus);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
