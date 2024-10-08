@@ -763,7 +763,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
             TLOGI(WmsLogTag::WMS_RECOVER, "persistentId=%{public}d", persistentId);
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             visibleWindowCountMap_.erase(sceneSession->GetCallingPid());
-            sceneSessionMap_.erase(persistentId);
+            EraseSceneSessionAndMarkDirty(persistentId);
             if (systemConfig_.IsPcWindow() &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
                 MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
@@ -2112,7 +2112,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             }
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-                sceneSessionMap_.erase(dialog->GetPersistentId());
+                EraseSceneSessionAndMarkDirty(dialog->GetPersistentId());
                 systemTopSceneSessionMap_.erase(dialog->GetPersistentId());
                 nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
@@ -2157,13 +2157,29 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    sceneSessionMap_.erase(persistentId);
+    EraseSceneSessionAndMarkDirty(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
     if (systemConfig_.IsPcWindow() &&
         MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     }
+}
+
+/**
+ * if visible session is erased, mark dirty
+ * lock-free
+ */
+void SceneSessionManager::EraseSceneSessionAndMarkDirty(int32_t persistentId)
+{
+    // get scene session lock-free
+    auto iter = sceneSessionMap_.find(persistentId);
+    sptr<SceneSession> sceneSession = iter != sceneSessionMap_.end() ? iter->second : nullptr;
+
+    if (sceneSession != nullptr && sceneSession->IsVisible()) {
+        sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+    }
+    sceneSessionMap_.erase(persistentId);
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
@@ -3066,7 +3082,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        sceneSessionMap_.erase(persistentId);
+        EraseSceneSessionAndMarkDirty(persistentId);
         systemTopSceneSessionMap_.erase(persistentId);
         nonSystemFloatSceneSessionMap_.erase(persistentId);
         UnregisterCreateSubSessionListener(persistentId);
@@ -9082,7 +9098,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             nextFlushCompletedCV_.notify_all();
         }
         processingFlushUIParams_.store(true);
-        uint32_t sessionMapDirty = 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& item : sceneSessionMap_) {
@@ -9095,18 +9110,18 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
                 auto iter = uiParams.find(sceneSession->GetPersistentId());
                 if (iter != uiParams.end()) {
-                    sessionMapDirty |= sceneSession->UpdateUIParam(iter->second);
+                    sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
                 } else {
-                    sessionMapDirty |= sceneSession->UpdateUIParam();
+                    sessionMapDirty_ |= sceneSession->UpdateUIParam();
                 }
             }
         }
         processingFlushUIParams_.store(false);
 
         // post process if dirty
-        if ((sessionMapDirty & (~static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA))) !=
+        if ((sessionMapDirty_ & (~static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA))) !=
             static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
-            TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty);
+            TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty_);
             for (const auto& item : uiParams) {
                 TLOGD(WmsLogTag::WMS_PIPELINE,
                     "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX: %{public}f, transY: %{public}f,"
@@ -9114,15 +9129,16 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
-            ProcessFocusZOrderChange(sessionMapDirty);
+            ProcessFocusZOrderChange(sessionMapDirty_);
             PostProcessFocus();
-            PostProcessProperty(sessionMapDirty);
+            PostProcessProperty(sessionMapDirty_);
             NotifyAllAccessibilityInfo();
             AnomalyDetection::SceneZOrderCheckProcess();
-        } else if (sessionMapDirty == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
-            PostProcessProperty(sessionMapDirty);
+        } else if (sessionMapDirty_ == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
+            PostProcessProperty(sessionMapDirty_);
         }
         FlushWindowInfoToMMI();
+        sessionMapDirty_ = 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& item : sceneSessionMap_) {
