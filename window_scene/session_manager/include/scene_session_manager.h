@@ -299,6 +299,7 @@ public:
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
+    WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
@@ -458,12 +459,17 @@ private:
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty> &property, const sptr<SceneSession> &sceneSession);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+
+    /**
+     * Window Immersive
+     */
     bool UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
-    void UpdateAvoidArea(const int32_t persistentId);
-    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+    void UpdateAvoidArea(int32_t persistentId);
+    void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
