@@ -953,14 +953,14 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
-    float brightness = -0.5; // brightness < 0
+    float brightness = -0.5f; // brightness < 0
     WMError res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-    brightness = 2.0; // brightness > 1
+    brightness = 2.0f; // brightness > 1
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
-    brightness = 0.5;
+    brightness = 0.5f;
     window->hostSession_ = session;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
@@ -990,7 +990,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    float brightness = 0.5;
+    float brightness = 0.5f;
     WMError res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
 
