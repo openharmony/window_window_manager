@@ -1417,6 +1417,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetGrayScale04, Function | SmallTest | Lev
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
 
