@@ -128,6 +128,11 @@ ohos_shared_library("scene_session") {
     defines += [ "IMF_ENABLE" ]
   }
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.barrierfree_accessibility)) {
+    defines += [ "POWERMGR_WINDOW_MANAGER_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
