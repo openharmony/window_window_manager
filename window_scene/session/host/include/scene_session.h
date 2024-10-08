@@ -42,8 +42,8 @@ using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& pers
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
     WindowType type, uint64_t displayId)>;
-using UpdateAvoidAreaCallback = std::function<void(const int32_t& persistentId)>;
-using UpdateAvoidAreaByTypeCallback = std::function<void(const int32_t persistentId, AvoidAreaType type)>;
+using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
+using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
