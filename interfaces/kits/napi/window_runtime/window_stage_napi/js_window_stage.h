@@ -65,9 +65,7 @@ private:
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
 
-    bool ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option);
-
-    std::weak_ptr<Rosen::WindowScene> windowScene_;
+    std::weak_ptr<WindowScene> windowScene_;
 };
 }  // namespace Rosen
 }  // namespace OHOS

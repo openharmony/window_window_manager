@@ -457,6 +457,113 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
 }
+
+/**
+ * @tc.name: GetAllSceneSessionForAccessibility
+ * @tc.desc: GetAllSceneSessionForAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetAllSceneSessionForAccessibility, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    ASSERT_EQ(sceneSessionList.size(), 0);
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = 1;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = 1;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    SessionInfo info3;
+    info3.abilityName_ = "test3";
+    info3.bundleName_ = "test3";
+    info3.windowType_ = 1;
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    ASSERT_NE(nullptr, sceneSession3);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession1);
+    ssm_->sceneSessionMap_.emplace(2, sceneSession2);
+    ssm_->sceneSessionMap_.emplace(3, sceneSession3);
+    sceneSession1->isScbCoreEnabled_ = false;
+    sceneSession2->isScbCoreEnabled_ = false;
+    sceneSession3->isScbCoreEnabled_ = false;
+    sceneSession1->isVisibleForAccessibility_ = true;
+    sceneSession2->isVisibleForAccessibility_ = false;
+    sceneSession3->isVisibleForAccessibility_ = true;
+    sceneSession1->isVisible_ = true;
+    sceneSession2->isVisible_ = false;
+    sceneSession3->isVisible_ = true;
+    ssm_->GetAllSceneSessionForAccessibility(sceneSessionList);
+    ASSERT_EQ(sceneSessionList.size(), 1);
+}
+
+/**
+ * @tc.name: GetMainParentSceneSession001
+ * @tc.desc: test GetMainParentSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetMainParentSceneSession001, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> ret = ssm_->GetMainParentSceneSession(0, ssm_->sceneSessionMap_);
+    ASSERT_EQ(ret, nullptr);
+    
+    ret = ssm_->GetMainParentSceneSession(999, ssm_->sceneSessionMap_);
+    ASSERT_EQ(ret, nullptr);
+
+    SessionInfo info;
+    info.abilityName_ = "GetMainParentSceneSession001";
+    info.bundleName_ = "GetMainParentSceneSession001";
+    sptr<SceneSession> scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
+
+    ssm_->sceneSessionMap_[999] = scensession;
+    ret = ssm_->GetMainParentSceneSession(999, ssm_->sceneSessionMap_);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetParentMainWindowId001
+ * @tc.desc: test GetParentMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetParentMainWindowId001, Function | SmallTest | Level3)
+{
+    int32_t windowId = 0;
+    int32_t mainWindowId = 0;
+    WMError ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    windowId = -1;
+    ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+
+    ASSERT_NE(scensession, nullptr);
+    windowId = 200;
+    scensession->persistentId_ = windowId;
+    ssm_->sceneSessionMap_[windowId] = scensession;
+    ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    scensession->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    scensession->property_->type_ = WindowType::WINDOW_TYPE_DIALOG;
+    ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
 }  // namespace
 }
 }

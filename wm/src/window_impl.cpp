@@ -1611,7 +1611,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
@@ -2035,6 +2035,9 @@ WMError WindowImpl::RaiseToAppTop()
 
 WMError WindowImpl::DisableAppWindowDecor()
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -2660,7 +2663,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
 void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastOriRect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display)
 {
-    auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
+    auto task = [weakThis = wptr(this), reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
+            return;
+        }
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
@@ -2669,16 +2677,16 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve);
-        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-            NotifySizeChange(rectToAce, reason, rsTransaction);
-            lastSizeChangeReason_ = reason;
+        if ((rectToAce != lastOriRect) || (reason != window->lastSizeChangeReason_)) {
+            window->NotifySizeChange(rectToAce, reason, rsTransaction);
+            window->lastSizeChangeReason_ = reason;
         }
-        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
+        window->UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
         }
-        postTaskDone_ = true;
+        window->postTaskDone_ = true;
     };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
@@ -2738,12 +2746,17 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
 
 void WindowImpl::PerformBack()
 {
-    auto task = [this]() {
-        if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    auto task = [weakThis = wptr(this)]() {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(window->property_->GetWindowType())) {
             WLOGD("it is not a main window");
             return;
         }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(window->context_);
         if (abilityContext == nullptr) {
             WLOGFE("abilityContext is null");
             return;
@@ -2753,18 +2766,18 @@ void WindowImpl::PerformBack()
         if (ret == ERR_OK && needMoveToBackground) {
             abilityContext->MoveAbilityToBackground();
             WLOGD("id: %{public}u closed, to move Ability: %{public}u",
-                  property_->GetWindowId(), needMoveToBackground);
+                  window->property_->GetWindowId(), needMoveToBackground);
             return;
         }
         // TerminateAbility will invoke last ability, CloseAbility will not.
-        bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+        bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(window->property_->GetWindowMode());
         if (shouldTerminateAbility) {
             abilityContext->TerminateSelf();
         } else {
             abilityContext->CloseAbility();
         }
         WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
-              property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
+              window->property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
     };
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     handler_->PostTask(task, "WindowImpl::PerformBack");
@@ -3957,6 +3970,10 @@ bool WindowImpl::IsFullScreen() const
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return;
+    }
     if (property_->GetRequestedOrientation() == orientation) {
         return;
     }
@@ -3968,6 +3985,10 @@ void WindowImpl::SetRequestedOrientation(Orientation orientation)
 
 Orientation WindowImpl::GetRequestedOrientation()
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return Orientation::UNSPECIFIED;
+    }
     return property_->GetRequestedOrientation();
 }
 

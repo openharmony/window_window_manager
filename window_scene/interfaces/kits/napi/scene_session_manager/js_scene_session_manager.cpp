@@ -205,8 +205,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetInstanceCount);
     BindNativeFunction(env, exportObj, "getLastInstanceKey", moduleName,
         JsSceneSessionManager::GetLastInstanceKey);
-    BindNativeFunction(env, exportObj, "packageRemovedOrChanged", moduleName,
-        JsSceneSessionManager::PackageRemovedOrChanged);
+    BindNativeFunction(env, exportObj, "refreshAppInfo", moduleName,
+        JsSceneSessionManager::RefreshAppInfo);
     return NapiGetUndefined(env);
 }
 
@@ -353,15 +353,17 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::str
     taskScheduler_->PostMainThreadTask(task, "OnStatusBarEnabledUpdate, Enable" + std::to_string(enable));
 }
 
-void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName)
+void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName,
+    GestureBackType type)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", enable, bundleName.c_str());
-    auto task = [enable, bundleName, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_] {
+    TLOGI(WmsLogTag::WMS_MAIN, "enable: %{public}d bundleName: %{public}s", enable, bundleName.c_str());
+    auto task =
+        [enable, bundleName, type, jsCallBack = GetJSCallback(GESTURE_NAVIGATION_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MAIN, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName)};
+        napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName), CreateJsValue(env, type)};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnGestureNavigationEnabledUpdate" + std::to_string(enable));
@@ -497,9 +499,8 @@ void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
 
 void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
 {
-    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable, const std::string& bundleName) {
-        WLOGFD("GestureNavigationEnabledUpdate");
-        this->OnGestureNavigationEnabledUpdate(enable, bundleName);
+    auto func = [this](bool enable, const std::string& bundleName, GestureBackType type) {
+        this->OnGestureNavigationEnabledUpdate(enable, bundleName, type);
     };
     SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(func);
 }
@@ -727,7 +728,7 @@ napi_value JsSceneSessionManager::GetWindowSceneConfig(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateRotateAnimationConfig(env, info) : nullptr;
 }
@@ -1021,7 +1022,7 @@ napi_value JsSceneSessionManager::GetLastInstanceKey(napi_env env, napi_callback
     return me->OnGetLastInstanceKey(env, info);
 }
 
-napi_value JsSceneSessionManager::PackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::RefreshAppInfo(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     if (me == nullptr) {
@@ -3247,7 +3248,7 @@ napi_value JsSceneSessionManager::OnGetMaxInstanceCount(napi_env env, napi_callb
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
-    napi_create_int32(env, SceneSessionManager::GetInstance().GetMaxInstanceCount(bundleName), &result);
+    napi_create_uint32(env, SceneSessionManager::GetInstance().GetMaxInstanceCount(bundleName), &result);
     return result;
 }
 
@@ -3270,7 +3271,7 @@ napi_value JsSceneSessionManager::OnGetInstanceCount(napi_env env, napi_callback
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
-    napi_create_int32(env, SceneSessionManager::GetInstance().GetInstanceCount(bundleName), &result);
+    napi_create_uint32(env, SceneSessionManager::GetInstance().GetInstanceCount(bundleName), &result);
     return result;
 }
 
@@ -3316,7 +3317,7 @@ napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().PackageRemovedOrChanged(bundleName);
+    SceneSessionManager::GetInstance().RefreshAppInfo(bundleName);
     return NapiGetUndefined(env);
 }
 

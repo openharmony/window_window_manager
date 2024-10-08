@@ -21,6 +21,9 @@
 #include "ui/rs_surface_node.h"
 #include "window_manager_hilog.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "screen_manager.h"
 
 
 using namespace testing;
@@ -167,13 +170,13 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, Function | SmallTest | Level1)
     uint32_t tmp = 0;
     int32_t pos = 0;
     moveDragController->InitMoveDragProperty();
-    WSRect res = moveDragController->GetTargetRect();
+    WSRect res = moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
     ASSERT_EQ(tmp, res.height_);
     ASSERT_EQ(tmp, res.width_);
     ASSERT_EQ(pos, res.posX_);
     ASSERT_EQ(pos, res.posY_);
 
-    res = moveDragController->GetTargetRect(true);
+    res = moveDragController->GetTargetRect();
     ASSERT_EQ(tmp, res.height_);
     ASSERT_EQ(tmp, res.width_);
     ASSERT_EQ(pos, res.posX_);
@@ -643,7 +646,7 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
+    auto dragHotAreaFunc = [](DisplayId displayId, int32_t type, const SizeChangeReason reason) {
         type = 0;
     };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
@@ -1097,11 +1100,11 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function |
 }
 
 /**
- * @tc.name: CalcUnifiedTransform
- * @tc.desc: test function : CalcUnifiedTransform
+ * @tc.name: CalcUnifiedTranslate
+ * @tc.desc: test function : CalcUnifiedTranslate
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, CalcUnifiedTransform, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, CalcUnifiedTranslate, Function | SmallTest | Level1)
 {
     moveDragController->InitMoveDragProperty();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -1111,9 +1114,49 @@ HWTEST_F(MoveDragControllerTest, CalcUnifiedTransform, Function | SmallTest | Le
     pointerItem.SetDisplayX(10);
     pointerItem.SetDisplayY(30);
     pointerEvent->AddPointerItem(pointerItem);
-    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTransform(pointerEvent);
-    ASSERT_EQ(10, res.first);
-    ASSERT_EQ(30, res.second);
+    std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    ASSERT_EQ(0, res.first);
+    ASSERT_EQ(0, res.second);
+}
+
+/**
+ * @tc.name: GetSysWindowFlag
+ * @tc.desc: test function : GetSysWindowFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetSysWindowFlag, Function | SmallTest | Level1)
+{
+    bool preSystemWindowFlag = moveDragController->IsSystemWindow();
+    moveDragController->SetAsSystemWindow(true);
+    ASSERT_EQ(true, moveDragController->IsSystemWindow());
+    moveDragController->SetAsSystemWindow(false);
+    ASSERT_EQ(false, moveDragController->IsSystemWindow());
+    moveDragController->SetAsSystemWindow(preSystemWindowFlag);
+}
+
+/**
+ * @tc.name: MoveDragInterrupt
+ * @tc.desc: test function : MoveDragInterrupt
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, MoveDragInterrupt, Function | SmallTest | Level1)
+{
+    moveDragController->MoveDragInterrupt();
+    ASSERT_EQ(false, moveDragController->GetStartDragFlag());
+    ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
+    ASSERT_EQ(false, moveDragController->hasPointDown_);
+}
+
+/**
+ * @tc.name: ResetCrossMoveDragProperty
+ * @tc.desc: test function : ResetCrossMoveDragProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ResetCrossMoveDragProperty, Function | SmallTest | Level1)
+{
+    moveDragController->ResetCrossMoveDragProperty();
+    ASSERT_EQ(false, moveDragController->IsSystemWindow());
+    ASSERT_EQ(false, moveDragController->hasPointDown_);
 }
 }
 }

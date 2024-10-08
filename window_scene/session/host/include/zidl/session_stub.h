@@ -73,13 +73,18 @@ private:
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
+    int HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
+    int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

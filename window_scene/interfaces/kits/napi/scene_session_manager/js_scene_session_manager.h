@@ -118,7 +118,8 @@ public:
     static napi_value GetMaxInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
-    static napi_value PackageRemovedOrChanged(napi_env env, napi_callback_info info);
+    static napi_value RefreshAppInfo(napi_env env, napi_callback_info info);
+    
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
@@ -191,7 +192,7 @@ private:
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
-    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
+    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName, GestureBackType type);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
