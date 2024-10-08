@@ -3079,7 +3079,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
         .name = option.name_,
     };
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (screenSession == nullptr || info == nullptr) {
         TLOGI(WmsLogTag::DMS, "InitVirtualScreen: new screenSession or info failed");
@@ -3232,15 +3232,14 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsSuccedentScreenLocked(sptr<S
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(defaultScreenId);
     if (iter == screenSessionMap_.end()) {
-        TLOGE(WmsLogTag::DMS,
-            "AddAsSuccedentScreenLocked. defaultScreenId:%{public}" PRIu64" is not in screenSessionMap_.",
+        TLOGE(WmsLogTag::DMS, "defaultScreenId:%{public}" PRIu64" is not in screenSessionMap_.",
             defaultScreenId);
         return nullptr;
     }
     auto screen = iter->second;
     auto screenGroupIter = smsScreenGroupMap_.find(screen->groupSmsId_);
     if (screenGroupIter == smsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS, "AddAsSuccedentScreenLocked. groupSmsId:%{public}" PRIu64" is not in smsScreenGroupMap_.",
+        TLOGE(WmsLogTag::DMS, "groupSmsId:%{public}" PRIu64" is not in smsScreenGroupMap_.",
             screen->groupSmsId_);
         return nullptr;
     }
@@ -3259,7 +3258,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::RemoveFromGroupLocked(sptr<Screen
     auto groupSmsId = screen->groupSmsId_;
     sptr<ScreenSessionGroup> screenGroup = GetAbstractScreenGroup(groupSmsId);
     if (!screenGroup) {
-        TLOGE(WmsLogTag::DMS, "RemoveFromGroupLocked. groupSmsId:%{public}" PRIu64"is not in smsScreenGroupMap_.",
+        TLOGE(WmsLogTag::DMS, "groupSmsId:%{public}" PRIu64"is not in smsScreenGroupMap_.",
             groupSmsId);
         return nullptr;
     }
@@ -3272,9 +3271,13 @@ sptr<ScreenSessionGroup> ScreenSessionManager::RemoveFromGroupLocked(sptr<Screen
 bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup)
 {
     bool res = screenGroup->RemoveChild(screen);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+        TLOGI(WmsLogTag::DMS, "remove child and call flush.");
+    }
     if (!res) {
-        TLOGE(WmsLogTag::DMS,
-            "RemoveChildFromGroup. remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
+        TLOGE(WmsLogTag::DMS, "remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
             screen->screenId_, screen->groupSmsId_);
         return false;
     }
@@ -3283,8 +3286,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         smsScreenGroupMap_.erase(screenGroup->screenId_);
         screenSessionMap_.erase(screenGroup->screenId_);
-        TLOGE(WmsLogTag::DMS, "RemoveChildFromGroup. screenSessionMap_ remove screen:%{public}" PRIu64"",
-            screenGroup->screenId_);
+        TLOGE(WmsLogTag::DMS, "screenSessionMap_ remove screen:%{public}" PRIu64, screenGroup->screenId_);
     }
     return true;
 }
@@ -3414,8 +3416,7 @@ void ScreenSessionManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> sc
 {
     TLOGI(WmsLogTag::DMS, "RemoveVirtualScreenFromGroup enter!");
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "RemoveVirtualScreenFromGroup permission denied!");
-        TLOGE(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d",
+        TLOGE(WmsLogTag::DMS, "permission denied calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
