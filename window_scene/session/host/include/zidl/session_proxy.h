@@ -87,6 +87,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    WSError RequestFocus(bool isFocused) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

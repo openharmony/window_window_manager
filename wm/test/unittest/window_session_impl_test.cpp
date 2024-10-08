@@ -589,6 +589,40 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestFocusByClient
+ * @tc.desc: RequestFocusByClient Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RequestFocusByClient, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("WindowRequestFocusByClientCheck");
+    sptr<WindowSessionImpl> window =
+        new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    WMError res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "RequestFocusByClient", "RequestFocusByClient", "RequestFocusByClient" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_INITIAL;
+    res = window->RequestFocusByClient(true);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->RequestFocusByClient(false);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RequestFocusByClient end";
+}
+
+/**
  * @tc.name: UpdateViewportConfig
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
