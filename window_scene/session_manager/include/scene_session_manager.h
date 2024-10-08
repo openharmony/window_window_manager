@@ -224,6 +224,17 @@ public:
     WSError GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
 
+    /**
+     * @brief request focus status
+     *
+     * This function provides the ability for window to change focus status.
+     *
+     * @param persistentId window ID
+     * @param isFocused is Focused
+     * @param byForeground byForeground
+     * @param reason focus change reason
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
@@ -240,6 +251,14 @@ public:
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
+
+    /**
+     * @brief get the focused window info
+     *
+     * This function provides the ability for other services to get the focused window info.
+     *
+     * @param focusInfo the focused session info
+     */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
     void NotifySessionMovedToFront(int32_t persistentId);
@@ -252,6 +271,15 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
+        
+    /**
+     * @brief get focus session token
+     *
+     * This function provides the ability for other services to get the focused session token.
+     *
+     * @param token  the object of token
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -357,6 +385,16 @@ public:
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
+
+    /**
+     * @brief shift App window focus
+     *
+     * This function provides the ability for applications to shift focus in application.
+     *
+     * @param sourcePersistentId source persistent Id
+     * @param targetPersistentId target persistent Id
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
