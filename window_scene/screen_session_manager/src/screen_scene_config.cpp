@@ -35,6 +35,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 constexpr uint32_t DISPLAY_PHYSICAL_SIZE = 2;
+constexpr uint32_t SCROLLABLE_PARAM_SIZE = 2;
 enum XmlNodeElement {
     DPI = 0,
     SUB_DPI,
@@ -56,7 +57,8 @@ enum XmlNodeElement {
     EXTERNAL_SCREEN_DEFAULT_MODE,
     CAST_BUNDLE_NAME,
     CAST_ABILITY_NAME,
-    PHYSICAL_DISPLAY_RESOLUTION
+    PHYSICAL_DISPLAY_RESOLUTION,
+    SCROLLABLE_PARAM
 };
 }
 
@@ -66,6 +68,7 @@ std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
 std::map<std::string, std::vector<std::string>> ScreenSceneConfig::stringListConfig_;
 std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::displayPhysicalResolution_;
+std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::scrollableParams_;
 std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
@@ -91,7 +94,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {EXTERNAL_SCREEN_DEFAULT_MODE, "externalScreenDefaultMode"},
     {CAST_BUNDLE_NAME, "castBundleName"},
     {CAST_ABILITY_NAME, "castAbilityName"},
-    {PHYSICAL_DISPLAY_RESOLUTION, "physicalDisplayResolution"}
+    {PHYSICAL_DISPLAY_RESOLUTION, "physicalDisplayResolution"},
+    {SCROLLABLE_PARAM, "scrollableParam"}
 };
 
 
@@ -198,6 +202,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         ReadStringListConfigInfo(currNode, nodeName);
     } else if (xmlNodeMap_[PHYSICAL_DISPLAY_RESOLUTION] == nodeName) {
         ReadPhysicalDisplayConfigInfo(currNode);
+    } else if (xmlNodeMap_[SCROLLABLE_PARAM] == nodeName) {
+        ReadScrollableParam(currNode);
     } else {
         TLOGI(WmsLogTag::DMS, "xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
     }
@@ -287,6 +293,56 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::GetAllDisplayPhysicalConfig()
 {
     return displayPhysicalResolution_;
+}
+
+void ScreenSceneConfig::ReadScrollableParam(const xmlNodePtr& currNode)
+{
+    xmlChar* displayModeXml = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
+    if (displayModeXml == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        return;
+    }
+    xmlChar* displayModeContext = xmlNodeGetContent(currNode);
+    if (displayModeContext == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[SsConfig] read xml nodeName:(%{public}s) context null", currNode->name);
+        xmlFree(displayModeXml);
+        return;
+    }
+    std::string scrollableParamStr = reinterpret_cast<const char*>(displayModeContext);
+    if (scrollableParamStr.empty()) {
+        xmlFree(displayModeContext);
+        xmlFree(displayModeXml);
+        return;
+    }
+    auto scrollableParamArray = Split(scrollableParamStr, ":");
+    if (scrollableParamArray.size() != SCROLLABLE_PARAM_SIZE) {
+        xmlFree(displayModeContext);
+        xmlFree(displayModeXml);
+        return;
+    }
+    FoldDisplayMode foldDisplayMode;
+    if (!xmlStrcmp(displayModeXml, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL"))) {
+        foldDisplayMode = FoldDisplayMode::FULL;
+    } else if (!xmlStrcmp(displayModeXml, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_MAIN"))) {
+        foldDisplayMode = FoldDisplayMode::MAIN;
+    } else if (!xmlStrcmp(displayModeXml, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_SUB"))) {
+        foldDisplayMode = FoldDisplayMode::SUB;
+    } else if (!xmlStrcmp(displayModeXml, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_COORDINATION"))) {
+        foldDisplayMode = FoldDisplayMode::COORDINATION;
+    } else {
+        foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    }
+    ScrollableParam scrollableParam;
+    scrollableParam.velocityScale_ = scrollableParamArray[0];
+    scrollableParam.friction_ = scrollableParamArray[1];
+    scrollableParams_[foldDisplayMode] = scrollableParam;
+    xmlFree(displayModeContext);
+    xmlFree(displayModeXml);
+}
+
+std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::GetAllScrollableParam()
+{
+    return scrollableParams_;
 }
 
 void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)

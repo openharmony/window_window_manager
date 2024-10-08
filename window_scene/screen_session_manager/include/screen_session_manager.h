@@ -291,6 +291,7 @@ public:
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
         const std::string& secondaryScreenMode);
+    void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
