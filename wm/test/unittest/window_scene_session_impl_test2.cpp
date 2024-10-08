@@ -1273,29 +1273,26 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowLimits01, Function | SmallTest | 
 */
 HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits01");
     option->SetDisplayId(0);
 
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_FROZEN;
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
     WindowLimits windowLimits = {2000, 2000, 2000, 2000, 0.0f, 0.0f};
-    if (WMError::WM_OK == window->SetWindowLimits(windowLimits)) {
-        WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-        ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
-        ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
-        ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
-    }
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits));
+    WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
+    ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
+    ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
+    ASSERT_EQ(windowSizeLimits.minWidth_, 2000);
+    ASSERT_EQ(windowSizeLimits.minHeight_, 2000);
 }
 
 /**
