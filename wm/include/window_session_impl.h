@@ -74,7 +74,7 @@ public:
     /*
      * inherits from window
      */
-    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
