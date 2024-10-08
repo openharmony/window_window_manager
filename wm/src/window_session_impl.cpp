@@ -507,7 +507,7 @@ void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId
     }
 }
 
-WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);

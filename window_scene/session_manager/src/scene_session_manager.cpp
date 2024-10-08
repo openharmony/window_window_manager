@@ -5747,15 +5747,24 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
         sceneSession->SetFocusedOnShow(true);
     } else {
         if (Session::IsScbCoreEnabled()) {
-            if (IsSessionVisibleForeground(sceneSession)) {
-                RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
-            } else {
-                PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
-                sceneSession->SetPostProcessFocusState(state);
-            }
+            ProcessFocusWhenForegroundScbCore(sceneSession);
         } else {
             RequestSessionFocus(persistentId, true, FocusChangeReason::APP_FOREGROUND);
         }
+    }
+}
+
+void SceneSessionManager::ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession)
+{
+    if (IsSessionVisibleForeground(sceneSession)) {
+        if (sceneSession->IsFocusableOnShow()) {
+            RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
+        } else {
+            sceneSession->SetFocusableOnShow(true);
+        }
+    } else {
+        PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
+        sceneSession->SetPostProcessFocusState(state);
     }
 }
 
@@ -9200,9 +9209,18 @@ void SceneSessionManager::PostProcessFocus()
             WLOGFE("session is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, isFocused: %{public}d, reason: %{public}d",
+        TLOGD(WmsLogTag::WMS_PIPELINE,
+            "id: %{public}d, isFocused: %{public}d, reason: %{public}d, focusableOnShow: %{public}d",
             session->GetPersistentId(), session->GetPostProcessFocusState().isFocused_,
-            session->GetPostProcessFocusState().reason_);
+            session->GetPostProcessFocusState().reason_, session->IsFocusableOnShow());
+        if (!session->IsFocusableOnShow() &&
+            (session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND ||
+             session->GetPostProcessFocusState().reason_ == FocusChangeReason::APP_FOREGROUND)) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus", session->GetPersistentId());
+            session->ResetPostProcessFocusState();
+            session->SetFocusableOnShow(true);
+            continue; 
+        }
         if (focusChanged) {
             session->ResetPostProcessFocusState();
             continue;
