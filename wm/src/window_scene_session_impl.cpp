@@ -3063,7 +3063,7 @@ void WindowSceneSessionImpl::UpdateFocusableOnShow(bool withFocus)
         auto ret = hostSession->SetFocusableOnShow(withFocus);
         if (ret != WSError::WS_OK) {
             TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
-            static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
+                static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
         }
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "failed because of nullptr");
