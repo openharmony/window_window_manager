@@ -580,7 +580,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
     ASSERT_NE(nullptr, scensession);
 
     ASSERT_FALSE(ssm_->NotifyVisibleChange(scensession->GetPersistentId()));
-    ssm_->sceneSessionMap_[scensession->GetPersistentId()] = scensession;
+    ssm_->sceneSessionMap_.insert(scensession->GetPersistentId(), scensession);
     ASSERT_TRUE(ssm_->NotifyVisibleChange(scensession->GetPersistentId()));
 
     ssm_->sceneSessionMap_.erase(scensession->GetPersistentId());
