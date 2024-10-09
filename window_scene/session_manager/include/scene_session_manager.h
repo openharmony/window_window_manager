@@ -68,6 +68,13 @@ struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
 };
+struct ComparedSessionInfo {
+    std::string bundleName_;
+    std::string moduleName_;
+    std::string abilityName_;
+    int32_t appIndex_ = 0;
+    bool isAtomicService_ = false;
+};
 class SceneSession;
 struct SecSurfaceInfo;
 class RSUIExtensionData;
@@ -140,9 +147,7 @@ public:
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
-    sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
-        const std::string& moduleName, const std::string& abilityName, const int32_t appIndex);
-
+    sptr<SceneSession> GetSceneSessionByName(const ComparedSessionInfo& info);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -212,7 +217,8 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -247,7 +253,7 @@ public:
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    WMError GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId) override;
+    WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -294,6 +300,7 @@ public:
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
+    WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
@@ -453,12 +460,17 @@ private:
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty> &property, const sptr<SceneSession> &sceneSession);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+
+    /**
+     * Window Immersive
+     */
     bool UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
-    void UpdateAvoidArea(const int32_t persistentId);
-    void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+    void UpdateAvoidArea(int32_t persistentId);
+    void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -697,7 +709,7 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
-    void HandleCastScreenDisConnection(const sptr<SceneSession> sceneSession);
+    void HandleCastScreenDisConnection(uint64_t screenId);
     void ProcessWindowModeType();
     WindowModeType CheckWindowModeType();
     void NotifyRSSWindowModeTypeUpdate();
@@ -713,6 +725,7 @@ private:
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+    void ResetWant(sptr<SceneSession>& sceneSession);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 };
 } // namespace OHOS::Rosen

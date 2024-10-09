@@ -3286,11 +3286,15 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
 void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
@@ -3306,7 +3310,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
         }
     }
-    uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }

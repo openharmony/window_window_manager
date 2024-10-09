@@ -843,7 +843,8 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -869,13 +870,25 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     config.SetOrientation(orientation);
     config.SetTransformHint(transformHint);
+    std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
+    if (reason == WindowSizeChangeReason::ROTATION) {
+        if (auto hostSession = GetHostSession()) {
+            hostSession->GetAllAvoidAreas(avoidAreasToUpdate);
+        }
+    } else {
+        avoidAreasToUpdate = avoidAreas;
+    }
+    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+    }
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
             WLOGFW("uiContent is null!");
             return;
         }
-        uiContent->UpdateViewportConfig(config, reason, rsTransaction);
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
@@ -2590,11 +2603,8 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-          "id: %{public}d, type: %{public}d, "
-          "top %{public}s, bottom %{public}s, left %{public}s, right %{public}s",
-          GetPersistentId(), type,
-          avoidArea->topRect_.ToString().c_str(), avoidArea->bottomRect_.ToString().c_str(),
-          avoidArea->leftRect_.ToString().c_str(), avoidArea->rightRect_.ToString().c_str());
+          "window [%{public}d, %{public}s] type %{public}d area %{public}s",
+          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
@@ -2617,6 +2627,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }

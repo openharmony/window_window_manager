@@ -886,6 +886,28 @@ public:
         delete avoidArea;
         return nullptr;
     }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        if (isEmptyAvoidArea()) {
+            ss << "empty";
+            return ss.str();
+        }
+        if (!topRect_.IsUninitializedRect()) {
+            ss << "top " << topRect_.ToString() << " ";
+        }
+        if (!bottomRect_.IsUninitializedRect()) {
+            ss << "bottom " << bottomRect_.ToString() << " ";
+        }
+        if (!leftRect_.IsUninitializedRect()) {
+            ss << "left " << leftRect_.ToString() << " ";
+        }
+        if (!rightRect_.IsUninitializedRect()) {
+            ss << "right " << rightRect_.ToString() << " ";
+        }
+        return ss.str();
+    }
 };
 
 /**

@@ -68,7 +68,8 @@ using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconP
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
-using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
+    bool shouldBackToCaller)>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
@@ -276,7 +277,7 @@ public:
     WSError PendingSessionToForeground();
     void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
         func);
-    WSError PendingSessionToBackgroundForDelegator();
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func);

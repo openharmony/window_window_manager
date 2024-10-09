@@ -40,7 +40,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token, bool shouldBackToCaller) override
     {
         return WSError::WS_OK;
     }
