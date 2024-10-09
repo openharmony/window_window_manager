@@ -826,7 +826,7 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
             width = mode->width_;
         }
 
-        point.posX_ += width;
+        point.posX_ += static_cast<int32_t>(width);
     }
 }
 

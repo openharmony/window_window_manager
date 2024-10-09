@@ -77,8 +77,8 @@ private:
     ScreenId screenGroupId_ { SCREEN_ID_INVALID };
     int32_t offsetX_ { 0 };
     int32_t offsetY_ { 0 };
-    uint32_t width_ { 0 };
-    uint32_t height_ { 0 };
+    int32_t width_ { 0 };
+    int32_t height_ { 0 };
     uint32_t refreshRate_ { 0 };
     float virtualPixelRatio_ { 1.0f };
     Rotation rotation_ { Rotation::ROTATION_0 };
