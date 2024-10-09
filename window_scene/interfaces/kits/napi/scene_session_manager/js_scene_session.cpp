@@ -1424,21 +1424,20 @@ void JsSceneSession::ProcessBackPressedRegister()
 
 void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnSystemBarPropertyChange_ = [weakThis = wptr(this)](
+    session->RegisterSystemBarPropertyChangeCallback([weakThis = wptr(this)](
         const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSystemBarPropertyChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSystemBarPropertyChange(propertyMap);
-    };
-    TLOGD(WmsLogTag::WMS_IMMS, "success");
+    });
 }
 
 void JsSceneSession::ProcessNeedAvoidRegister()
