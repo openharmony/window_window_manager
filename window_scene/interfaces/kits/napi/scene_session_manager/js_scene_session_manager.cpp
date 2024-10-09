@@ -1029,7 +1029,7 @@ napi_value JsSceneSessionManager::RefreshAppInfo(napi_env env, napi_callback_inf
         TLOGW(WmsLogTag::WMS_LIFE, "me is null");
         return nullptr;
     }
-    return me->OnPackageRemovedOrChanged(env, info);
+    return me->OnRefreshAppInfo(env, info);
 }
 
 napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_info info)
@@ -3299,7 +3299,7 @@ napi_value JsSceneSessionManager::OnGetLastInstanceKey(napi_env env, napi_callba
     return result;
 }
 
-napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnRefreshAppInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
