@@ -777,8 +777,11 @@ bool WindowImpl::IsSupportWideGamut()
 
 void WindowImpl::SetColorSpace(ColorSpace colorSpace)
 {
-    if (!IsWindowValid() || surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is invalid or surface node is nullptr");
+    if (!IsWindowValid()) {
+        return;
+    }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "surface node is nullptr, winId: %{public}u", GetWindowId());
         return;
     }
     auto surfaceGamut = GetSurfaceGamutFromColorSpace(colorSpace);
@@ -787,8 +790,11 @@ void WindowImpl::SetColorSpace(ColorSpace colorSpace)
 
 ColorSpace WindowImpl::GetColorSpace()
 {
-    if (!IsWindowValid() || surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is invalid or surface node is nullptr");
+    if (!IsWindowValid()) {
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "surface node is nullptr, winId: %{public}u", GetWindowId());
         return ColorSpace::COLOR_SPACE_DEFAULT;
     }
     auto surfaceGamut = surfaceNode_->GetColorSpace();
