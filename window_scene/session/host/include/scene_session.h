@@ -87,6 +87,7 @@ using PiPStateChangeCallback = std::function<void(const std::string& bundleName,
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
+using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 
 class SceneSession : public Session {
 public:
@@ -264,7 +265,7 @@ public:
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
-    
+
     virtual bool IsModal() const { return false; }
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     void SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func);
@@ -364,6 +365,11 @@ public:
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Visibility
+     */
+    void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
     /*
      * Window Lifecycle
@@ -687,7 +693,7 @@ private:
      */
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
-    
+
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
 
@@ -696,6 +702,11 @@ private:
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /*
+     * Window Visibility
+     */
+    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

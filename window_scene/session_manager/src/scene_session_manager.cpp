@@ -1513,6 +1513,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
         });
+        sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
+            this->NotifyVisibleChange(persistentId);
+        });
         if (sceneSession->moveDragController_) {
             sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
         }
@@ -3795,6 +3798,16 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 #else
     WLOGFD("Can not found the sub system of PowerMgr");
 #endif
+}
+
+bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        return false;
+    }
+    HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    return true;
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
@@ -9202,7 +9215,7 @@ void SceneSessionManager::PostProcessFocus()
             TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus", session->GetPersistentId());
             session->ResetPostProcessFocusState();
             session->SetFocusableOnShow(true);
-            continue; 
+            continue;
         }
         if (focusChanged) {
             session->ResetPostProcessFocusState();
