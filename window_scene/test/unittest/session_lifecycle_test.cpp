@@ -555,7 +555,7 @@ HWTEST_F(WindowSessionLifecycleTest, PendingSessionToBackgroundForDelegator, Fun
 {
     ASSERT_NE(session_, nullptr);
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
