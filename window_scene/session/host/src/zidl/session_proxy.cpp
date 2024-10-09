@@ -115,6 +115,7 @@ WSError SessionProxy::Background(bool isFromClient, const std::string& identityT
         TLOGE(WmsLogTag::WMS_LIFE, "Write identityToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("[WMSCom] remote is null");
