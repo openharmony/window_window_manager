@@ -15,6 +15,7 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "common_test_utils.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 #include "window_adapter.h"
@@ -22,6 +23,7 @@
 #include "ability_context_impl.h"
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -115,6 +117,7 @@ void WindowLayoutTest::SetUp()
 {
     activeWindows_.clear();
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_app_floating_window_test");
 }
 
 void WindowLayoutTest::TearDown()

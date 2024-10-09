@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "display_manager_proxy.h"
+#include "common_test_utils.h"
 #include "window_test_utils.h"
 #include "window_accessibility_controller.h"
 #include "wm_common.h"
@@ -46,6 +47,7 @@ void WindowEffectTest::TearDownTestCase()
 
 void WindowEffectTest::SetUp()
 {
+    CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_effect_test");
     windowInfo_ = {
             .name = "TestWindow",
             .rect = {0, 0, 100, 200},

@@ -29,9 +29,11 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "common_test_utils.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -1205,6 +1207,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     info.bundleName_ = "test2";
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
+    CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_test5");
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetWindowFlags(123);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
