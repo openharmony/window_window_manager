@@ -37,8 +37,8 @@ AbstractDisplay::AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info,
     }
     screenId_ = absScreen->dmsId_;
     screenGroupId_ = absScreen->groupDmsId_;
-    width_ = info->width_;
-    height_ = info->height_;
+    width_ = static_cast<int32_t>(info->width_);
+    height_ = static_cast<int32_t>(info->height_);
     refreshRate_ = info->refreshRate_;
     orientation_ = absScreen->orientation_;
     name_ = absScreen->GetScreenName();
