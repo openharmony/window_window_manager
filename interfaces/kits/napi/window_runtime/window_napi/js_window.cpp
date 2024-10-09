@@ -6696,7 +6696,7 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
 
 napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }

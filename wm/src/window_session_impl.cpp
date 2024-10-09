@@ -952,6 +952,10 @@ WMError WindowSessionImpl::RequestFocus() const
 /** @note @window.focus */
 WMError WindowSessionImpl::RequestFocusByClient(bool isFocused) const
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     if (IsWindowSessionInvalid()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
