@@ -225,15 +225,6 @@ WSError SceneSession::Foreground(
         }
     }
 
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE, "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, "
-                "bundleName: %{public}s", GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
-            return WSError::WS_OK;
-        }
-    }
-
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
         !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
@@ -296,6 +287,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
         !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
@@ -306,6 +298,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
             GetSessionInfo().bundleName_.c_str());
         return WSError::WS_OK;
     }
+
     return BackgroundTask(true);
 }
 
@@ -402,6 +395,7 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
             GetSessionInfo().bundleName_.c_str());
         return WSError::WS_OK;
     }
+    
     return DisconnectTask(isFromClient, true);
 }
 
