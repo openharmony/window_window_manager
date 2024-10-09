@@ -3465,7 +3465,7 @@ napi_value JsSceneSession::OnSetWindowLastSafeRect(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     WSRect lastRect = { left, top, width, height };
-    session->SetLastSafeRect(lastRect);
+    session->SetSessionRequestRect(lastRect);
     return NapiGetUndefined(env);
 }
 
