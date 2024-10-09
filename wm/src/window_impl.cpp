@@ -789,7 +789,7 @@ ColorSpace WindowImpl::GetColorSpace()
 {
     if (!IsWindowValid() || surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "window is invalid or surface node is nullptr");
-        return ColorSpace::COLOR_SPACE_DEFAULT;;
+        return ColorSpace::COLOR_SPACE_DEFAULT;
     }
     auto surfaceGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(surfaceGamut);
