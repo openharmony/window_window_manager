@@ -1845,8 +1845,8 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     info2.bundleName_ = "test2";
     info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    sceneSession2->SetParentSession(sceneSession1);
     ASSERT_NE(nullptr, sceneSession2);
+    sceneSession2->SetParentSession(sceneSession1);
 
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
