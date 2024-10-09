@@ -575,15 +575,14 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "test";
     info.bundleName_ = "test";
-    sptr<SceneSession> scensession = nullptr;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
 
-    ASSERT_FALSE(ssm_->NotifyVisibleChange(scensession->GetPersistentId()));
-    ssm_->sceneSessionMap_.insert({scensession->GetPersistentId(), scensession});
-    ASSERT_TRUE(ssm_->NotifyVisibleChange(scensession->GetPersistentId()));
+    ASSERT_FALSE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
 
-    ssm_->sceneSessionMap_.erase(scensession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 }  // namespace
 }
