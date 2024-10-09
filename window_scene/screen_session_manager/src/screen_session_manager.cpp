@@ -4016,7 +4016,10 @@ void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
     }
     TLOGI(WmsLogTag::DMS, "NotifyDisplayCreate");
     for (auto& agent : agents) {
-        agent->OnDisplayCreate(displayInfo);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
+            agent->OnDisplayCreate(displayInfo);
+        }
     }
 }
 
@@ -4028,7 +4031,10 @@ void ScreenSessionManager::NotifyDisplayDestroy(DisplayId displayId)
     }
     TLOGI(WmsLogTag::DMS, "NotifyDisplayDestroy");
     for (auto& agent : agents) {
-        agent->OnDisplayDestroy(displayId);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
+            agent->OnDisplayDestroy(displayId);
+        }
     }
 }
 
