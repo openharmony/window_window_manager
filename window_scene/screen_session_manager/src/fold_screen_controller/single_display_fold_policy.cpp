@@ -349,8 +349,8 @@ void SingleDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
-    screenSession->PropertyChange(screenProperty_, reason);
+    ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    screenSession->PropertyChange(property, reason);
     screenSession->SetRotation(Rotation::ROTATION_0);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
