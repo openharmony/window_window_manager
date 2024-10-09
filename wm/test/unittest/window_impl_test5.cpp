@@ -1411,18 +1411,17 @@ HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
     option->SetWindowName("GetVirtualPixelRatio01");
     option->SetDisplayId(1);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     float vpr = 0.0f;
     window->property_->SetDisplayId(-1);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, 1.0);
+    ASSERT_EQ(vpr, 1.0f);
 
     window->property_->SetDisplayId(0);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 1.0);
+    ASSERT_NE(vpr, 1.0f);
 }
 }
 } // namespace Rosen

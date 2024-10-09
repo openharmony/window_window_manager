@@ -1372,18 +1372,17 @@ HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetVirtualPixelRatio");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
-    float vpr = 0;
+    float vpr = 0.0f;
     window->property_->SetDisplayId(-1);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, 1.0);
+    ASSERT_EQ(vpr, 1.0f);
 
     window->property_->SetDisplayId(0);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 1.0);
+    ASSERT_NE(vpr, 1.0f);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
 }
 }
