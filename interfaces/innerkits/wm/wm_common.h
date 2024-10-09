@@ -206,6 +206,7 @@ enum class WMError : int32_t {
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
+    WM_ERROR_SYSTEM_ABNORMALLY,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
