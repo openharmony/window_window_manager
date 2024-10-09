@@ -37,7 +37,6 @@ public:
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         const std::string& identityToken = "") override;
     WSError DrawingCompleted() override;
-    WSError UpdateActiveStatus(bool isActive) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
