@@ -27,7 +27,7 @@ public:
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
@@ -200,6 +200,7 @@ private:
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
+    void UpdateFocusableOnShow(bool withFocus);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();

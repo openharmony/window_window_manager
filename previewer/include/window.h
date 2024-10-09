@@ -169,7 +169,7 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WMError Destroy() = 0;
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }

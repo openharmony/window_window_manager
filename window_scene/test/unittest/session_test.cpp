@@ -205,19 +205,16 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest |
 HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
 {
     sptr<ISession> sessionToken = nullptr;
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
-    EXPECT_NE(nullptr, mockSessionStage);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
         SizeChangeReason::UNDEFINED, "WindowSessionTest"));
-    sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
-    EXPECT_NE(nullptr, mockEventChannel);
+    sptr<WindowEventChannelMocker> mockEventChannel = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage);
     SystemSessionConfig sessionConfig;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
             mockEventChannel, nullptr, sessionConfig, property));
 
@@ -226,11 +223,15 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
         SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     ASSERT_EQ(rect, session_->winRect_);
 
+    rect = {0, 0, 200, 200};
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
+    ASSERT_EQ(rect, session_->winRect_);
 
+    rect = {0, 0, 300, 300};
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
+    ASSERT_EQ(rect, session_->winRect_);
 }
 
 /**
@@ -855,6 +856,7 @@ HWTEST_F(WindowSessionTest, SetFocusable, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+    ASSERT_EQ(session_->GetFocusable(), false);
 }
 
 /**
@@ -911,7 +913,9 @@ HWTEST_F(WindowSessionTest, SetAspectRatio, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(WSError::WS_OK, session_->SetAspectRatio(0.1f));
+    const float ratio = 0.1f;
+    ASSERT_EQ(WSError::WS_OK, session_->SetAspectRatio(ratio));
+    ASSERT_EQ(ratio, session_->GetAspectRatio());
 }
 
 /**
@@ -942,6 +946,7 @@ HWTEST_F(WindowSessionTest, SetFocusable02, Function | SmallTest | Level2)
     session_->sessionInfo_.isSystem_ = false;
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(true));
+    ASSERT_EQ(session_->GetFocusable(), true);
 }
 
 /**

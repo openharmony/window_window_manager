@@ -295,6 +295,11 @@ void Session::SetAppInstanceKey(const std::string& appInstanceKey)
     sessionInfo_.appInstanceKey_ = appInstanceKey;
 }
 
+std::string Session::GetAppInstanceKey() const
+{
+    return sessionInfo_.appInstanceKey_;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
@@ -518,6 +523,13 @@ void Session::SetSystemFocusable(bool systemFocusable)
     }
 }
 
+WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d", GetPersistentId(), isFocusableOnShow);
+    focusableOnShow_ = isFocusableOnShow;
+    return WSError::WS_OK;
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -539,6 +551,11 @@ bool Session::GetSystemFocusable() const
 bool Session::CheckFocusable() const
 {
     return GetFocusable() && GetSystemFocusable();
+}
+
+bool Session::IsFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool Session::IsFocused() const
@@ -1323,10 +1340,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
-        }
-        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
-            !session->IsFocused() && session->GetFocusable()) {
-            TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "SetAttachState");

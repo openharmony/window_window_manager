@@ -296,6 +296,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetIsPcAppInPad(reply.ReadBool());
         property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
+        property->SetAppInstanceKey(reply.ReadString());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -1892,6 +1893,34 @@ WSError SessionProxy::RequestFocus(bool isFocused)
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isFocusableOnShow)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isFocused failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
