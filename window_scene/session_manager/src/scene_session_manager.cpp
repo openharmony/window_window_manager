@@ -25,7 +25,6 @@
 #include <hitrace_meter.h>
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
-#include "screen_manager.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -2212,28 +2211,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
-}
-
-void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
-{
-    auto task = [screenId] {
-        ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-        if (defScreenId == screenId) {
-            return;
-        }
-        auto flag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
-        if (flag != VirtualScreenFlag::CAST) {
-            return;
-        }
-        std::vector<uint64_t> mirrorIds { screenId };
-        ScreenId groupId;
-        DMError ret = ScreenManager::GetInstance().MakeMirror(0, mirrorIds, groupId);
-        if (ret != Rosen::DMError::DM_OK) {
-            TLOGI(WmsLogTag::WMS_LIFE, "MakeMirror failed, ret: %{public}d", ret);
-            return;
-        }
-    };
-    eventHandler_->PostTask(task, "HandleCastScreenDisConnection: ScreenId:" + std::to_string(screenId));
 }
 
 void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
