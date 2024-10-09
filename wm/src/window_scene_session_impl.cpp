@@ -1857,6 +1857,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     bool isTitleHoverShown, bool isDockHoverShown)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
         "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(),
         static_cast<int32_t>(isTitleHoverShown), static_cast<int32_t>(isDockHoverShown));
@@ -2556,6 +2559,9 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
 
 WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
@@ -2576,6 +2582,9 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 
 WMError WindowSceneSessionImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetWindowFlags(updateFlags);
 }
