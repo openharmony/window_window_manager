@@ -205,8 +205,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetInstanceCount);
     BindNativeFunction(env, exportObj, "getLastInstanceKey", moduleName,
         JsSceneSessionManager::GetLastInstanceKey);
-    BindNativeFunction(env, exportObj, "packageRemovedOrChanged", moduleName,
-        JsSceneSessionManager::PackageRemovedOrChanged);
     BindNativeFunction(env, exportObj, "refreshAppInfo", moduleName,
         JsSceneSessionManager::RefreshAppInfo);
     BindNativeFunction(env, exportObj, "getWindowPid", moduleName,
