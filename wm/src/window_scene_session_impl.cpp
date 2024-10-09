@@ -3245,6 +3245,10 @@ WMError WindowSceneSessionImpl::SetAlpha(float alpha)
 
 WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto persistentId = property_->GetPersistentId();
     TLOGI(WmsLogTag::WMS_DIALOG, "id: %{public}d", persistentId);
     WMError ret = SingletonContainer::Get<WindowAdapter>().BindDialogSessionTarget(persistentId, targetToken);
@@ -3294,6 +3298,10 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
 
 WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     property_->KeepKeyboardOnFocus(keepKeyboardFlag);
     return WmErrorCode::WM_OK;
 }
