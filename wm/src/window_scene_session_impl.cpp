@@ -468,7 +468,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = session;
     }
-
+    RecoverSessionListener();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName = %{public}s, persistentId = %{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -510,10 +510,12 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         TLOGE(WmsLogTag::WMS_RECOVER, "session is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    RecoverSessionListener();
     TLOGI(WmsLogTag::WMS_RECOVER, "Recover and reconnect sceneSession successful");
-    std::lock_guard<std::mutex> lock(hostSessionMutex_);
-    hostSession_ = session;
+    {
+        std::lock_guard<std::mutex> lock(hostSessionMutex_);
+        hostSession_ = session;
+    }
+    RecoverSessionListener();
     return static_cast<WMError>(ret);
 }
 
