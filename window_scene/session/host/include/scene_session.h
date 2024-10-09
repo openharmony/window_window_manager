@@ -706,7 +706,7 @@ private:
     /*
      * Window Visibility
      */
-    NotifyVisibleChangeFunc notifyVisibleChangeFunc_
+    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
