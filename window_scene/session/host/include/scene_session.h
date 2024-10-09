@@ -622,11 +622,6 @@ private:
     void NotifyPrivacyModeChange();
 
     /*
-     * Multi instance
-     */
-    bool CheckInstanceKey(const sptr<AAFwk::SessionInfo> abilitySessionInfo, SessionInfo& info);
-
-    /*
      * PiP Window
      */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;

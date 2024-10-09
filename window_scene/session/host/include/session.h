@@ -208,8 +208,6 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
-    void SetFocusedOnShow(bool focusedOnShow);
-    bool IsFocusedOnShow() const;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
@@ -304,15 +302,8 @@ public:
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick(bool requestFocus = true);
-    void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
-        FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void NotifyUIRequestFocus();
-    virtual void NotifyUILostFocus();
     bool GetStateFromManager(const ManagerState key);
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
-    virtual WSError UpdateFocus(bool isFocused);
-    WSError NotifyFocusStatus(bool isFocused);
-    WSError RequestFocus(bool isFocused) override;
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
@@ -323,16 +314,8 @@ public:
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
     WSError SetIsPcAppInPad(bool enable);
-    virtual WSError SetSystemSceneBlockingFocus(bool blocking);
-    bool GetBlockingFocus() const;
-    WSError SetFocusable(bool isFocusable);
-    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
-    bool GetFocusable() const;
-    bool GetSystemFocusable() const;
-    bool CheckFocusable() const;
-    bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
     bool GetRectChangeBySystem() const;
@@ -342,7 +325,6 @@ public:
     bool GetSystemTouchable() const;
     virtual WSError SetRSVisible(bool isVisible);
     bool GetRSVisible() const;
-    bool GetFocused() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
     WSError SetDrawingContentState(bool isRSDrawing);
@@ -361,6 +343,31 @@ public:
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
+
+    /*
+     * Window Focus
+     */
+    virtual WSError SetSystemSceneBlockingFocus(bool blocking);
+    bool GetBlockingFocus() const;
+    WSError SetFocusable(bool isFocusable);
+    bool GetFocusable() const;
+    void SetFocusedOnShow(bool focusedOnShow);
+    bool IsFocusedOnShow() const;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
+    bool IsFocusableOnShow() const;
+    virtual void SetSystemFocusable(bool systemFocusable);
+    bool GetSystemFocusable() const;
+    bool CheckFocusable() const;
+    bool IsFocused() const;
+    bool GetFocused() const;
+    virtual WSError UpdateFocus(bool isFocused);
+    virtual void PresentFocusIfPointDown();
+    WSError RequestFocus(bool isFocused) override;
+    void NotifyRequestFocusStatusNotifyManager(bool isFocused, bool byForeground = true,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    void NotifyUIRequestFocus();
+    virtual void NotifyUILostFocus();
+    WSError NotifyFocusStatus(bool isFocused);
 
     /*
      * Multi Window
@@ -420,7 +427,6 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
-    virtual void PresentFocusIfPointDown();
     void ResetSnapshot();
     std::shared_ptr<Media::PixelMap> GetSnapshotPixelMap(const float oriScale = 1.0f, const float newScale = 1.0f);
     virtual std::vector<Rect> GetTouchHotAreas() const
@@ -496,7 +502,7 @@ public:
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
-    void GetAppInstanceKey(const std::string& appInstanceKey) const;
+    std::string GetAppInstanceKey() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -628,9 +634,13 @@ protected:
     uint32_t zOrder_ = 0;
     uint32_t lastZOrder_ = 0;
 
-    uint32_t uiNodeId_ = 0;
+    /*
+     * Window Focus
+     */
     bool isFocused_ = false;
     bool blockingFocus_ {false};
+
+    uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
@@ -704,11 +714,15 @@ private:
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
+    /*
+     * Window Focus
+     */
     mutable std::shared_mutex uiRequestFocusMutex_;
     mutable std::shared_mutex uiLostFocusMutex_;
-
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
+    std::atomic_bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
+
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 

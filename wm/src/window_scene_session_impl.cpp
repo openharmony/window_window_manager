@@ -1060,7 +1060,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     uiContent->PreLayout();
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
@@ -1118,6 +1118,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return ret;
     }
     UpdateTitleButtonVisibility();
+    UpdateFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
@@ -2362,7 +2363,7 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         }
         return res;
     }
-    WindowPrepareTerminateHandler* handler = new WindowPrepareTerminateHandler();
+    WindowPrepareTerminateHandler* handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
     PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
         auto weakSession = hostSessionWptr.promote();
         if (weakSession == nullptr) {
@@ -2372,9 +2373,8 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     };
     handler->SetPrepareTerminateFun(func);
-    sptr<AAFwk::IPrepareTerminateCallback> callback = handler;
     if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
-        callback) != ERR_OK) {
+        handler) != ERR_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "PrepareTerminateAbility failed, do close window");
         hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     }
@@ -3171,6 +3171,22 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
     // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+}
+
+void WindowSceneSessionImpl::UpdateFocusableOnShow(bool withFocus)
+{
+    if (withFocus) {
+        return; // default value of focusableOnShow
+    }
+    if (auto hostSession = GetHostSession()) {
+        auto ret = hostSession->SetFocusableOnShow(withFocus);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
+                static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed because of nullptr");
+    }
 }
 
 WMError WindowSceneSessionImpl::SetAlpha(float alpha)
@@ -4208,7 +4224,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
 }
- 
+
 bool WindowSceneSessionImpl::GetGestureBackEnabled() const
 {
     if (windowSystemConfig_.IsPcWindow()) {

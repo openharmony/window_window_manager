@@ -121,6 +121,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         }
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
+            property->SetAppInstanceKey(session->GetAppInstanceKey());
         }
         auto ret = session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
@@ -128,6 +129,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return ret;
         }
         session->NotifyPropertyWhenConnect();
+        session->isStatusBarVisible_ = true;
         return ret;
     };
     return PostSyncTask(task, "ConnectInner");
@@ -3369,20 +3371,12 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session);
-        if (session->systemConfig_.IsPcWindow()) {
-            int32_t maxInstanceCount = MultiInstanceManager::GetInstance().GetMaxInstanceCount(info.bundleName_);
-            TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d maxInstanceCount:%{public}d",
-                session->GetPersistentId(), maxInstanceCount);
-            if (maxInstanceCount > 0 && !session->CheckInstanceKey(abilitySessionInfo, info)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "instanceKey is invalid, id:%{public}d instanceKey:%{public}s",
+        if (session->systemConfig_.IsPcWindow() &&
+            MultiInstanceManager::GetInstance().IsMultiInstance(session->GetSessionInfo().bundleName_)) {
+            if (!MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(info)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "multi instance start fail, id:%{public}d instanceKey:%{public}s",
                     session->GetPersistentId(), info.appInstanceKey_.c_str());
                 return WSError::WS_ERROR_INVALID_PARAM;
-            }
-            if (maxInstanceCount > 0 &&
-                !MultiInstanceManager::GetInstance().IsInstanceKeyExist(info.bundleName_, info.appInstanceKey_)) {
-                TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, create not exist instanceKey:%{public}s",
-                    session->GetPersistentId(), info.appInstanceKey_.c_str());
-                MultiInstanceManager::GetInstance().CreateNewInstanceKey(info.bundleName_, info.appInstanceKey_);
             }
         }
         session->HandleCastScreenConnection(info, session);
@@ -5084,24 +5078,6 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
         return;
     }
     customDecorHeight_ = height;
-}
-
-bool SceneSession::CheckInstanceKey(const sptr<AAFwk::SessionInfo> abilitySessionInfo, SessionInfo& info)
-{
-    if (info.appInstanceKey_.empty()) {
-        if (abilitySessionInfo->persistentId != 0) {
-            TLOGE(WmsLogTag::WMS_LIFE, "empty instance key, persistentId:%{public}d",
-                abilitySessionInfo->persistentId);
-            return false;
-        }
-        info.isNewAppInstance_ = true;
-        return true;
-    } else if (!MultiInstanceManager::GetInstance().IsValidInstanceKey(info.bundleName_, info.appInstanceKey_)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "invalid instancekey:%{public}s", info.appInstanceKey_.c_str());
-        return false;
-    }
-    info.isNewAppInstance_ = false;
-    return true;
 }
 
 void SceneSession::UpdateGestureBackEnabled()

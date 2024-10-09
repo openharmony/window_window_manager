@@ -32,6 +32,7 @@ group("unittest") {
     ":ws_main_session_lifecycle_test",
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
+    ":ws_multi_instance_manager_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
     ":ws_scene_board_judgement_test",
@@ -937,6 +938,21 @@ ohos_unittest("ws_move_drag_controller_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_multi_instance_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "multi_instance_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
   ]

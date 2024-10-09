@@ -207,6 +207,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetLastInstanceKey);
     BindNativeFunction(env, exportObj, "packageRemovedOrChanged", moduleName,
         JsSceneSessionManager::PackageRemovedOrChanged);
+    BindNativeFunction(env, exportObj, "refreshAppInfo", moduleName,
+        JsSceneSessionManager::RefreshAppInfo);
     BindNativeFunction(env, exportObj, "getWindowPid", moduleName,
         JsSceneSessionManager::GetWindowPid);
     return NapiGetUndefined(env);
@@ -1024,7 +1026,7 @@ napi_value JsSceneSessionManager::GetLastInstanceKey(napi_env env, napi_callback
     return me->OnGetLastInstanceKey(env, info);
 }
 
-napi_value JsSceneSessionManager::PackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::RefreshAppInfo(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     if (me == nullptr) {
@@ -3329,7 +3331,7 @@ napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().PackageRemovedOrChanged(bundleName);
+    SceneSessionManager::GetInstance().RefreshAppInfo(bundleName);
     return NapiGetUndefined(env);
 }
 
@@ -3352,7 +3354,7 @@ napi_value JsSceneSessionManager::OnGetWindowPid(napi_env env, napi_callback_inf
         return NapiGetUndefined(env);
     }
     int32_t pid = INVALID_PID;
-    WMError ret = SceneSessionManager::GetInstance().CheckoutWindowId(windowId, pid);
+    WMError ret = SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
     if (ret != WMError::WM_OK) {
         WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGE(WmsLogTag::WMS_SCB, "[NAPI] Get window pid failed, return %{public}d", wmErrorCode);
