@@ -3397,7 +3397,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
         .name = option.name_,
     };
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
+        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (screenSession == nullptr || info == nullptr) {
         TLOGI(WmsLogTag::DMS, "InitVirtualScreen: new screenSession or info failed");
