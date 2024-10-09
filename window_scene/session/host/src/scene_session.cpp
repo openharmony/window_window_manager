@@ -204,7 +204,8 @@ WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
     return ret;
 }
 
-WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError SceneSession::Foreground(
+    sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -231,6 +232,17 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
                 "bundleName: %{public}s", GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
+    }
+
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
+        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "Foreground Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "identityToken: %{public}s, bundleName: %{public}s",
+            clientIdentityToken_.c_str(),
+            identityToken.c_str(),
+            GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_OK;
     }
     return ForegroundTask(property);
 }
@@ -279,19 +291,20 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
     return WSError::WS_OK;
 }
 
-WSError SceneSession::Background(bool isFromClient)
+WSError SceneSession::Background(bool isFromClient, const std::string& identityToken)
 {
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Background failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
-            return WSError::WS_OK;
-        }
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
+        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "Background Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "identityToken: %{public}s, bundleName: %{public}s",
+            clientIdentityToken_.c_str(),
+            identityToken.c_str(),
+            GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_OK;
     }
     return BackgroundTask(true);
 }
@@ -377,16 +390,17 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
     }
 }
 
-WSError SceneSession::Disconnect(bool isFromClient)
+WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Disconnect failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
-            return WSError::WS_OK;
-        }
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
+        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "Disconnect Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "identityToken: %{public}s, bundleName: %{public}s",
+            clientIdentityToken_.c_str(),
+            identityToken.c_str(),
+            GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_OK;
     }
     return DisconnectTask(isFromClient, true);
 }
