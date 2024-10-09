@@ -16,7 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include <ability_context.h>
-
+#include "common_test_utils.h"
 #include "window_test_utils.h"
 #include "window.h"
 #include "window_option.h"
@@ -34,6 +34,32 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    // define windowTypes_ for SystemSubWindow02
+    std::vector<WindowType> windowTypes_ = {
+        WindowType::WINDOW_TYPE_APP_LAUNCHING,
+        WindowType::WINDOW_TYPE_DOCK_SLICE,
+        WindowType::WINDOW_TYPE_INCOMING_CALL,
+        WindowType::WINDOW_TYPE_SEARCHING_BAR,
+        WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
+        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
+        WindowType::WINDOW_TYPE_FLOAT,
+        WindowType::WINDOW_TYPE_TOAST,
+        WindowType::WINDOW_TYPE_STATUS_BAR,
+        WindowType::WINDOW_TYPE_PANEL,
+        WindowType::WINDOW_TYPE_VOLUME_OVERLAY,
+        WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+        WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
+        WindowType::WINDOW_TYPE_POINTER,
+        WindowType::WINDOW_TYPE_LAUNCHER_RECENT,
+        WindowType::WINDOW_TYPE_LAUNCHER_DOCK,
+        WindowType::WINDOW_TYPE_BOOT_ANIMATION,
+        WindowType::WINDOW_TYPE_FREEZE_DISPLAY,
+        WindowType::WINDOW_TYPE_VOICE_INTERACTION,
+        WindowType::WINDOW_TYPE_FLOAT_CAMERA,
+        WindowType::WINDOW_TYPE_PLACEHOLDER,
+        WindowType::WINDOW_TYPE_SCREENSHOT,
+        WindowType::WINDOW_TYPE_GLOBAL_SEARCH,
+    };
 };
 
 void WindowSystemSubWindowTest::SetUpTestCase()
@@ -143,32 +169,10 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | Level2)
 {
-    std::vector<WindowType> windowTypes = {
-        WindowType::WINDOW_TYPE_APP_LAUNCHING,
-        WindowType::WINDOW_TYPE_DOCK_SLICE,
-        WindowType::WINDOW_TYPE_INCOMING_CALL,
-        WindowType::WINDOW_TYPE_SEARCHING_BAR,
-        WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
-        WindowType::WINDOW_TYPE_FLOAT,
-        WindowType::WINDOW_TYPE_TOAST,
-        WindowType::WINDOW_TYPE_STATUS_BAR,
-        WindowType::WINDOW_TYPE_PANEL,
-        WindowType::WINDOW_TYPE_VOLUME_OVERLAY,
-        WindowType::WINDOW_TYPE_NAVIGATION_BAR,
-        WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
-        WindowType::WINDOW_TYPE_POINTER,
-        WindowType::WINDOW_TYPE_LAUNCHER_RECENT,
-        WindowType::WINDOW_TYPE_LAUNCHER_DOCK,
-        WindowType::WINDOW_TYPE_BOOT_ANIMATION,
-        WindowType::WINDOW_TYPE_FREEZE_DISPLAY,
-        WindowType::WINDOW_TYPE_VOICE_INTERACTION,
-        WindowType::WINDOW_TYPE_FLOAT_CAMERA,
-        WindowType::WINDOW_TYPE_PLACEHOLDER,
-        WindowType::WINDOW_TYPE_SCREENSHOT,
-        WindowType::WINDOW_TYPE_GLOBAL_SEARCH,
-    };
-    for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
+    for (auto itor = windowTypes_.begin(); itor != windowTypes_.end(); itor++) {
+        if (static_cast<WindowType>(*itor) == WindowType::WINDOW_TYPE_FLOAT) {
+            CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_systemsubwindow_test");
+        }
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
