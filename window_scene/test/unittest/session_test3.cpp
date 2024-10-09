@@ -130,7 +130,7 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
     session_->SetContextTransparentFunc(contextTransparentFunc);
     session_->NotifyContextTransparent();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -286,7 +286,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogBackground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -324,7 +324,7 @@ HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Leve
     session_->dialogVec_.push_back(session03);
     session_->HandleDialogForeground();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -448,7 +448,7 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->property_->SetFocusable(false);
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -479,7 +479,7 @@ HWTEST_F(WindowSessionTest3, HandlePointDownDialog, Function | SmallTest | Level
     session_->dialogVec_.push_back(dialogSession4);
     session_->HandlePointDownDialog();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**

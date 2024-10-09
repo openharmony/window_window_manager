@@ -1735,12 +1735,8 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     avoidArea = hostSession->GetAvoidAreaByType(type);
     getAvoidAreaCnt_++;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d %{public}u times, "
-          "top{%{public}d,%{public}d,%{public}d,%{public}d}, down{%{public}d,%{public}d,%{public}d,%{public}d}",
-          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_,
-          avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, avoidArea.topRect_.width_, avoidArea.topRect_.height_,
-          avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.width_,
-          avoidArea.bottomRect_.height_);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d times %{public}u area %{public}s",
+          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 
@@ -2625,20 +2621,20 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
     return nullptr;
 }
 
-static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint32_t windowId, uint32_t& mainWindowId)
+static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, int32_t windowId, int32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {
         const auto& window = pair.second;
         if (window == nullptr) {
             return WMError::WM_ERROR_NULLPTR;
         }
-        if (window->GetWindowId() != windowId) {
+        if (window->GetPersistentId() != windowId) {
             continue;
         }
 
         if (WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetWindowId());
-            mainWindowId = window->GetWindowId();
+            TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetPersistentId());
+            mainWindowId = window->GetPersistentId();
             return WMError::WM_OK;
         }
         if (WindowHelper::IsSubWindow(window->GetType()) || WindowHelper::IsDialogWindow(window->GetType())) {
@@ -2651,13 +2647,13 @@ static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, uint
     return WMError::WM_ERROR_INVALID_PARENT;
 }
 
-uint32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
+int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
 {
     if (windowId == INVALID_SESSION_ID) {
         TLOGW(WmsLogTag::WMS_SUB, "invalid windowId id");
         return INVALID_SESSION_ID;
     }
-    uint32_t mainWindowId = INVALID_SESSION_ID;
+    int32_t mainWindowId = INVALID_SESSION_ID;
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         WMError findRet = GetParentMainWindowIdInner(windowSessionMap_, windowId, mainWindowId);

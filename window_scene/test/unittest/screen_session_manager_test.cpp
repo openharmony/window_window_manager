@@ -18,6 +18,7 @@
 #include "session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
+#include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
 
@@ -2000,6 +2001,19 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, Function | S
     } else {
         ASSERT_TRUE(allSize.empty());
     }
+}
+
+/**
+ * @tc.name: PhyMirrorConnectWakeupScreen
+ * @tc.desc: PhyMirrorConnectWakeupScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->PhyMirrorConnectWakeupScreen();
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
+    ssm_->PhyMirrorConnectWakeupScreen();
 }
 }
 } // namespace Rosen
