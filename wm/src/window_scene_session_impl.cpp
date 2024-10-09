@@ -2243,10 +2243,10 @@ WMError WindowSceneSessionImpl::Restore()
     }
     if (property_->GetIsAppSupportPhoneInPc()) {
         TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc,The device is not supported");
-        return static_cast<WMError>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     hostSession->OnRestoreMainWindow();
     return WMError::WM_OK;
 }
