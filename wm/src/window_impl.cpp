@@ -681,7 +681,7 @@ float WindowImpl::GetVirtualPixelRatio()
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId:%{public}" PRIu64", window id:%{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId:%{public}" PRIu64 ", window id:%{public}u",
             property_->GetDisplayId(), property_->GetWindowId());
         return vpr;
     }

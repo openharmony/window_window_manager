@@ -1005,7 +1005,6 @@ float WindowSessionImpl::GetVirtualPixelRatio()
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
         return vpr;
     }
-
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
