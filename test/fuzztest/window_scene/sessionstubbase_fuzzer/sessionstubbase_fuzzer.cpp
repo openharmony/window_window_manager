@@ -64,9 +64,6 @@ void SessionStubBaseTest(sptr<Session> sessionStub, MessageParcel& parcel)
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         parcel, reply, option);
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
-        parcel, reply, option);
-    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_TERMINATE),
         parcel, reply, option);
     parcel.RewindRead(0);
