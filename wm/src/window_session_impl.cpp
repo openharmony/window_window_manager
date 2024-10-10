@@ -2279,8 +2279,7 @@ WMError WindowSessionImpl::RegisterSwitchFreeMultiWindowListener(const sptr<ISwi
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType()) &&
-        !WindowHelper::IsUIExtensionWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -2295,8 +2294,7 @@ WMError WindowSessionImpl::UnregisterSwitchFreeMultiWindowListener(const sptr<IS
         WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType()) &&
-        !WindowHelper::IsUIExtensionWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
