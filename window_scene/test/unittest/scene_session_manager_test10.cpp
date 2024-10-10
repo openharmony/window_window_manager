@@ -229,14 +229,14 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     info1.windowType_ = 1;
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    
+
     SessionInfo info2;
     info2.abilityName_ = "nextSession";
     info2.bundleName_ = "nextSession";
     info2.windowType_ = 1;
     sptr<SceneSession> nextSession = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(nextSession, nullptr);
-    
+
     ssm_->lastFocusedAppSessionId_ = nextSession->GetPersistentId();
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 
@@ -435,7 +435,7 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->focusedSessionId_ = 1;
     ssm_->ProcessFocusZOrderChange(97);
-    
+
     sceneSession->lastZOrder_ = 2203;
     sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
@@ -511,7 +511,7 @@ HWTEST_F(SceneSessionManagerTest10, GetMainParentSceneSession001, Function | Sma
 {
     sptr<SceneSession> ret = ssm_->GetMainParentSceneSession(0, ssm_->sceneSessionMap_);
     ASSERT_EQ(ret, nullptr);
-    
+
     ret = ssm_->GetMainParentSceneSession(999, ssm_->sceneSessionMap_);
     ASSERT_EQ(ret, nullptr);
 
@@ -563,6 +563,26 @@ HWTEST_F(SceneSessionManagerTest10, GetParentMainWindowId001, Function | SmallTe
     scensession->property_->type_ = WindowType::WINDOW_TYPE_DIALOG;
     ret = ssm_->GetParentMainWindowId(windowId, mainWindowId);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyVisibleChange
+ * @tc.desc: test NotifyVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ASSERT_FALSE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 }  // namespace
 }

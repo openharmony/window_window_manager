@@ -2207,13 +2207,8 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
-    // 异步发送屏幕旋转公共事件
-    auto task = [=]() {
-        TLOGI(WmsLogTag::DMS, "publish dms rotation event");
-        ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
-            displayInfo->GetScreenId(), displayInfo->GetRotation());
-    };
-    taskScheduler_->PostAsyncTask(task, "UpdateScreenRotationProperty");
+    ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
+        displayInfo->GetScreenId(), displayInfo->GetRotation());
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,

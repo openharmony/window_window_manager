@@ -271,7 +271,7 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
-        
+
     /**
      * @brief get focus session token
      *
@@ -855,7 +855,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
-    
+
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
     std::atomic_bool processingFlushUIParams_ { false };
@@ -921,6 +921,11 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+
+    /*
+     * Window Visibility
+     */
+    bool NotifyVisibleChange(int32_t persistentId);
 
     /*
      * Fold Screen Status Change Report
