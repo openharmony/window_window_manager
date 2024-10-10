@@ -2266,7 +2266,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             sceneSession->SetSessionInfoWant(nullptr);
         }
-        ResetWant(sceneSession);
+        ResetWantInfo(sceneSession);
         sceneSession->ResetSessionInfoResultCode();
     }
     NotifySessionForCallback(sceneSession, needRemoveSession);
