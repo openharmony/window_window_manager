@@ -45,6 +45,8 @@ public:
     void InternalScreenOnChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
 
     void InternalScreenOffChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
+
+    void ExternalScreenDisconnectChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
 private:
     MultiScreenManager();
     ~MultiScreenManager();

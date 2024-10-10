@@ -671,6 +671,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         isPhyScreenConnected_ = false;
     }
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN ||
+            screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+            TLOGI(WmsLogTag::DMS, "need to change screen");
+            ScreenId internalScreenId = GetInternalScreenId();
+            sptr<ScreenSession> internalSession = GetScreenSession(internalScreenId);
+            MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, screenSession);
+        }
         FreeDisplayMirrorNodeInner(screenSession);
     }
     if (clientProxy_) {
