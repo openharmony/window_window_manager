@@ -227,7 +227,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_VALUE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     MessageParcel tmp;
     tmp.WriteUint32(1);
     res = session_->ProcessRemoteRequest(

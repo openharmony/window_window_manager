@@ -4765,6 +4765,11 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
+void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
+{
+    notifyVisibleChangeFunc_ = func;
+}
+
 void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
 {
     privacyModeChangeNotifyFunc_ = func;
@@ -4852,6 +4857,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     isVisible_ = visibility;
     if (updatePrivateStateAndNotifyFunc_ != nullptr) {
         updatePrivateStateAndNotifyFunc_(GetPersistentId());
+    }
+    if (notifyVisibleChangeFunc_ != nullptr) {
+        notifyVisibleChangeFunc_(GetPersistentId());
     }
     return true;
 }
