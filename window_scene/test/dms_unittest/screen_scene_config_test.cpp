@@ -753,6 +753,131 @@ HWTEST_F(ScreenSceneConfigTest, ReadPhysicalDisplayConfigInfo08, Function | Smal
     xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL:abc:def"));
     xmlFreeNode(currNode);
 }
+
+/**
+ * @tc.name: ReadScrollableParam01
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam01, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam02
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam02, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL:1.5:0.5"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam03
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam03, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_MAIN:1.5:0.5"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam04
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam04, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_SUB:1.5:0.5"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam05
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam05, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("UNKNOWN:1.5:0.5"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam06
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam06, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+        xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_FULL:1.5:"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam07
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam07, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>(" "));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam08
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam08, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("UNKNOWN:!!:aa"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: ReadScrollableParam09
+ * @tc.desc: ReadScrollableParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadScrollableParam09, Function | SmallTest | Level3)
+{
+    xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
+    ASSERT_NE(currNode, nullptr);
+    xmlNodeSetContent(currNode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_COORDINATION:1.5:0.5"));
+    ScreenSceneConfig::ReadScrollableParam(currNode);
+    xmlFreeNode(currNode);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
