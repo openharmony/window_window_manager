@@ -4372,6 +4372,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
     WSRect rect = session->GetSessionRect();
     std::string isVisible = session->IsVisible() ? "true" : "false";
+    std::string isRSVisible = session->GetRSVisible() ? "true" : "false";
     std::string focusable = session->GetFocusable() ? "true" : "false";
     std::string decoStatus = sessionProperty->IsDecorEnable() ? "true" : "false";
     bool privacyMode = sessionProperty->GetSystemPrivacyMode() || sessionProperty->GetPrivacyMode();
@@ -4388,6 +4389,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "Orientation: " << static_cast<uint32_t>(session->GetRequestedOrientation()) << std::endl;
     oss << "FirstFrameCallbackCalled: " << isFirstFrameAvailable << std::endl;
     oss << "IsVisible: " << isVisible << std::endl;
+    oss << "isRSVisible: " << isRSVisible << std::endl;
     oss << "Focusable: "  << focusable << std::endl;
     oss << "DecoStatus: "  << decoStatus << std::endl;
     oss << "isPrivacyMode: "  << isPrivacyMode << std::endl;
