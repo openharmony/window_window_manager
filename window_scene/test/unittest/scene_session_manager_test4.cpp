@@ -200,11 +200,11 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant06, Function | SmallTes
 }
 
 /**
- * @tc.name: GetSceneSessionByName01
- * @tc.desc: SceneSesionManager test GetSceneSessionByName
+ * @tc.name: GetSceneSessionByIdentityInfo01
+ * @tc.desc: SceneSesionManager test GetSceneSessionByIdentityInfo
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByName01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByIdentityInfo01, Function | SmallTest | Level3)
 {
     std::string abilityName = "test1";
     std::string bundleName = "test2";
@@ -219,8 +219,8 @@ HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByName01, Function | SmallTest
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ComparedSessionInfo compareSessionInfo = { bundleName, moduleName, abilityName, appIndex };
-    ASSERT_NE(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
+    SessionIdentityInfo identityInfo = { bundleName, moduleName, abilityName, appIndex };
+    ASSERT_NE(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
 }
 
 /**
