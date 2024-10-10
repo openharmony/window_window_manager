@@ -2120,6 +2120,14 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
+     * @brief Set the ContinueState of window.
+     *
+     * @param continueState of the window.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
