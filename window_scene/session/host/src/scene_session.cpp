@@ -113,7 +113,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (SessionHelper::IsMainWindow(session->GetWindowType()) && !identityToken.empty() &&
             !session->clientIdentityToken_.empty() && identityToken != session->clientIdentityToken_) {
             TLOGW(WmsLogTag::WMS_LIFE,
-                "Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+                "Identity Token vaildate failed, clientIdentityToken: %{public}s, "
                 "identityToken: %{public}s, bundleName: %{public}s",
                 session->clientIdentityToken_.c_str(), identityToken.c_str(),
                 session->GetSessionInfo().bundleName_.c_str());
@@ -228,11 +228,9 @@ WSError SceneSession::Foreground(
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
         !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
-            "Foreground Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "Foreground Identity Token vaildate failed, clientIdentityToken: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(),
-            identityToken.c_str(),
-            GetSessionInfo().bundleName_.c_str());
+            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
         return WSError::WS_OK;
     }
     return ForegroundTask(property);
@@ -291,11 +289,9 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
         !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
-            "Background Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "Background Identity Token vaildate failed, clientIdentityToken: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(),
-            identityToken.c_str(),
-            GetSessionInfo().bundleName_.c_str());
+            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
         return WSError::WS_OK;
     }
 
@@ -388,11 +384,9 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
         !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
-            "Disconnect Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
+            "Disconnect Identity Token vaildate failed, clientIdentityToken: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(),
-            identityToken.c_str(),
-            GetSessionInfo().bundleName_.c_str());
+            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
         return WSError::WS_OK;
     }
     
