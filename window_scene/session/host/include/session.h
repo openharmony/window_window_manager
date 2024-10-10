@@ -347,11 +347,11 @@ public:
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool GetFocusable() const;
-    void SetFocusedOnShow(bool focusedOnShow);
+    void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
     bool IsFocusableOnShow() const;
-    virtual void SetSystemFocusable(bool systemFocusable);
+    virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
     bool IsFocused() const;

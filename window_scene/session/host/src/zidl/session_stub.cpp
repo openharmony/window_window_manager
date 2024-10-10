@@ -1089,7 +1089,7 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
     bool isFocusableOnShow = true;
     if (!data.ReadBool(isFocusableOnShow)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");
