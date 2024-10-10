@@ -101,7 +101,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
-    InputTransferStation::GetInstance().AddInputWindow(this);
+
+    auto usage = property_->GetUIExtensionUsage();
+    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        InputTransferStation::GetInstance().AddInputWindow(this);
+    }
+
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
@@ -158,7 +163,12 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+
+    auto usage = property_->GetUIExtensionUsage();
+    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+    }
+
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
