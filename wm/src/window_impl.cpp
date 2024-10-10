@@ -684,6 +684,19 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     return WMError::WM_OK;
 }
 
+float WindowImpl::GetVirtualPixelRatio()
+{
+    float vpr = 1.0f;
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId:%{public}" PRIu64 ", window id:%{public}u",
+            property_->GetDisplayId(), property_->GetWindowId());
+        return vpr;
+    }
+    return display->GetVirtualPixelRatio();
+}
+
 std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::string& abcPath)
 {
     std::filesystem::path abcFile { abcPath };
