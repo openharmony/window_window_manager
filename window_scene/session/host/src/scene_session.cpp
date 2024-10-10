@@ -226,7 +226,7 @@ WSError SceneSession::Foreground(
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
             "Foreground Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
@@ -289,7 +289,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
             "Background Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
@@ -386,7 +386,7 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !session->clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
             "Disconnect Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
             "identityToken: %{public}s, bundleName: %{public}s",
