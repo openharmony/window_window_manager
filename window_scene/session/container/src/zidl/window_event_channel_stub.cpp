@@ -138,6 +138,7 @@ int WindowEventChannelStub::HandleTransferFocusStateEvent(MessageParcel& data, M
 
 int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data, MessageParcel& reply)
 {
+#ifdef POWERMGR_WINDOW_MANAGER_ENABLE
     int64_t elementId = 0;
     if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -171,11 +172,13 @@ int WindowEventChannelStub::HandleTransferSearchElementInfo(MessageParcel& data,
             return ERR_INVALID_DATA;
         }
     }
+#endif
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel& data, MessageParcel& reply)
 {
+#ifdef POWERMGR_WINDOW_MANAGER_ENABLE
     int64_t elementId = 0;
     if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -209,11 +212,13 @@ int WindowEventChannelStub::HandleTransferSearchElementInfosByText(MessageParcel
             return ERR_INVALID_DATA;
         }
     }
+#endif
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& data, MessageParcel& reply)
 {
+#ifdef POWERMGR_WINDOW_MANAGER_ENABLE
     int64_t elementId = 0;
     if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -240,11 +245,13 @@ int WindowEventChannelStub::HandleTransferFindFocusedElementInfo(MessageParcel& 
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;
     }
+#endif
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, MessageParcel& reply)
 {
+#ifdef POWERMGR_WINDOW_MANAGER_ENABLE
     int64_t elementId = 0;
     if (!data.ReadInt64(elementId)) {
         WLOGFE("Parameter elementId is invalid!");
@@ -271,6 +278,7 @@ int WindowEventChannelStub::HandleTransferFocusMoveSearch(MessageParcel& data, M
         WLOGFE("Failed to WriteParcelable info");
         return ERR_INVALID_DATA;
     }
+#endif
     return ERR_NONE;
 }
 
