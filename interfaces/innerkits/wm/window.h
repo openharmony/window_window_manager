@@ -1084,7 +1084,7 @@ public:
      */
     virtual WMError RequestFocusByClient(bool isFocused) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
-     * @brief Check current focus status.https://gitee.com/openharmony/window_window_manager/issues/IAW4II?from=project-issue
+     * @brief Check current focus status.
      *
      * @return True means window is focused, false means window is unfocused.
      */
