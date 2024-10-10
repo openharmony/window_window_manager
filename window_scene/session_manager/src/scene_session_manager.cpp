@@ -11063,12 +11063,14 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
 {
     if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
         iter != processWatermarkPidMap_.end()) {
         sceneSession->SetWatermarkEnabled(iter->second, true);
+        return true;
     }
+    return false;
 }
 
 void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
