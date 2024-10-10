@@ -368,7 +368,8 @@ public:
      * @brief when casting the screen, Virtual screen playback and pause function.
      *
      * @param screenId screenId used in virtual screen.
-     * @return screenStatus VIRTUAL_SCREEN_PLAY or VIRTUAL_SCREEN_PAUSE.
+     * @param screenStatus VIRTUAL_SCREEN_PLAY or VIRTUAL_SCREEN_PAUSE.
+     * @return True means set success, false means set failed.
      */
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
 private:
