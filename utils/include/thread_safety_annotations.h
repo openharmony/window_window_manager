@@ -98,18 +98,18 @@ struct SCOPED_CAPABILITY ScopedGuard {
 
 } // namespace OHOS::Rosen
 
-#define THREAD_GUARD(guard)  \
+#define LOCK_GUARD(guard)  \
     ACQUIRE(guard) RELEASE(guard)
 
-#define THREAD_GUARD_EXPR(guard, expr)         \
+#define LOCK_GUARD_EXPR(guard, expr)           \
     [&] {                                      \
         OHOS::Rosen::ScopedGuard lock(guard);  \
         return (expr);                         \
     }()
 
-#define CREATE_THREAD_GUARD(opt1, opt2, guard, ...) guard
+#define CREATE_THREAD_SAFETY_GUARD(opt1, opt2, guard, ...) guard
 
 #define THREAD_SAFETY_GUARD(...) \
-    CREATE_THREAD_GUARD(__VA_ARGS__, THREAD_GUARD_EXPR, THREAD_GUARD, )(__VA_ARGS__)
+    CREATE_THREAD_SAFETY_GUARD(__VA_ARGS__, LOCK_GUARD_EXPR, LOCK_GUARD, )(__VA_ARGS__)
 
 #endif // THREAD_SAFETY_ANNOTATIONS_H
