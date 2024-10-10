@@ -3978,11 +3978,6 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                     info.persistentId_);
                 return;
             }
-            if (auto sessionProperty = session->GetSessionProperty()) {
-                TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, recover requestedOrientation %{public}u when exception",
-                    session->GetPersistentId(), static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
-                sessionProperty->SetRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
-            }
             if (session->GetSessionInfo().isSystem_) {
                 WLOGW("NotifySessionExceptionFunc, id: %{public}d is system",
                     session->GetPersistentId());
