@@ -5606,24 +5606,27 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
         mainScreenId, secondaryScreenId, operateMode.c_str());
     sptr<ScreenSession> firstSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-            continue;
-        }
-        if (!screenSession->GetIsCurrentInUse()) {
-            TLOGE(WmsLogTag::DMS, "current screen: %{public}" PRIu64" is not in user!", sessionIt.first);
-            continue;
-        }
-        if (sessionIt.first == mainScreenId) {
-            firstSession = screenSession;
-        }
-        if (sessionIt.first == secondaryScreenId) {
-            secondarySession = screenSession;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (!screenSession->GetIsCurrentInUse()) {
+                TLOGE(WmsLogTag::DMS, "current screen: %{public}" PRIu64" is not in user!", sessionIt.first);
+                continue;
+            }
+            if (sessionIt.first == mainScreenId) {
+                firstSession = screenSession;
+            }
+            if (sessionIt.first == secondaryScreenId) {
+                secondarySession = screenSession;
+            }
         }
     }
+    
     if (firstSession != nullptr && secondarySession != nullptr) {
         MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, operateMode);
     } else {
