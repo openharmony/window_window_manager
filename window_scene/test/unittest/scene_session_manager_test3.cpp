@@ -485,11 +485,11 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSession002, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: GetSceneSessionByName
+ * @tc.name: GetSceneSessionByIdentityInfo
  * @tc.desc: SceneSesionManager get scene session by name
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByName, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByIdentityInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -504,22 +504,22 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByName, Function | SmallTest |
     std::string moduleName1 = "test2";
     std::string abilityName1 = "test3";
     int32_t appIndex1 = 10;
-    ComparedSessionInfo compareSessionInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
+    SessionIdentityInfo identityInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     std::string bundleName2 = "test11";
     std::string moduleName2 = "test22";
     std::string abilityName2 = "test33";
     int32_t appIndex2 = 100;
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
-    compareSessionInfo = { bundleName1, moduleName2, abilityName2, appIndex2 };
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
-    compareSessionInfo = { bundleName2, moduleName1, abilityName2, appIndex2 };
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
-    compareSessionInfo = { bundleName2, moduleName2, abilityName1, appIndex2 };
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
-    compareSessionInfo = { bundleName2, moduleName2, abilityName2, appIndex1 };
-    ASSERT_EQ(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
+    identityInfo = { bundleName1, moduleName2, abilityName2, appIndex2 };
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
+    identityInfo = { bundleName2, moduleName1, abilityName2, appIndex2 };
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
+    identityInfo = { bundleName2, moduleName2, abilityName1, appIndex2 };
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
+    identityInfo = { bundleName2, moduleName2, abilityName2, appIndex1 };
+    ASSERT_EQ(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
     ssm_->sceneSessionMap_.erase(1);
 }
 

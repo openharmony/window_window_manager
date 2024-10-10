@@ -344,13 +344,13 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {
-                ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
                     info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             }
         }
         if (sceneSession == nullptr) {
-            WLOGFI("return nullptr, RequestSceneSession");
+            WLOGFI("SceneSession not exist, request a new one.");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
                 WLOGFE("RequestSceneSession return nullptr");
