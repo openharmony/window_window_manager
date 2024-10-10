@@ -15,8 +15,8 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "common_test_utils.h"
 #include "window_test_utils.h"
-
 #include "window_impl.h"
 #include "wm_common.h"
 
@@ -214,6 +214,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
 */
 HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, Function | MediumTest | Level3)
 {
+    CommonTestUtils::GuaranteeFloatWindowPermission("window_raisetoapptop_test");
     fullInfo_.name  = "mainWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
