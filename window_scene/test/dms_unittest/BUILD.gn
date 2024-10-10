@@ -39,6 +39,7 @@ group("unittest") {
     ":ws_screen_session_manager_proxy_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
+    ":ws_screen_session_manager_test2",
     ":ws_screen_session_publish_test",
     ":ws_screen_session_test",
     ":ws_screen_setting_helper_test",
