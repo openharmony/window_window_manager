@@ -269,6 +269,7 @@ protected:
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void RegisterFrameLayoutCallback();
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
+
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
