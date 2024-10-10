@@ -350,7 +350,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             }
         }
         if (sceneSession == nullptr) {
-            WLOGFI("SceneSession not exist, request a new one.");
+            TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
                 WLOGFE("RequestSceneSession return nullptr");
