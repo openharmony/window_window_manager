@@ -89,6 +89,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
+    bool TryToCancelScreenOff() override;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);

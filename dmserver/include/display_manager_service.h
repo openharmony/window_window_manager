@@ -90,6 +90,7 @@ public:
         std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop = true) override;
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    bool TryToCancelScreenOff() override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
 

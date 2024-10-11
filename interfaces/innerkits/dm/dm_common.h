@@ -207,6 +207,7 @@ enum class DisplayPowerEvent : uint32_t {
     DESKTOP_READY,
     DOZE,
     DOZE_SUSPEND,
+    DISPLAY_OFF_CANCELED,
 };
 
 /**
