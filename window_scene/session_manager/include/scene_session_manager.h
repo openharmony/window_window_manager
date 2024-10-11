@@ -65,12 +65,14 @@ namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
 }
+
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
     std::string codePath_;
 };
-struct ComparedSessionInfo {
+
+struct SessionIdentityInfo {
     std::string bundleName_;
     std::string moduleName_;
     std::string abilityName_;
@@ -79,6 +81,7 @@ struct ComparedSessionInfo {
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
 };
+
 class SceneSession;
 struct SecSurfaceInfo;
 class RSUIExtensionData;
@@ -164,7 +167,7 @@ public:
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
     void PostFlushWindowInfoTask(FlushWindowInfoTask &&task, const std::string taskName, const int delayTime);
 
-    sptr<SceneSession> GetSceneSessionByName(const ComparedSessionInfo& info);
+    sptr<SceneSession> GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -660,6 +663,7 @@ private:
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    void ResetWantInfo(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Rotate Animation
@@ -940,7 +944,6 @@ private:
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
-    void ResetWant(sptr<SceneSession>& sceneSession);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
