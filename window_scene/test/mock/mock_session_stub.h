@@ -34,9 +34,10 @@ public:
         SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
         const std::string& identityToken));
 
-    MOCK_METHOD2(Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient));
-    MOCK_METHOD1(Background, WSError(bool isFromClient));
-    MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
+    MOCK_METHOD3(
+        Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken));
+    MOCK_METHOD2(Background, WSError(bool isFromClient, const std::string& identityToken));
+    MOCK_METHOD2(Disconnect, WSError(bool isFromClient, const std::string& identityToken));
     MOCK_METHOD1(Show, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Hide, WSError(void));
     MOCK_METHOD0(DrawingCompleted, WSError(void));
