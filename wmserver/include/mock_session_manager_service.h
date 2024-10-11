@@ -48,7 +48,7 @@ public:
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
 
     /*
-     * Window Snapshot Skip
+     * Window Snapshot
      */
     int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
@@ -90,7 +90,7 @@ private:
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
     /*
-     * Window Snapshot Skip
+     * Window Snapshot
      */
     sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
     int32_t RecoverSCBSnapshotSkipByUserId(int32_t userId);
@@ -118,7 +118,7 @@ private:
     std::map<int32_t, bool> wmsConnectionStatusMap_;
 
     /*
-     * Window Snapshot Skip
+     * Window Snapshot
      */
     std::mutex userIdBundleNamesMapLock_;
     std::unordered_map<int32_t, std::vector<std::string>> userIdBundleNamesMap_;
