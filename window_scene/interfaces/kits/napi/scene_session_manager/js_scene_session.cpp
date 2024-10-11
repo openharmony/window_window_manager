@@ -2517,7 +2517,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
             } else {
                 ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.isAtomicService_ };
+                    info.appIndex_, info.windowType_, info.isAtomicService_ };
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
             }
         }

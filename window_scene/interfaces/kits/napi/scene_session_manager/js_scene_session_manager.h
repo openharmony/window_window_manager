@@ -39,6 +39,7 @@ enum class ListenerFunctionType : uint32_t {
     CALLING_WINDOW_ID_CHANGE_CB,
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+    ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -188,6 +189,8 @@ private:
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ProcessAbilityManagerCollaboratorRegistered();
+    void OnAbilityManagerCollaboratorRegistered();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
