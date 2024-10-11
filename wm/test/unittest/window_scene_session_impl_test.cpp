@@ -452,7 +452,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTe
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("DisableAppWindowDecor01");
-    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSceneSessionImpl> windowSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSession);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -461,6 +461,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTe
     ASSERT_NE(nullptr, session);
     std::shared_ptr<AbilityRuntime::Context> context;
     ASSERT_EQ(WMError::WM_OK, windowSession->Create(context, session));
+    windowSession->property_->SetPersistentId(1);
 
     windowSession->UpdateDecorEnable(false);
     windowSession->windowSystemConfig_.isSystemDecorEnable_ = false;
