@@ -266,4 +266,9 @@ WMError SceneSessionManagerLite::GetRootMainWindowId(const int32_t persistentId,
 {
     return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
 }
+
+WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAccessibilityWindowInfo(infos);
+}
 } // namespace OHOS::Rosen
