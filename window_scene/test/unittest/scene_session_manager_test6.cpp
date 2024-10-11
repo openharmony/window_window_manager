@@ -1175,7 +1175,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | Small
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->UpdatePrivateStateAndNotify(0);
+    ssm_->privacyBundleMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "DumpSessionWithId";
