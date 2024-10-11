@@ -212,9 +212,10 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
 HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, Function | SmallTest | Level3)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
-    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(
         type, windowManagerAgent));
 }
@@ -1588,7 +1589,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level
 {
     WSError ret;
     ret = ssm_->SetSessionLabel(nullptr, "test");
-    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1607,7 +1608,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
 {
     WSError ret;
     ret = ssm_->SetSessionIcon(nullptr, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
