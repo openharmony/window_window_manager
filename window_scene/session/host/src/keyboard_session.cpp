@@ -128,7 +128,7 @@ WSError KeyboardSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError KeyboardSession::Disconnect(bool isFromClient)
+WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto task = [weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
