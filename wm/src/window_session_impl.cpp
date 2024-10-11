@@ -1003,7 +1003,7 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
 
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
-    float vpr = 1.0f;
+    float vpr = 0.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
