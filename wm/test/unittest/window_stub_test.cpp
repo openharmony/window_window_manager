@@ -774,4 +774,3 @@ HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
 }
 }
 }
-
