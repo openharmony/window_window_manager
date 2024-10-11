@@ -3665,5 +3665,15 @@ void WindowSessionImpl::UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason
         SetFrameLayoutCallbackEnable(true);
     }
 }
+
+WMError WindowSessionImpl::SetContinueState(int32_t continueState)
+{
+    if (continueState > ContinueState::CONTINUESTATE_MAX || continueState < ContinueState::CONTINUESTATE_UNKNOWN) {
+        TLOGE(WmsLogTag::WMS_MAIN, "continueState is invalid: %{public}d", continueState);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
