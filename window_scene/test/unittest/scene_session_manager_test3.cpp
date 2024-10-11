@@ -402,7 +402,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigStartingWindowAnimation, Function | Sma
  * @tc.name: CreateCurve
  * @tc.desc: SceneSesionManager create curve
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, CreateCurve, Function | SmallTest | Level3)
 {
     WindowSceneConfig::ConfigItem curveConfig;
@@ -432,7 +432,7 @@ HWTEST_F(SceneSessionManagerTest3, CreateCurve, Function | SmallTest | Level3)
  * @tc.name: SetRootSceneContext
  * @tc.desc: SceneSesionManager set root scene context
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetRootSceneContext, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -445,7 +445,7 @@ HWTEST_F(SceneSessionManagerTest3, SetRootSceneContext, Function | SmallTest | L
  * @tc.name: GetRootSceneSession
  * @tc.desc: SceneSesionManager get root scene session
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetRootSceneSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -458,7 +458,7 @@ HWTEST_F(SceneSessionManagerTest3, GetRootSceneSession, Function | SmallTest | L
  * @tc.name: GetSceneSession
  * @tc.desc: SceneSesionManager get scene session
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetSceneSession, Function | SmallTest | Level3)
 {
     int32_t persistentId = 65535;
@@ -469,7 +469,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSession, Function | SmallTest | Level
  * @tc.name: GetSceneSession002
  * @tc.desc: SceneSesionManager get scene session
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetSceneSession002, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -488,7 +488,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSession002, Function | SmallTest | Le
  * @tc.name: GetSceneSessionByIdentityInfo
  * @tc.desc: SceneSesionManager get scene session by name
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByIdentityInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -527,7 +527,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByIdentityInfo, Function | Sma
  * @tc.name: GetSceneSessionVectorByType
  * @tc.desc: SceneSesionManager get scene session vector by type
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -562,7 +562,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | Small
  * @tc.name: UpdateParentSessionForDialog
  * @tc.desc: SceneSesionManager UpdateParentSessionForDialog
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | SmallTest | Level3)
 {
     WSError result = ssm_->UpdateParentSessionForDialog(nullptr, nullptr);
@@ -602,7 +602,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | Smal
  * @tc.name: CheckWindowId
  * @tc.desc: CheckWindowId
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -627,7 +627,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckWindowId, Function | SmallTest | Level3)
  * @tc.name: CheckAppIsInDisplay
  * @tc.desc: CheckAppIsInDisplay
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -678,7 +678,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, Function | SmallTest | L
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, CreateAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -703,7 +703,7 @@ HWTEST_F(SceneSessionManagerTest3, CreateAndConnectSpecificSession, Function | S
  * @tc.name: StartUIAbilityBySCB
  * @tc.desc: StartUIAbilityBySCB
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, StartUIAbilityBySCB, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -720,7 +720,7 @@ HWTEST_F(SceneSessionManagerTest3, StartUIAbilityBySCB, Function | SmallTest | L
  * @tc.name: ChangeUIAbilityVisibilityBySCB
  * @tc.desc: ChangeUIAbilityVisibilityBySCB
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -737,7 +737,7 @@ HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, Function | Sm
  * @tc.name: SetAbilitySessionInfo
  * @tc.desc: SceneSesionManager set ability session info
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -756,7 +756,7 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, Function | SmallTest |
  * @tc.name: PrepareTerminate
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, PrepareTerminate, Function | SmallTest | Level3)
 {
     int32_t persistentId = 0;
@@ -768,7 +768,7 @@ HWTEST_F(SceneSessionManagerTest3, PrepareTerminate, Function | SmallTest | Leve
  * @tc.name: DestroyDialogWithMainWindow
  * @tc.desc: SceneSesionManager destroy dialog with main window
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DestroyDialogWithMainWindow, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -784,7 +784,7 @@ HWTEST_F(SceneSessionManagerTest3, DestroyDialogWithMainWindow, Function | Small
  * @tc.name: AddClientDeathRecipient
  * @tc.desc: SceneSesionManager add client death recipient
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, AddClientDeathRecipient, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -802,7 +802,7 @@ HWTEST_F(SceneSessionManagerTest3, AddClientDeathRecipient, Function | SmallTest
  * @tc.name: DestroySpecificSession
  * @tc.desc: SceneSesionManager destroy specific session
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DestroySpecificSession, Function | SmallTest | Level3)
 {
     sptr<IRemoteObject> remoteObject = nullptr;
@@ -815,7 +815,7 @@ HWTEST_F(SceneSessionManagerTest3, DestroySpecificSession, Function | SmallTest 
  * @tc.name: SetCreateSystemSessionListener
  * @tc.desc: SceneSesionManager set create specific session listener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetCreateSystemSessionListener, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -827,7 +827,7 @@ HWTEST_F(SceneSessionManagerTest3, SetCreateSystemSessionListener, Function | Sm
  * @tc.name: SetGestureNavigationEnabledChangeListener
  * @tc.desc: SceneSesionManager set gesture navigation enabled change listener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabledChangeListener, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -839,7 +839,7 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabledChangeListener, Fu
  * @tc.name: OnOutsideDownEvent
  * @tc.desc: SceneSesionManager on out side down event
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, Function | SmallTest | Level3)
 {
     int32_t x = 32;
@@ -853,7 +853,7 @@ HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, Function | SmallTest | Le
  * @tc.name: NotifySessionTouchOutside
  * @tc.desc: SceneSesionManager notify session touch outside
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -865,7 +865,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside, Function | SmallTe
  * @tc.name: SetOutsideDownEventListener
  * @tc.desc: SceneSesionManager set outside down event listener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetOutsideDownEventListener, Function | SmallTest | Level3)
 {
     ProcessOutsideDownEventFunc func = [](int32_t x, int32_t y) {
@@ -880,7 +880,7 @@ HWTEST_F(SceneSessionManagerTest3, SetOutsideDownEventListener, Function | Small
  * @tc.name: DestroyAndDisconnectSpecificSession
  * @tc.desc: SceneSesionManager destroy and disconnect specific session
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level3)
 {
     int32_t persistentId = 0;
@@ -892,7 +892,7 @@ HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSession, Function
  * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level3)
 {
     int32_t persistentId = 0;
@@ -904,7 +904,7 @@ HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSessionWithDetach
  * @tc.name: GetWindowSceneConfig
  * @tc.desc: SceneSesionManager get window scene config
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetWindowSceneConfig, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -916,7 +916,7 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowSceneConfig, Function | SmallTest | 
  * @tc.name: ProcessBackEvent
  * @tc.desc: SceneSesionManager process back event
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, ProcessBackEvent, Function | SmallTest | Level3)
 {
     WSError result = ssm_->ProcessBackEvent();
@@ -999,7 +999,7 @@ HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle3, Function | SmallT
  * @tc.name: InitUserInfo
  * @tc.desc: SceneSesionManager init user info
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, InitUserInfo, Function | SmallTest | Level3)
 {
     int32_t newUserId = 10086;
