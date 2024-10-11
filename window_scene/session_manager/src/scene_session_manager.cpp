@@ -2376,23 +2376,11 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
-        property->GetIsUIExtFirstSubWindow() && property->GetIsUIExtensionAbilityProcess() &&
-        SessionPermission::IsStartedByUIExtension()) {
-        auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
-        if (extensionParentSession == nullptr) {
-            WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
-        AAFwk::UIExtensionHostInfo hostInfo;
-        AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
-        if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
-            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
-                "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
-                hostInfo.elementName_.GetBundleName().c_str());
-            return WSError::WS_ERROR_INVALID_WINDOW;
+ 
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
+        WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
+        if (err != WSError::WS_OK) {
+            return err;
         }
     }
 
@@ -2424,6 +2412,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         info.bundleName_ = property->GetSessionInfo().bundleName_;
         info.abilityName_ = property->GetSessionInfo().abilityName_;
         info.moduleName_ = property->GetSessionInfo().moduleName_;
+        info.screenId_ = property->GetDisplayId();
 
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
@@ -2450,6 +2439,33 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     };
 
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
+}
+
+WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
+    sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage)
+{
+    sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
+    if (extensionParentSession == nullptr) {
+        WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
+        SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
+        AAFwk::UIExtensionHostInfo hostInfo;
+        AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
+        if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
+            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
+                "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
+                hostInfo.elementName_.GetBundleName().c_str());
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+    }
+    sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
+    if (sessionStage && parentProperty) {
+        sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
+        property->SetDisplayId(parentProperty->GetDisplayId());
+    }
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
@@ -7035,6 +7051,13 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
             sceneSession->NotifyDestroy();
             return WSError::WS_ERROR_INVALID_PARAM;
         }
+        sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
+        sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
+        if (parentProperty != nullptr && property != nullptr) {
+            auto displayId = parentProperty->GetDisplayId();
+            property->SetDisplayId(displayId);
+            sceneSession->SetScreenId(displayId);
+        }
         sceneSession->SetParentSession(parentSession);
         sceneSession->SetParentPersistentId(parentSession->GetPersistentId());
         UpdateParentSessionForDialog(sceneSession, sceneSession->GetSessionProperty());
@@ -10087,25 +10110,6 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
         }
     }
     return true;
-}
-
-WMError SceneSessionManager::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
-{
-    auto task = [this, persistentId, &displayId]() {
-        sptr<SceneSession> session = GetSceneSession(persistentId);
-        if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "GetDisplayIdByPersistentId: session is nullptr");
-            return WMError::WM_ERROR_INVALID_SESSION;
-        }
-        sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
-        if (sessionProperty == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "GetDisplayIdByPersistentId: sessionProperty is nullptr");
-            return WMError::WM_ERROR_INVALID_SESSION;
-        }
-        displayId = static_cast<int32_t>(sessionProperty->GetDisplayId());
-        return WMError::WM_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByPersistentId");
 }
 
 void SceneSessionManager::CacVisibleWindowNum()

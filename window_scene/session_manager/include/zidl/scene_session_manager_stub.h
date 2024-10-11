@@ -104,7 +104,6 @@ private:
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
-    int HandleGetDisplayIdByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);

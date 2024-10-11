@@ -139,8 +139,6 @@ public:
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
     virtual WMError ReleaseForegroundSessionScreenLock();
-    WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId);
-
     /*
      * PC Window
      */
