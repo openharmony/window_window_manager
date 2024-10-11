@@ -48,7 +48,7 @@ public:
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
 
     /*
-     * window snapshot skip
+     * Window Snapshot Skip
      */
     int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;

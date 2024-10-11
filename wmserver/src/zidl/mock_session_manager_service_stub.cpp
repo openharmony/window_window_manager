@@ -94,7 +94,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNam
     int32_t userId = data.ReadInt32();
     std::vector<std::string> bundleNameList;
     if (!data.ReadStringVector(&bundleNameList)) {
-        WLOGFE("Fail to read bundleNameList");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
         return ERR_INVALID_DATA;
     }
     int32_t errCode = SetSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList);
@@ -113,7 +113,10 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel&
     for (int i = 0; i < mapSize; i++) {
         int32_t userId = data.ReadInt32();
         std::vector<std::string> bundleNameList;
-        data.ReadStringVector(&bundleNameList);
+        if (!data.ReadStringVector(&bundleNameList)) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
+            return ERR_INVALID_DATA;
+        }
         idBundlesMap[userId] = bundleNameList;
     }
     int32_t errCode = SetSnapshotSkipByMap(idBundlesMap);
