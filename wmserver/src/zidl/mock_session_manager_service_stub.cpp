@@ -79,7 +79,7 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             return HandleSetSnapshotSkipByUserIdAndBundleNames(data, reply);
         }
         case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP: {
-            return HandleSetSnapshotSkipByMap(data, reply);
+            return HandleSetSnapshotSkipByIdNamesMap(data, reply);
         }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
@@ -102,7 +102,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNam
     return ERR_NONE;
 }
 
-int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel& data, MessageParcel& reply)
+int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(MessageParcel& data, MessageParcel& reply)
 {
     int32_t mapSize = data.ReadInt32();
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
@@ -119,7 +119,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel&
         }
         idBundlesMap[userId] = bundleNameList;
     }
-    int32_t errCode = SetSnapshotSkipByMap(idBundlesMap);
+    int32_t errCode = SetSnapshotSkipByIdNamesMap(idBundlesMap);
     reply.WriteInt32(errCode);
     return ERR_NONE;
 }

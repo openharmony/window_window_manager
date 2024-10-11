@@ -49,7 +49,7 @@ public:
     virtual void UnregisterSMSLiteRecoverListener() = 0;
     virtual int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) = 0;
-    virtual int32_t SetSnapshotSkipByMap(const std::unordered_map<int32_t,
+    virtual int32_t SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames) = 0;
 };
 }

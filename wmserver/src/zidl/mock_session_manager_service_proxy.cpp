@@ -197,7 +197,7 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
     }
 }
 
-int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(const int32_t userId,
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
@@ -229,8 +229,8 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(co
     return reply.ReadInt32();
 }
 
-int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
-    const std::unordered_map<int32_t, std::vector<std::string>> &userIdAndBunldeNames)
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByIdNamesMap(
+    const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     MessageParcel data;
     MessageParcel reply;
