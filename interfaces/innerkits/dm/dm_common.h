@@ -418,6 +418,14 @@ struct DisplayPhysicalResolution {
 };
 
 /**
+ * @brief scrollable param
+ */
+struct ScrollableParam {
+    std::string velocityScale_;
+    std::string friction_;
+};
+
+/**
  * @brief displayRect
  */
 struct DMRect {

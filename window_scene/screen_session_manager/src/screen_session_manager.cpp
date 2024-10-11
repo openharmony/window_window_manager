@@ -5487,7 +5487,7 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "set virtual screen status enter, screenId: %{public}" PRIu64 " screenStatus: %{public}d",
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 " screenStatus: %{public}d",
         screenId, static_cast<int32_t>(screenStatus));
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
@@ -5606,29 +5606,43 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
         mainScreenId, secondaryScreenId, operateMode.c_str());
     sptr<ScreenSession> firstSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-            continue;
-        }
-        if (!screenSession->GetIsCurrentInUse()) {
-            TLOGE(WmsLogTag::DMS, "current screen: %{public}" PRIu64" is not in user!", sessionIt.first);
-            continue;
-        }
-        if (sessionIt.first == mainScreenId) {
-            firstSession = screenSession;
-        }
-        if (sessionIt.first == secondaryScreenId) {
-            secondarySession = screenSession;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (!screenSession->GetIsCurrentInUse()) {
+                TLOGE(WmsLogTag::DMS, "current screen: %{public}" PRIu64" is not in user!", sessionIt.first);
+                continue;
+            }
+            if (sessionIt.first == mainScreenId) {
+                firstSession = screenSession;
+            }
+            if (sessionIt.first == secondaryScreenId) {
+                secondarySession = screenSession;
+            }
         }
     }
+    
     if (firstSession != nullptr && secondarySession != nullptr) {
         MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, operateMode);
     } else {
         TLOGE(WmsLogTag::DMS, "params error");
     }
+}
+
+void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
+{
+    std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
+    std::string srollVelocityScale = scrollableParams.count(displayMode) != 0 ?
+        scrollableParams[displayMode].velocityScale_ : "0";
+    std::string srollFriction = scrollableParams.count(displayMode) != 0 ?
+        scrollableParams[displayMode].friction_ : "0";
+    system::SetParameter("persist.scrollable.velocityScale", srollVelocityScale);
+    system::SetParameter("persist.scrollable.friction", srollFriction);
 }
 
 void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenIdStr,

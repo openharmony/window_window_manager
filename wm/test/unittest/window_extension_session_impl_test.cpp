@@ -1587,6 +1587,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetDisplayId(displayId);
+    window_->property_->windowRect_ = {1, 1, 1, 1};
 
     auto isFollowHost = true;
     auto densityValue = 0.1f;

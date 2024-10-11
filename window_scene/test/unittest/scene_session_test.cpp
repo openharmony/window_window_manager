@@ -1678,7 +1678,6 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     info.abilityName_ = "SetAspectRatio5";
     info.bundleName_ = "SetAspectRatio5";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
     float ratio = 0.1;
@@ -1690,7 +1689,8 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetAspectRatio(ratio);
-    EXPECT_NE(sceneSession, nullptr);
+    auto result = sceneSession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1734,7 +1734,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**

@@ -1009,7 +1009,6 @@ float WindowSessionImpl::GetVirtualPixelRatio()
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
         return vpr;
     }
-
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
@@ -2310,22 +2309,34 @@ void WindowSessionImpl::RecoverSessionListener()
 {
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_RECOVER, "with persistentId=%{public}d", persistentId);
-    if (avoidAreaChangeListeners_.find(persistentId) != avoidAreaChangeListeners_.end() &&
-        !avoidAreaChangeListeners_[persistentId].empty()) {
-        SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
+        if (avoidAreaChangeListeners_.find(persistentId) != avoidAreaChangeListeners_.end() &&
+            !avoidAreaChangeListeners_[persistentId].empty()) {
+            SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
+        }
     }
-    if (touchOutsideListeners_.find(persistentId) != touchOutsideListeners_.end() &&
-        !touchOutsideListeners_[persistentId].empty()) {
-        SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(persistentId, true);
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(touchOutsideListenerMutex_);
+        if (touchOutsideListeners_.find(persistentId) != touchOutsideListeners_.end() &&
+            !touchOutsideListeners_[persistentId].empty()) {
+            SingletonContainer::Get<WindowAdapter>().UpdateSessionTouchOutsideListener(persistentId, true);
+        }
     }
-    if (windowVisibilityChangeListeners_.find(persistentId) != windowVisibilityChangeListeners_.end() &&
-        !windowVisibilityChangeListeners_[persistentId].empty()) {
-        SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, true);
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
+        if (windowVisibilityChangeListeners_.find(persistentId) != windowVisibilityChangeListeners_.end() &&
+            !windowVisibilityChangeListeners_[persistentId].empty()) {
+            SingletonContainer::Get<WindowAdapter>().UpdateSessionWindowVisibilityListener(persistentId, true);
+        }
     }
-    if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
-        !windowRectChangeListeners_[persistentId].empty()) {
-        if (auto hostSession = GetHostSession()) {
-            hostSession->UpdateRectChangeListenerRegistered(true);
+    {
+        std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
+        if (windowRectChangeListeners_.find(persistentId) != windowRectChangeListeners_.end() &&
+            !windowRectChangeListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateRectChangeListenerRegistered(true);
+            }
         }
     }
 }

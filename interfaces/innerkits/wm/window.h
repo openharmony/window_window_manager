@@ -2040,11 +2040,11 @@ public:
      */
     virtual bool GetDefaultDensityEnabled() { return false; }
 
-   /**
-    * @brief Get virtual pixel ratio.
-    *
-    * @return Value of PixelRatio obtained from displayInfo.
-    */
+    /**
+     * @brief Get virtual pixel ratio.
+     *
+     * @return Value of PixelRatio obtained from displayInfo.
+     */
     virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**

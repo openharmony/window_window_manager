@@ -3701,7 +3701,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
             notifyAll = !forceHideFloatOld;
-        } else if (property->IsFloatingWindowAppType()) {
+        } else if (property->IsFloatingWindowAppType() && !property->GetSystemCalling()) {
             nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
             if (forceHideFloatOld) {
                 sceneSession->NotifyForceHideChange(true);
@@ -3711,7 +3711,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.erase(persistentId);
             notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
-        } else if (property->IsFloatingWindowAppType()) {
+        } else if (property->IsFloatingWindowAppType() && !property->GetSystemCalling()) {
             nonSystemFloatSceneSessionMap_.erase(persistentId);
             if (property->GetForceHide()) {
                 sceneSession->NotifyForceHideChange(false);
@@ -3977,11 +3977,6 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 WLOGW("NotifySessionExceptionFunc, Not found session, id: %{public}d",
                     info.persistentId_);
                 return;
-            }
-            if (auto sessionProperty = session->GetSessionProperty()) {
-                TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, recover requestedOrientation %{public}u when exception",
-                    session->GetPersistentId(), static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
-                sessionProperty->SetRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
             }
             if (session->GetSessionInfo().isSystem_) {
                 WLOGW("NotifySessionExceptionFunc, id: %{public}d is system",
@@ -11063,12 +11058,14 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
 {
     if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
         iter != processWatermarkPidMap_.end()) {
         sceneSession->SetWatermarkEnabled(iter->second, true);
+        return true;
     }
+    return false;
 }
 
 void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)

@@ -938,7 +938,7 @@ private:
     /*
      * Window Watermark
      */
-    void SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
     void ResetWant(sptr<SceneSession>& sceneSession);
 
