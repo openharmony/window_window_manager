@@ -1318,14 +1318,26 @@ HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
 
 /**
  * @tc.name: NotifyDisplayInfoChange01
- * @tc.desc: check NotifyDisplayInfoChange
+ * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
 {
-    WMError ret;
-    ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange02
+ * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> Token = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(Token, nullptr);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(Token, 1, 2, DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**

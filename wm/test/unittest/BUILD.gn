@@ -477,10 +477,13 @@ ohos_unittest("wm_window_scene_session_impl_test3") {
 
 ohos_unittest("wm_window_scene_session_impl_test4") {
   module_out_path = module_out_path
-
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
   sources = [ "window_scene_session_impl_test4.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",

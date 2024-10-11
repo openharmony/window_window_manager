@@ -27,7 +27,7 @@ public:
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
@@ -42,6 +42,7 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
+    WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
     WmErrorCode StartMoveSystemWindow() override;
@@ -62,6 +63,8 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
+    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
@@ -158,6 +161,12 @@ public:
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
 
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool enable) override;
+    bool GetGestureBackEnabled() const override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -191,6 +200,7 @@ private:
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
+    void UpdateFocusableOnShow(bool withFocus);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
@@ -232,7 +242,14 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
+    bool titleHoverShowEnabled_ = true;
+    bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Gesture Back
+     */
+    bool gestureBackEnabled_ = true;
 
     /*
      * Window Property.
@@ -244,6 +261,11 @@ private:
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
+
+    /*
+     * system window
+    */
+    WMError SetSystemWindowDisplayId(WindowType type);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

@@ -19,9 +19,31 @@
 #include "dm_common.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
+#include "app_state_data.h"
+#include "iapplication_state_observer.h"
+#include "ability_state_data.h"
+#include "process_data.h"
 
 namespace OHOS {
 namespace Rosen {
+using OHOS::AppExecFwk::AppStateData;
+using OHOS::AppExecFwk::IApplicationStateObserver;
+class ApplicationStatePocketObserver : public IApplicationStateObserver {
+public:
+    ApplicationStatePocketObserver();
+    virtual ~ApplicationStatePocketObserver() = default;
+    void OnForegroundApplicationChanged(const AppStateData &appStateData) override;
+    void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
+    void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) override {};
+    void OnProcessCreated(const AppExecFwk::ProcessData &processData) override {};
+    void OnProcessDied(const AppExecFwk::ProcessData &processData) override {};
+    void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
+    sptr<IRemoteObject> AsObject() override { return nullptr; };
+    std::string GetForegroundApp();
+
+private:
+    std::string foregroundBundleName_ {""};
+};
 class SingleDisplaySensorPocketFoldStateManager : public SensorFoldStateManager {
 public:
     SingleDisplaySensorPocketFoldStateManager();
@@ -35,6 +57,12 @@ public:
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
+    void SetCameraFoldStrategy(float angle);
+    void SetCameraStatusChange(float angle, int hall);
+    sptr<ApplicationStatePocketObserver> applicationStateObserver_;
+    bool isInCameraFoldStrategy_ = false;
+    bool isCameraStatus_ = false;
+    std::vector<std::string> hallSwitchPackageNameList_;
     int allowUserSensorForLargeFoldDevice = 0;
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);

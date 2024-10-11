@@ -127,6 +127,26 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged, Function | Sm
 }
 
 /**
+ * @tc.name: NotifyCaptureStatusChanged01
+ * @tc.desc: NotifyCaptureStatusChanged01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyCaptureStatusChanged(true);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: NotifyDisplayChangeInfoChanged
  * @tc.desc: NotifyDisplayChangeInfoChanged
  * @tc.type: FUNC
@@ -137,6 +157,27 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, Function 
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
 
     sptr<DisplayChangeInfo> display_change_info = new DisplayChangeInfo();
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifyDisplayChangeInfoChanged01
+ * @tc.desc: NotifyDisplayChangeInfoChanged01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    sptr<DisplayChangeInfo> display_change_info = nullptr;
     int resultValue = 0;
     std::function<void()> func = [&]()
     {
@@ -190,6 +231,48 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged, Function | Sm
 }
 
 /**
+ * @tc.name: NotifyAvailableAreaChanged01
+ * @tc.desc: NotifyAvailableAreaChanged01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged01, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    DMRect rect = {1, 1, 1, 1};
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifyAvailableAreaChanged02
+ * @tc.desc: NotifyAvailableAreaChanged02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged02, Function | SmallTest | Level1)
+{
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    DMRect rect = {3, 3, 3, 3};
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: OnScreenConnect
  * @tc.desc: OnScreenConnect
  * @tc.type: FUNC
@@ -197,6 +280,29 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged, Function | Sm
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect, Function | SmallTest | Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
+
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->OnScreenConnect(screenInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: OnScreenConnect01
+ * @tc.desc: OnScreenConnect01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, Function | SmallTest | Level1)
+{
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
 
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -259,6 +365,29 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: OnScreenChange01
+ * @tc.desc: OnScreenChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange01, Function | SmallTest | Level1)
+{
+    sptr<ScreenInfo> screenInfo = nullptr;
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: OnScreenGroupChange
  * @tc.desc: OnScreenGroupChange
  * @tc.type: FUNC
@@ -290,6 +419,28 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, Function | SmallTest
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate, Function | SmallTest | Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: OnDisplayCreate01
+ * @tc.desc: OnDisplayCreate01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate01, Function | SmallTest | Level1)
+{
+    sptr<DisplayInfo> displayInfo = nullptr;
 
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
@@ -350,6 +501,30 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: OnDisplayChange01
+ * @tc.desc: OnDisplayChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, Function | SmallTest | Level1)
+{
+    sptr<DisplayInfo> displayInfo = nullptr;
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+
+/**
  * @tc.name: OnScreenshot
  * @tc.desc: OnScreenshot
  * @tc.type: FUNC
@@ -372,6 +547,28 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: OnScreenshot01
+ * @tc.desc: OnScreenshot01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot01, Function | SmallTest | Level1)
+{
+    sptr<ScreenshotInfo> snapshotInfo = nullptr;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: NotifyPrivateWindowStateChanged
  * @tc.desc: NotifyPrivateWindowStateChanged
  * @tc.type: FUNC
@@ -379,6 +576,28 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, Function | SmallTest | Leve
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level1)
 {
     bool hasPrivate = false;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+
+    int resultValue = 0;
+    std::function<void()> func = [&]()
+    {
+        displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifyPrivateWindowStateChanged01
+ * @tc.desc: NotifyPrivateWindowStateChanged01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged01, Function | SmallTest | Level1)
+{
+    bool hasPrivate = true;
 
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);

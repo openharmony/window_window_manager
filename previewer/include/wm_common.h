@@ -175,6 +175,7 @@ enum class WMError : int32_t {
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
+    WM_ERROR_SYSTEM_ABNORMALLY,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system.
 
@@ -246,9 +247,10 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_IS_TOAST = 1 << 7,
-    WINDOW_FLAG_END = 1 << 8,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
+    WINDOW_FLAG_HANDWRITING = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_END = 1 << 9,
 };
 
 /**
@@ -286,6 +288,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
     {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED   },
+    {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
 };
 
 /**
@@ -788,6 +791,8 @@ enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set imersiveStateEnable
     EXIT_IMMERSIVE = 1,        // imersiveStateEnable will be set as false
     ENTER_IMMERSIVE = 2,        // imersiveStateEnable will be set as true
+    // imersiveStateEnable will be set as true, and title, statusbar and dockbar will be hide
+    ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 
 
@@ -808,11 +813,17 @@ struct SystemWindowOptions {
     int32_t windowType = -1;
 };
 
+enum class ModalityType : uint8_t {
+    WINDOW_MODALITY,
+    APPLICATION_MODALITY,
+};
+
 struct SubWindowOptions {
     std::string title;
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 
 struct ExtensionWindowConfig {

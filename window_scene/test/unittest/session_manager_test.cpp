@@ -234,7 +234,7 @@ HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener, Function | SmallTest | 
     sessionManager.isRecoverListenerRegistered_ = false;
     sessionManager.mockSessionManagerServiceProxy_ = nullptr;
     sessionManager.RegisterSMSRecoverListener();
-    ASSERT_EQ(sessionManager.mockSessionManagerServiceProxy_, nullptr);
+    ASSERT_EQ(sessionManager.isRecoverListenerRegistered_, false);
 }
 
 /**
@@ -248,6 +248,22 @@ HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
     sessionManager.InitMockSMSProxy();
     sessionManager.InitMockSMSProxy();
     ASSERT_NE(sessionManager.foundationDeath_, nullptr);
+}
+
+
+/**
+ * @tc.name: RegisterWindowManagerRecoverCallbackFunc
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    auto testFunc = []() {
+        return;
+    };
+    sessionManager.RegisterWindowManagerRecoverCallbackFunc(testFunc);
+    ASSERT_NE(sessionManager.windowManagerRecoverFunc_, nullptr);
 }
 }
 }

@@ -16,15 +16,16 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 #define OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 
+#include <mutex>
+
 #include <refbase.h>
 #include <struct_multimodal.h>
 
 #include "common/include/window_session_property.h"
 #include "property/rs_properties_def.h"
 #include "window.h"
+#include "screen_manager.h"
 #include "ws_common_inner.h"
-#include <mutex>
-
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -34,27 +35,38 @@ namespace OHOS::Rosen {
 
 using MoveDragCallback = std::function<void(const SizeChangeReason)>;
 
-using NotifyWindowDragHotAreaFunc = std::function<void(uint64_t displayId, uint32_t type,
+using NotifyWindowDragHotAreaFunc = std::function<void(DisplayId displayId, uint32_t type,
     const SizeChangeReason reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
 const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
-class MoveDragController : public RefBase {
+class MoveDragController : public ScreenManager::IScreenListener {
 public:
-    MoveDragController(int32_t persistentId);
+    MoveDragController(int32_t persistentId, bool isSystemWindow = false);
     ~MoveDragController() = default;
+
+    /*
+     * Cross Display Move Drag
+     */
+    enum class TargetRectCoordinate {
+        RELATED_TO_START_DISPLAY,
+        RELATED_TO_END_DISPLAY,
+        GLOBAL
+    };
 
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
+    void SetAsSystemWindow(bool isSystemWindow);
+    bool IsSystemWindow() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
-    WSRect GetTargetRect(bool needGlobalRect = false) const;
+    WSRect GetTargetRect(TargetRectCoordinate coordinate = TargetRectCoordinate::RELATED_TO_START_DISPLAY) const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -80,8 +92,17 @@ public:
     uint64_t GetInitParentNodeId() const;
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag();
     std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
-    void InitCrossDisplayProperty(uint64_t displayId, uint64_t parentNodeId);
+    void InitCrossDisplayProperty(DisplayId displayId, uint64_t parentNodeId);
     WSRect GetScreenRectById(DisplayId displayId);
+    void MoveDragInterrupt();
+    void ResetCrossMoveDragProperty();
+
+    /*
+     * Monitor screen connection status
+     */
+    void OnConnect(ScreenId screenId) override;
+    void OnDisconnect(ScreenId screenId) override;
+    void OnChange(ScreenId screenId) override;
 
 private:
     struct MoveDragProperty {
@@ -118,6 +139,7 @@ private:
     constexpr static float NEAR_ZERO = 0.001f;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -146,7 +168,7 @@ private:
     /*
      * Cross Display Move Drag
      */
-    std::pair<int32_t, int32_t> CalcUnifiedTransform(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    std::pair<int32_t, int32_t> CalcUnifiedTranslate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
@@ -207,14 +229,17 @@ private:
     /*
      * Cross Display Move Drag
      */
-    uint64_t moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    bool isSystemWindow_ = false;
+    bool moveDragIsInterrupted_ = false;
+    DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t initParentNodeId_ = -1ULL;
-    std::mutex displayIdSetDuringMoveDragMutex_;
-    std::set<uint64_t> displayIdSetDuringMoveDrag_;
-    uint64_t hotAreaDisplayId_ = 0;
+    DisplayId hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
     int32_t originalDisplayOffsetY_ = 0;
+    std::mutex displayIdSetDuringMoveDragMutex_;
+    std::set<uint64_t> displayIdSetDuringMoveDrag_;
+    // Above guarded by displayIdSetDuringMoveDragMutex_
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
