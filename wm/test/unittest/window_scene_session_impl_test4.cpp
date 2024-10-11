@@ -17,6 +17,7 @@
 #include <parameters.h>
 #include "ability_context_impl.h"
 #include "display_info.h"
+#include "common_test_utils.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
@@ -53,6 +54,7 @@ void WindowSceneSessionImplTest4::TearDownTestCase() {}
 void WindowSceneSessionImplTest4::SetUp()
 {
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    CommonTestUtils::GuaranteeFloatWindowPermission("wm_window_scene_session_impl_test4");
 }
 
 void WindowSceneSessionImplTest4::TearDown()

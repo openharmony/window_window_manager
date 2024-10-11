@@ -1399,6 +1399,30 @@ HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTes
     context->GetAbilityInfo()->windowModes = supportModes;
     window->GetConfigurationFromAbilityInfo();
 }
+
+/**
+ * @tc.name: GetVirtualPixelRatio01
+ * @tc.desc: GetVirtualPixelRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio01");
+    option->SetDisplayId(1);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    float vpr = 0.0f;
+    window->property_->SetDisplayId(-1);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_EQ(vpr, 1.0f);
+
+    window->property_->SetDisplayId(0);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_NE(vpr, 1.0f);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
