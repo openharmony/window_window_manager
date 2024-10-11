@@ -103,7 +103,7 @@ namespace {
  * @tc.name: UpdateSceneSessionWant01
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant01, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -116,7 +116,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant01, Function | SmallTes
  * @tc.name: UpdateSceneSessionWant02
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant02, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -129,7 +129,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant02, Function | SmallTes
  * @tc.name: UpdateSceneSessionWant03
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant03, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -145,7 +145,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant03, Function | SmallTes
  * @tc.name: UpdateSceneSessionWant04
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant04, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -163,7 +163,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant04, Function | SmallTes
  * @tc.name: UpdateSceneSessionWant05
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant05, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -183,7 +183,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant05, Function | SmallTes
  * @tc.name: UpdateSceneSessionWant06
  * @tc.desc: SceneSesionManager test UpdateSceneSessionWant
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant06, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -200,11 +200,11 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSceneSessionWant06, Function | SmallTes
 }
 
 /**
- * @tc.name: GetSceneSessionByName01
- * @tc.desc: SceneSesionManager test GetSceneSessionByName
+ * @tc.name: GetSceneSessionByIdentityInfo01
+ * @tc.desc: SceneSesionManager test GetSceneSessionByIdentityInfo
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByName01, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByIdentityInfo01, Function | SmallTest | Level3)
 {
     std::string abilityName = "test1";
     std::string bundleName = "test2";
@@ -219,15 +219,15 @@ HWTEST_F(SceneSessionManagerTest4, GetSceneSessionByName01, Function | SmallTest
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ComparedSessionInfo compareSessionInfo = { bundleName, moduleName, abilityName, appIndex };
-    ASSERT_NE(ssm_->GetSceneSessionByName(compareSessionInfo), nullptr);
+    SessionIdentityInfo identityInfo = { bundleName, moduleName, abilityName, appIndex };
+    ASSERT_NE(ssm_->GetSceneSessionByIdentityInfo(identityInfo), nullptr);
 }
 
 /**
  * @tc.name: DestroyAndDisconnectSpecificSession01
  * @tc.desc: SceneSesionManager test DestroyAndDisconnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, DestroyAndDisconnectSpecificSession01, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -244,7 +244,7 @@ HWTEST_F(SceneSessionManagerTest4, DestroyAndDisconnectSpecificSession01, Functi
  * @tc.name: GetAllSessionDumpInfo
  * @tc.desc: SceneSesionManager test GetAllSessionDumpInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetAllSessionDumpInfo, Function | SmallTest | Level3)
 {
     SessionInfo info1;
@@ -273,7 +273,7 @@ HWTEST_F(SceneSessionManagerTest4, GetAllSessionDumpInfo, Function | SmallTest |
  * @tc.name: GetSpecifiedSessionDumpInfo
  * @tc.desc: SceneSesionManager test GetSpecifiedSessionDumpInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -293,7 +293,7 @@ HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, Function | Small
  * @tc.name: NotifyEnterRecentTask02
  * @tc.desc: NotifyEnterRecentTask
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, NotifyEnterRecentTask02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -304,7 +304,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifyEnterRecentTask02, Function | SmallTest
  * @tc.name: GetWindowStatus
  * @tc.desc: GetWindowStatus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetWindowStatus, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -332,7 +332,7 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowStatus, Function | SmallTest | Level
  * @tc.name: UpdateDisplayRegion
  * @tc.desc: UpdateDisplayRegion
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateDisplayRegion, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -355,7 +355,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateDisplayRegion, Function | SmallTest | L
  * @tc.name: GetCustomDecorHeight
  * @tc.desc: GetCustomDecorHeight
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetCustomDecorHeight, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -374,7 +374,7 @@ HWTEST_F(SceneSessionManagerTest4, GetCustomDecorHeight, Function | SmallTest | 
  * @tc.name: IsVectorSame
  * @tc.desc: IsVectorSame
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, IsVectorSame, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -411,7 +411,7 @@ HWTEST_F(SceneSessionManagerTest4, IsVectorSame, Function | SmallTest | Level3)
  * @tc.name: ReportWindowProfileInfos
  * @tc.desc: ReportWindowProfileInfos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -432,7 +432,7 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos, Function | SmallTes
  * @tc.name: ReportWindowProfileInfos02
  * @tc.desc: ReportWindowProfileInfos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -454,7 +454,7 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos02, Function | SmallT
  * @tc.name: ReportWindowProfileInfos03
  * @tc.desc: ReportWindowProfileInfos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos03, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -472,7 +472,7 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos03, Function | SmallT
  * @tc.name: ReportWindowProfileInfos04
  * @tc.desc: ReportWindowProfileInfos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos04, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -485,7 +485,7 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos04, Function | SmallT
  * @tc.name: CacVisibleWindowNum
  * @tc.desc: CacVisibleWindowNum
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, CacVisibleWindowNum, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -521,7 +521,7 @@ HWTEST_F(SceneSessionManagerTest4, CacVisibleWindowNum, Function | SmallTest | L
  * @tc.name: GetAppMainSceneSession
  * @tc.desc: GetAppMainSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -552,7 +552,7 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
  * @tc.name: GetImmersiveState02
  * @tc.desc: GetImmersiveState
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -591,7 +591,7 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | L
  * @tc.name: UpdateSessionDisplayId
  * @tc.desc: UpdateSessionDisplayId
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -616,7 +616,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, Function | SmallTest 
  * @tc.name: UpdateSessionWindowVisibilityListener02
  * @tc.desc: UpdateSessionWindowVisibilityListener
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -634,7 +634,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Func
  * @tc.name: NotifySessionAINavigationBarChange
  * @tc.desc: NotifySessionAINavigationBarChange
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -657,7 +657,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifySessionAINavigationBarChange, Function 
  * @tc.name: UpdateNormalSessionAvoidArea
  * @tc.desc: UpdateNormalSessionAvoidArea
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateNormalSessionAvoidArea, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -692,7 +692,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateNormalSessionAvoidArea, Function | Smal
  * @tc.name: UpdateAvoidSessionAvoidArea
  * @tc.desc: UpdateAvoidSessionAvoidArea
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateAvoidSessionAvoidArea, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -718,7 +718,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateAvoidSessionAvoidArea, Function | Small
  * @tc.name: FindSessionByAffinity
  * @tc.desc: FindSessionByAffinity
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, FindSessionByAffinity, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -731,7 +731,7 @@ HWTEST_F(SceneSessionManagerTest4, FindSessionByAffinity, Function | SmallTest |
  * @tc.name: SetSystemAnimatedScenes
  * @tc.desc: SetSystemAnimatedScenes
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, SetSystemAnimatedScenes, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -744,7 +744,7 @@ HWTEST_F(SceneSessionManagerTest4, SetSystemAnimatedScenes, Function | SmallTest
  * @tc.name: GetProcessDrawingState
  * @tc.desc: GetProcessDrawingState
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -779,7 +779,7 @@ HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest 
  * @tc.name: GetPreWindowDrawingState
  * @tc.desc: GetPreWindowDrawingState
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -806,7 +806,7 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
  * @tc.name: GetWindowDrawingContentChangeInfo
  * @tc.desc: GetWindowDrawingContentChangeInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -840,7 +840,7 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo, Function |
  * @tc.name: DealwithDrawingContentChange
  * @tc.desc: DealwithDrawingContentChange
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, DealwithDrawingContentChange, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -871,7 +871,7 @@ HWTEST_F(SceneSessionManagerTest4, DealwithDrawingContentChange, Function | Smal
  * @tc.name: GetSubSceneSession
  * @tc.desc: GetSubSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetSubSceneSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -903,7 +903,7 @@ HWTEST_F(SceneSessionManagerTest4, GetSubSceneSession, Function | SmallTest | Le
  * @tc.name: RemoveDuplicateSubSession
  * @tc.desc: RemoveDuplicateSubSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, RemoveDuplicateSubSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -940,7 +940,7 @@ HWTEST_F(SceneSessionManagerTest4, RemoveDuplicateSubSession, Function | SmallTe
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: UpdateSubWindowVisibility
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -993,7 +993,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSubWindowVisibility, Function | SmallTe
  * @tc.name: SelectSesssionFromMap
  * @tc.desc: SelectSesssionFromMap
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, SelectSesssionFromMap, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1027,7 +1027,7 @@ HWTEST_F(SceneSessionManagerTest4, SelectSesssionFromMap, Function | SmallTest |
  * @tc.name: GetAccessibilityWindowInfo
  * @tc.desc: GetAccessibilityWindowInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetAccessibilityWindowInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1067,7 +1067,7 @@ HWTEST_F(SceneSessionManagerTest4, GetAccessibilityWindowInfo, Function | SmallT
  * @tc.name: ShiftAppWindowFocus02
  * @tc.desc: ShiftAppWindowFocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, ShiftAppWindowFocus02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1108,7 +1108,7 @@ HWTEST_F(SceneSessionManagerTest4, ShiftAppWindowFocus02, Function | SmallTest |
  * @tc.name: UpdateTitleInTargetPos
  * @tc.desc: UpdateTitleInTargetPos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateTitleInTargetPos, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1130,7 +1130,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateTitleInTargetPos, Function | SmallTest 
  * @tc.name: GetIsLayoutFullScreen
  * @tc.desc: GetIsLayoutFullScreen
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetIsLayoutFullScreen, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1182,7 +1182,7 @@ HWTEST_F(SceneSessionManagerTest4, GetIsLayoutFullScreen, Function | SmallTest |
  * @tc.name: UpdateExtWindowFlags
  * @tc.desc: UpdateExtWindowFlags
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1196,7 +1196,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | 
  * @tc.name: AddOrRemoveSecureSession02
  * @tc.desc: AddOrRemoveSecureSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1221,7 +1221,7 @@ HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallT
  * @tc.name: GetSessionSnapshotPixelMap
  * @tc.desc: GetSessionSnapshotPixelMap
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1254,7 +1254,7 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallT
  * @tc.name: GetStartupPageFromResource
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, GetStartupPageFromResource, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1270,7 +1270,7 @@ HWTEST_F(SceneSessionManagerTest4, GetStartupPageFromResource, Function | SmallT
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: HandleHideNonSystemFloatingWindows
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest4, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
