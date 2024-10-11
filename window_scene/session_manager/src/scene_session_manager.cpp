@@ -11017,7 +11017,7 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(const int32_t us
 
 void SceneSessionManager::SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession)
 {
-    std::string name = sceneSession->GetSessionInfo().bundleName_;
+    const std::string& name = sceneSession->GetSessionInfo().bundleName_;
     if (snapshotSkipBundleNameSet_.find(name) != snapshotSkipBundleNameSet_.end()) {
         TLOGI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
             name.c_str());
