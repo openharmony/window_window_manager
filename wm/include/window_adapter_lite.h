@@ -56,6 +56,7 @@ public:
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
