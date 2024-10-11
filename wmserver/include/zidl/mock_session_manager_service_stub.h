@@ -30,7 +30,7 @@ public:
 
 private:
     int32_t HandleSetSnapshotSkipByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleSetSnapshotSkipByMap(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetSnapshotSkipByIdNamesMap(MessageParcel& data, MessageParcel& reply);
 };
 }
 }
