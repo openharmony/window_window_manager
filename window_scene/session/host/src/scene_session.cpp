@@ -5092,6 +5092,12 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
     }
 }
 
+int32_t GetCustomDecorHeight() const
+{
+    std::lock_guard lock(customDecorHeightMutex_);
+    return customDecorHeight_;
+}
+
 void SceneSession::SetCustomDecorHeight(int32_t height)
 {
     constexpr int32_t MIN_DECOR_HEIGHT = 37;
@@ -5099,6 +5105,7 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         return;
     }
+    std::lock_guard lock(customDecorHeightMutex_);
     customDecorHeight_ = height;
 }
 
