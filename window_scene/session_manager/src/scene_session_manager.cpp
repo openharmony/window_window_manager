@@ -226,8 +226,8 @@ SceneSessionManager::~SceneSessionManager()
 void SceneSessionManager::Init()
 {
     auto deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    bool isScbCoreEnabled = (deviceType == "phone" || deviceType == "2in1" || deviceType == "tablet") &&
-        system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    bool isScbCoreEnabled = (deviceType == "phone" || deviceType == "2in1" || deviceType == "tablet" ||
+        deviceType == "wearable") && system::GetParameter("persist.window.scbcore.enable", "1") == "1";
     Session::SetScbCoreEnabled(isScbCoreEnabled);
 
     constexpr uint64_t interval = 5 * 1000; // 5 second
