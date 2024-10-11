@@ -176,7 +176,7 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     ASSERT_NE(nullptr, option1);
     auto windowSession = sptr<WindowSessionImpl>::MakeSptr(option1);
     ASSERT_NE(nullptr, windowSession);
-    auto windowSceneSessionImpl = sptr<windowSceneSessionImpl>::MakeSptr(option1);
+    auto windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     windowSceneSessionImpl->GetMainWindowWithId(1);
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
