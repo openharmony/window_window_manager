@@ -1553,7 +1553,7 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
         }
     }
 
-    rsInterface_.SetScreenPowerStatus(screenId, status);
+    CallRsSetScreenPowerStatusSync(screenId, status);
     return true;
 }
 
@@ -1763,7 +1763,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
         }
     }
 
-    rsInterface_.SetScreenPowerStatus(screenId, status);
+    CallRsSetScreenPowerStatusSync(screenId, status);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
@@ -1867,10 +1867,10 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     }
 
     if (foldScreenController_ != nullptr) {
-        rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
+        CallRsSetScreenPowerStatusSync(foldScreenController_->GetCurrentScreenId(), status);
     } else {
         for (auto screenId : screenIds) {
-            rsInterface_.SetScreenPowerStatus(screenId, status);
+            CallRsSetScreenPowerStatusSync(screenId, status);
         }
     }
     HandlerSensor(status, reason);
@@ -1898,6 +1898,23 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
 void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status)
 {
     rsInterface_.SetScreenPowerStatus(screenId, status);
+}
+
+void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode)
+{
+    auto updateDisplayModeTask = [=] {
+        TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+        foldScreenController_->SetDisplayMode(targetDisplayMode);
+    };
+    taskScheduler_->PostAsyncTask(updateDisplayModeTask, "updateDisplayModeTask");
+}
+
+void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status)
+{
+    auto rsSetScreenPowerStatusTask = [=] {
+        rsInterface_.SetScreenPowerStatus(screenId, status);
+    };
+    screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
 }
 
 void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
