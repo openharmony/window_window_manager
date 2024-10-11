@@ -10983,7 +10983,7 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSe
     }
 }
 
-WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(const int32_t userId,
+WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {

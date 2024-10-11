@@ -296,7 +296,7 @@ public:
 
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override { return WMError::WM_OK; }
     
-    virtual WMError SkipSnapshotByUserIdAndBundleNames(const int32_t userId,
+    virtual WMError SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) = 0;
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
