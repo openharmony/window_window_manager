@@ -827,7 +827,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
     const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
         return ERR_UNKNOWN_TRANSACTION;
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
@@ -845,7 +845,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
         return ERR_UNKNOWN_TRANSACTION;
     }
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
