@@ -91,15 +91,21 @@ class CAPABILITY("mutex") SingleThreadGuard {};
 constexpr SingleThreadGuard SCENE_SESSION_THREAD;
 
 template <typename Guard>
-struct SCOPED_CAPABILITY ScopedGuard {
+struct SCOPED_CAPABILITY ScopedGuard final {
     explicit ScopedGuard(const Guard& guard) ACQUIRE(guard) {}
     ~ScopedGuard() RELEASE() {}
+
+    ScopedGuard(const ScopedGuard&) = delete;
+    ScopedGuard& operator=(const ScopedGuard&) = delete;
 };
 
 } // namespace OHOS::Rosen
 
 #define LOCK_GUARD(guard)  \
     ACQUIRE(guard) RELEASE(guard)
+
+#define LOCK_GUARD_TWO(guard, expr)  \
+    (OHOS::Rosen::ScopedGuard(guard), expr)
 
 #define LOCK_GUARD_EXPR(guard, expr)           \
     [&] {                                      \
@@ -110,6 +116,6 @@ struct SCOPED_CAPABILITY ScopedGuard {
 #define CREATE_THREAD_SAFETY_GUARD(opt1, opt2, guard, ...) guard
 
 #define THREAD_SAFETY_GUARD(...) \
-    CREATE_THREAD_SAFETY_GUARD(__VA_ARGS__, LOCK_GUARD_EXPR, LOCK_GUARD, )(__VA_ARGS__)
+    CREATE_THREAD_SAFETY_GUARD(__VA_ARGS__, LOCK_GUARD_TWO, LOCK_GUARD, )(__VA_ARGS__)
 
 #endif // THREAD_SAFETY_ANNOTATIONS_H
