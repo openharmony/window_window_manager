@@ -456,6 +456,26 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPropertyChanged, Function |
 }
 
 /**
+ * @tc.name: HandleOnHoverStatusChanged
+ * @tc.desc: HandleOnHoverStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnHoverStatusChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    int32_t hoverStatus = 0;
+    data.WriteInt32(hoverStatus);
+
+    int ret = screenSessionManagerClientStub_->HandleOnHoverStatusChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: HandleOnSensorRotationChanged
  * @tc.desc: HandleOnSensorRotationChanged test
  * @tc.type: FUNC

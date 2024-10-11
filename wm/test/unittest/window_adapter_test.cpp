@@ -109,13 +109,11 @@ HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject> remoteObj;
     auto ret = windowAdapter.GetUIContentRemoteObj(WINDOW_ID, remoteObj);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
-    } else {
-        ASSERT_EQ(ret, WMError::WM_OK);
-    }
+    ASSERT_EQ(ret, WMError::WM_ERROR_SAMGR);
 }
 
 /**
@@ -254,6 +252,55 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: RegisterSessionRecoverCallbackFunc
+ * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    auto testFunc = [] {
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
+}
+
+/**
+ * @tc.name: WindowManagerAndSessionRecover
+ * @tc.desc: WindowAdapter/WindowManagerAndSessionRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    int32_t ret = 0;
+    auto testFunc = [&ret] {
+        ret = 1;
+        return WMError::WM_DO_NOTHING;
+    };
+
+    auto testFunc2 = [&ret] {
+        ret = 2;
+        return WMError::WM_OK;
+    };
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    windowAdapter.WindowManagerAndSessionRecover();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, 1);
+    }
+    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
+    windowAdapter.WindowManagerAndSessionRecover();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, 2);
+    } else {
+        ASSERT_EQ(ret, 0);
+    }
 }
 
 /**
@@ -441,11 +488,13 @@ HWTEST_F(WindowAdapterTest, UpdateProperty, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     uint32_t windowId = 0;
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
     uint32_t percent = 0;
     auto ret = windowAdapter.SetWindowGravity(windowId, gravity, percent);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -456,10 +505,12 @@ HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, NotifyWindowTransition, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
     sptr<WindowTransitionInfo> from = nullptr;
     sptr<WindowTransitionInfo> to = nullptr;
     auto ret = windowAdapter.NotifyWindowTransition(from, to);
-    ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
 }
 
 /**
@@ -471,7 +522,13 @@ HWTEST_F(WindowAdapterTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
     uint32_t windowId = 0;
+
+    windowAdapter.isProxyValid_ = true;
     auto ret = windowAdapter.RaiseToAppTop(windowId);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
+    windowAdapter.isProxyValid_ = false;
+
+    ret = windowAdapter.RaiseToAppTop(windowId);
     std::shared_ptr<MMI::KeyEvent> event = nullptr;
     windowAdapter.DispatchKeyEvent(windowId, event);
     ASSERT_EQ(WMError::WM_OK, ret);

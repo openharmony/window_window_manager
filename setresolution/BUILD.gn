@@ -20,8 +20,13 @@ config("setresolution_config") {
 }
 
 ohos_executable("setresolution_screen") {
-  install_enable = true
   sources = [ "src/setresolution_screen.cpp" ]
+
+  if (build_variant == "root") {
+    install_enable = true
+  } else {
+    install_enable = false
+  }
 
   configs = [
     ":setresolution_config",

@@ -426,7 +426,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
-    ssm_->HandleCastScreenDisConnection(sceneSession->GetSessionInfo().screenId_);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
@@ -871,6 +870,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function 
     ssm_->failRecoveredPersistentIdSet_.insert(2);
     ssm_->failRecoveredPersistentIdSet_.insert(3);
     ssm_->removeFailRecoveredSession();
+    EXPECT_EQ(ssm_->failRecoveredPersistentIdSet_.size(), 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 

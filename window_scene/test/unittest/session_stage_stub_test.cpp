@@ -117,7 +117,13 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt32(1);
     data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    data.WriteInt32(1);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
@@ -142,11 +148,11 @@ HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, Function | Sma
 }
 
 /**
- * @tc.name: HandleUpdateDensity
+ * @tc.name: HandleUpdateDensity01
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity01, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -155,6 +161,19 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity, Function | SmallTest | Level
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateDensity02
+ * @tc.desc: test function : HandleUpdateDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleUpdateDensity(data, reply));
 }
 
 /**
@@ -777,8 +796,8 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: HandleNotifyDumpInfo
- * @tc.desc: test function : HandleNotifyDumpInfo
+ * @tc.name: HandleSetSplitButtonVisible
+ * @tc.desc: test function : HandleSetSplitButtonVisible
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest | Level1)

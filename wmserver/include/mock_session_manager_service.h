@@ -90,7 +90,7 @@ private:
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
     /*
-     * window snapshot skip
+     * Window Snapshot Skip
      */
     sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
     int32_t RecoverSCBSnapshotSkipByUserId(int32_t userId);

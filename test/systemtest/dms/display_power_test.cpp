@@ -210,11 +210,11 @@ HWTEST_F(DisplayPowerTest, set_display_state_002, Function | MediumTest | Level2
 {
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     bool ret = DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     ASSERT_EQ(stateGet, initialState);
     CheckDisplayStateCallback(false);
-    ASSERT_EQ(false, isDisplayStateCallbackCalled_);
+    ASSERT_EQ(true, isDisplayStateCallbackCalled_);
 }
 
 /**
@@ -257,7 +257,7 @@ HWTEST_F(DisplayPowerTest, set_display_state_callback_002, Function | MediumTest
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
     CheckDisplayStateCallback(false);
-    ASSERT_EQ(false, isDisplayStateCallbackCalled_);
+    ASSERT_EQ(true, isDisplayStateCallbackCalled_);
 }
 
 /**

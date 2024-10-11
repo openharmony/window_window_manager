@@ -77,6 +77,25 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for processing full-screen layout changes.
+     *
+     * @param isLayoutFullScreen Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
      * @brief Raise the application subwindow to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -243,8 +262,36 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+
+    /**
+     * @brief Request to get focus or lose focus.
+     *
+     * @param isFocused True means window wants to get focus, false means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set focusable of window when show.
+     *
+     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
+
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+    /**
+     * @brief Callback for session modal type changes.
+     *
+     * @param subWindowModalType Indicates the {@link SubWindowModalType}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

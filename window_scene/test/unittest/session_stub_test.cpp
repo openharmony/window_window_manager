@@ -227,7 +227,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_VALUE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     MessageParcel tmp;
     tmp.WriteUint32(1);
     res = session_->ProcessRemoteRequest(
@@ -313,6 +313,9 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
     ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE),
@@ -658,6 +661,27 @@ HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest
     MessageParcel reply;
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleGetAppForceLandscapeConfig(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUpdateSessionRect
+ * @tc.desc: test for HandleUpdateSessionRect
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdateSessionRect, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    data.WriteUint32(10);
+    data.WriteUint32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(40);
+    data.WriteUint32(0);
+    data.WriteBool(true);
+    auto res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 

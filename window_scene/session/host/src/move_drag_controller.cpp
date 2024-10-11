@@ -15,6 +15,8 @@
 
 #include "session/host/include/move_drag_controller.h"
 
+#include <cinttypes>
+
 #include <hitrace_meter.h>
 #include <pointer_event.h>
 #include "input_manager.h"
@@ -42,14 +44,46 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
 }
 
-MoveDragController::MoveDragController(int32_t persistentId)
+MoveDragController::MoveDragController(int32_t persistentId, bool isSystemWindow)
 {
     persistentId_ = persistentId;
+    isSystemWindow_ = isSystemWindow;
+}
+
+void MoveDragController::OnConnect(ScreenId id)
+{
+    TLOGW(WmsLogTag::WMS_LAYOUT, "Moving or dragging is interrupt due to new screen %{public}" PRIu64
+        " connection.", id);
+    moveDragIsInterrupted_ = true;
+}
+
+void MoveDragController::OnDisconnect(ScreenId id)
+{
+    TLOGW(WmsLogTag::WMS_LAYOUT, "Moving or dragging is interrupt due to screen %{public}" PRIu64
+        " disconnection.", id);
+    moveDragIsInterrupted_ = true;
+}
+
+void MoveDragController::OnChange(ScreenId id)
+{
+    TLOGW(WmsLogTag::WMS_LAYOUT, "Moving or dragging is interrupt due to screen %{public}" PRIu64
+        " change.", id);
+    moveDragIsInterrupted_ = true;
 }
 
 void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBack)
 {
     moveDragCallback_ = callBack;
+}
+
+void MoveDragController::SetAsSystemWindow(bool isSystemWindow)
+{
+    isSystemWindow_ = isSystemWindow;
+}
+
+bool MoveDragController::IsSystemWindow() const
+{
+    return isSystemWindow_;
 }
 
 void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
@@ -125,17 +159,38 @@ bool MoveDragController::GetMovable() const
     return isMovable_;
 }
 
-WSRect MoveDragController::GetTargetRect(bool needGlobalRect) const
+WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
 {
-    if (needGlobalRect) {
-        return {
-            moveDragProperty_.targetRect_.posX_ + originalDisplayOffsetX_,
-            moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_,
-            moveDragProperty_.targetRect_.width_,
-            moveDragProperty_.targetRect_.height_};
-    } else {
+    DisplayId relatedDisplayId = DISPLAY_ID_INVALID;
+    switch (coordinate) {
+        case TargetRectCoordinate::GLOBAL:
+            return {
+                moveDragProperty_.targetRect_.posX_ + originalDisplayOffsetX_,
+                moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_,
+                moveDragProperty_.targetRect_.width_,
+                moveDragProperty_.targetRect_.height_ };
+        case TargetRectCoordinate::RELATED_TO_START_DISPLAY:
+            return moveDragProperty_.targetRect_;
+        case TargetRectCoordinate::RELATED_TO_END_DISPLAY:
+            relatedDisplayId = moveDragEndDisplayId_;
+            break;
+        default:
+            return moveDragProperty_.targetRect_;
+    }
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(relatedDisplayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return relative coordinates.");
         return moveDragProperty_.targetRect_;
     }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    int32_t currentDisplayOffsetX = screenProperty.GetStartX();
+    int32_t currentDisplayOffsetY = screenProperty.GetStartY();
+    return {
+            moveDragProperty_.targetRect_.posX_ + originalDisplayOffsetX_ - currentDisplayOffsetX,
+            moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_ - currentDisplayOffsetY,
+            moveDragProperty_.targetRect_.width_,
+            moveDragProperty_.targetRect_.height_ };
 }
 
 void MoveDragController::InitMoveDragProperty()
@@ -143,8 +198,12 @@ void MoveDragController::InitMoveDragProperty()
     moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
 }
 
-void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t initParentNodeId)
+void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
 {
+    DMError error = ScreenManager::GetInstance().RegisterScreenListener(this);
+    if (error != DMError::DM_OK) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Register ScreenListener false.");
+    }
     {
         std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
         displayIdSetDuringMoveDrag_.insert(displayId);
@@ -159,9 +218,29 @@ void MoveDragController::InitCrossDisplayProperty(uint64_t displayId, uint64_t i
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     originalDisplayOffsetX_ = screenProperty.GetStartX();
     originalDisplayOffsetY_ = screenProperty.GetStartY();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}llu, "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}" PRIu64 ", "
         "originalDisplayOffsetX: %{public}d, originalDisplayOffsetY: %{public}d",
         moveDragStartDisplayId_, originalDisplayOffsetX_, originalDisplayOffsetY_);
+}
+
+void MoveDragController::ResetCrossMoveDragProperty()
+{
+    moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+    DMError error = ScreenManager::GetInstance().UnregisterScreenListener(this);
+    if (error != DMError::DM_OK) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Register ScreenListener false.");
+    }
+    {
+        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
+        displayIdSetDuringMoveDrag_.clear();
+    }
+    moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    initParentNodeId_ = -1;
+    originalDisplayOffsetX_ = 0;
+    originalDisplayOffsetY_ = 0;
+    isSystemWindow_ = false;
+    moveDragIsInterrupted_ = false;
 }
 
 void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType,
@@ -253,6 +332,10 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     bool ret = true;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
+            if (moveDragIsInterrupted_) {
+                MoveDragInterrupt();
+                return true;
+            }
             reason = SizeChangeReason::MOVE;
             uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
             UpdateHotAreaType(pointerEvent);
@@ -264,6 +347,13 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         case MMI::PointerEvent::POINTER_ACTION_CANCEL:
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
+            if (!hasPointDown_) {
+                return true;
+            }
+            if (moveDragIsInterrupted_) {
+                MoveDragInterrupt();
+                return true;
+            }
             reason = SizeChangeReason::DRAG_END;
             SetStartMoveFlag(false);
             hasPointDown_ = false;
@@ -328,6 +418,18 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
 }
 
+void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (!IsSystemWindow() || static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
+        std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
+        moveDragProperty_.targetRect_ = MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ?
+            CalcFixedAspectRatioTargetRect(
+                type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
+            CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+}
+
 bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
 {
@@ -352,19 +454,28 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
+            if (moveDragIsInterrupted_) {
+                MoveDragInterrupt();
+                return true;
+            }
             reason = SizeChangeReason::DRAG;
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            if (!hasPointDown_) {
+                return true;
+            }
+            auto screenRect = GetScreenRectById(moveDragStartDisplayId_);
+            if (moveDragIsInterrupted_ || screenRect == WSRect {-1, -1, -1, -1}) {
+                MoveDragInterrupt();
+                return true;
+            }
             reason = SizeChangeReason::DRAG_END;
             isStartDrag_ = false;
             hasPointDown_ = false;
-            if (GetScreenRectById(moveDragStartDisplayId_) == WSRect{-1, -1, -1, -1}) {
-                return false;
-            }
-            moveDragEndDisplayId_ = GetTargetRect(true).IsOverlap(GetScreenRectById(moveDragStartDisplayId_)) ?
+            moveDragEndDisplayId_ = GetTargetRect(TargetRectCoordinate::GLOBAL).IsOverlap(screenRect) ?
                 moveDragStartDisplayId_ : pointerEvent->GetTargetDisplayId();
             ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
             NotifyWindowInputPidChange(isStartDrag_);
@@ -373,12 +484,28 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         default:
             return false;
     }
-    std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
-    moveDragProperty_.targetRect_ = MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ? CalcFixedAspectRatioTargetRect(
-        type_, trans.first, trans.second, aspectRatio_, moveDragProperty_.originalRect_) :
-        CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
+    CalcDragTargetRect(pointerEvent);
     ProcessSessionRectChange(reason);
     return true;
+}
+
+void MoveDragController::MoveDragInterrupt()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted.");
+    SizeChangeReason reason = SizeChangeReason::DRAG_END;
+    hasPointDown_ = false;
+    if (isStartDrag_) {
+        isStartDrag_ = false;
+        ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
+        NotifyWindowInputPidChange(isStartDrag_);
+    };
+    if (GetStartMoveFlag()) {
+        SetStartMoveFlag(false);
+        ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
+    };
+    moveDragEndDisplayId_ = moveDragStartDisplayId_;
+    moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
+    ProcessSessionRectChange(reason);
 }
 
 WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
@@ -387,8 +514,7 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
     if (!screenSession) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "ScreenSession id null.");
-        WSRect invalidRect = {-1, -1, -1, -1};
-        return invalidRect;
+        return WSRect {-1, -1, -1, -1};
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     WSRect screenRect = {
@@ -400,7 +526,7 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
     return screenRect;
 }
 
-std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTransform(
+std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -441,18 +567,17 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX;
         moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
         return false;
-    } else {
-        std::pair<int32_t, int32_t> trans = CalcUnifiedTransform(pointerEvent);
+    };
+    if (!IsSystemWindow() || static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
+        std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ = {
             moveDragProperty_.originalRect_.posX_ + trans.first,
             moveDragProperty_.originalRect_.posY_ + trans.second,
             originalRect.width_,
             originalRect.height_};
-        WLOGFD("move rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            moveDragProperty_.targetRect_.posX_, moveDragProperty_.targetRect_.posY_,
-            moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);
-        return true;
     }
+    WLOGFD("move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+    return true;
 }
 
 bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -904,7 +1029,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     }
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
-    uint64_t displayId = pointerEvent->GetTargetDisplayId();
+    DisplayId displayId = pointerEvent->GetTargetDisplayId();
     uint32_t windowDragHotAreaType = SceneSession::GetWindowDragHotAreaType(displayId,
         WINDOW_HOT_AREA_TYPE_UNDEFINED, pointerDisplayX, pointerDisplayY);
     if (windowDragHotAreaType_ != windowDragHotAreaType) {
@@ -912,7 +1037,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
             windowDragHotAreaType_, windowDragHotAreaType);
     }
     if (hotAreaDisplayId_ != displayId) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "displayId is changed, old: %{public}llu, new: %{public}llu",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "displayId is changed, old: %{public}" PRIu64 ", new: %{public}" PRIu64,
             moveDragStartDisplayId_, displayId);
         hotAreaDisplayId_ = displayId;
     }
@@ -957,11 +1082,11 @@ void MoveDragController::SetIsPcWindow(bool isPcWindow)
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
 {
     std::set<uint64_t> newAddedDisplayIdSet;
-    WSRect windowRect = GetTargetRect(true);
+    WSRect windowRect = GetTargetRect(TargetRectCoordinate::GLOBAL);
     std::map<ScreenId, ScreenProperty> screenProperties = ScreenSessionManagerClient::GetInstance().
         GetAllScreensProperties();
+    std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
     for (const auto& [screenId, screenProperty] : screenProperties) {
-        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
         if (displayIdSetDuringMoveDrag_.find(screenId) != displayIdSetDuringMoveDrag_.end()) {
             continue;
         }
@@ -976,7 +1101,7 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
             newAddedDisplayIdSet.insert(screenId);
         }
     }
-return newAddedDisplayIdSet;
+    return newAddedDisplayIdSet;
 }
 
 void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)

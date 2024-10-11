@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <iostream>
 #include "common_test_utils.h"
 
 #include <access_token.h>
@@ -104,5 +105,27 @@ void CommonTestUtils::SetAceessTokenPermission(const std::string processName,
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+void CommonTestUtils::GuaranteeFloatWindowPermission(const std::string processName)
+{
+    const char **perms = new const char *[1];
+    perms[0] = "ohos.permission.SYSTEM_FLOAT_WINDOW";
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = processName.c_str(),
+        .aplStr = "system_core",
+    };
+    uint64_t tokenId = GetAccessTokenId(&infoInstance);
+    auto ret = SetSelfTokenID(tokenId);
+    auto ret1 = OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+    std::cout << "Guarantee float window permission, processName: " << processName << ", tokenId: " <<
+        tokenId << ", set selfTokenId return: " << ret << ", reload native tokenInfo return: " << ret1 << std::endl;
+    delete[] perms;
 }
 } // namespace OHOS::Rosen
