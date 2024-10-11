@@ -5934,8 +5934,8 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -5962,8 +5962,8 @@ WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListen
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
@@ -6371,13 +6371,24 @@ WSError SceneSessionManager::TerminateSessionNew(
     TLOGI(WmsLogTag::WMS_LIFE,
         "bundleName=%{public}s, needStartCaller=%{public}d, isFromBroker=%{public}d",
         info->want.GetElement().GetBundleName().c_str(), needStartCaller, isFromBroker);
-    auto task = [this, info, needStartCaller, isFromBroker]() {
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    uint32_t callerToken = IPCSkeleton::GetCallingTokenID();
+    auto task = [this, info, needStartCaller, isFromBroker, callingPid, callerToken]() {
         sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSessionNew:fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
+        const bool pidCheck = (callingPid != -1) && (callingPid == sceneSession->GetCallingPid());
+        if (!pidCheck &&
+            !SessionPermission::VerifyPermissionByCallerToken(callerToken,
+                PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+            TLOGE(WmsLogTag::WMS_LIFE,
+                "The caller has not permission granted, callingPid_:%{public}d, callingPid:%{public}d",
+                sceneSession->GetCallingPid(), callingPid);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        WSError errCode = sceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
         return errCode;
     };
     return taskScheduler_->PostSyncTask(task, "TerminateSessionNew");
@@ -8019,8 +8030,8 @@ WSError SceneSessionManager::ClearSession(int32_t persistentId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, persistentId]() {
@@ -8053,8 +8064,8 @@ WSError SceneSessionManager::ClearAllSessions()
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this]() {
@@ -8088,8 +8099,8 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -8111,8 +8122,8 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, sessionId]() {
@@ -9960,6 +9971,10 @@ WMError SceneSessionManager::ClearMainSessions(const std::vector<int32_t>& persi
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_MAIN, "Clear main sessions failed, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     clearFailedIds.clear();
