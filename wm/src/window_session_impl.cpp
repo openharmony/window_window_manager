@@ -1310,6 +1310,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         isIgnoreSafeAreaNeedNotify_ = false;
     }
 
+    // UIContent may be nullptr on setting system bar properties, need to set menubar color on UIContent init.
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        uiContent->SetStatusBarItemColor(property.contentColor_);
+    }
+
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -2279,8 +2285,7 @@ WMError WindowSessionImpl::RegisterSwitchFreeMultiWindowListener(const sptr<ISwi
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType()) &&
-        !WindowHelper::IsUIExtensionWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -2295,8 +2300,7 @@ WMError WindowSessionImpl::UnregisterSwitchFreeMultiWindowListener(const sptr<IS
         WLOGFE("listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType()) &&
-        !WindowHelper::IsUIExtensionWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }

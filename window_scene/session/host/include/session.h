@@ -136,9 +136,10 @@ public:
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError DrawingCompleted() override;

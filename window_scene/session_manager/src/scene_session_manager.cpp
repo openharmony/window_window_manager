@@ -567,27 +567,10 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
-            !WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             continue;
         }
         sceneSession->SwitchFreeMultiWindow(enable);
-    }
-
-    if (!remoteExtSessionMap_.empty()) {
-        for (auto item = remoteExtSessionMap_.begin(); item != remoteExtSessionMap_.end(); ++item) {
-            if ((item->first == nullptr) || (item->second == nullptr)) {
-                continue;
-            }
-            int32_t persistentId = INVALID_SESSION_ID;
-            int32_t parentId = INVALID_SESSION_ID;
-            if (!GetExtensionWindowIds(item->second, persistentId, parentId)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
-                return WSError::WS_ERROR_INVALID_WINDOW;
-            }
-            sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(item->first);
-            sessionStage->SwitchFreeMultiWindow(enable);
-        }
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -1227,24 +1210,28 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return iter->second;
 }
 
-sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const ComparedSessionInfo& info)
+sptr<SceneSession> SceneSessionManager::GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
+        if (!sceneSession) {
+            return nullptr;
+        }
         if (sceneSession->GetSessionInfo().bundleName_ != info.bundleName_ ||
             sceneSession->GetSessionInfo().appIndex_ != info.appIndex_ ||
             sceneSession->GetSessionInfo().appInstanceKey_ != info.instanceKey_ ||
             sceneSession->GetSessionInfo().windowType_ != info.windowType_) {
             continue;
         }
+        const auto& sessionModuleName = sceneSession->GetSessionInfo().moduleName_;
+        const auto& sessionAbilityName = sceneSession->GetSessionInfo().abilityName_;
         if (info.isAtomicService_) {
-            if ((sceneSession->GetSessionInfo().moduleName_.empty() || sceneSession->GetSessionInfo().moduleName_ == info.moduleName_) &&
-                (sceneSession->GetSessionInfo().abilityName_.empty() || sceneSession->GetSessionInfo().abilityName_ == info.abilityName_)){
+            if ((sessionModuleName.empty() || sessionModuleName == info.moduleName_) &&
+                (sessionAbilityName.empty() || sessionAbilityName == info.abilityName_)) {
                 return sceneSession;
             }
-        } else if (sceneSession->GetSessionInfo().moduleName_ == info.moduleName_ &&
-            sceneSession->GetSessionInfo().abilityName_ == info.abilityName_) {
+        } else if (sessionModuleName == info.moduleName_ && sessionAbilityName == info.abilityName_) {
             return sceneSession;
         }
     }
@@ -1538,9 +1525,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 "abilityName: %{public}s, appIndex: %{public}d",
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
                 sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
-            ComparedSessionInfo compareSessionInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_,
-                sessionInfo.appIndex_, sessionInfo.appInstanceKey_, sessionInfo.windowType_, sessionInfo.isAtomicService_ };
-            auto sceneSession = GetSceneSessionByName(compareSessionInfo);
+            SessionIdentityInfo identityInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
+                sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.appInstanceKey_,
+                sessionInfo.windowType_, sessionInfo.isAtomicService_ };
+            auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
@@ -2218,7 +2206,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
+void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
 {
     auto& sessionInfo = sceneSession->GetSessionInfo();
     if (sessionInfo.want != nullptr) {
@@ -2226,17 +2214,15 @@ void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
         const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
         const auto& keySessionId = sessionInfo.want->GetStringParam(KEY_SESSION_ID);
         auto want = std::make_shared<AAFwk::Want>();
-        if (want != nullptr) {
-            AppExecFwk::ElementName element;
-            element.SetBundleName(bundleName);
-            element.SetAbilityName(abilityName);
-            want->SetElement(element);
-            want->SetBundle(bundleName);
-            if (!keySessionId.empty()) {
-                want->SetParam(KEY_SESSION_ID, keySessionId);
-            }
-            sceneSession->SetSessionInfoWant(want);
+        AppExecFwk::ElementName element;
+        element.SetBundleName(bundleName);
+        element.SetAbilityName(abilityName);
+        want->SetElement(element);
+        want->SetBundle(bundleName);
+        if (!keySessionId.empty()) {
+            want->SetParam(KEY_SESSION_ID, keySessionId);
         }
+        sceneSession->SetSessionInfoWant(want);
     }
 }
 
@@ -2263,7 +2249,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             sceneSession->SetSessionInfoWant(nullptr);
         }
-        ResetWant(sceneSession);
+        ResetWantInfo(sceneSession);
         sceneSession->ResetSessionInfoResultCode();
     }
     NotifySessionForCallback(sceneSession, needRemoveSession);
