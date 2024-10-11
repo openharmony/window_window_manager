@@ -650,7 +650,7 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return
+            return;
         }
         session->OnSystemBarPropertyChange_ = std::move(callback);
     };
@@ -5054,7 +5054,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
-            session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
             session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
