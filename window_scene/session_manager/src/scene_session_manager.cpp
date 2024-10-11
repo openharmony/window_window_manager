@@ -9002,7 +9002,7 @@ void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int3
 
 void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
-    auto task = [this, forceFlush]() {
+    auto task = [this, forceFlush] {
         if (isUserBackground_) {
             TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
             return;
