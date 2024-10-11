@@ -67,12 +67,14 @@ namespace AncoConsts {
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
+    std::string codePath_;
 };
 struct ComparedSessionInfo {
     std::string bundleName_;
     std::string moduleName_;
     std::string abilityName_;
     int32_t appIndex_ = 0;
+    uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
 };
 class SceneSession;
@@ -102,6 +104,7 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
+using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
@@ -284,6 +287,10 @@ public:
 
     void RegisterWindowChanged(const WindowChangedFunc& func);
 
+    /*
+     * Collaborator
+     */
+    void SetAbilityManagerCollaboratorRegisteredFunc(const AbilityManagerCollaboratorRegisteredFunc& func);
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
@@ -673,11 +680,16 @@ private:
                                      AAFwk::MissionSnapshot& sessionSnapshot);
     sptr<AAFwk::IAbilityManagerCollaborator> GetCollaboratorByType(int32_t collaboratorType);
 
+    /*
+     * Collaborator
+     */
+    AbilityManagerCollaboratorRegisteredFunc abilityManagerCollaboratorRegisteredFunc_;
     const int32_t BROKER_UID = 5557;
     const int32_t BROKER_RESERVE_UID = 5005;
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime_ { 0 };
+
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
     std::atomic_bool processingFlushUIParams_ { false };
@@ -690,6 +702,7 @@ private:
     void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistentId);
+    bool PreHandleCollaboratorStartAbility(sptr<SceneSession>& sceneSession, int32_t persistentId = 0);
     bool PreHandleCollaborator(sptr<SceneSession>& sceneSession, int32_t persistentId = 0);
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);

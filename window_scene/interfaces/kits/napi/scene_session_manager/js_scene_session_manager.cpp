@@ -60,6 +60,7 @@ const std::string START_UI_ABILITY_ERROR = "startUIAbilityError";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
+const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -72,6 +73,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {START_UI_ABILITY_ERROR,       ListenerFunctionType::START_UI_ABILITY_ERROR},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
         ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
+    {ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB, ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB},
 };
 } // namespace
 
@@ -406,6 +408,20 @@ void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
     taskScheduler_->PostMainThreadTask(task, "OnCallingSessionIdChange, sessionId:" + std::to_string(sessionId));
 }
 
+void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    const char* const where = __func__;
+    auto task = [jsCallBack = GetJSCallback(ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB), env = env_, where] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, where);
+}
+
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -505,6 +521,14 @@ void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
         this->OnCallingSessionIdChange(callingSessionId);
     };
     SceneSessionManager::GetInstance().SetCallingSessionIdSessionListenser(func);
+}
+
+void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
+{
+    auto func = [this] {
+        this->OnAbilityManagerCollaboratorRegistered();
+    };
+    SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -1016,6 +1040,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB:
             ProcessGestureNavigationEnabledChangeListener();
             break;
+        case ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB:
+            ProcessAbilityManagerCollaboratorRegistered();
+            break;
         default:
             break;
     }
@@ -1130,6 +1157,7 @@ static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAb
     }
     napi_set_named_property(env, objValue, "abilityItemInfo", CreateAbilityItemInfo(env, scbAbilityInfo.abilityInfo_));
     napi_set_named_property(env, objValue, "sdkVersion", CreateJsValue(env, scbAbilityInfo.sdkVersion_));
+    napi_set_named_property(env, objValue, "codePath", CreateJsValue(env, scbAbilityInfo.codePath_));
     return objValue;
 }
  
