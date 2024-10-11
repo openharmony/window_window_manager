@@ -577,4 +577,28 @@ void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSes
     TLOGI(WmsLogTag::DMS, "current mainScreenId = %{public}" PRIu64 ", status = %{public}s",
         multiScreenStatus_.first, multiScreenStatus_.second.c_str());
 }
+
+void MultiScreenManager::ExternalScreenDisconnectChange(sptr<ScreenSession> internalSession,
+    sptr<ScreenSession> externalSession)
+{
+    if (internalSession == nullptr || externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internal or external screen is null!");
+        return;
+    }
+    if (externalSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+        if (internalSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            DoFirstMirrorChange(internalSession, externalSession, SCREEN_MIRROR);
+            TLOGI(WmsLogTag::DMS, "8: external mirror to internal mirror");
+        } else if (internalSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+            DoFirstExtendChange(internalSession, externalSession, SCREEN_MIRROR);
+            TLOGI(WmsLogTag::DMS, "16: external extend to internal mirror");
+        } else {
+            TLOGE(WmsLogTag::DMS, "paramater error!");
+            return;
+        }
+    } else {
+        DoFirstMainChange(internalSession, externalSession, SCREEN_MIRROR);
+        TLOGI(WmsLogTag::DMS, "12: internal extend to internal mirror");
+    }
+}
 } // namespace OHOS::Rosen
