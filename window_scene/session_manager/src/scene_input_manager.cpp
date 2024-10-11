@@ -420,12 +420,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
-    isUserBackground_ = userBackground;
-}
-
-bool SceneInputManager::IsUserBackground()
-{
-    return isUserBackground_;
+    isUserBackground_.store(userBackground);
 }
 
 void SceneInputManager::SetCurrentUserId(int32_t userId)
@@ -477,7 +472,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
-        if (isUserBackground_) {
+        if (isUserBackground_.load()) {
             TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
