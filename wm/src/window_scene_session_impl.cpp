@@ -211,16 +211,46 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+static sptr<WindowSessionImpl> FindMainWindowOrExtensionSubWindow(uint32_t parentId,
+    const WindowSessionImplMap& sessionMap)
+{
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
+        return nullptr;
+    }
+    for (const auto& [_, pair] : sessionMap) {
+        auto& window = pair.second;
+        if (window && window->GetWindowId() == parentId) {
+            if (WindowHelper::IsMainWindow(window->GetType()) ||
+                (WindowHelper::IsSubWindow(window->GetType()) && window->GetProperty()->GetExtensionFlag())) {
+                TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
+                return window;
+            }
+            return FindMainWindowOrExtensionSubWindow(window->GetParentId(), sessionMap);
+        }
+    }
+    TLOGW(WmsLogTag::WMS_SUB, "don't find main session, parentId:%{public}u", parentId);
+    return nullptr;
+}
+
 bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (!windowSystemConfig_.IsPadWindow()) {
+        return windowSystemConfig_.IsPcWindow();
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
+    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
         return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
     }
-    auto mainWindow = GetMainWindowWithContext(GetContext());
+    sptr<WindowSessionImpl> mainWindow = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        mainWindow = FindMainWindowOrExtensionSubWindow(property_->GetParentId(), windowSessionMap_);
+    }
     if (mainWindow == nullptr) {
         return false;
     }
-    return mainWindow->IsPcOrPadCapabilityEnabled();
+    return mainWindow->WindowSessionImpl::IsPcOrPadCapabilityEnabled();
 }
 
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
@@ -248,7 +278,7 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
             property_->GetWindowName().c_str(), GetType());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+    if (!isToast && parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
         !parentSession->IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
