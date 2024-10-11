@@ -21,6 +21,7 @@
 
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
+#include <shared_mutex>
 #include <ui/rs_display_node.h>
 
 #include "screen_property.h"
@@ -193,7 +194,7 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
-    bool isScreenLocked_ = true;
+    std::atomic<bool> isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
@@ -222,7 +223,7 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     bool hasPrivateWindowForeground_ = false;
-    std::recursive_mutex mutex_;
+    mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     bool isFold_ = false;
