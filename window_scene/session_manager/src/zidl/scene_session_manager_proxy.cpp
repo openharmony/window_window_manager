@@ -2291,7 +2291,7 @@ WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool sk
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SkipSnapshotByUserIdAndBundleNames(const int32_t userId,
+WMError SceneSessionManagerProxy::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
