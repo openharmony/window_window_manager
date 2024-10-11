@@ -709,7 +709,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
-    std::atomic_bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
+    bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
