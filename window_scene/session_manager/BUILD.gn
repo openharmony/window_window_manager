@@ -50,6 +50,8 @@ config("session_manager_public_config") {
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
   ]
+
+  cflags = [ "-D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }
 
 ohos_shared_library("scene_session_manager") {
