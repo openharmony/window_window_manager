@@ -1116,7 +1116,7 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function 
  * @tc.name: NotifySwitchingUser
  * @tc.desc: SceneSesionManager notify switching user
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -1129,7 +1129,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | L
  * @tc.name: GetSessionInfoByContinueSessionId
  * @tc.desc: SceneSesionManager GetSessionInfoByContinueSessionId
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetSessionInfoByContinueSessionId, Function | SmallTest | Level3)
 {
     std::string continueSessionId = "";
@@ -1142,7 +1142,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSessionInfoByContinueSessionId, Function |
  * @tc.name: PreHandleCollaborator
  * @tc.desc: SceneSesionManager prehandle collaborator
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1190,7 +1190,7 @@ HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, Function | SmallTest |
  * @tc.name: CheckCollaboratorType
  * @tc.desc: SceneSesionManager check collborator type
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, Function | SmallTest | Level3)
 {
     int32_t type = CollaboratorType::RESERVE_TYPE;
@@ -1205,7 +1205,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, Function | SmallTest |
  * @tc.name: NotifyUpdateSessionInfo
  * @tc.desc: SceneSesionManager notify update session info
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, NotifyUpdateSessionInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1227,7 +1227,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyUpdateSessionInfo, Function | SmallTest
  * @tc.name: QueryAbilityInfoFromBMS
  * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, QueryAbilityInfoFromBMS, Function | SmallTest | Level3)
 {
     const int32_t uId = 32;
@@ -1254,7 +1254,7 @@ HWTEST_F(SceneSessionManagerTest3, QueryAbilityInfoFromBMS, Function | SmallTest
  * @tc.name: IsSessionClearable
  * @tc.desc: SceneSesionManager is session clearable
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1303,7 +1303,7 @@ HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, Function | SmallTest | Le
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1322,7 +1322,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, Function | SmallTest | Le
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: SceneSesionManager update hide non system floating windows
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1351,7 +1351,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
  * @tc.name: UpdateBrightness
  * @tc.desc: SceneSesionManager update brightness
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
@@ -1363,7 +1363,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Leve
  * @tc.name: SetDisplayBrightness
  * @tc.desc: SceneSesionManager set display brightness
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, Function | SmallTest | Level3)
 {
     float brightness = 2.0f;
@@ -1378,7 +1378,7 @@ HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, Function | SmallTest | 
  * @tc.name: SetGestureNavigationEnabled02
  * @tc.desc: SceneSesionManager set gesture navigation enable
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, Function | SmallTest | Level3)
 {
     bool enable = true;
@@ -1398,7 +1398,7 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, Function | Sma
  * @tc.name: SetFocusedSessionId
  * @tc.desc: SceneSesionManager set focused session id
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | Level3)
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
@@ -1416,7 +1416,7 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
  * @tc.name: RequestFocusStatus
  * @tc.desc: SceneSesionManager request focus status
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Level3)
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
@@ -1446,7 +1446,7 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Le
  * @tc.name: NotifyRequestFocusStatusNotifyManager
  * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1467,7 +1467,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, Functi
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
 {
     uint32_t zOrder = 9999;
@@ -1482,7 +1482,7 @@ HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, Function |
  * @tc.name: RaiseWindowToTop
  * @tc.desc: SceneSesionManager raise window to top
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, RaiseWindowToTop, Function | SmallTest | Level3)
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
@@ -1501,7 +1501,7 @@ HWTEST_F(SceneSessionManagerTest3, RaiseWindowToTop, Function | SmallTest | Leve
  * @tc.name: ShiftAppWindowFocus
  * @tc.desc: SceneSesionManager shift app window focus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | Level3)
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
@@ -1522,7 +1522,7 @@ HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | L
  * @tc.name: RegisterSessionExceptionFunc
  * @tc.desc: SceneSesionManager register session expection func
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1544,7 +1544,7 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
  * @tc.name: DumpSessionInfo
  * @tc.desc: SceneSesionManager dump session info
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DumpSessionInfo, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1574,7 +1574,7 @@ HWTEST_F(SceneSessionManagerTest3, DumpSessionInfo, Function | SmallTest | Level
  * @tc.name: DumpSessionElementInfo
  * @tc.desc: SceneSesionManager dump session element info
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, DumpSessionElementInfo, Function | SmallTest | Level3)
 {
     DumpRootSceneElementInfoFunc func_ = DumpRootSceneElementInfoFuncTest;
@@ -1603,7 +1603,7 @@ HWTEST_F(SceneSessionManagerTest3, DumpSessionElementInfo, Function | SmallTest 
  * @tc.name: NotifyDumpInfoResult
  * @tc.desc: SceneSesionManager notify dump info result
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, NotifyDumpInfoResult, Function | SmallTest | Level3)
 {
     std::vector<std::string> info = {"std::", "vector", "<std::string>"};
@@ -1626,7 +1626,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyDumpInfoResult, Function | SmallTest | 
  * @tc.name: UpdateFocus
  * @tc.desc: SceneSesionManager update focus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdateFocus, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
@@ -1641,7 +1641,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateFocus, Function | SmallTest | Level3)
  * @tc.name: UpdateWindowMode
  * @tc.desc: SceneSesionManager update window mode
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdateWindowMode, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
@@ -1658,7 +1658,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateWindowMode, Function | SmallTest | Leve
  * @tc.name: SetScreenLocked && IsScreenLocked
  * @tc.desc: SceneSesionManager update screen locked state
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, IsScreenLocked, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
@@ -1672,7 +1672,7 @@ HWTEST_F(SceneSessionManagerTest3, IsScreenLocked, Function | SmallTest | Level3
  * @tc.name: UpdatePrivateStateAndNotify
  * @tc.desc: SceneSesionManager update private state and notify
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
@@ -1694,7 +1694,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, Function | Small
  * @tc.name: UpdatePrivateStateAndNotifyForAllScreens
  * @tc.desc: SceneSesionManager update private state and notify for all screens
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1713,7 +1713,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Fun
  * @tc.name: GerPrivacyBundleListOneWindow
  * @tc.desc: get privacy bundle list when one window exist only.
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
@@ -1754,7 +1754,7 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, Function | Sma
  * @tc.name: GetTopWindowId
  * @tc.desc: get top window id by main window id.
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo1;
@@ -1795,7 +1795,7 @@ HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, Function | SmallTest | Level3
  * @tc.name: ConfigWindowImmersive
  * @tc.desc: ConfigWindowImmersive SwitchFreeMultiWindow
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, Function | SmallTest | Level3)
 {
     WindowSceneConfig::ConfigItem immersiveConfig;
