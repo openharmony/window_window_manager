@@ -145,6 +145,7 @@ public:
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+    virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

@@ -151,6 +151,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -800,6 +802,19 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     TLOGD(WmsLogTag::WMS_DIALOG, "called");
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
