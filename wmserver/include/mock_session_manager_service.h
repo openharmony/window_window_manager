@@ -118,7 +118,7 @@ private:
     std::map<int32_t, bool> wmsConnectionStatusMap_;
 
     /*
-     * window snapshot skip
+     * Window Snapshot Skip
      */
     std::mutex userIdBundleNamesMapLock_;
     std::unordered_map<int32_t, std::vector<std::string>> userIdBundleNamesMap_;
