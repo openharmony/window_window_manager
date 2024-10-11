@@ -5092,7 +5092,7 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
     }
 }
 
-int32_t GetCustomDecorHeight() const
+int32_t SceneSession::GetCustomDecorHeight() const
 {
     std::lock_guard lock(customDecorHeightMutex_);
     return customDecorHeight_;
