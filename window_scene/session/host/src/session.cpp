@@ -520,8 +520,17 @@ void Session::SetSystemFocusable(bool systemFocusable)
 
 WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d", GetPersistentId(), isFocusableOnShow);
-    focusableOnShow_ = isFocusableOnShow;
+    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+            session->GetPersistentId(), isFocusableOnShow);
+        session->focusableOnShow_ = isFocusableOnShow;
+    };
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 
