@@ -88,6 +88,8 @@
 namespace OHOS::Rosen {
 class CAPABILITY("mutex") SingleThreadGuard {};
 
+// ONLY used for those accessed ONLY on scene session manager thread.
+// If other looper threads(NOT ffrt or ipc), define a new one.
 constexpr SingleThreadGuard SCENE_SESSION_THREAD;
 
 template <typename Guard>
@@ -101,20 +103,25 @@ struct SCOPED_CAPABILITY ScopedGuard final {
 
 } // namespace OHOS::Rosen
 
+// Use this for lambdas. THREAD_SAFETY_GUARD is preferred.
 #define LOCK_GUARD(guard)  \
     ACQUIRE(guard) RELEASE(guard)
 
+// Use this for expressions. THREAD_SAFETY_GUARD is preferred.
 #define LOCK_GUARD_TWO(guard, expr)  \
     (OHOS::Rosen::ScopedGuard(guard), expr)
 
+// Use this when LOCK_GUARD_TWO/THREAD_SAFETY_GUARD works failed.
 #define LOCK_GUARD_EXPR(guard, expr)           \
     [&] {                                      \
         OHOS::Rosen::ScopedGuard lock(guard);  \
         return (expr);                         \
     }()
 
+// Do not use this.
 #define CREATE_THREAD_SAFETY_GUARD(opt1, opt2, guard, ...) guard
 
+// Use THREAD_SAFETY_GUARD for common cases, including LOCK_GUARD and LOCK_GUARD_TWO.
 #define THREAD_SAFETY_GUARD(...) \
     CREATE_THREAD_SAFETY_GUARD(__VA_ARGS__, LOCK_GUARD_TWO, LOCK_GUARD,)(__VA_ARGS__)
 
