@@ -66,6 +66,8 @@ ohos_shared_library("scene_session") {
 
   public_configs = [ ":session_public_config" ]
 
+  cflags = [ "-D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
+
   deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
