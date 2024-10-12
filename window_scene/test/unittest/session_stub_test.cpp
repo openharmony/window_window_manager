@@ -220,6 +220,23 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: HandleSetAutoStartPiP
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
+    bool isAutoStartValid = true;
+    data.WriteInt32(isAutoStartValid);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetAutoStartPiP(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -339,6 +356,22 @@ HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function |
     MessageParcel reply;
     data.WriteBool(true);
     auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleRequestFocus
+ * @tc.desc: sessionStub HandleRequestFocusTest
+ * @tc.type: FUNC
+ * @tc.require: #IAPLFA
+ */
+HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(false);
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleRequestFocus(data, reply);
     ASSERT_EQ(0, res);
 }
 }

@@ -100,47 +100,6 @@ public:
     void OnPictureInPictureStart();
     bool IsTypeNodeEnabled() const;
 
-    class PiPMainWindowListenerImpl : public Rosen::IWindowChangeListener {
-    public:
-        PiPMainWindowListenerImpl(const sptr<Window> window);
-        void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
-            const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override {};
-        void OnModeChange(WindowMode mode, bool hasDeco = true) override;
-        WindowMode GetMode();
-        bool IsValid();
-    private:
-        void DelayReset();
-
-        WindowMode mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
-        bool isValid_ = true;
-        std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
-    };
-
-    class PipMainWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
-    public:
-        PipMainWindowLifeCycleImpl(const std::string& navigationId, const sptr<Window> window)
-        {
-            navigationId_ = navigationId;
-            if (window != nullptr) {
-                window_ = window;
-                windowListener_ = new PiPMainWindowListenerImpl(window_);
-                window_->RegisterWindowChangeListener(windowListener_);
-            }
-        };
-        ~PipMainWindowLifeCycleImpl()
-        {
-            if (window_ != nullptr && windowListener_ != nullptr) {
-                window_->UnregisterWindowChangeListener(windowListener_);
-            }
-        };
-        void AfterBackground() override;
-        void BackgroundFailed(int32_t type) override;
-    private:
-        std::string navigationId_ = "";
-        sptr<Window> window_ = nullptr;
-        sptr<PiPMainWindowListenerImpl> windowListener_ = nullptr;
-    };
-
 private:
     class WindowLifeCycleListener : public IWindowLifeCycle {
     public:
@@ -148,8 +107,6 @@ private:
     };
 
 private:
-    static sptr<IRemoteObject> remoteObj_;
-    static ErrCode getSettingsAutoStartStatus(const std::string& key, std::string& value);
     uint32_t GetPipPriority(uint32_t pipTemplateType);
     WMError CreatePictureInPictureWindow(StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);

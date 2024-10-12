@@ -41,6 +41,7 @@ public:
     static bool CheckCallingIsUserTestMode(pid_t pid);
     static bool IsBetaVersion();
     static bool IsFoundationCall();
+    static std::string GetCallingBundleName();
 };
 } // Rosen
 } // OHOS

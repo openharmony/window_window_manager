@@ -41,7 +41,14 @@ void WindowExtensionProxy::SetBounds(const Rect& rect)
         WLOGFE("write rect failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_SETBOUNDS, data, reply, option) != ERR_NONE) {
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_SETBOUNDS, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
         return;
     }
@@ -56,7 +63,14 @@ void WindowExtensionProxy::Hide()
         WLOGFE("write interface token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option) != ERR_NONE) {
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
 }
@@ -70,7 +84,14 @@ void WindowExtensionProxy::Show()
         WLOGFE("write interface token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option) != ERR_NONE) {
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
 }
@@ -88,7 +109,14 @@ void WindowExtensionProxy::GetExtensionWindow(sptr<IWindowExtensionClient>& toke
         WLOGFE("write object failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_CONNECT_TO_EXTENSION, data, replay, option) != ERR_NONE) {
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_CONNECT_TO_EXTENSION, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
 }
