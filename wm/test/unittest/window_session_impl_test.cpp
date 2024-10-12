@@ -1923,6 +1923,126 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
 }
+
+/**
+ * @tc.name: AddSetUIContentTimeoutCheck
+ * @tc.desc: AddSetUIContentTimeoutCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->handler_ = nullptr;
+    window->property_ = nullptr;
+    window->context_ = nullptr;
+    window->AddSetUIContentTimeoutCheck();
+
+    option->SetWindowName("AddSetUIContentTimeoutCheck_test");
+    option->SetBundleName("UTtest");
+    WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;
+    option->SetWindowType(type1);
+    sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window1, nullptr);
+    window1->AddSetUIContentTimeoutCheck();
+
+    WindowType type2 = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    option->SetWindowType(type2);
+    sptr<WindowSessionImpl> window2 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window2, nullptr);
+    window2->AddSetUIContentTimeoutCheck();
+}
+
+/**
+ * @tc.name: FindMainWindowWithContext01
+ * @tc.desc: FindMainWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, FindMainWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowTag(WindowTag::MAIN_WINDOW);
+    option->SetWindowName("FindMainWindowWithContext01");
+    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, windowSession);
+
+    windowSession->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_TRUE(windowSession->FindMainWindowWithContext() == nullptr);
+    windowSession->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
+    ASSERT_TRUE(windowSession->FindMainWindowWithContext() == nullptr);
+
+    windowSession->property_->SetPersistentId(1002);
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
+    windowSession->Destroy(true);
+}
+
+/**
+ * @tc.name: FindExtensionWindowWithContext01
+ * @tc.desc: FindExtensionWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, FindExtensionWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FindExtensionWindowWithContext01");
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    ASSERT_TRUE(windowSession->FindExtensionWindowWithContext() == nullptr);
+
+    windowSession->property_->SetPersistentId(12345);
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    windowSession->context_ = abilityContext_;
+    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
+    ASSERT_TRUE(nullptr != windowSession->FindExtensionWindowWithContext());
+    windowSession->Destroy(true);
+}
+
+/**
+ * @tc.name: SetUIContentComplete
+ * @tc.desc: SetUIContentComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIContentComplete, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    window->SetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+}
+
+/**
+ * @tc.name: NotifySetUIContentComplete
+ * @tc.desc: NotifySetUIContentComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifySetUIContent");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
