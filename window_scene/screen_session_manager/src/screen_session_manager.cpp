@@ -100,6 +100,7 @@ constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
 static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
 static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
+static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
@@ -1961,6 +1962,14 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             that.foldScreenPowerInit_();
         }
         that.RegisterSettingRotationObserver();
+        if (that.defaultDpi) {
+            auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
+            if (!ret) {
+                TLOGE(WmsLogTag::DMS, "set setting defaultDpi failed");
+            } else {
+                TLOGI(WmsLogTag::DMS, "set setting defaultDpi:%{public}d", that.defaultDpi);
+            }
+        }
     }
 }
 
