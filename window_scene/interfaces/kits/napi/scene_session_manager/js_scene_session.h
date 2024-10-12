@@ -37,6 +37,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
+    SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
@@ -176,6 +177,7 @@ private:
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
+    void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
     void ProcessBackPressedRegister();
@@ -223,6 +225,7 @@ private:
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
+    void OnAutoStartPiPStatusChange(bool isAutoStart);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnRaiseAboveTarget(int32_t subWindowId);
