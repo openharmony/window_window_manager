@@ -325,8 +325,6 @@ public:
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     void SetShouldHideNonSecureWindows(bool shouldHide);
-    WSError SetPipActionEvent(const std::string& action, int32_t status);
-    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     void UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
         const ExtensionWindowFlags& extWindowActions);
     ExtensionWindowFlags GetCombinedExtWindowFlags();
