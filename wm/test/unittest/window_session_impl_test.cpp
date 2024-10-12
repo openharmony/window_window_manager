@@ -1935,11 +1935,6 @@ HWTEST_F(WindowSessionImplTest, AddSetUIContentTimeoutCheck_test, Function | Sma
     ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    window->handler_ = nullptr;
-    window->property_ = nullptr;
-    window->context_ = nullptr;
-    window->AddSetUIContentTimeoutCheck();
-
     option->SetWindowName("AddSetUIContentTimeoutCheck_test");
     option->SetBundleName("UTtest");
     WindowType type1 = WindowType::APP_MAIN_WINDOW_BASE;

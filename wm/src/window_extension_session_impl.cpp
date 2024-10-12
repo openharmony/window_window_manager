@@ -308,7 +308,7 @@ void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
         isPrivacyMode);
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
@@ -793,7 +793,7 @@ WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool sho
 
 WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}u, shouldHide: %{public}u", GetPersistentId(), shouldHide);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, shouldHide: %{public}u", GetPersistentId(), shouldHide);
     WMError checkRet = CheckHideNonSecureWindowsPermission(shouldHide);
     if (checkRet != WMError::WM_OK) {
         return checkRet;
@@ -820,7 +820,7 @@ WMError WindowExtensionSessionImpl::HideNonSecureWindows(bool shouldHide)
 
 WMError WindowExtensionSessionImpl::SetWaterMarkFlag(bool isEnable)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}u, isEnable: %{public}u", GetPersistentId(), isEnable);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isEnable: %{public}u", GetPersistentId(), isEnable);
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.waterMarkFlag = isEnable;
         return WMError::WM_OK;
