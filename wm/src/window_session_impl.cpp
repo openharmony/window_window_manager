@@ -1196,7 +1196,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
-
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -1253,9 +1252,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    TLOGD(WmsLogTag::WMS_LIFE, "notify uiContent window size change end");
 
     NotifySetUIContentComplete();
-    TLOGD(WmsLogTag::WMS_LIFE, "notify uiContent window size change end");
     return WMError::WM_OK;
 }
 
