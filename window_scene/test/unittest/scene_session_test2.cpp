@@ -2141,11 +2141,11 @@ HWTEST_F(SceneSessionTest2, SetAdjustKeyboardLayoutCallback, Function | SmallTes
     NotifyRestoreMainWindowFunc func;
     sceneSession->SetAdjustKeyboardLayoutCallback(func);
 
-    auto func1 = [sceneSession](const bool flag) {
+    NotifyRestoreMainWindowFunc func1 = [sceneSession](const KeyboardLayoutParams& params) {
         return;
-    }
+    };
     sceneSession->SetAdjustKeyboardLayoutCallback(func1);
-    ASSERT_EQ(func1, session->adjustKeyboardLayoutFunc_);
+    ASSERT_NE(nullptr, session->adjustKeyboardLayoutFunc_);
 }
 
 /**
