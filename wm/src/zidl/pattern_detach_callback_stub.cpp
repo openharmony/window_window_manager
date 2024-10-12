@@ -26,7 +26,7 @@ int PatternDetachCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     TLOGD(WmsLogTag::WMS_LIFE, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::WMS_LIFE, "InterfaceToken check failed");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
     PatternDetachCallbackMessage msgId = static_cast<PatternDetachCallbackMessage>(code);
     switch (msgId) {

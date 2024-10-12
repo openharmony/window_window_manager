@@ -77,7 +77,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest3::ssm_ = nullptr;
 
 bool SceneSessionManagerTest3::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable) {
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ = [](bool enable,
+    const std::string& bundleName) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -85,7 +86,7 @@ void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
+void ProcessStatusBarEnabledChangeFuncTest(bool enable, const std::string& bundleName)
 {
 }
 
@@ -1413,10 +1414,10 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, Function | Smal
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
-    bool result01 = ssm_->IsSessionVisible(sceneSession);
+    bool result01 = ssm_->IsSessionVisibleForeground(sceneSession);
     EXPECT_FALSE(result01);
     sceneSession->UpdateNativeVisibility(true);
-    bool result02 = ssm_->IsSessionVisible(sceneSession);
+    bool result02 = ssm_->IsSessionVisibleForeground(sceneSession);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_FALSE(result02);
     } else {

@@ -65,7 +65,7 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UseFocusIdIfCallingSessionIdInvalid();
-    void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
+    void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
     void RelayoutKeyBoard();
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);

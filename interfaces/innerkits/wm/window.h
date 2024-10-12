@@ -20,6 +20,7 @@
 #include <parcel.h>
 #include <iremote_object.h>
 
+#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
@@ -630,7 +631,7 @@ public:
      *
      * @return displayId of window.
      */
-    virtual uint64_t GetDisplayId() const { return INVALID_DISPLAY_ID; }
+    virtual uint64_t GetDisplayId() const { return DISPLAY_ID_INVALID; }
     /**
      * @brief Get flag of window.
      *
@@ -1044,6 +1045,12 @@ public:
      * @return WM_OK means request success, others means request failed.
      */
     virtual WMError RequestFocus() const { return WMError::WM_OK; }
+    /**
+     * @brief Request to get focus or lose focus.
+     *
+     * @return WM_OK means request success, others means request failed.
+     */
+    virtual WMError RequestFocusByClient(bool isFocused) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Check current focus status.
      *
@@ -1686,6 +1693,13 @@ public:
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
 
     /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
+
+    /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
@@ -2118,6 +2132,14 @@ public:
      * @return true means the immersive mode is enabled, and false means the opposite.
      */
     virtual bool GetImmersiveModeEnabledState() const { return true; }
+
+    /**
+     * @brief Set the ContinueState of window.
+     *
+     * @param continueState of the window.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
      * @brief Get the window status of current window.

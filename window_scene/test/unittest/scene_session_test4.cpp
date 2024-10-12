@@ -134,8 +134,9 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.isSystemCalling_ = {true};
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, sceneSession, action);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
 }
 
 /**

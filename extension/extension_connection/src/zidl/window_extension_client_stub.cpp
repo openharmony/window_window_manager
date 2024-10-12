@@ -27,7 +27,7 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     WLOGI(" code is %{public}d", code);
     switch (code) {
@@ -65,7 +65,7 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

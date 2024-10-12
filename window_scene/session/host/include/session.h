@@ -293,6 +293,7 @@ public:
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateFocus(bool isFocused);
     WSError NotifyFocusStatus(bool isFocused);
+    WSError RequestFocus(bool isFocused) override;
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetIsPcAppInPad(bool enable);
@@ -313,8 +314,8 @@ public:
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
-    virtual WSError SetVisible(bool isVisible);
-    bool GetVisible() const;
+    virtual WSError SetRSVisible(bool isVisible);
+    bool GetRSVisible() const;
     bool GetFocused() const;
     WSError SetVisibilityState(WindowVisibilityState state);
     WindowVisibilityState GetVisibilityState() const;
@@ -441,6 +442,14 @@ public:
     };
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
+    virtual bool IsVisibleForeground() const;
+    void SetIsStarting(bool isStarting);
+    void SetUIStateDirty(bool dirty);
+    void SetMainSessionUIStateDirty(bool dirty);
+    bool GetUIStateDirty() const;
+    void ResetDirtyFlags();
+    static bool IsScbCoreEnabled();
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -557,7 +566,6 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating = false;
     float floatingScale_ = 1.0f;
-    bool isDirty_ = false;
     std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
@@ -573,6 +581,9 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
+    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
+    bool isStarting_ = false;   // when start app, session is starting state until foreground
+    std::atomic_bool mainUIStateDirty_ = false;
 
 private:
     void HandleDialogForeground();
@@ -628,7 +639,7 @@ private:
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
-    std::string callingBundleName_ { "unknow" };
+    std::string callingBundleName_ { "unknown" };
     bool isRSVisible_ {false};
     WindowVisibilityState visibilityState_ { WINDOW_LAYER_STATE_MAX};
     bool needNotify_ {true};
