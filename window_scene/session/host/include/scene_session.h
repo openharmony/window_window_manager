@@ -392,6 +392,7 @@ protected:
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
     WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
+    bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         const sptr<WindowSessionProperty>& sessionProperty, bool isShow);
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
@@ -434,6 +435,9 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    // session lifecycle funcs
+    WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
