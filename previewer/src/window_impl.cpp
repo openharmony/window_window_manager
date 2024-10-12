@@ -1001,6 +1001,7 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
     return true;
 }
 
+/** @note @window.hierarchy */
 WmErrorCode WindowImpl::RaiseToAppTop()
 {
     return WmErrorCode::WM_OK;
@@ -1098,11 +1099,13 @@ WMError WindowImpl::SetResizeByDragEnabled(bool dragEnabled)
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     return WmErrorCode::WM_OK;

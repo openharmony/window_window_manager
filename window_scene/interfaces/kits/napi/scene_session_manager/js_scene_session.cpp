@@ -833,6 +833,7 @@ void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
     TLOGI(WmsLogTag::WMS_PIP, "register success");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseToTopRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
@@ -851,6 +852,7 @@ void JsSceneSession::ProcessRaiseToTopRegister()
     WLOGFD("ProcessRaiseToTopRegister success");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 {
     NotifyRaiseToTopForPointDownFunc func = [weakThis = wptr(this)]() {
@@ -870,6 +872,7 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
     WLOGFD("ProcessRaiseToTopForPointDownRegister success");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseAboveTargetRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
@@ -1029,6 +1032,7 @@ void JsSceneSession::ProcessSessionExceptionRegister()
     WLOGFD("ProcessSessionExceptionRegister success");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::ProcessSessionTopmostChangeRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
@@ -1491,6 +1495,7 @@ napi_value JsSceneSession::SetShowRecent(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetShowRecent(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsSceneSession::SetZOrder(napi_env env, napi_callback_info info)
 {
     if (Session::IsScbCoreEnabled()) {
@@ -2276,6 +2281,7 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::OnRaiseToTop()
 {
     WLOGFI("[NAPI]OnRaiseToTop");
@@ -2298,6 +2304,7 @@ void JsSceneSession::OnRaiseToTop()
     taskScheduler_->PostMainThreadTask(task, "OnRaiseToTop");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::OnRaiseToTopForPointDown()
 {
     WLOGFI("[NAPI]OnRaiseToTopForPointDown");
@@ -2391,6 +2398,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
     taskScheduler_->PostMainThreadTask(task, "OnSessionTouchableChange: state " + std::to_string(touchable));
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::OnSessionTopmostChange(bool topmost)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]State: %{public}u", topmost);

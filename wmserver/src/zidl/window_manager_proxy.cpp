@@ -1023,6 +1023,7 @@ void WindowManagerProxy::OffWindowZoom()
     }
 }
 
+/** @note @window.hierarchy */
 WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
 {
     MessageParcel data;

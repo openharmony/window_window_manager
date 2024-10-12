@@ -456,6 +456,7 @@ napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowFocusable(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetTopmost");
@@ -526,6 +527,7 @@ napi_value JsWindow::SetResizeByDragEnabled(napi_env env, napi_callback_info inf
     return (me != nullptr) ? me->OnSetResizeByDragEnabled(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info info)
 {
     WLOGI("SetRaiseByClickEnabled");
@@ -589,6 +591,7 @@ napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnSetSingleFrameComposerEnabled(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindow::RaiseToAppTop(napi_env env, napi_callback_info info)
 {
     WLOGI("RaiseToAppTop");
@@ -757,6 +760,7 @@ napi_value JsWindow::Maximize(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMaximize(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]RaiseAboveTarget");
