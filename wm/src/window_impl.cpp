@@ -1068,6 +1068,11 @@ WMError WindowImpl::SetAspectRatio(float ratio)
 
 WMError WindowImpl::ResetAspectRatio()
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
     WLOGFI("windowId: %{public}u", GetWindowId());
     if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
@@ -1787,6 +1792,11 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
@@ -2074,6 +2084,11 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 /** @note @window.hierarchy */
 WMError WindowImpl::RaiseToAppTop()
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
@@ -3350,6 +3365,10 @@ int64_t WindowImpl::GetVSyncPeriod()
 
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return;
+    }
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     isFocused_ = focused;
     if (focused) {
@@ -3372,6 +3391,10 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 
 bool WindowImpl::IsFocused() const
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        return false;
+    }
     return isFocused_;
 }
 
