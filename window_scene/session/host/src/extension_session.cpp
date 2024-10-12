@@ -81,7 +81,7 @@ int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::WMS_EVENT, "InterfaceToken check failed");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
 
     auto msgId = static_cast<WindowEventChannelListenerMessage>(code);

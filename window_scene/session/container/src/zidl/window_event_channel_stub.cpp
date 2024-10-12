@@ -36,7 +36,7 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     WLOGFD("Window event channel on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
 
     switch (code) {
