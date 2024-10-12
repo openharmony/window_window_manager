@@ -3819,7 +3819,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     auto task = [weakThis = wptr(this), isAutoStart] {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating_) {
+        if (!session || session->isTerminating) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return;
         }
