@@ -324,14 +324,6 @@ private:
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
 
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ShowHelpInfo(std::string& dumpInfo);
-    void ShowIllegalArgsInfo(std::string& dumpInfo);
-    int DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo);
-    int DumpAllScreenInfo(std::string& dumpInfo);
-    int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
-    bool IsValidDigitString(const std::string& idStr) const;
-    int SetFoldDisplayMode(const std::string& modeParam);
-    int SetFoldStatusLocked(const std::string& lockParam);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo);
@@ -470,7 +462,6 @@ private:
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsDefaultMirrorMode(ScreenId screenId);
-    bool IsValidDisplayModeCommand(std::string command);
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void UnRegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
