@@ -40,6 +40,8 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
+    bool IsVisibleForeground() const override;
+
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void UpdatePointerArea(const WSRect& rect) override;

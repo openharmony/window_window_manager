@@ -58,6 +58,7 @@ enum class WmsLogTag : uint8_t {
     WMS_TOAST,                 // C04211
     WMS_MULTI_WINDOW,          // C04212
     WMS_INPUT_KEY_FLOW,        // C04213
+    WMS_PIPELINE,              // C04214
     END = 256,                 // Last one, do not use
 };
 
@@ -82,9 +83,15 @@ inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_TOAST, "WMSToast" },
     { WmsLogTag::WMS_MULTI_WINDOW, "WMSMultiWindow" },
     { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
+    { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
 };
+#ifdef IS_RELEASE_VERSION
+#define WMS_FILE_NAME ""
+#else
+#define WMS_FILE_NAME (__builtin_strrchr(__FILE_NAME__, '/') ?   \
+                       __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
+#endif
 
-#define WMS_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #define FMT_PREFIX "[%{public}s] %{public}s(%{public}d): "
 
 #define FMT_PREFIX_NO_FUNC "[%{public}s]: "

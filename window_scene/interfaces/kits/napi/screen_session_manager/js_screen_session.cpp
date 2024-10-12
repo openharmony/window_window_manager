@@ -75,7 +75,7 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
     : env_(env), screenSession_(screenSession)
 {
-    std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOW";
+    std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOWN";
     screenScene_ = new(std::nothrow) ScreenScene(name);
     if (screenSession_) {
         SetScreenSceneDpiFunc func = [this](float density) {
