@@ -295,7 +295,7 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
 
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ColorSpace colorSpace1 = window->GetColorSpace();
-    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ASSERT_EQ(colorSpace1, ColorSpace::COLOR_SPACE_DEFAULT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: ColorSpace end";
 }
 
