@@ -30,8 +30,6 @@ config("session_public_config") {
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
   ]
-
-  cflags = [ "-D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }
 
 ohos_shared_library("scene_session") {
