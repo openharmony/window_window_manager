@@ -501,6 +501,7 @@ public:
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
+    virtual bool IsFreeMultiWindowMode() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
