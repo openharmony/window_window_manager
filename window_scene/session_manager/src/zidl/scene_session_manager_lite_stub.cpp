@@ -32,7 +32,7 @@ int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
 
     return ProcessRemoteRequest(code, data, reply, option);
@@ -160,9 +160,14 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel 
 
 int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandlePendingSessionToBackground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    const WSError& errCode = PendingSessionToBackgroundForDelegator(token);
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    const WSError& errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
