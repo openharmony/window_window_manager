@@ -99,7 +99,7 @@ protected:
 private:
     void SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNode>& rsDisplayNode,
         const RSDisplayNodeConfig& config, const Point& startPoint);
-    std::string name_ { "UNKNOW" };
+    std::string name_ { "UNKNOWN" };
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
     mutable std::recursive_mutex mutex_;

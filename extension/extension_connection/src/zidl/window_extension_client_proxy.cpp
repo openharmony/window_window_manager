@@ -40,7 +40,14 @@ void WindowExtensionClientProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
         WLOGFE("write surfaceNode failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
     WLOGI("end");
@@ -56,7 +63,14 @@ void WindowExtensionClientProxy::OnBackPress()
         WLOGFE("write token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
     WLOGI("end");
@@ -77,7 +91,14 @@ void WindowExtensionClientProxy::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>
         WLOGFE("write key event failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
     WLOGI("end");
@@ -98,7 +119,14 @@ void WindowExtensionClientProxy::OnPointerEvent(const std::shared_ptr<MMI::Point
         WLOGFE("write key event failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
     WLOGI("end");

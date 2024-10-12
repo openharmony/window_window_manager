@@ -45,7 +45,6 @@ public:
     virtual WSError DrawingCompleted() = 0;
 
     // scene session
-    virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
@@ -124,6 +123,15 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Update the auto start pip window status.
+     *
+     * @param isAutoStart Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetAutoStartPiP(bool isAutoStart) { return WSError::WS_OK; }
+
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     {
@@ -146,6 +154,7 @@ public:
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+    virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

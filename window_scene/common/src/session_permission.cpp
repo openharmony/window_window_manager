@@ -80,11 +80,11 @@ bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
     if (needPrintLog) {
-        WLOGFE("Not system service calling, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "Not system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     }
     return false;
 }
@@ -93,7 +93,7 @@ bool SessionPermission::IsSystemCalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    WLOGFD("tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+    TLOGD(WmsLogTag::DEFAULT, "tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
         flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         return true;
@@ -108,40 +108,42 @@ bool SessionPermission::IsSACalling()
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        WLOGFW("SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+        TLOGW(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
-    WLOGFI("Not SA called, tokenId:%{public}u, flag:%{public}u", tokenId, flag);
+    TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     return false;
 }
 
 bool SessionPermission::VerifyCallingPermission(const std::string& permissionName)
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
+    TLOGD(WmsLogTag::DEFAULT, "permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
+        TLOGE(WmsLogTag::DEFAULT,
+            "permission %{public}s: PERMISSION_DENIED, callingTokenID:%{private}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
 
 bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName)
 {
-    WLOGFD("permission %{public}s, callingTokenID:%{public}u",
+    TLOGD(WmsLogTag::DEFAULT, "permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        WLOGFE("permission %{public}s: PERMISSION_DENIED, callingTokenID:%{public}u, ret:%{public}d",
+        TLOGE(WmsLogTag::DEFAULT,
+            "permission %{public}s: PERMISSION_DENIED, callingTokenID:%{private}u, ret:%{public}d",
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    WLOGFI("Verify AccessToken success. permission %{public}s, callingTokenID:%{public}u",
+    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -177,7 +179,7 @@ bool SessionPermission::IsShellCall()
         WLOGFI("TokenType is Shell, verify success");
         return true;
     }
-    WLOGFI("Not Shell called. tokenId:%{public}u, type:%{public}u", callerToken, tokenType);
+    TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
     return false;
 }
 
@@ -273,23 +275,21 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     std::string callingBundleName;
     bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
     if (callingBundleName != bundleName) {
-        TLOGE(WmsLogTag::DEFAULT,
-            "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-            callingBundleName.c_str(), bundleName.c_str());
+        TLOGE(WmsLogTag::DEFAULT, "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
+              callingBundleName.c_str(), bundleName.c_str());
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
     AppExecFwk::BundleInfo bundleInfo;
     int userId = uid / 200000; // 200000 use uid to caculate userId
-    bool ret = bundleManagerServiceProxy->GetBundleInfoV9(callingBundleName,
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
+    bool ret = bundleManagerServiceProxy->GetBundleInfoV9(
+        callingBundleName, static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO),
         bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
 
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DEFAULT,
-            "failed to query app info, callingBundleName:%{public}s, userId:%{public}d",
-            callingBundleName.c_str(), userId);
+        TLOGE(WmsLogTag::DEFAULT, "failed to query app info, callingBundleName:%{public}s, userId:%{public}d",
+              callingBundleName.c_str(), userId);
         return false;
     }
 
@@ -298,9 +298,8 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
         return true;
     }
 
-    TLOGE(WmsLogTag::DEFAULT,
-        "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
-        callingBundleName.c_str(), bundleName.c_str());
+    TLOGE(WmsLogTag::DEFAULT, "verify app failed, callingBundleName %{public}s, bundleName %{public}s.",
+          callingBundleName.c_str(), bundleName.c_str());
     return false;
 }
 
@@ -368,5 +367,20 @@ bool SessionPermission::IsFoundationCall()
     return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
+std::string SessionPermission::GetCallingBundleName()
+{
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
+        WLOGFE("failed to get BundleManagerServiceProxy");
+        return "";
+    }
+    int uid = IPCSkeleton::GetCallingUid();
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string callingBundleName;
+    bundleManagerServiceProxy->GetNameForUid(uid, callingBundleName);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return callingBundleName;
+}
 } // namespace Rosen
 } // namespace OHOS

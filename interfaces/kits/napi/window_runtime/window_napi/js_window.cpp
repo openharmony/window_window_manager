@@ -869,6 +869,13 @@ napi_value JsWindow::IsFocused(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsFocused(env, info) : nullptr;
 }
 
+napi_value JsWindow::RequestFocus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRequestFocus(env, info) : nullptr;
+}
+
 napi_value JsWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
@@ -1021,14 +1028,18 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_ == nullptr) {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    } else {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_ == nullptr) {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        } else {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "Window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
         }
     }
     wptr<Window> weakToken(windowToken_);
@@ -1156,14 +1167,20 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env, info);
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    return HideWindowFunction(env, info, errCode);
 }
 
-napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
+napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, WmErrorCode errCode)
 {
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WmErrorCode::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
+                return;
+            }
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr or get invalid param");
@@ -1200,15 +1217,19 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_) {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_) {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
+        } else {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
-    } else {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -5522,7 +5543,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_OK && WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env, info);
+        return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -6214,6 +6235,74 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
     return CreateJsValue(env, isFocused);
 }
 
+static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
+    wptr<Window> weakToken, bool isFocused)
+{
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    execute = [weakToken, errCodePtr, isFocused] {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        if (*errCodePtr != WmErrorCode::WM_OK) {
+            return;
+        }
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RequestFocusByClient(isFocused));
+        TLOGI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+    };
+    complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (errCodePtr == nullptr) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnRequestFocus failed"));
+        }
+    };
+}
+
+napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    size_t argc = 4; // number of arg
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) { // 1: maximum params num
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    bool isFocused = false;
+    napi_status retCode = napi_get_value_bool(env, argv[0], &isFocused);
+    if (retCode != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetRequestFocusTask(execute, complete, weakToken, isFocused);
+    // only return promise<void>
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRequestFocus",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 static bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& WindowOption)
 {
     if (jsObject == nullptr) {
@@ -6449,6 +6538,7 @@ void BindFunctions(napi_env env, napi_value object, const char *moduleName)
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getWindowStatus", moduleName, JsWindow::GetWindowStatus);
     BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
+    BindNativeFunction(env, object, "requestFocus", moduleName, JsWindow::RequestFocus);
     BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
 }
 }  // namespace Rosen

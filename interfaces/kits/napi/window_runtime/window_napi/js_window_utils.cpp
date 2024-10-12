@@ -499,7 +499,7 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
     napi_set_named_property(env, objValue, "navigationBarContentColor",
         CreateJsValue(env, GetHexColor(navi.contentColor_)));
     napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
-        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+        CreateJsValue(env, navi.contentColor_ == SYSTEM_COLOR_WHITE));
     napi_set_named_property(env, objValue, "enableStatusBarAnimation",
                             CreateJsValue(env, status.enableAnimation_));
     napi_set_named_property(env, objValue, "enableNavigationBarAnimation",

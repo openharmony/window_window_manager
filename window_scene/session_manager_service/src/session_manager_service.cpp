@@ -33,9 +33,6 @@ SessionManagerService* g_sessionManagerService;
 
 SessionManagerService::~SessionManagerService()
 {
-    if (g_sessionManagerService != nullptr) {
-        g_sessionManagerService = nullptr;
-    }
     WLOGFI("~SessionManagerService");
 }
 

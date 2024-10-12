@@ -49,7 +49,12 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -71,7 +76,12 @@ void WindowManagerAgentProxy::UpdateWindowModeTypeInfo(WindowModeType type)
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
@@ -103,7 +113,12 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -129,7 +144,12 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -155,7 +175,12 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -181,7 +206,12 @@ void WindowManagerAgentProxy::UpdateWindowDrawingContentInfo(
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE), data, reply,
         option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -207,7 +237,12 @@ void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessToken
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -227,7 +262,12 @@ void WindowManagerAgentProxy::NotifyWaterMarkFlagChangedResult(bool showWaterMar
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -253,7 +293,12 @@ void WindowManagerAgentProxy::UpdateVisibleWindowNum(
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -273,7 +318,12 @@ void WindowManagerAgentProxy::NotifyGestureNavigationEnabledResult(bool enable)
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -296,7 +346,12 @@ void WindowManagerAgentProxy::UpdateCameraWindowStatus(uint32_t accessTokenId, b
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
@@ -315,7 +370,12 @@ void WindowManagerAgentProxy::NotifyWindowStyleChange(WindowStyleType type)
         TLOGE(WmsLogTag::WMS_MAIN, "Write displayId failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
