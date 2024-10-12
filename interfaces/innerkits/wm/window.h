@@ -1744,6 +1744,13 @@ public:
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is pc window or pad free multiwindow.
+     *
+     * @return True means pc window or pad free multiwindow, false means the opposite.
+     */
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.

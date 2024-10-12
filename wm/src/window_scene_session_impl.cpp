@@ -253,6 +253,26 @@ bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
     return parentWindow->WindowSessionImpl::IsPcOrPadCapabilityEnabled();
 }
 
+bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    if (!windowSystemConfig_.IsPadWindow()) {
+        return windowSystemConfig_.IsPcWindow();
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
+    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
+        return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
+    }
+    sptr<WindowSessionImpl> parentWindow = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentWindow = FindMainWindowOrExtensionSubWindow(property_->GetParentId(), windowSessionMap_);
+    }
+    if (parentWindow == nullptr) {
+        return false;
+    }
+    return parentWindow->WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
