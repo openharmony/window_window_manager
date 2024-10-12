@@ -1967,6 +1967,183 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetSubWindowModalType02
+ * @tc.desc: GetSubWindowModalType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalType2";
+    info.bundleName_ = "ModalType2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_TOAST);
+}
+
+/**
+ * @tc.name: GetSubWindowModalType03
+ * @tc.desc: GetSubWindowModalType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalType3";
+    info.bundleName_ = "ModalType3";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_WINDOW_MODALITY);
+}
+
+/**
+ * @tc.name: GetSubWindowModalType04
+ * @tc.desc: GetSubWindowModalType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType04, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ModalType4";
+    info.bundleName_ = "ModalType4";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->GetSubWindowModalType();
+    ASSERT_EQ(result, SubWindowModalType::TYPE_NORMAL);
+}
+
+/**
+ * @tc.name: RegisterDefaultAnimationFlagChangeCallback
+ * @tc.desc: RegisterDefaultAnimationFlagChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, RegisterDefaultAnimationFlagChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterDefaultAnimationFlagChangeCallback";
+    info.bundleName_ = "RegisterDefaultAnimationFlagChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->RegisterDefaultAnimationFlagChangeCallback([sceneSession](const bool flag) {
+        return;
+    });
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->RegisterSessionChangeCallback(nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(true));
+
+    sessionChangeCallback->onWindowAnimatoinFlagChange_ = nullptr;
+    sceneSession->RegisterSessionChangeCallback(sessionChangeCallback);
+    sceneSession->RegisterDefaultAnimationFlagChangeCallback([sceneSession](const bool flag) {
+        return;
+    });
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(true));
+}
+
+/**
+ * @tc.name: SetMainWindowTopmostChangeCallback
+ * @tc.desc: SetMainWindowTopmostChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetMainWindowTopmostChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainWindowTopmostChangeCallback";
+    info.bundleName_ = "SetMainWindowTopmostChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifyMainWindowTopmostChangeFunc func;
+    sceneSession->SetMainWindowTopmostChangeCallback(func);
+
+    func = [sceneSession](const bool flag) {
+        return;
+    }
+    sceneSession->SetMainWindowTopmostChangeCallback(func);
+    ASSERT_EQ(func, sceneSession->mainWindowTopmostChangeFunc_);
+}
+
+/**
+ * @tc.name: SetKeyboardGravityChangeCallback
+ * @tc.desc: SetKeyboardGravityChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetKeyboardGravityChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetKeyboardGravityChangeCallback";
+    info.bundleName_ = "SetKeyboardGravityChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifyKeyboardGravityChangeFunc func;
+    sceneSession->SetKeyboardGravityChangeCallback(func);
+
+    sceneSession->SetKeyboardGravityChangeCallback([sceneSession](const bool flag) {
+        return;
+    });
+    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, sceneSession->GetKeyboardGravity());
+}
+
+/**
+ * @tc.name: SetRestoreMainWindowCallback
+ * @tc.desc: SetRestoreMainWindowCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetRestoreMainWindowCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetRestoreMainWindowCallback";
+    info.bundleName_ = "SetRestoreMainWindowCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifyRestoreMainWindowFunc func;
+    sceneSession->SetRestoreMainWindowCallback(func);
+
+    auto func1 = [sceneSession](const bool flag) {
+        return;
+    }
+    sceneSession->SetRestoreMainWindowCallback(func1);
+    ASSERT_EQ(func1, sceneSession->sessionChangeCallback_->onRestoreMainWindowFunc_);
+}
+
+/**
+ * @tc.name: SetAdjustKeyboardLayoutCallback
+ * @tc.desc: SetAdjustKeyboardLayoutCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetAdjustKeyboardLayoutCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAdjustKeyboardLayoutCallback";
+    info.bundleName_ = "SetAdjustKeyboardLayoutCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifyRestoreMainWindowFunc func;
+    sceneSession->SetAdjustKeyboardLayoutCallback(func);
+
+    auto func1 = [sceneSession](const bool flag) {
+        return;
+    }
+    sceneSession->SetAdjustKeyboardLayoutCallback(func1);
+    ASSERT_EQ(func1, session->adjustKeyboardLayoutFunc_);
+}
+
+/**
  * @tc.name: CheckGetAvoidAreaAvailable
  * @tc.desc: CheckGetAvoidAreaAvailable
  * @tc.type: FUNC
