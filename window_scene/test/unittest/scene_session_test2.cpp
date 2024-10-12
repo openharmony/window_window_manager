@@ -2042,7 +2042,6 @@ HWTEST_F(SceneSessionTest2, RegisterDefaultAnimationFlagChangeCallback, Function
     sceneSession->RegisterSessionChangeCallback(nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(true));
 
-    sessionChangeCallback->onWindowAnimatoinFlagChange_ = nullptr;
     sceneSession->RegisterSessionChangeCallback(sessionChangeCallback);
     sceneSession->RegisterDefaultAnimationFlagChangeCallback([sceneSession](const bool flag) {
         return;
@@ -2065,11 +2064,11 @@ HWTEST_F(SceneSessionTest2, SetMainWindowTopmostChangeCallback, Function | Small
     NotifyMainWindowTopmostChangeFunc func;
     sceneSession->SetMainWindowTopmostChangeCallback(func);
 
-    func = [sceneSession](const bool flag) {
+    NotifyMainWindowTopmostChangeFunc func1 = [sceneSession](bool isTopmost) {
         return;
-    }
-    sceneSession->SetMainWindowTopmostChangeCallback(func);
-    ASSERT_EQ(func, sceneSession->mainWindowTopmostChangeFunc_);
+    };
+    sceneSession->SetMainWindowTopmostChangeCallback(func1);
+    ASSERT_NE(nullptr, sceneSession->mainWindowTopmostChangeFunc_);
 }
 
 /**
@@ -2089,9 +2088,10 @@ HWTEST_F(SceneSessionTest2, SetKeyboardGravityChangeCallback, Function | SmallTe
     NotifyKeyboardGravityChangeFunc func;
     sceneSession->SetKeyboardGravityChangeCallback(func);
 
-    sceneSession->SetKeyboardGravityChangeCallback([sceneSession](const bool flag) {
+    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity){
         return;
-    });
+    };
+    sceneSession->SetKeyboardGravityChangeCallback(func1);
     ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, sceneSession->GetKeyboardGravity());
 }
 
@@ -2112,11 +2112,16 @@ HWTEST_F(SceneSessionTest2, SetRestoreMainWindowCallback, Function | SmallTest |
     NotifyRestoreMainWindowFunc func;
     sceneSession->SetRestoreMainWindowCallback(func);
 
-    auto func1 = [sceneSession](const bool flag) {
+    NotifyRestoreMainWindowFunc func1 = [sceneSession]() {
         return;
-    }
+    };
     sceneSession->SetRestoreMainWindowCallback(func1);
-    ASSERT_EQ(func1, sceneSession->sessionChangeCallback_->onRestoreMainWindowFunc_);
+    ASSERT_EQ(nullptr, sceneSession->sessionChangeCallback_);
+
+    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->RegisterSessionChangeCallback(sessionchangeCallback);
+    sceneSession->SetRestoreMainWindowCallback(func1);
+    ASSERT_NE(nullptr, sceneSession->sessionChangeCallback_);
 }
 
 /**
