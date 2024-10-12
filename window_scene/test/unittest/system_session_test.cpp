@@ -192,6 +192,24 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: GetMissionId
+ * @tc.desc: test function : GetMissionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(systemSession_ != nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testSystemSession1";
+    info.moduleName_ = "testSystemSession2";
+    info.bundleName_ = "testSystemSession3";
+    sptr<Session> session = new (std::nothrow) Session(info);
+    systemSession_->parentSession_ = session;
+    auto ret = systemSession_->GetMissionId();
+    ASSERT_EQ(0, ret);
+}
+
+/**
  * @tc.name: RectCheck
  * @tc.desc: test function : RectCheck
  * @tc.type: FUNC
