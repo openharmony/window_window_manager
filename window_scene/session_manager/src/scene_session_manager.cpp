@@ -10974,7 +10974,7 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppProcess(const sptr<SceneSe
     }
 }
 
-WMError SceneSessionManager::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
@@ -10983,35 +10983,35 @@ WMError SceneSessionManager::SetSnapshotSkipByUserIdAndBundleNameList(const int3
     }
     TLOGI(WmsLogTag::DEFAULT, "userId:%{public}d", userId);
     auto task = [this, userId, bundleNameList] {
-        snapshotBundleNameSet_.clear();
+        snapshotSkipBundleNameSet_.clear();
         for (auto& bundleName : bundleNameList) {
-            snapshotBundleNameSet_.insert(bundleName);
+            snapshotSkipBundleNameSet_.insert(std::move(bundleName));
         }
-        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
                 continue;
             }
-            std::string name = sceneSession->GetSessionInfo().bundleName_;
-            if (snapshotBundleNameSet_.find(name) != snapshotBundleNameSet_.end()) {
-                TLOGI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
-                    name.c_str());
+            const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
+            if (snapshotSkipBundleNameSet_.find(bundleName) != snapshotSkipBundleNameSet_.end()) {
+                TLOGNI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
+                    bundleName.c_str());
                 sceneSession->SetSnapshotSkip(true);
                 continue;
             }
             sceneSession->SetSnapshotSkip(false);
         }
     };
-    taskScheduler_->PostTask(task, "SetSnapshotSkipByUserIdAndBundleNameList");
+    taskScheduler_->PostTask(task, __func__);
     return WMError::WM_OK;
 }
 
 void SceneSessionManager::SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession)
 {
-    std::string name = sceneSession->GetSessionInfo().bundleName_;
-    if (snapshotBundleNameSet_.find(name) != snapshotBundleNameSet_.end()) {
-        TLOGI(WmsLogTag::DEFAULT, "new session set RS snapshot skip true, name:%{public}s",
-                name.c_str());
+    const std::string& name = sceneSession->GetSessionInfo().bundleName_;
+    if (snapshotSkipBundleNameSet_.find(name) != snapshotSkipBundleNameSet_.end()) {
+        TLOGI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
+            name.c_str());
         sceneSession->SetSnapshotSkip(true);
     }
 }
