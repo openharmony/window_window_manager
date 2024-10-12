@@ -100,7 +100,7 @@ private:
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply);
+    int HandleSkipSnapshotByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply);
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);

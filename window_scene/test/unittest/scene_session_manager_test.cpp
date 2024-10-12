@@ -1832,15 +1832,14 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
 }
 
 /**
- * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
- * @tc.desc: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.name: SkipSnapshotByUserIdAndBundleNames
+ * @tc.desc: SkipSnapshotByUserIdAndBundleNames
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    std::string bundleName = "TestName";
-    auto ret = ssm_->SetSnapshotSkipByUserIdAndBundleNameList(100, {bundleName});
+    auto ret = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName"});
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 

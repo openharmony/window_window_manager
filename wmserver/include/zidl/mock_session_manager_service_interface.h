@@ -34,7 +34,7 @@ public:
         TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER,
         TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER,
         TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER,
-        TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST,
+        TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES,
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP,
     };
 
@@ -47,9 +47,10 @@ public:
     virtual void UnregisterSMSRecoverListener() = 0;
     virtual void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) = 0;
     virtual void UnregisterSMSLiteRecoverListener() = 0;
-    virtual int32_t SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    virtual int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) = 0;
-    virtual int32_t SetSnapshotSkipByMap(const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap) = 0;
+    virtual int32_t SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
+        std::vector<std::string>>& userIdAndBunldeNames) = 0;
 };
 }
 }
