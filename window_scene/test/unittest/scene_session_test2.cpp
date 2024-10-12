@@ -2088,7 +2088,7 @@ HWTEST_F(SceneSessionTest2, SetKeyboardGravityChangeCallback, Function | SmallTe
     NotifyKeyboardGravityChangeFunc func;
     sceneSession->SetKeyboardGravityChangeCallback(func);
 
-    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity){
+    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity) {
         return;
     };
     sceneSession->SetKeyboardGravityChangeCallback(func1);
@@ -2138,14 +2138,158 @@ HWTEST_F(SceneSessionTest2, SetAdjustKeyboardLayoutCallback, Function | SmallTes
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
 
-    NotifyRestoreMainWindowFunc func;
+    NotifyKeyboardLayoutAdjustFunc func;
     sceneSession->SetAdjustKeyboardLayoutCallback(func);
 
-    NotifyRestoreMainWindowFunc func1 = [sceneSession](const KeyboardLayoutParams& params) {
+    NotifyKeyboardLayoutAdjustFunc func1 = [sceneSession](const KeyboardLayoutParams& params) {
         return;
     };
     sceneSession->SetAdjustKeyboardLayoutCallback(func1);
-    ASSERT_NE(nullptr, session->adjustKeyboardLayoutFunc_);
+    ASSERT_NE(nullptr, sceneSession->adjustKeyboardLayoutFunc_);
+}
+
+/**
+ * @tc.name: GetStartMoveFlag
+ * @tc.desc: GetStartMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, GetStartMoveFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetStartMoveFlag";
+    info.bundleName_ = "GetStartMoveFlag";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    bool isMoving = false;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+
+    scensession->moveDragController_ = new MoveDragController(1024);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+}
+
+/**
+ * @tc.name: SetCompatibleWindowSizeInPc
+ * @tc.desc: SetCompatibleWindowSizeInPc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetCompatibleWindowSizeInPc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetCompatibleWindowSizeInPc";
+    info.bundleName_ = "SetCompatibleWindowSizeInPc";
+
+    int32_t portraitWidth = 10;
+    int32_t portraitHeight = 20;
+    int32_t landscapeWidth = 10;
+    int32_t landscapeHeight = 20;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR,
+        sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
+
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+    ASSERT_EQ(WSError::WSError::WS_OK,
+        sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
+}
+
+/**
+ * @tc.name: SetAppSupportPhoneInPc
+ * @tc.desc: SetAppSupportPhoneInPc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetAppSupportPhoneInPc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAppSupportPhoneInPc";
+    info.bundleName_ = "SetAppSupportPhoneInPc";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR, sceneSession->SetAppSupportPhoneInPc(false));
+
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->SetAppSupportPhoneInPc(false));
+}
+
+/**
+ * @tc.name: CompatibleFullScreenRecover
+ * @tc.desc: CompatibleFullScreenRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, CompatibleFullScreenRecover, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CompatibleFullScreenRecover";
+    info.bundleName_ = "CompatibleFullScreenRecover";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenRecover());
+
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
+    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->CompatibleFullScreenRecover());
+}
+
+/**
+ * @tc.name: SetIsPcAppInPad
+ * @tc.desc: SetIsPcAppInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetIsPcAppInPad, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsPcAppInPad";
+    info.bundleName_ = "SetIsPcAppInPad";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR, sceneSession->SetIsPcAppInPad(false));
+
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->SetIsPcAppInPad(false));
+}
+
+/**
+ * @tc.name: CompatibleFullScreenClose
+ * @tc.desc: CompatibleFullScreenClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, CompatibleFullScreenClose, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CompatibleFullScreenClose";
+    info.bundleName_ = "CompatibleFullScreenClose";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
+
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
+    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
+}
+
+/**
+ * @tc.name: CreateWindowStateDetectTask
+ * @tc.desc: CreateWindowStateDetectTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, CreateWindowStateDetectTask, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CreateWindowStateDetectTask";
+    info.bundleName_ = "CreateWindowStateDetectTask";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->CreateWindowStateDetectTask(isAttach, WindowMode::WINDOW_MODE_UNDEFINED);
+
+    auto isScreenLockedCallback = [sceneSession]() { return; };
+    sceneSession->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
+    bool isAttach = true;
+    sceneSession->CreateWindowStateDetectTask(isAttach, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(isAttach, true);
 }
 
 /**
