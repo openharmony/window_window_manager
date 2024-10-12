@@ -75,6 +75,9 @@ void SystemSession::UpdateCameraWindowStatus(bool isShowing)
 
 WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto type = GetWindowType();
     if (((type == WindowType::WINDOW_TYPE_TOAST) || (type == WindowType::WINDOW_TYPE_FLOAT)) &&
         !SessionPermission::IsSystemCalling()) {
@@ -110,6 +113,9 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SystemSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto type = GetWindowType();
     if (NeedSystemPermission(type)) {
         // Do not need to verify the permission to hide the input method status bar.
@@ -281,11 +287,15 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
             return ret;
         }
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
-            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            if (Session::IsScbCoreEnabled()) {
+                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+            } else {
+                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+            }
         }
         if (session->reason_ != SizeChangeReason::DRAG) {
             session->reason_ = SizeChangeReason::UNDEFINED;
-            session->isDirty_ = false;
+            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         }
         return ret;
     };
@@ -296,10 +306,10 @@ WSError SystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> r
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto currentRect = winRect_;
-    if (!GetVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
+    if (!GetRSVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
         WLOGE("Error size: [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
             " persistentId: %{public}d",
-            currentRect.width_, currentRect.height_, GetVisible(), GetPersistentId());
+            currentRect.width_, currentRect.height_, GetRSVisible(), GetPersistentId());
         return false;
     }
 
@@ -333,7 +343,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
 {
     auto sessionState = GetSessionState();
     int32_t action = pointerEvent->GetPointerAction();
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     bool isDialog = WindowHelper::IsDialogWindow(GetWindowType());
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
@@ -379,5 +389,14 @@ WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
         session->dialogSessionBackGestureEnabled_ = isEnabled;
         return WSError::WS_OK;
     });
+}
+
+bool SystemSession::IsVisibleForeground() const
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleForeground() && Session::IsVisibleForeground();
+    }
+    return Session::IsVisibleForeground();
 }
 } // namespace OHOS::Rosen

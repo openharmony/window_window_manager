@@ -120,6 +120,7 @@ public:
     WSError UpdateFocus(bool focus) override;
     bool IsFocused() const override;
     WMError RequestFocus() const override;
+    WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -179,7 +180,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
-    WSError NotifyCloseExistPipWindow() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams) override;
@@ -206,11 +206,17 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
+
+    /*
+     * PiP Window
+     */
+    WSError NotifyCloseExistPipWindow() override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
-
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
+    void SetAutoStartPiP(bool isAutoStart) override;
+
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -235,6 +241,7 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    WMError SetContinueState(int32_t continueState) override;
 
 protected:
     WMError Connect();
@@ -443,7 +450,6 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
-    std::atomic<bool> isUiContentDestructing_ = false;
 
     /*
      * Window Layout
