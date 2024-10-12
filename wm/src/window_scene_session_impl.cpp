@@ -242,15 +242,15 @@ bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
     if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
         return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
     }
-    sptr<WindowSessionImpl> mainWindow = nullptr;
+    sptr<WindowSessionImpl> parentWindow = nullptr;
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-        mainWindow = FindMainWindowOrExtensionSubWindow(property_->GetParentId(), windowSessionMap_);
+        parentWindow = FindMainWindowOrExtensionSubWindow(property_->GetParentId(), windowSessionMap_);
     }
-    if (mainWindow == nullptr) {
+    if (parentWindow == nullptr) {
         return false;
     }
-    return mainWindow->WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+    return parentWindow->WindowSessionImpl::IsPcOrPadCapabilityEnabled();
 }
 
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
