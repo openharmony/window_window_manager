@@ -63,10 +63,9 @@ bool Permission::IsSystemCalling(bool isLocalSysCalling)
     if (IsSystemServiceCalling(false, isLocalSysCalling)) {
         return true;
     }
-    uint64_t accessTokenIDEx = isLocalSysCalling ?
+    uint64_t tokenId = isLocalSysCalling ?
         IPCSkeleton::GetSelfTokenID() : IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
-    return isSystemApp;
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
 bool Permission::CheckCallingPermission(const std::string& permission)
