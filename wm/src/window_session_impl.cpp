@@ -1389,8 +1389,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         WLOGFD("decorVisible:%{public}d", decorVisible);
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-            decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
-                (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
+            decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
+                    (property_->GetIsPcAppInPad() && isSubWindow));
         }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -1417,8 +1417,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
-                    (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
+                decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
+                        (property_->GetIsPcAppInPad() && isSubWindow));
             }
             WLOGFD("decorVisible:%{public}d", decorVisible);
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());

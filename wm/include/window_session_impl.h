@@ -378,10 +378,7 @@ protected:
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
-    bool IsFreeMultiWindowMode() const
-    {
-        return windowSystemConfig_.IsFreeMultiWindowMode();
-    }
+    bool IsFreeMultiWindowMode() const;
 
     /*
      * DFX

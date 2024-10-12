@@ -3382,4 +3382,18 @@ bool Session::IsVisible() const
 {
     return isVisible_;
 }
+
+bool Session::IsFreeMultiWindowMode() const
+{
+    if (systemConfig_.uiType_ != UI_TYPE_PAD) {
+        return false;
+    }
+    if (parentSession_) {
+        sptr<Session> mainSession = parentSession_->GetMainSession();
+        if (mainSession != nullptr) {
+            return mainSession->GetSystemConfig().IsFreeMultiWindowMode();
+        }
+    }
+    return GetSystemConfig().IsFreeMultiWindowMode();
+}
 } // namespace OHOS::Rosen
