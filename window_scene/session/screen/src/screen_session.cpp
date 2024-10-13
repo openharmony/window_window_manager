@@ -770,6 +770,16 @@ void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
     property_.SetDensityInCurResolution(densityInCurResolution);
 }
 
+void ScreenSession::SetDefaultDensity(float DefaultDensity)
+{
+    property_.SetDefaultDensity(DefaultDensity);
+}
+
+void ScreenSession::UpdateVirtualPixelRatio(const RRect& bounds)
+{
+    property_.UpdateVirtualPixelRatio(bounds);
+}
+
 void ScreenSession::SetScreenType(ScreenType type)
 {
     property_.SetScreenType(type);
