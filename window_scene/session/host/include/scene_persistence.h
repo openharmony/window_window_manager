@@ -68,6 +68,7 @@ private:
     std::atomic<bool> isSavingSnapshot_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
+    std::mutex savingSnapshotMutex_;
 };
 } // namespace OHOS::Rosen
 
