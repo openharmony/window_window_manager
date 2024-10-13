@@ -32,7 +32,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Scree
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
-const unsigned int XCOLLIE_TIMEOUT_10S = 10;
+const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -1152,7 +1152,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         width = abstractScreenModes->width_;
     }
     RSScreenType screenType;
-    DmsXcollie dmsXcollie("DMS:GetDensityInCurResolution", XCOLLIE_TIMEOUT_10S);
+    DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
     auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
     if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
         displayNode_->SetSecurityDisplay(true);
@@ -1419,7 +1419,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         .scaleY = scaleY,
     };
     {
-        DmsXcollie dmsXcollie("DMS:GetDensityInCurResolution", XCOLLIE_TIMEOUT_10S);
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshot:TakeSurfaceCapture", XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, config);
         if (!ret) {
