@@ -607,6 +607,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, F
     windowIds.push_back(node1->GetWindowId());
     displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
     ASSERT_EQ(0, node1->GetDisplayId());
+    rootApp->clear();
 }
 
 /**
