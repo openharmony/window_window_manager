@@ -104,6 +104,7 @@ static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
+constexpr float PHYSICAL_MASS = 1.6f;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -1271,21 +1272,6 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
-    if (isDensityDpiLoad_) {
-        if (screenId == SCREEN_ID_MAIN) {
-            TLOGI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
-            property.SetVirtualPixelRatio(subDensityDpi_);
-            property.SetDefaultDensity(subDensityDpi_);
-            property.SetDensityInCurResolution(subDensityDpi_);
-        } else {
-            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
-            property.SetVirtualPixelRatio(densityDpi_);
-            property.SetDefaultDensity(densityDpi_);
-            property.SetDensityInCurResolution(densityDpi_);
-        }
-    } else {
-        property.UpdateVirtualPixelRatio(screenBounds);
-    }
     property.SetRefreshRate(screenRefreshRate);
     property.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
 
@@ -1297,6 +1283,53 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.CalcDefaultDisplayOrientation();
 }
 
+void ScreenSessionManager::InitScreenDensity(sptr<ScreenSession> session, const ScreenProperty& property)
+{
+    if (session->GetScreenProperty().GetScreenType() == ScreenType::REAL && !session->isInternal_) {
+        // 表示拓展屏
+        float extendDensity = CalcDefaultExtendScreenDensity(property);
+        TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
+        session->SetVirtualPixelRatio(extendDensity);
+        session->SetDefaultDensity(extendDensity);
+        session->SetDensityInCurResolution(extendDensity);
+        return;
+    }
+    if (isDensityDpiLoad_) {
+        if (session->GetScreenId() == SCREEN_ID_MAIN) {
+            TLOGI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
+            session->SetVirtualPixelRatio(subDensityDpi_);
+            session->SetDefaultDensity(subDensityDpi_);
+            session->SetDensityInCurResolution(subDensityDpi_);
+        } else {
+            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
+            session->SetVirtualPixelRatio(densityDpi_);
+            session->SetDefaultDensity(densityDpi_);
+            session->SetDensityInCurResolution(densityDpi_);
+        }
+    } else {
+        session->UpdateVirtualPixelRatio(property.GetBounds());
+    }
+}
+
+float ScreenSessionManager::CalcDefaultExtendScreenDensity(const ScreenProperty& property)
+{
+    int32_t phyWith = property.GetPhyWidth();
+    int32_t phyHeight = property.GetPhyHeight();
+    float phyDiagonal = std::sqrt(static_cast<float>(phyWith * phyWith + phyHeight * phyHeight));
+    TLOGI(WmsLogTag::DMS, "phyDiagonal:%{public}f", phyDiagonal);
+    if (phyDiagonal > 0) {
+        RRect phyBounds = property.GetPhyBounds();
+        int32_t width = phyBounds.rect_.GetWidth();
+        int32_t height = phyBounds.rect_.GetHeight();
+        float PPI = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_TO_MM / phyDiagonal;
+        float density = PPI * PHYSICAL_MASS / BASELINE_DENSITY;
+        TLOGI(WmsLogTag::DMS, "PPI:%{public}f", PPI);
+        return density;
+    } else {
+        return densityDpi_;
+    }
+}
+
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "GetOrCreateScreenSession ENTER. ScreenId: %{public}" PRIu64 "", screenId);
@@ -1306,12 +1339,10 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return screenSession;
     }
 
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none" && phyScreenPropMap_.size() > 1) {
         // pc is none, pad&&phone is mirror
-        if (phyScreenPropMap_.size() > 1) {
-            TLOGI(WmsLogTag::DMS, "Only Support one External screen.");
-            return nullptr;
-        }
+        TLOGI(WmsLogTag::DMS, "Only Support one External screen.");
+        return nullptr;
     }
     screenIdManager_.UpdateScreenId(screenId, screenId);
 
@@ -1352,6 +1383,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     screenEventTracker_.RecordEvent("create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
+    InitScreenDensity(session, property);
     RegisterRefreshRateChangeListener();
     TLOGI(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
