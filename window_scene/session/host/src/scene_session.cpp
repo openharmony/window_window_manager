@@ -1600,7 +1600,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        
+
         using T = std::underlying_type_t<AvoidAreaType>;
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_SYSTEM);
             avoidType <= static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR); avoidType++) {
@@ -4256,6 +4256,11 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
+void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
+{
+    notifyVisibleChangeFunc_ = func;
+}
+
 bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
 {
     if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -4400,6 +4405,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
         return false;
     }
     isVisible_ = visibility;
+    if (notifyVisibleChangeFunc_ != nullptr) {
+        notifyVisibleChangeFunc_(GetPersistentId());
+    }
     return true;
 }
 
