@@ -26,14 +26,14 @@ using DisplayId = uint64_t;
 using ScreenId = uint64_t;
 
 namespace {
-    constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
-    constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
-    constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
-    constexpr int DOT_PER_INCH = 160;
-    const static std::string DEFAULT_SCREEN_NAME = "buildIn";
-    constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 640;
-    constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
-    constexpr uint32_t BASELINE_DENSITY = 160;
+constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
+constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
+constexpr int DOT_PER_INCH = 160;
+const static std::string DEFAULT_SCREEN_NAME = "buildIn";
+constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 640;
+constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
+constexpr uint32_t BASELINE_DENSITY = 160;
 }
 
 /**

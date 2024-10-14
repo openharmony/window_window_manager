@@ -22,10 +22,11 @@
 #include <mutex>
 #include <vector>
 #include "wm_common.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
-    using StateTask = std::function<void()>;
+using StateTask = std::function<void()>;
 }
 enum class WindowNodeState : uint32_t {
     INITIAL,

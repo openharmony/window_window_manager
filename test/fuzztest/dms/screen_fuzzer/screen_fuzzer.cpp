@@ -28,8 +28,8 @@
 namespace OHOS::Rosen {
 
 namespace {
-    constexpr char END_CHAR = '\0';
-    constexpr size_t LEN = 10;
+constexpr char END_CHAR = '\0';
+constexpr size_t LEN = 10;
 }
 template<class T>
 size_t GetObject(T &object, const uint8_t *data, size_t size)
