@@ -33,7 +33,7 @@ namespace OHOS {
 namespace Rosen {
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
-void BindFunctions(napi_env env, napi_value object, const char *moduleName);
+void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
@@ -175,7 +175,7 @@ private:
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
-    napi_value HideWindowFunction(napi_env env, napi_callback_info info);
+    napi_value HideWindowFunction(napi_env env, napi_callback_info info, WmErrorCode errCode);
     napi_value OnShow(napi_env env, napi_callback_info info);
     napi_value OnShowWindow(napi_env env, napi_callback_info info);
     napi_value OnShowWithAnimation(napi_env env, napi_callback_info info);

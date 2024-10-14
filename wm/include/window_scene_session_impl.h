@@ -161,6 +161,7 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
+    virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
@@ -227,7 +228,7 @@ private:
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
-    uint32_t getAvoidAreaCnt_ = 0;
+    std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type);
 

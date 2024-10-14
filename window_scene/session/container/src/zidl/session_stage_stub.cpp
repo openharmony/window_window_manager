@@ -27,12 +27,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageStub"};
 }
 
-int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Scene session stage on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
 
     switch (code) {

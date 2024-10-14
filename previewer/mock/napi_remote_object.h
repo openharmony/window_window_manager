@@ -22,9 +22,9 @@
 #include "refbase.h"
 
 namespace OHOS {
-    sptr<IRemoteObject> NAPI_ohos_rpc_getNativeRemoteObject(napi_env env, napi_value object)
-    {
-        return nullptr;
-    }
+sptr<IRemoteObject> NAPI_ohos_rpc_getNativeRemoteObject(napi_env env, napi_value object)
+{
+    return nullptr;
+}
 } // namespace OHOS
 #endif // NAPI_IPC_OHOS_REMOTE_OBJECT_H

@@ -794,8 +794,8 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         property_->SetModeSupportInfo(modeSupportInfo);
         // update modeSupportInfo to server
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-        auto isPhone = windowSystemConfig_.uiType_ == "phone";
-        auto isPad = windowSystemConfig_.uiType_ == "pad";
+        auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
+        auto isPad = windowSystemConfig_.uiType_ == UI_TYPE_PAD;
         bool onlySupportFullScreen = (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
             ((!isPhone && !isPad) || IsFreeMultiWindowMode());
         if (onlySupportFullScreen || property_->GetFullScreenStart()) {
@@ -1658,7 +1658,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     avoidArea = hostSession->GetAvoidAreaByType(type);
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}d times %{public}u area %{public}s",
-          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_, avoidArea.ToString().c_str());
+          GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_.load(), avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 
@@ -1747,8 +1747,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        windowSystemConfig_.uiType_ != "phone" &&
-        windowSystemConfig_.uiType_ != "pad") {
+        windowSystemConfig_.uiType_ != UI_TYPE_PHONE &&
+        windowSystemConfig_.uiType_ != UI_TYPE_PAD) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1906,7 +1906,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     }
 
     if (IsFreeMultiWindowMode() || (WindowHelper::IsMainWindow(GetType()) &&
-        windowSystemConfig_.uiType_ != "phone" && windowSystemConfig_.uiType_ != "pad")) {
+        windowSystemConfig_.uiType_ != UI_TYPE_PHONE && windowSystemConfig_.uiType_ != UI_TYPE_PAD)) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1996,6 +1996,9 @@ WMError WindowSceneSessionImpl::Maximize()
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -2081,6 +2084,10 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     if (WindowHelper::IsMainWindow(GetType())) {
@@ -2109,11 +2116,14 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
-    auto isPC = windowSystemConfig_.uiType_ == "pc";
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     if (!(isPC || IsFreeMultiWindowMode())) {
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
@@ -2152,7 +2162,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    auto isPC = windowSystemConfig_.uiType_ == "pc";
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     bool isPcAppInPad = property_->GetIsPcAppInPad();
     bool isValidWindow = isMainWindow ||
             ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog));
@@ -2217,6 +2227,9 @@ WMError WindowSceneSessionImpl::Close()
 
 WMError WindowSceneSessionImpl::DisableAppWindowDecor()
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -2366,6 +2379,9 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
 
 WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
         context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
@@ -2386,6 +2402,9 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 
 WMError WindowSceneSessionImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetWindowFlags(updateFlags);
 }
@@ -3130,7 +3149,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (windowSystemConfig_.uiType_ == "pc") {
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
             surfaceNode_->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -3221,6 +3240,12 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     windowSystemConfig_.freeMultiWindowEnable_ = enable;
     return WSError::WS_OK;
+}
+
+bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
+{
+    return windowSystemConfig_.freeMultiWindowEnable_ &&
+        windowSystemConfig_.freeMultiWindowSupport_;
 }
 
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
@@ -3739,7 +3764,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
     enableImmersiveMode_ = enable;
     hostSession_->OnLayoutFullScreenChange(enableImmersiveMode_);
     WindowMode mode = GetMode();
-    auto isPC = windowSystemConfig_.uiType_ == "pc";
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     if (!isPC || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return SetLayoutFullScreen(enableImmersiveMode_);
     }

@@ -147,17 +147,25 @@ HWTEST_F(SystemSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
+    property->windowState_ = WindowState::STATE_INITIAL;
+    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+
+    property->windowState_ = WindowState::STATE_CREATED;
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
-
 
     property->windowState_ = WindowState::STATE_SHOWN;
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    property->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    property->windowState_ = WindowState::STATE_HIDDEN;
     result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->windowState_ = WindowState::STATE_DESTROYED;
+    result = systemSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**

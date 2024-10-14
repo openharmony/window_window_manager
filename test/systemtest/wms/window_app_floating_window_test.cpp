@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest"};
 }
 
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {

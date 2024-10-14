@@ -29,7 +29,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_IN_US = 10000;
+constexpr uint32_t SLEEP_TIME_IN_US = 10000;
 }
 
 class RemoteAnimationTest : public testing::Test {

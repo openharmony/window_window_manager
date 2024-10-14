@@ -155,12 +155,58 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        return session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        return session->ReconnectInner(property);
     });
+}
+
+WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
+{
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WindowState windowState = property->GetWindowState();
+    TLOGI(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, windowState: %{public}d ", GetPersistentId(), windowState);
+    WSError ret = WSError::WS_OK;
+    switch (windowState) {
+        case WindowState::STATE_INITIAL: {
+            TLOGE(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, invalid window state: STATE_INITIAL",
+                GetPersistentId());
+            ret = WSError::WS_ERROR_INVALID_PARAM;
+            break;
+        }
+        case WindowState::STATE_CREATED:
+            break;
+        case WindowState::STATE_SHOWN: {
+            UpdateSessionState(SessionState::STATE_FOREGROUND);
+            UpdateActiveStatus(true);
+            break;
+        }
+        case WindowState::STATE_HIDDEN: {
+            UpdateSessionState(SessionState::STATE_BACKGROUND);
+            break;
+        }
+        default:
+            TLOGE(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, invalid window state: %{public}u",
+                GetPersistentId(), windowState);
+            ret = WSError::WS_ERROR_INVALID_PARAM;
+            break;
+    }
+    if (ret != WSError::WS_OK) {
+        Session::Disconnect(false);
+    }
+    return ret;
 }
 
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
 {
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
@@ -169,7 +215,11 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
             return WSError::WS_OK;
         }
     }
-    
+    return ForegroundTask(property);
+}
+
+WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property)
+{
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -214,6 +264,9 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
 
 WSError SceneSession::Background(bool isFromClient)
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
@@ -490,7 +543,7 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
     return PostSyncTask(task, "SetGlobalMaximizeMode");
 }
 
-WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
+WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     auto task = [weakThis = wptr(this), &mode]() {
         auto session = weakThis.promote();
@@ -663,7 +716,7 @@ void SceneSession::FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSe
             TLOGE(WmsLogTag::WMS_LAYOUT, "keyboard property is null");
             return;
         }
-        static bool isPhone = systemConfig_.uiType_ == "phone";
+        static bool isPhone = systemConfig_.uiType_ == UI_TYPE_PHONE;
         if (!IsKeyboardNeedLeftOffset(isPhone, sessionProperty) || panelSession->winRect_.posX_ != 0) {
             keyboardSession->winRect_.posX_ = panelSession->winRect_.posX_;
         }
@@ -902,6 +955,19 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
         }
         session->sessionPiPControlStatusChangeFunc_ = func;
         return WSError::WS_OK;
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            return;
+        }
+        session->autoStartPiPStatusChangeFunc_ = func;
     };
     PostTask(task, __func__);
 }
@@ -1194,7 +1260,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == "phone" || systemConfig_.uiType_ == "pad") &&
+        (systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -1239,7 +1305,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
           WindowHelper::IsMainWindow(Session::GetWindowType())) ||
          (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
           GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
+         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1350,7 +1417,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
         }
 
         if (mode != WindowMode::WINDOW_MODE_FLOATING ||
-            uiType == "phone" || uiType == "pad") {
+            uiType == UI_TYPE_PHONE || uiType == UI_TYPE_PAD) {
             return true;
         }
     }
@@ -1556,9 +1623,6 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "action: %{public}s, status: %{public}d", action.c_str(), status);
-    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
-        return WSError::WS_ERROR_INVALID_TYPE;
-    }
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -1744,7 +1808,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) {
-            auto isPC = systemConfig_.uiType_ == "pc";
+            auto isPC = systemConfig_.uiType_ == UI_TYPE_PC;
             if ((isPC || IsFreeMultiWindowMode() || property->GetIsPcAppInPad()) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
@@ -2416,6 +2480,33 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
+        leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
+    } else if (surfaceNode_ != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
+        surfaceNode_->SetForceUIFirst(forceUIFirst);
+    }
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     auto task = [weakThis = wptr(this), needDefaultAnimationFlag]() {
@@ -2781,8 +2872,8 @@ void SceneSession::SetSystemTouchable(bool touchable)
 WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool visible)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The interface permission failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [weakThis = wptr(this), abilitySessionInfo, visible]() {
@@ -2873,8 +2964,8 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The permission check failed.");
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     bool isFoundationCall = SessionPermission::IsFoundationCall();
@@ -2956,6 +3047,8 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
+        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
+            return property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM);
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             uint32_t oldFlags = sessionProperty->GetWindowFlags();
             uint32_t flags = property->GetWindowFlags();
@@ -3530,7 +3623,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {
-    if (!SessionPermission::VerifySessionPermission()) {
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -3801,6 +3894,24 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
         return WSError::WS_OK;
     };
     PostTask(task, "UpdatePiPControlStatus");
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    auto task = [weakThis = wptr(this), isAutoStart] {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
+            return;
+        }
+        if (session->autoStartPiPStatusChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
+            session->autoStartPiPStatusChangeFunc_(isAutoStart);
+        }
+    };
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 
@@ -4143,6 +4254,17 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
 void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
 {
     updatePrivateStateAndNotifyFunc_ = func;
+}
+
+bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
+{
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no permission");
+            return false;
+        }
+    }
+    return true;
 }
 
 bool SceneSession::IsPcOrPadEnableActivation() const
