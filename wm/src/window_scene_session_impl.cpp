@@ -260,7 +260,7 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     }
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
     if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
-        return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
+        return IsFreeMultiWindowMode();
     }
     sptr<WindowSessionImpl> parentWindow = nullptr;
     {
@@ -270,7 +270,7 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     if (parentWindow == nullptr) {
         return false;
     }
-    return parentWindow->WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
+    return parentWindow->IsFreeMultiWindowMode();
 }
 
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()

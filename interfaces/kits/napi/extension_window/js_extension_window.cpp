@@ -895,15 +895,15 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
         }
-        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        windowOption->SetOnlySupportSceneBoard(true);
-        windowOption->SetExtensionTag(true);
         auto extWindow = extensionWindow->GetWindow();
         if (extWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
         }
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetOnlySupportSceneBoard(true);
+        windowOption->SetExtensionTag(true);
         auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
         if (window == nullptr) {
             task.Reject(env, CreateJsError(env,

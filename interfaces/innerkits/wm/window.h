@@ -1744,9 +1744,9 @@ public:
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
-     * @brief Is pc window or pad free multiwindow.
+     * @brief Is pc window or pad free multi-window.
      *
-     * @return True means pc window or pad free multiwindow, false means the opposite.
+     * @return True means pc window or pad free multi-window, false means the opposite.
      */
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
