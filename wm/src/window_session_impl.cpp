@@ -1439,6 +1439,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "set topmost");
@@ -1453,6 +1454,7 @@ WMError WindowSessionImpl::SetTopmost(bool topmost)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
+/** @note @window.hierarchy */
 bool WindowSessionImpl::IsTopmost() const
 {
     return property_->IsTopmost();
@@ -1474,6 +1476,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     WLOGFD("set raiseEnabled");
