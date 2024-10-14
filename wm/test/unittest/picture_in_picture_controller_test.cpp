@@ -829,6 +829,29 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
 }
 
 /**
+ * @tc.name: PrepareSource
+ * @tc.desc: PrepareSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, PrepareSource, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    ASSERT_NE(nullptr, pipControl);
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->PrepareSource();
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->mainWindow_ = nullptr;
+    pipControl->PrepareSource();
+    pipControl->mainWindow_ = mw;
+    pipControl->pipOption_->SetNavigationId("");
+    pipControl->PrepareSource();
+}
+
+/**
  * @tc.name: LocateSource
  * @tc.desc: LocateSource
  * @tc.type: FUNC
