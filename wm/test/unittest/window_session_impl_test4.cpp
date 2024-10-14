@@ -1411,6 +1411,33 @@ HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Le
     ASSERT_NE(vpr, 1.0f);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
 }
+
+/**
+ * @tc.name: NotifyRotationAnimationEnd
+ * @tc.desc: test NotifyRotationAnimationEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd001, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyRotationAnimationEnd001");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    ASSERT_NE(window->handler_, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(window->uiContent_, nullptr);
+    window->NotifyRotationAnimationEnd();
+
+    window->uiContent_ = nullptr;
+    ASSERT_EQ(window->uiContent_, nullptr);
+    window->NotifyRotationAnimationEnd();
+
+    window->handler_ = nullptr;
+    ASSERT_EQ(window->handler_, nullptr);
+    window->NotifyRotationAnimationEnd();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
