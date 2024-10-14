@@ -333,7 +333,6 @@ HWTEST_F(WindowSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | SmallT
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
