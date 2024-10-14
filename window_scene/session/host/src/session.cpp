@@ -3205,7 +3205,7 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -3385,7 +3385,7 @@ bool Session::IsVisible() const
 
 bool Session::IsFreeMultiWindowMode() const
 {
-    if (systemConfig_.uiType_ != UI_TYPE_PAD) {
+    if (!systemConfig_.IsPadWindow()) {
         return false;
     }
     if (parentSession_) {
