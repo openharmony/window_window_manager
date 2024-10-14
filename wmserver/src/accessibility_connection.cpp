@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AccessibilityConnection"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AccessibilityConnection"};
 }
 
 void AccessibilityConnection::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& node, WindowUpdateType type)

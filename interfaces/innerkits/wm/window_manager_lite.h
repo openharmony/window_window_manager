@@ -130,6 +130,14 @@ public:
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 
     /**
+     * @brief raise window to top by windowId
+     *
+     * @param persistentId this window to raise
+     * @return WM_OK if raise success
+     */
+    WMError RaiseWindowToTop(int32_t persistentId);
+
+    /**
      * @brief Get window mode type.
      *
      * @param void
@@ -171,14 +179,6 @@ public:
      */
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
 
-    /**
-     * @brief raise window to top by windowId
-     *
-     * @param persistentId this window to raise
-     * @return WM_OK if raise success
-     */
-    WMError RaiseWindowToTop(int32_t persistentId);
-    
     /**
      * @brief Register WMS connection status changed listener.
      * @attention Callable only by u0 system user. A process only supports successful registration once.

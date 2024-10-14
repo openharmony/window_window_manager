@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
@@ -1001,6 +1001,7 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
     return true;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::RaiseToAppTop()
 {
     return WMError::WM_OK;
@@ -1098,11 +1099,13 @@ WMError WindowImpl::SetResizeByDragEnabled(bool dragEnabled)
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WMError WindowImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     return WMError::WM_OK;

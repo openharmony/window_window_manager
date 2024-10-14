@@ -41,7 +41,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 private:
-    sptr<KeyboardSession> GetKeyboardSession(std::string &abilityName, std::string &bundleName);
+    sptr<KeyboardSession> GetKeyboardSession(std::string& abilityName, std::string& bundleName);
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -60,7 +60,7 @@ void KeyboardSessionTest::TearDown()
 {
 }
 
-sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(std::string &abilityName, std::string &bundleName)
+sptr<KeyboardSession> KeyboardSessionTest::GetKeyboardSession(std::string& abilityName, std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;
@@ -199,7 +199,7 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect, Function | SmallTest | L
     ASSERT_NE(mockSessionStage, nullptr);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->sessionStage_ = mockSessionStage;
-    auto ret = keyboardSession->NotifyClientToUpdateRect(nullptr);
+    auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 

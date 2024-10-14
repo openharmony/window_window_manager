@@ -32,8 +32,8 @@ using namespace testing::ext;
 
 namespace OHOS::Rosen {
 namespace  {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
-    const int WAIT_FOR_SYNC_US = 1;  // 1s
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
+const int WAIT_FOR_SYNC_US = 1;  // 1s
 }
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {

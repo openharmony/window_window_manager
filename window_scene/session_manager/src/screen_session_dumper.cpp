@@ -20,11 +20,26 @@
 #include "unique_fd.h"
 #include "screen_session_manager.h"
 #include "session_permission.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_FOLD_STATUS = "-f";
+
+const std::string STATUS_FOLD_HALF = "-z";
+const std::string STATUS_EXPAND = "-y";
+const std::string STATUS_FOLD = "-p";
+const std::string ARG_FOLD_DISPLAY_FULL = "-f";
+const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
+const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
+const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
+const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
+const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -76,12 +91,6 @@ void ScreenSessionDumper::OutputDumpInfo()
 
 void ScreenSessionDumper::ExcuteDumpCmd()
 {
-    const std::string ARG_DUMP_HELP = "-h";
-    const std::string ARG_DUMP_ALL = "-a";
-    const std::string STATUS_FOLD_HALF = "-z";
-    const std::string STATUS_EXPAND = "-y";
-    const std::string STATUS_FOLD = "-p";
-    const std::string ARG_DUMP_FOLD_STATUS = "-f";
     if (params_.empty() || params_[0] == ARG_DUMP_HELP) { //help command
         ShowHelpInfo();
     }
@@ -94,11 +103,33 @@ void ScreenSessionDumper::ExcuteDumpCmd()
         ShowAllScreenInfo();
     } else if (!params_.empty() && params_[0] == ARG_DUMP_FOLD_STATUS) { // dump fold status command
         DumpFoldStatus();
-    } else if (params_.size() == 1 && (params_[0] == STATUS_FOLD_HALF ||
-        params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD)) {
-        ShowNotifyFoldStatusChangedInfo();
     }
+    ExcuteInjectCmd();
     OutputDumpInfo();
+}
+
+void ScreenSessionDumper::ExcuteInjectCmd()
+{
+    bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
+    if (!isDebugMode) {
+        TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
+        dumpInfo_.append("dms.hidumper.supportdebug false\n");
+        return;
+    }
+    if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
+        ShowNotifyFoldStatusChangedInfo();
+    } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
+        int errCode = SetFoldDisplayMode();
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
+    } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
+                || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
+        int errCode = SetFoldStatusLocked();
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
+    }
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
@@ -427,6 +458,9 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
     dumpInfo_.append(oss.str());
 }
 
+/*
+ * hidumper inject methods
+ */
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
     TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", params_[0].c_str());
@@ -445,6 +479,56 @@ void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 void ScreenSessionDumper::ShowIllegalArgsInfo()
 {
     dumpInfo_.append("The arguments are illegal and you can enter '-h' for help.");
+}
+
+bool ScreenSessionDumper::IsValidDisplayModeCommand(std::string command)
+{
+    if (std::find(displayModeCommands.begin(), displayModeCommands.end(), command) != displayModeCommands.end()) {
+        return true;
+    }
+    return false;
+}
+
+int ScreenSessionDumper::SetFoldDisplayMode()
+{
+    std::string modeParam = params_[0];
+    if (modeParam.empty()) {
+        return -1;
+    }
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    if (modeParam == ARG_FOLD_DISPLAY_FULL) {
+        displayMode = FoldDisplayMode::FULL;
+    } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
+        displayMode = FoldDisplayMode::MAIN;
+    } else if (modeParam == ARG_FOLD_DISPLAY_SUB) {
+        displayMode = FoldDisplayMode::SUB;
+    } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
+        displayMode = FoldDisplayMode::COORDINATION;
+    } else {
+        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
+        return -1;
+    }
+    ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
+    return 0;
+}
+
+int ScreenSessionDumper::SetFoldStatusLocked()
+{
+    std::string lockParam = params_[0];
+    if (lockParam.empty()) {
+        return -1;
+    }
+    bool lockDisplayStatus = false;
+    if (lockParam == ARG_LOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = true;
+    } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
+        lockDisplayStatus = false;
+    } else {
+        TLOGW(WmsLogTag::DMS, "SetFoldStatusLocked status not support");
+        return -1;
+    }
+    ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
+    return 0;
 }
 } // Rosen
 } // OHOS
