@@ -338,6 +338,11 @@ static void AddCallingPidMapItem(const sptr<SceneSession>& session,
     auto sessionCallingPid = session->GetCallingPid();
     auto iter = callingPidMap.find(sessionCallingPid);
     if (iter == callingPidMap.end()) {
+        SubWindowModalType modalType = session->GetSubWindowModalType();
+        if (modalType == SubWindowModalType::TYPE_DIALOG ||
+            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
+            return;
+        }
         callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
         UpdateCallingPidMapItem(session, callingPidMap);
         TLOGD(WmsLogTag::WMS_DIALOG,
@@ -387,6 +392,7 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
         if (modalType == SubWindowModalType::TYPE_DIALOG ||
             modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
             AddDialogSessionMapItem(session, dialogMap);
+            AddCallingPidMapItem(session, callingPidMap);
         } else if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
             AddDialogSessionMapItem(session, dialogMap);
             hasModalApplication = true;
