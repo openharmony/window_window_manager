@@ -3443,7 +3443,8 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
     if (mainSession != nullptr) {
         postNow = !(mainSession->GetUIStateDirty());
     }
-    if (postNow || AppExecFwk::EventRunner::GetMainEventRunner()->IsCurrentRunnerThread() ||
+    auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (postNow || (mainEventRunner && mainEventRunner->IsCurrentRunnerThread()) ||
         taskScheduler_->GetEventHandler()->GetEventRunner()->IsCurrentRunnerThread()) {
         return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
     }
