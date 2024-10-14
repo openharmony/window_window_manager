@@ -28,31 +28,31 @@
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
-    class Configuration;
-    class Ability;
+class Configuration;
+class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
-    class AbilityContext;
-    class Context;
+class AbilityContext;
+class Context;
 }
 
 namespace OHOS::AAFwk {
-    class Want;
-    class WantParams;
+class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
-    class UIContent;
+class UIContent;
 }
 
 namespace OHOS::Media {
-    class PixelMap;
+class PixelMap;
 }
 
 namespace OHOS::Accessibility {
@@ -1691,6 +1691,13 @@ public:
      * @param status pip control status.
      */
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
+
+    /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.

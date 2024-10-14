@@ -26,8 +26,8 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
-    constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -499,7 +499,7 @@ napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window)
     napi_set_named_property(env, objValue, "navigationBarContentColor",
         CreateJsValue(env, GetHexColor(navi.contentColor_)));
     napi_set_named_property(env, objValue, "isNavigationBarLightIcon",
-        CreateJsValue(env, status.contentColor_ == SYSTEM_COLOR_WHITE));
+        CreateJsValue(env, navi.contentColor_ == SYSTEM_COLOR_WHITE));
     napi_set_named_property(env, objValue, "enableStatusBarAnimation",
                             CreateJsValue(env, status.enableAnimation_));
     napi_set_named_property(env, objValue, "enableNavigationBarAnimation",
@@ -544,7 +544,9 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     for (size_t i = 0; i < infos.size(); i++) {
         auto info = infos[i];
         auto windowType = info->GetWindowType();
-        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
+        auto windowVisibilityState = info->GetWindowVisibilityState();
+        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END &&
+            windowVisibilityState != WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
         }
     }

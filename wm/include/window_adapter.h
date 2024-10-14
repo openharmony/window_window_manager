@@ -65,7 +65,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to);
@@ -133,7 +133,8 @@ public:
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
-    
+    virtual WMError ReleaseForegroundSessionScreenLock();
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();

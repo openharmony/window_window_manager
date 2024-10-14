@@ -1300,7 +1300,7 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
     terminateSessionFunc_ = func;
 }
 
-void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
+void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
     if (lifeCycleTaskQueue_.empty()) {
@@ -1433,7 +1433,7 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
     terminateSessionFuncTotal_ = func;
 }
 
-WSError Session::SetSessionLabel(const std::string &label)
+WSError Session::SetSessionLabel(const std::string& label)
 {
     WLOGFI("run Session::SetSessionLabel");
     if (updateSessionLabelFunc_) {
@@ -1442,7 +1442,7 @@ WSError Session::SetSessionLabel(const std::string &label)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func)
 {
     updateSessionLabelFunc_ = func;
 }
@@ -1462,7 +1462,7 @@ WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func)
 {
     updateSessionIconFunc_ = func;
 }
