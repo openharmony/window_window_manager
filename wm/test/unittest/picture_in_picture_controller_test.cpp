@@ -867,7 +867,6 @@ HWTEST_F(PictureInPictureControllerTest, LocateSource, Function | SmallTest | Le
     ASSERT_NE(nullptr, pipControl);
     pipControl->window_ = nullptr;
     pipControl->LocateSource();
-    
     pipControl->window_ = mw;
     pipControl->LocateSource();
 }
