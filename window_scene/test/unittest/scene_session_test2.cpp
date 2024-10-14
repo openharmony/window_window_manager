@@ -2160,10 +2160,11 @@ HWTEST_F(SceneSessionTest2, GetStartMoveFlag, Function | SmallTest | Level2)
     info.bundleName_ = "GetStartMoveFlag";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController = new MoveDragController(1);
     bool isMoving = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
 
-    scensession->moveDragController_ = new MoveDragController(1024);
+    sceneSession->moveDragController_ = new MoveDragController(1024);
     ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
 }
 
@@ -2183,12 +2184,13 @@ HWTEST_F(SceneSessionTest2, SetCompatibleWindowSizeInPc, Function | SmallTest | 
     int32_t landscapeWidth = 10;
     int32_t landscapeHeight = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR,
+    sceneSession->SetSessionProperty(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR,
         sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
-    ASSERT_EQ(WSError::WSError::WS_OK,
+    ASSERT_EQ(WSError::WS_OK,
         sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
 }
 
@@ -2204,11 +2206,12 @@ HWTEST_F(SceneSessionTest2, SetAppSupportPhoneInPc, Function | SmallTest | Level
     info.bundleName_ = "SetAppSupportPhoneInPc";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR, sceneSession->SetAppSupportPhoneInPc(false));
+    sceneSession->SetSessionProperty(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetAppSupportPhoneInPc(false));
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
-    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->SetAppSupportPhoneInPc(false));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetAppSupportPhoneInPc(false));
 }
 
 /**
@@ -2223,12 +2226,16 @@ HWTEST_F(SceneSessionTest2, CompatibleFullScreenRecover, Function | SmallTest | 
     info.bundleName_ = "CompatibleFullScreenRecover";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenRecover());
+    sceneSession->SetSessionProperty(nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenRecover());
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->CompatibleFullScreenRecover());
+    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenRecover());
 }
 
 /**
@@ -2243,11 +2250,12 @@ HWTEST_F(SceneSessionTest2, SetIsPcAppInPad, Function | SmallTest | Level2)
     info.bundleName_ = "SetIsPcAppInPad";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WSError::WS_ERROR_NULLPTR, sceneSession->SetIsPcAppInPad(false));
+    sceneSession->SetSessionProperty(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetIsPcAppInPad(false));
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
-    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->SetIsPcAppInPad(false));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetIsPcAppInPad(false));
 }
 
 /**
@@ -2262,12 +2270,16 @@ HWTEST_F(SceneSessionTest2, CompatibleFullScreenClose, Function | SmallTest | Le
     info.bundleName_ = "CompatibleFullScreenClose";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
+    sceneSession->SetSessionProperty(nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    ASSERT_EQ(WSError::WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
+    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
 }
 
 /**
