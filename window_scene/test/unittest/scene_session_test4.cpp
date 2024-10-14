@@ -775,7 +775,7 @@ HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, SetDefaultDisplayIdIfNeed02, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "SetDefaultDisplayIdIfNeed02";
@@ -791,7 +791,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed02, Function | SmallTest | L
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, SetDefaultDisplayIdIfNeed03, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "SetDefaultDisplayIdIfNeed03";
@@ -808,7 +808,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed03, Function | SmallTest | L
  * @tc.desc: NotifyServerToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyServerToUpdateRect";
