@@ -1152,7 +1152,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     UpdateTitleButtonVisibility();
     UpdateFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
-        ret = static_cast<WMError>(hostSession->Foreground(property_, true));
+        ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         PreLayoutOnShow(type, displayInfo);
         // Add maintenance logs before the IPC process.
@@ -1223,7 +1223,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (res != WMError::WM_OK) {
             return res;
         }
-        res = static_cast<WMError>(hostSession->Background(true));
+        res = static_cast<WMError>(hostSession->Background(true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         res = static_cast<WMError>(hostSession->Hide());
     } else {
@@ -1352,7 +1352,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 
     if (WindowHelper::IsMainWindow(GetType())) {
         if (auto hostSession = GetHostSession()) {
-            ret = static_cast<WMError>(hostSession->Disconnect(true));
+            ret = static_cast<WMError>(hostSession->Disconnect(true, identityToken_));
         }
     }
     return ret;
