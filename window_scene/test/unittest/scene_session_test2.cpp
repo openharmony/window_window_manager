@@ -84,6 +84,16 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     WSError result = sceneSession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
 
+    sptr<SceneSession> tempSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int32_t persistentId = 1;
+    tempSession->persistentId_ = persistentId;
+    int32_t callingPid = 2;
+    tempSession->callingPid_ = callingPid;
+    sceneSession->subSession_.push_back(tempSession);
+    int32_t subWindowId = 1;
+    result = sceneSession->RaiseAboveTarget(subWindowId);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
@@ -1128,7 +1138,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     WSRect rectResult = scensession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [scensession](DisplayId newDisplayId, int32_t type, const SizeChangeReason reason) {
+    auto dragHotAreaFunc = [scensession](DisplayId displayId, int32_t type, const SizeChangeReason reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1537,7 +1547,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->RaiseAppMainWindowToTop();
+    WSError result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     bool status = true;
     sceneSession->OnNeedAvoid(status);
@@ -1547,7 +1558,8 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     sceneSession->NotifyPropertyWhenConnect();
 
     sceneSession->focusedOnShow_ = false;
-    sceneSession->RaiseAppMainWindowToTop();
+    result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
 }
 
 /**
@@ -1666,14 +1678,13 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->SetPipActionEvent("pointerEvent", 0));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetPipActionEvent("pointerEvent", 0));
 
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
-
     sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
 /**

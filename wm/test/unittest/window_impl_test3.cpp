@@ -1165,6 +1165,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<Window> topWindow = window->GetTopWindowWithId(INVALID_WINDOW_ID);
+    ASSERT_EQ(topWindow, nullptr);
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -1392,13 +1393,29 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId03, Function | SmallTest | Level3)
     option->SetWindowName("GetTopWindowWithId03");
     sptr<WindowImpl> window = new WindowImpl(option);
     uint32_t mainWinId = 0;
+    uint32_t windowId = 1;
+    string winName = "test";
+    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
 
-    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    ASSERT_NE(WMError::WM_OK, ret);
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(Return(WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
-    ret = WMError::WM_OK;
-    uint32_t topWinId = INVALID_WINDOW_ID;
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
+        SetArgReferee<1>(windowId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
+    uint32_t topWinId = 1;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithId(mainWinId));
+
+    uint32_t tempWindowId = 3;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
+        SetArgReferee<1>(tempWindowId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    WindowImpl::windowMap_.erase(winName);
 }
 
 /**
@@ -1436,6 +1453,22 @@ HWTEST_F(WindowImplTest3, GetSubWindow03, Function | SmallTest | Level3)
     uint32_t parentId = 0;
 
     ASSERT_EQ(std::vector<sptr<Window>>(), window->GetSubWindow(parentId));
+}
+
+/**
+ * @tc.name: SetNeedDefaultAnimation
+ * @tc.desc: SetNeedDefaultAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, SetNeedDefaultAnimation, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetNeedDefaultAnimation");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    bool defaultAnimation = true;
+    window->SetNeedDefaultAnimation(defaultAnimation);
+    EXPECT_EQ(true, window->needDefaultAnimation_);
+    EXPECT_EQ(WMError::WM_OK, window->SetTextFieldAvoidInfo(2.0, 3.0));
 }
 }
 } // namespace Rosen

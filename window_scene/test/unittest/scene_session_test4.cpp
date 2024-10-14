@@ -78,20 +78,14 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateFlags, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateStatusProps(property, action);
-    sceneSession->HandleActionUpdateNavigationProps(property, action);
-    sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
-    sceneSession->HandleActionUpdateFlags(property, action);
-
-    auto ret = sceneSession->HandleActionUpdateFlags(property, action);
-    ASSERT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateFlags(property, action);
-    windowSessionProperty.isSystemCalling_ = {true};
-    OHOS::Rosen::Session session(info);
-    session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateFlags(property, action);
+    WMError ret = sceneSession->HandleActionUpdateStatusProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateFlags(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -170,21 +164,18 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateWindowLimits, Function | SmallTest
 HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     OHOS::Rosen::Session session(info);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session.property_ = property;
 
-    sceneSession->HandleActionUpdateDragenabled(property, action);
+    WMError res = sceneSession->HandleActionUpdateDragenabled(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, res);
 
-    session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateDragenabled(property, action);
-
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateDragenabled(property, action);
+    session.property_->SetSystemCalling(true);
+    res = sceneSession->HandleActionUpdateDragenabled(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -449,25 +440,6 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, Function | SmallTest 
 
     action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
     EXPECT_EQ(WMError::WM_OK, sceneSession->UpdateSessionPropertyByAction(property, action));
-}
-
-/**
- * @tc.name: HandleUpdatePropertyByAction
- * @tc.desc: HandleUpdatePropertyByAction function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleUpdatePropertyByAction, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleUpdatePropertyByAction";
-    info.bundleName_ = "HandleUpdatePropertyByAction";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
-    sceneSession->HandleUpdatePropertyByAction(property, action);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->HandleUpdatePropertyByAction(nullptr, action));
 }
 
 /**
@@ -744,6 +716,30 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags1, Function | SmallTest | Level2)
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
     sceneSession->property_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
     sceneSession->SetWindowFlags(property);
+}
+
+/**
+ * @tc.name: SetGestureBackEnabled
+ * @tc.desc: SetGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetGestureBackEnabled";
+    info.bundleName_ = "SetGestureBackEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isEnableGestureBack_ = false;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    EXPECT_NE(nullptr, sceneSession->specificCallback_);
+    auto func = [sceneSession](int32_t persistentId) {
+        return;
+    };
+    sceneSession->specificCallback_->onUpdateGestureBackEnabled_ = func;
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
+    EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
 }
 }
 }

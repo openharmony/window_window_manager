@@ -141,13 +141,15 @@ HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | S
 
 /**
  * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode test
+ * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetPrivacyMode(), false);
+    property->SetPrivacyMode(true);
+    ASSERT_EQ(property->GetPrivacyMode(), true);
     property->SetPrivacyMode(false);
     ASSERT_EQ(property->GetPrivacyMode(), false);
 }
@@ -171,10 +173,10 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode, Function | SmallTest |
 HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2)
 {
     float brightness = 0.02;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetBrightness(brightness);
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetBrightness(), 0);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetBrightness(brightness);
+    ASSERT_EQ(brightness, property->GetBrightness());
 }
 
 /**
@@ -188,6 +190,19 @@ HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetTopmost(topmost);
     ASSERT_TRUE(windowSessionProperty.IsTopmost());
+}
+
+/**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    bool isTopmost = true;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetMainWindowTopmost(isTopmost);
+    ASSERT_TRUE(windowSessionProperty.IsMainWindowTopmost());
 }
 
 /**
@@ -708,6 +723,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
@@ -749,6 +765,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
@@ -941,14 +958,14 @@ HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
-    bool keepScreenOn = false;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool keepScreenOn = true;
     property->SetKeepScreenOn(keepScreenOn);
-    ASSERT_EQ(property->keepScreenOn_, keepScreenOn);
-    delete property;
+    ASSERT_EQ(keepScreenOn, property->IsKeepScreenOn());
+    keepScreenOn = false;
+    property->SetKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsKeepScreenOn());
 }
 
 /**

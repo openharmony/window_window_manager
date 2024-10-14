@@ -457,11 +457,11 @@ HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: UnregisterListener
- * @tc.desc: UnregisterListener | RegisterListener desc
+ * @tc.name: RegisterListener01
+ * @tc.desc: Run successfully
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RegisterListener01, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -473,8 +473,71 @@ HWTEST_F(WindowImplTest5, UnregisterListener, Function | SmallTest | Level1)
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
     sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
     ASSERT_NE(listener2, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(listener2);
-    window->RegisterOccupiedAreaChangeListener(nullptr);
+    ASSERT_EQ(window->RegisterOccupiedAreaChangeListener(listener2), WMError::WM_OK);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: RegisterListener02
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, RegisterListener02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    ASSERT_EQ(window->RegisterOccupiedAreaChangeListener(nullptr), WMError::WM_ERROR_NULLPTR);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: UnregisterListener01
+ * @tc.desc: Run successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UnregisterListener01, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    window->RegisterOccupiedAreaChangeListener(listener2);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(listener2), WMError::WM_OK);
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
+}
+
+/**
+ * @tc.name: UnregisterListener02
+ * @tc.desc: Listener is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, UnregisterListener02, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterListener");
+    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    ASSERT_NE(window, nullptr);
+
+    sptr<MockOccupiedAreaChangeListener> listener1;
+    window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener1);
+    sptr<MockOccupiedAreaChangeListener> listener2 = new (std::nothrow) MockOccupiedAreaChangeListener();
+    ASSERT_NE(listener2, nullptr);
+    ASSERT_EQ(window->UnregisterOccupiedAreaChangeListener(nullptr), WMError::WM_ERROR_NULLPTR);
     window->occupiedAreaChangeListeners_[window->GetWindowId()].clear();
 }
 
@@ -1012,6 +1075,9 @@ HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
 
+    window->state_ = WindowState::STATE_INITIAL;
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_ERROR_INVALID_WINDOW);
+
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
 
@@ -1019,13 +1085,14 @@ HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
 
     window->state_ = WindowState::STATE_SHOWN;
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_EQ(window->Resize(10, 10), WMError::WM_ERROR_INVALID_OPERATION);
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->Resize(10, 10);
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(window->Resize(10, 10), WMError::WM_OK);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1331,6 +1398,30 @@ HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTes
     supportModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
     context->GetAbilityInfo()->windowModes = supportModes;
     window->GetConfigurationFromAbilityInfo();
+}
+
+/**
+ * @tc.name: GetVirtualPixelRatio01
+ * @tc.desc: GetVirtualPixelRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio01");
+    option->SetDisplayId(1);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    float vpr = -1.0f;
+    window->property_->SetDisplayId(-1);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_EQ(vpr, 0.0f);
+
+    window->property_->SetDisplayId(0);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_NE(vpr, 0.0f);
 }
 }
 } // namespace Rosen

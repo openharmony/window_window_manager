@@ -122,6 +122,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetCurrentPiPWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROOT_MAIN_WINDOW_ID):
             return HandleGetRootMainWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO):
+            return HandleGetAccessibilityWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -183,13 +185,18 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
 
 int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandlePendingSessionToBackground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToBackgroundForDelegator(token);
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -680,6 +687,18 @@ int SceneSessionManagerLiteStub::HandleGetRootMainWindowId(MessageParcel &data, 
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to WriteInt32 hostWindowId");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError errCode = GetAccessibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("Write window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

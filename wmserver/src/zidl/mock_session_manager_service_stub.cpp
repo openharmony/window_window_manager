@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceStub"};
+constexpr int32_t MAX_USER_SIZE = 1000;
 }
 
 int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -74,11 +75,11 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             UnregisterSMSLiteRecoverListener();
             break;
         }
-        case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST: {
-            return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+        case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES: {
+            return HandleSetSnapshotSkipByUserIdAndBundleNames(data, reply);
         }
         case MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP: {
-            return HandleSetSnapshotSkipByMap(data, reply);
+            return HandleSetSnapshotSkipByIdNamesMap(data, reply);
         }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
@@ -87,31 +88,38 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
     return ERR_NONE;
 }
 
-int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(
+int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNames(
     MessageParcel& data, MessageParcel& reply)
 {
     int32_t userId = data.ReadInt32();
     std::vector<std::string> bundleNameList;
     if (!data.ReadStringVector(&bundleNameList)) {
-        WLOGFE("Fail to read bundleNameList");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
         return ERR_INVALID_DATA;
     }
-    int32_t errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    int32_t errCode = SetSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList);
     reply.WriteInt32(errCode);
     return ERR_NONE;
 }
 
-int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByMap(MessageParcel& data, MessageParcel& reply)
+int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(MessageParcel& data, MessageParcel& reply)
 {
     int32_t mapSize = data.ReadInt32();
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
+    if (mapSize > MAX_USER_SIZE) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Too many users!");
+        return ERR_INVALID_DATA;
+    }
     for (int i = 0; i < mapSize; i++) {
         int32_t userId = data.ReadInt32();
         std::vector<std::string> bundleNameList;
-        data.ReadStringVector(&bundleNameList);
+        if (!data.ReadStringVector(&bundleNameList)) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
+            return ERR_INVALID_DATA;
+        }
         idBundlesMap[userId] = bundleNameList;
     }
-    int32_t errCode = SetSnapshotSkipByMap(idBundlesMap);
+    int32_t errCode = SetSnapshotSkipByIdNamesMap(idBundlesMap);
     reply.WriteInt32(errCode);
     return ERR_NONE;
 }

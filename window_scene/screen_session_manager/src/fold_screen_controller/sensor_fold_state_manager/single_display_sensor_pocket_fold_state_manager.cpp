@@ -19,33 +19,61 @@
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
+#include "screen_scene_config.h"
 
 #include "window_manager_hilog.h"
+#include "app_mgr_client.h"
+#include "screen_session_manager/include/screen_rotation_property.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
 #endif
 
 namespace OHOS::Rosen {
+using OHOS::AppExecFwk::AppStateData;
+using OHOS::AppExecFwk::ApplicationState;
 namespace {
+const std::string CAMERA_NAME = "camera";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
 constexpr float CLOSE_ALTA_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
 constexpr float OPEN_ALTA_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
 constexpr float ALTA_HALF_FOLDED_BUFFER = 10.0F;
 constexpr float LARGER_BOUNDARY_FOR_ALTA_THRESHOLD = 90.0F;
+constexpr float CAMERA_MAX_VAL = 100.0F;
 constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
+constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
+constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
+constexpr float HOVER_STATUS_EXIT_MIN_THRESHOLD = 5.0F;
+constexpr float HOVER_STATUS_EXIT_MAX_THRESHOLD = 175.0F;
 } // namespace
 
-SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager() {}
+SingleDisplaySensorPocketFoldStateManager::SingleDisplaySensorPocketFoldStateManager()
+{
+    auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
+    if (stringListConfig.count("hallSwitchApp") != 0) {
+        hallSwitchPackageNameList_ = stringListConfig["hallSwitchApp"];
+    }
+}
 SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateManager() {}
 
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    SetCameraFoldStrategy(angle);
+    if (isInCameraFoldStrategy_) {
+        HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        SetCameraStatusChange(angle, hall);
+        return;
+    }
+    SetCameraStatusChange(angle, hall);
+    if (IsTentMode()) {
+        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
+    }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -53,6 +81,16 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    SetCameraFoldStrategy(angle);
+    if (isInCameraFoldStrategy_) {
+        HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
+        SetCameraStatusChange(angle, hall);
+        return;
+    }
+    SetCameraStatusChange(angle, hall);
+    if (IsTentMode()) {
+        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
+    }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -66,6 +104,72 @@ void SingleDisplaySensorPocketFoldStateManager::UpdateSwitchScreenBoundaryForLar
     }
 }
 
+void SingleDisplaySensorPocketFoldStateManager::SetCameraFoldStrategy(float angle)
+{
+    FoldStatus currentState = GetCurrentState();
+
+    if (angle >= CAMERA_MAX_VAL) {
+        if (isInCameraFoldStrategy_ != false) {
+            isInCameraFoldStrategy_ = false;
+            TLOGI(WmsLogTag::DMS, "Disable CameraFoldStrategy.");
+        }
+        return;
+    }
+    if (applicationStateObserver_ == nullptr) {
+        return;
+    }
+    if (applicationStateObserver_->GetForegroundApp().empty()) {
+        return;
+    }
+    if (applicationStateObserver_->GetForegroundApp().find(CAMERA_NAME) != std::string::npos &&
+        currentState == FoldStatus::FOLDED) {
+        if (isInCameraFoldStrategy_ != true) {
+            isInCameraFoldStrategy_ = true;
+            TLOGI(WmsLogTag::DMS, "Enable CameraFoldStrategy.");
+        }
+    }
+}
+
+void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angle, int hall)
+{
+    if (hall == HALL_FOLDED_THRESHOLD) {
+        if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "hall is %{public}d, exit cemera status", hall);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
+        }
+        return;
+    }
+
+    if ((std::isless(angle, HOVER_STATUS_EXIT_MIN_THRESHOLD)) ||
+        (std::isgreater(angle, HOVER_STATUS_EXIT_MAX_THRESHOLD))) {
+        if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f, exit camera status", angle);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
+        }
+        return;
+    }
+
+    if (applicationStateObserver_ == nullptr) {
+        return;
+    }
+
+    if ((angle > ANGLE_MIN_VAL) && (angle < CAMERA_MAX_VAL) &&
+        (applicationStateObserver_->GetForegroundApp().find(CAMERA_NAME) != std::string::npos)) {
+        if (!isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
+            isCameraStatus_ = true;
+        }
+    } else {
+        if (isCameraStatus_) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f or is not camera app, exit camera status", angle);
+            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS_CANCEL);
+            isCameraStatus_ = false;
+        }
+    }
+}
 
 FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float angle, int hall)
 {
@@ -111,5 +215,89 @@ FoldStatus SingleDisplaySensorPocketFoldStateManager::GetNextFoldState(float ang
     return state;
 }
 
-void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver() {}
+void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver()
+{
+    applicationStateObserver_ = new (std::nothrow) ApplicationStatePocketObserver();
+    auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (applicationStateObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "applicationStateObserver_ is nullptr.");
+        return;
+    }
+    if (appMgrClient_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
+    } else {
+        auto flag = static_cast<int32_t>(
+            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, hallSwitchPackageNameList_));
+        if (flag != ERR_OK) {
+            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
+        } else {
+            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
+        }
+    }
+}
+
+void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    bool isNotRepeated = isTent ^ IsTentMode();
+    if (!isNotRepeated) {
+        WLOGI("Repeat reporting tent mode:%{public}s, no processing", (isTent == true) ? "on" : "off");
+        return;
+    }
+
+    SetTentMode(isTent);
+    if (foldScreenPolicy == nullptr) {
+        WLOGE("foldScreenPolicy is nullptr");
+        return;
+    }
+
+    if (isTent) {
+        FoldStatus currentState = GetCurrentState();
+        foldScreenPolicy->ChangeOnTentMode(currentState);
+    } else {
+        foldScreenPolicy->ChangeOffTentMode();
+    }
+}
+
+bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int hall)
+{
+    if (hall == HALL_FOLDED_THRESHOLD) {
+        WLOGI("Exit tent mode due to hall sensor report folded");
+        return true;
+    }
+
+    if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
+        WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
+        return true;
+    }
+
+    return false;
+}
+
+void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float angle, int hall,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    if (TriggerTentExit(angle, hall)) {
+        FoldStatus nextState = GetNextFoldState(angle, hall);
+        HandleSensorChange(nextState, angle, foldScreenPolicy);
+        SetTentMode(false);
+    }
+}
+
+ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}
+
+void ApplicationStatePocketObserver::OnForegroundApplicationChanged(const AppStateData &appStateData)
+{
+    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND)) {
+        foregroundBundleName_ = appStateData.bundleName;
+    }
+    if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_BACKGROUND)
+        && foregroundBundleName_.compare(appStateData.bundleName) == 0) {
+        foregroundBundleName_ = "" ;
+    }
+}
+
+std::string ApplicationStatePocketObserver::GetForegroundApp()
+{
+    return foregroundBundleName_;
+}
 } // namespace OHOS::Rosen

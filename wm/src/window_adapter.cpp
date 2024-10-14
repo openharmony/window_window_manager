@@ -468,7 +468,7 @@ WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     return wmsProxy->GetTopWindowId(mainWinId, topWinId);
 }
 
-WMError WindowAdapter::GetParentMainWindowId(uint32_t windowId, uint32_t& mainWindowId)
+WMError WindowAdapter::GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
@@ -946,6 +946,15 @@ WMError WindowAdapter::GetWindowStyleType(WindowStyleType& windowStyleType)
     return wmsProxy->GetWindowStyleType(windowStyleType);
 }
 
+WMError WindowAdapter::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+}
+
 sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -966,6 +975,22 @@ WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& water
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
+}
+
+WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return wmsProxy->ReleaseForegroundSessionScreenLock();
+}
+
+WMError WindowAdapter::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetDisplayIdByPersistentId(persistentId, displayId);
 }
 
 } // namespace Rosen

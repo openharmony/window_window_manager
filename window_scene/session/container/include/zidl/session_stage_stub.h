@@ -73,6 +73,11 @@ private:
     int HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
+    bool CalculateDataSize(const std::vector<std::string>& infos);
+    bool WriteSmallStringVector(
+        const std::vector<std::string>& infos, MessageParcel& reply);
+    bool WriteBigStringVector(
+        const std::vector<std::string>& infos, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply);
 };

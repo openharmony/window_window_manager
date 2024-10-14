@@ -26,6 +26,7 @@
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
 #include <pointer_event.h>
+#include <ui/rs_surface_node.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -416,10 +417,12 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
+    ASSERT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    ASSERT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(true));
+    ASSERT_EQ(true, scensession->IsKeepScreenOn());
     ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(false));
     ASSERT_EQ(false, scensession->IsKeepScreenOn());
 }
@@ -725,26 +728,46 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: SetPrivacyMode
- * @tc.desc: SetPrivacyMode
+ * @tc.name: SetPrivacyMode01
+ * @tc.desc: Set PrivacyMode as false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "SetPrivacyMode";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    int ret = 0;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    scensession->surfaceNode_ = surfaceNode;
     scensession->SetPrivacyMode(false);
-    ASSERT_EQ(0, ret);
+    ASSERT_EQ(false, scensession->property_->GetPrivacyMode());
+    ASSERT_EQ(false, scensession->property_->GetSystemPrivacyMode());
+}
+
+/**
+ * @tc.name: SetPrivacyMode02
+ * @tc.desc: Set PrivacyMode as true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background02";
+    info.bundleName_ = "SetPrivacyMode";
+    info.windowType_ = 1;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    scensession->surfaceNode_ = surfaceNode;
+    scensession->SetPrivacyMode(true);
+    ASSERT_EQ(true, scensession->property_->GetPrivacyMode());
+    ASSERT_EQ(true, scensession->property_->GetSystemPrivacyMode());
 }
 
 /**
@@ -904,7 +927,7 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
     scensession->sessionRectChangeFunc_ = [](const WSRect& rect,
-        const SizeChangeReason reason, DisplayId newDisplayId) {
+        const SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
@@ -1024,9 +1047,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
 
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
-    scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](
+    scensession->OnSystemBarPropertyChange_ = [](
         const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){};
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
         WSError::WS_OK);
@@ -1472,6 +1493,7 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->moveDragController_->hasPointDown_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
@@ -1490,7 +1512,7 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
     info.bundleName_ = "OnSystemSessionEvent";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_EQ(scensession, nullptr);
+    ASSERT_NE(scensession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
@@ -1499,7 +1521,28 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     auto result = scensession->OnSystemSessionEvent(event);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: OnTitleAndDockHoverShowChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(scensession, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    scensession->SetSessionProperty(property);
+    auto result = scensession->OnTitleAndDockHoverShowChange(true, true);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1524,8 +1567,28 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetAspectRatio2
+ * @tc.name: SetMainWindowTopmost
  * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainWindowTopmost";
+    info.bundleName_ = "SetMainWindowTopmost";
+    sptr<SceneSession> sceneSession = new (std::nothrow) MainSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetMainWindowTopmost(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_FALSE(sceneSession->IsMainWindowTopmost());
+}
+
+/**
+ * @tc.name: SetAspectRatio2
+ * @tc.desc: test for aspectRatio NearZero
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
@@ -1533,28 +1596,24 @@ HWTEST_F(SceneSessionTest, SetAspectRatio2, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio2";
     info.bundleName_ = "SetAspectRatio2";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.0001;
-    auto result = scensession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 }
 
 /**
  * @tc.name: SetAspectRatio3
- * @tc.desc: normal function
+ * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
@@ -1562,25 +1621,26 @@ HWTEST_F(SceneSessionTest, SetAspectRatio3, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio3";
     info.bundleName_ = "SetAspectRatio3";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
-    float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    float ratio = 2.5;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    WindowLimits limits;
+    limits.maxWidth_ = 3000;
+    limits.maxHeight_ = 3000;
+    limits.minWidth_ = 2000;
+    limits.minHeight_ = 2000;
+    property->SetWindowLimits(limits);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetAspectRatio4
- * @tc.desc: normal function
+ * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
@@ -1588,23 +1648,20 @@ HWTEST_F(SceneSessionTest, SetAspectRatio4, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio4";
     info.bundleName_ = "SetAspectRatio4";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
-    limits.maxHeight_ = 0;
-    limits.minWidth_ = 0;
+    limits.maxWidth_ = 3000;
+    limits.maxHeight_ = 3000;
+    limits.minWidth_ = 2000;
+    limits.minHeight_ = 2000;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
@@ -1618,29 +1675,25 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio5";
     info.bundleName_ = "SetAspectRatio5";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxHeight_ = 10;
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    scensession->SetAspectRatio(ratio);
-    EXPECT_NE(scensession, nullptr);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetAspectRatio(ratio);
+    auto result = sceneSession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetAspectRatio6
- * @tc.desc: normal function
+ * @tc.desc: test for sessionProperty is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
@@ -1648,24 +1701,13 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
     info.bundleName_ = "SetAspectRatio6";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->SetSessionProperty(nullptr);
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowLimits limits;
-    limits.maxHeight_ = 0;
-    limits.minWidth_ = 10;
-    property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    auto result = sceneSession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1678,24 +1720,19 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio7";
     info.bundleName_ = "SetAspectRatio7";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->isActive_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
 
     float ratio = 0.1;
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowLimits limits;
     limits.maxHeight_ = 10;
     limits.minWidth_ = 10;
     property->SetWindowLimits(limits);
-    scensession->SetSessionProperty(property);
-    auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->SetAspectRatio(ratio);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1857,6 +1894,43 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateSessionRect3
+ * @tc.desc: test for isGlobal is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRect";
+    info.bundleName_ = "UpdateSessionRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
+
+    sceneSession->SetSessionProperty(property);
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    WSRect oldRect({1, 1, 1, 1});
+    WSRect parentRect({10, 10, 1, 1});
+
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetParentSession(parentSession);
+    EXPECT_NE(sceneSession->GetParentSession(), nullptr);
+    parentSession->SetSessionRect(parentRect);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
+    bool isGlobal = true;
+    WSError result = sceneSession->UpdateSessionRect(oldRect, reason, isGlobal);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    WSRect newRect = sceneSession->GetSessionRect();
+    ASSERT_EQ(newRect.posX_, oldRect.posX_ - parentRect.posX_);
+    ASSERT_EQ(newRect.posY_, oldRect.posY_ - parentRect.posY_);
+}
+
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1932,7 +2006,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
@@ -1990,7 +2064,7 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     sceneSession->moveDragController_ = nullptr;
     sceneSession->SetMoveDragCallback();
 }
@@ -2046,8 +2120,24 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     property->SetDisplayId(-99);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetDefaultDisplayIdIfNeed();
-    EXPECT_NE(property->GetDisplayId(), SCREEN_ID_INVALID);
+    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect test = { 100, 100, 100, 100 };
+    sceneSession->SetSessionGlobalRect(test);
+    sceneSession->SetScbCoreEnabled(true);
+    EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
 }
-}
-}
+} // namespace
+} // Rosen
+} // OHOS
