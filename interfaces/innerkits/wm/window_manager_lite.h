@@ -220,6 +220,14 @@ public:
      */
     WindowStyleType GetWindowStyleType();
 
+    /**
+     * @brief Terminate session by persistentId and start caller.
+     * @persistentId persistentId to be terminated.
+     *
+     * @return WM_OK means Terminate success, others means Terminate failed.
+     */
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
