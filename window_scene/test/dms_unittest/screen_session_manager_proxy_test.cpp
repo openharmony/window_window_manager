@@ -1360,10 +1360,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, Function | SmallTest
     bool immersive = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(immersive));
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     } else {
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(immersive));
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     }
 }
 

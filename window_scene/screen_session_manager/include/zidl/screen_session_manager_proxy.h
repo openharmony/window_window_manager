@@ -119,7 +119,7 @@ public:
     virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    virtual DMError HasImmersiveWindow(bool& immersive) override;
+    virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;

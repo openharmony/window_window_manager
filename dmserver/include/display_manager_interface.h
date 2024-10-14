@@ -299,7 +299,10 @@ public:
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 
-    virtual DMError HasImmersiveWindow(bool& immersive) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
