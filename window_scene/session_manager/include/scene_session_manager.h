@@ -760,6 +760,12 @@ private:
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+
+    /*
+     * Window Visibility
+     */
+    bool NotifyVisibleChange(int32_t persistentId);
+
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);

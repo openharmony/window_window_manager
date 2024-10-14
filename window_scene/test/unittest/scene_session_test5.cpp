@@ -225,12 +225,12 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     WSRect rect;
     AvoidArea avoidArea;
     session->property_->SetWindowFlags(0);
-  
+
     session->isDisplayStatusBarTemporarily_.store(false);
 
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     SystemSessionConfig systemConfig;
- 
+
     session->SetSystemConfig(systemConfig);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -440,7 +440,7 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, Function | SmallTest 
         (nullptr, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
         (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-    
+
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
         (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
 }
@@ -1040,6 +1040,22 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
 }
 
+/**
+ * @tc.name: SetNotifyVisibleChangeFunc
+ * @tc.desc: SetNotifyVisibleChangeFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
+    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
+}
 }
 }
 }
