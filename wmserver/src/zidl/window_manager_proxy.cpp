@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
 }
 
 
@@ -1023,6 +1023,7 @@ void WindowManagerProxy::OffWindowZoom()
     }
 }
 
+/** @note @window.hierarchy */
 WMError WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
 {
     MessageParcel data;

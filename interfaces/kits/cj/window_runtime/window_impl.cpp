@@ -740,6 +740,7 @@ int32_t CJWindowImpl::SetResizeByDragEnabled(bool enable)
     return static_cast<int32_t>(ret);
 }
 
+/** @note @window.hierarchy */
 int32_t CJWindowImpl::RaiseToAppTop()
 {
     ResWindow result = CheckWindow();
@@ -796,6 +797,7 @@ uint32_t CJWindowImpl::GetWindowColorSpace(int32_t* errCode)
     return static_cast<uint32_t>(colorSpace);
 }
 
+/** @note @window.hierarchy */
 int32_t CJWindowImpl::SetRaiseByClickEnabled(bool enable)
 {
     ResWindow result = CheckWindow();
@@ -809,6 +811,7 @@ int32_t CJWindowImpl::SetRaiseByClickEnabled(bool enable)
     return static_cast<int32_t>(ret);
 }
 
+/** @note @window.hierarchy */
 int32_t CJWindowImpl::RaiseAboveTarget(int32_t windowId)
 {
     ResWindow result = CheckWindow();

@@ -35,7 +35,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
 }
 int JsWindowExtension::extensionCnt_ = 0;
 
@@ -51,7 +51,7 @@ public:
     }
 };
 
-napi_value AttachWindowExtensionContext(napi_env env, void *value, void *)
+napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
 {
     WLOGI("AttachWindowExtensionContext");
     if (value == nullptr) {
@@ -82,7 +82,7 @@ napi_value AttachWindowExtensionContext(napi_env env, void *value, void *)
         return nullptr;
     }
     napi_wrap(env, contextObj, workContext,
-              [](napi_env, void *data, void *) {
+              [](napi_env, void* data, void *) {
                 WLOGI("Finalizer for weak_ptr service extension context is called");
                 delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
               }, nullptr, nullptr);
@@ -174,7 +174,7 @@ void JsWindowExtension::BindContext(napi_env env, napi_value obj)
     napi_set_named_property(env, obj, "context", contextObj);
 
     napi_wrap(env, contextObj, workContext,
-              [](napi_env, void *data, void *) {
+              [](napi_env, void* data, void *) {
                 WLOGI("Finalizer for weak_ptr extension context is called");
                 delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
               }, nullptr, nullptr);

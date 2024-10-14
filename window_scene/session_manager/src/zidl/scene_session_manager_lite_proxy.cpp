@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
-WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::SetSessionLabel");
     MessageParcel data;
@@ -865,7 +865,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterWindowManagerAgent(WindowManager
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t &pid)
+WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -946,6 +946,34 @@ WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowMo
 
     windowModeType = static_cast<WindowModeType>(reply.ReadUint32());
     return static_cast<WMError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 
 WMError SceneSessionManagerLiteProxy::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
@@ -1043,35 +1071,6 @@ WMError SceneSessionManagerLiteProxy::ClearMainSessions(const std::vector<int32_
     }
     reply.ReadInt32Vector(&clearFailedIds);
     return static_cast<WMError>(reply.ReadInt32());
-}
-
-WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
 }
 
 WSError SceneSessionManagerLiteProxy::RegisterIAbilityManagerCollaborator(int32_t type,

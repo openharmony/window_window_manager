@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
 }
 
 WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,

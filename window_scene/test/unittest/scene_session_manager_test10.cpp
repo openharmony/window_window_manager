@@ -143,14 +143,14 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     info1.windowType_ = 1;
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    
+
     SessionInfo info2;
     info2.abilityName_ = "nextSession";
     info2.bundleName_ = "nextSession";
     info2.windowType_ = 1;
     sptr<SceneSession> nextSession = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(nextSession, nullptr);
-    
+
     ssm_->lastFocusedAppSessionId_ = nextSession->GetPersistentId();
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 
@@ -161,6 +161,26 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     nextSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession);
     ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
+}
+
+/**
+ * @tc.name: NotifyVisibleChange
+ * @tc.desc: test NotifyVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ASSERT_FALSE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 }  // namespace
 }

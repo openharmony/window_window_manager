@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionInterfaceFuzzTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionInterfaceFuzzTest"};
 }
 
 static std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext =

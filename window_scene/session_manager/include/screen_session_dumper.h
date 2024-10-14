@@ -52,8 +52,15 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
+    void ExcuteInjectCmd();
+/*
+    hidumper 命令注入隔离
+*/
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
+    bool IsValidDisplayModeCommand(std::string command);
+    int SetFoldDisplayMode();
+    int SetFoldStatusLocked();
 
 private:
     int fd_;
