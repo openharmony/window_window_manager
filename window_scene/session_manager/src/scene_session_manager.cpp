@@ -3086,7 +3086,8 @@ WSError SceneSessionManager::ProcessBackEvent()
             WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFI("ProcessBackEvent session persistentId: %{public}d", focusedSessionId_);
+        WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+            focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
             WLOGFD("RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
@@ -3097,7 +3098,11 @@ WSError SceneSessionManager::ProcessBackEvent()
             session->RequestSessionBack(false);
             return WSError::WS_OK;
         }
-        session->ProcessBackEvent();
+        if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
+            rootSceneProcessBackEventFunc_();
+        } else {
+            session->ProcessBackEvent();
+        }
         return WSError::WS_OK;
     };
 
@@ -4457,7 +4462,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
 
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
-    if (!IsSessionVisibleForeground(sceneSession)) {
+    if (!sceneSession->GetSessionInfo().isSystem_ && !IsSessionVisibleForeground(sceneSession)) {
         needBlockNotifyFocusStatusUntilForeground_ = true;
     }
     ShiftFocus(sceneSession, reason);
@@ -10187,6 +10192,12 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
         return {};
     }
     return appForceLandscapeMap_[bundleName];
+}
+
+void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc)
+{
+    rootSceneProcessBackEventFunc_ = processBackEventFunc;
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
 }
 
 WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
