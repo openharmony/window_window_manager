@@ -21,8 +21,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string PNAMEID = "windowManager";
-    const std::string PVERSION = "1.0";
+const std::string PNAMEID = "windowManager";
+const std::string PVERSION = "1.0";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(PiPReporter)
 

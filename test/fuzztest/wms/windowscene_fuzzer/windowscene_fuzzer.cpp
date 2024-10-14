@@ -30,9 +30,9 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
-    constexpr char END_CHAR = '\0';
-    constexpr size_t LEN = 10;
+constexpr size_t DATA_MIN_SIZE = 2;
+constexpr char END_CHAR = '\0';
+constexpr size_t LEN = 10;
 }
 class WindowLifeCycle : public IWindowLifeCycle {
 public:

@@ -21,8 +21,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayCutoutController"};
-    const uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayCutoutController"};
+const uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 }
 
 bool DisplayCutoutController::isWaterfallDisplay_ = false;
