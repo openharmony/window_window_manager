@@ -78,20 +78,14 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateFlags, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateStatusProps(property, action);
-    sceneSession->HandleActionUpdateNavigationProps(property, action);
-    sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
-    sceneSession->HandleActionUpdateFlags(property, action);
-
-    auto ret = sceneSession->HandleActionUpdateFlags(property, action);
-    ASSERT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateFlags(property, action);
-    windowSessionProperty.isSystemCalling_ = {true};
-    OHOS::Rosen::Session session(info);
-    session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateFlags(property, action);
+    WMError ret = sceneSession->HandleActionUpdateStatusProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateFlags(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**

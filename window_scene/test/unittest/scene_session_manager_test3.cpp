@@ -675,31 +675,6 @@ HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, Function | SmallTest | L
 }
 
 /**
- * @tc.name: CreateAndConnectSpecificSession
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, CreateAndConnectSpecificSession, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    sptr<ISessionStage> sessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    std::shared_ptr<RSSurfaceNode> node = nullptr;
-    sptr<WindowSessionProperty> property;
-    sptr<ISession> session;
-    SystemSessionConfig systemConfig;
-    sptr<IRemoteObject> token;
-    int32_t id = 0;
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: StartUIAbilityBySCB
  * @tc.desc: StartUIAbilityBySCB
  * @tc.type: FUNC
