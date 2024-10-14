@@ -4288,7 +4288,7 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
     return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo(displayId) : nullptr;
 }
 
-DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
+DMError ScreenSessionManager::HasImmersiveWindow(ScreenId screenId, bool& immersive)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
@@ -4298,7 +4298,7 @@ DMError ScreenSessionManager::HasImmersiveWindow(bool& immersive)
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    clientProxy_->OnImmersiveStateChanged(immersive);
+    clientProxy_->OnImmersiveStateChanged(screenId, immersive);
     return DMError::DM_OK;
 }
 
