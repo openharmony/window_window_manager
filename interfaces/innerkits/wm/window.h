@@ -2142,6 +2142,13 @@ public:
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
+     * @brief Get whether the free multi-window mode is enabled or not.
+     *
+     * @return true means the free multi-window mode is enabled, and false means the opposite.
+     */
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+
+    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
