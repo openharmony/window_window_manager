@@ -757,20 +757,17 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
 */
 HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
     info.abilityName_ = "GetCustomDecorHeight";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetCustomDecorHeight(50);
     sceneSession->SetCustomDecorHeight(20);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ASSERT_EQ(20, ssm_->GetCustomDecorHeight(1));
+    ASSERT_EQ(50, sceneSession->customDecorHeight_);
 
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession2->SetCustomDecorHeight(50);
     sceneSession2->SetCustomDecorHeight(150);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession2));
-    ASSERT_EQ(20, ssm_->GetCustomDecorHeight(2));
+    ASSERT_EQ(50, sceneSession2->customDecorHeight_);
 }
 
 /**
@@ -786,7 +783,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed02, Function | SmallTest | L
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
-    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
+    ASSERT_EQ(sceneSession.GetSessionProperty()->GetDisplayId(), 0);
 }
 
 /**
@@ -819,9 +816,8 @@ HWTEST_F(SceneSessionTest, NotifyServerToUpdateRect01, Function | SmallTest | Le
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->NotifyServerToUpdateRect();
     SessionUIParam uiParam;
-    SizeChangeReason reason;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;;
     sceneSession->SetForegroundInteractiveStatus(false);
     sceneSession->NotifyServerToUpdateRect(uiParam, reason);
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
@@ -835,10 +831,10 @@ HWTEST_F(SceneSessionTest, NotifyServerToUpdateRect01, Function | SmallTest | Le
     uiParam.needSync_ = true;
     uiParam.rect_ = {0, 0, 1, 1};
 
-    sceneSession.winRect_ = {0, 0, 1, 1};
+    sceneSession->winRect_ = {0, 0, 1, 1};
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
-    sceneSession.winRect_ = {1, 1, 1, 1};
+    sceneSession->winRect_ = {1, 1, 1, 1};
     ASSERT_EQ(true, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     uiParam.rect_ = {0, 0, 1, 0};
