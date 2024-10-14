@@ -164,6 +164,7 @@ private:
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
 
+    void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
