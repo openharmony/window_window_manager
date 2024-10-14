@@ -3140,7 +3140,7 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     } else {
         screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
     }
-    TLOGI(WmsLogTag::DMS, "SetVirtualScreenRefreshRate, refreshInterval is %{public}d", refreshInterval);
+    TLOGI(WmsLogTag::DMS, "refreshInterval is %{public}d", refreshInterval);
     return DMError::DM_OK;
 }
 
