@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -50,56 +51,8 @@ void PictureInPictureManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: ReportPiPStartWindow
- * @tc.desc: ReportPiPStartWindow/ReportPiPStopWindow
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPStartWindow, Function | SmallTest | Level2)
-{
-    int result = 0;
-    int32_t source = 0;
-    std::string errorReason = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
-    source = 1;
-    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
-    ASSERT_EQ(result, 0);
-}
-
-/**
- * @tc.name: ReportPiPActionEvent
- * @tc.desc: ReportPiPActionEvent
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPActionEvent, Function | SmallTest | Level2)
-{
-    int result = 0;
-    std::string actionEvent = "";
-    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
-    ASSERT_EQ(result, 0);
-}
-
-/**
- * @tc.name: ReportPiPRatio
- * @tc.desc: ReportPiPRatio/ReportPiPRestore
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureManagerTest, ReportPiPRatio, Function | SmallTest | Level2)
-{
-    int result = 0;
-    SingletonContainer::Get<PiPReporter>().ReportPiPRatio(100, 120);
-    ASSERT_EQ(result, 0);
-    SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
-}
-
-
-/**
  * @tc.name: PiPWindowState
- * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo
+ * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo/ReportPiPStartWindow/ReportPiPStopWindow/ReportPiPActionEvent
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
@@ -110,6 +63,17 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
     ASSERT_EQ(1, static_cast<int>(PictureInPictureManager::windowToControllerMap_.size()));
     PictureInPictureManager::RemovePipControllerInfo(100);
     ASSERT_EQ(0, static_cast<int>(PictureInPictureManager::windowToControllerMap_.size()));
+    int32_t source = 0;
+    std::string errorReason = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    source = 1;
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(source, 1, 1, errorReason);
+    SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(source, 1, 1, errorReason);
+    std::string actionEvent = "";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
+    actionEvent = "nextVideo";
+    SingletonContainer::Get<PiPReporter>().ReportPiPActionEvent(1, actionEvent);
 }
 
 /**
@@ -188,26 +152,21 @@ HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest
  */
 HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | SmallTest | Level2)
 {
-    int result = 0;
     PictureInPictureManager::AttachAutoStartController(0, nullptr);
-
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::SetActiveController(pipController);
-    result++;
     wptr<PictureInPictureController> pipController1 =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController1, nullptr);
 
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
     PictureInPictureManager::autoStartController_ = pipController1;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
 }
 
 /**
