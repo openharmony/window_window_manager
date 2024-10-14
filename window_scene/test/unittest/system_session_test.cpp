@@ -206,7 +206,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     systemSession_->sessionStage_ = mockSessionStage;
-    auto ret = systemSession_->NotifyClientToUpdateRect(nullptr);
+    auto ret = systemSession_->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 

@@ -36,7 +36,8 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError ProcessBackEvent() override;
 
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 

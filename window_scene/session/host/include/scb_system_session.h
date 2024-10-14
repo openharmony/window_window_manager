@@ -27,7 +27,8 @@ public:
     void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
 
-    WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
     void PresentFocusIfPointDown() override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void PresentFoucusIfNeed(int32_t pointerAcrion) override;
@@ -38,6 +39,8 @@ public:
     sptr<SceneSession> GetKeyboardSession() const override;
     void SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func);
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    void SyncScenePanelGlobalPosition(bool needSync) override;
+    bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode();
 
     bool IsVisibleForeground() const override;
@@ -48,6 +51,7 @@ protected:
 
 private:
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
+    bool isNeedSyncGlobalPos_ = true; // can only accessed in main thread
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H
