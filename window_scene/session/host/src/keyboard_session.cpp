@@ -71,6 +71,9 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (!CheckPermissionWithPropertyAnimation(property)) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -90,6 +93,9 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
 
 WSError KeyboardSession::Hide()
 {
+    if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -107,7 +113,7 @@ WSError KeyboardSession::Hide()
         ret = session->SceneSession::Background();
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
-        if (session->systemConfig_.uiType_ == "pc" || session->GetSessionScreenName() == "HiCar"
+        if (session->systemConfig_.uiType_ == UI_TYPE_PC || session->GetSessionScreenName() == "HiCar"
             || session->GetSessionScreenName() == "SuperLauncher") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             session->RestoreCallingSession();
@@ -354,7 +360,7 @@ void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& cal
         textFieldPositionY = sessionProperty->GetTextFieldPositionY();
         textFieldHeight = sessionProperty->GetTextFieldHeight();
     }
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_, textFieldPositionY, textFieldHeight);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "lastSafeRect: %{public}s, safeRect: %{public}s, keyboardRect: %{public}s, "
         "textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", lastSafeRect.ToString().c_str(),
@@ -397,7 +403,7 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     if (isCallingSessionFloating && isMainOrParentFloating &&
-        (systemConfig_.uiType_ == "phone" || (systemConfig_.uiType_ == "pad" && !isFreeMultiWindowMode))) {
+        (systemConfig_.uiType_ == UI_TYPE_PHONE || (systemConfig_.uiType_ == UI_TYPE_PAD && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
     }

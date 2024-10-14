@@ -52,7 +52,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetGestureNavigaionEnabled(bool enable) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
@@ -64,7 +64,7 @@ public:
     WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
+    WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -111,12 +111,16 @@ public:
     WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
+    WSError GetFreeMultiWindowEnableState(bool& enable) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError ToggleShownStateForAllAppWindows() override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
+    WMError ReleaseForegroundSessionScreenLock() override;
 
 private:
     template<typename T>

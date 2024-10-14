@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
 }
 
 const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
@@ -314,7 +314,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 
 bool StartingWindow::IsWindowFollowParent(WindowType type)
 {
-    auto isPhone = uiType_ == "phone";
+    auto isPhone = uiType_ == UI_TYPE_PHONE;
     if (!isPhone) {
         return false;
     }

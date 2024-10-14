@@ -451,7 +451,7 @@ struct PointInfo {
  * @brief topN main window info.
  */
 struct MainWindowInfo : public Parcelable {
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(pid_)) {
             return false;
@@ -545,7 +545,6 @@ namespace {
     constexpr int32_t SYSTEM_USERID = 0;
     constexpr int32_t BASE_USER_RANGE = 200000;
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
-    constexpr uint64_t INVALID_DISPLAY_ID = -1ULL;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

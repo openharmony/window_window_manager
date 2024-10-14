@@ -21,15 +21,15 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceStub"};
 }
 
-int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
-        return -1;
+        return ERR_TRANSACTION_FAILED;
     }
     auto msgId = static_cast<MockSessionManagerServiceMessage>(code);
     WLOGFI("Receive MockSessionManagerServiceMessage = %{public}u", msgId);
@@ -70,7 +70,7 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return 0;
+    return ERR_NONE;
 }
 } // namespace Rosen
 } // namespace OHOS

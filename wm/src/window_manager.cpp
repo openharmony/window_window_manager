@@ -252,7 +252,8 @@ void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
 
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    WLOGFD("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    TLOGD(WmsLogTag::DEFAULT,
+        "Camera float window, accessTokenId = %{private}u, isShowing = %{public}u", accessTokenId, isShowing);
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1328,5 +1329,13 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
+WMError WindowManager::ReleaseForegroundSessionScreenLock()
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

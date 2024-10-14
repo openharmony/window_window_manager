@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceProxy"};
 }
 
 sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
@@ -32,7 +32,12 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
         WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_GET_SESSION_MANAGER_SERVICE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -52,7 +57,12 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetScreenSessionManagerLite(
         WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER),
         data, reply, option) != ERR_NONE) {
         return nullptr;
@@ -71,7 +81,12 @@ void MockSessionManagerServiceProxy::NotifySceneBoardAvailable()
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
@@ -95,7 +110,12 @@ void MockSessionManagerServiceProxy::RegisterSMSRecoverListener(const sptr<IRemo
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
@@ -112,7 +132,12 @@ void MockSessionManagerServiceProxy::UnregisterSMSRecoverListener()
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
@@ -136,7 +161,12 @@ void MockSessionManagerServiceProxy::RegisterSMSLiteRecoverListener(const sptr<I
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
@@ -154,7 +184,12 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
         TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
         MockSessionManagerServiceMessage::TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");

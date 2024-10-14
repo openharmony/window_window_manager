@@ -37,7 +37,12 @@ void PatternDetachCallbackProxy::OnPatternDetach(int32_t persisitentId)
         TLOGE(WmsLogTag::WMS_LIFE, "Write persisitentId failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
     }

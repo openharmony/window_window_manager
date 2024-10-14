@@ -36,12 +36,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
 } // namespace
 
-int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
+        return ERR_TRANSACTION_FAILED;
     }
 
     return ProcessRemoteRequest(code, data, reply, option);
@@ -143,6 +143,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS):
             return HandleUpdatePiPControlStatus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
+            return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -503,7 +505,7 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetGlobalMaximizeMode!");
     auto mode = data.ReadUint32();
@@ -512,7 +514,7 @@ int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel 
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleGetGlobalMaximizeMode!");
     MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
@@ -693,6 +695,19 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     }
 }
 
+int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    bool isAutoStart = false;
+    if (!data.ReadBool(isAutoStart)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart);
+    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleProcessPointDownSession!");
@@ -728,7 +743,7 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
     SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());

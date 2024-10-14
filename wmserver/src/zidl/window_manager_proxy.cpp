@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
 }
 
 
@@ -61,7 +61,12 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
         }
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_CREATE_WINDOW),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_CREATE_WINDOW),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -87,7 +92,12 @@ WMError WindowManagerProxy::AddWindow(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ADD_WINDOW),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ADD_WINDOW),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -116,7 +126,12 @@ WMError WindowManagerProxy::RemoveWindow(uint32_t windowId, bool isFromInnerkits
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REMOVE_WINDOW),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REMOVE_WINDOW),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -140,7 +155,12 @@ WMError WindowManagerProxy::DestroyWindow(uint32_t windowId, bool /* onlySelf */
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DESTROY_WINDOW),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DESTROY_WINDOW),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -163,7 +183,12 @@ WMError WindowManagerProxy::RequestFocus(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REQUEST_FOCUS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REQUEST_FOCUS),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -194,7 +219,12 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
         return avoidArea;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_AVOID_AREA),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return avoidArea;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_AVOID_AREA),
         data, reply, option) != ERR_NONE) {
         return avoidArea;
     }
@@ -226,7 +256,12 @@ WMError WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType ty
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -256,7 +291,12 @@ WMError WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType 
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -286,7 +326,12 @@ WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAni
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto error = remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),
         data, reply, option);
     if (error != ERR_NONE) {
         WLOGFE("RSWindowAnimation Send request error: %{public}d", error);
@@ -319,7 +364,13 @@ void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
         WLOGFE("Failed to write moveDragProperty!");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG),
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -342,7 +393,13 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isPointDown)
         WLOGFE("Write isPointDown failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -361,7 +418,12 @@ void WindowManagerProxy::ProcessPointUp(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -380,7 +442,12 @@ WMError WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
         WLOGFE("Write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -404,7 +471,12 @@ WMError WindowManagerProxy::ToggleShownStateForAllAppWindows()
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -430,7 +502,12 @@ WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
         WLOGFE("Write mode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -460,7 +537,12 @@ WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -491,7 +573,12 @@ WMError WindowManagerProxy::SetWindowGravity(uint32_t windowId, WindowGravity gr
 
     MessageParcel reply;
     MessageOption option;
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_WINDOW_GRAVITY),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_WINDOW_GRAVITY),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -516,7 +603,12 @@ __attribute__((no_sanitize("cfi"))) WMError WindowManagerProxy::GetTopWindowId(
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -534,7 +626,12 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<Accessib
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -559,7 +656,12 @@ WMError WindowManagerProxy::GetUnreliableWindowInfo(int32_t windowId,
         WLOGFE("Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
         static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
@@ -580,7 +682,12 @@ WMError WindowManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisib
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -600,7 +707,12 @@ WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SYSTEM_CONFIG),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SYSTEM_CONFIG),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -640,7 +752,12 @@ WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& f
         WLOGFE("Failed to write to isFromClient!");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto error = remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
         data, reply, option);
     if (error != ERR_NONE) {
         WLOGFE("Send request error: %{public}d", static_cast<uint32_t>(error));
@@ -664,7 +781,12 @@ WMError WindowManagerProxy::GetModeChangeHotZones(DisplayId displayId, ModeChang
         WLOGFE("Write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -709,12 +831,16 @@ void WindowManagerProxy::MinimizeWindowsByLauncher(std::vector<uint32_t> windowI
         WLOGFE("Write isAnimated failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ANIMATION_CALLBACK),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ANIMATION_CALLBACK),
         data, reply, option) != ERR_NONE) {
         WLOGFE("Send request error");
         return;
     }
-    ;
     if (reply.ReadBool()) {
         sptr<IRemoteObject> finishCallbackObject = reply.ReadRemoteObject();
         finishCallback = iface_cast<RSIWindowAnimationFinishedCallback>(finishCallbackObject);
@@ -742,7 +868,12 @@ WMError WindowManagerProxy::UpdateAvoidAreaListener(uint32_t windowId, bool have
         WLOGFE("Write avoid area listener failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -767,7 +898,12 @@ WMError WindowManagerProxy::UpdateRsTree(uint32_t windowId, bool isAdd)
         WLOGFE("Write avoid area listener failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -793,7 +929,12 @@ WMError WindowManagerProxy::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObj
             return WMError::WM_ERROR_IPC_FAILED;
         }
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -823,7 +964,12 @@ void WindowManagerProxy::SetAnchorAndScale(int32_t x, int32_t y, float scale)
         WLOGFE("Write scale failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -846,7 +992,12 @@ void WindowManagerProxy::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
         WLOGFE("Write anchor deltaY failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -861,7 +1012,12 @@ void WindowManagerProxy::OffWindowZoom()
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_OFF_WINDOW_ZOOM),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_OFF_WINDOW_ZOOM),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -882,7 +1038,12 @@ WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
@@ -904,7 +1065,12 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
         WLOGFE("Write windowId failed");
         return nullptr;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SNAPSHOT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SNAPSHOT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return nullptr;
@@ -943,7 +1109,12 @@ WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -969,7 +1140,12 @@ void WindowManagerProxy::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI
         WLOGFE("Write event faild");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
@@ -989,7 +1165,12 @@ void WindowManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& in
         WLOGFE("Write info failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
@@ -1010,7 +1191,12 @@ WMError WindowManagerProxy::GetWindowAnimationTargets(std::vector<uint32_t> miss
         WLOGFE("Write missionIds failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -1034,7 +1220,12 @@ void WindowManagerProxy::SetMaximizeMode(MaximizeMode maximizeMode)
         WLOGFE("Write maximizeMode failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
@@ -1050,7 +1241,12 @@ MaximizeMode WindowManagerProxy::GetMaximizeMode()
         return MaximizeMode::MODE_FULL_FILL;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_MAXIMIZE_MODE),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return MaximizeMode::MODE_FULL_FILL;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_MAXIMIZE_MODE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return MaximizeMode::MODE_FULL_FILL;
@@ -1069,7 +1265,12 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FOCUS_WINDOW_INFO),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FOCUS_WINDOW_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;

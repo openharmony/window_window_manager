@@ -40,16 +40,16 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
-    constexpr Rect g_emptyRect = {0, 0, 0, 0};
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
-    constexpr size_t INDEX_ZERO = 0;
-    constexpr size_t INDEX_ONE = 1;
-    constexpr size_t INDEX_TWO = 2;
-    constexpr double MIN_GRAY_SCALE = 0.0;
-    constexpr double MAX_GRAY_SCALE = 1.0;
-    constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindow"};
+constexpr Rect g_emptyRect = {0, 0, 0, 0};
+constexpr int32_t MIN_DECOR_HEIGHT = 37;
+constexpr int32_t MAX_DECOR_HEIGHT = 112;
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
+constexpr double MIN_GRAY_SCALE = 0.0;
+constexpr double MAX_GRAY_SCALE = 1.0;
+constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -1028,14 +1028,18 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_ == nullptr) {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    } else {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_ == nullptr) {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        } else {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "Window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
         }
     }
     wptr<Window> weakToken(windowToken_);
@@ -1163,14 +1167,20 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 {
-    return HideWindowFunction(env, info);
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    return HideWindowFunction(env, info, errCode);
 }
 
-napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
+napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, WmErrorCode errCode)
 {
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCode != WmErrorCode::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
+                return;
+            }
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr or get invalid param");
@@ -1207,15 +1217,19 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (windowToken_) {
-        auto winType = windowToken_->GetType();
-        if (!WindowHelper::IsSystemWindow(winType)) {
-            WLOGFE("window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+    WmErrorCode errCode = Permission::IsSystemCallingOrStartByHdcd(true) ?
+        WmErrorCode::WM_OK : WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    if (errCode == WmErrorCode::WM_OK) {
+        if (windowToken_) {
+            auto winType = windowToken_->GetType();
+            if (!WindowHelper::IsSystemWindow(winType)) {
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+                errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            }
+        } else {
+            errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
-    } else {
-        errCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -2658,7 +2672,7 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
 
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, err](napi_env env, NapiAsyncTask &task, int32_t status) mutable {
+        [weakToken, err](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
@@ -4095,7 +4109,7 @@ napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback
     return result;
 }
 
-void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode &errCode, int32_t &subWindowId)
+void GetSubWindowId(napi_env env, napi_value nativeVal, WmErrorCode& errCode, int32_t& subWindowId)
 {
     if (nativeVal == nullptr) {
         WLOGFE("Failed to get subWindowId");
@@ -5122,7 +5136,8 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -5529,7 +5544,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_OK && WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("subWindow hide");
-        return HideWindowFunction(env, info);
+        return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
 
     wptr<Window> weakToken(windowToken_);
@@ -6408,7 +6423,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
     return result;
 }
 
-void BindFunctions(napi_env env, napi_value object, const char *moduleName)
+void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "show", moduleName, JsWindow::Show);
     BindNativeFunction(env, object, "showWindow", moduleName, JsWindow::ShowWindow);
