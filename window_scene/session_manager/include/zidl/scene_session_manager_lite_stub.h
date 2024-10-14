@@ -69,6 +69,7 @@ private:
     int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

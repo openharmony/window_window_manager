@@ -73,6 +73,7 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
 protected:
     SceneSessionManagerLite() = default;
