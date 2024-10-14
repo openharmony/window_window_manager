@@ -183,6 +183,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
     }
     window1->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     const sptr<Window>& window2 = Utils::CreateTestWindow(fullAppInfo_2_);
+    ASSERT_NE(nullptr, window2);
     window2->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     ASSERT_EQ(WMError::WM_OK, window2->Show());
