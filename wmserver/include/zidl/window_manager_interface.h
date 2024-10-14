@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -146,7 +147,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
     virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
     {
@@ -220,6 +221,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetFreeMultiWindowEnableState(bool& enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {
         return WMError::WM_OK;
@@ -237,6 +242,7 @@ public:
         return WMError::WM_OK;
     };
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
+    virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
 };
 }
 }

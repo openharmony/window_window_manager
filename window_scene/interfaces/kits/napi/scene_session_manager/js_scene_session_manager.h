@@ -39,6 +39,7 @@ enum class ListenerFunctionType : uint32_t {
     CALLING_WINDOW_ID_CHANGE_CB,
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+    ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -164,8 +165,9 @@ private:
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
 
-    void OnStatusBarEnabledUpdate(bool enable);
-    void OnGestureNavigationEnabledUpdate(bool enable);
+    void OnRootSceneBackEvent();
+    void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
+    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
@@ -188,6 +190,8 @@ private:
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
+    void ProcessAbilityManagerCollaboratorRegistered();
+    void OnAbilityManagerCollaboratorRegistered();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

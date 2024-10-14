@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
 }
 
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -37,6 +37,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     switch (msgId) {
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
+            if (info == nullptr) {
+                WLOGFE("FocusChangeInfo is null");
+                return ERR_INVALID_DATA;
+            }
             bool focused = data.ReadBool();
             UpdateFocusChangeInfo(info, focused);
             break;

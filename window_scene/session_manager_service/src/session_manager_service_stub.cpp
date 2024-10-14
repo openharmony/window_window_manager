@@ -22,8 +22,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceStub" };
 }
 
-int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
 {
     WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {

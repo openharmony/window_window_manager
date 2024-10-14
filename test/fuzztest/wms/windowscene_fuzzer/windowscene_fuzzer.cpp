@@ -30,9 +30,9 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
-    constexpr char END_CHAR = '\0';
-    constexpr size_t LEN = 10;
+constexpr size_t DATA_MIN_SIZE = 2;
+constexpr char END_CHAR = '\0';
+constexpr size_t LEN = 10;
 }
 class WindowLifeCycle : public IWindowLifeCycle {
 public:
@@ -63,7 +63,7 @@ public:
 };
 
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -72,7 +72,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
-size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t size)
+size_t InitWindowOption1(WindowOption& windowOption, const uint8_t* data, size_t size)
 {
     size_t startPos = 0;
     Rect windowRect;
@@ -106,7 +106,7 @@ size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t
     return startPos;
 }
 
-size_t InitWindowOption2(WindowOption &windowOption, const uint8_t *data, size_t size)
+size_t InitWindowOption2(WindowOption& windowOption, const uint8_t* data, size_t size)
 {
     size_t startPos = 0;
     uint32_t flags;
@@ -150,7 +150,7 @@ size_t InitWindowOption2(WindowOption &windowOption, const uint8_t *data, size_t
     return startPos;
 }
 
-size_t InitWindowOption(WindowOption &windowOption, const uint8_t *data, size_t size)
+size_t InitWindowOption(WindowOption& windowOption, const uint8_t* data, size_t size)
 {
     size_t startPos = 0;
     startPos += InitWindowOption1(windowOption, data + startPos, size - startPos);

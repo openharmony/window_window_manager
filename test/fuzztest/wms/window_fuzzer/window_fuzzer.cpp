@@ -221,7 +221,7 @@ public:
 };
 
 template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
+size_t GetObject(T& object, const uint8_t* data, size_t size)
 {
     size_t objectSize = sizeof(object);
     if (objectSize > size) {
@@ -231,7 +231,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
 }
 
 /* 调用该接口后, 需要释放内存 */
-char *CopyDataToString(const uint8_t *data, size_t size)
+char *CopyDataToString(const uint8_t* data, size_t size)
 {
     if (size > DATA_MAX_SIZE) {
         return nullptr;

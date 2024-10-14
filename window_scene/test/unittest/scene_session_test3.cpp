@@ -206,16 +206,16 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     scensession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = scensession->UpdateRect(rect, reason);
+    WSError result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->winRect_ = rect;
     scensession->reason_ = SizeChangeReason::DRAG_END;
-    result = scensession->UpdateRect(rect, reason);
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     WSRect rect2({0, 0, 0, 0});
-    result = scensession->UpdateRect(rect2, reason);
+    result = scensession->UpdateRect(rect2, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -293,7 +293,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scensession->SetSessionProperty(property);
-    auto result = scensession->NotifyClientToUpdateRectTask(nullptr);
+    auto result = scensession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr);
     ASSERT_NE(result, WSError::WS_OK);
 }
 

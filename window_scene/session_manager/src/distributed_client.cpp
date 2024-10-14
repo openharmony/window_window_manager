@@ -127,7 +127,7 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
     return true;
 }
 
-int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state)
 {
     WLOGFI("SetMissionContinueState called. Mission id: %{public}d, state: %{public}d", missionId, state);
     sptr<IRemoteObject> remote = GetDmsProxy();

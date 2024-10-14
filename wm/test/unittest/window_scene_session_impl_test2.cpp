@@ -1628,6 +1628,11 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     option->SetWindowName("SetTitleButtonVisible");
     sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
