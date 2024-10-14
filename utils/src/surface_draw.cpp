@@ -157,7 +157,7 @@ sptr<OHOS::SurfaceBuffer> SurfaceDraw::GetSurfaceBuffer(sptr<OHOS::Surface> laye
     return buffer;
 }
 
-std::unique_ptr<OHOS::Media::PixelMap> SurfaceDraw::DecodeImageToPixelMap(const std::string &imagePath)
+std::unique_ptr<OHOS::Media::PixelMap> SurfaceDraw::DecodeImageToPixelMap(const std::string& imagePath)
 {
     OHOS::Media::SourceOptions opts;
     opts.formatHint = "image/png";
@@ -179,7 +179,7 @@ std::unique_ptr<OHOS::Media::PixelMap> SurfaceDraw::DecodeImageToPixelMap(const 
     return pixelMap;
 }
 
-void SurfaceDraw::DrawPixelmap(Drawing::Canvas &canvas, const std::string& imagePath)
+void SurfaceDraw::DrawPixelmap(Drawing::Canvas& canvas, const std::string& imagePath)
 {
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = DecodeImageToPixelMap(imagePath);
     if (pixelmap == nullptr) {
@@ -195,7 +195,7 @@ void SurfaceDraw::DrawPixelmap(Drawing::Canvas &canvas, const std::string& image
     RSPixelMapUtil::DrawPixelMap(canvas, *pixelmap, 0, 0);
 }
 
-bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath)
+bool SurfaceDraw::DoDraw(uint8_t* addr, uint32_t width, uint32_t height, const std::string& imagePath)
 {
     Drawing::Bitmap bitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
@@ -214,7 +214,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const s
     return true;
 }
 
-bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap)
+bool SurfaceDraw::DoDraw(uint8_t* addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap)
 {
     Drawing::Bitmap bitmap;
     Drawing::Canvas canvas;
@@ -244,7 +244,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::sh
     return true;
 }
 
-bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_t color)
+bool SurfaceDraw::DoDraw(uint8_t* addr, uint32_t width, uint32_t height, uint32_t color)
 {
     Drawing::Bitmap bitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,

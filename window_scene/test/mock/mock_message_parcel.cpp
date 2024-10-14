@@ -168,7 +168,7 @@ bool Parcel::WriteFloat(float value)
 }
 
 #ifdef ENABLE_MOCK_READ_INT32
-bool Parcel::ReadInt32(int32_t &value)
+bool Parcel::ReadInt32(int32_t& value)
 {
     if (g_setReadInt32ErrorFlag) {
         return false;
@@ -178,7 +178,7 @@ bool Parcel::ReadInt32(int32_t &value)
 #endif
 
 #ifdef ENABLE_MOCK_READ_INT64
-bool Parcel::ReadInt64(int64_t &value)
+bool Parcel::ReadInt64(int64_t& value)
 {
     if (g_setReadInt64ErrorFlag) {
         return false;
