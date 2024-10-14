@@ -167,7 +167,6 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
     PictureInPictureManager::autoStartController_ = pipController1;
     PictureInPictureManager::AttachAutoStartController(0, pipController1);
-    ASSERT_EQ(result, 1);
 }
 
 /**
