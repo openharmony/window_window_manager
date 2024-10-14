@@ -569,6 +569,15 @@ WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICam
     return ret;
 }
 
+WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RaiseWindowToTop(persistentId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "raise window to top failed.");
+    }
+    return ret;
+}
+
 WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
@@ -601,15 +610,6 @@ WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persist
         return WMError::WM_OK;
     }
     return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
-}
-
-WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
-{
-    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RaiseWindowToTop(persistentId);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "raise window to top failed.");
-    }
-    return ret;
 }
 
 WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
