@@ -237,6 +237,7 @@ public:
         return WMError::WM_OK;
     };
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
+    virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
 };
 }
 }
