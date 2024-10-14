@@ -465,6 +465,23 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: IsWindowFollowParent01
+ * @tc.desc: IsWindowFollowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Level2)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    } else {
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    }
+    ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_COMPONENT));
+}
+
+/**
  * @tc.name: CreateLeashAndStartingSurfaceNode01
  * @tc.desc: CreateLeashAndStartingSurfaceNode
  * @tc.type: FUNC

@@ -45,14 +45,14 @@ public:
         Rect transparentRect);
 
 private:
-    static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath);
-    static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_t color);
-    static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap);
+    static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, const std::string& imagePath);
+    static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, uint32_t color);
+    static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap);
     static sptr<OHOS::Surface> GetLayer(std::shared_ptr<RSSurfaceNode> surfaceNode);
     static sptr<OHOS::SurfaceBuffer> GetSurfaceBuffer(sptr<OHOS::Surface> layer, int32_t bufferWidth,
         int32_t bufferHeight);
-    static void DrawPixelmap(Drawing::Canvas &canvas, const std::string& imagePath);
-    static std::unique_ptr<OHOS::Media::PixelMap> DecodeImageToPixelMap(const std::string &imagePath);
+    static void DrawPixelmap(Drawing::Canvas& canvas, const std::string& imagePath);
+    static std::unique_ptr<OHOS::Media::PixelMap> DecodeImageToPixelMap(const std::string& imagePath);
     static bool DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& rect,
         std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color, bool fillWindow = false);
 };

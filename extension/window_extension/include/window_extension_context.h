@@ -39,7 +39,7 @@ public:
      *
      * @return errCode WM_OK on success, others on failure.
      */
-    WMError StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
+    WMError StartAbility(const AAFwk::Want& want, const AAFwk::StartOptions& startOptions) const;
 
     static const size_t CONTEXT_TYPE_ID;
 private:

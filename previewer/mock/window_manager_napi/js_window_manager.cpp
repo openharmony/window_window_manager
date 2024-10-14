@@ -83,6 +83,7 @@ napi_value JsWindowManager::GetTopWindow(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindowManager::GetLastWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("GetLastWindow");

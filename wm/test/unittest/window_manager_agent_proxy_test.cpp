@@ -18,6 +18,7 @@
 #include <functional>
 #include "window_manager_agent_proxy.h"
 #include "window_manager_agent.h"
+#include "display_manager_adapter.h"
 
 using namespace testing;
 using namespace testing::ext;

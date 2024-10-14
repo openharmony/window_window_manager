@@ -47,9 +47,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Controller"};
-    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-    constexpr float MASKING_SURFACE_NODE_Z_ORDER = 9999;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Controller"};
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr float MASKING_SURFACE_NODE_Z_ORDER = 9999;
 }
 
 uint32_t WindowController::GenWindowId()
@@ -1263,6 +1263,8 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
+
+/** @note @window.hierarchy */
 WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);

@@ -107,6 +107,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
+    AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
 
@@ -198,6 +199,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
+    SetUIContentComplete();
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
@@ -306,7 +308,8 @@ void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}u, isPrivacyMode: %{public}u", GetWindowId(), isPrivacyMode);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
+        isPrivacyMode);
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -490,6 +493,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
+    SetUIContentComplete();
     NotifyModalUIExtensionMayBeCovered(true);
 
     UpdateAccessibilityTreeInfo();
@@ -1016,6 +1020,21 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
+}
+
+bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
+{
+    bool enable = false;
+    SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "GetFreeMultiWindowEnableState = %{public}u", enable);
+    return enable;
+}
+
+void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyExtensionTimeout(errorCode);
 }
 
 WindowType WindowExtensionSessionImpl::GetParentWindowType() const
