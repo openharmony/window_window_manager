@@ -40,7 +40,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token) override
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token, bool shouldBackToCaller) override
     {
         return WSError::WS_OK;
     }
@@ -190,6 +190,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -246,6 +250,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, Function | SmallTest 
         SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
     EXPECT_EQ(IPC_STUB_UNKNOW_TRANS_ERR, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    data.WriteString("OnRemoteRequest UT Testing.");
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_NONE, res);

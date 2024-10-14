@@ -187,9 +187,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, Functio
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
 
-    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+    auto ret = sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
         session, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -213,9 +213,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, Functi
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
 
-    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+    auto ret = sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
         session, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -239,9 +239,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, Functi
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = nullptr;
 
-    sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
+    auto ret = sceneSessionManagerProxy_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, node, property,
         session, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -265,9 +265,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, Function
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
 
-    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+    auto ret = sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
         property, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -291,9 +291,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, Functio
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
 
-    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+    auto ret = sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
         property, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -317,9 +317,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, Functio
     sptr<ISession> session = new (std::nothrow) SessionMocker(info);
     sptr<IRemoteObject> token = nullptr;
 
-    sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
+    auto ret = sceneSessionManagerProxy_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session,
         property, token);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1054,23 +1054,36 @@ HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Fu
 }
 
 /**
- * @tc.name: SetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.name: SkipSnapshotByUserIdAndBundleNames
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-            new SceneSessionManagerProxy(iRemoteObjectMocker);
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     int32_t userId = 1;
     std::vector<std::string> bundleNameList = {"a", "b", "c"};
-    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SetSnapshotSkipByUserIdAndBundleNameList(
+    ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->SkipSnapshotByUserIdAndBundleNames(
         userId, bundleNameList));
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
+}
 }  // namespace
 }
 }

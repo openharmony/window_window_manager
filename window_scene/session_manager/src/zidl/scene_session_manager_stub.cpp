@@ -172,10 +172,17 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
             return HandleSkipSnapshotForAppProcess(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST):
-            return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+        case static_cast<uint32_t>
+            (SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES):
+            return HandleSkipSnapshotByUserIdAndBundleNames(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
+            return HandleGetWindowIdsByCoordinate(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
+            return HandleReleaseForegroundSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_DISPLAYID):
+            return HandleGetDisplayIdByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -418,13 +425,18 @@ int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel& dat
 
 int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandlePendingSessionToBackground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToBackgroundForDelegator(token);
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -883,14 +895,14 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t windowId = INVALID_SESSION_ID;
-    if (!data.ReadUint32(windowId)) {
+    int32_t windowId = INVALID_SESSION_ID;
+    if (!data.ReadInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read windowId failed");
         return ERR_INVALID_DATA;
     }
-    uint32_t mainWindowId = INVALID_SESSION_ID;
+    int32_t mainWindowId = INVALID_SESSION_ID;
     WMError errCode = GetParentMainWindowId(windowId, mainWindowId);
-    if (!reply.WriteUint32(mainWindowId)) {
+    if (!reply.WriteInt32(mainWindowId)) {
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
@@ -1121,7 +1133,7 @@ int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleSkipSnapshotByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply)
 {
     int32_t userId = -1;
     if (!data.ReadInt32(userId)) {
@@ -1133,7 +1145,7 @@ int SceneSessionManagerStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(Mess
         TLOGE(WmsLogTag::DEFAULT, "Fail to read bundleNameList");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    WMError errCode = SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1156,6 +1168,59 @@ int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t displayId;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t windowNumber;
+    if (!data.ReadInt32(windowNumber)) {
+        TLOGE(WmsLogTag::DEFAULT, "read windowNumber failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t x;
+    int32_t y;
+    if (!data.ReadInt32(x) || !data.ReadInt32(y)) {
+        TLOGE(WmsLogTag::DEFAULT, "read coordinate failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> windowIds;
+    WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32Vector(windowIds);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
+{
+    WMError errCode = ReleaseForegroundSessionScreenLock();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetDisplayIdByPersistentId(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 persistentId");
+        return ERR_INVALID_DATA;
+    }
+    int32_t displayId = 0;
+    WMError errCode = GetDisplayIdByPersistentId(persistentId, displayId);
+    if (!reply.WriteInt32(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write DisplayId fail.");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

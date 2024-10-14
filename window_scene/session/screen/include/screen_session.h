@@ -50,6 +50,7 @@ public:
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
+    virtual void OnHoverStatusChange(int32_t hoverStatus, ScreenId extendScreenId) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -78,6 +79,7 @@ enum class ScreenSessionReason : int32_t {
     CREATE_SESSION_FOR_VIRTUAL,
     CREATE_SESSION_FOR_MIRROR,
     CREATE_SESSION_FOR_REAL,
+    CREATE_SESSION_WITHOUT_DISPLAY_NODE,
     INVALID,
 };
 
@@ -154,6 +156,7 @@ public:
     DMError SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace);
 
     void HandleSensorRotation(float sensorRotation);
+    void HandleHoverStatusChange(int32_t hoverStatus);
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     bool HasPrivateSessionForeground() const;
@@ -168,7 +171,7 @@ public:
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
@@ -216,6 +219,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    void HoverStatusChange(int32_t hoverStatus);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
@@ -245,7 +249,7 @@ private:
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
-    float currentSensorRotation_ { 0.0f };
+    float currentSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };

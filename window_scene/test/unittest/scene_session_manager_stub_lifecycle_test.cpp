@@ -77,6 +77,9 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
 
     sptr<ISessionStage> sessionStage = new SessionStageMocker();
     ASSERT_NE(nullptr, sessionStage);
+    int res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
+    ASSERT_EQ(res, ERR_INVALID_DATA);
+
     data.WriteRemoteObject(sessionStage->AsObject());
     sptr<IWindowEventChannel> eventChannel = new WindowEventChannel(sessionStage);
     ASSERT_NE(nullptr, eventChannel);
@@ -86,7 +89,8 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
-    stub_->HandleRecoverAndReconnectSceneSession(data, reply);
+    res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
+    ASSERT_EQ(res, ERR_INVALID_STATE);
 
     data.WriteRemoteObject(sessionStage->AsObject());
     data.WriteRemoteObject(eventChannel->AsObject());
@@ -99,8 +103,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
-
-    int res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
+    res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_STATE);
 }
 
@@ -139,7 +142,7 @@ HWTEST_F(
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     int res = stub_->HandlePendingSessionToBackgroundForDelegator(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

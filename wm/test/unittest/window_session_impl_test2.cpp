@@ -651,7 +651,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest 
 
     mode = WindowMode::WINDOW_MODE_PIP;
     window->NotifyWindowStatusChange(mode);
-    window->Destroy();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
@@ -843,7 +843,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | 
 
     window->uiContent_ = nullptr;
     window->UpdateDecorEnableToAce(false);
-    window->Destroy();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
@@ -933,6 +933,8 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight, Function | SmallTest | Level2)
 {
     auto window = GetTestWindowImpl("GetDecorHeight");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
     int32_t height = -1;
     ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
     
@@ -954,6 +956,8 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea, Function | SmallTest | Leve
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
     window->uiContent_ = std::move(uiContent);
@@ -1075,8 +1079,14 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
     auto window = GetTestWindowImpl("GetVirtualPixelRatio");
     ASSERT_NE(nullptr, window);
     sptr<DisplayInfo> displayInfo = new (std::nothrow) DisplayInfo();
+    float density = 2.0f;
+    displayInfo->SetVirtualPixelRatio(density);
     float vpr = window->GetVirtualPixelRatio(displayInfo);
-    ASSERT_EQ(1.0, vpr);
+    ASSERT_EQ(density, vpr);
+
+    window->useUniqueDensity_ = true;
+    vpr = window->GetVirtualPixelRatio(displayInfo);
+    ASSERT_EQ(window->virtualPixelRatio_, vpr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetVirtualPixelRatio end";
 }
 

@@ -477,10 +477,13 @@ ohos_unittest("wm_window_scene_session_impl_test3") {
 
 ohos_unittest("wm_window_scene_session_impl_test4") {
   module_out_path = module_out_path
-
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
   sources = [ "window_scene_session_impl_test4.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -591,7 +594,10 @@ ohos_unittest("wm_picture_in_picture_manager_test") {
 
   sources = [ "picture_in_picture_manager_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ace_engine:ace_xcomponent_controller",

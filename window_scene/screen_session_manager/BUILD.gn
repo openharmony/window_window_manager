@@ -84,6 +84,7 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_session_dumper.cpp",
     "src/screen_session_manager.cpp",
     "src/screen_setting_helper.cpp",
+    "src/screen_tent_property.cpp",
     "src/session_display_power_controller.cpp",
     "src/setting_observer.cpp",
     "src/setting_provider.cpp",
@@ -100,6 +101,7 @@ ohos_shared_library("screen_session_manager") {
     "input:libmmi-napi",
   ]
   deps = [
+    "${window_base_path}/etc:wms_etc",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -168,10 +170,6 @@ ohos_shared_library("screen_session_manager") {
   if (device_status_enable) {
     external_deps += [ "device_status:devicestatus_client" ]
     defines += [ "DEVICE_STATUS_ENABLE" ]
-  }
-
-  if (build_variant == "user") {
-    defines += [ "IS_RELEASE_VERSION" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

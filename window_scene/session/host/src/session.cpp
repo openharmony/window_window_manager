@@ -27,7 +27,6 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
-#include "anr_manager.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "util.h"
@@ -190,6 +189,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
+    std::lock_guard<std::mutex> lock(snapshotMutex_);
     return snapshot_;
 }
 
@@ -294,6 +294,11 @@ void Session::SetScreenId(uint64_t screenId)
 void Session::SetAppInstanceKey(const std::string& appInstanceKey)
 {
     sessionInfo_.appInstanceKey_ = appInstanceKey;
+}
+
+std::string Session::GetAppInstanceKey() const
+{
+    return sessionInfo_.appInstanceKey_;
 }
 
 const SessionInfo& Session::GetSessionInfo() const
@@ -519,6 +524,22 @@ void Session::SetSystemFocusable(bool systemFocusable)
     }
 }
 
+WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+            session->GetPersistentId(), isFocusableOnShow);
+        session->focusableOnShow_ = isFocusableOnShow;
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -540,6 +561,11 @@ bool Session::GetSystemFocusable() const
 bool Session::CheckFocusable() const
 {
     return GetFocusable() && GetSystemFocusable();
+}
+
+bool Session::IsFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool Session::IsFocused() const
@@ -906,8 +932,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
-            .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         sessionStage_->UpdateRect(rect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
@@ -981,8 +1006,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
@@ -1080,7 +1103,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -1160,7 +1183,7 @@ void Session::HandleDialogForeground()
     }
 }
 
-WSError Session::Background(bool isFromClient)
+WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
@@ -1179,7 +1202,6 @@ WSError Session::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1198,7 +1220,7 @@ void Session::ResetIsActive()
     isActive_ = false;
 }
 
-WSError Session::Disconnect(bool isFromClient)
+WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
@@ -1216,7 +1238,6 @@ WSError Session::Disconnect(bool isFromClient)
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
     }
-    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -1329,10 +1350,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
-        }
-        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
-            !session->IsFocused() && session->GetFocusable()) {
-            TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "SetAttachState");
@@ -1562,11 +1579,16 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
-        SessionInfo info = GetSessionInfo();
-        if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+    auto task = [weakThis = wptr(this), needStartCaller]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->isTerminating_ = true;
+        SessionInfo info = session->GetSessionInfo();
+        if (session->terminateSessionFuncNew_) {
+            session->terminateSessionFuncNew_(info, needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -1617,12 +1639,13 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     pendingSessionToBackgroundForDelegatorFunc_ = func;
 }
 
-WSError Session::PendingSessionToBackgroundForDelegator()
+WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), shouldBackToCaller);
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(info);
+        pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
     }
     return WSError::WS_OK;
 }
@@ -1895,12 +1918,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFW("InputTracking id:%{public}d, The pointerEvent does not report normally,"
-            "bundleName:%{public}s not reponse, pid:%{public}d, persistentId:%{public}d",
-            pointerEvent->GetId(), callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -1943,12 +1960,6 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
 {
     WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
-    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, "
-            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
-            callingBundleName_.c_str(), callingPid_, persistentId_);
-        return WSError::WS_DO_NOTHING;
-    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -2055,19 +2066,22 @@ void Session::SaveSnapshot(bool useFfrt)
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        session->snapshot_ = session->Snapshot(runInFfrt);
-        if (!(session->snapshot_ && session->scenePersistence_)) {
+        auto pixelMap = session->Snapshot(runInFfrt);
+        if (pixelMap == nullptr) {
             return;
         }
+        {
+            std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+            session->snapshot_ = pixelMap;
+        }
         std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-                return;
+            if (auto session = weakThis.promote()) {
+                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                session->snapshot_ = nullptr;
             }
-            session->ResetSnapshot();
         };
-        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     if (!useFfrt) {
         task();
@@ -2154,7 +2168,6 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
-    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -2318,6 +2331,7 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    UpdateGestureBackEnabled();
     // notify scb arkui focus
     if (!isFocused) {
         NotifyUILostFocus();
@@ -2493,6 +2507,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property->SetWindowMode(mode);
         property->SetIsNeedUpdateWindowMode(true);
+        UpdateGestureBackEnabled();
     } else {
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -2503,6 +2518,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         } else {
             surfaceNode_->MarkUifirstNode(true);
         }
+        UpdateGestureBackEnabled();
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2553,6 +2569,7 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
     return property_;
 }
 
+/** @note @window.layout */
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
@@ -2580,6 +2597,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     }
 }
 
+/** @note @window.layout */
 void Session::RectCheckProcess()
 {
     if (!(IsSessionForeground() || isVisible_)) {
@@ -2622,6 +2640,7 @@ void Session::RectCheckProcess()
     }
 }
 
+/** @note @window.layout */
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2633,24 +2652,36 @@ void Session::SetSessionRect(const WSRect& rect)
     RectCheckProcess();
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
 }
 
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    globalRect_ = rect;
+}
+
+/** @note @window.layout */
 WSRect Session::GetLastLayoutRect() const
 {
     return lastLayoutRect_;
 }
 
+/** @note @window.layout */
 WSRect Session::GetLayoutRect() const
 {
     return layoutRect_;
@@ -2741,14 +2772,6 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->HandleBackEvent();
-}
-
-WSError Session::MarkProcessed(int32_t eventId)
-{
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("InputTracking persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
-    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
@@ -3289,18 +3312,13 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     property->SetTouchHotAreas(touchHotAreas);
 }
 
-void Session::ResetSnapshot()
-{
-    snapshot_.reset();
-}
-
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 

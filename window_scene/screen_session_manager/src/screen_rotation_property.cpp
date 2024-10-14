@@ -59,5 +59,22 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
     }
     return sensorRotation;
 }
+
+void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus)
+{
+    static DeviceHoverStatus lastHoverStatusConverted_ = DeviceHoverStatus::INVALID;
+    TLOGI(WmsLogTag::DMS, "DeviceHoverStatus: %{public}d, "
+        "lastHoverStatusConverted: %{public}d", hoverStatus, lastHoverStatusConverted_);
+
+    if (hoverStatus != DeviceHoverStatus::INVALID) {
+        lastHoverStatusConverted_ = hoverStatus;
+    }
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (!screenSession) {
+        TLOGW(WmsLogTag::DMS, "screenSession is null, sensor rotation status handle failed");
+        return;
+    }
+    screenSession->HandleHoverStatusChange(static_cast<int32_t>(hoverStatus));
+}
 } // Rosen
 } // OHOS

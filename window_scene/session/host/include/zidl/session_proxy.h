@@ -28,9 +28,10 @@ public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}
     virtual ~SessionProxy() = default;
 
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -47,6 +48,9 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
+    WSError OnRestoreMainWindow() override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
@@ -94,11 +98,17 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
+    
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
-    WSError SendRequest(SessionInterfaceCode code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
 

@@ -367,6 +367,34 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive02, Function | SmallTes
     mainSession_->NotifyClientToUpdateInteractive(true);
     ASSERT_TRUE(true); // exec success
 }
+
+/**
+ * @tc.name: OnRestoreMainWindow
+ * @tc.desc: OnRestoreMainWindow function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnRestoreMainWindow";
+    info.bundleName_ = "OnRestoreMainWindow";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    session->RegisterSessionChangeCallback(sessionChangeCallback);
+    sessionChangeCallback->onRestoreMainWindowFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+
+    NotifyRestoreMainWindowFunc func = []() {
+        return;
+    };
+    sessionChangeCallback->onRestoreMainWindowFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+}
+
 }
 }
 }

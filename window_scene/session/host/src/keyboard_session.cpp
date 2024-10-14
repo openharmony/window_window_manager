@@ -128,7 +128,7 @@ WSError KeyboardSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError KeyboardSession::Disconnect(bool isFromClient)
+WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto task = [weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
@@ -178,7 +178,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
-    if (!IsSessionForeground()) {
+    if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
     }
@@ -202,7 +202,7 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 void KeyboardSession::OnCallingSessionUpdated()
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
-    if (!IsSessionForeground()) {
+    if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
     }
@@ -403,7 +403,7 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if (!IsSessionForeground()) {
+    if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
     }

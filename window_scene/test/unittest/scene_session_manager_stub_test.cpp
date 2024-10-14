@@ -392,6 +392,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToBackgroundForDelega
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
+    data.WriteString("TransIdPendingSessionToBackgroundForDelegator UT Testing");
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR);
 
@@ -1117,7 +1118,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Fu
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
-    stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    int res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_STATE);
 
     data.WriteRemoteObject(sessionStage->AsObject());
     data.WriteRemoteObject(eventChannel->AsObject());
@@ -1131,7 +1133,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Fu
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
-    int res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
+    res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_STATE);
 }
 
@@ -2080,11 +2082,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
 }
 
 /**
- * @tc.name: HandleSetSnapshotSkipByUserIdAndBundleNameList
- * @tc.desc: test HandleSetSnapshotSkipByUserIdAndBundleNameList
+ * @tc.name: HandleSkipSnapshotByUserIdAndBundleNames
+ * @tc.desc: test HandleSkipSnapshotByUserIdAndBundleNames
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleNameList, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2093,7 +2095,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSnapshotSkipByUserIdAndBundleName
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteStringVector(bundleNameList);
-    int res = stub_->HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+    int res = stub_->HandleSkipSnapshotByUserIdAndBundleNames(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleReleaseForegroundSessionScreenLock
+ * @tc.desc: test HandleReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }

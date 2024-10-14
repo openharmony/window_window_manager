@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "window.h"
 #include "wm_common.h"
+#include "common_test_utils.h"
 #include "window_test_utils.h"
 using namespace testing;
 using namespace testing::ext;
@@ -76,6 +77,7 @@ void WindowAnimationTransitionTest::TearDownTestCase()
 
 void WindowAnimationTransitionTest::SetUp()
 {
+    CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_animation_transition_test");
     windowInfo_ = {
             .name = "AnimationTestWindow",
             .rect = {0, 0, 200, 200},

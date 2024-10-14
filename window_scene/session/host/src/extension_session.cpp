@@ -18,7 +18,6 @@
 #include "ipc_skeleton.h"
 
 #include "window_manager_hilog.h"
-#include "anr_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -439,7 +438,7 @@ AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
     return avoidArea;
 }
 
-WSError ExtensionSession::Background(bool isFromClient)
+WSError ExtensionSession::Background(bool isFromClient, const std::string& identityToken)
 {
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Background ExtensionSession, id: %{public}d, state: %{public}" PRIu32"",
@@ -455,7 +454,6 @@ WSError ExtensionSession::Background(bool isFromClient)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     NotifyBackground();
-    DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
 

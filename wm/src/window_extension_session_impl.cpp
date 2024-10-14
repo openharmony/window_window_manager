@@ -101,7 +101,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
     }
-    InputTransferStation::GetInstance().AddInputWindow(this);
+
+    auto usage = property_->GetUIExtensionUsage();
+    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        InputTransferStation::GetInstance().AddInputWindow(this);
+    }
+
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
@@ -158,7 +163,12 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+
+    auto usage = property_->GetUIExtensionUsage();
+    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+    }
+
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -412,8 +422,14 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isConsumedFuture = isConsumedPromise->get_future().share();
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
-            [this, isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
-                this->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+            [weakThis = wptr(this), isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+                bool consumed) {
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
+                    return;
+                }
+                window->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
             });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
@@ -822,11 +838,11 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoi
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
 
-WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     CheckAndAddExtWindowFlags();
     UpdateSystemViewportConfig();
-    return this->WindowSessionImpl::Show(reason, withAnimation);
+    return WindowSessionImpl::Show(reason, withAnimation, withFocus);
 }
 
 WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
@@ -1144,20 +1160,6 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
-}
-
-WSError WindowExtensionSessionImpl::SwitchFreeMultiWindow(bool enable)
-{
-    if (IsWindowSessionInvalid()) {
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    if (windowSystemConfig_.freeMultiWindowEnable_ == enable) {
-        return WSError::WS_ERROR_REPEAT_OPERATION;
-    }
-    NotifySwitchFreeMultiWindow(enable);
-    // Switch process finish, update system config
-    windowSystemConfig_.freeMultiWindowEnable_ = enable;
-    return WSError::WS_OK;
 }
 
 bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()

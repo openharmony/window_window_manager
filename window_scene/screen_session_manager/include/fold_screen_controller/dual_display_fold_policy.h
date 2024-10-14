@@ -42,11 +42,14 @@ private:
     void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, ScreenId offScreenId, ScreenId onScreenId);
     void ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId);
     void ChangeScreenDisplayModeToCoordination();
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
     void RecoverWhenBootAnimationExit();
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     FoldDisplayMode GetModeMatchStatus();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
+    void SetdisplayModeChangeStatus(bool status) override;
+    ScreenId GetScreenIdByDisplayMode(FoldDisplayMode displayMode);
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen

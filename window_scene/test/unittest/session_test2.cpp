@@ -385,7 +385,7 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent01, Function | SmallTest | Level2)
 
     session_->sessionInfo_.isSystem_ = false;
     session_->state_ = SessionState::STATE_DISCONNECT;
-    
+
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
@@ -1602,9 +1602,9 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
 
-    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
     session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
-    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator());
+    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -1801,6 +1801,7 @@ HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
 
     auto result = session_->SetFocusable(isFocusable);
     ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(session_->GetFocusable(), true);
 }
 
 /**

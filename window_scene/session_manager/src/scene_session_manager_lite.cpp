@@ -112,10 +112,11 @@ WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteOb
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+    bool shouldBackToCaller)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token);
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
 }
 
 WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token)
@@ -264,5 +265,10 @@ WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName
 WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
+}
+
+WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAccessibilityWindowInfo(infos);
 }
 } // namespace OHOS::Rosen
