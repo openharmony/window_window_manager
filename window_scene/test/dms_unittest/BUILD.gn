@@ -354,7 +354,7 @@ ohos_unittest("ws_screen_session_manager_client_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-  ] 
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
