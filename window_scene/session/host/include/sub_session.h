@@ -26,9 +26,6 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
-    WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
-        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1) override;
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     int32_t GetMissionId() const override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;

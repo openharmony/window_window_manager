@@ -103,6 +103,7 @@ using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSes
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
+using RootSceneProcessBackEventFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -208,14 +209,14 @@ public:
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
 
-    WSError InitUserInfo(int32_t userId, std::string &fileDir);
+    WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
     void NotifySessionMovedToFront(int32_t persistentId);
-    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
@@ -236,7 +237,7 @@ public:
         SessionInfoBean& sessionInfo) override;
     WSError DumpSessionAll(std::vector<std::string> &infos) override;
     WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
-    WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
+    WSError GetAllAbilityInfos(const AAFwk::Want& want, int32_t userId,
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
     WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
@@ -282,6 +283,7 @@ public:
     void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
+    void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
@@ -294,7 +296,7 @@ public:
     void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
     void NotifyRecoveringFinished();
 
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
+    WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
@@ -374,6 +376,11 @@ public:
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
 
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -452,8 +459,8 @@ private:
     WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
-    int32_t NotifyRssThawApp(const int32_t uid, const std::string &bundleName,
-        const std::string &reason);
+    int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
+        const std::string& reason);
     void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession);
     bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
@@ -747,6 +754,7 @@ private:
 
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
+    RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

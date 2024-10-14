@@ -237,8 +237,8 @@ private:
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
-    void UpdateSessionLabel(const std::string &label);
-    void UpdateSessionIcon(const std::string &iconPath);
+    void UpdateSessionLabel(const std::string& label);
+    void UpdateSessionIcon(const std::string& iconPath);
     void OnSessionException(const SessionInfo& info, bool needRemoveSession);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
