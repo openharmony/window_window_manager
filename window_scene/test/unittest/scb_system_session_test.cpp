@@ -72,7 +72,7 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest 
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     scbSystemSession_->sessionStage_ = mockSessionStage;
-    auto ret = scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -189,7 +189,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
-    scbSystemSession_->NotifyClientToUpdateRect(nullptr);
+    scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
 }
 
 /**

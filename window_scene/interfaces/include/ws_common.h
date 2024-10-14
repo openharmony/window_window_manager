@@ -459,7 +459,7 @@ struct WSRectT {
 
     inline bool IsInvalid() const
     {
-        return IsEmpty() || NearZero(width_) || NearZero(height_);
+        return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
     inline std::string ToString() const
@@ -631,8 +631,11 @@ struct SessionUIParam {
     float scaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
+    float transX_ { 0.0f }; // global translateX
+    float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {
