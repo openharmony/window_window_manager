@@ -1245,6 +1245,31 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
+
+/**
+ * @tc.name: SetRootSceneProcessBackEventFunc
+ * @tc.desc: test function : SetRootSceneProcessBackEventFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "SetRootSceneProcessBackEventFunc";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->focusedSessionId_ = sceneSession->GetPersistentId();
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->ProcessBackEvent();
+
+    RootSceneProcessBackEventFunc func = []() {};
+    ssm_->SetRootSceneProcessBackEventFunc(func);
+    ssm_->ProcessBackEvent();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
