@@ -62,7 +62,7 @@ void SystemSessionTest::SetUp()
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    systemSession_ = new (std::nothrow) SystemSession(info, specificCallback);
+    systemSession_ = sptr<SystemSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, systemSession_);
 }
 
