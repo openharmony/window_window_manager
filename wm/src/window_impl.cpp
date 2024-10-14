@@ -1975,6 +1975,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
+/** @note @window.hierarchy */
 WmErrorCode WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
