@@ -49,6 +49,7 @@ public:
     void OnKeyboardPanelUpdated() override;
     void OpenKeyboardSyncTransaction() override;
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
+    bool IsVisibleForeground() const override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -64,6 +65,7 @@ private:
     void RaiseCallingSession(const WSRect& keyboardPanelRect,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
     void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
     void RelayoutKeyBoard();
@@ -72,6 +74,8 @@ private:
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     std::shared_ptr<RSTransaction> GetRSTransaction();
     std::string GetSessionScreenName();
+    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
+        bool isShow);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
