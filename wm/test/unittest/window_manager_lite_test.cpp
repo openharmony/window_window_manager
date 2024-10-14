@@ -71,6 +71,14 @@ public:
     }
 };
 
+class TestWindowUpdateListener : public IWindowUpdateListener {
+public:
+    void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) override
+    {
+        WLOGI("TestWindowUpdateListener");
+    }
+};
+
 class WindowManagerLiteTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -878,6 +886,96 @@ HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
     WindowManagerLite::GetInstance().destroyed_ = true;
     WindowManagerLite::GetInstance().OnRemoteDied();
     ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
+}
+
+/**
+ * @tc.name: GetAccessibilityWindowInfo01
+ * @tc.desc: check GetAccessibilityWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetAccessibilityWindowInfo01, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.clear();
+    EXPECT_CALL(m->Mock(), GetAccessibilityWindowInfo(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManagerLite::GetInstance().GetAccessibilityWindowInfo(infos));
+    EXPECT_CALL(m->Mock(), GetAccessibilityWindowInfo(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_WINDOW));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, WindowManagerLite::GetInstance().GetAccessibilityWindowInfo(infos));
+}
+
+/**
+ * @tc.name: RegisterWindowUpdateListener01
+ * @tc.desc: check RegisterWindowUpdateListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterWindowUpdateListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowUpdateListeners_;
+    windowManager.pImpl_->windowUpdateListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowUpdateListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(nullptr));
+
+    sptr<TestWindowUpdateListener> listener = new TestWindowUpdateListener();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowUpdateListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowUpdateListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowUpdateListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowUpdateListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowUpdateListeners_.size());
+
+    windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowUpdateListener01
+ * @tc.desc: check UnregisterWindowUpdateListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowUpdateListeners_;
+    windowManager.pImpl_->windowUpdateListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowUpdateListeners_.clear();
+
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowUpdateListener(nullptr));
+
+    sptr<TestWindowUpdateListener> listener1 = new TestWindowUpdateListener();
+    sptr<TestWindowUpdateListener> listener2 = new TestWindowUpdateListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowUpdateListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWindowUpdateListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->windowUpdateListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->windowUpdateListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowUpdateListenerAgent_);
+
+    windowManager.pImpl_->windowUpdateListeners_.emplace_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->windowUpdateListeners_.size());
+
+    windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
 }
 }
 }
