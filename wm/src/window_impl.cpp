@@ -1999,6 +1999,9 @@ WmErrorCode WindowImpl::RaiseToAppTop()
 
 WMError WindowImpl::DisableAppWindowDecor()
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -3928,6 +3931,10 @@ bool WindowImpl::IsFullScreen() const
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return;
+    }
     if (property_->GetRequestedOrientation() == orientation) {
         return;
     }
@@ -3939,6 +3946,10 @@ void WindowImpl::SetRequestedOrientation(Orientation orientation)
 
 Orientation WindowImpl::GetRequestedOrientation()
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
+        return Orientation::UNSPECIFIED;
+    }
     return property_->GetRequestedOrientation();
 }
 
