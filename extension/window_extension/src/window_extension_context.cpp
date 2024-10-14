@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionContext"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionContext"};
 }
 
 const size_t WindowExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("WindowExtensionContext"));

@@ -22,7 +22,7 @@
 #include "window_option.h"
 
 namespace OHOS::AppExecFwk {
-    class Configuration;
+class Configuration;
 }
 
 namespace OHOS {

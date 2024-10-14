@@ -25,12 +25,12 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr int RGB565_PIXEL_BYTES = 2;
-    constexpr int RGB888_PIXEL_BYTES = 3;
-    constexpr int BPP = 4;
-    constexpr int RGBA8888BUF_SIZE = 10;
-    constexpr int RGB888BUF_SIZE = 10;
-    constexpr int RGB565BUF_SIZE = 10;
+constexpr int RGB565_PIXEL_BYTES = 2;
+constexpr int RGB888_PIXEL_BYTES = 3;
+constexpr int BPP = 4;
+constexpr int RGBA8888BUF_SIZE = 10;
+constexpr int RGB888BUF_SIZE = 10;
+constexpr int RGB565BUF_SIZE = 10;
 }
 class SnapshotUtilsTest : public testing::Test {
 public:
