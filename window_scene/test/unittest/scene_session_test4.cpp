@@ -749,6 +749,101 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
     EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
 }
+
+/**
+ * @tc.name: GetCustomDecorHeight02
+ * @tc.desc: GetCustomDecorHeight
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "GetCustomDecorHeight";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetCustomDecorHeight(50);
+    sceneSession->SetCustomDecorHeight(20);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ASSERT_EQ(20, ssm_->GetCustomDecorHeight(1));
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession2->SetCustomDecorHeight(50);
+    sceneSession2->SetCustomDecorHeight(150);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession2));
+    ASSERT_EQ(20, ssm_->GetCustomDecorHeight(2));
+}
+
+/**
+ * @tc.name: SetDefaultDisplayIdIfNeed02
+ * @tc.desc: SetDefaultDisplayIdIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetDefaultDisplayIdIfNeed02";
+    info.bundleName_ = "SetDefaultDisplayIdIfNeed02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
+}
+
+/**
+ * @tc.name: SetDefaultDisplayIdIfNeed03
+ * @tc.desc: SetDefaultDisplayIdIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetDefaultDisplayIdIfNeed03";
+    info.bundleName_ = "SetDefaultDisplayIdIfNeed03";
+    info.screenId_ = 20;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+    ASSERT_EQ(20, sceneSession->GetSessionInfo().screenId_);
+}
+
+/**
+ * @tc.name: NotifyServerToUpdateRect01
+ * @tc.desc: NotifyServerToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyServerToUpdateRect";
+    info.bundleName_ = "NotifyServerToUpdateRect";
+    info.screenId_ = 20;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->NotifyServerToUpdateRect();
+    SessionUIParam uiParam;
+    SizeChangeReason reason;
+    sceneSession->SetForegroundInteractiveStatus(false);
+    sceneSession->NotifyServerToUpdateRect(uiParam, reason);
+    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->SetForegroundInteractiveStatus(true);
+    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    uiParam.needSync_ = false;
+    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    uiParam.needSync_ = true;
+    uiParam.rect_ = {0, 0, 1, 1};
+
+    sceneSession.winRect_ = {0, 0, 1, 1};
+    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession.winRect_ = {1, 1, 1, 1};
+    ASSERT_EQ(true, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    uiParam.rect_ = {0, 0, 1, 0};
+    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+}
 }
 }
 }
