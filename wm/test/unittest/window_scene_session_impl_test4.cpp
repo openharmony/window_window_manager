@@ -802,7 +802,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     property = SystemBarProperty();
     property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
