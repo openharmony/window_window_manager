@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,29 +14,42 @@
  */
 
 #include "window_scene.h"
-#include <new>
+
+#include <ability_context.h>
 #include <configuration.h>
 
-#include "static_call.h"
-#include "window_impl.h"
-#include "window_manager_hilog.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
+#include "singleton_container.h"
+#include "static_call.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowScene"};
-}
+const std::string MAIN_WINDOW_ID = "main window";
+std::atomic<uint32_t> g_count { 0 };
 
-const std::string WindowScene::MAIN_WINDOW_ID = "main window";
+std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    if (context == nullptr) {
+        return MAIN_WINDOW_ID + std::to_string(g_count++);
+    } else {
+        std::string windowName = context->GetBundleName() + std::to_string(g_count++);
+        std::size_t pos = windowName.find_last_of('.');
+        return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
+    }
+}
+}
 
 WindowScene::~WindowScene()
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "~WindowScene");
-    if (mainWindow_ != nullptr) {
-        mainWindow_->Destroy();
-        mainWindow_ = nullptr;
+    TLOGI(WmsLogTag::WMS_MAIN, "winId %{public}u destructor!", mainWindowId_);
+}
+
+void WindowScene::OnLastStrongRef(const void *)
+{
+    if (auto mainWindow = GetMainWindow()) {
+        mainWindow->Destroy();
     }
 }
 
@@ -44,28 +57,30 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "WindowScene init with normal option!");
-    displayId_ = displayId;
     if (option == nullptr) {
-        option = new(std::nothrow) WindowOption();
-        if (option == nullptr) {
-            TLOGW(WmsLogTag::WMS_MAIN, "alloc WindowOption failed");
-            return WMError::WM_ERROR_NULLPTR;
-        }
+        option = sptr<WindowOption>::MakeSptr();
     }
     option->SetDisplayId(displayId);
     option->SetWindowTag(WindowTag::MAIN_WINDOW);
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
     }
-    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
+    auto mainWindow = SingletonContainer::Get<StaticCall>().CreateWindow(
         GenerateMainWindowName(context), option, context);
-    if (mainWindow_ == nullptr) {
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow_->RegisterLifeCycleListener(listener);
+    {
+        std::lock_guard<std::mutex> lock(mainWindowMutex_);
+        mainWindow_ = mainWindow;
+    }
+    mainWindowId_ = mainWindow->GetWindowId();
+    mainWindow->RegisterLifeCycleListener(listener);
+
     // report when application startup request window
     SingletonContainer::Get<WindowInfoReporter>()
-        .ReportStartWindow(option->GetBundleName(), mainWindow_->GetWindowName());
+        .ReportStartWindow(option->GetBundleName(), mainWindow->GetWindowName());
     return WMError::WM_OK;
 }
 
@@ -74,9 +89,8 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     const std::string& identityToken)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "WindowScene with window session!");
-    displayId_ = displayId;
     if (option == nullptr || iSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Cannot init scene with option or iSession null!");
+        TLOGE(WmsLogTag::WMS_MAIN, "failed with option or iSession null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     option->SetDisplayId(displayId);
@@ -84,148 +98,157 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
     }
-    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(option, context, iSession, identityToken);
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after creat Window!");
+    auto mainWindow = SingletonContainer::Get<StaticCall>()
+        .CreateWindow(option, context, iSession, identityToken);
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow_->RegisterLifeCycleListener(listener);
+    {
+        std::lock_guard<std::mutex> lock(mainWindowMutex_);
+        mainWindow_ = mainWindow;
+    }
+    mainWindowId_ = mainWindow->GetWindowId();
+    mainWindow->RegisterLifeCycleListener(listener);
+
     // report when application startup request window
     SingletonContainer::Get<WindowInfoReporter>()
-        .ReportStartWindow(option->GetBundleName(), mainWindow_->GetWindowName());
+        .ReportStartWindow(option->GetBundleName(), mainWindow->GetWindowName());
     return WMError::WM_OK;
-}
-
-std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const
-{
-    if (context == nullptr) {
-        return MAIN_WINDOW_ID + std::to_string(count++);
-    } else {
-        std::string windowName = context->GetBundleName() + std::to_string(count++);
-        std::size_t pos = windowName.find_last_of('.');
-        return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
-    }
 }
 
 sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const
 {
-    if (windowName.empty() || mainWindow_ == nullptr || option == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, " WindowScene Name: %{public}s", windowName.c_str());
+    auto mainWindow = GetMainWindow();
+    if (windowName.empty() || mainWindow == nullptr || option == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "new windowName: %{public}s", windowName.c_str());
         return nullptr;
     }
-    option->SetParentId(mainWindow_->GetWindowId());
+    option->SetParentId(mainWindow->GetWindowId());
     option->SetWindowTag(WindowTag::SUB_WINDOW);
-    TLOGD(WmsLogTag::WMS_SUB, "WindowScene Name: %{public}s, parentId: %{public}u",
-        windowName.c_str(), mainWindow_->GetWindowId());
-    return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option, mainWindow_->GetContext());
+    TLOGD(WmsLogTag::WMS_SUB, "windowName: %{public}s, parentId: %{public}u",
+        windowName.c_str(), mainWindow->GetWindowId());
+    return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option, mainWindow->GetContext());
 }
 
-const sptr<Window>& WindowScene::GetMainWindow() const
+sptr<Window> WindowScene::GetMainWindow() const
 {
+    std::lock_guard<std::mutex> lock(mainWindowMutex_);
     return mainWindow_;
 }
 
 std::vector<sptr<Window>> WindowScene::GetSubWindow()
 {
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Get sub window failed, because main window is null");
-        return std::vector<sptr<Window>>();
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
+        return {};
     }
-    uint32_t parentId = mainWindow_->GetWindowId();
+    uint32_t parentId = mainWindow->GetWindowId();
     return SingletonContainer::Get<StaticCall>().GetSubWindow(parentId);
 }
 
 WMError WindowScene::GoForeground(uint32_t reason)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "reason:%{public}u", reason);
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Go foreground failed, because main window is null");
+    TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->Show(reason);
+    return mainWindow->Show(reason);
 }
 
 WMError WindowScene::GoBackground(uint32_t reason)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "reason:%{public}u", reason);
-    if (mainWindow_ == nullptr) {
-        WLOGFE("Go background failed, because main window is null");
+    TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->Hide(reason);
+    return mainWindow->Hide(reason);
 }
 
 WMError WindowScene::GoDestroy()
 {
-    if (mainWindow_ == nullptr) {
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-
-    WMError ret = mainWindow_->Destroy();
+    WMError ret = mainWindow->Destroy();
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene go destroy failed name: %{public}s",
-            mainWindow_->GetWindowName().c_str());
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, name: %{public}s", mainWindow->GetWindowName().c_str());
         return ret;
     }
+
+    std::lock_guard<std::mutex> lock(mainWindowMutex_);
     mainWindow_ = nullptr;
     return WMError::WM_OK;
 }
 
 WMError WindowScene::OnNewWant(const AAFwk::Want& want)
 {
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "On new want failed, because main window is null");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow_->OnNewWant(want);
+    mainWindow->OnNewWant(want);
     return WMError::WM_OK;
 }
 
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
 {
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Set systembar property failed, because main window is null");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->SetSystemBarProperty(type, property);
+    return mainWindow->SetSystemBarProperty(type, property);
 }
 
 WMError WindowScene::RequestFocus() const
 {
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Request focus failed, because main window is null");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->RequestFocus();
+    return mainWindow->RequestFocus();
 }
 
 void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (mainWindow_ == nullptr) {
-        WLOGFE("Update configuration failed, because main window is null");
-        return;
+    if (auto mainWindow = GetMainWindow()) {
+        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}u", mainWindow->GetWindowId());
+        mainWindow->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
-    mainWindow_->UpdateConfiguration(configuration);
 }
 
 std::string WindowScene::GetContentInfo() const
 {
-    if (mainWindow_ == nullptr) {
-        WLOGFE("Get content info failed, because main window is null");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return "";
     }
-    return mainWindow_->GetContentInfo();
+    return mainWindow->GetContentInfo();
 }
 
 WMError WindowScene::NotifyMemoryLevel(int32_t level)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "Notify memory level: %{public}d", level);
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Notify memory level failed, because main window is null");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->NotifyMemoryLevel(level);
+    TLOGI(WmsLogTag::WMS_MAIN, "level: %{public}d", level);
+    return mainWindow->NotifyMemoryLevel(level);
 }
+
 } // namespace Rosen
 } // namespace OHOS

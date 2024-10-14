@@ -39,7 +39,7 @@ public:
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsWindowListener>(this)) {}
     ~JsWindowListener();
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
-    void CallJsMethod(const char* methodName, napi_value const *argv = nullptr, size_t argc = 0);
+    void CallJsMethod(const char* methodName, napi_value const* argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
 
 private:

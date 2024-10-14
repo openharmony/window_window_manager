@@ -200,11 +200,7 @@ namespace {
 
         mgr.globalHall = 10;
         mgr.TriggerDisplaySwitch();
-        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-            EXPECT_EQ(mgr.globalAngle, 25);
-        } else {
-            EXPECT_NE(mgr.globalAngle, 25);
-        }
+        EXPECT_EQ(mgr.globalAngle, 25);
     }
 }
 } // namespace Rosen

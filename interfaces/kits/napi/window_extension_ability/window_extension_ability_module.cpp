@@ -32,7 +32,7 @@ void NAPI_application_WindowExtensionAbility_AutoRegister()
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_WindowExtensionAbility_GetJSCode(const char **buf, int *bufLen)
+void NAPI_application_WindowExtensionAbility_GetJSCode(const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_extension_ability_js_start;
@@ -44,7 +44,7 @@ void NAPI_application_WindowExtensionAbility_GetJSCode(const char **buf, int *bu
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_WindowExtensionAbility_GetABCCode(const char **buf, int *buflen)
+void NAPI_application_WindowExtensionAbility_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_window_extension_ability_abc_start;

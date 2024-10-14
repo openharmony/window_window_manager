@@ -733,6 +733,13 @@ public:
      */
     WindowStyleType GetWindowStyleType();
 
+    /**
+     * @brief Release screen lock of foreground sessions.
+     *
+     * @return WM_OK means release success, others means failed.
+     */
+    WMError ReleaseForegroundSessionScreenLock();
+
 private:
     WindowManager();
     ~WindowManager();

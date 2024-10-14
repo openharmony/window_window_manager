@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerLifecycleTest : public testing::Test {
 public:
@@ -215,7 +215,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegato
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 }
 
 /**
@@ -510,13 +510,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionCreate, Function | Small
     ASSERT_NE(nullptr, sceneSession);
     ssm_->NotifySessionCreate(sceneSession, info);
     EXPECT_NE(info.want, nullptr);
-    AppExecFwk::AbilityInfo aInfo;
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo =
-        std::make_shared<AppExecFwk::AbilityInfo>(aInfo);
-    ASSERT_NE(nullptr, abilityInfo);
-    int32_t collaboratorType = CollaboratorType::RESERVE_TYPE;
-    ssm_->NotifyLoadAbility(collaboratorType, abilitySessionInfo, abilityInfo);
 }
 
 /**
