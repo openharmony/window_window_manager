@@ -268,6 +268,28 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Test04
+ * @tc.desc: Test04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
+{
+    WindowManagerLite lite;
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    ASSERT_NE(lite.pImpl_, nullptr);
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    focusChangeInfo = new FocusChangeInfo();
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    lite.pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
+    lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
+    lite.pImpl_->NotifyWindowModeChange(WindowModeType::WINDOW_MODE_SPLIT);
+}
+
+/**
  * @tc.name: RegisterWindowModeChangedListener02
  * @tc.desc: check RegisterWindowModeChangedListener
  * @tc.type: FUNC
@@ -427,28 +449,6 @@ HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest 
     ASSERT_EQ(nullptr, lite.pImpl_->focusChangedListenerAgent_);
     ASSERT_EQ(nullptr, lite.pImpl_->windowUpdateListenerAgent_);
     ASSERT_EQ(nullptr, lite.pImpl_->windowDrawingContentListenerAgent_);
-}
-
-/**
- * @tc.name: Test04
- * @tc.desc: Test04
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
-{
-    WindowManagerLite lite;
-    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
-    ASSERT_NE(lite.pImpl_, nullptr);
-    lite.pImpl_->NotifyFocused(focusChangeInfo);
-    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
-    focusChangeInfo = new FocusChangeInfo();
-    lite.pImpl_->NotifyFocused(focusChangeInfo);
-    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
-    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
-    lite.pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
-    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
-    lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
-    lite.pImpl_->NotifyWindowModeChange(WindowModeType::WINDOW_MODE_SPLIT);
 }
 
 /**
