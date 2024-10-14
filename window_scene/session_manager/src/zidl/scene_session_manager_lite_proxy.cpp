@@ -961,7 +961,6 @@ WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
         TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");

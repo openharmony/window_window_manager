@@ -140,6 +140,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
+    WSError RaiseWindowToTop(int32_t persistentId) override
+    {
+        return WSError::WS_OK;
+    }
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
     {
         MainWindowInfo mainWindowInfo;
@@ -151,10 +155,6 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         clearFailedIds.push_back(1);
         return WMError::WM_OK;
-    }
-    WSError RaiseWindowToTop(int32_t persistentId) override
-    {
-        return WSError::WS_OK;
     }
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
@@ -613,6 +613,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
 }
 
 /**
+ * @tc.name: HandleRaiseWindowToTop
+ * @tc.desc: test function : HandleRaiseWindowToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleGetAllMainWindowInfos
  * @tc.desc: test function : HandleGetAllMainWindowInfos
  * @tc.type: FUNC
@@ -639,22 +655,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, Function | Sm
     data.WriteInt32Vector(persistentIds);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleRaiseWindowToTop
- * @tc.desc: test function : HandleRaiseWindowToTop
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

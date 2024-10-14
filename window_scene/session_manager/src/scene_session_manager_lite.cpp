@@ -211,6 +211,11 @@ WMError SceneSessionManagerLite::GetWindowModeType(WindowModeType& windowModeTyp
     return SceneSessionManager::GetInstance().GetWindowModeType(windowModeType);
 }
 
+WSError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
+{
+    return SceneSessionManager::GetInstance().RaiseWindowToTop(persistentId);
+}
+
 WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
@@ -225,11 +230,6 @@ WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& p
     std::vector<int32_t>& clearFailedIds)
 {
     return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
-}
-
-WSError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
-{
-    return SceneSessionManager::GetInstance().RaiseWindowToTop(persistentId);
 }
 
 WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t type,
