@@ -669,7 +669,7 @@ HWTEST_F(SceneSessionTest3, GetStartMoveFlag, Function | SmallTest | Level2)
     info.bundleName_ = "GetStartMoveFlag";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1);
     bool isMoving = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
 
