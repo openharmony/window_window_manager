@@ -31,6 +31,12 @@ public:
     void TearDown() override;
 };
 
+class MockWindow : public Window {
+public:
+    MockWindow() {};
+    ~MockWindow() {};
+};
+
 void PictureInPictureManagerTest::SetUpTestCase()
 {
 }
@@ -296,6 +302,25 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
     PictureInPictureManager::SetActiveController(pipController);
     window = PictureInPictureManager::GetCurrentWindow();
     ASSERT_EQ(window, pipController->window_);
+}
+
+/**
+ * @tc.name: DoPrepareSource
+ * @tc.desc: DoPrepareSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoPreRestore();
+    PictureInPictureManager::SetActiveController(pipController);
+    PictureInPictureManager::DoPreRestore();
 }
 
 /**
