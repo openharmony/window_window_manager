@@ -790,7 +790,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
-    windowSceneSessionImpl->hostSession = session;
+    windowSceneSessionImpl->hostSession_ = session;
     SystemBarProperty property;
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
