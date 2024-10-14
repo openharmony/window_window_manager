@@ -72,6 +72,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
 {
     inputMethodWindowInfo_.name = "input_method.1";
     const sptr<Window>& window = Utils::CreateTestWindow(inputMethodWindowInfo_);
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, window->GetType());
     window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
     ASSERT_EQ(WMError::WM_OK, window->Show());
