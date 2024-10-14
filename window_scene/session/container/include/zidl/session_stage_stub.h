@@ -30,8 +30,8 @@ public:
     SessionStageStub() = default;
     ~SessionStageStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override;
 
 private:
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);

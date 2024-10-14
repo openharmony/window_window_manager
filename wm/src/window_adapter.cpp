@@ -157,7 +157,7 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return ret;
 }
 
-WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t &pid)
+WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
