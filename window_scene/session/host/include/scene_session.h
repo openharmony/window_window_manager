@@ -156,6 +156,12 @@ public:
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
+    bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
+        uint32_t& screenWidth, uint32_t& screenHeight);
+    bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
+        uint32_t& screenWidth, uint32_t& screenHeight);
+    void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
+        uint32_t screenHeight);
     virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
 
     WSError UpdateActiveStatus(bool isActive) override;
@@ -403,12 +409,6 @@ protected:
     std::string GetRatioPreferenceKey();
     WSError NotifyClientToUpdateRectTask(std::shared_ptr<RSTransaction> rsTransaction);
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
-    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
-        const sptr<WindowSessionProperty>& sessionProperty, bool isShow);
-    bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
-        uint32_t &screenWidth, uint32_t &screenHeight);
-    bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
-        uint32_t &screenWidth, uint32_t &screenHeight);
     std::string GetRectInfo(const WSRect& rect)
     {
         using std::to_string;
@@ -574,6 +574,9 @@ private:
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
+    bool isScreenAngleMismatch_ = false;
+    uint32_t targetScreenWidth_ = 0;
+    uint32_t targetScreenHeight_ = 0;
     bool isStatusBarVisible_ = true;
 
     // Session recover
