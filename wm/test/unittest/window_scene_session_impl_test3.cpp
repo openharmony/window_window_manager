@@ -2023,25 +2023,40 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->PreLayoutOnShow(window->property_->GetWindowType()); // uicontent is nullptr
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->state_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->requestState_);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+    Rect request = { 100, 100, 100, 100 };
+    window->property_->SetRequestRect(request);
+    // uicontent is not nullptr and session is nullptr
+    window->PreLayoutOnShow(window->property_->GetWindowType());
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-
     window->hostSession_ = session;
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window->uiContent_);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-
-    Rect request = { 100, 100, 100, 100 };
-    window->property_->SetRequestRect(request);
+    // uicontent is not nullptr and session is not nullptr
     window->PreLayoutOnShow(window->property_->GetWindowType());
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+
     request = { 100, 100, 0, 100 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+
     request = { 100, 100, 100, 0 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
+    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
 }
 
 /**
