@@ -152,37 +152,6 @@ WSError SystemSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError SystemSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
-    int32_t pid, int32_t uid)
-{
-    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        WindowState windowState = property->GetWindowState();
-        WindowType type = property->GetWindowType();
-        if (windowState == WindowState::STATE_SHOWN) {
-            session->isActive_ = true;
-            if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-                session->UpdateSessionState(SessionState::STATE_ACTIVE);
-            } else {
-                session->UpdateSessionState(SessionState::STATE_FOREGROUND);
-            }
-        } else {
-            session->isActive_ = false;
-            session->UpdateSessionState(SessionState::STATE_BACKGROUND);
-        }
-        return WSError::WS_OK;
-    });
-}
-
 WSError SystemSession::Disconnect(bool isFromClient)
 {
     auto task = [weakThis = wptr(this), isFromClient]() {

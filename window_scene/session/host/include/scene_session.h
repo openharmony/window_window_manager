@@ -52,6 +52,7 @@ using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
     WsPiPControlStatus status)>;
+using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -143,6 +144,7 @@ public:
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
     WSError Background(bool isFromClient = false) override;
     WSError BackgroundTask(const bool isSaveSnapshot = true);
@@ -188,9 +190,21 @@ public:
     std::vector<Rect> GetTouchHotAreas() const override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+
+    /*
+     * PiP Window
+     */
+    PiPTemplateInfo GetPiPTemplateInfo() const;
+    void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
+    WSError SetAutoStartPiP(bool isAutoStart) override;
     void NotifyPiPWindowPrepareClose() override;
+    void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
+    void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
+    WSError SetPipActionEvent(const std::string& action, int32_t status);
+    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
+
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -203,10 +217,10 @@ public:
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
-    void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
+    void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void SetRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
@@ -237,7 +251,6 @@ public:
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
-    void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
@@ -260,7 +273,6 @@ public:
     std::vector<sptr<SceneSession>> GetToastSession() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
     std::string GetWindowNameAllType() const;
-    PiPTemplateInfo GetPiPTemplateInfo() const;
     SubWindowModalType GetSubWindowModalType() const;
     WSRect GetRestoringRectForKeyboard() const;
     std::string GetClientIdentityToken() const;
@@ -315,8 +327,6 @@ public:
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     void SetShouldHideNonSecureWindows(bool shouldHide);
-    WSError SetPipActionEvent(const std::string& action, int32_t status);
-    WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
     void UpdateExtWindowFlags(int32_t extPersistentId, const ExtensionWindowFlags& extWindowFlags,
         const ExtensionWindowFlags& extWindowActions);
     ExtensionWindowFlags GetCombinedExtWindowFlags();
@@ -521,7 +531,14 @@ private:
         const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+
+    /*
+     * PiP Window
+     */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
+    NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
+    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     static wptr<SceneSession> enterSession_;
@@ -534,7 +551,6 @@ private:
     std::atomic_bool isDeviceWakeupByApplication_ { false };
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     SessionEventParam sessionEventParam_ = { 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };

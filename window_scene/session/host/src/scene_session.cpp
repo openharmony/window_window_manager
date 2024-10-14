@@ -155,8 +155,51 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        return session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        return session->ReconnectInner(property);
     });
+}
+
+WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
+{
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WindowState windowState = property->GetWindowState();
+    TLOGI(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, windowState: %{public}d ", GetPersistentId(), windowState);
+    WSError ret = WSError::WS_OK;
+    switch (windowState) {
+        case WindowState::STATE_INITIAL: {
+            TLOGE(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, invalid window state: STATE_INITIAL",
+                GetPersistentId());
+            ret = WSError::WS_ERROR_INVALID_PARAM;
+            break;
+        }
+        case WindowState::STATE_CREATED:
+            break;
+        case WindowState::STATE_SHOWN: {
+            UpdateSessionState(SessionState::STATE_FOREGROUND);
+            UpdateActiveStatus(true);
+            break;
+        }
+        case WindowState::STATE_HIDDEN: {
+            UpdateSessionState(SessionState::STATE_BACKGROUND);
+            break;
+        }
+        default:
+            TLOGE(WmsLogTag::WMS_RECOVER, "persistentId: %{public}d, invalid window state: %{public}u",
+                GetPersistentId(), windowState);
+            ret = WSError::WS_ERROR_INVALID_PARAM;
+            break;
+    }
+    if (ret != WSError::WS_OK) {
+        Session::Disconnect(false);
+    }
+    return ret;
 }
 
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
@@ -916,6 +959,19 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
     PostTask(task, __func__);
 }
 
+void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            return;
+        }
+        session->autoStartPiPStatusChangeFunc_ = func;
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
 {
     auto newWinRect = winRect_;
@@ -1570,9 +1626,6 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 WSError SceneSession::SetPipActionEvent(const std::string& action, int32_t status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "action: %{public}s, status: %{public}d", action.c_str(), status);
-    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP || GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
-        return WSError::WS_ERROR_INVALID_TYPE;
-    }
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2428,6 +2481,33 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
         leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
     RSTransaction::FlushImplicitTransaction();
+}
+
+void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction) {
+        RSTransaction::FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
+        leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
+    } else if (surfaceNode_ != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
+        surfaceNode_->SetForceUIFirst(forceUIFirst);
+    }
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
 }
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
@@ -3817,6 +3897,24 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
         return WSError::WS_OK;
     };
     PostTask(task, "UpdatePiPControlStatus");
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    auto task = [weakThis = wptr(this), isAutoStart] {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating) {
+            TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
+            return;
+        }
+        if (session->autoStartPiPStatusChangeFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
+            session->autoStartPiPStatusChangeFunc_(isAutoStart);
+        }
+    };
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 

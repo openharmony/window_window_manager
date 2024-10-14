@@ -1564,6 +1564,10 @@ float WindowSessionImpl::GetBrightness() const
 
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation: %{public}u target:%{public}u state_:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
     bool isUserOrientation = IsUserOrientation(orientation);
@@ -1576,6 +1580,10 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 
 Orientation WindowSessionImpl::GetRequestedOrientation()
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
+        return Orientation::UNSPECIFIED;
+    }
     if (!property_) {
         WLOGFE("property_ is nullptr id: %{public}d", GetPersistentId());
         return Orientation::UNSPECIFIED;
@@ -1725,6 +1733,9 @@ WMError WindowSessionImpl::UnregisterWindowStatusChangeListener(const sptr<IWind
 
 WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
@@ -1737,9 +1748,11 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
 
 WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
 {
-    auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-    if (!isSubWindow) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "called by invalid window type, type:%{public}d", GetType());
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
@@ -1749,6 +1762,9 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
@@ -1779,6 +1795,9 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 
 WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
@@ -1814,6 +1833,9 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
 
 WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     Rect decorRect;
     Rect titleButtonLeftRect;
     bool res = false;
@@ -1868,6 +1890,9 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
@@ -1918,6 +1943,9 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
     const sptr<IWindowTitleButtonRectChangedListener>& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start unregister windowTitleButtonRectChange listener, id:%{public}d", persistentId);
@@ -2226,6 +2254,9 @@ void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventC
 
 WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -3520,6 +3551,17 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
         static_cast<WsPiPControlStatus>(status));
+}
+
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return;
+    }
+    if (auto hostSession = GetHostSession()) {
+        hostSession->SetAutoStartPiP(isAutoStart);
+    }
 }
 
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
