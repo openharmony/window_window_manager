@@ -50,6 +50,7 @@ public:
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiverLocked();
+    std::shared_ptr<RSFrameRateLinker> GetFrameRateLinker();
     void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
     void OnVsyncTimeOut();
 
