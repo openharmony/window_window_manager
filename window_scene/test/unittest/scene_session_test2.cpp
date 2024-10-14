@@ -738,6 +738,10 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, &func);
     scensession->sessionStage_ = nullptr;
     scensession->NotifyTouchOutside();
+
+    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    scensession->sessionStage_ = nullptr;
+    scensession->NotifyTouchOutside();
 }
 
 /**
@@ -761,6 +765,10 @@ HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest |
     scensession->sessionChangeCallback_->OnTouchOutside_ = func;
     bool result = scensession->CheckOutTouchOutsideRegister();
     EXPECT_EQ(true, result);
+
+    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    result = scensession->CheckOutTouchOutsideRegister();
+    EXPECT_EQ(false, result);
 
     scensession->sessionChangeCallback_ = nullptr;
     result = scensession->CheckOutTouchOutsideRegister();
@@ -791,6 +799,9 @@ HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Leve
     int result = session->GetPersistentId();
     EXPECT_EQ(0, result);
     scensession->UpdateRotationAvoidArea();
+
+    scensession->specificCallback_ = nullptr;
+    scensession->UpdateRotationAvoidArea();
 }
 
 /**
@@ -816,6 +827,10 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     scensession->sessionChangeCallback_->OnForceHideChange_ = func;
     EXPECT_NE(nullptr, &func);
     scensession->NotifyForceHideChange(true);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyForceHideChange(true);
+    ASSERT_EQ(scensession->property_->forceHide_, false);
 }
 
 /**
@@ -1076,6 +1091,16 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     res = sceneSession->SetPiPControlEvent(controlType, status);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetPiPControlEvent(controlType, status), WSError::WS_ERROR_INVALID_TYPE);
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetPiPControlEvent(controlType, status), WSError::WS_OK);
 }
 
 /**
@@ -1325,6 +1350,12 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sceneSession->moveDragController_ = new MoveDragController(1);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
+
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    auto result = sceneSession->OnSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1408,6 +1439,9 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     bool showWhenLocked = true;
     sceneSession->OnShowWhenLocked(showWhenLocked);
     sceneSession->NotifyPropertyWhenConnect();
+
+    sceneSession->focusedOnShow_ = false;
+    sceneSession->RaiseAppMainWindowToTop();
 }
 
 /**
@@ -1470,6 +1504,27 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
     WSRect rect;
     AvoidArea avoidArea;
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+    ASSERT_EQ(sceneSession->GetIsDisplayStatusBarTemporarily(), true);
+
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->property_ = property;
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
+        WSRect rect = {1, 1, 1, 1};
+        return rect;
+    };
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
 }
 
 /**
@@ -1498,6 +1553,17 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     float vpr = 0.0;
     sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
+
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->SetPipActionEvent("pointerEvent", 0));
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
 /**
@@ -1721,6 +1787,51 @@ HWTEST_F(SceneSessionTest2, SetSkipDraw, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetSkipDraw(true);
     sceneSession->SetSkipDraw(false);
+}
+
+/**
+ * @tc.name: CheckGetAvoidAreaAvailable
+ * @tc.desc: CheckGetAvoidAreaAvailable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetAvoidAreaAvailable";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+}
+
+/**
+ * @tc.name: SetWindowAnimationFlag
+ * @tc.desc: SetWindowAnimationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowAnimationFlag";
+    info.bundleName_ = "SetWindowAnimationFlag";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    sceneSession->sessionChangeCallback_->onWindowAnimationFlagChange_ = [](
+        bool isNeedDefaultAnimationFlag) {};
+    sceneSession->SetWindowAnimationFlag(true);
+    ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }
 }
 }
