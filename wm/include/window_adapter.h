@@ -133,7 +133,8 @@ public:
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
-    
+    virtual WMError ReleaseForegroundSessionScreenLock();
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();

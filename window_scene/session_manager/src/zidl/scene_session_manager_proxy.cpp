@@ -2242,4 +2242,21 @@ WMError SceneSessionManagerProxy::GetProcessSurfaceNodeIdByPersistentId(const in
     reply.ReadUInt64Vector(&surfaceNodeIds);
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::ReleaseForegroundSessionScreenLock()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

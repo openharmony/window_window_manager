@@ -173,6 +173,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
+            return HandleReleaseForegroundSessionScreenLock(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1070,6 +1072,13 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
         TLOGE(WmsLogTag::DEFAULT, "Write surfaceNodeIds fail.");
         return ERR_INVALID_DATA;
     }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
+{
+    WMError errCode = ReleaseForegroundSessionScreenLock();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
