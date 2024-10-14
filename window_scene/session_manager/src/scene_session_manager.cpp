@@ -10863,7 +10863,7 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
-WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     if (!SessionPermission::IsSystemServiceCalling()) {
         TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
@@ -10873,8 +10873,7 @@ WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int
     auto task = [this, persistentId, &hostWindowId, where]() {
         hostWindowId = INVALID_WINDOW_ID;
         sptr<Session> session = GetSceneSession(persistentId);
-        while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
-        {
+        while (session && SessionHelper::IsSubWindow(session->GetWindowType())) {
             session = session->GetParentSession();
         }
         if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {

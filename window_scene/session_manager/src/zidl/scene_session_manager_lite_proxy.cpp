@@ -1259,7 +1259,7 @@ WMError SceneSessionManagerLiteProxy::GetCurrentPiPWindowInfo(std::string& bundl
     return errorCode;
 }
 
-WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     MessageParcel data;
     MessageParcel reply;

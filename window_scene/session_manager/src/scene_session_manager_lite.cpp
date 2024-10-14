@@ -261,7 +261,7 @@ WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName
     return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
 }
 
-WMError SceneSessionManagerLite::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
 }

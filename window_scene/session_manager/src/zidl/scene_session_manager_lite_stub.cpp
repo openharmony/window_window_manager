@@ -667,17 +667,17 @@ int SceneSessionManagerLiteStub::HandleGetRootMainWindowId(MessageParcel &data, 
     TLOGI(WmsLogTag::WMS_MAIN, "call");
     int32_t persistentId = INVALID_WINDOW_ID;
     if (!data.ReadInt32(persistentId)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Failed to readInt32 windowId");
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to readInt32 windowId");
         return ERR_INVALID_DATA;
     }
     int32_t hostWindowId = INVALID_WINDOW_ID;
     WMError errCode = GetRootMainWindowId(persistentId, hostWindowId);
     if (errCode != WMError::WM_OK) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Failed to GetRootMainWindowId(%{public}d)", hostWindowId);
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to GetRootMainWindowId(%{public}d)", hostWindowId);
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(hostWindowId)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Failed to WriteInt32 hostWindowId");
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to WriteInt32 hostWindowId");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
