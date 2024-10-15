@@ -4892,7 +4892,7 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        bool isPhoneOrPad = systemConfig_.UI_TYPE_PHONE || systemConfig_.UI_TYPE_PAD;
+        bool isPhoneOrPad = systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD;
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
                               (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
                               (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
