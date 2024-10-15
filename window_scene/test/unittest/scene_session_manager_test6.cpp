@@ -131,6 +131,23 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
 }
 
 /**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest5, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
+    std::shared_ptr<RSUIExtensionData> secExtData = std::make_shared<RSUIExtensionData>(callbackData);
+    ssm_->currentUserId_ = 101;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+
+    ssm_->currentUserId_ = 100;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+}
+
+/**
  * @tc.name: GetWindowLayerChangeInfo
  * @tc.desc: GetWindowLayerChangeInfo
  * @tc.type: FUNC
