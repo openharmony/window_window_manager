@@ -190,9 +190,6 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
             globalHall, globalAngle);
         return;
     }
-    if (globalHall == HALL_FOLDED_THRESHOLD) {
-        globalAngle = ANGLE_MIN_VAL;
-    }
     TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
     if (!registerPosture_) {
         globalAngle = ANGLE_MIN_VAL;
