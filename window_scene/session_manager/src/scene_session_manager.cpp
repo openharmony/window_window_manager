@@ -8115,6 +8115,28 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
     taskScheduler_->PostSyncTask(task, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
 }
 
+void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
+        return;
+    }
+
+    auto task = [displayInfo]() -> WSError {
+        ScreenSessionManagerClient::GetInstance().UpdateDisplayScale(displayInfo->GetScreenId(),
+            displayInfo->GetScaleX(),
+            displayInfo->GetScaleY(),
+            displayInfo->GetPivotX(),
+            displayInfo->GetPivotY(),
+            displayInfo->GetTranslateX(),
+            displayInfo->GetTranslateY());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostAsyncTask(task);
+}
+
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -8128,6 +8150,10 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
         case DisplayStateChangeType::UPDATE_ROTATION: {
             SceneSessionManager::GetInstance().ProcessUpdateRotationChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
+            break;
+        }
+        case DisplayStateChangeType::UPDATE_SCALE: {
+            SceneSessionManager::GetInstance().ProcessDisplayScale(displayInfo);
             break;
         }
         default:
