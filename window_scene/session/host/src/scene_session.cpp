@@ -3386,7 +3386,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session);
-        if (session->systemConfig_.IsPcWindow() &&
+        if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(session->GetSessionInfo().bundleName_)) {
             if (!MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(info)) {
                 TLOGE(WmsLogTag::WMS_LIFE, "multi instance start fail, id:%{public}d instanceKey:%{public}s",
