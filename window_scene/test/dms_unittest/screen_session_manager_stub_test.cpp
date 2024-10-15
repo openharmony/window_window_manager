@@ -1850,6 +1850,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest85, Function | SmallTest |
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0u);
 
     uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW);

@@ -571,8 +571,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool immersive = false;
-            DMError ret = HasImmersiveWindow(immersive);
+            DMError ret = HasImmersiveWindow(screenId, immersive);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             reply.WriteBool(immersive);
             break;

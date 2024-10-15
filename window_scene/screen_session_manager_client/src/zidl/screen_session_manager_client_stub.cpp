@@ -224,8 +224,9 @@ int ScreenSessionManagerClientStub::HandleOnScreenshot(MessageParcel& data, Mess
 int ScreenSessionManagerClientStub::HandleOnImmersiveStateChanged(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleOnImmersiveStateChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
     bool immersive = false;
-    OnImmersiveStateChanged(immersive);
+    OnImmersiveStateChanged(screenId, immersive);
     if (!reply.WriteBool(immersive)) {
         WLOGFE("Write immersive failed");
         return ERR_TRANSACTION_FAILED;
