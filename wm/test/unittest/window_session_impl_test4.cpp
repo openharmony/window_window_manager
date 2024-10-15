@@ -277,19 +277,28 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetSubWindowModal");
     sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, mainWindow);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    mainWindow->hostSession_ = session;
+    ASSERT_NE(nullptr, mainWindow->property_);
+    mainWindow->property_->SetPersistentId(1); // 1 is main window id
+    mainWindow->state_ = WindowState::STATE_CREATED;
     WMError res = mainWindow->SetSubWindowModal(true); // main window is invalid
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, res);
 
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(nullptr, window->property_);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    res = window->SetSubWindowModal(true); // sub window is valid
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res); // window state is invalid
+
     window->hostSession_ = session;
-    res = window->SetSubWindowModal(true); // // sub window is valid
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(2); // 2 is sub window id
+    window->state_ = WindowState::STATE_CREATED;
+    res = window->SetSubWindowModal(true); // sub window is valid
     ASSERT_EQ(WMError::WM_OK, res);
     res = window->SetSubWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, res);
