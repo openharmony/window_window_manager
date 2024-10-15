@@ -110,14 +110,11 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (SessionHelper::IsMainWindow(session->GetWindowType()) && !identityToken.empty() &&
-            !session->clientIdentityToken_.empty() && identityToken != session->clientIdentityToken_) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Identity Token vaildate failed, clientIdentityToken: %{public}s, "
-                "identityToken: %{public}s, bundleName: %{public}s",
-                session->clientIdentityToken_.c_str(), identityToken.c_str(),
-                session->GetSessionInfo().bundleName_.c_str());
-            return WSError::WS_OK;
+        if (SessionHelper::IsMainWindow(session->GetWindowType())) {
+            if (!session->CheckIdentityToken(identityToken)) {
+                TLOGW(WmsLogTag::WMS_LIFE, "check failed");
+                return WSError::WS_OK;
+            }
         }
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
@@ -225,13 +222,11 @@ WSError SceneSession::Foreground(
         }
     }
 
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
-        TLOGW(WmsLogTag::WMS_LIFE,
-            "Foreground Identity Token vaildate failed, clientIdentityToken: %{public}s, "
-            "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
-        return WSError::WS_OK;
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
+        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
+            return WSError::WS_OK;
+        }
     }
     return ForegroundTask(property);
 }
@@ -286,13 +281,11 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
-        TLOGW(WmsLogTag::WMS_LIFE,
-            "Background Identity Token vaildate failed, clientIdentityToken: %{public}s, "
-            "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
-        return WSError::WS_OK;
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
+        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
+            return WSError::WS_OK;
+        }
     }
 
     return BackgroundTask(true);
@@ -381,15 +374,12 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
-    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType()) && !identityToken.empty() &&
-        !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
-        TLOGW(WmsLogTag::WMS_LIFE,
-            "Disconnect Identity Token vaildate failed, clientIdentityToken: %{public}s, "
-            "identityToken: %{public}s, bundleName: %{public}s",
-            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
-        return WSError::WS_OK;
+    if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
+        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
+            return WSError::WS_OK;
+        }
     }
-    
     return DisconnectTask(isFromClient, true);
 }
 
@@ -5115,5 +5105,29 @@ void SceneSession::UpdateGestureBackEnabled()
         specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
         specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
     }
+}
+
+bool SceneSession::CheckIdentityToken(const std::string& identityToken)
+{
+    if (!identityToken.empty() && !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "CheckIdentityToken failed, clientIdentityToken: %{public}s, "
+            "identityToken: %{public}s, bundleName: %{public}s",
+            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SceneSession::CheckPid()
+{
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != -1 && callingPid != GetCallingPid()) {
+        TLOGW(WmsLogTag::WMS_LIFE, 
+            "CheckPid failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+            GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Rosen
