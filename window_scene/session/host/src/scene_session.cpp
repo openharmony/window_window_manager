@@ -652,7 +652,7 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->OnSystemBarPropertyChange_ = std::move(callback);
+        session->onSystemBarPropertyChange_ = std::move(callback);
     };
     PostTask(task, __func__);
 }
@@ -1305,8 +1305,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
         SetIsDisplayStatusBarTemporarily(false);
     }
-    if (OnSystemBarPropertyChange_) {
-        OnSystemBarPropertyChange_(property->GetSystemBarProperty());
+    if (onSystemBarPropertyChange_) {
+        onSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
