@@ -154,7 +154,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
                     window->GetProperty()->GetPersistentId());
                 return window;
             } else if (WindowHelper::IsSubWindow(window->GetType()) &&
-                (IsSessionMainWindow(window->GetParentId()) || window->GetProperty()->GetExtensionFlag() ||
+                (IsSessionMainWindow(window->GetParentId()) || window->GetProperty()->GetIsUIExtFirstSubWindow() ||
                  VerifySubWindowLevel(window->GetParentId()))) {
                 // subwindow's grandparent is mainwindow or subwindow's parent is an extension subwindow
                 return window;
@@ -222,7 +222,7 @@ static sptr<WindowSessionImpl> FindMainWindowOrExtensionSubWindow(uint32_t paren
         auto& window = pair.second;
         if (window && window->GetWindowId() == parentId) {
             if (WindowHelper::IsMainWindow(window->GetType()) ||
-                (WindowHelper::IsSubWindow(window->GetType()) && window->GetProperty()->GetExtensionFlag())) {
+                (WindowHelper::IsSubWindow(window->GetType()) && window->GetProperty()->GetIsUIExtFirstSubWindow())) {
                 TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
                 return window;
             }
@@ -238,7 +238,7 @@ bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
     if (!windowSystemConfig_.IsPadWindow()) {
         return windowSystemConfig_.IsPcWindow();
     }
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetIsUIExtFirstSubWindow();
     if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
         return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
     }
@@ -310,14 +310,14 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     property_->SetSessionInfo(info);
 
     bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
-    bool isUiExtSubWindowFlag = property_->GetIsUIExtensionSubWindowFlag();
+    bool isUiExtSubWindowFlag = property_->GetIsUIExtAnySubWindow();
 
     bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) &&
-        !property_->GetExtensionFlag() && !isUiExtSubWindowFlag;
+        !property_->GetIsUIExtFirstSubWindow() && !isUiExtSubWindowFlag;
     bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) &&
-        !property_->GetExtensionFlag() && isUiExtSubWindowFlag && !isToastFlag;
+        !property_->GetIsUIExtFirstSubWindow() && isUiExtSubWindowFlag && !isToastFlag;
     bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag && isToastFlag;
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag();
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetIsUIExtFirstSubWindow();
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
@@ -474,7 +474,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType type = GetType();
-    if (WindowHelper::IsSubWindow(type) && property_->GetExtensionFlag() == false) { // sub window
+    if (WindowHelper::IsSubWindow(type) && !property_->GetIsUIExtFirstSubWindow()) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
@@ -1335,13 +1335,13 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag() == false) {
+        } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetIsUIExtFirstSubWindow()) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (property_->GetExtensionFlag() == true) {
+        } else if (property_->GetIsUIExtFirstSubWindow()) {
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
     }
@@ -4283,14 +4283,14 @@ WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     return WMError::WM_OK;
 }
 
-bool WindowSceneSessionImpl::GetIsUIExtensionFlag() const
+bool WindowSceneSessionImpl::GetIsUIExtFirstSubWindow() const
 {
-    return property_->GetExtensionFlag();
+    return property_->GetIsUIExtFirstSubWindow();
 }
 
-bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
+bool WindowSceneSessionImpl::GetIsUIExtAnySubWindow() const
 {
-    return property_->GetIsUIExtensionSubWindowFlag();
+    return property_->GetIsUIExtAnySubWindow();
 }
 
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)

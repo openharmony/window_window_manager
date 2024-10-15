@@ -158,8 +158,8 @@ public:
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
-    bool GetIsUIExtensionFlag() const override;
-    bool GetIsUIExtensionSubWindowFlag() const override;
+    bool GetIsUIExtFirstSubWindow() const override;
+    bool GetIsUIExtAnySubWindow() const override;
 
     /*
      * Gesture Back

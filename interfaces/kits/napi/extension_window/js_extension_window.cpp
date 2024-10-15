@@ -887,7 +887,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         windowOption->SetOnlySupportSceneBoard(true);
-        windowOption->SetExtensionTag(true);
+        windowOption->SetIsUIExtFirstSubWindow(true);
         auto extWindow = extensionWindow->GetWindow();
         if (extWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
