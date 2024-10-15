@@ -104,6 +104,7 @@ public:
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
         TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
@@ -265,6 +266,8 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+
+    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
 

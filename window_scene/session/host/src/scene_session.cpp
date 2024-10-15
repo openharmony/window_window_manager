@@ -666,11 +666,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
                 "preRect: %{public}s",
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
-            session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         } else {
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
+        session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s",
             session->GetPersistentId(), session->reason_, updateReason.c_str(), rect.ToString().c_str());
 
@@ -4491,10 +4491,15 @@ bool SceneSession::PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) con
 
 void SceneSession::NotifyClientToUpdateAvoidArea()
 {
-    if (specificCallback_ == nullptr || specificCallback_->onUpdateAvoidArea_ == nullptr) {
+    if (specificCallback_ == nullptr) {
         return;
     }
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    if (specificCallback_->onUpdateAvoidArea_) {
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    }
+    if (specificCallback_->onUpdateOccupiedAreaIfNeed_) {
+        specificCallback_->onUpdateOccupiedAreaIfNeed_(GetPersistentId());
+    }
 }
 
 bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
