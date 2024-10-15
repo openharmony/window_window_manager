@@ -1117,11 +1117,11 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->SetMovabla(true);
+    sceneSession->SetMovable(true);
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = new MoveDragController(1);
-    sceneSession->SetMovabla(true);
+    sceneSession->SetMovable(true);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
