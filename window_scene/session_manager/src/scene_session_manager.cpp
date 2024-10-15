@@ -4878,7 +4878,7 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+        bool isPhoneOrPad = systemConfig_.UI_TYPE_PHONE || systemConfig_.UI_TYPE_PAD;
         bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
                               (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
                               (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
@@ -8815,7 +8815,7 @@ void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
     }
-    if (!systemConfig_.IsPhoneWindow() && !systemConfig_.IsPadWindow()) {
+    if (!systemConfig_.UI_TYPE_PHONE && !systemConfig_.UI_TYPE_PAD) {
         return;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "has zOrder dirty");
