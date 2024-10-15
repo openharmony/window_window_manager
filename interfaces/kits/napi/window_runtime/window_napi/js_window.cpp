@@ -179,7 +179,7 @@ napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 {
-    WLOGI("MoveToAsync");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowToAsync(env, info) : nullptr;
 }
@@ -200,7 +200,7 @@ napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 {
-    WLOGI("ResizeAsync");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindowAsync(env, info) : nullptr;
 }
