@@ -851,5 +851,18 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }
+
+/**
+ * @tc.name: OnRemoteDied01
+ * @tc.desc: OnRemoteDied01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance().destroyed_ = true;
+    WindowManagerLite::GetInstance().OnRemoteDied();
+    ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
+>>>>>>> OpenHarmony-5.0.1-Release
+}
 }
 }
