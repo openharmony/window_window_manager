@@ -366,19 +366,23 @@ public:
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    bool GetImmersiveState(ScreenId screenId);
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
-    WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
-    WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
-    WSRect GetAINavigationBarArea(uint64_t displayId);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
+
+    /*
+     * Window Immersive
+     */
+    bool GetImmersiveState(ScreenId screenId);
+    WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
+    WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
+    WSRect GetAINavigationBarArea(uint64_t displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,

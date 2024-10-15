@@ -8999,7 +8999,6 @@ void DisplayChangeListener::OnImmersiveStateChange(ScreenId screenId, bool& imme
 bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
 {
     auto task = [this, screenId] {
-        uint64_t targetScreenId = static_cast<uint64_t>(screenId);
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
             auto sceneSession = item->second;
@@ -9022,7 +9021,7 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
                 WLOGFE("Property is nullptr");
                 continue;
             }
-            if (property->GetDisplayId() != targetScreenId) {
+            if (property->GetDisplayId() != screenId) {
                 continue;
             }
             auto sysBarProperty = property->GetSystemBarProperty();
