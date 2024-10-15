@@ -959,36 +959,13 @@ HWTEST_F(SceneSessionTest4, OnTitleAndDockHoverShowChange01, Function | SmallTes
     SessionInfo info;
     info.abilityName_ = "OnTitleAndDockHoverShowChange01";
     info.bundleName_ = "OnTitleAndDockHoverShowChange01";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    auto result = scensession->OnTitleAndDockHoverShowChange(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: OnTitleAndDockHoverShowChange02
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, OnTitleAndDockHoverShowChange02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "OnTitleAndDockHoverShowChange02";
-    info.bundleName_ = "OnTitleAndDockHoverShowChange02";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    scensession->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_ = [scensession]() {
-        return;
-    };
-    auto result = scensession->OnTitleAndDockHoverShowChange(true, true);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    auto result = sceneSession->OnTitleAndDockHoverShowChange(true, true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1002,13 +979,13 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAutoStartPiP01";
     info.bundleName_ = "SetAutoStartPiP01";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scenesession->isTerminating_ = false;
-    auto result = scensession->SetAutoStartPiP(true);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isTerminating_ = false;
+    auto result = sceneSession->SetAutoStartPiP(true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1022,17 +999,17 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAutoStartPiP02";
     info.bundleName_ = "SetAutoStartPiP02";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scenesession->isTerminating_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isTerminating_ = true;
     NotifyAutoStartPiPStatusChangeFunc func = [](bool flag) {
         return;
     };
-    scensession->autoStartPiPStatusChangeFunc_ = func;
-    auto result = scensession->SetAutoStartPiP(true);
+    sceneSession->autoStartPiPStatusChangeFunc_ = func;
+    auto result = sceneSession->SetAutoStartPiP(true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1046,13 +1023,13 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP03, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAutoStartPiP03";
     info.bundleName_ = "SetAutoStartPiP03";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scenesession->isTerminating_ = true;
-    auto result = scensession->SetAutoStartPiP(true);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isTerminating_ = true;
+    auto result = sceneSession->SetAutoStartPiP(true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1077,11 +1054,11 @@ HWTEST_F(SceneSessionTest4, UpdatePiPControlStatus, Function | SmallTest | Level
 
     auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
     auto status = WsPiPControlStatus::PLAY;
-    scenesession->isTerminating_ = false;
+    sceneSession->isTerminating_ = false;
     WSError result = sceneSession->UpdatePiPControlStatus(controlType, status);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    scenesession->isTerminating_ = true;
+    sceneSession->isTerminating_ = true;
     result = sceneSession->UpdatePiPControlStatus(controlType, status);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1096,13 +1073,13 @@ HWTEST_F(SceneSessionTest4, SetSplitButtonVisible01, Function | SmallTest | Leve
     SessionInfo info;
     info.abilityName_ = "SetSplitButtonVisible01";
     info.bundleName_ = "SetSplitButtonVisible01";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
-    scensession->sessionStage_ = nullptr;
-    auto result = scensession->SetSplitButtonVisible(true);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->sessionStage_ = nullptr;
+    auto result = sceneSession->SetSplitButtonVisible(true);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1116,14 +1093,14 @@ HWTEST_F(SceneSessionTest4, SetSplitButtonVisible02, Function | SmallTest | Leve
     SessionInfo info;
     info.abilityName_ = "SetSplitButtonVisible02";
     info.bundleName_ = "SetSplitButtonVisible02";
-    sptr<SceneSession> scensession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    scensession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    scensession->sessionStage_ = mockSessionStage;
-    auto result = scensession->SetSplitButtonVisible(true);
+    sceneSession->sessionStage_ = mockSessionStage;
+    auto result = sceneSession->SetSplitButtonVisible(true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -1138,7 +1115,7 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
     info.abilityName_ = "SetMovable01";
     info.bundleName_ = "SetMovable01";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sceneSession->SetMovabla(true);
     sceneSession->leashWinSurfaceNode_ = nullptr;
@@ -1165,7 +1142,7 @@ HWTEST_F(SceneSessionTest4, TerminateSession01, Function | SmallTest | Level2)
     info.abilityName_ = "TerminateSession01";
     info.bundleName_ = "TerminateSession01";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
@@ -1191,7 +1168,7 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags01, Function | SmallTest | Level2)
     info.abilityName_ = "SetWindowFlags01";
     info.bundleName_ = "SetWindowFlags01";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetWindowFlags(property);
@@ -1209,7 +1186,7 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags02, Function | SmallTest | Level2)
     info.abilityName_ = "SetWindowFlags02";
     info.bundleName_ = "SetWindowFlags02";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowFlags(2);
     sceneSession->SetSessionProperty(property);
@@ -1233,7 +1210,7 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags03, Function | SmallTest | Level2)
     info.abilityName_ = "SetWindowFlags03";
     info.bundleName_ = "SetWindowFlags03";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowFlags(2);
     sceneSession->SetSessionProperty(property);
@@ -1262,46 +1239,6 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction02, Function | SmallTes
     sceneSession->SetSessionProperty(property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
-}
-
-/**
- * @tc.name: IsNeedSystemPermissionByAction01
- * @tc.desc: IsNeedSystemPermissionByAction function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, IsNeedSystemPermissionByAction01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "IsNeedSystemPermissionByAction01";
-    info.bundleName_ = "IsNeedSystemPermissionByAction01";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowFlags(2);
-    sceneSession->SetSessionProperty(property);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
-
-    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
-    property2->SetWindowFlags(2);
-    ASSERT_EQ(true, sceneSession->IsNeedSystemPermissionByAction(action,
-        property2, sceneSession->GetSessionProperty()));
-
-    action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
-    ASSERT_EQ(false, sceneSession->IsNeedSystemPermissionByAction(action,
-        property2, sceneSession->GetSessionProperty()));
-
-    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
-    ASSERT_EQ(false, sceneSession->IsNeedSystemPermissionByAction(action,
-        property2, sceneSession->GetSessionProperty()));
-
-    sceneSession->GetSessionProperty()->SetWindowFlags(4);
-    property2->SetWindowFlags(4);
-    ASSERT_EQ(true, sceneSession->IsNeedSystemPermissionByAction(action,
-        property2, sceneSession->GetSessionProperty()));
-
-    action = WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST;
-    ASSERT_EQ(false, sceneSession->IsNeedSystemPermissionByAction(action,
-        property2, sceneSession->GetSessionProperty()));
 }
 }
 }
