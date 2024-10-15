@@ -1037,12 +1037,12 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "begin");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     NotifyPendingSessionToBackgroundForDelegatorFunc func = [weakThis = wptr(this)](const SessionInfo& info,
         bool shouldBackToCaller) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->PendingSessionToBackgroundForDelegator(info, shouldBackToCaller);
