@@ -5122,7 +5122,7 @@ bool SceneSession::CheckPid()
 {
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     if (callingPid != -1 && callingPid != GetCallingPid()) {
-        TLOGW(WmsLogTag::WMS_LIFE, 
+        TLOGW(WmsLogTag::WMS_LIFE,
             "CheckPid failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
             GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
         return false;
