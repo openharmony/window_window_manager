@@ -223,7 +223,7 @@ WSError SceneSession::Foreground(
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
@@ -282,7 +282,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
@@ -374,7 +374,7 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || CheckIdentityToken(identityToken)) {
+        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
