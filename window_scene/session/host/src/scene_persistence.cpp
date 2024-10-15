@@ -125,6 +125,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         }
         option.numberHint = 1;
 
+        std::lock_guard<std::mutex> lock(scenePersistence->savingSnapshotMutex_);
         remove(scenePersistence->snapshotPath_.c_str());
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
         imagePacker.StartPacking(scenePersistence->snapshotPath_, option);

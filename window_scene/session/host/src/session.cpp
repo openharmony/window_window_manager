@@ -175,6 +175,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
+    std::lock_guard<std::mutex> lock(snapshotMutex_);
     return snapshot_;
 }
 
@@ -1950,19 +1951,22 @@ void Session::SaveSnapshot(bool useFfrt)
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        session->snapshot_ = session->Snapshot();
-        if (!(session->snapshot_ && session->scenePersistence_)) {
+        auto pixelMap = session->Snapshot();
+        if (pixelMap == nullptr) {
             return;
         }
+        {
+            std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+            session->snapshot_ = pixelMap;
+        }
         std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-                return;
+            if (auto session = weakThis.promote()) {
+                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                session->snapshot_ = nullptr;
             }
-            session->ResetSnapshot();
         };
-        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
     if (!useFfrt || snapshotFfrtHelper == nullptr) {
@@ -3016,18 +3020,13 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     property->SetTouchHotAreas(touchHotAreas);
 }
 
-void Session::ResetSnapshot()
-{
-    snapshot_.reset();
-}
-
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 } // namespace OHOS::Rosen
