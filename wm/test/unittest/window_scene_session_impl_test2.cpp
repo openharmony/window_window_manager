@@ -721,7 +721,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     option->SetWindowName("RaiseAboveTarget01");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, windowSceneSession->RaiseAboveTarget(0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, windowSceneSession->RaiseAboveTarget(0));
 }
 
 /**

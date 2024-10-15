@@ -50,7 +50,7 @@ public:
     MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
     MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
     MOCK_METHOD2(GetUnreliableWindowInfo, WMError(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos));
-    MOCK_METHOD1(RaiseToAppTop, WmErrorCode(uint32_t windowId));
+    MOCK_METHOD1(RaiseToAppTop, WMError(uint32_t windowId));
     MOCK_METHOD1(GetSystemConfig, WMError(SystemConfig& systemConfig));
     MOCK_METHOD2(DispatchKeyEvent, void(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event));
     MOCK_METHOD0(GetMaximizeMode,  MaximizeMode());

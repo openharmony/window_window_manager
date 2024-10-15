@@ -122,6 +122,10 @@ public:
     virtual void OnImmersiveStateChange(bool& immersive) override;
     virtual void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;
+
+    /*
+     * Fold Screen Status Change Report
+     */
     virtual void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
 };
 
@@ -137,10 +141,10 @@ public:
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
-    WSError RequestSceneSessionDestruction(
-        const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
+    WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
+        bool isSaveSnapshot = true, const bool isForceClean = false);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession> &scnSession, sptr<AAFwk::SessionInfo> scnSessionInfo,
-        const bool needRemoveSession);
+        const bool needRemoveSession, const bool isForceClean = false);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
@@ -376,7 +380,13 @@ public:
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
+    void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
+
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
@@ -397,6 +407,7 @@ protected:
 private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
+    static sptr<SceneSessionManager> CreateInstance();
     void Init();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
@@ -439,7 +450,7 @@ private:
         std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, std::string& visibilityInfo);
 
     void PostProcessFocus();
-    void PostProcessProperty();
+    void PostProcessProperty(uint32_t dirty);
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -487,6 +498,7 @@ private:
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty> &property, const sptr<SceneSession> &sceneSession);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
 
     /**
@@ -769,9 +781,13 @@ private:
      */
     bool NotifyVisibleChange(int32_t persistentId);
 
+    /*
+     * Fold Screen Status Change Report
+     */
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
-    WMError CheckAndReportScreenFoldStatus(const ScreenFoldData& data);
+    WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
+
     void ResetWant(sptr<SceneSession>& sceneSession);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
