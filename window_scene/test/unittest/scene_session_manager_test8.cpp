@@ -274,7 +274,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus02, Function | SmallTest | Le
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
 
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    PostProcessFocusState state = {true, true, true, FocusChangeReason::RECENT};
     sceneSession->SetPostProcessFocusState(state);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
