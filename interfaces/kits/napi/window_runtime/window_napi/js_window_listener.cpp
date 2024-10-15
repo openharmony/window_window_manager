@@ -153,7 +153,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
     auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
+            TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -168,7 +168,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_value objValue = nullptr;
             napi_create_object(env, &objValue);
             if (objValue == nullptr) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "Failed to get object");
+                TLOGE(WmsLogTag::WMS_IMMS, "Failed to get object");
                 return;
             }
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
