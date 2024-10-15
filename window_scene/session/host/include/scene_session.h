@@ -509,7 +509,7 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
-    NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /*
      * Window Hierarchy
