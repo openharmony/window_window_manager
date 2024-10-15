@@ -569,10 +569,10 @@ HWTEST_F(WindowControllerTest, RaiseToAppTop, Function | SmallTest | Level3)
     windowNode->SetDisplayId(DISPLAY_ID_INVALID);
 
     uint32_t windowId = windowNode->GetWindowId();
-    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, windowController_->RaiseToAppTop(windowId));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, windowController_->RaiseToAppTop(windowId));
 
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, windowController_->RaiseToAppTop(windowId));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, windowController_->RaiseToAppTop(windowId));
 
     sptr<WindowNode> parentWindow = new (std::nothrow)WindowNode();
     parentWindow->property_->windowId_ = 90;
@@ -580,7 +580,7 @@ HWTEST_F(WindowControllerTest, RaiseToAppTop, Function | SmallTest | Level3)
     windowRoot_->windowNodeMap_.insert(std::make_pair(parentWindow->GetWindowId(), parentWindow));
 
     windowNode->parent_ = parentWindow;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY, windowController_->RaiseToAppTop(windowId));
+    ASSERT_EQ(WMError::WM_DO_NOTHING, windowController_->RaiseToAppTop(windowId));
 
     windowRoot_->windowNodeMap_.clear();
 }

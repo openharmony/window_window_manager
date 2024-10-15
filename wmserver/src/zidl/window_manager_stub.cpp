@@ -299,7 +299,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
             uint32_t windowId = data.ReadUint32();
-            WmErrorCode errCode = RaiseToAppTop(windowId);
+            WMError errCode = RaiseToAppTop(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
