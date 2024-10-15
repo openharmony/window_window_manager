@@ -74,6 +74,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
 } // namespace
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
+bool Session::isScbCoreEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -3106,7 +3107,12 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
 
 bool Session::IsScbCoreEnabled()
 {
-    return system::GetParameter("const.product.devicetype", "unknown") == UI_TYPE_PHONE &&
-        system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    return isScbCoreEnabled_;
+}
+
+void Session::SetScbCoreEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_PIPELINE, "%{public}d", enabled);
+    isScbCoreEnabled_ = enabled;
 }
 } // namespace OHOS::Rosen
