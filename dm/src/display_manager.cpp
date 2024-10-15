@@ -59,6 +59,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     DMError SetFoldStatusLockedFromJs(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -941,6 +942,17 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
 DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
 {
     return pImpl_->SetFoldDisplayModeFromJs(mode);
+}
+
+void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+}
+
+void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
+    float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)

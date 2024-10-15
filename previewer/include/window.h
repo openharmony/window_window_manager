@@ -186,7 +186,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
     virtual WMError SetDialogBackGestureEnabled(bool isEnabled) = 0;
-    virtual WmErrorCode RaiseToAppTop() = 0;
+    virtual WMError RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
     virtual WMError SetShadowRadius(float radius) = 0;
@@ -292,7 +292,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) = 0;
     virtual WMError SetTopmost(bool topmost) { return WMError::WM_OK; }
     virtual bool IsTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;

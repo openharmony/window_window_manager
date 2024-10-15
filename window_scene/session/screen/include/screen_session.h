@@ -21,6 +21,7 @@
 
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
+#include <shared_mutex>
 #include <ui/rs_display_node.h>
 
 #include "screen_property.h"
@@ -110,6 +111,7 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
+    void SetUpdateScreenPivotCallback(std::function<void(float, float)>&& updateScreenPivotCallback);
 
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
@@ -121,6 +123,8 @@ public:
 
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
     void DestroyScreenScene();
+
+    void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX, float translateY);
 
     std::string GetName();
     ScreenId GetScreenId();
@@ -192,7 +196,7 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
-    bool isScreenLocked_ = true;
+    std::atomic<bool> isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
@@ -221,9 +225,10 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     bool hasPrivateWindowForeground_ = false;
-    std::recursive_mutex mutex_;
+    mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
+    std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { 0.0f };
     std::vector<uint32_t> hdrFormats_;

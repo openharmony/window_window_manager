@@ -457,6 +457,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    static void SetScbCoreEnabled(bool enabled);
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
 protected:
@@ -600,6 +601,7 @@ protected:
     uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
+    static bool isScbCoreEnabled_;
 
 private:
     void HandleDialogForeground();
