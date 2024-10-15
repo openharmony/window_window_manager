@@ -750,7 +750,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
             TLOGI(WmsLogTag::WMS_RECOVER, "persistentId=%{public}d", persistentId);
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             visibleWindowCountMap_.erase(sceneSession->GetCallingPid());
-            EraseSceneSessionAndMarkDirty(persistentId);
+            EraseSceneSessionAndMarkDirtyLockFree(persistentId);
             if (systemConfig_.IsPcWindow() &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
                 MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
@@ -2109,7 +2109,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             }
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-                EraseSceneSessionAndMarkDirty(dialog->GetPersistentId());
+                EraseSceneSessionAndMarkDirtyLockFree(dialog->GetPersistentId());
                 systemTopSceneSessionMap_.erase(dialog->GetPersistentId());
                 nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
@@ -2154,7 +2154,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    EraseSceneSessionAndMarkDirty(persistentId);
+    EraseSceneSessionAndMarkDirtyLockFree(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
     if (systemConfig_.IsPcWindow() &&
@@ -2167,11 +2167,15 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
  * if visible session is erased, mark dirty
  * lock-free
  */
-void SceneSessionManager::EraseSceneSessionAndMarkDirty(int32_t persistentId)
+void SceneSessionManager::EraseSceneSessionAndMarkDirtyLockFree(int32_t persistentId)
 {
     // get scene session lock-free
     auto iter = sceneSessionMap_.find(persistentId);
-    sptr<SceneSession> sceneSession = iter != sceneSessionMap_.end() ? iter->second : nullptr;
+    if (iter == sceneSessionMap_.end()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "id: %{public}d not exist", persistentId);
+        return;
+    }
+    sptr<SceneSession> sceneSession = iter->second;
 
     if (sceneSession != nullptr && sceneSession->IsVisible()) {
         sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
@@ -3060,7 +3064,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        EraseSceneSessionAndMarkDirty(persistentId);
+        EraseSceneSessionAndMarkDirtyLockFree(persistentId);
         systemTopSceneSessionMap_.erase(persistentId);
         nonSystemFloatSceneSessionMap_.erase(persistentId);
         UnregisterCreateSubSessionListener(persistentId);
