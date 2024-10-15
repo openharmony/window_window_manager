@@ -900,7 +900,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     AvoidArea avoidarea;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 }
 
 /*
@@ -916,8 +916,8 @@ HWTEST_F(WindowSceneSessionImplTest, Immersive, Function | SmallTest | Level3)
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
 
 
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetLayoutFullScreen(false));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetFullScreen(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
@@ -1483,6 +1483,7 @@ HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Leve
     ASSERT_NE(nullptr, window);
     window->property_->SetWindowName("IsPrivacyModec");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
@@ -1552,7 +1553,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, Function | Sm
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetImmersiveModeEnabledState(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetImmersiveModeEnabledState(false));
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
