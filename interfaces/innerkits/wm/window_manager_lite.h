@@ -268,6 +268,30 @@ public:
      */
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
+    /**
+     * @brief Get accessibility window info.
+     *
+     * @param infos WindowInfos used for Accessibility.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+
+    /**
+     * @brief Register window updated listener.
+     *
+     * @param listener IWindowUpdateListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+    
+    /**
+     * @brief Unregister window updated listener.
+     *
+     * @param listener IWindowUpdateListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -289,6 +313,8 @@ private:
     void OnRemoteDied();
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     WMError NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        WindowUpdateType type) const;
 };
 } // namespace Rosen
 } // namespace OHOS

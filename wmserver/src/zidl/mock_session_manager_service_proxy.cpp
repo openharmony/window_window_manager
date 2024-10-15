@@ -197,7 +197,7 @@ void MockSessionManagerServiceProxy::UnregisterSMSLiteRecoverListener()
     }
 }
 
-int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
@@ -221,7 +221,7 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList
         return ERR_NULL_OBJECT;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        MockSessionManagerServiceMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SendRequest failed");
         return ERR_TRANSACTION_FAILED;
@@ -229,8 +229,8 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNameList
     return reply.ReadInt32();
 }
 
-int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
-    const std::unordered_map<int32_t, std::vector<std::string>> &idBundlesMap)
+int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByIdNamesMap(
+    const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -239,8 +239,8 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByMap(
         TLOGE(WmsLogTag::WMS_RECOVER, "WriteInterfaceToken failed");
         return ERR_TRANSACTION_FAILED;
     }
-    data.WriteInt32(idBundlesMap.size());
-    for (auto it = idBundlesMap.begin(); it != idBundlesMap.end(); ++it) {
+    data.WriteInt32(userIdAndBunldeNames.size());
+    for (auto it = userIdAndBunldeNames.begin(); it != userIdAndBunldeNames.end(); ++it) {
         if (!data.WriteInt32(it->first)) {
             TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
             return ERR_INVALID_DATA;

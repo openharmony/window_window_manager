@@ -1265,7 +1265,7 @@ WMError SceneSessionManagerLiteProxy::GetCurrentPiPWindowInfo(std::string& bundl
     return errorCode;
 }
 
-WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1294,5 +1294,34 @@ WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(const int32_t persiste
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManagerLiteProxy::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write InterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("read window info failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

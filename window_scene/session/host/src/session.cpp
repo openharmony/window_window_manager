@@ -189,6 +189,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
+    std::lock_guard<std::mutex> lock(snapshotMutex_);
     return snapshot_;
 }
 
@@ -293,6 +294,11 @@ void Session::SetScreenId(uint64_t screenId)
 void Session::SetAppInstanceKey(const std::string& appInstanceKey)
 {
     sessionInfo_.appInstanceKey_ = appInstanceKey;
+}
+
+std::string Session::GetAppInstanceKey() const
+{
+    return sessionInfo_.appInstanceKey_;
 }
 
 const SessionInfo& Session::GetSessionInfo() const
@@ -518,6 +524,22 @@ void Session::SetSystemFocusable(bool systemFocusable)
     }
 }
 
+WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+            session->GetPersistentId(), isFocusableOnShow);
+        session->focusableOnShow_ = isFocusableOnShow;
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -539,6 +561,11 @@ bool Session::GetSystemFocusable() const
 bool Session::CheckFocusable() const
 {
     return GetFocusable() && GetSystemFocusable();
+}
+
+bool Session::IsFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool Session::IsFocused() const
@@ -905,8 +932,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     winRect_ = rect;
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
-            .animationDuration_ = rotateAnimationDuration };
+        SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         sessionStage_->UpdateRect(rect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
@@ -1077,7 +1103,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -1157,7 +1183,7 @@ void Session::HandleDialogForeground()
     }
 }
 
-WSError Session::Background(bool isFromClient)
+WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
@@ -1194,7 +1220,7 @@ void Session::ResetIsActive()
     isActive_ = false;
 }
 
-WSError Session::Disconnect(bool isFromClient)
+WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
@@ -1324,10 +1350,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
-        }
-        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
-            !session->IsFocused() && session->GetFocusable()) {
-            TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "SetAttachState");
@@ -1560,7 +1582,7 @@ WSError Session::Clear(bool needStartCaller)
     auto task = [weakThis = wptr(this), needStartCaller]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->isTerminating_ = true;
@@ -2044,19 +2066,22 @@ void Session::SaveSnapshot(bool useFfrt)
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        session->snapshot_ = session->Snapshot(runInFfrt);
-        if (!(session->snapshot_ && session->scenePersistence_)) {
+        auto pixelMap = session->Snapshot(runInFfrt);
+        if (pixelMap == nullptr) {
             return;
         }
+        {
+            std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+            session->snapshot_ = pixelMap;
+        }
         std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-                return;
+            if (auto session = weakThis.promote()) {
+                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                session->snapshot_ = nullptr;
             }
-            session->ResetSnapshot();
         };
-        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     if (!useFfrt) {
         task();
@@ -2143,7 +2168,6 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
-    acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -3288,18 +3312,13 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     property->SetTouchHotAreas(touchHotAreas);
 }
 
-void Session::ResetSnapshot()
-{
-    snapshot_.reset();
-}
-
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 

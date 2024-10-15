@@ -2291,7 +2291,7 @@ WMError SceneSessionManagerProxy::SkipSnapshotForAppProcess(int32_t pid, bool sk
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+WMError SceneSessionManagerProxy::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     MessageParcel data;
@@ -2315,7 +2315,7 @@ WMError SceneSessionManagerProxy::SetSnapshotSkipByUserIdAndBundleNameList(const
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST),
+        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -2408,6 +2408,37 @@ WMError SceneSessionManagerProxy::ReleaseForegroundSessionScreenLock()
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write persistentId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (int errCode = remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_PARENT_DISPLAYID),
+        data, reply, option); errCode!= ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed with errCode, %{public}d", errCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadInt32(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());

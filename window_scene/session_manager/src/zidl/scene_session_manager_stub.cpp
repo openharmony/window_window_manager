@@ -172,14 +172,17 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP):
             return HandleSkipSnapshotForAppProcess(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMELIST):
-            return HandleSetSnapshotSkipByUserIdAndBundleNameList(data, reply);
+        case static_cast<uint32_t>
+            (SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES):
+            return HandleSkipSnapshotByUserIdAndBundleNames(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
             return HandleReleaseForegroundSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_DISPLAYID):
+            return HandleGetDisplayIdByPersistentId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1130,7 +1133,7 @@ int SceneSessionManagerStub::HandleSkipSnapshotForAppProcess(MessageParcel& data
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleSkipSnapshotByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply)
 {
     int32_t userId = -1;
     if (!data.ReadInt32(userId)) {
@@ -1142,7 +1145,7 @@ int SceneSessionManagerStub::HandleSetSnapshotSkipByUserIdAndBundleNameList(Mess
         TLOGE(WmsLogTag::DEFAULT, "Fail to read bundleNameList");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetSnapshotSkipByUserIdAndBundleNameList(userId, bundleNameList);
+    WMError errCode = SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1201,6 +1204,23 @@ int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data,
 int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
 {
     WMError errCode = ReleaseForegroundSessionScreenLock();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetDisplayIdByPersistentId(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 persistentId");
+        return ERR_INVALID_DATA;
+    }
+    int32_t displayId = 0;
+    WMError errCode = GetDisplayIdByPersistentId(persistentId, displayId);
+    if (!reply.WriteInt32(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write DisplayId fail.");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

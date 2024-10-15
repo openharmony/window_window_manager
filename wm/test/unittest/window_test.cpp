@@ -15,12 +15,14 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
-#include "window.h"
-#include "mock_window_adapter.h"
-#include "singleton_mocker.h"
-#include "scene_board_judgement.h"
-#include "key_event.h"
 #include "accessibility_event_info.h"
+#include "key_event.h"
+#include "mock_window_adapter.h"
+#include "scene_board_judgement.h"
+#include "singleton_mocker.h"
+#include "window.h"
+#include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,59 +58,76 @@ void WindowTest::TearDown()
 namespace {
 /**
  * @tc.name: Create01
- * @tc.desc: Create window with no WindowName and no abilityToken
+ * @tc.desc: Create window with no WindowName，no option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = nullptr;
     ASSERT_EQ(nullptr, Window::Create("", option));
 }
 
 /**
  * @tc.name: Create02
- * @tc.desc: Create window with WindowName and no abilityToken
+ * @tc.desc: Create window with WindowName，no option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = new WindowOption();
+    // no option: Window::Create with defult option
+    // default option : default WindowType is WindowType::WINDOW_TYPE_APP_MAIN_WINDOW
+    //                  default onlySupportSceneBoard_ is false
+    sptr<WindowOption> option = nullptr;
     auto window = Window::Create("WindowTest02", option);
-    if (window != nullptr)
-    {
-        ASSERT_NE(nullptr, window);
-    }
-    if (window != nullptr)
-    {
-        ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    }
+    // Create app main window need context and isession
+    ASSERT_EQ(nullptr, window);
 }
 
 /**
  * @tc.name: Create03
- * @tc.desc: Mock CreateWindow return WM_ERROR_SAMGR, create window with WindowName and no abilityToken
+ * @tc.desc: Create window with WindowName, option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    // WindowType::WINDOW_TYPE_UI_EXTENSION is neither appWindow nor systemWindow
     auto window = Window::Create("WindowTest03", option);
-    if (window != nullptr) {
-        ASSERT_EQ(nullptr, Window::Create("WindowTest03", option));
-    }
+    ASSERT_EQ(nullptr, window);
 }
 
 /**
  * @tc.name: Create04
- * @tc.desc: Create window with WindowName and no option
+ * @tc.desc: Create window with WindowName and no abilityToken
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = nullptr;
-    ASSERT_EQ(nullptr, Window::Create("", option));
+    sptr<WindowOption> option = new WindowOption();
+    // Create app float window but only support sceneBoard
+    // Create app float window no need context and isession
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetOnlySupportSceneBoard(true);
+    auto window = Window::Create("WindowTest04", option);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, window);
+        ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    } else {
+        ASSERT_EQ(nullptr, window);
+    }
+}
+
+/**
+ * @tc.name: Create05
+ * @tc.desc: Create window with WindowName option and context
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_EQ(nullptr, Window::Create("WindowTest05", option, abilityContext_));
 }
 
 /**
@@ -199,6 +218,43 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetContext());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetTopWindowWithId
+ * @tc.desc: get top window with id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    ASSERT_NE(nullptr, m);
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    uint32_t mainWinId = 0;
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+    
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    string winName = "test";
+    int32_t winId = 1;
+    WindowSessionImpl::windowSessionMap_.insert(
+        std::make_pair(winName, pair<int32_t, sptr<WindowSessionImpl>>(winId, windowSession)));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    int32_t tempWinId = 3;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(tempWinId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
 /**
@@ -2412,29 +2468,42 @@ HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | Small
  */
 HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
 {
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    window->GetTopWindowWithContext(context);
-}
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
 
-/**
- * @tc.name: Create05
- * @tc.desc: Create window with WindowName and no abilityToken
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
-{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    winSession->property_->SetPersistentId(1);
+    string winName = "test";
+    int32_t winId = 1;
+    WindowSessionImpl::windowSessionMap_.insert(
+        make_pair(winName, std::pair<int32_t, sptr<WindowSessionImpl>>(winId, winSession)));
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = nullptr;
-    auto window = Window::Create("WindowTest02", option);
-    uint32_t version = 0;
-    if (version < 10) {
-        ASSERT_NE(10, version);
-    }
-    WindowOption windowoption;
-    windowoption.onlySupportSceneBoard_ = true;
-    ASSERT_NE(true, option->GetOnlySupportSceneBoard());
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(winId),
+        Return(WMError::WM_DO_NOTHING)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    winSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    int32_t tempWinId = 4;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(DoAll(
+        SetArgReferee<1>(tempWinId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
+
+    WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
 /**

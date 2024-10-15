@@ -245,9 +245,13 @@ public:
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) { return WMError::WM_OK; }
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
-        int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
     virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
+    virtual WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

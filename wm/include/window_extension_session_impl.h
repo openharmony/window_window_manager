@@ -84,7 +84,7 @@ public:
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
-    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
     float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
@@ -92,7 +92,6 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     bool GetFreeMultiWindowModeEnabledState() override;
-    WSError SwitchFreeMultiWindow(bool enable) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;

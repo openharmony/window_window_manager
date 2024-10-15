@@ -130,6 +130,22 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
     }
     SetdisplayModeChangeStatus(true);
     ReportFoldDisplayModeChange(displayMode);
+    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
+    ChangeScreenDisplayModeProc(screenSession, displayMode);
+    if (currentDisplayMode_ != displayMode) {
+        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        currentDisplayMode_ = displayMode;
+        lastDisplayMode_ = displayMode;
+    }
+    SetdisplayModeChangeStatus(false);
+}
+
+void DualDisplayFoldPolicy::ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession,
+    FoldDisplayMode displayMode)
+{
     switch (displayMode) {
         case FoldDisplayMode::SUB: {
             ChangeScreenDisplayModeInner(screenSession, SCREEN_ID_MAIN, SCREEN_ID_SUB);
@@ -147,15 +163,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
             break;
         }
     }
-    if (currentDisplayMode_ != displayMode) {
-        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
-    }
-    {
-        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
-    }
-    SetdisplayModeChangeStatus(false);
 }
 
 void DualDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)

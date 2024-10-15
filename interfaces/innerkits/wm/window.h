@@ -749,6 +749,19 @@ public:
      */
     virtual bool IsTopmost() const { return false; }
     /**
+     * @brief Set whether the main window is topmost
+     *
+     * @param isTopmost whether main window is topmost
+     * @return WMError
+     */
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    /**
+     * @brief Get whether main window is topmost
+     *
+     * @return True means main window is topmost
+     */
+    virtual bool IsMainWindowTopmost() const { return false; }
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
@@ -846,9 +859,11 @@ public:
      *
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param withFocus True means window can get focus when it shows to foreground, false means the opposite;
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) { return WMError::WM_OK; }
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+                         bool withFocus = true) { return WMError::WM_OK; }
     /**
      * @brief Hide window
      *
@@ -1540,6 +1555,15 @@ public:
      * @return WMError
      */
     virtual WMError Recover() { return WMError::WM_OK; }
+
+    /**
+     * @brief After the app main window is minimized, if the Ability is not in the backgroud state,
+     * you can restore app main window.
+     *
+     * @return WMError
+     */
+    virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -2017,6 +2041,13 @@ public:
     virtual bool GetDefaultDensityEnabled() { return false; }
 
     /**
+     * @brief Get virtual pixel ratio.
+     *
+     * @return Value of PixelRatio obtained from displayInfo.
+     */
+    virtual float GetVirtualPixelRatio() { return 0.0f; }
+
+    /**
      * @brief Hide None Secure Windows.
      *
      * @param shouldHide bool.
@@ -2042,9 +2073,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2117,7 +2149,7 @@ public:
      */
     virtual WMError RegisterSwitchFreeMultiWindowListener(
         const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
- 
+
     /**
      * @brief Unregister switch free multi-window listener.
      *
@@ -2277,7 +2309,7 @@ public:
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-    
+
     /**
      * @brief Get the window status of current window.
      *
@@ -2350,7 +2382,7 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
- 
+
     /**
      * @brief Get whether the gesture back is enabled or not.
      *

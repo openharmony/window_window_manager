@@ -66,6 +66,21 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Restore
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnRestoreMainWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    WSError res = sProxy->OnRestoreMainWindow();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow end";
+}
+
+/**
  * @tc.name: RaiseToAppTop
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -73,12 +88,57 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseToAppTop start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     WSError res = sProxy->RaiseToAppTop();
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->RaiseToAppTop();
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->RaiseToAppTop();
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    res = sProxy->RaiseToAppTop();
     ASSERT_EQ(res, WSError::WS_OK);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseToAppTop end";
+}
+
+/**
+ * @tc.name: RaiseAboveTarget
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RaiseAboveTarget, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAboveTarget start";
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> proxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    int32_t subWindowId = 0;
+    WSError res = proxy->RaiseAboveTarget(subWindowId);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->RaiseAboveTarget(subWindowId);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = proxy->RaiseAboveTarget(subWindowId);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    res = proxy->RaiseAboveTarget(subWindowId);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAboveTarget end";
 }
 
 /**
@@ -514,6 +574,58 @@ HWTEST_F(SessionProxyTest, UpdateClientRect01, Function | SmallTest | Level2)
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
+}
+
+/**
+ * @tc.name: TransferExtensionData
+ * @tc.desc: TransferExtensionData test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TransferExtensionData, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    AAFwk::WantParams wantParams;
+    auto res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_OK);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->TransferExtensionData(wantParams);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyAsyncOn
+ * @tc.desc: NotifyAsyncOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAsyncOn, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyAsyncOn();
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyAsyncOn();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyAsyncOn();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen

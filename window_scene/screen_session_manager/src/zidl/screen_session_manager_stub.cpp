@@ -571,8 +571,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool immersive = false;
-            DMError ret = HasImmersiveWindow(immersive);
+            DMError ret = HasImmersiveWindow(screenId, immersive);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             reply.WriteBool(immersive);
             break;
@@ -841,6 +842,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION: {
             ProcSetVirtualScreenSecurityExemption(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_MAX_REFRESHRATE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t refreshRate = data.ReadUint32();
+            uint32_t actualRefreshRate;
+            DMError ret = SetVirtualScreenMaxRefreshRate(screenId, refreshRate, actualRefreshRate);
+            reply.WriteUint32(actualRefreshRate);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:
