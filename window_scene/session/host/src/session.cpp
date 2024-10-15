@@ -482,6 +482,14 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
     }
+    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
+     * already background, which may cause performance deterioration.
+     */
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
+        state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
+        return;
+    }
     state_ = state;
     SetMainSessionUIStateDirty(true);
     NotifySessionStateChange(state);
