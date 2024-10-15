@@ -679,29 +679,18 @@ void JsSceneSession::ClearCbMap(bool needRemove, int32_t persistentId)
 
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 {
-<<<<<<< HEAD
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onWindowAnimationFlagChange_ = [weakThis = wptr(this)](bool isNeedDefaultAnimationFlag) {
+    session->RegisterDefaultAnimationFlagChangeCallback([weakThis = wptr(this)](bool isNeedDefaultAnimationFlag) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionDefaultAnimationFlagChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
-    };
-=======
->>>>>>> bcd0caf32 (solution to onWindowAnimationFlagChange_ data race)
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->RegisterDefaultAnimationFlagChangeCallback([this](bool isNeedDefaultAnimationFlag) {
-        this->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
     });
 }
 
