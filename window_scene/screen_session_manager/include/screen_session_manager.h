@@ -87,6 +87,8 @@ public:
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
+    uint32_t GetScreenBrightness(uint64_t screenId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;

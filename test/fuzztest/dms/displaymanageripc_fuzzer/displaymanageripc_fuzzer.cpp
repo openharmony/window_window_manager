@@ -86,53 +86,53 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
 void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sendData, MessageParcel& reply,
     MessageOption& option)
 {
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
-        sendData, reply, option);
-    proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
+    proxy->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SUSPEND_END),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
         sendData, reply, option);
 }
 
@@ -141,48 +141,48 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
 {
     int flags = option.GetFlags();
     option.SetFlags(MessageOption::TF_SYNC);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
         sendData, reply, option);
     manager->DestroyVirtualScreen(static_cast<ScreenId>(reply.ReadUint64()));
     option.SetFlags(flags);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
-        sendData, reply, option);
-    proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_ORIENTATION),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_ORIENTATION),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP),
+        sendData, reply, option);
+    proxy->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM),
         sendData, reply, option);
 }
 
