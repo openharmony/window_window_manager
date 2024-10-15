@@ -45,7 +45,6 @@ namespace {
     constexpr int32_t SENSOR_SUCCESS = 0;
     constexpr int32_t POSTURE_INTERVAL = 100000000;
     constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
     static const float INWARD_HALF_FOLDED_MIN_THRESHOLD = static_cast<float>(system::GetIntParameter<int32_t>
         ("const.fold.half_folded_min_threshold", 85));
@@ -82,6 +81,7 @@ void FoldScreenSensorManager::RegisterPostureCallback()
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
         TLOGE(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
+        registerPosture_ = true;
         TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.RegisterPostureCallback success.");
     }
 }
@@ -93,6 +93,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
     TLOGI(WmsLogTag::DMS, "UnRegisterPostureCallback, deactivateRet: %{public}d, unsubscribeRet: %{public}d",
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
+        registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
@@ -193,7 +194,7 @@ void FoldScreenSensorManager::HandleHallData(const SensorEvent * const event)
         globalAngle = ANGLE_MIN_VAL;
     }
     TLOGI(WmsLogTag::DMS, "hall value is: %{public}u, angle value is: %{public}f", globalHall, globalAngle);
-    if (globalHall == HALL_FOLDED_THRESHOLD) {
+    if (!registerPosture_) {
         globalAngle = ANGLE_MIN_VAL;
     }
     sensorFoldStateManager_->HandleHallChange(globalAngle, globalHall, foldScreenPolicy_);
@@ -208,7 +209,7 @@ void FoldScreenSensorManager::TriggerDisplaySwitch()
 {
     TLOGI(WmsLogTag::DMS, "TriggerDisplaySwitch hall value is: %{public}u, angle value is: %{public}f",
         globalHall, globalAngle);
-    if (globalHall == HALL_FOLDED_THRESHOLD) {
+    if (!registerPosture_) {
         globalAngle = ANGLE_MIN_VAL;
     } else {
         if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
