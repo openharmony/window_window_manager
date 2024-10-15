@@ -445,7 +445,7 @@ HWTEST_F(SceneSessionTest4, HandleUpdatePropertyByAction, Function | SmallTest |
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
-    sceneSession->HandleUpdatePropertyByAction(property, action);
+    sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->HandleUpdatePropertyByAction(nullptr, sceneSession, action));
 }
 
