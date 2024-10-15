@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(WMError, CloseTargetFloatWindow, (const std::string& bundleName));
     MOCK_METHOD(WMError, CloseTargetPiPWindow, (const std::string& bundleName));
     MOCK_METHOD1(GetCurrentPiPWindowInfo, WMError(std::string& bundleName));
+    MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
 };
 }
 } // namespace OHOS

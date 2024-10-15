@@ -276,6 +276,10 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetSubWindowModal");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError res = mainWindow->SetSubWindowModal(true); // main window is invalid
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, res);
+
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
@@ -286,8 +290,10 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError res = window->SetSubWindowModal(true);
-    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->SetSubWindowModal(true); // sub window is valid
+    ASSERT_EQ(WMError::WM_OK, res);
+    res = window->SetSubWindowModal(false);
+    ASSERT_EQ(WMError::WM_OK, res);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest01 end";
 }
 
@@ -1437,6 +1443,58 @@ HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Le
     window->property_->SetDisplayId(0);
     vpr = window->GetVirtualPixelRatio();
     ASSERT_NE(vpr, 0.0f);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
+}
+
+/**
+ * @tc.name: NotifyRotationAnimationEnd
+ * @tc.desc: test NotifyRotationAnimationEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd001, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyRotationAnimationEnd001");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    ASSERT_NE(window->handler_, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(window->uiContent_, nullptr);
+    window->NotifyRotationAnimationEnd();
+
+    window->uiContent_ = nullptr;
+    ASSERT_EQ(window->uiContent_, nullptr);
+    window->NotifyRotationAnimationEnd();
+
+    window->handler_ = nullptr;
+    ASSERT_EQ(window->handler_, nullptr);
+    window->NotifyRotationAnimationEnd();
+}
+
+/**
+ * @tc.name: GetSubWindow
+ * @tc.desc: test GetSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetSubWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSubWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->property_->SetParentId(101); // this subWindow's parentId is 101
+    std::vector<sptr<Window> > subWindows = window->GetSubWindow(101); // 101 is parentId
+    ASSERT_EQ(0, subWindows.size());
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl> > >(101, { window }));
+    subWindows = window->GetSubWindow(101); // 101 is parentId
+    ASSERT_EQ(1, subWindows.size());
+    WindowSessionImpl::subWindowSessionMap_.erase(101); // 101
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
 }
 }

@@ -17,6 +17,7 @@
 #include "mock_RSIWindowAnimationController.h"
 
 #include "remote_animation.h"
+#include "session_manager.h"
 #include "starting_window.h"
 #include "window_transition_info.h"
 #include "window_property.h"
@@ -697,6 +698,30 @@ HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | Small
     ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession
+ * @tc.desc: WindowAdapter/CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node;
+    sptr<WindowSessionProperty> property;
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 101; // 101 is persistentId
+    windowAdapter.CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(session, nullptr);
 }
 }
 }

@@ -78,20 +78,14 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateFlags, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateStatusProps(property, action);
-    sceneSession->HandleActionUpdateNavigationProps(property, action);
-    sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
-    sceneSession->HandleActionUpdateFlags(property, action);
-
-    auto ret = sceneSession->HandleActionUpdateFlags(property, action);
-    ASSERT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateFlags(property, action);
-    windowSessionProperty.isSystemCalling_ = {true};
-    OHOS::Rosen::Session session(info);
-    session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateFlags(property, action);
+    WMError ret = sceneSession->HandleActionUpdateStatusProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateNavigationIndicatorProps(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = sceneSession->HandleActionUpdateFlags(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -738,8 +732,6 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->isEnableGestureBack_ = false;
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
-    sceneSession->specificCallback_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
     auto func = [sceneSession](int32_t persistentId) {

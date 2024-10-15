@@ -483,7 +483,7 @@ public:
      * Window Snapshot
      */
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
-    WMError SetSnapshotSkipByUserIdAndBundleNameList(const int32_t userId,
+    WMError SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
     WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
 
@@ -681,6 +681,7 @@ private:
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
+    void EraseSceneSessionAndMarkDirty(int32_t persistentId);   // lock-free
     WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
@@ -951,8 +952,9 @@ private:
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
-    std::unordered_set<std::string> snapshotBundleNameSet_;
+    std::unordered_set<std::string> snapshotSkipBundleNameSet_; // ONLY Accessed on OS_sceneSession thread
 
+    int32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;

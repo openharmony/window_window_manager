@@ -84,6 +84,7 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName) override;
     WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
     WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
 private:
     template<typename T>
