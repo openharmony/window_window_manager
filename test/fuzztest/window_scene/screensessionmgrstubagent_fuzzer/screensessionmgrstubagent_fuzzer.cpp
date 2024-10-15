@@ -30,7 +30,7 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
-    constexpr size_t DATA_MIN_SIZE = 2;
+constexpr size_t DATA_MIN_SIZE = 2;
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

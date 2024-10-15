@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
-WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::SetSessionLabel");
     MessageParcel data;
@@ -865,7 +865,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterWindowManagerAgent(WindowManager
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t &pid)
+WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -961,7 +961,6 @@ WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
         TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");

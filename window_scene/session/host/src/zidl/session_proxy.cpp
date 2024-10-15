@@ -631,6 +631,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     return static_cast<WSError>(ret);
 }
 
+/** @note @window.hierarchy */
 WSError SessionProxy::RaiseToAppTop()
 {
     MessageParcel data;
@@ -689,6 +690,7 @@ WSError SessionProxy::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
     return WSError::WS_OK;
 }
 
+/** @note @window.hierarchy */
 WSError SessionProxy::RaiseAboveTarget(int32_t subWindowId)
 {
     MessageParcel data;

@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
 }
 class ScreenSessionDumperTest : public testing::Test {
 public:

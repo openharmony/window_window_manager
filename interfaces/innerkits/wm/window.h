@@ -28,31 +28,31 @@
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
-    class Configuration;
-    class Ability;
+class Configuration;
+class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
-    class AbilityContext;
-    class Context;
+class AbilityContext;
+class Context;
 }
 
 namespace OHOS::AAFwk {
-    class Want;
-    class WantParams;
+class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
-    class UIContent;
+class UIContent;
 }
 
 namespace OHOS::Media {
-    class PixelMap;
+class PixelMap;
 }
 
 namespace OHOS::Accessibility {
@@ -2140,6 +2140,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
+
+    /**
+     * @brief Get whether the free multi-window mode is enabled or not.
+     *
+     * @return true means the free multi-window mode is enabled, and false means the opposite.
+     */
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
 
     /**
      * @brief Get the window status of current window.

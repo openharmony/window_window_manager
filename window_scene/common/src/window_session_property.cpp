@@ -360,6 +360,7 @@ void WindowSessionProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+/** @note @window.hierarchy */
 void WindowSessionProperty::SetTopmost(bool topmost)
 {
     topmost_ = topmost;

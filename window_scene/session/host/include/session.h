@@ -63,8 +63,8 @@ using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
     std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
-using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
-using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
+using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
+using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
@@ -137,7 +137,7 @@ public:
     WSError Hide() override;
     WSError DrawingCompleted() override;
     void ResetSessionConnectState();
-    
+
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
@@ -159,7 +159,8 @@ public:
         bool needNotifyClient = true);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    virtual WSError NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
+    virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false);
@@ -200,6 +201,7 @@ public:
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
+    WSRect GetSessionGlobalRect() const;
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     std::string GetWindowName() const;
@@ -210,7 +212,7 @@ public:
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     WSError UpdateDensity();
     WSError UpdateOrientation();
 
@@ -371,8 +373,8 @@ public:
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
     void NotifyScreenshot();
-    void RemoveLifeCycleTask(const LifeCycleTaskType &taskType);
-    void PostLifeCycleTask(Task &&task, const std::string &name, const LifeCycleTaskType &taskType);
+    void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
+    void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
     WSError UpdateMaximizeMode(bool isMaximize);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
@@ -450,11 +452,12 @@ public:
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
+    virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
-        SessionLifeCycleTask(const Task &task, const std::string &name, const LifeCycleTaskType &type)
+        SessionLifeCycleTask(const Task& task, const std::string& name, const LifeCycleTaskType& type)
             : task(task), name(name), type(type) {}
         Task task;
         const std::string name;
@@ -514,6 +517,7 @@ protected:
     WSRect winRect_;
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_; // rect of root view
+    WSRect globalRect_; // globalRect include translate
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -604,7 +608,7 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     int32_t GetRotateAnimationDuration();
-    
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>

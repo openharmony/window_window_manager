@@ -1183,6 +1183,16 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

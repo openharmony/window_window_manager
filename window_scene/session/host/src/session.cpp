@@ -857,10 +857,10 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGFD("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "
-        "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
+        "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
     if (!IsSessionValid()) {
         winRect_ = rect;
         TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
@@ -941,8 +941,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     callingPid_ = pid;
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED) :
-        NotifyClientToUpdateRect(nullptr);
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
+        NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
@@ -1301,7 +1301,7 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
     terminateSessionFunc_ = func;
 }
 
-void Session::RemoveLifeCycleTask(const LifeCycleTaskType &taskType)
+void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
     if (lifeCycleTaskQueue_.empty()) {
@@ -1434,7 +1434,7 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
     terminateSessionFuncTotal_ = func;
 }
 
-WSError Session::SetSessionLabel(const std::string &label)
+WSError Session::SetSessionLabel(const std::string& label)
 {
     WLOGFI("run Session::SetSessionLabel");
     if (updateSessionLabelFunc_) {
@@ -1443,7 +1443,7 @@ WSError Session::SetSessionLabel(const std::string &label)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func)
 {
     updateSessionLabelFunc_ = func;
 }
@@ -1463,7 +1463,7 @@ WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
     return WSError::WS_OK;
 }
 
-void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func)
 {
     updateSessionIconFunc_ = func;
 }
@@ -2443,6 +2443,14 @@ void Session::RectCheckProcess()
     }
 }
 
+WSRect Session::GetSessionGlobalRect() const
+{
+    if (IsScbCoreEnabled()) {
+        return globalRect_;
+    }
+    return winRect_;
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2625,12 +2633,14 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
+/** @note @window.hierarchy */
 void Session::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
     NotifySessionInfoChange();
 }
 
+/** @note @window.hierarchy */
 uint32_t Session::GetZOrder() const
 {
     return zOrder_;
@@ -2889,7 +2899,7 @@ void Session::SetOffset(float x, float y)
         .height_ = std::round(bounds_.height_),
     };
     if (newRect != winRect_) {
-        UpdateRect(newRect, SizeChangeReason::UNDEFINED);
+        UpdateRect(newRect, SizeChangeReason::UNDEFINED, "SetOffset");
     }
 }
 

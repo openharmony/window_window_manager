@@ -779,8 +779,8 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     }
 }
 
-void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool &hideMaximizeButton, bool &hideMinimizeButton,
-    bool &hideSplitButton)
+void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
+    bool& hideSplitButton)
 {
     if (!isPC) {
         return;
@@ -835,6 +835,23 @@ void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> paren
         useUniqueDensity_ = parentWindow->useUniqueDensity_;
         virtualPixelRatio_ = parentWindow->virtualPixelRatio_;
     }
+}
+
+sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
+{
+    if (context_ == nullptr) {
+        return nullptr;
+    }
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            context_.get() == win->GetContext().get()) {
+            return win;
+        }
+    }
+    WLOGFW("Can not find main window, not app type");
+    return nullptr;
 }
 
 sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
@@ -1247,6 +1264,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGD(WmsLogTag::WMS_LIFE, "notify uiContent window size change end");
+
+    NotifySetUIContentComplete();
     return WMError::WM_OK;
 }
 
@@ -1420,6 +1439,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "set topmost");
@@ -1434,6 +1454,7 @@ WMError WindowSessionImpl::SetTopmost(bool topmost)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
+/** @note @window.hierarchy */
 bool WindowSessionImpl::IsTopmost() const
 {
     return property_->IsTopmost();
@@ -1455,6 +1476,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     WLOGFD("set raiseEnabled");
@@ -3725,6 +3747,70 @@ WMError WindowSessionImpl::SetContinueState(int32_t continueState)
     }
     property_->EditSessionInfo().continueState = static_cast<ContinueState>(continueState);
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetUIContentComplete()
+{
+    bool setUIContentCompleted = false;
+    if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+    }
+}
+
+void WindowSessionImpl::AddSetUIContentTimeoutCheck()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        
+        if (window->setUIContentCompleted_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+            return;
+        }
+
+        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        std::ostringstream oss;
+        oss << "SetUIContent timeout uid: " << getuid();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
+        }
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+        }
+    };
+    handler_->PostTask(task, SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
+        SET_UICONTENT_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
+}
+
+void WindowSessionImpl::NotifySetUIContentComplete()
+{
+    if (WindowHelper::IsMainWindow(GetType())) { // main window
+        SetUIContentComplete();
+    } else if (WindowHelper::IsSubWindow(GetType()) ||
+               WindowHelper::IsSystemWindow(GetType())) { // sub window or system window
+        // created by UIExtension
+        auto extWindow = FindExtensionWindowWithContext();
+        if (extWindow != nullptr) {
+            extWindow->SetUIContentComplete();
+            return;
+        }
+
+        // created by main window
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr) {
+            mainWindow->SetUIContentComplete();
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
