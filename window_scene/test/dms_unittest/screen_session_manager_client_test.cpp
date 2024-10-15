@@ -738,7 +738,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged01, Function | S
     bool immersive = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**
@@ -752,7 +752,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged02, Function | S
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**

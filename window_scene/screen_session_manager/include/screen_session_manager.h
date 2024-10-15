@@ -189,7 +189,7 @@ public:
     void OnScreenshot(sptr<ScreenshotInfo> info);
     bool IsMultiScreenCollaboration();
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    DMError HasImmersiveWindow(bool& immersive) override;
+    DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);

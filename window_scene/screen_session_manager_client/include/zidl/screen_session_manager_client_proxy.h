@@ -42,7 +42,7 @@ public:
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     void OnScreenshot(DisplayId displayId) override;
-    void OnImmersiveStateChanged(bool& immersive) override;
+    void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) override;

@@ -500,7 +500,7 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
 HWTEST_F(SceneSessionManagerTest, GetImmersiveState, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->GetImmersiveState();
+    ssm_->GetImmersiveState(0u);
     ASSERT_EQ(ret, 0);
 }
 

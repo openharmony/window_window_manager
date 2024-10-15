@@ -8998,14 +8998,14 @@ WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
+void DisplayChangeListener::OnImmersiveStateChange(ScreenId screenId, bool& immersive)
 {
-    immersive = SceneSessionManager::GetInstance().GetImmersiveState();
+    immersive = SceneSessionManager::GetInstance().GetImmersiveState(screenId);
 }
 
-bool SceneSessionManager::GetImmersiveState()
+bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
 {
-    auto task = [this] {
+    auto task = [this, screenId] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
             auto sceneSession = item->second;
@@ -9026,6 +9026,9 @@ bool SceneSessionManager::GetImmersiveState()
             auto property = sceneSession->GetSessionProperty();
             if (property == nullptr) {
                 WLOGFE("Property is nullptr");
+                continue;
+            }
+            if (property->GetDisplayId() != screenId) {
                 continue;
             }
             auto sysBarProperty = property->GetSystemBarProperty();

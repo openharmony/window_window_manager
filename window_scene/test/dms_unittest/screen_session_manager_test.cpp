@@ -1910,9 +1910,9 @@ HWTEST_F(ScreenSessionManagerTest, DisableMirror, Function | SmallTest | Level3)
 HWTEST_F(ScreenSessionManagerTest, HasImmersiveWindow, Function | SmallTest | Level3)
 {
     bool immersive = false;
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(immersive));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(0u, immersive));
     immersive = true;
-    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(immersive));
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->HasImmersiveWindow(0u, immersive));
 }
 
 /**
