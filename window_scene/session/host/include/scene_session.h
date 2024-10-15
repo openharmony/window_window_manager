@@ -526,6 +526,8 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+    bool CheckIdentityToken(const std::string& identityToken);
+    bool CheckPid();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
