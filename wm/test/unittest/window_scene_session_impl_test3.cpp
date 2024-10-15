@@ -1901,6 +1901,35 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowWithId, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: GetMainWindowWithId
+ * @tc.desc: GetMainWindowWithId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, GetMainWindowWithId, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetMainWindowWithId");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSession);
+    ASSERT_NE(nullptr, windowSession->property_);
+    windowSession->property_->SetPersistentId(1);
+    ASSERT_NE(nullptr, windowSession->property_);
+    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(1, windowSession)));
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
+    auto ret = windowSceneSessionImpl->GetMainWindowWithId(1);
+    EXPECT_TRUE(ret == nullptr);
+    windowSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ret = windowSceneSessionImpl->GetMainWindowWithId(1);
+    EXPECT_TRUE(ret == nullptr);
+    ret = windowSceneSessionImpl->GetMainWindowWithId(0);
+    EXPECT_TRUE(ret == nullptr);
+}
+
+/**
  * @tc.name: PreNotifyKeyEvent
  * @tc.desc: PreNotifyKeyEvent
  * @tc.type: FUNC
