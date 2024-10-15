@@ -113,21 +113,13 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
-    WLOGFD("SessionManagerLite destroy");
-    DeleteAllSessionListeners();
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    destroyed_ = true;
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed");
 }
 
 void SessionManagerLite::ClearSessionManagerProxy()
 {
-    WLOGFD("ClearSessionManagerProxy enter");
+    WLOGFI("enter");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (destroyed_) {
-        WLOGFI("Already destroyed");
-        return;
-    }
-
     sessionManagerServiceProxy_ = nullptr;
     sceneSessionManagerLiteProxy_ = nullptr;
     screenSessionManagerLiteProxy_ = nullptr;
@@ -206,11 +198,11 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
 void SessionManagerLite::ReregisterSessionListener() const
 {
     if (sceneSessionManagerLiteProxy_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy_ is null");
+        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy is null");
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_RECOVER, "RecoverSessionListeners, listener count = %{public}" PRIu64,
+    TLOGI(WmsLogTag::WMS_RECOVER, "listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
@@ -222,7 +214,7 @@ void SessionManagerLite::ReregisterSessionListener() const
 
 void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register user switch listener enter");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "enter");
     userSwitchCallbackFunc_ = callbackFunc;
 }
 
@@ -266,7 +258,7 @@ void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService> &sessio
         sceneSessionManagerLiteProxy_ = nullptr;
         InitSceneSessionManagerLiteProxy();
         if (!sceneSessionManagerLiteProxy_) {
-            TLOGE(WmsLogTag::WMS_MULTI_USER, "sceneSessionManagerLiteProxy_ is null");
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "sceneSessionManagerLiteProxy is null");
             return;
         }
     }
@@ -288,14 +280,14 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
         return;
     }
     RegisterSMSRecoverListener();
-    sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
-    if (!remoteObject2) {
-        WLOGFE("Remote object2 is nullptr");
+    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetSessionManagerService();
+    if (!remoteObject) {
+        WLOGFE("Remote object is nullptr");
         return;
     }
-    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
+    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject);
     if (!sessionManagerServiceProxy_) {
-        WLOGFE("sessionManagerServiceProxy_ is nullptr");
+        WLOGFE("sessionManagerServiceProxy is nullptr");
     }
 }
 
@@ -305,18 +297,18 @@ void SessionManagerLite::InitScreenSessionManagerLiteProxy()
         return;
     }
     if (!mockSessionManagerServiceProxy_) {
-        WLOGFE("mockSessionManagerServiceProxy_ is nullptr");
+        WLOGFE("mockSessionManagerServiceProxy is nullptr");
         return;
     }
 
     sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetScreenSessionManagerLite();
     if (!remoteObject) {
-        WLOGFW("Get screen session manager lite proxy failed, scene session manager service is null");
+        WLOGFW("Get screen session manager lite proxy failed, null");
         return;
     }
     screenSessionManagerLiteProxy_ = iface_cast<IScreenSessionManagerLite>(remoteObject);
     if (!screenSessionManagerLiteProxy_) {
-        WLOGFW("Get screen session manager lite proxy failed, nullptr");
+        WLOGFW("Get screen session manager lite proxy failed, iface_cast null");
     }
 }
 
@@ -326,18 +318,18 @@ void SessionManagerLite::InitSceneSessionManagerLiteProxy()
         return;
     }
     if (!sessionManagerServiceProxy_) {
-        WLOGFE("sessionManagerServiceProxy_ is nullptr");
+        WLOGFE("sessionManagerServiceProxy is nullptr");
         return;
     }
 
     sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetSceneSessionManagerLite();
     if (!remoteObject) {
-        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
+        WLOGFW("Get scene session manager proxy failed, null");
         return;
     }
     sceneSessionManagerLiteProxy_ = iface_cast<ISceneSessionManagerLite>(remoteObject);
     if (sceneSessionManagerLiteProxy_) {
-        ssmDeath_ = new (std::nothrow) SSMDeathRecipientLite();
+        ssmDeath_ = new SSMDeathRecipientLite();
         if (!ssmDeath_) {
             WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
             return;
@@ -346,9 +338,8 @@ void SessionManagerLite::InitSceneSessionManagerLiteProxy()
             WLOGFE("Failed to add death recipient");
             return;
         }
-    }
-    if (!sceneSessionManagerLiteProxy_) {
-        WLOGFW("Get scene session manager proxy failed, nullptr");
+    } else {
+        WLOGFW("Get scene session manager proxy failed, iface_cast null");
     }
 }
 
@@ -362,16 +353,6 @@ void SessionManagerLite::Clear()
 
 void SSMDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
-    if (wptrDeath == nullptr) {
-        WLOGFE("SSMDeathRecipientLite wptrDeath is null");
-        return;
-    }
-
-    sptr<IRemoteObject> object = wptrDeath.promote();
-    if (!object) {
-        WLOGFE("SSMDeathRecipientLite object is null");
-        return;
-    }
     WLOGI("ssm OnRemoteDied");
     SessionManagerLite::GetInstance().Clear();
     SessionManagerLite::GetInstance().ClearSessionManagerProxy();
@@ -419,7 +400,6 @@ WMError SessionManagerLite::InitMockSMSProxy()
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to get system ability mgr.");
         return WMError::WM_ERROR_NULLPTR;
     }
-
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     if (!remoteObject) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Remote object is nullptr");
@@ -437,7 +417,7 @@ WMError SessionManagerLite::InitMockSMSProxy()
     if (!foundationDeath_) {
         foundationDeath_ = sptr<FoundationDeathRecipientLite>::MakeSptr();
         if (!foundationDeath_) {
-            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to create death Recipient ptr FoundationDeathRecipientLite");
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to create death Recipient ptr");
             return WMError::WM_ERROR_NO_MEM;
         }
     }
@@ -453,7 +433,7 @@ void SessionManagerLite::RegisterSMSRecoverListener()
 {
     if (!recoverListenerRegistered_) {
         if (!mockSessionManagerServiceProxy_) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "mockSessionManagerServiceProxy_ is null");
+            TLOGE(WmsLogTag::WMS_RECOVER, "mockSessionManagerServiceProxy is null");
             return;
         }
         recoverListenerRegistered_ = true;
@@ -480,23 +460,13 @@ void SessionManagerLite::OnWMSConnectionChangedCallback(
 
 void FoundationDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
-    if (wptrDeath == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "FoundationDeathRecipient wptrDeath is null");
-        return;
-    }
-
-    sptr<IRemoteObject> object = wptrDeath.promote();
-    if (!object) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "FoundationDeathRecipient object is null");
-        return;
-    }
     TLOGI(WmsLogTag::WMS_RECOVER, "Foundation died");
     SessionManagerLite::GetInstance().OnFoundationDied();
 }
 
 void SessionManagerLite::OnFoundationDied()
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "On foundation died enter");
+    TLOGI(WmsLogTag::WMS_RECOVER, "enter");
     {
         std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
         isWMSConnected_ = false;

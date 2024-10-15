@@ -1596,39 +1596,39 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 }
 
 /** @note @window.hierarchy */
-WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
+WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
     WLOGFI("[WMSCom] id: %{public}d", GetPersistentId());
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(GetType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     const WSError ret = hostSession->RaiseToAppTop();
-    return static_cast<WmErrorCode>(ret);
+    return static_cast<WMError>(ret);
 }
 
 /** @note @window.hierarchy */
-WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
+WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     auto parentId = GetParentId();
     auto currentWindowId = GetWindowId();
 
     if (parentId == INVALID_SESSION_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     auto subWindows = Window::GetSubWindow(parentId);
@@ -1636,26 +1636,26 @@ WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
         return static_cast<uint32_t>(subWindowId) == window->GetWindowId();
     });
     if (targetWindow == subWindows.end()) {
-        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     if (!WindowHelper::IsSubWindow(GetType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if ((state_ != WindowState::STATE_SHOWN) ||
         ((*targetWindow)->GetWindowState() != WindowState::STATE_SHOWN)) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
     if (currentWindowId == static_cast<uint32_t>(subWindowId)) {
-        return WmErrorCode::WM_OK;
+        return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSError ret = hostSession->RaiseAboveTarget(subWindowId);
-    return WM_JS_TO_ERROR_CODE_MAP.at(static_cast<WMError>(ret));
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
@@ -3247,6 +3247,11 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
+    if (windowSystemConfig_.freeMultiWindowEnable_ == enable) {
+        return WSError::WS_ERROR_REPEAT_OPERATION;
+    }
+    NotifySwitchFreeMultiWindow(enable);
+    //Switch process finish, update system config
     windowSystemConfig_.freeMultiWindowEnable_ = enable;
     return WSError::WS_OK;
 }
