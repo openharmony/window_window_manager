@@ -289,14 +289,14 @@ WindowType WindowOption::GetParentWindowType() const
     return parentWindowType_;
 }
 
-void WindowOption::SetExtensionTag(bool isExtensionTag)
+void WindowOption::SetIsUIExtFirstSubWindow(bool isUIExtFirstSubWindow)
 {
-    isExtensionTag_ = isExtensionTag;
+    isUIExtFirstSubWindow_ = isUIExtFirstSubWindow;
 }
 
-bool WindowOption::GetExtensionTag() const
+bool WindowOption::GetIsUIExtFirstSubWindow() const
 {
-    return isExtensionTag_;
+    return isUIExtFirstSubWindow_;
 }
 
 void WindowOption::SetUIExtensionUsage(uint32_t uiExtensionUsage)
@@ -318,14 +318,14 @@ void WindowOption::SetDialogDecorEnable(bool decorEnable)
     dialogDecorEnable_ = decorEnable;
 }
 
-void WindowOption::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+void WindowOption::SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow)
 {
-    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+    isUIExtAnySubWindow_ = isUIExtAnySubWindow;
 }
 
-bool WindowOption::GetIsUIExtensionSubWindowFlag() const
+bool WindowOption::GetIsUIExtAnySubWindow() const
 {
-    return isUIExtensionSubWindowFlag_;
+    return isUIExtAnySubWindow_;
 }
 
 bool WindowOption::GetDialogDecorEnable() const
