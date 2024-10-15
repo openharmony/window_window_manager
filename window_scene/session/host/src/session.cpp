@@ -1528,7 +1528,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
 
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
         GetPersistentId(), shouldBackToCaller);
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
