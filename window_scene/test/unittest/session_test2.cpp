@@ -836,6 +836,19 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoWant008, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetSessionInfoProcessOptions
+ * @tc.desc: SetSessionInfoProcessOptions Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetSessionInfoProcessOptions, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    session_->SetSessionInfoProcessOptions(processOptions);
+    ASSERT_EQ(processOptions, session_->sessionInfo_.processOptions);
+}
+
+/**
  * @tc.name: SetSessionInfoPersistentId009
  * @tc.desc: SetSessionInfoPersistentId Test
  * @tc.type: FUNC
