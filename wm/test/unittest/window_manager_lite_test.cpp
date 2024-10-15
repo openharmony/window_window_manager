@@ -822,5 +822,17 @@ HWTEST_F(WindowManagerLiteTest, GetWindowStyleType, Function | SmallTest | Level
     WindowStyleType type = WindowManagerLite::GetInstance().GetWindowStyleType();
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
 }
+
+/**
+ * @tc.name: OnRemoteDied01
+ * @tc.desc: OnRemoteDied01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance().destroyed_ = true;
+    WindowManagerLite::GetInstance().OnRemoteDied();
+    ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
+}
 }
 }
