@@ -289,8 +289,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    res = window->SetSubWindowModal(true); // sub window is valid
+    res = window->SetSubWindowModal(true); // // sub window is valid
     ASSERT_EQ(WMError::WM_OK, res);
     res = window->SetSubWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, res);
