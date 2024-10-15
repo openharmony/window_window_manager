@@ -618,7 +618,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
-    
+
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionFocus(3, false, reason);
@@ -1602,6 +1602,54 @@ HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | S
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->CheckModalSubWindowPermission(property);
 }
+
+/**
+ * @tc.name: RequestFocusStatusBySCB
+ * @tc.desc: SceneSessionManager request focus status from SCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RequestFocusTest";
+    info.bundleName_ = "RequestFocusTest";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetFocusable(true);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = property;
+    sceneSession->persistentId_ = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    FocusChangeReason reason = FocusChangeReason::FOREGROUND;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+
+    reason = FocusChangeReason::CLICK;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+
+    ssm_->RequestFocusStatusBySCB(1, false, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(ssm_->focusedSessionId_, 1);
+
+    reason = FocusChangeReason::MOVE_UP;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    FocusChangeReason reasonResult = sceneSession->GetPostProcessFocusState().reason_;
+    ASSERT_EQ(reasonResult, FocusChangeReason::MOVE_UP);
+
+    reason = FocusChangeReason::DEFAULT;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
