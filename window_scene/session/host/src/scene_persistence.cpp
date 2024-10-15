@@ -151,7 +151,7 @@ bool ScenePersistence::IsSavingSnapshot()
     return isSavingSnapshot_.load();
 }
 
-void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t &oldPersistentId)
+void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId)
 {
     auto task = [weakThis = wptr(this), oldPersistentId]() {
         auto scenePersistence = weakThis.promote();

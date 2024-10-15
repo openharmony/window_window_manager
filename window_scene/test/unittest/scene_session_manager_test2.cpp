@@ -36,30 +36,30 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    constexpr int WAIT_SLEEP_TIME = 1;
-    using ConfigItem = WindowSceneConfig::ConfigItem;
-    ConfigItem ReadConfig(const std::string& xmlStr)
-    {
-        ConfigItem config;
-        xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
-        if (docPtr == nullptr) {
-            return config;
-        }
+const std::string EMPTY_DEVICE_ID = "";
+constexpr int WAIT_SLEEP_TIME = 1;
+using ConfigItem = WindowSceneConfig::ConfigItem;
+ConfigItem ReadConfig(const std::string& xmlStr)
+{
+    ConfigItem config;
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    if (docPtr == nullptr) {
+        return config;
+    }
 
-        xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
-        if (rootPtr == nullptr || rootPtr->name == nullptr ||
-            xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-            xmlFreeDoc(docPtr);
-            return config;
-        }
-
-        std::map<std::string, ConfigItem> configMap;
-        config.SetValue(configMap);
-        WindowSceneConfig::ReadConfig(rootPtr, *config.mapValue_);
+    xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
+    if (rootPtr == nullptr || rootPtr->name == nullptr ||
+        xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
         return config;
     }
+
+    std::map<std::string, ConfigItem> configMap;
+    config.SetValue(configMap);
+    WindowSceneConfig::ReadConfig(rootPtr, *config.mapValue_);
+    xmlFreeDoc(docPtr);
+    return config;
+}
 }
 class SceneSessionManagerTest2 : public testing::Test {
 public:

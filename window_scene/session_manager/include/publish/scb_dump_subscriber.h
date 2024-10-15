@@ -35,11 +35,11 @@ public:
     {}
     ~ScbDumpSubscriber() = default;
 
-    void OnReceiveEvent(const EventFwk::CommonEventData &data);
+    void OnReceiveEvent(const EventFwk::CommonEventData& data);
 
     WSError Publish(std::string cmd);
 
-    std::string GetDebugDumpInfo(std::chrono::milliseconds const &time);
+    std::string GetDebugDumpInfo(std::chrono::milliseconds const& time);
 
     static void Subscribe(std::shared_ptr<ScbDumpSubscriber>& scbSubscriber);
 

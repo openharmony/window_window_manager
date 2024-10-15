@@ -124,6 +124,7 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindowStage::SetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]SetShowOnLockScreen");
@@ -728,7 +729,7 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
     std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene);
     napi_wrap(env, objValue, jsWindowStage.release(), JsWindowStage::Finalizer, nullptr, nullptr);
 
-    const char *moduleName = "JsWindowStage";
+    const char* moduleName = "JsWindowStage";
     BindNativeFunction(env,
         objValue, "setUIContent", moduleName, JsWindowStage::SetUIContent);
     BindNativeFunction(env,

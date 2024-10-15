@@ -24,10 +24,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowStub"};
 }
 
-int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     if (staticDestroyMonitor_.IsDestroyed()) {
         WLOGFE("Main thread finished, static data has been destroyed");
@@ -102,6 +102,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
+            if (info == nullptr) {
+                WLOGFE("OccupiedAreaChangeInfo is null");
+                return ERR_INVALID_DATA;
+            }
             bool hasRSTransaction = data.ReadBool();
             if (hasRSTransaction) {
                 auto rsTransaction = data.ReadParcelable<RSTransaction>();
@@ -119,6 +123,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
+            if (info == nullptr) {
+                WLOGFE("OccupiedAreaChangeInfo is null");
+                return ERR_INVALID_DATA;
+            }
             struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
             bool hasRSTransaction = data.ReadBool();
             if (hasRSTransaction) {

@@ -27,9 +27,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayPowerTest"};
-    constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 40;
-    constexpr uint32_t SLEEP_TIME_IN_US = 50000;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayPowerTest"};
+constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 40;
+constexpr uint32_t SLEEP_TIME_IN_US = 50000;
 }
 
 class DisplayPowerEventListener : public IDisplayPowerEventListener {

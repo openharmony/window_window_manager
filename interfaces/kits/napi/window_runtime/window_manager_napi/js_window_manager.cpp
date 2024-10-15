@@ -31,12 +31,13 @@
 #include "pixel_map_napi.h"
 #include "permission.h"
 #include "singleton_container.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
-    const std::string PIP_WINDOW = "pip_window";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
+const std::string PIP_WINDOW = "pip_window";
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -107,6 +108,7 @@ napi_value JsWindowManager::GetTopWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetTopWindow(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
 napi_value JsWindowManager::GetLastWindow(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);

@@ -35,16 +35,16 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr int32_t INDEX_ONE = 1;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
-    const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
-        { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
-        { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
-        { DisplayState::ON,           DisplayStateMode::STATE_ON           },
-        { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
-        { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
-        { DisplayState::VR,           DisplayStateMode::STATE_VR           },
-        { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
-    };
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
+const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
+    { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
+    { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
+    { DisplayState::ON,           DisplayStateMode::STATE_ON           },
+    { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
+    { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
+    { DisplayState::VR,           DisplayStateMode::STATE_VR           },
+    { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
+};
 
 using GraphicCM_ColorSpaceType = enum {
     GRAPHIC_CM_COLORSPACE_NONE,
