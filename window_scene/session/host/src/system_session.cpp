@@ -34,7 +34,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), true);
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
@@ -154,7 +154,7 @@ WSError SystemSession::Hide()
     return WSError::WS_OK;
 }
 
-WSError SystemSession::Disconnect(bool isFromClient)
+WSError SystemSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto task = [weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();

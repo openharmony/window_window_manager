@@ -186,7 +186,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bundleName = "test";
         return WMError::WM_OK;
     }
-    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override
+    WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
     }

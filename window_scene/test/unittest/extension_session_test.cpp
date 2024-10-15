@@ -777,23 +777,51 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
     MockFunction<AvoidArea(AvoidAreaType type)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(1).WillOnce([](AvoidAreaType type) {
-        return AvoidArea();
-    });
-    auto res = extensionSession_->GetAvoidAreaByType(type);
-    ASSERT_EQ(res, AvoidArea());
+    AvoidAreaType typeSystem = AvoidAreaType::TYPE_SYSTEM;
+    AvoidAreaType typeCutout = AvoidAreaType::TYPE_CUTOUT;
+    AvoidAreaType typeSystemGesture = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    AvoidAreaType typeKeyboard = AvoidAreaType::TYPE_KEYBOARD;
+    AvoidAreaType typeNavigationIndicator = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    AvoidArea expectedAvoidArea;
+    expectedAvoidArea.topRect_ = {10, 20, 30, 40};
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
+    auto res = extensionSession_->GetAvoidAreaByType(typeSystem);
+    ASSERT_EQ(res, expectedAvoidArea);
+    res = extensionSession_->GetAvoidAreaByType(typeCutout);
+    ASSERT_EQ(res, expectedAvoidArea);
+    res = extensionSession_->GetAvoidAreaByType(typeSystemGesture);
+    ASSERT_EQ(res, expectedAvoidArea);
+    res = extensionSession_->GetAvoidAreaByType(typeKeyboard);
+    ASSERT_EQ(res, expectedAvoidArea);
+    res = extensionSession_->GetAvoidAreaByType(typeNavigationIndicator);
+    ASSERT_EQ(res, expectedAvoidArea);
 
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
-    res = extensionSession_->GetAvoidAreaByType(type);
+    res = extensionSession_->GetAvoidAreaByType(typeSystem);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeCutout);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeSystemGesture);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeKeyboard);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeNavigationIndicator);
     ASSERT_EQ(res, AvoidArea());
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
-    res = extensionSession_->GetAvoidAreaByType(type);
+    res = extensionSession_->GetAvoidAreaByType(typeSystem);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeCutout);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeSystemGesture);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeKeyboard);
+    ASSERT_EQ(res, AvoidArea());
+    res = extensionSession_->GetAvoidAreaByType(typeNavigationIndicator);
     ASSERT_EQ(res, AvoidArea());
 }
 

@@ -1172,6 +1172,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
         return callingSession;
     };
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = true;
     auto callingOriPosY = 0;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1405,6 +1406,7 @@ HWTEST_F(KeyboardSessionTest, UpdateKeyboardAvoidArea01, Function | SmallTest | 
     auto expectDirtyFlag = 0;
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = true;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [&expectDirtyFlag](const uint32_t& persistentId) {
         expectDirtyFlag = 1;
     };
@@ -1417,13 +1419,25 @@ HWTEST_F(KeyboardSessionTest, UpdateKeyboardAvoidArea01, Function | SmallTest | 
     }
 
     // miss callback
+    expectDirtyFlag = 0;
     keyboardSession->dirtyFlags_ = 1;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
-    ASSERT_EQ(keyboardSession->dirtyFlags_, 1);
+    keyboardSession->UpdateKeyboardAvoidArea();
+    if (Session::IsScbCoreEnabled()) {
+        ASSERT_EQ(keyboardSession->dirtyFlags_, 1);
+    } else {
+        ASSERT_EQ(expectDirtyFlag, 0);
+    }
 
+    expectDirtyFlag = 0;
     keyboardSession->dirtyFlags_ = 2;
     keyboardSession->specificCallback_ = nullptr;
-    ASSERT_EQ(keyboardSession->dirtyFlags_, 2);
+    keyboardSession->UpdateKeyboardAvoidArea();
+    if (Session::IsScbCoreEnabled()) {
+        ASSERT_EQ(keyboardSession->dirtyFlags_, 2);
+    } else {
+        ASSERT_EQ(expectDirtyFlag, 0);
+    }
 }
 
 /**

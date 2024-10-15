@@ -148,6 +148,7 @@ public:
         TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION,
         TRANS_ID_SET_VIRTUAL_SCREEN_STATUS,
         TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION,
+        TRANS_ID_SET_VIRTUAL_SCREEN_MAX_REFRESHRATE,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -298,7 +299,10 @@ public:
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
 
-    virtual DMError HasImmersiveWindow(bool& immersive) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
@@ -335,6 +339,11 @@ public:
         std::vector<uint64_t>& windowIdList)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate)
+    {
+        return DMError::DM_OK;
     }
 };
 } // namespace OHOS::Rosen

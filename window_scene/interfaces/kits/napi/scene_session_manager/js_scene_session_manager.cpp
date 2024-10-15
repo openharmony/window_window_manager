@@ -205,8 +205,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetInstanceCount);
     BindNativeFunction(env, exportObj, "getLastInstanceKey", moduleName,
         JsSceneSessionManager::GetLastInstanceKey);
-    BindNativeFunction(env, exportObj, "packageRemovedOrChanged", moduleName,
-        JsSceneSessionManager::PackageRemovedOrChanged);
+    BindNativeFunction(env, exportObj, "refreshAppInfo", moduleName,
+        JsSceneSessionManager::RefreshAppInfo);
+    BindNativeFunction(env, exportObj, "getWindowPid", moduleName,
+        JsSceneSessionManager::GetWindowPid);
     return NapiGetUndefined(env);
 }
 
@@ -728,7 +730,7 @@ napi_value JsSceneSessionManager::GetWindowSceneConfig(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateRotateAnimationConfig(env, info) : nullptr;
 }
@@ -1022,14 +1024,24 @@ napi_value JsSceneSessionManager::GetLastInstanceKey(napi_env env, napi_callback
     return me->OnGetLastInstanceKey(env, info);
 }
 
-napi_value JsSceneSessionManager::PackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::RefreshAppInfo(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     if (me == nullptr) {
         TLOGW(WmsLogTag::WMS_LIFE, "me is null");
         return nullptr;
     }
-    return me->OnPackageRemovedOrChanged(env, info);
+    return me->OnRefreshAppInfo(env, info);
+}
+
+napi_value JsSceneSessionManager::GetWindowPid(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "me is null");
+        return nullptr;
+    }
+    return me->OnGetWindowPid(env, info);
 }
 
 napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_info info)
@@ -3299,7 +3311,7 @@ napi_value JsSceneSessionManager::OnGetLastInstanceKey(napi_env env, napi_callba
     return result;
 }
 
-napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnRefreshAppInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -3317,8 +3329,39 @@ napi_value JsSceneSessionManager::OnPackageRemovedOrChanged(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().PackageRemovedOrChanged(bundleName);
+    SceneSessionManager::GetInstance().RefreshAppInfo(bundleName);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnGetWindowPid(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId;
+    if (!ConvertFromJsValue(env, argv[0], windowId)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to windowId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t pid = INVALID_PID;
+    WMError ret = SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI] Get window pid failed, return %{public}d", wmErrorCode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Get window pid failed."));
+        return NapiGetUndefined(env);
+    }
+    napi_value result = nullptr;
+    napi_create_int32(env, pid, &result);
+    return result;
 }
 
 void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleName)

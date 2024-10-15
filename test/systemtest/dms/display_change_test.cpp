@@ -337,7 +337,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | L
  */
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | Level2)
 {
-    uint32_t densityDpi = 700;
+    uint32_t densityDpi = DOT_PER_INCH_MAXIMUM_VALUE + 1;
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, defaultScreen_->SetDensityDpi(densityDpi));
 }
 

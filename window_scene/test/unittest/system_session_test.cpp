@@ -62,7 +62,7 @@ void SystemSessionTest::SetUp()
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    systemSession_ = new (std::nothrow) SystemSession(info, specificCallback);
+    systemSession_ = sptr<SystemSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, systemSession_);
 }
 
@@ -125,88 +125,6 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
 
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, systemSession_->TransferKeyEvent(keyEvent));
 }
-
-/**
- * @tc.name: TransferKeyEvent03
- * @tc.desc: check func TransferKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
-{
-    systemSession_->state_ = SessionState::STATE_CONNECT;
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-
-    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(nullptr, windowSessionProperty);
-    systemSession_->property_ = windowSessionProperty;
-    EXPECT_NE(WSError::WS_OK, systemSession_->TransferKeyEvent(keyEvent));
-}
-
-/**
- * @tc.name: CheckKeyEventDispatch01
- * @tc.desc: check func CheckKeyEventDispatch
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, CheckKeyEventDispatch01, Function | SmallTest | Level1)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    systemSession_->isRSVisible_ = false;
-    systemSession_->winRect_ = {1, 1, 1, 1};
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->isRSVisible_ = true;
-    systemSession_->winRect_ = {1, 1, 1, 1};
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->winRect_ = {1, 1, 1, 0};
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->isRSVisible_ = true;
-    systemSession_->winRect_ = {1, 1, 0, 0};
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-}
-
-/**
- * @tc.name: CheckKeyEventDispatch02
- * @tc.desc: check func CheckKeyEventDispatch
- * @tc.type: FUNC
- */
-HWTEST_F(SystemSessionTest, CheckKeyEventDispatch02, Function | SmallTest | Level1)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
-    systemSession_->isRSVisible_ = true;
-    systemSession_->winRect_ = {1, 1, 0, 0};
-
-    SessionInfo info;
-    info.abilityName_ = "ParamSystemSession1";
-    info.moduleName_ = "ParamSystemSession2";
-    info.bundleName_ = "ParamSystemSession3";
-    sptr<Session> session = new (std::nothrow) Session(info);
-    systemSession_->parentSession_ = session;
-
-    systemSession_->parentSession_->state_ = SessionState::STATE_CONNECT;
-    systemSession_->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->state_ = SessionState::STATE_ACTIVE;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->state_ = SessionState::STATE_CONNECT;
-    systemSession_->parentSession_->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->parentSession_->state_ = SessionState::STATE_ACTIVE;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->parentSession_->state_ = SessionState::STATE_CONNECT;
-    systemSession_->state_ = SessionState::STATE_CONNECT;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-
-    systemSession_->parentSession_->state_ = SessionState::STATE_FOREGROUND;
-    systemSession_->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(false, systemSession_->CheckKeyEventDispatch(keyEvent));
-}
-
 
 /**
  * @tc.name: ProcessBackEvent01
@@ -294,17 +212,6 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Leve
     int32_t posX = 2;
     int32_t posY = 3;
     auto ret = systemSession_->ProcessPointDownSession(posX, posY);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(nullptr, windowSessionProperty);
-
-    systemSession_->property_ = windowSessionProperty;
-    ret = systemSession_->ProcessPointDownSession(posX, posY);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    windowSessionProperty->raiseEnabled_ = false;
-    ret = systemSession_->ProcessPointDownSession(posX, posY);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
 
@@ -856,6 +763,38 @@ HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1
     ASSERT_EQ(ret, false);
 }
 
+/**
+ * @tc.name: UpdatePiPWindowStateChanged
+ * @tc.desc: test function : UpdatePiPWindowStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.moduleName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.bundleName_ = "UpdatePiPWindowStateChanged";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SystemSession> systemSession =
+        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    EXPECT_NE(nullptr, systemSession);
+    PiPStateChangeCallback callbackFun = [](const std::string& bundleName, bool isForeground) {
+        return;
+    };
+    callback->onPiPStateChange_ = callbackFun;
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, systemSession->GetWindowType());
+    systemSession->UpdatePiPWindowStateChanged(true);
+
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    sptr<SystemSession> system =
+        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    EXPECT_NE(nullptr, system);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, system->GetWindowType());
+    system->UpdatePiPWindowStateChanged(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

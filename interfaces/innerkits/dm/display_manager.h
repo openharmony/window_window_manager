@@ -704,7 +704,7 @@ private:
     ~DisplayManager();
     void OnRemoteDied();
 
-    void ShowDisplayIdList();
+    void ShowDisplayIdList(bool isShowLog = false);
     std::mutex displayOperateMutex_;
     DisplayId GetCallingAbilityDisplayId();
     std::vector<std::pair<wptr<IRemoteObject>, DisplayId>> displayIdList_ {};

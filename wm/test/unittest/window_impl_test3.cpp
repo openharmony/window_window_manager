@@ -738,6 +738,9 @@ HWTEST_F(WindowImplTest3, RaiseToAppTop, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     option->parentId_ = INVALID_WINDOW_ID;
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RaiseToAppTop());
+
+    window->SetWindowState(WindowState::STATE_CREATED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->RaiseToAppTop());
 
     window->property_->parentId_ = 100000;
@@ -1165,6 +1168,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<Window> topWindow = window->GetTopWindowWithId(INVALID_WINDOW_ID);
+    ASSERT_EQ(topWindow, nullptr);
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -1350,7 +1354,7 @@ HWTEST_F(WindowImplTest3, SetSnapshotSkip, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, window);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillRepeatedly(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetSnapshotSkip(true));
 }
 
 /**
@@ -1392,13 +1396,29 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId03, Function | SmallTest | Level3)
     option->SetWindowName("GetTopWindowWithId03");
     sptr<WindowImpl> window = new WindowImpl(option);
     uint32_t mainWinId = 0;
+    uint32_t windowId = 1;
+    string winName = "test";
+    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
 
-    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    ASSERT_NE(WMError::WM_OK, ret);
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(Return(WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
-    ret = WMError::WM_OK;
-    uint32_t topWinId = INVALID_WINDOW_ID;
+
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
+        SetArgReferee<1>(windowId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
+    uint32_t topWinId = 1;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithId(mainWinId));
+
+    uint32_t tempWindowId = 3;
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
+        SetArgReferee<1>(tempWindowId),
+        Return(WMError::WM_OK)
+    ));
+    ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
+
+    WindowImpl::windowMap_.erase(winName);
 }
 
 /**

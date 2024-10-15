@@ -462,6 +462,30 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetDialogSessionMap02
+ * @tc.desc: GetDialogSessionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sceneSession->SetSessionProperty(property);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    sceneSession->SetParentSession(session);
+    std::map<int32_t, sptr<SceneSession>> sessionMap;
+    sessionMap.emplace(1, sceneSession);
+    auto sessionList = manager_->GetDialogSessionMap(sessionMap);
+    ASSERT_EQ(2, sessionList.size());
+}
+
+/**
  * @tc.name: UpdatePointerAreas
  * @tc.desc: UpdatePointerAreas
  * @tc.type: FUNC

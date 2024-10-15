@@ -1459,9 +1459,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallT
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     ssm_->sceneSessionMap_.erase(0);
@@ -2011,13 +2009,44 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
     sptr<IRemoteObject> token;
     int32_t id = 0;
     ASSERT_NE(ssm_, nullptr);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    // property is nullptr
+    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+
+    // property is not nullptr
     property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetTopmost(true);
+    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL)));
+    property->SetWindowFlags(flags);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetFloatingWindowAppType(true);
+    ssm_->shouldHideNonSecureFloatingWindows_.store(true);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->isScreenLocked_ = true;
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, res);
 }
 
 /**
@@ -2085,8 +2114,28 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
-    property->SetParentPersistentId(1);
+    int32_t parentPersistentId = 1;
+    property->SetParentPersistentId(parentPersistentId);
     ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
+    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
+    ssm_->RecoverCachedSubSession(parentPersistentId);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
+}
+
+
+/**
+ * @tc.name: SetAlivePersistentIds
+ * @tc.desc: SetAlivePersistentIds
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
+    ssm_->SetAlivePersistentIds(recoveredPersistentIds);
+    ASSERT_EQ(ssm_->alivePersistentIds_, recoveredPersistentIds);
 }
 
 /**

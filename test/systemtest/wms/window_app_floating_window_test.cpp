@@ -21,6 +21,7 @@
 #include "window_manager.h"
 #include "window_option.h"
 #include "window_scene.h"
+#include "common_test_utils.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 
@@ -79,6 +80,7 @@ void WindowAppFloatingWindowTest::TearDownTestCase()
 
 void WindowAppFloatingWindowTest::SetUp()
 {
+    CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_app_floating_window_test");
 }
 
 void WindowAppFloatingWindowTest::TearDown()

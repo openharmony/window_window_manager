@@ -141,7 +141,20 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, Function | SmallTest | Level1)
 {
     subSession_->Hide();
     subSession_->GetMissionId();
+    
+    subSession_->isActive_ = true;
+    ASSERT_EQ(WSError::WS_OK, subSession_->Hide());
+    subSession_->isActive_ = false;
 
+    subSession_->sessionInfo_.isSystem_ = true;
+    ASSERT_EQ(WSError::WS_OK, subSession_->Hide());
+    subSession_->sessionInfo_.isSystem_ = false;
+
+    sptr<ISessionStage> tempStage_ = subSession_->sessionStage_;
+    subSession_->sessionStage_ = nullptr;
+    ASSERT_EQ(WSError::WS_OK, subSession_->Hide());
+    subSession_->sessionStage_ = tempStage_;
+    
     WSRect rect;
     subSession_->UpdatePointerArea(rect);
     subSession_->RectCheck(50, 100);

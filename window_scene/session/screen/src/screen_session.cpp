@@ -32,7 +32,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Scree
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
-const unsigned int XCOLLIE_TIMEOUT_10S = 10;
+const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -46,6 +46,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     Rosen::RSDisplayNodeConfig rsConfig;
+    bool isNeedCreateDisplayNode = true;
     switch (reason) {
         case ScreenSessionReason::CREATE_SESSION_FOR_CLIENT: {
             TLOGI(WmsLogTag::DMS, "create screen session for client. noting to do.");
@@ -67,12 +68,19 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
             rsConfig.screenId = screenId_;
             break;
         }
+        case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
+            TLOGI(WmsLogTag::DMS, "screen session no need create displayNode.");
+            isNeedCreateDisplayNode = false;
+            break;
+        }
         default : {
             TLOGE(WmsLogTag::DMS, "invalid screen session config.");
             break;
         }
     }
-    CreateDisplayNode(rsConfig);
+    if (isNeedCreateDisplayNode) {
+        CreateDisplayNode(rsConfig);
+    }
 }
 
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
@@ -350,11 +358,12 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-void ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetBounds(updatedProperty.GetBounds());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
+    return property_;
 }
 
 void ScreenSession::UpdateDisplayState(DisplayState displayState)
@@ -1143,7 +1152,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         width = abstractScreenModes->width_;
     }
     RSScreenType screenType;
-    DmsXcollie dmsXcollie("DMS:GetDensityInCurResolution", XCOLLIE_TIMEOUT_10S);
+    DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
     auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
     if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
         displayNode_->SetSecurityDisplay(true);
@@ -1193,20 +1202,20 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             break;
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
-                WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
+                WLOGI("SCREEN_MIRROR, config is not mirror");
                 break;
             }
             if (defaultScreenSession == nullptr) {
-                WLOGFE("AddChild fail, defaultScreenSession is nullptr");
+                WLOGFE("defaultScreenSession is nullptr");
                 break;
             }
             std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();
             if (displayNode == nullptr) {
-                WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
+                WLOGFE("displayNode is nullptr, cannot get DisplayNode");
                 break;
             }
             NodeId nodeId = displayNode->GetId();
-            WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
+            WLOGI("mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
                 mirrorScreenId_, screenSession->rsId_, nodeId);
             config = {screenSession->rsId_, true, nodeId, true};
             break;
@@ -1410,7 +1419,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         .scaleY = scaleY,
     };
     {
-        DmsXcollie dmsXcollie("DMS:GetDensityInCurResolution", XCOLLIE_TIMEOUT_10S);
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshot:TakeSurfaceCapture", XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, config);
         if (!ret) {

@@ -771,11 +771,11 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
             return item.first == abilityToken && item.second == displayId;
     });
     if (iter != displayIdList_.end()) {
-        WLOGFI("abilityToken and display has been added.");
+        WLOGFI("abilityToken and display[%{public}" PRIu64"] has been added.", displayId);
     } else {
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
     }
-    ShowDisplayIdList();
+    ShowDisplayIdList(true);
 }
 
 void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
@@ -796,7 +796,7 @@ void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityTo
     if (iter != displayIdList_.end()) {
         displayIdList_.erase(iter);
     }
-    ShowDisplayIdList();
+    ShowDisplayIdList(true);
 }
 
 DisplayId DisplayManager::GetCallingAbilityDisplayId()
@@ -817,26 +817,37 @@ DisplayId DisplayManager::GetCallingAbilityDisplayId()
             break;
         }
     }
-    ShowDisplayIdList();
+    ShowDisplayIdList(false);
     return displayCount == 1 ? displayId : DISPLAY_ID_INVALID;
 }
 
-void DisplayManager::ShowDisplayIdList()
+void DisplayManager::ShowDisplayIdList(bool isShowLog)
 {
     std::ostringstream oss;
     oss << "current display id list:[";
     for (const auto &iter : displayIdList_) {
         oss << iter.second << ",";
     }
-    WLOGFD("%{public}s", oss.str().c_str());
+    if (isShowLog) {
+        WLOGFD("%{public}s]", oss.str().c_str());
+    } else {
+        WLOGFI("%{public}s]", oss.str().c_str());
+    }
 }
 
 sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
 {
     if (isFromNapi) {
+        sptr<Display> display = nullptr;
         DisplayId displayId = GetCallingAbilityDisplayId();
         if (displayId != DISPLAY_ID_INVALID) {
-            return pImpl_->GetDisplayById(displayId);
+            WLOGFI("displayId:%{public}" PRIu64, displayId);
+            display = pImpl_->GetDisplayById(displayId);
+        }
+        if (display != nullptr) {
+            return display;
+        } else {
+            WLOGFI("get displayId:%{public}" PRIu64" info nullptr.", displayId);
         }
     }
     return pImpl_->GetDefaultDisplaySync();

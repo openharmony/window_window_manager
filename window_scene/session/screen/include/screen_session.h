@@ -79,6 +79,7 @@ enum class ScreenSessionReason : int32_t {
     CREATE_SESSION_FOR_VIRTUAL,
     CREATE_SESSION_FOR_MIRROR,
     CREATE_SESSION_FOR_REAL,
+    CREATE_SESSION_WITHOUT_DISPLAY_NODE,
     INVALID,
 };
 
@@ -170,7 +171,7 @@ public:
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
@@ -248,7 +249,7 @@ private:
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
-    float currentSensorRotation_ { 0.0f };
+    float currentSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
