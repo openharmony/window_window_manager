@@ -18,7 +18,7 @@
 
 #include <bitset>
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <shared_mutex>
 #include <vector>
@@ -67,15 +67,17 @@ private:
     bool ConvertInstanceKeyToInstanceId(const std::string& instanceKey, uint32_t& instanceId) const;
 
     std::shared_mutex mutex_;
-    std::map<std::string, std::vector<uint32_t>> bundleInstanceIdListMap_;
-    std::map<std::string, std::bitset<MAX_INSTANCE_COUNT>> bundleInstanceUsageMap_;
-    // above guarded by mutex_
+    std::unordered_map<std::string, std::vector<uint32_t>> bundleInstanceIdListMap_;
+    std::unordered_map<std::string, std::bitset<MAX_INSTANCE_COUNT>> bundleInstanceUsageMap_;
+    // Above guarded by mutex_
 
     std::shared_mutex appInfoMutex_;
-    std::map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
-    // above guarded by mutex_
+    std::unordered_map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
+    // Above guarded by appInfoMutex_
 
-    std::map<std::string, int32_t> instanceKeyRefCountMap_; // guarded by SceneSessionManager sceneSessionMapMutex_
+    // Guarded by SceneSessionManager sceneSessionMapMutex_
+    std::unordered_map<std::string, int32_t> instanceKeyRefCountMap_;
+
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     int32_t userId_ = 0;
