@@ -150,8 +150,12 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     bool IsPcOrPadCapabilityEnabled() const override;
 
+    /*
+    * Free Multi Window
+    */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
+
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
