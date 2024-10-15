@@ -895,7 +895,8 @@ HWTEST_F(SceneSessionTest4, UnregisterSessionChangeListeners01, Function | Small
     sceneSession->sessionChangeCallback_ = new (std::nothrow) MainSession::SessionChangeCallback();
     ASSERT_NE(sceneSession->sessionChangeCallback_, nullptr);
     sceneSession->UnregisterSessionChangeListeners();
-    NotifyPendingSessionToBackgroundForDelegatorFunc func = [sceneSession](const SessionInfo& info, bool shouldBackToCaller) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func =[sceneSession](const SessionInfo& info,
+        bool shouldBackToCaller) { return; };
     sceneSession->pendingSessionToBackgroundForDelegatorFunc_ = func;
     ASSERT_EQ(WSError::WS_OK, sceneSession->PendingSessionToBackgroundForDelegator(true));
 }
