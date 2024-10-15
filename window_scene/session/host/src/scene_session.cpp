@@ -287,7 +287,6 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
             return WSError::WS_OK;
         }
     }
-
     return BackgroundTask(true);
 }
 
