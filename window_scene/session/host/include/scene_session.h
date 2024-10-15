@@ -414,7 +414,7 @@ public:
     /*
      * Window Decor
      */
-    int32_t GetCustomDecorHeight() override { return customDecorHeight_; }
+    int32_t GetCustomDecorHeight() const;
     void SetCustomDecorHeight(int32_t height) override;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -657,7 +657,13 @@ private:
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+
+    /*
+     * Window Decor
+     */
+    mutable std::mutex customDecorHeightMutex_;
     int32_t customDecorHeight_ = 0;
+
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;

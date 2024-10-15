@@ -478,6 +478,43 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetSessionRectChangeCallback03
+ * @tc.desc: SetSessionRectChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionRectChangeCallback03";
+    info.bundleName_ = "SetSessionRectChangeCallback03";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionProperty(property);
+    WSRect rec = { 1, 1, 1, 1 };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+        return;
+    };
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(nullptr);
+
+    rec.width_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(nullptr);
+
+    rec.height_ = 0;
+    rec.width_ = 1;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(nullptr);
+
+    rec.height_ = 0;
+    rec.width_ = 0;
+    session->SetSessionRequestRect(rec);
+    session->SetSessionRectChangeCallback(nullptr);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -563,6 +600,47 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     session->SetSessionProperty(property);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(10.0f));
+}
+
+/**
+ * @tc.name: CheckAspectRatioValid02
+ * @tc.desc: CheckAspectRatioValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, CheckAspectRatioValid02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckAspectRatioValid02";
+    info.bundleName_ = "CheckAspectRatioValid02";
+    info.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+
+    WindowLimits windowLimits;
+    ASSERT_NE(sceneSession->GetSessionProperty(), nullptr);
+    sceneSession->GetSessionProperty()->SetWindowLimits(windowLimits);
+
+    SystemSessionConfig systemConfig;
+    systemConfig.isSystemDecorEnable_ = false;
+    sceneSession->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, sceneSession->IsDecorEnable());
+
+    windowLimits.minWidth_ = 0;
+    windowLimits.minHeight_ = 0;
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SetAspectRatio(0.0f));
+
+    windowLimits.minWidth_ = 1;
+    windowLimits.minHeight_ = 2;
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SetAspectRatio(0.0f));
+
+    windowLimits.minWidth_ = 2;
+    windowLimits.minHeight_ = 1;
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SetAspectRatio(0.0f));
+
+    windowLimits.minWidth_ = 1;
+    windowLimits.minHeight_ = 2;
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SetAspectRatio(1.0f));
 }
 
 /**
