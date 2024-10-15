@@ -913,7 +913,7 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetWindowType(property);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
 }
 
@@ -925,8 +925,8 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
 HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation02, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "IsPcOrPadEnableActivation01";
-    info.bundleName_ = "IsPcOrPadEnableActivation01";
+    info.abilityName_ = "IsPcOrPadEnableActivation02";
+    info.bundleName_ = "IsPcOrPadEnableActivation02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
