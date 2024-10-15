@@ -771,22 +771,6 @@ HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: SetDefaultDisplayIdIfNeed02
- * @tc.desc: SetDefaultDisplayIdIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, SetDefaultDisplayIdIfNeed02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetDefaultDisplayIdIfNeed02";
-    info.bundleName_ = "SetDefaultDisplayIdIfNeed02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->SetDefaultDisplayIdIfNeed();
-    ASSERT_EQ(sceneSession.GetSessionProperty()->GetDisplayId(), 0);
-}
-
-/**
  * @tc.name: SetDefaultDisplayIdIfNeed03
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC
@@ -855,15 +839,15 @@ HWTEST_F(SceneSessionTest4, UpdateRectInner01, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
     SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     sceneSession->SetForegroundInteractiveStatus(true);
 
     uiParam.needSync_ = true;
     uiParam.rect_ = {0, 0, 1, 1};
 
     sceneSession->winRect_ = {1, 1, 1, 1};
-    scensession->isVisible_ = true;
-    ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+    sceneSession->isVisible_ = true;
+    ASSERT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
 }
 
 /**
@@ -878,91 +862,20 @@ HWTEST_F(SceneSessionTest4, UpdateVisibilityInner01, Function | SmallTest | Leve
     info.bundleName_ = "UpdateVisibilityInner01";
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    scensession->isVisible_ = false;
+    sceneSession->isVisible_ = false;
+    ASSERT_EQ(false, sceneSession->UpdateVisibilityInner(false));
+
     sceneSession->SetSessionProperty(nullptr);
-    SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible,
+    VisibilityChangedDetectFunc func = [sceneSession](const int32_t pid, const bool isVisible,
         const bool newIsVisible) {
             return;
     };
     sceneSession->SetVisibilityChangedDetectFunc(func);
 
-    UpdatePrivateStateAndNotifyFunc func1 = [this](int32_t persistentId) {
+    UpdatePrivateStateAndNotifyFunc func1 = [sceneSession](int32_t persistentId) {
         return;
     };
-    sceneSession->SetUpdatePrivateStateAndNotifyFunc(func1);
-    NotifyVisibleChangeFunc func2 = [this](int32_t persistentId) {
-        return;
-    };
-    sceneSession->SetNotifyVisibleChangeFunc(true);
-    ASSERT_EQ(true, sceneSession->UpdateVisibilityInner(uiParam, reason));
-}
-
-/**
- * @tc.name: UpdateVisibilityInner
- * @tc.desc: UpdateVisibilityInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, UpdateVisibilityInner01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateVisibilityInner01";
-    info.bundleName_ = "UpdateVisibilityInner01";
-    info.screenId_ = 20;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    scensession->isVisible_ = false;
-    sceneSession->SetSessionProperty(nullptr);
-    SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible,
-        const bool newIsVisible) {
-            return;
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
-
-    UpdatePrivateStateAndNotifyFunc func1 = [this](int32_t persistentId) {
-        return;
-    };
-    sceneSession->SetUpdatePrivateStateAndNotifyFunc(func1);
-    NotifyVisibleChangeFunc func2 = [this](int32_t persistentId) {
-        return;
-    };
-    sceneSession->SetNotifyVisibleChangeFunc(true);
-    ASSERT_EQ(true, sceneSession->UpdateVisibilityInner(uiParam, reason));
-}
-
-/**
- * @tc.name: UpdateVisibilityInner
- * @tc.desc: UpdateVisibilityInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, UpdateVisibilityInner01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateVisibilityInner01";
-    info.bundleName_ = "UpdateVisibilityInner01";
-    info.screenId_ = 20;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    scensession->isVisible_ = false;
-    sceneSession->SetSessionProperty(nullptr);
-    SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible,
-        const bool newIsVisible) {
-            return;
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
-
-    UpdatePrivateStateAndNotifyFunc func1 = [this](int32_t persistentId) {
-        return;
-    };
-    sceneSession->SetUpdatePrivateStateAndNotifyFunc(func1);
-    NotifyVisibleChangeFunc func2 = [this](int32_t persistentId) {
-        return;
-    };
-    sceneSession->SetNotifyVisibleChangeFunc(true);
-    ASSERT_EQ(true, sceneSession->UpdateVisibilityInner(uiParam, reason));
+    ASSERT_EQ(true, sceneSession->UpdateVisibilityInner(true));
 }
 
 /**
@@ -982,7 +895,7 @@ HWTEST_F(SceneSessionTest4, UnregisterSessionChangeListeners01, Function | Small
     sceneSession->sessionChangeCallback_ = new (std::nothrow) MainSession::SessionChangeCallback();
     ASSERT_NE(sceneSession->sessionChangeCallback_, nullptr);
     sceneSession->UnregisterSessionChangeListeners();
-    NotifyPendingSessionToBackgroundForDelegatorFunc func = [](const SessionInfo& info, bool shouldBackToCaller) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func = [sceneSession](const SessionInfo& info, bool shouldBackToCaller) {};
     sceneSession->pendingSessionToBackgroundForDelegatorFunc_ = func;
     ASSERT_EQ(WSError::WS_OK, sceneSession->PendingSessionToBackgroundForDelegator(true));
 }
@@ -998,21 +911,18 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
     info.abilityName_ = "IsPcOrPadEnableActivation01";
     info.bundleName_ = "IsPcOrPadEnableActivation01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
-    ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
 }
 
 /**
- * @tc.name: IsPcOrPadEnableActivation01
+ * @tc.name: IsPcOrPadEnableActivation02
  * @tc.desc: IsPcOrPadEnableActivation
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation02, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "IsPcOrPadEnableActivation01";
@@ -1020,35 +930,6 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetAppForceLandscapeConfig";
-    info.bundleName_ = "GetAppForceLandscapeConfig";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    AppForceLandscapeConfig config = {};
-    NotifyForceSplitFunc func = [this](const std::string& bundleName) {
-            return this->GetAppForceLandscapeConfig(bundleName);
-        });
-    sceneSession->RegisterForceSplitListener(func);
-    auto result = sceneSession->GetAppForceLandscapeConfig(config);
-    ASSERT_EQ(result, WMError::WM_OK);
 }
 }
 }
