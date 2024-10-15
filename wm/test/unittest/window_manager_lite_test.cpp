@@ -862,7 +862,6 @@ HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
     WindowManagerLite::GetInstance().destroyed_ = true;
     WindowManagerLite::GetInstance().OnRemoteDied();
     ASSERT_EQ(WindowManagerLite::GetInstance().destroyed_, true);
->>>>>>> OpenHarmony-5.0.1-Release
 }
 }
 }
