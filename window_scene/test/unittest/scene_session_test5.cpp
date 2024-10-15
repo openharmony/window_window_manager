@@ -1548,7 +1548,7 @@ HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | L
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
 
-    session->SetNotifyVisibleChangeFunc([](int32_t persistentId){});
+    session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
     EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
 }
 }
