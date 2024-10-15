@@ -13,4 +13,4 @@
 
 import("//build/ohos.gni")
 
-print("scene_board_enabled = ${scene_board_enabled}")
+print("window_manager_use_sceneboard = ${window_manager_use_sceneboard}")
