@@ -135,7 +135,7 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
  * @tc.desc: UpdateSecSurfaceInfo
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest5, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
