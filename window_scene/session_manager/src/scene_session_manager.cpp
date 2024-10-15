@@ -8887,7 +8887,7 @@ void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
     }
-    if (!systemConfig_.UI_TYPE_PHONE && !systemConfig_.UI_TYPE_PAD) {
+    if (systemConfig_.uiType_ != UI_TYPE_PHONE && systemConfig_.uiType_ != UI_TYPE_PAD) {
         return;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "has zOrder dirty");
