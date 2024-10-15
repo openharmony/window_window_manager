@@ -111,8 +111,8 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType())) {
-            if (!session->CheckIdentityToken(identityToken)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "check failed");
+            if (!session->CheckIdentityTokenIfMatched(identityToken)) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "check failed");
                 return WSError::WS_OK;
             }
         }
@@ -223,7 +223,7 @@ WSError SceneSession::Foreground(
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
@@ -282,7 +282,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
@@ -374,7 +374,7 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        if (!CheckPid() || !CheckIdentityToken(identityToken)) {
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
             TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
@@ -5106,24 +5106,23 @@ void SceneSession::UpdateGestureBackEnabled()
     }
 }
 
-bool SceneSession::CheckIdentityToken(const std::string& identityToken)
+bool SceneSession::CheckIdentityTokenIfMatched(const std::string& identityToken)
 {
     if (!identityToken.empty() && !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
         TLOGW(WmsLogTag::WMS_LIFE,
-            "CheckIdentityToken failed, clientIdentityToken: %{public}s, "
-            "identityToken: %{public}s, bundleName: %{public}s",
+            "failed, clientIdentityToken: %{public}s, identityToken: %{public}s, bundleName: %{public}s",
             clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
         return false;
     }
     return true;
 }
 
-bool SceneSession::CheckPid()
+bool SceneSession::CheckPidIfMatched()
 {
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     if (callingPid != -1 && callingPid != GetCallingPid()) {
         TLOGW(WmsLogTag::WMS_LIFE,
-            "CheckPid failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+            "failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
             GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
         return false;
     }
