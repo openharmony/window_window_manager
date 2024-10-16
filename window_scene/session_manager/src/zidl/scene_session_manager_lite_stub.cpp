@@ -173,7 +173,7 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
     TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
         return ERR_INVALID_DATA;
     }
     bool shouldBackToCaller = true;
@@ -181,7 +181,7 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
         TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

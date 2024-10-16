@@ -148,6 +148,7 @@ public:
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
+    void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
@@ -315,7 +316,7 @@ public:
     void AddWindowDragHotArea(uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    bool UpdateImmersiveState();
+    bool GetImmersiveState();
     WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
@@ -390,10 +391,10 @@ public:
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
-    WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId);
+    WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
 
     /*
      * Window Property
