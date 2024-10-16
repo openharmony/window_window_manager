@@ -1119,7 +1119,7 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
 
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
     bool isFocused = false;
     if (!data.ReadBool(isFocused)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
