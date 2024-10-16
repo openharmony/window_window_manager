@@ -391,9 +391,9 @@ public:
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
+    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
-    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
 
     /*
      * Window Property
