@@ -215,7 +215,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
-    return IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
 }
 
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const

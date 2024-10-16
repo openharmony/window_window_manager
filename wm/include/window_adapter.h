@@ -140,7 +140,7 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
     virtual WMError ReleaseForegroundSessionScreenLock();
     WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId);
-    
+    virtual WMError IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();
