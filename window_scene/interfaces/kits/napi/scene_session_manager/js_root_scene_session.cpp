@@ -325,7 +325,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
     if (callerSession != nullptr) {
         TLOGI(WmsLogTag::WMS_SCB,
             "update isCalledRightlyByCallerId result is from :%{public}d to false", info.isCalledRightlyByCallerId_);
-        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+        info.isCalledRightlyByCallerId_ = false;
     }
 }
 
