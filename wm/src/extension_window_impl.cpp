@@ -51,5 +51,12 @@ WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
     TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMarkFlag is called");
     return windowExtensionSessionImpl_->SetWaterMarkFlag(isEnable);
 }
+
+WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "enter");
+    return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
+}
+
 } // namespace Rosen
 } // namespace OHOS

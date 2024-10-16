@@ -35,6 +35,8 @@ public:
     virtual WMError HideNonSecureWindows(bool shouldHide) = 0;
 
     virtual WMError SetWaterMarkFlag(bool isEnable) = 0;
+
+    virtual WMError HidePrivacyContentForHost(bool needHide) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
