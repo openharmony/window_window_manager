@@ -214,7 +214,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
-static void SetWindowSize(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
 {
     auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
@@ -232,6 +232,16 @@ static void SetWindowSize(napi_env env, napi_value objValue, const sptr<SceneSes
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
                 TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.height = %{public}d", value);
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.left") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.top") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, value));
             }
         }
     }
@@ -267,7 +277,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
     napi_set_named_property(env, objValue, "appInstanceKey",
         CreateJsValue(env, session->GetSessionInfo().appInstanceKey_));
-    SetWindowSize(env, objValue, session);
+    SetWindowSizeAndPosition(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
         napi_set_named_property(env, objValue, "screenId",
