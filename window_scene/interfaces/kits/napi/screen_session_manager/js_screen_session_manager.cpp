@@ -237,7 +237,7 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnScreenConnected: Failed to SendEvent.");
         }
