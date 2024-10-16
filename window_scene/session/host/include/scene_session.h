@@ -232,7 +232,7 @@ public:
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
-
+    WSError SetOccluded(bool occluded);
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;

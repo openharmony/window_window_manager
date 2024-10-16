@@ -840,11 +840,13 @@ ohos_unittest("ws_scene_session_test") {
   ]
 
   deps = [ ":ws_unittest_common" ]
+  defines = [ "POWER_MANAGER_ENABLE" ]
 
   external_deps = [
     "ability_base:session_info",
     "c_utils:utils",
     "hilog:libhilog",
+    "power_manager:powermgr_client",
   ]
 }
 
