@@ -3528,11 +3528,11 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type,
             } else {
                 specificCallback_->onUpdateAvoidArea_(GetPersistentId());
             }
-         }
+        }
         SetSystemBarProperty(iter->first, iter->second);
         TLOGD(WmsLogTag::WMS_IMMS, "%{public}d, enable: %{public}d",
             static_cast<int32_t>(iter->first), iter->second.enable_);
-     }
+    }
 }
 
 void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
