@@ -1808,6 +1808,24 @@ WSError SceneSession::SetPiPControlEvent(WsPiPControlType controlType, WsPiPCont
     return sessionStage_->SetPiPControlEvent(controlType, status);
 }
 
+WSError SceneSession::SetOccluded(bool occluded)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "occluded:%{public}d, id:%{public}d", static_cast<int32_t>(occluded), GetPersistentId());
+    if (GetWindowType() != WindowType::WINDOW_TYPE_PIP && GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    if (keepScreenLock_ == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "keep screen on:%{public}d", static_cast<int32_t>(!occluded));
+    if (occluded) {
+        keepScreenLock_->UnLock();
+    } else {
+        keepScreenLock_->Lock();
+    }
+    return WSError::WS_OK;
+}
+
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
     static std::pair<int32_t, MMI::WindowArea> preWindowArea =
