@@ -4969,13 +4969,12 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(sptr<SceneSession>& scene
     return WSError::WS_OK;
 }
 
-bool SceneSessionManager::CheckParentSessionVisible(const sptr<SceneSession>& session)
+bool SceneSessionManager::IsParentSessionVisible(const sptr<SceneSession>& session)
 {
-    if ((WindowHelper::IsSubWindow(session->GetWindowType()) ||
-        session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
-        GetSceneSession(session->GetParentPersistentId()) &&
-        !IsSessionVisible(GetSceneSession(session->GetParentPersistentId()))) {
-        return false;
+    if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
+        session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        auto parentSession = GetSceneSession(session->GetParentPersistentId());
+        return parentSession == nullptr || IsSessionVisibleForeground(parentSession);
     }
     return true;
 }
@@ -4983,13 +4982,13 @@ bool SceneSessionManager::CheckParentSessionVisible(const sptr<SceneSession>& se
 void SceneSessionManager::DumpAllSessionFocusableInfo(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
-    auto func = [this](sptr<SceneSession> session) {
+    auto func = [this](const sptr<SceneSession>& session) {
         if (session == nullptr) {
             return false;
         }
-        bool parentVisible = CheckParentSessionVisible(session);
+        bool parentVisible = IsParentSessionVisible(session);
         bool sessionVisible = IsSessionVisible(session);
-        TLOGI(WmsLogTag::WMS_FOCUS, "%{public}d, winType:%{public}d, hide:%{public}d, "
+        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}d, winType:%{public}d, hide:%{public}d, "
             "focusable:%{public}d, visible:%{public}d, parentVisible:%{public}d",
             session->GetPersistentId(), session->GetWindowType(), session->GetForceHideState(),
             session->GetFocusable(), sessionVisible, parentVisible);
@@ -5012,7 +5011,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
             return false;
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
-            IsSessionVisibleForeground(session) && CheckParentSessionVisible(session)) {
+            IsSessionVisibleForeground(session) && IsParentSessionVisible(session)) {
             ret = session;
             return true;
         }
