@@ -4291,16 +4291,6 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return WMError::WM_OK;
 }
 
-void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
-{
-    updatePrivateStateAndNotifyFunc_ = func;
-}
-
-void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
-{
-    notifyVisibleChangeFunc_ = func;
-}
-
 bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const
 {
     if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
@@ -4310,6 +4300,16 @@ bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSession
         }
     }
     return true;
+}
+
+void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
+{
+    notifyVisibleChangeFunc_ = func;
+}
+
+void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
+{
+    updatePrivateStateAndNotifyFunc_ = func;
 }
 
 bool SceneSession::IsPcOrPadEnableActivation() const
@@ -4410,6 +4410,9 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
         return false;
     }
     isVisible_ = visibility;
+    if (updatePrivateStateAndNotifyFunc_ != nullptr) {
+        updatePrivateStateAndNotifyFunc_(GetPersistentId());
+    }
     if (notifyVisibleChangeFunc_ != nullptr) {
         notifyVisibleChangeFunc_(GetPersistentId());
     }
