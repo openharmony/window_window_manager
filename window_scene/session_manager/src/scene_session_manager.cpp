@@ -281,6 +281,13 @@ void SceneSessionManager::Init()
     openDebugTrace = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
     SceneInputManager::GetInstance().Init();
+
+    // MMI window state error check
+    int32_t retCode = MMI::InputManager::GetInstance()->
+        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+    });
+    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -6700,6 +6707,41 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
     taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
 }
 
+void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d, persistentId: %{public}d", pid, persistentId);
+    if (pid == -1) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid pid");
+        return;
+    }
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", pid,
+        "PERSISTENT_ID", persistentId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    auto task = [this, pid] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (!sceneSession || pid != sceneSession->GetCallingPid() ||
+                !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+            if (abilitySessionInfo) {
+                TLOGI(WmsLogTag::WMS_LIFE, "terminate session, persistentId: %{public}d",
+                    abilitySessionInfo->persistentId);
+                sceneSession->TerminateSessionNew(abilitySessionInfo, false, false);
+            }
+        }
+    };
+    // delay 2000ms, wait for hidumper
+    taskScheduler_->PostAsyncTask(task, __func__, 2000);
+}
+
 sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)
 {
     if (!targetToken) {
@@ -7607,12 +7649,12 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
     bool shouldBackToCaller)
 {
-    auto task = [this, &token, shouldBackToCaller]() {
+    auto task = [this, &token, shouldBackToCaller] {
         auto session = FindSessionByToken(token);
         if (session != nullptr) {
             return session->PendingSessionToBackgroundForDelegator(shouldBackToCaller);
         }
-        TLOGE(WmsLogTag::WMS_LIFE, "fail to find token");
+        TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     };
     return taskScheduler_->PostSyncTask(task, "PendingSessionToBackgroundForDelegator");
@@ -8716,45 +8758,47 @@ WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 
 void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
 {
-    immersive = SceneSessionManager::GetInstance().UpdateImmersiveState();
+    immersive = SceneSessionManager::GetInstance().GetImmersiveState();
 }
 
-bool SceneSessionManager::UpdateImmersiveState()
+bool SceneSessionManager::GetImmersiveState()
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
-        auto sceneSession = item->second;
-        if (sceneSession == nullptr) {
-            WLOGFE("Session is nullptr");
-            continue;
+    auto task = [this] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
+            auto sceneSession = item->second;
+            if (sceneSession == nullptr) {
+                WLOGFE("Session is nullptr");
+                continue;
+            }
+            if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                continue;
+            }
+            auto state = sceneSession->GetSessionState();
+            if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+                continue;
+            }
+            if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+                continue;
+            }
+            auto property = sceneSession->GetSessionProperty();
+            if (property == nullptr) {
+                WLOGFE("Property is nullptr");
+                continue;
+            }
+            auto sysBarProperty = property->GetSystemBarProperty();
+            if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
+                WLOGI("GetImmersiveState, window is immersive. id:%{public}d", sceneSession->GetPersistentId());
+                return true;
+            } else {
+                WLOGI("GetImmersiveState, statusBar is enabled. id:%{public}d", sceneSession->GetPersistentId());
+                break;
+            }
         }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            continue;
-        }
-        auto state = sceneSession->GetSessionState();
-        if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            continue;
-        }
-        if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
-            continue;
-        }
-        auto property = sceneSession->GetSessionProperty();
-        if (property == nullptr) {
-            WLOGFE("Property is nullptr");
-            continue;
-        }
-        TLOGI(WmsLogTag::WMS_MAIN, "session id:%{public}d", sceneSession->GetPersistentId());
-        auto sysBarProperty = property->GetSystemBarProperty();
-        if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
-            TLOGI(WmsLogTag::WMS_MAIN, "window is immersive. id:%{public}d", sceneSession->GetPersistentId());
-            return true;
-        } else {
-            TLOGI(WmsLogTag::WMS_MAIN, "statusBar is enabled. id:%{public}d", sceneSession->GetPersistentId());
-            break;
-        }
-    }
-    TLOGI(WmsLogTag::WMS_MAIN, "not immersive");
-    return false;
+        WLOGI("GetImmersiveState, not immersive");
+        return false;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetImmersiveState");
 }
 
 void SceneSessionManager::NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason,

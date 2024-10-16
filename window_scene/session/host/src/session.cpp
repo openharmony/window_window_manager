@@ -1186,6 +1186,10 @@ WSError Session::SetActive(bool active)
         TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
@@ -1528,7 +1532,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
 
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
         GetPersistentId(), shouldBackToCaller);
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
@@ -2543,6 +2547,10 @@ WSError Session::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->HandleBackEvent();
 }
 
@@ -3060,13 +3068,12 @@ void Session::ResetSnapshot()
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
-    WLOGFI("GetSnapshotPixelMap id %{public}d", GetPersistentId());
-    if (scenePersistence_ != nullptr && scenePersistence_->IsSavingSnapshot()) {
-        return snapshot_;
-    } else if (scenePersistence_ != nullptr && !scenePersistence_->IsSavingSnapshot()) {
-        return scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
+    TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
+    if (scenePersistence_ == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 
 bool Session::IsVisibleForeground() const
