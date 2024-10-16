@@ -16,12 +16,8 @@
 #include "anomaly_detection.h"
 #include <hitrace_meter.h>
 
-#include "dfx_hisysevent.h"
-#include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
 
 namespace OHOS {
