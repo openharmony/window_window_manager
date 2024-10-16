@@ -2751,7 +2751,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
           info.bundleName_ == "");
         TLOGI(WmsLogTag::WMS_SCB,
-            "update isCalledRightlyByCallerId result is from :%{public}d to false", info.isCalledRightlyByCallerId_);
+            "update isCalledRightlyByCallerId from :%{public}d to false", info.isCalledRightlyByCallerId_);
         info.isCalledRightlyByCallerId_ = false;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
