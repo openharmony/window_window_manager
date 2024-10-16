@@ -47,6 +47,7 @@ public:
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError TerminateSessionByPersistentId(int32_t persistentId) = 0;
 };
 }
 }
