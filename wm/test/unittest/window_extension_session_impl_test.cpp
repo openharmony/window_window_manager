@@ -592,6 +592,16 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, Function | SmallTest |
     ASSERT_NE(WMError::WM_OK, window_->SetPrivacyMode(true));
 }
 
+HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(WMError::WM_OK, window_->HidePrivacyContentForHost(true));
+}
+
 /**
  * @tc.name: NotifyFocusStateEvent01
  * @tc.desc: NotifyFocusStateEvent Test
