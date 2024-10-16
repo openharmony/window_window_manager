@@ -10467,6 +10467,30 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
     return appForceLandscapeMap_[bundleName];
 }
 
+WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_APP_PROCESS)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!SessionPermission::IsSystemAppCall()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system app.");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", persistentId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    sceneSession->Clear(true);
+    TLOGI(WmsLogTag::WMS_LIFE, "Terminate success, id:%{public}d.", persistentId);
+    return WMError::WM_OK;
+}
+
 void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc)
 {
     rootSceneProcessBackEventFunc_ = processBackEventFunc;
