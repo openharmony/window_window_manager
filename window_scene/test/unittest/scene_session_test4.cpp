@@ -1233,6 +1233,150 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction02, Function | SmallTes
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
 }
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode01
+ * @tc.desc: HandleMoveDragSurfaceNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleMoveDragSurfaceNode01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode01";
+    info.bundleName_ = "HandleMoveDragSurfaceNode01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->leashWinSurfaceNode_ = surfaceNode;
+    sceneSession->InitializeCrossMoveDrag();
+    sceneSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    sceneSession->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
+    sceneSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+    sceneSession->HandleMoveDragSurfaceNode(SizeChangeReason::UNDEFINED);
+    ASSERT_NE(nullptr, sceneSession->GetSurfaceNodeForMoveDrag());
+}
+
+/**
+ * @tc.name: HandleMoveDragEnd01
+ * @tc.desc: HandleMoveDragEnd Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleMoveDragEnd01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragEnd01";
+    info.bundleName_ = "HandleMoveDragEnd01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetOriPosYBeforeRaisedByKeyboard(20);
+    SizeChangeReason reason = SizeChangeReason::DRAG;
+    WSRect rect;
+    sceneSession->HandleMoveDragEnd(rect, reason);
+    ASSERT_EQ(0, sceneSession->GetOriPosYBeforeRaisedByKeyboard());
+}
+
+/**
+ * @tc.name: HandleMoveDragEnd02
+ * @tc.desc: HandleMoveDragEnd Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleMoveDragEnd02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragEnd02";
+    info.bundleName_ = "HandleMoveDragEnd02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetOriPosYBeforeRaisedByKeyboard(20);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    sceneSession->moveDragController_->SetAsSystemWindow(true);
+    SizeChangeReason reason = SizeChangeReason::DRAG;
+    WSRect rect;
+    sceneSession->HandleMoveDragEnd(rect, reason);
+    ASSERT_EQ(0, sceneSession->GetOriPosYBeforeRaisedByKeyboard());
+}
+
+/**
+ * @tc.name: HandleMoveDragEnd03
+ * @tc.desc: HandleMoveDragEnd Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleMoveDragEnd03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragEnd03";
+    info.bundleName_ = "HandleMoveDragEnd03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->SetOriPosYBeforeRaisedByKeyboard(20);
+    SizeChangeReason reason = SizeChangeReason::DRAG;
+    WSRect rect;
+    sceneSession->HandleCompatibleModeDrag(rect, reason, false, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, reason, false, false, false);
+    sceneSession->HandleMoveDragEnd(rect, reason);
+    ASSERT_EQ(0, sceneSession->GetOriPosYBeforeRaisedByKeyboard());
+}
+
+/**
+ * @tc.name: IsMovable01
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, isMovable01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "isMovable01";
+    info.bundleName_ = "isMovable01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(false, sceneSession->IsMovable());
+}
+
+/**
+ * @tc.name: IsMovable02
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable02";
+    info.bundleName_ = "IsMovable02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
+    ASSERT_EQ(false, sceneSession->IsMovable());
+
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+}
+
+/**
+ * @tc.name: IsMovable03
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable03";
+    info.bundleName_ = "IsMovable03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+    ASSERT_EQ(false, sceneSession->IsMovable());
+}
 }
 }
 }
