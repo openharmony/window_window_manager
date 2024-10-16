@@ -2443,4 +2443,38 @@ WMError SceneSessionManagerProxy::GetDisplayIdByPersistentId(int32_t persistentI
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    bool replyIsPcOrPadFreeMultiWindowMode = false;
+    if (!reply.ReadBool(replyIsPcOrPadFreeMultiWindowMode)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read replyIsPcOrPadFreeMultiWindowMode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    isPcOrPadFreeMultiWindowMode = replyIsPcOrPadFreeMultiWindowMode;
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

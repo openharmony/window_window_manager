@@ -100,6 +100,7 @@ public:
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

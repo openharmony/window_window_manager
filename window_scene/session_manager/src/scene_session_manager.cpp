@@ -11174,4 +11174,10 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
     return WMError::WM_OK;
 #endif
 }
+
+WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode)
+{
+    isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
