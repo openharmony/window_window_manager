@@ -2752,7 +2752,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
           info.bundleName_ == "");
         TLOGI(WmsLogTag::WMS_SCB,
             "update isCalledRightlyByCallerId result is from :%{public}d to false", info.isCalledRightlyByCallerId_);
-        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+        info.isCalledRightlyByCallerId_ = false;
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), sessionInfo] {
