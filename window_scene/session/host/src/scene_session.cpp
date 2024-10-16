@@ -4535,6 +4535,9 @@ bool SceneSession::UpdateZOrderInner(uint32_t zOrder)
     if (zOrder_ == zOrder) {
         return false;
     }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}u -> %{public}u, lastZOrder: %{public}u",
+          GetPersistentId(), zOrder_, zOrder, lastZOrder_);
+    lastZOrder_ = zOrder_;
     zOrder_ = zOrder;
     return true;
 }
