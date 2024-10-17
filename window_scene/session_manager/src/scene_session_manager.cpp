@@ -9069,13 +9069,13 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
     auto task = [this, remoteExtSession]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession");
+            TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
             return;
         }
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
         if (!GetExtensionWindowIds(iter->second, persistentId, parentId)) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
 
@@ -9282,8 +9282,8 @@ void SceneSessionManager::HideNonSecureFloatingWindows()
     for (const auto& [persistentId, session] : nonSystemFloatSceneSessionMap_) {
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", session->GetWindowName().c_str(), persistentId, shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
+                session->GetWindowName().c_str(), persistentId, shouldHide);
         }
     }
 }
@@ -9309,8 +9309,8 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
 
         if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !session->IsSystemSpecificSession()) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
+                session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
         }
     }
 }
