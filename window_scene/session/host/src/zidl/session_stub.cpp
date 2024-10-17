@@ -628,11 +628,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
         return ERR_INVALID_DATA;
     }
-    SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
-    if (SizeChangeReason::UNDEFINED > reason || reason > SizeChangeReason::END) {
+    if (static_cast<uint32_t>(SizeChangeReason::UNDEFINED) > changeReason 
+        || changeReason > static_cast<uint32_t>(SizeChangeReason::END)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
         return ERR_INVALID_DATA;
     }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
     bool isGlobal = false;
     if (!data.ReadBool(isGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
