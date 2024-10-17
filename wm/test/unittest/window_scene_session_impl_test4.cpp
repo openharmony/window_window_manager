@@ -1221,8 +1221,8 @@ HWTEST_F(WindowSceneSessionImplTest4, GetParentSessionAndVerify, Function | Smal
 }
 
 /**
- * @tc.name: GetParentSessionAndVerify
- * @tc.desc: GetParentSessionAndVerify Test
+ * @tc.name: MainWindowCloseInner
+ * @tc.desc: MainWindowCloseInner Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest4, MainWindowCloseInner, Function | SmallTest | Level2)
