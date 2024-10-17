@@ -338,7 +338,7 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
     WLOGFI("run");
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
-    TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     bool isFocused = data.ReadBool();
@@ -873,7 +873,7 @@ int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, Message
 {
     auto persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
-    TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = RaiseWindowToTop(persistentId);
@@ -895,7 +895,7 @@ int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessagePa
 {
     uint32_t mainWinId = 0;
     if (!data.ReadInt32(mainWinId)) {
-    TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
         return ERR_INVALID_DATA;
     }
     uint32_t topWinId;
@@ -941,7 +941,7 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     if (!data.ReadInt32(targetPersistentId)) {
-    TLOGE(WmsLogTag::WMS_FOCUS, "read targetPersistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "read targetPersistentId failed");
         return ERR_INVALID_DATA;
     }
     WSError ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
