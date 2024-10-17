@@ -121,6 +121,7 @@ void SessionManagerAgentController::NotifyAccessibilityWindowInfo(
     }
 }
 
+
 void SessionManagerAgentController::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
     WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}u", static_cast<uint32_t>(hasWaterMark));
