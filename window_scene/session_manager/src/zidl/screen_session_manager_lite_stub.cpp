@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteStub"};
 }
 
 int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -45,6 +45,10 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
         }
         case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {
             HandleGetFoldDisplayMode(data, reply);
+            break;
+        }
+        case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
+            HandleSetFoldDisplayMode(data, reply);
             break;
         }
         case ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE: {
@@ -105,6 +109,14 @@ int ScreenSessionManagerLiteStub::HandleGetFoldDisplayMode(MessageParcel &data, 
     WLOGFD("run HandleGetFoldDisplayMode!");
     FoldDisplayMode displayMode = GetFoldDisplayMode();
     reply.WriteUint32(static_cast<uint32_t>(displayMode));
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerLiteStub::HandleSetFoldDisplayMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("run HandleSetFoldDisplayMode!");
+    FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
+    SetFoldDisplayMode(displayMode);
     return ERR_NONE;
 }
 
