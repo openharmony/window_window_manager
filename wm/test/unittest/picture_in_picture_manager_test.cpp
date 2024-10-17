@@ -307,11 +307,11 @@ HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: DoPrepareSource
- * @tc.desc: DoPrepareSource
+ * @tc.name: DoLocateSource
+ * @tc.desc: DoLocateSource
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoLocateSource, Function | SmallTest | Level2)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
