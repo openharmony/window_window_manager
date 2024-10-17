@@ -15,7 +15,6 @@
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/scene_session_manager_lite.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
