@@ -59,8 +59,8 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
                 return ERR_INVALID_DATA;
             }
-            if (static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED) > changeReason 
-                || changeReason > static_cast<uint32_t>(WindowSizeChangeReason::END)) {
+            if (static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED) > changeReason ||
+                changeReason > static_cast<uint32_t>(WindowSizeChangeReason::END)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
                 return ERR_INVALID_DATA;
             }
