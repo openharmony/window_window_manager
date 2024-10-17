@@ -325,10 +325,13 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
 
         // on full screen
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
-        screenId_ = SCREEN_ID_FULL;
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-        SetdisplayModeChangeStatus(false);
+        auto taskScreenOnFullOn = [=] {
+            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
+            screenId_ = SCREEN_ID_FULL;
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+            SetdisplayModeChangeStatus(false);
+        };
+        screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
     }
 }
 
