@@ -66,6 +66,7 @@ ohos_systemtest("wms_window_layout_test") {
 
   deps = [
     ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session:scene_session",
@@ -83,7 +84,10 @@ ohos_systemtest("wms_window_effect_test") {
 
   sources = [ "window_effect_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -125,7 +129,10 @@ ohos_systemtest("wms_window_systemsubwindow_test") {
 
   sources = [ "window_systemsubwindow_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
@@ -346,7 +353,10 @@ ohos_systemtest("wms_window_raisetoapptop_test") {
 
   sources = [ "window_raisetoapptop_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -416,7 +426,10 @@ ohos_systemtest("wms_window_app_floating_window_test") {
 
   sources = [ "window_app_floating_window_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -446,7 +459,10 @@ ohos_systemtest("wms_window_animation_transition_test") {
 
   sources = [ "window_animation_transition_test.cpp" ]
 
-  deps = [ ":wms_systemtest_common" ]
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -492,6 +508,7 @@ config("wms_systemtest_common_public_config") {
     "${window_base_path}/wmserver/include",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
+    "${window_base_path}/test/common/utils/include",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",

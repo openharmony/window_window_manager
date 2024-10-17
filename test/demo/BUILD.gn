@@ -101,7 +101,10 @@ ohos_executable("demo_system_sub_window") {
     "../common/utils/include",
   ]
 
-  deps = [ "${window_base_path}/wm:libwm" ]
+  deps = [
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/wm:libwm",
+  ]
 
   external_deps = [
     "c_utils:utils",

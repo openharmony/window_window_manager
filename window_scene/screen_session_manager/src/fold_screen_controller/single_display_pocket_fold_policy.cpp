@@ -99,21 +99,20 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
     {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-            "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
             TLOGW(WmsLogTag::DMS, "ChangeScreenDisplayMode already in displayMode %{public}d", displayMode);
             return;
         }
-        ReportFoldDisplayModeChange(displayMode);
-        ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
-        ChangeScreenDisplayModeProc(screenSession, displayMode);
-        
-        if (currentDisplayMode_ != displayMode) {
-            ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
-        }
+    }
+    ReportFoldDisplayModeChange(displayMode);
+    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
+    ChangeScreenDisplayModeProc(screenSession, displayMode);
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }

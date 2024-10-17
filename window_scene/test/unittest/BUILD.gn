@@ -53,6 +53,7 @@ group("unittest") {
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_manager_test10",
+    ":ws_scene_session_manager_test11",
     ":ws_scene_session_manager_test2",
     ":ws_scene_session_manager_test3",
     ":ws_scene_session_manager_test4",
@@ -618,10 +619,13 @@ ohos_unittest("ws_scene_session_manager_test4") {
 
 ohos_unittest("ws_scene_session_manager_test5") {
   module_out_path = module_out_path
-
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
   sources = [ "scene_session_manager_test5.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "ability_base:configuration",
@@ -723,6 +727,26 @@ ohos_unittest("ws_scene_session_manager_test10") {
   module_out_path = module_out_path
 
   sources = [ "scene_session_manager_test10.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_test11") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test11.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

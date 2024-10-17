@@ -53,7 +53,8 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
 }
 } // namespace
 
-WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError SessionProxy::Foreground(
+    sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -78,7 +79,10 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFr
         TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write identityToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("[WMSCom] remote is null");
@@ -93,7 +97,7 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property, bool isFr
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Background(bool isFromClient)
+WSError SessionProxy::Background(bool isFromClient, const std::string& identityToken)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -104,6 +108,10 @@ WSError SessionProxy::Background(bool isFromClient)
     }
     if (!data.WriteBool(isFromClient)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write isFromClient failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write identityToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -180,7 +188,7 @@ WSError SessionProxy::Hide()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Disconnect(bool isFromClient)
+WSError SessionProxy::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -194,7 +202,10 @@ WSError SessionProxy::Disconnect(bool isFromClient)
         WLOGFE("Write isFromClient failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write identityToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");

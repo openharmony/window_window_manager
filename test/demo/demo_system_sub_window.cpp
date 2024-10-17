@@ -20,7 +20,7 @@
 #include "wm_common.h"
 #include "window_option.h"
 #include "window_manager.h"
-
+#include "common_test_utils.h"
 #include "future.h"
 
 namespace OHOS {
@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
     std::cout << "before add window " << std::endl;
     OutputWindowInfos(infos);
 
+    CommonTestUtils::GuaranteeFloatWindowPermission("demo_system_sub_window");
     Rect baseWindowRect = { 150, 150, 400, 600 };
     sptr<WindowOption> baseOp = new WindowOption();
     baseOp->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);

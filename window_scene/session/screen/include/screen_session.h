@@ -119,6 +119,8 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    void SetDefaultDensity(float DefaultDensity);
+    void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
 
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
@@ -249,7 +251,7 @@ private:
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
-    float currentSensorRotation_ { 0.0f };
+    float currentSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };

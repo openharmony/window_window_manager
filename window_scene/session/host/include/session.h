@@ -136,9 +136,10 @@ public:
     WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError DrawingCompleted() override;
@@ -351,11 +352,11 @@ public:
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
     bool GetFocusable() const;
-    void SetFocusedOnShow(bool focusedOnShow);
+    void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
+    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
     bool IsFocusableOnShow() const;
-    virtual void SetSystemFocusable(bool systemFocusable);
+    virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
     bool IsFocused() const;
@@ -427,7 +428,6 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
-    void ResetSnapshot();
     std::shared_ptr<Media::PixelMap> GetSnapshotPixelMap(const float oriScale = 1.0f, const float newScale = 1.0f);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
@@ -485,10 +485,7 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
-    virtual int32_t GetCustomDecorHeight()
-    {
-        return 0;
-    };
+
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
@@ -563,6 +560,7 @@ protected:
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
@@ -721,7 +719,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
-    std::atomic_bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
+    bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
