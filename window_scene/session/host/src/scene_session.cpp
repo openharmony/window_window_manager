@@ -4412,8 +4412,9 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
 
 uint32_t SceneSession::UpdateUIParam()
 {
+    bool lastVisible = IsVisible();
     dirtyFlags_ |= UpdateVisibilityInner(false) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
-    if (!IsVisible() && isFocused_) {
+    if (lastVisible && !IsVisible() && isFocused_) {
         postProcessFocusState_.enabled_ = true;
         postProcessFocusState_.isFocused_ = false;
         postProcessFocusState_.reason_ = FocusChangeReason::BACKGROUND;
