@@ -156,7 +156,7 @@ void SingleDisplayPocketFoldPolicy::SendSensorResult(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "SendSensorResult FoldStatus: %{public}d", foldStatus);
     FoldDisplayMode displayMode = GetModeMatchStatus();
-    if (displayMode != currentDisplayMode_ && !(currentDisplayMode_ == FoldDisplayMode::COORDINATION &&
+    if (!(currentDisplayMode_ == FoldDisplayMode::COORDINATION &&
         displayMode == FoldDisplayMode::FULL)) {
         ChangeScreenDisplayMode(displayMode);
     }
