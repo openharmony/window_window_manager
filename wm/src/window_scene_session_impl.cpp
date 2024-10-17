@@ -978,7 +978,7 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
     property_->SetLastLimitsVpr(virtualPixelRatio);
 }
 
-void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
+void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
@@ -989,7 +989,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type)
     TLOGI(WmsLogTag::WMS_LIFE, "name: %{public}s, id: %{public}d, type: %{public}u, requestRect:%{public}s",
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
-        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE);
+        UpdateViewportConfig(GetRequestRect(), WindowSizeChangeReason::RESIZE, nullptr, info);
     }
     state_ = WindowState::STATE_SHOWN;
     requestState_ = WindowState::STATE_SHOWN;
@@ -1044,7 +1044,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     float density = GetVirtualPixelRatio(displayInfo);
     if (!MathHelper::NearZero(virtualPixelRatio_ - density) ||
         !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
-        UpdateDensity();
+        UpdateDensityInner(displayInfo);
     }
 
     WMError ret = UpdateAnimationFlagProperty(withAnimation);
@@ -1057,7 +1057,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
-        PreLayoutOnShow(type);
+        PreLayoutOnShow(type, displayInfo);
         // Add maintenance logs before the IPC process.
         TLOGI(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
             property_->GetWindowName().c_str(), GetPersistentId());
@@ -1080,7 +1080,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetMode());
-    NotifyDisplayInfoChange();
+    NotifyDisplayInfoChange(displayInfo);
     return ret;
 }
 
@@ -3603,6 +3603,11 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 
 void WindowSceneSessionImpl::UpdateDensity()
 {
+    UpdateDensityInner(nullptr);
+}
+
+void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
+{
     if (!userLimitsSet_) {
         UpdateWindowSizeLimits();
         UpdateNewSize();
@@ -3613,10 +3618,10 @@ void WindowSceneSessionImpl::UpdateDensity()
         }
     }
 
-    NotifyDisplayInfoChange();
+    NotifyDisplayInfoChange(info);
 
     auto preRect = GetRect();
-    UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
+    UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED, nullptr, info);
     WLOGFI("WindowSceneSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
@@ -3675,17 +3680,23 @@ WSError WindowSceneSessionImpl::UpdateOrientation()
     return WSError::WS_OK;
 }
 
-void WindowSceneSessionImpl::NotifyDisplayInfoChange()
+void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& info)
 {
     TLOGD(WmsLogTag::DMS, "NotifyDisplayInfoChange, wid: %{public}d", GetPersistentId());
-    auto displayId = property_->GetDisplayId();
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS, "get display by displayId %{public}" PRIu64 " failed.", displayId);
-        return;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    DisplayId displayId = 0;
+    if (info == nullptr) {
+        displayId = property_->GetDisplayId();
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::DMS, "get display by displayId %{public}" PRIu64 " failed.", displayId);
+            return;
+        }
+        displayInfo = display->GetDisplayInfo();
+    } else {
+        displayInfo = info;
     }
-    auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
