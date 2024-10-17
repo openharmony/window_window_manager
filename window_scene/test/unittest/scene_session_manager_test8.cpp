@@ -443,7 +443,7 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
     EXPECT_EQ(1998, sceneSession2->GetParentSession()->GetWindowId());
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
     ssm_->UpdateSubWindowVisibility(sceneSession,
-        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
+        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo);
 }
 
 /**
