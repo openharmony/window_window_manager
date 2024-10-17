@@ -587,7 +587,7 @@ int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, Mes
 {
     auto persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
-    TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = RaiseWindowToTop(persistentId);
