@@ -1884,9 +1884,10 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (property_->GetCompatibleModeInPc()) {
+    auto isPC = windowSystemConfig_.IsPcWindow();
+    if ((isPC || IsFreeMultiWindowMode()) && property_->GetCompatibleModeInPc()) {
         TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not LayoutFullScreen");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_OK;
     }
 
     bool preStatus = property_->IsLayoutFullScreen();
