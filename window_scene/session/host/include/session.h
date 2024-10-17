@@ -304,12 +304,9 @@ public:
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
-    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
-    bool GetSystemFocusable() const;
-    bool CheckFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
@@ -649,7 +646,6 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
-    std::atomic_bool systemFocusable_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
