@@ -116,6 +116,7 @@ const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
+constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
@@ -1782,7 +1783,9 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
-        scnSession->SetForegroundInteractiveStatus(true);
+        if (!Session::IsScbCoreEnabled()) {
+            scnSession->SetForegroundInteractiveStatus(true);
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         TLOGI(WmsLogTag::WMS_MAIN, "Request active id:%{public}d system:%{public}u isNewActive:%{public}d",
             persistentId, static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_), isNewActive);
@@ -3464,9 +3467,12 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
         return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
     }
     TLOGI(WmsLogTag::WMS_PIPELINE, "wait for flush UI, id: %{public}d", mainWinId);
-    std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
-    if (nextFlushCompletedCV_.wait_for(lock, std::chrono::milliseconds(100)) == std::cv_status::timeout) {
-        TLOGW(WmsLogTag::WMS_PIPELINE, "wait for 100ms");
+    {
+        std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
+        if (nextFlushCompletedCV_.wait_for(lock, std::chrono::milliseconds(GET_TOP_WINDOW_DELAY)) ==
+            std::cv_status::timeout) {
+            TLOGW(WmsLogTag::WMS_PIPELINE, "wait for 100ms");
+        }
     }
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
 }
@@ -4427,15 +4433,19 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
             }
             if (reason == FocusChangeReason::MOVE_UP) {
                 auto session = GetSceneSession(persistentId);
-                if (session) {
+                if (session && !session->IsFocused()) {
                     PostProcessFocusState state = { true, true, reason };
                     session->SetPostProcessFocusState(state);
                 }
                 return;
             }
+            // need modifying the RequestFocusReason in SCBSceneSession.onClick() before remove this
+            if (reason == FocusChangeReason::CLICK) {
+                return;
+            }
             if (RequestSessionFocus(persistentId, byForeground, reason) != WSError::WS_OK) {
                 auto session = GetSceneSession(persistentId);
-                if (session) {
+                if (session && !session->IsFocused()) {
                     PostProcessFocusState state = { true, true, reason };
                     session->SetPostProcessFocusState(state);
                 }
@@ -8802,7 +8812,7 @@ void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInf
     DelayedSingleton<ANRManager>::GetInstance()->SwitchAnr(false);
 }
 
-void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos)
+void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
 {
     WLOGFI("AppAnrListener OnAppDebugStoped");
     if (debugInfos.empty()) {
@@ -8833,11 +8843,15 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 if (sceneSession == nullptr) {
                     continue;
                 }
-                if (sceneSession->GetSessionInfo().screenId_ != screenId) {
+                if (sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID &&
+                    sceneSession->GetSessionInfo().screenId_ != screenId) {
                     continue;
                 }
                 auto iter = uiParams.find(sceneSession->GetPersistentId());
                 if (iter != uiParams.end()) {
+                    if (sceneSession->GetSessionInfo().screenId_ == SCREEN_ID_INVALID) {
+                        sceneSession->SetScreenIdOnServer(screenId);
+                    }
                     sessionMapDirty |= sceneSession->UpdateUIParam(iter->second);
                 } else {
                     sessionMapDirty |= sceneSession->UpdateUIParam();
@@ -9009,6 +9023,7 @@ void SceneSessionManager::PostProcessProperty(uint32_t dirty)
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             ProcessSubSessionForeground(session);
         }
+        session->SetPostProcessProperty(false);
     }
 
     // update avoid area
