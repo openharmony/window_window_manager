@@ -695,7 +695,7 @@ private:
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
-    void removeFailRecoveredSession();
+    void RemoveFailRecoveredSession();
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
