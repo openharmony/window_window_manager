@@ -60,7 +60,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 return ERR_INVALID_DATA;
             }
             if(WindowSizeChangeReason::UNDEFINED > changeReason || changeReason > WindowSizeChangeReason::END) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "changeReason not in the limit");
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
                 return ERR_INVALID_DATA;
             }
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(changeReason);

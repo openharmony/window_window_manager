@@ -629,7 +629,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         return ERR_INVALID_DATA;
     }
     if(SizeChangeReason::UNDEFINED > changeReason || changeReason > SizeChangeReason::END) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "changeReason not in the limit");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
         return ERR_INVALID_DATA;
     }
     SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
