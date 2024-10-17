@@ -177,7 +177,6 @@ public:
 
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
-
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
     bool IsLayoutFullScreen() const;
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
@@ -187,10 +186,6 @@ public:
     void Read(Parcel& parcel, WSPropertyChangeAction action);
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
-    void SetParentWindowType(WindowType parentWindowType);
-    WindowType GetParentWindowType() const;
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
-    bool GetIsUIExtensionSubWindowFlag() const;
 
     /**
      * Sub Window
@@ -207,6 +202,10 @@ public:
     UIExtensionUsage GetUIExtensionUsage() const;
     void SetExtensionFlag(bool isExtensionFlag);
     bool GetExtensionFlag() const;
+    void SetParentWindowType(WindowType parentWindowType);
+    WindowType GetParentWindowType() const;
+    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    bool GetIsUIExtensionSubWindowFlag() const;
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -314,7 +313,7 @@ private:
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
-    
+
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
@@ -331,12 +330,12 @@ private:
     int32_t compatibleInPcLandscapeWidth_ = 0;
     int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isSupportDragInPcCompatibleMode_ = false;
+    bool isPcAppInPad_ = false;
 
     /**
      * Sub Window
      */
     uint32_t subWindowLevel_ = 1;
-    bool isPcAppInPad_ = false;
 
     /*
      * UIExtension
