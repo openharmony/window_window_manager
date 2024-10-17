@@ -370,17 +370,11 @@ void WindowManagerAgentProxy::NotifyWindowStyleChange(WindowStyleType type)
         TLOGE(WmsLogTag::WMS_MAIN, "Write displayId failed");
         return;
     }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
-        return;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS
 
