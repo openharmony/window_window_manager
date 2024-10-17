@@ -1588,7 +1588,8 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
+    napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
