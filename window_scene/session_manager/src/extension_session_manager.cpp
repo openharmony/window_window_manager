@@ -210,8 +210,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
 
 WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession)
 {
-    const char* const where = __func_;
-    auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extension_session)] {
+    const char* const where = __func__;
+    auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extensionSession)] {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is nullptr", where);
@@ -231,7 +231,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
         }
         extensionSessionMap_.erase(persistentId);
     };
-    taskScheduler_->PostAsyncTask(task, __func_);
+    taskScheduler_->PostAsyncTask(task, __func__);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
