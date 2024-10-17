@@ -198,10 +198,6 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone03, 
     instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestructionDone(extensionSession));
     usleep(WAIT_SYNC_IN_NS);
-
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestructionDone(extensionSession));
-    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
