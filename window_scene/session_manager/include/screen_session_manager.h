@@ -336,7 +336,6 @@ private:
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
-    sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
