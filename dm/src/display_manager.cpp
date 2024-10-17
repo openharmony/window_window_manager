@@ -1871,7 +1871,6 @@ bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallb
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
-            WLOGFI("[UL_POWER]previous callback not called or callback invalid");
             if (displayStateCallback_ != nullptr) {
                 WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
@@ -1937,11 +1936,11 @@ bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
 {
     WLOGFD("freeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("freeze display fail, num of display is 0");
+        WLOGFE("freeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("freeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        WLOGFE("freeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
@@ -1951,11 +1950,11 @@ bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
 {
     WLOGFD("unfreeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("unfreeze display fail, num of display is 0");
+        WLOGFE("unfreeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("unfreeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        WLOGFE("unfreeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);

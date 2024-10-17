@@ -537,7 +537,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayChangeList
 {
     TLOGI(WmsLogTag::DMS, "[DMNDK] register display change listener.");
     if (displayChangeCallback == NULL || listenerIndex == NULL) {
-        TLOGE(WmsLogTag::DMS, "[DMNDK] register display change listener fail(input params null).");
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register fail(input params null).");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
     }
     std::unique_lock<std::shared_mutex> lock(displayChangeMutex);
@@ -554,13 +554,13 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayChangeList
     static std::atomic<uint32_t> registerCount = 1;
     DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(displayListener);
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "[DMNDK] display change listener register failed ret=%{public}d.", ret);
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register failed ret=%{public}d.", ret);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     *listenerIndex = registerCount++;
     g_displayChangeCallbackMap.emplace(*listenerIndex, displayChangeCallback);
     g_displayChangeListenerMap.emplace(*listenerIndex, displayListener);
-    TLOGI(WmsLogTag::DMS, "[DMNDK] register display change success and listenerIndex= %{public}d.", *listenerIndex);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] register success and listenerIndex= %{public}d.", *listenerIndex);
     return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
 }
 
@@ -570,7 +570,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayChangeLi
     std::unique_lock<std::shared_mutex> lock(displayChangeMutex);
     auto iter = g_displayChangeListenerMap.find(listenerIndex);
     if (iter == g_displayChangeListenerMap.end()) {
-        TLOGE(WmsLogTag::DMS, "[DMNDK] unregister display change listener fail(not find register info).");
+        TLOGE(WmsLogTag::DMS, "[DMNDK] unregister fail(not find register info).");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
     }
     DMError ret = DMError::DM_OK;

@@ -438,7 +438,7 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (options.size() > MAX_SCREEN_SIZE) {
-        WLOGFW("Make expand failed. The options size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        WLOGFW("Make expand failed. Options size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     std::vector<ScreenId> screenIds;
@@ -465,7 +465,7 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screenIds.size() > MAX_SCREEN_SIZE) {
-        WLOGFW("Make UniqueScreen failed. The screenIds size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        WLOGFW("Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
@@ -476,7 +476,7 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
 {
     WLOGFI("Make mirror for screen: %{public}" PRIu64"", mainScreenId);
     if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
-        WLOGFW("Make Mirror failed. The mirrorScreenId size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        WLOGFW("Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
@@ -540,7 +540,7 @@ DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screen
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screens.size() > MAX_SCREEN_SIZE) {
-        WLOGFW("RemoveVirtualScreenFromGroup failed. The screens size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        WLOGFW("RemoveVirtualScreenFromGroup failed. Screens size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenFromGroup(screens);

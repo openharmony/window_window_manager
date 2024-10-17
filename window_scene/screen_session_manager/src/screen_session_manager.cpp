@@ -270,7 +270,7 @@ void ScreenSessionManager::Init()
 
     RegisterScreenChangeListener();
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
-        TLOGI(WmsLogTag::DMS, "Current device type not support SetSensorSubscriptionEnabled.");
+        TLOGI(WmsLogTag::DMS, "Current type not support SetSensorSubscriptionEnabled.");
     } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
         // 多屏设备只要有屏幕亮,GetScreenPower获取的任意一块屏幕状态均是ON
         SetSensorSubscriptionEnabled();
