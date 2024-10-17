@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 constexpr int32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
-WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label)
+WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::SetSessionLabel");
     MessageParcel data;
@@ -63,8 +63,8 @@ WSError SceneSessionManagerLiteProxy::SetSessionLabel(const sptr<IRemoteObject> 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::SetSessionIcon(const sptr<IRemoteObject> &token,
-    const std::shared_ptr<Media::PixelMap> &icon)
+WSError SceneSessionManagerLiteProxy::SetSessionIcon(const sptr<IRemoteObject>& token,
+    const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::SetSessionIcon");
     MessageParcel data;
@@ -97,7 +97,7 @@ WSError SceneSessionManagerLiteProxy::SetSessionIcon(const sptr<IRemoteObject> &
 }
 
 WSError SceneSessionManagerLiteProxy::IsValidSessionIds(
-    const std::vector<int32_t> &sessionIds, std::vector<bool> &results)
+    const std::vector<int32_t>& sessionIds, std::vector<bool>& results)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::IsValidSessionIds");
     MessageParcel data;
@@ -127,7 +127,7 @@ WSError SceneSessionManagerLiteProxy::IsValidSessionIds(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject> &token)
+WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::PendingSessionToForeground");
     MessageParcel data;
@@ -458,7 +458,7 @@ WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::Sess
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
+WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::GetFocusSessionToken");
     MessageParcel data;
@@ -558,7 +558,7 @@ WSError SceneSessionManagerLiteProxy::GetSessionSnapshot(const std::string& devi
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::SetSessionContinueState(const sptr<IRemoteObject> &token,
+WSError SceneSessionManagerLiteProxy::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
     MessageParcel data;
