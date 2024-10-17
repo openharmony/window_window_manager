@@ -628,7 +628,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
         return ERR_INVALID_DATA;
     }
-    if(SizeChangeReason::UNDEFINED > changeReason || changeReason > SizeChangeReason::END) {
+    if (SizeChangeReason::UNDEFINED > changeReason || changeReason > SizeChangeReason::END) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
         return ERR_INVALID_DATA;
     }
