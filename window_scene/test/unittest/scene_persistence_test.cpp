@@ -176,24 +176,6 @@ HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SaveUpdatedIcon02
- * @tc.desc: test function : SaveUpdatedIcon02
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon02, Function | SmallTest | Level1)
-{
-    std::string directory = "0/Storage";
-    std::string bundleName = "testBundleName";
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->snapshotPath_ = "/data/1.png";
-    ASSERT_NE(nullptr, mPixelMap);
-    scenePersistence->SaveUpdatedIcon(mPixelMap);
-    std::string result(scenePersistence->GetUpdatedIconPath());
-    std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    EXPECT_EQ(result.compare(test), 1);
-}
-
-/**
  * @tc.name: IsSnapshotExisted
  * @tc.desc: test function : IsSnapshotExisted
  * @tc.type: FUNC
