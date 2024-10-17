@@ -15,13 +15,8 @@
 
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 
-#include <ipc_types.h>
 #include <ui/rs_surface_node.h>
 #include "marshalling_helper.h"
-#include "session/host/include/scene_session.h"
-#include "window_manager.h"
-#include "window_manager_agent_proxy.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
