@@ -982,7 +982,6 @@ private:
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);
 
-
     struct SessionInfoList {
         int32_t uid_;
         std::string bundleName_;
