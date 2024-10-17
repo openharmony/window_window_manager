@@ -664,6 +664,35 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: CheckIfNeedCommitRsTransaction
+ * @tc.desc: CheckIfNeedCommitRsTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    bool res = false;
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::UNDEFINED;
+    for (uint32_t i = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
+         i < static_cast<uint32_t>(WindowSizeChangeReason::END); i++) {
+        wmReason = static_cast<WindowSizeChangeReason>(i);
+        res = window->CheckIfNeedCommitRsTransaction(wmReason);
+        if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+            wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+            wmReason == WindowSizeChangeReason::MAXIMIZE) {
+            ASSERT_EQ(res, false);
+        } else {
+            ASSERT_EQ(res, true);
+        }
+    }
+    window->Destroy();
+}
+
+/**
  * @tc.name: UpdateRectForRotation
  * @tc.desc: UpdateRectForRotation Test
  * @tc.type: FUNC

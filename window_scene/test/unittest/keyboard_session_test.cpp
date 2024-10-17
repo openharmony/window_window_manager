@@ -1096,6 +1096,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Leve
     Rosen::WSRect keyboardPanelRect{ 0, 0, 0, 0 };
     Rosen::WSRect emptyRect{ 0, 0, 0, 0 };
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->RaiseCallingSession(keyboardPanelRect, rsTransaction);
     ASSERT_EQ(resultRect, emptyRect);
 
@@ -1131,6 +1132,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession02, Function | SmallTest | Leve
     ASSERT_NE(keyboardSession, nullptr);
     sptr<KSSceneSessionMocker> callingSession = GetSceneSessionMocker("callingSession", "callingSession");
     ASSERT_NE(callingSession, nullptr);
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->winRect_ = { 1, 1, 1, 1 };
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
