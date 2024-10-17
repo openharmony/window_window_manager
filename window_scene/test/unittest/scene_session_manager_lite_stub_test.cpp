@@ -52,7 +52,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override
     {
         return WSError::WS_OK;
     }
