@@ -2173,7 +2173,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             " isForceClean:%{public}d", persistentId, needRemoveSession, isSaveSnapshot, isForceClean);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
         WindowDestroyNotifyVisibility(scnSession);
-        scnSession->Disconnect();
+        scnSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;

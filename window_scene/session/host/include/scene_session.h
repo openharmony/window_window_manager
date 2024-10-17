@@ -153,6 +153,7 @@ public:
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
+    WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
     virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
