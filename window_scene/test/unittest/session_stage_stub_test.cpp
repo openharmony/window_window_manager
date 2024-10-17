@@ -813,45 +813,6 @@ HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetSplitButtonVisible(data, reply));
 }
-
-/**
- * @tc.name: HandleCompatibleFullScreenRecover
- * @tc.desc: test function : HandleCompatibleFullScreenRecover
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleCompatibleFullScreenRecover(data, reply));
-}
-
-/**
- * @tc.name: HandleCompatibleFullScreenMinimize
- * @tc.desc: test function : HandleCompatibleFullScreenMinimize
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleCompatibleFullScreenMinimize(data, reply));
-}
-
-/**
- * @tc.name: HandleCompatibleFullScreenClose
- * @tc.desc: test function : HandleCompatibleFullScreenClose
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleCompatibleFullScreenClose(data, reply));
-}
 }
 }
 }

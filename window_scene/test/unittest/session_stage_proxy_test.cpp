@@ -620,42 +620,6 @@ HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Le
     WSError res = sessionStage_->SetSplitButtonVisible(false);
     ASSERT_EQ(WSError::WS_OK, res);
 }
-
-/**
- * @tc.name: CompatibleFullScreenRecover
- * @tc.desc: test function : CompatibleFullScreenRecover
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenRecover, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenRecover();
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
- * @tc.name: CompatibleFullScreenMinimize
- * @tc.desc: test function : CompatibleFullScreenMinimize
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenMinimize, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
- * @tc.name: CompatibleFullScreenClose
- * @tc.desc: test function : CompatibleFullScreenClose
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest | Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenClose();
-    ASSERT_EQ(WSError::WS_OK, res);
-}
 }
 }
 }
