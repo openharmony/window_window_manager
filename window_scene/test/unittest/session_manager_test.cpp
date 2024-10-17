@@ -96,6 +96,9 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sessionManager.wmsConnectionChangedFunc_ = nullptr;
     sessionManager.OnWMSConnectionChangedCallback(0, 0, true, false);
 
+    sessionManager.wmsConnectionChangedFunc_ = [](int32_t userId, int32_t screenId, bool isConnected) {};
+    sessionManager.OnWMSConnectionChangedCallback(101, MOCK_SCREEN_ID_ZERO, true, true);
+
     int32_t userId = 2;
     int32_t screenId = 0;
     bool isConnected = true;
@@ -186,17 +189,14 @@ HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest 
 HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
-    
-    bool funcInvoked = false;
     sessionManager.userSwitchCallbackFunc_ = nullptr;
     sessionManager.OnUserSwitch(nullptr);
-    ASSERT_EQ(funcInvoked, false);
 
-    std::function<void()> userSwitchCallbackFunc;
-    sessionManager.userSwitchCallbackFunc_ = userSwitchCallbackFunc;
-    sptr<ISessionManagerService> sessionManagerService;
+    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
+    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
+    ASSERT_NE(nullptr, sessionManagerService);
+    sessionManager.userSwitchCallbackFunc_ = []() {};
     sessionManager.OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(funcInvoked, false);
 }
 
 /**
@@ -221,6 +221,23 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterWMSConnectionChangedListener1
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.isRecoverListenerRegistered_ = true;
+    sessionManager.currentWMSUserId_ = 100;
+    sessionManager.currentScreenId_ = 0;
+    sessionManager.isWMSConnected_ = true;
+    auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
+    auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
