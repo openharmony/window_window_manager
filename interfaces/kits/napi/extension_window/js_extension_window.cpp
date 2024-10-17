@@ -894,11 +894,18 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         if (extensionWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
+            return;
         }
         auto extWindow = extensionWindow->GetWindow();
         if (extWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
+            return;
+        }
+        if (windowOption == nullptr) {
+            task.Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
+            return;
         }
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
