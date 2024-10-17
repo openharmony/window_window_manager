@@ -6672,14 +6672,14 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RequestFocusByClient(isFocused));
-        TLOGI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
+        TLOGNI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
+            window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
@@ -6861,7 +6861,6 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
     }
     if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
     size_t argc = 4;

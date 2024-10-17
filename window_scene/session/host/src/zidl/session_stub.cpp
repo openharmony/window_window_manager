@@ -244,7 +244,13 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         WLOGFW("[WMSCom] Property not exist!");
         property = sptr<WindowSessionProperty>::MakeSptr();
     }
-    const WSError errCode = Foreground(property, true);
+    bool isFromClient = data.ReadBool();
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = Foreground(property, true, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -252,7 +258,13 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
-    const WSError errCode = Background(true);
+    bool isFromClient = data.ReadBool();
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = Background(true, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -260,7 +272,13 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
-    WSError errCode = Disconnect(true);
+    bool isFromClient = data.ReadBool();
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = Disconnect(true, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1101,7 +1119,7 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
 
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
     bool isFocused = false;
     if (!data.ReadBool(isFocused)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
@@ -1114,7 +1132,7 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
     bool isFocusableOnShow = true;
     if (!data.ReadBool(isFocusableOnShow)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");

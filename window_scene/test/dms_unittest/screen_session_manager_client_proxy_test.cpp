@@ -240,7 +240,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnImmersiveStateChanged, Function 
     bool immersive = false;
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClientProxy_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**

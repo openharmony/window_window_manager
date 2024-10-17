@@ -1424,21 +1424,20 @@ void JsSceneSession::ProcessBackPressedRegister()
 
 void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnSystemBarPropertyChange_ = [weakThis = wptr(this)](
+    session->RegisterSystemBarPropertyChangeCallback([weakThis = wptr(this)](
         const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSystemBarPropertyChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSystemBarPropertyChange(propertyMap);
-    };
-    TLOGD(WmsLogTag::WMS_IMMS, "success");
+    });
 }
 
 void JsSceneSession::ProcessNeedAvoidRegister()
@@ -3090,13 +3089,13 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
             } else {
-                ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
+                SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
                     info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
-                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
+                sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             }
         }
         if (sceneSession == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "GetSceneSessionByName return nullptr, RequestSceneSession");
+            TLOGI(WmsLogTag::WMS_LIFE, "SceneSession not exist, request a new one.");
             sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
             if (sceneSession == nullptr) {
                 TLOGE(WmsLogTag::WMS_LIFE, "RequestSceneSession return nullptr");

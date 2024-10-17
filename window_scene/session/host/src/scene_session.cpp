@@ -110,14 +110,11 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (SessionHelper::IsMainWindow(session->GetWindowType()) && !identityToken.empty() &&
-            !session->clientIdentityToken_.empty() && identityToken != session->clientIdentityToken_) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Identity Token vaildate failed, clientIdentityToken_: %{public}s, "
-                "identityToken: %{public}s, bundleName: %{public}s",
-                session->clientIdentityToken_.c_str(), identityToken.c_str(),
-                session->GetSessionInfo().bundleName_.c_str());
-            return WSError::WS_OK;
+        if (SessionHelper::IsMainWindow(session->GetWindowType())) {
+            if (!session->CheckIdentityTokenIfMatched(identityToken)) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "check failed");
+                return WSError::WS_OK;
+            }
         }
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
@@ -204,7 +201,8 @@ WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
     return ret;
 }
 
-WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError SceneSession::Foreground(
+    sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -225,10 +223,8 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     }
 
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE, "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, "
-                "bundleName: %{public}s", GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
     }
@@ -279,17 +275,15 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
     return WSError::WS_OK;
 }
 
-WSError SceneSession::Background(bool isFromClient)
+WSError SceneSession::Background(bool isFromClient, const std::string& identityToken)
 {
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Background failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
     }
@@ -377,14 +371,11 @@ void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
     }
 }
 
-WSError SceneSession::Disconnect(bool isFromClient)
+WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
-        int32_t callingPid = IPCSkeleton::GetCallingPid();
-        if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "Disconnect failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
-                GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        if (!CheckPidIfMatched() || !CheckIdentityTokenIfMatched(identityToken)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "check failed");
             return WSError::WS_OK;
         }
     }
@@ -640,6 +631,19 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
         return WSError::WS_OK;
     };
     PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
+}
+
+void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onSystemBarPropertyChange_ = std::move(callback);
+    };
+    PostTask(task, __func__);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
@@ -1290,8 +1294,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
         SetIsDisplayStatusBarTemporarily(false);
     }
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
-        sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
+    if (onSystemBarPropertyChange_) {
+        onSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
@@ -1986,7 +1990,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return WSError::WS_OK;
         }
         if (!moveDragController_) {
-            WLOGE("moveDragController_ is null");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
@@ -3371,7 +3375,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session);
-        if (session->systemConfig_.IsPcWindow() &&
+        if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(session->GetSessionInfo().bundleName_)) {
             if (!MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(info)) {
                 TLOGE(WmsLogTag::WMS_LIFE, "multi instance start fail, id:%{public}d instanceKey:%{public}s",
@@ -5039,7 +5043,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
-            session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
             session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
@@ -5078,6 +5081,12 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
     }
 }
 
+int32_t SceneSession::GetCustomDecorHeight() const
+{
+    std::lock_guard lock(customDecorHeightMutex_);
+    return customDecorHeight_;
+}
+
 void SceneSession::SetCustomDecorHeight(int32_t height)
 {
     constexpr int32_t MIN_DECOR_HEIGHT = 37;
@@ -5085,6 +5094,7 @@ void SceneSession::SetCustomDecorHeight(int32_t height)
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         return;
     }
+    std::lock_guard lock(customDecorHeightMutex_);
     customDecorHeight_ = height;
 }
 
@@ -5094,5 +5104,28 @@ void SceneSession::UpdateGestureBackEnabled()
         specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
         specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
     }
+}
+
+bool SceneSession::CheckIdentityTokenIfMatched(const std::string& identityToken)
+{
+    if (!identityToken.empty() && !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "failed, clientIdentityToken: %{public}s, identityToken: %{public}s, bundleName: %{public}s",
+            clientIdentityToken_.c_str(), identityToken.c_str(), GetSessionInfo().bundleName_.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SceneSession::CheckPidIfMatched()
+{
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != -1 && callingPid != GetCallingPid()) {
+        TLOGW(WmsLogTag::WMS_LIFE,
+            "failed, callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+            GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Rosen

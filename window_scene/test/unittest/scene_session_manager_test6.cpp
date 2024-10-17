@@ -131,6 +131,23 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
 }
 
 /**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
+    std::shared_ptr<RSUIExtensionData> secExtData = std::make_shared<RSUIExtensionData>(callbackData);
+    ssm_->currentUserId_ = 101;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+
+    ssm_->currentUserId_ = 100;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+}
+
+/**
  * @tc.name: GetWindowLayerChangeInfo
  * @tc.desc: Simulate window Layer change
  * @tc.type: FUNC
@@ -1175,7 +1192,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | Small
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->UpdatePrivateStateAndNotify(0);
+    ssm_->privacyBundleMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "DumpSessionWithId";
@@ -1186,6 +1203,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | Small
     sceneSession->property_ = nullptr;
     ASSERT_NE(nullptr, ssm_);
     ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 0);
     ASSERT_NE(nullptr, ssm_);
     ssm_->UpdatePrivateStateAndNotifyForAllScreens();
 }
@@ -1203,6 +1221,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.isSystem_ = true;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -1210,24 +1229,25 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetPrivacyMode(true);
     sceneSession->property_->SetDisplayId(1);
+    sceneSession->isVisible_ = false;
     std::unordered_set<std::string> privacyBundles1;
     std::unordered_set<std::string> privacyBundles2;
     std::unordered_set<std::string> privacyBundles3;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->privacyBundleMap_.insert({1, privacyBundles1});
-    ssm_->privacyBundleMap_.insert({2, privacyBundles2});
-    ssm_->privacyBundleMap_.insert({3, privacyBundles3});
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
     ssm_->UpdatePrivateStateAndNotify(1);
     ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession->property_->SetPrivacyMode(true);
     sceneSession->property_->SetDisplayId(2);
-    ssm_->UpdatePrivateStateAndNotify(1);
-    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 0);
+    sceneSession->isVisible_ = true;
+    ssm_->UpdatePrivateStateAndNotify(2);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 1);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->property_->SetPrivacyMode(false);
     sceneSession->property_->SetDisplayId(3);
-    ssm_->UpdatePrivateStateAndNotify(1);
+    ssm_->UpdatePrivateStateAndNotify(3);
     ASSERT_EQ(ssm_->privacyBundleMap_[3].size(), 0);
 }
 

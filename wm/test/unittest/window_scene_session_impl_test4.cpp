@@ -17,6 +17,7 @@
 #include <parameters.h>
 #include "ability_context_impl.h"
 #include "display_info.h"
+#include "common_test_utils.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
@@ -53,6 +54,7 @@ void WindowSceneSessionImplTest4::TearDownTestCase() {}
 void WindowSceneSessionImplTest4::SetUp()
 {
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    CommonTestUtils::GuaranteeFloatWindowPermission("wm_window_scene_session_impl_test4");
 }
 
 void WindowSceneSessionImplTest4::TearDown()
@@ -785,7 +787,12 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->hostSession_ = session;
     SystemBarProperty property;
+    windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
     auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
     auto ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
@@ -795,7 +802,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     property = SystemBarProperty();
     property.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
@@ -817,6 +824,12 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveToAsync(10, 10));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->MoveToAsync(10, 10));
 }
 
@@ -873,6 +886,10 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->ResizeAsync(500, 500));
 }
 

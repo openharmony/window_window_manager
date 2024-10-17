@@ -87,6 +87,8 @@ public:
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
+    uint32_t GetScreenBrightness(uint64_t screenId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
@@ -189,7 +191,7 @@ public:
     void OnScreenshot(sptr<ScreenshotInfo> info);
     bool IsMultiScreenCollaboration();
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    DMError HasImmersiveWindow(bool& immersive) override;
+    DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     void BlockScreenOnByCV(void);
@@ -223,6 +225,8 @@ public:
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
+    void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
+    void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
@@ -325,6 +329,8 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
+    void InitScreenDensity(sptr<ScreenSession> session, const ScreenProperty& property);
+    float CalcDefaultExtendScreenDensity(const ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);

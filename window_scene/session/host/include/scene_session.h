@@ -121,7 +121,6 @@ public:
         NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
@@ -158,11 +157,12 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
     WSError ReconnectInner(sptr<WindowSessionProperty> property);
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
@@ -363,6 +363,7 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
+    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
@@ -413,7 +414,7 @@ public:
     /*
      * Window Decor
      */
-    int32_t GetCustomDecorHeight() override { return customDecorHeight_; }
+    int32_t GetCustomDecorHeight() const;
     void SetCustomDecorHeight(int32_t height) override;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -508,6 +509,7 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /*
      * Window Hierarchy
@@ -524,6 +526,12 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /*
+     * Window Lifecycle
+     */
+    bool CheckIdentityTokenIfMatched(const std::string& identityToken);
+    bool CheckPidIfMatched();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -655,7 +663,13 @@ private:
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+
+    /*
+     * Window Decor
+     */
+    mutable std::mutex customDecorHeightMutex_;
     int32_t customDecorHeight_ = 0;
+
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     std::string clientIdentityToken_ = { "" };
     SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;

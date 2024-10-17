@@ -366,8 +366,13 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, Function | 
 HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode01, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
-    EXPECT_NE(FoldStatus::FOLDED, screenSessionManagerClient_->GetFoldStatus());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    } else {
+        EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    }
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }
 
@@ -385,7 +390,11 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode02, Function | SmallT
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
     screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    } else {
+        EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    }
     EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }
@@ -738,7 +747,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged01, Function | S
     bool immersive = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**
@@ -752,7 +761,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged02, Function | S
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**

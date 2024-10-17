@@ -859,7 +859,7 @@ public:
      *
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
-     * @param withFocus True means window can get focus when it show to foreground, false means the opposite;
+     * @param withFocus True means window can get focus when it shows to foreground, false means the opposite;
      * @return WM_OK means window show success, others means failed.
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
@@ -2045,7 +2045,7 @@ public:
      *
      * @return Value of PixelRatio obtained from displayInfo.
      */
-    virtual float GetVirtualPixelRatio() { return 1.0f; }
+    virtual float GetVirtualPixelRatio() { return 0.0f; }
 
     /**
      * @brief Hide None Secure Windows.

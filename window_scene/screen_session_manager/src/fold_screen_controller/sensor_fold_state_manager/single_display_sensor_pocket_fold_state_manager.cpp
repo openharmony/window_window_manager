@@ -150,7 +150,7 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraStatusChange(float angl
         }
         return;
     }
-    
+
     if (applicationStateObserver_ == nullptr) {
         return;
     }
@@ -241,6 +241,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
     bool isNotRepeated = isTent ^ IsTentMode();
     if (!isNotRepeated) {
         WLOGI("Repeat reporting tent mode:%{public}s, no processing", (isTent == true) ? "on" : "off");
+        return;
     }
 
     SetTentMode(isTent);
@@ -263,7 +264,7 @@ bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int
         WLOGI("Exit tent mode due to hall sensor report folded");
         return true;
     }
-    
+
     if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
         WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
         return true;
