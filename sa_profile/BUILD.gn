@@ -16,7 +16,7 @@ import("../windowmanager_aafwk.gni")
 
 ohos_sa_profile("wms_sa_profile") {
   sources = [ "4606.json" ]
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     sources += [ "scene_board/4607.json" ]
   } else {
     sources += [ "4607.json" ]

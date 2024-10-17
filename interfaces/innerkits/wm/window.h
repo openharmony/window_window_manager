@@ -2190,6 +2190,13 @@ public:
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
+
+    /*
      * @brief Get the parent window type of UIExtension
      *
      * @return Parent window type of UIExtension
