@@ -270,7 +270,7 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     if (parentWindow == nullptr) {
         return false;
     }
-    return parentWindow->IsPcOrPadFreeMultiWindowMode();
+    return parentWindow->WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
 }
 
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()

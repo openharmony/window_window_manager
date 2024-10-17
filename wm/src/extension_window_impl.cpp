@@ -52,7 +52,7 @@ WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
     return windowExtensionSessionImpl_->SetWaterMarkFlag(isEnable);
 }
 
-WMError ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
+bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "IsPcOrPadFreeMultiWindowMode is called");
     return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();

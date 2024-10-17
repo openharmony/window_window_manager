@@ -141,6 +141,7 @@ public:
     virtual WMError ReleaseForegroundSessionScreenLock();
     WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode);
+    
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();
