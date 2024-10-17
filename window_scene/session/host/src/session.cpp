@@ -500,19 +500,6 @@ bool Session::GetFocusable() const
     return true;
 }
 
-bool Session::GetSystemFocusable() const
-{
-    if (parentSession_) {
-        return systemFocusable_ && parentSession_->GetSystemFocusable();
-    }
-    return systemFocusable_;
-}
-
-bool Session::CheckFocusable() const
-{
-    return GetFocusable() && GetSystemFocusable();
-}
-
 bool Session::IsFocused() const
 {
     return isFocused_;
