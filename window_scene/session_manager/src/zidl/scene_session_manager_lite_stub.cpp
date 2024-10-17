@@ -585,7 +585,11 @@ int SceneSessionManagerLiteStub::HandleClearMainSessions(MessageParcel& data, Me
 
 int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
+    auto persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+    TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RaiseWindowToTop(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

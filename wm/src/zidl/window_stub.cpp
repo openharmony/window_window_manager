@@ -59,6 +59,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
                 return ERR_INVALID_DATA;
             }
+            if(WindowSizeChangeReason::UNDEFINED > changeReason || changeReason > WindowSizeChangeReason::END) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "changeReason not in the limit");
+                return ERR_INVALID_DATA;
+            }
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(changeReason);
             bool hasRSTransaction = false;
             if (!data.ReadBool(hasRSTransaction)) {
