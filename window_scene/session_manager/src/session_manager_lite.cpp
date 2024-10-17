@@ -163,7 +163,7 @@ void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& liste
             return (item && item->AsObject() == listener->AsObject());
         });
     if (it != sessionListeners_.end()) {
-        TLOGW(WmsLogTag::DEFAULT, "listener was already added, do not add again");
+        TLOGW(WmsLogTag::DEFAULT, "listener was already added");
         return;
     }
     sessionListeners_.emplace_back(listener);

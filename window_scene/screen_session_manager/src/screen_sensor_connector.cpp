@@ -40,7 +40,7 @@ sptr<TentMotionEventCallback> MotionTentSubscriber::motionEventCallback_ = nullp
 
 void ScreenSensorConnector::SubscribeRotationSensor()
 {
-    TLOGD(WmsLogTag::DMS, "dms: subscribe rotation-related sensor");
+    TLOGD(WmsLogTag::DMS, "subscribe rotation-related sensor");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
     if (MotionSubscriber::isMotionSensorSubscribed_) {
@@ -58,7 +58,7 @@ void ScreenSensorConnector::UnsubscribeRotationSensor()
 
 void ScreenSensorConnector::SubscribeTentSensor()
 {
-    TLOGD(WmsLogTag::DMS, "dms: subscribe tent sensor");
+    TLOGD(WmsLogTag::DMS, "subscribe tent sensor");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionTentSubscriber::SubscribeMotionSensor();
 #endif
@@ -75,9 +75,9 @@ void ScreenSensorConnector::UnsubscribeTentSensor()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    TLOGI(WmsLogTag::DMS, "dms: Subscribe motion Sensor");
+    TLOGI(WmsLogTag::DMS, "Subscribe motion Sensor");
     if (isMotionSensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS, "dms: motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "motion sensor's already subscribed");
         return;
     }
     sptr<RotationMotionEventCallback> callback = new (std::nothrow) RotationMotionEventCallback();
@@ -95,7 +95,7 @@ void MotionSubscriber::SubscribeMotionSensor()
 void MotionSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe motion sensor");
+        TLOGI(WmsLogTag::DMS, "Unsubscribe motion sensor");
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);
@@ -135,19 +135,19 @@ void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
 
 void MotionTentSubscriber::SubscribeMotionSensor()
 {
-    TLOGI(WmsLogTag::DMS, "dms: Subscribe tent motion Sensor");
+    TLOGI(WmsLogTag::DMS, "Subscribe tent motion Sensor");
     if (isMotionSensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS, "dms: tent motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "tent motion sensor's already subscribed");
         return;
     }
     sptr<TentMotionEventCallback> callback = new (std::nothrow) TentMotionEventCallback();
     if (callback == nullptr) {
-        TLOGE(WmsLogTag::DMS, "dms: malloc tent motion callback failed");
+        TLOGE(WmsLogTag::DMS, "malloc tent motion callback failed");
         return;
     }
     int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::MOTION_TYPE_TENT, callback);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "dms: SubscribeCallback type:%{public}d failed", OHOS::Msdp::MOTION_TYPE_TENT);
+        TLOGE(WmsLogTag::DMS, "SubscribeCallback type:%{public}d failed", OHOS::Msdp::MOTION_TYPE_TENT);
         return;
     }
     motionEventCallback_ = callback;
@@ -157,7 +157,7 @@ void MotionTentSubscriber::SubscribeMotionSensor()
 void MotionTentSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe tent motion sensor");
+        TLOGI(WmsLogTag::DMS, "Unsubscribe tent motion sensor");
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_TENT, motionEventCallback_);
@@ -175,7 +175,7 @@ void TentMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
     } else if (motionData.status == MOTION_ACTION_TENT_MODE_OFF) {
         ScreenTentProperty::HandleSensorEventInput(false);
     } else {
-        TLOGI(WmsLogTag::DMS, "dms: tent motion:%{public}d invalid", motionData.status);
+        TLOGI(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
     }
 }
 #endif

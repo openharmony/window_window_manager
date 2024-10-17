@@ -28,7 +28,7 @@ sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (dpiObserver_) {
-        TLOGD(WmsLogTag::DMS, "setting dpi observer is already registered");
+        TLOGD(WmsLogTag::DMS, "setting dpi observer is registered");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -43,7 +43,7 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
 void ScreenSettingHelper::RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (extendDpiObserver_) {
-        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is already registered");
+        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -58,7 +58,7 @@ void ScreenSettingHelper::RegisterExtendSettingDpiObserver(SettingObserver::Upda
 void ScreenSettingHelper::UnregisterSettingDpiObserver()
 {
     if (dpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "dpiObserver_ is nullptr, no need to unregister");
+        TLOGD(WmsLogTag::DMS, "dpiObserver_ is nullptr");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -72,7 +72,7 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
 void ScreenSettingHelper::UnregisterExtendSettingDpiObserver()
 {
     if (extendDpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "extendDpiObserver_ is nullptr, no need to unregister");
+        TLOGD(WmsLogTag::DMS, "extendDpiObserver_ is nullptr");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -115,7 +115,7 @@ bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string&
 void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFunc func)
 {
     if (castObserver_) {
-        TLOGD(WmsLogTag::DMS, "setting cast observer is already registered");
+        TLOGD(WmsLogTag::DMS, "setting cast observer is registered");
         return;
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -130,7 +130,7 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
 void ScreenSettingHelper::UnregisterSettingCastObserver()
 {
     if (castObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "castObserver_ is nullptr, no need to unregister");
+        TLOGD(WmsLogTag::DMS, "castObserver_ is nullptr");
         return;
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -155,7 +155,7 @@ bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
 void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::UpdateFunc func)
 {
     if (rotationObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "setting rotation observer is already registered");
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -170,7 +170,7 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
 void ScreenSettingHelper::UnregisterSettingRotationObserver()
 {
     if (rotationObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr, no need to unregister");
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
