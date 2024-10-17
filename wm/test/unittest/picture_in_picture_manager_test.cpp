@@ -301,9 +301,28 @@ HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Le
     auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
-    PictureInPictureManager::DoPreRestore();
+    PictureInPictureManager::DoPrepareSource();
     PictureInPictureManager::SetActiveController(pipController);
-    PictureInPictureManager::DoPreRestore();
+    PictureInPictureManager::DoPrepareSource();
+}
+
+/**
+ * @tc.name: DoPrepareSource
+ * @tc.desc: DoPrepareSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::activeController_ = nullptr;
+    PictureInPictureManager::DoLocateSource();
+    PictureInPictureManager::SetActiveController(pipController);
+    PictureInPictureManager::DoLocateSource();
 }
 
 /**
