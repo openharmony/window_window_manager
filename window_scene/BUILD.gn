@@ -23,7 +23,7 @@ group("window_scene") {
     "session_manager:screen_session_manager",
     "session_manager:session_manager",
   ]
-  if (scene_board_enabled) {
+  if (window_manager_use_sceneboard) {
     public_deps += [ "session_manager_service:session_manager_service" ]
   }
 }

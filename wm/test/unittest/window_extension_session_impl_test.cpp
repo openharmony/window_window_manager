@@ -1530,6 +1530,21 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
     window_->ReportModalUIExtensionMayBeCovered(true);
     window_->NotifyModalUIExtensionMayBeCovered(false);
 }
+
+/**
+ * @tc.name: GetRealParentId
+ * @tc.desc: GetRealParentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->SetRealParentId(12345);
+    EXPECT_EQ(window_->GetRealParentId(), 12345);
+
+    window_->property_ = nullptr;
+    EXPECT_EQ(window_->GetRealParentId(), INVALID_WINDOW_ID);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
