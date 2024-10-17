@@ -78,6 +78,8 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallT
     SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
     sessionManagerLite.RecoverSessionManagerService(nullptr);
     sessionManagerLite.ClearSessionManagerProxy();
+
+    sessionManagerLite.RegisterUserSwitchListener([]() {});
     sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
     sessionManagerLite.RecoverSessionManagerService(sessionManagerService);
 
@@ -258,6 +260,40 @@ HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, Function 
     SessionManagerLite::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterWMSConnectionChangedListener1
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener1, Function | SmallTest | Level2)
+{
+    SessionManagerLite sessionManagerLite;
+    sessionManagerLite.recoverListenerRegistered_ = true;
+    sessionManagerLite.currentWMSUserId_ = 100;
+    sessionManagerLite.currentScreenId_ = 0;
+    sessionManagerLite.isWMSConnected_ = true;
+    auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
+    auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: OnUserSwitch
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnUserSwitch, Function | SmallTest | Level2)
+{
+    SessionManagerLite sessionManagerLite;
+    sessionManagerLite.userSwitchCallbackFunc_ = nullptr;
+    sessionManagerLite.OnUserSwitch(nullptr);
+
+    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
+    ASSERT_NE(nullptr, sessionManagerService);
+    sessionManagerLite.RegisterUserSwitchListener([]() {});
+    sessionManagerLite.OnUserSwitch(sessionManagerService);
 }
 }
 }
