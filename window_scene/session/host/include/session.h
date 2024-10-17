@@ -304,7 +304,6 @@ public:
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
-    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
