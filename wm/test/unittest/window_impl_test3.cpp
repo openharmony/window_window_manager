@@ -1352,6 +1352,8 @@ HWTEST_F(WindowImplTest3, SetSnapshotSkip, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillRepeatedly(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetSnapshotSkip(true));
+    window->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(true));
 }
 
 /**
