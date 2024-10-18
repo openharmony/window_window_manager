@@ -1882,7 +1882,7 @@ napi_value JsSceneSession::NotifyOccludeChange(napi_env env, napi_callback_info 
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnNotifyOccludeChange(env, info) : nullptr;
+    return (me != nullptr) ? me->OnNotifyKeepScreenOnWithOcclusion(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
@@ -4263,7 +4263,7 @@ napi_value JsSceneSession::OnSetPiPControlEvent(napi_env env, napi_callback_info
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnNotifyOccludeChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnNotifyKeepScreenOnWithOcclusion(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
@@ -4283,6 +4283,7 @@ napi_value JsSceneSession::OnNotifyOccludeChange(napi_env env, napi_callback_inf
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
+    TLOGE(WmsLogTag::WMS_PIP, "[NAPI]persistId:%{public}d, occluded:%{public}d", persistentId_, occluded);
     SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
     return NapiGetUndefined(env);
 }
