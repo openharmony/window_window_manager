@@ -894,7 +894,7 @@ int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(Message
 int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t mainWinId = 0;
-    if (!data.ReadInt32(mainWinId)) {
+    if (!data.ReadUint32(mainWinId)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
         return ERR_INVALID_DATA;
     }
