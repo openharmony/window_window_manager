@@ -10571,17 +10571,20 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         }
         MainWindowInfo info;
         auto abilityInfo = session->GetSessionInfo().abilityInfo;
-        if (abilityInfo == nullptr) {
-            TLOGW(WmsLogTag::WMS_MAIN, "Session id:%{public}d abilityInfo is null.", session->GetPersistentId());
-            continue;
-        }
         info.pid_ = session->GetCallingPid();
         info.bundleName_ = session->GetSessionInfo().bundleName_;
         info.persistentId_ = session->GetPersistentId();
-        info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
-        TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info, Session id:%{public}d, bundleName:%{public}s, "
-            "bundleType:%{public}d", session->GetPersistentId(), info.bundleName_.c_str(), info.bundleType_);
-        infos.push_back(info);
+        if (IsAtomicServiceFreeInstall(session->GetSessionInfo())) {
+            TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}d is atomicServiceInstall", session->GetPersistentId());
+            info.bundleType_ = static_cast<int32_t>(AppExecFwk::BundleType::ATOMIC_SERVICE);
+            infos.push_back(info);
+        } else if (abilityInfo != nullptr) {
+            info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
+            infos.push_back(info);
+            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d,"
+                "bundleName:%{public}s, bundleType:%{public}d", session->GetPersistentId(),
+                info.bundleName_.c_str(), info.bundleType_);
+        }
     }
     return WMError::WM_OK;
 }
