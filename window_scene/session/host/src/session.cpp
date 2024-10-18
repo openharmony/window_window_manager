@@ -277,6 +277,11 @@ void Session::SetScreenId(uint64_t screenId)
     }
 }
 
+void Session::SetScreenIdOnServer(uint64_t screenId)
+{
+    sessionInfo_.screenId_ = screenId;
+}
+
 const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
