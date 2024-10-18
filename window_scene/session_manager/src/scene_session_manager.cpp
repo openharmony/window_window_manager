@@ -23,9 +23,9 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include <hitrace_meter.h>
+#include "ffrt_inner.h"
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
-#include "ffrt_inner.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -257,7 +257,7 @@ void SceneSessionManager::Init()
     taskScheduler_->SetExportHandler(eventHandler_);
 
     ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
-    WLOGI("FFRT user interactive qos max thread number = %{public}d, retcode = %{public}d",
+    TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
     listenerController_ = std::make_shared<SessionListenerController>();
