@@ -27,9 +27,6 @@
 #include "input_event.h"
 #include <pointer_event.h>
 #include "ui/rs_surface_node.h"
-#ifdef POWER_MANAGER_ENABLE
-#include <power_mgr_client.h>
-#endif
 
 using namespace testing;
 using namespace testing::ext;
@@ -1216,41 +1213,6 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->property_ = property;
     ASSERT_EQ(sceneSession->SetPiPControlEvent(controlType, status), WSError::WS_OK);
-}
-
-/*
- * @tc.name: SetOccluded
- * @tc.desc:  * @tc.name: SetOccluded
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, SetOccluded, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetOccluded";
-    info.bundleName_ = "SetOccluded";
-    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    auto property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    WSError res = sceneSession->SetOccluded(true);
-    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_TYPE);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->keepScreenLock_ = nullptr;
-    res = sceneSession->SetOccluded(true);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-
-    sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(
-        sceneSession->GetWindowName(), PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);;
-    res = sceneSession->SetOccluded(true);
-    ASSERT_EQ(res, WSError::WS_OK);
-    res = sceneSession->SetOccluded(false);
-    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**

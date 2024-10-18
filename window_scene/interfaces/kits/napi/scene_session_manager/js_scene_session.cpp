@@ -4283,7 +4283,7 @@ napi_value JsSceneSession::OnNotifyOccludeChange(napi_env env, napi_callback_inf
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetOccluded(occluded);
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
     return NapiGetUndefined(env);
 }
 
