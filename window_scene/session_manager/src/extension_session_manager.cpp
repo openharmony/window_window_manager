@@ -229,6 +229,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
         if (!extSessionInfo) {
             return;
         }
+        AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
     };
     taskScheduler_->PostAsyncTask(task, __func__);
