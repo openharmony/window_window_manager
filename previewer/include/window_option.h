@@ -393,17 +393,20 @@ public:
     bool GetWindowTopmost() const;
 
     /**
-     * @brief Set whether this window is a sub window of the UIExtension.
+     * @brief Set whether this window is a sub window of any level of UIExtension.
      *
-     * @return isUIExtensionSubWindowFlag.
+     * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
+     *                            false - is not any sub window of UIExtension.
     */
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
+
     /**
-     * @brief Get IsUIExtensionSubWindowFlag of window.
+     * @brief Get whether this window is a sub window of any level of UIExtension.
      *
-     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     * @return true - is a sub window of any level of UIExtension,
+     *         false - is not a sub window of any level of UIExtension.
      */
-    bool GetIsUIExtensionSubWindowFlag() const;
+    bool GetIsUIExtAnySubWindow() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };

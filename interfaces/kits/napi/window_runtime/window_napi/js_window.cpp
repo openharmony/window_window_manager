@@ -2518,11 +2518,9 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     bool isDockHoverShown = true;
     if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     const char* const funcName = __func__;
     NapiAsyncTask::CompleteCallback complete =
@@ -6672,14 +6670,14 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RequestFocusByClient(isFocused));
-        TLOGI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
+        TLOGNI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
+            window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {

@@ -80,7 +80,7 @@ WSError SceneSessionManagerLite::GetSessionInfoByContinueSessionId(
     return SceneSessionManager::GetInstance().GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo);
 }
 
-WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("in");
     return SceneSessionManager::GetInstance().RegisterSessionListener(listener);
@@ -262,7 +262,7 @@ WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName
     return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
 }
 
-WMError SceneSessionManagerLite::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
 }

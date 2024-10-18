@@ -226,8 +226,8 @@ SceneSessionManager::~SceneSessionManager()
 void SceneSessionManager::Init()
 {
     auto deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    bool isScbCoreEnabled = (deviceType == "phone" || deviceType == "2in1" || deviceType == "tablet") &&
-        system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    bool isScbCoreEnabled = (deviceType == "phone" || deviceType == "2in1" || deviceType == "tablet" ||
+        deviceType == "wearable") && system::GetParameter("persist.window.scbcore.enable", "1") == "1";
     Session::SetScbCoreEnabled(isScbCoreEnabled);
 
     constexpr uint64_t interval = 5 * 1000; // 5 second
@@ -273,7 +273,7 @@ void SceneSessionManager::Init()
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
-    if (systemConfig_.IsPcWindow()) {
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
@@ -572,7 +572,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
             continue;
         }
         bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
-            property->GetExtensionFlag();
+            property->GetIsUIExtFirstSubWindow();
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) || isUiExtSubWindow) {
             sceneSession->SwitchFreeMultiWindow(enable);
         }
@@ -750,8 +750,8 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
             TLOGI(WmsLogTag::WMS_RECOVER, "persistentId=%{public}d", persistentId);
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             visibleWindowCountMap_.erase(sceneSession->GetCallingPid());
-            EraseSceneSessionAndMarkDirty(persistentId);
-            if (systemConfig_.IsPcWindow() &&
+            EraseSceneSessionAndMarkDirtyLockFree(persistentId);
+            if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
                 MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
             }
@@ -805,7 +805,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             TLOGI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId = %{public}d", sessionId);
             sceneSession->NotifySessionExceptionInner(scnSessionInfo, false);
         }
-        removeFailRecoveredSession();
+        RemoveFailRecoveredSession();
     };
     return taskScheduler_->PostAsyncTask(task, "UpdateSessionInfoBySCB");
 }
@@ -1557,7 +1557,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        if (systemConfig_.IsPcWindow() && WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
+        if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
+            WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
@@ -1583,10 +1584,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-        }
-        if (systemConfig_.IsPcWindow() &&
-            MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
-            MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
+            if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
+                MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
+                MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
+            }
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
@@ -2109,7 +2110,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             }
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-                EraseSceneSessionAndMarkDirty(dialog->GetPersistentId());
+                EraseSceneSessionAndMarkDirtyLockFree(dialog->GetPersistentId());
                 systemTopSceneSessionMap_.erase(dialog->GetPersistentId());
                 nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
@@ -2154,10 +2155,10 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    EraseSceneSessionAndMarkDirty(persistentId);
+    EraseSceneSessionAndMarkDirtyLockFree(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
-    if (systemConfig_.IsPcWindow() &&
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
         MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     }
@@ -2167,11 +2168,15 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
  * if visible session is erased, mark dirty
  * lock-free
  */
-void SceneSessionManager::EraseSceneSessionAndMarkDirty(int32_t persistentId)
+void SceneSessionManager::EraseSceneSessionAndMarkDirtyLockFree(int32_t persistentId)
 {
     // get scene session lock-free
     auto iter = sceneSessionMap_.find(persistentId);
-    sptr<SceneSession> sceneSession = iter != sceneSessionMap_.end() ? iter->second : nullptr;
+    if (iter == sceneSessionMap_.end()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "id: %{public}d not exist", persistentId);
+        return;
+    }
+    sptr<SceneSession> sceneSession = iter->second;
 
     if (sceneSession != nullptr && sceneSession->IsVisible()) {
         sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
@@ -2352,7 +2357,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
-        property->GetExtensionFlag() && property->GetIsUIExtensionAbilityProcess() &&
+        property->GetIsUIExtFirstSubWindow() && property->GetIsUIExtensionAbilityProcess() &&
         SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         if (extensionParentSession == nullptr) {
@@ -2977,19 +2982,18 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
 {
     auto task = [this, persistentId]() {
-        int32_t callingSessionId = INVALID_SESSION_ID;
+        int32_t callingSessionId = INVALID_WINDOW_ID;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession != nullptr && sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            callingSessionId = static_cast<int32_t>(sceneSession->GetCallingSessionId());
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
+                persistentId, callingSessionId);
+        }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
-            auto sceneSession = item.second;
+            sceneSession = item.second;
             if (sceneSession == nullptr) {
                 continue;
-            }
-            auto sessionProperty = sceneSession->GetSessionProperty();
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-                sessionProperty != nullptr) {
-                callingSessionId = static_cast<int32_t>(sessionProperty->GetCallingSessionId());
-                TLOGI(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
-                    persistentId, callingSessionId);
             }
             if (!(sceneSession->IsVisible() ||
                 sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
@@ -3060,7 +3064,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        EraseSceneSessionAndMarkDirty(persistentId);
+        EraseSceneSessionAndMarkDirtyLockFree(persistentId);
         systemTopSceneSessionMap_.erase(persistentId);
         nonSystemFloatSceneSessionMap_.erase(persistentId);
         UnregisterCreateSubSessionListener(persistentId);
@@ -3123,7 +3127,7 @@ void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSes
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+    if (sessionProperty && sessionProperty->GetIsUIExtFirstSubWindow() &&
         !sessionProperty->GetIsUIExtensionAbilityProcess()) {
         sceneSession->NotifyDestroy();
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->
@@ -3195,7 +3199,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         }
         currentUserId_ = userId;
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-        if (systemConfig_.IsPcWindow()) {
+        if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
             MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
         }
         RegisterSecSurfaceInfoListener();
@@ -3267,7 +3271,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-            if (systemConfig_.IsPcWindow()) {
+            if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
                 MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
             }
             // notify screenSessionManager to recover current user
@@ -4391,6 +4395,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     oss << "Orientation: " << static_cast<uint32_t>(session->GetRequestedOrientation()) << std::endl;
     oss << "FirstFrameCallbackCalled: " << isFirstFrameAvailable << std::endl;
     oss << "IsVisible: " << isVisible << std::endl;
+    oss << "isRSVisible: " << (session->GetRSVisible() ? "true" : "false") << std::endl;
     oss << "Focusable: "  << focusable << std::endl;
     oss << "DecoStatus: "  << decoStatus << std::endl;
     oss << "isPrivacyMode: "  << isPrivacyMode << std::endl;
@@ -8174,8 +8179,7 @@ void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr.");
             return;
         }
-        if (keyboardSession->GetSessionProperty() == nullptr ||
-            keyboardSession->GetSessionProperty()->GetCallingSessionId() != static_cast<uint32_t>(persistentId)) {
+        if (keyboardSession->GetCallingSessionId() != static_cast<uint32_t>(persistentId)) {
             return;
         }
 
@@ -8993,14 +8997,14 @@ WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
+void DisplayChangeListener::OnImmersiveStateChange(ScreenId screenId, bool& immersive)
 {
-    immersive = SceneSessionManager::GetInstance().GetImmersiveState();
+    immersive = SceneSessionManager::GetInstance().GetImmersiveState(screenId);
 }
 
-bool SceneSessionManager::GetImmersiveState()
+bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
 {
-    auto task = [this] {
+    auto task = [this, screenId] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
             auto sceneSession = item->second;
@@ -9021,6 +9025,9 @@ bool SceneSessionManager::GetImmersiveState()
             auto property = sceneSession->GetSessionProperty();
             if (property == nullptr) {
                 WLOGFE("Property is nullptr");
+                continue;
+            }
+            if (property->GetDisplayId() != screenId) {
                 continue;
             }
             auto sysBarProperty = property->GetSystemBarProperty();
@@ -10264,7 +10271,7 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
         WindowUpdateType::WINDOW_UPDATE_ALL);
 }
 
-void SceneSessionManager::removeFailRecoveredSession()
+void SceneSessionManager::RemoveFailRecoveredSession()
 {
     for (const auto& persistentId : failRecoveredPersistentIdSet_) {
         auto sceneSession = GetSceneSession(persistentId);
@@ -11085,7 +11092,7 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
-WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     if (!SessionPermission::IsSystemServiceCalling()) {
         TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
@@ -11095,8 +11102,7 @@ WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int
     auto task = [this, persistentId, &hostWindowId, where]() {
         hostWindowId = INVALID_WINDOW_ID;
         sptr<Session> session = GetSceneSession(persistentId);
-        while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
-        {
+        while (session && SessionHelper::IsSubWindow(session->GetWindowType())) {
             session = session->GetParentSession();
         }
         if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
@@ -11111,7 +11117,7 @@ WMError SceneSessionManager::GetRootMainWindowId(const int32_t persistentId, int
 
 int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    if (systemConfig_.IsPcWindow()) {
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
     } else {
         return 0;
@@ -11120,7 +11126,7 @@ int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
 
 int32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
 {
-    if (systemConfig_.IsPcWindow()) {
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         return MultiInstanceManager::GetInstance().GetInstanceCount(bundleName);
     } else {
         return 0;
@@ -11129,7 +11135,7 @@ int32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
 
 std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleName)
 {
-    if (systemConfig_.IsPcWindow()) {
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         return MultiInstanceManager::GetInstance().GetLastInstanceKey(bundleName);
     } else {
         return "";
@@ -11138,7 +11144,7 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
 
 void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
 {
-    if (systemConfig_.IsPcWindow()) {
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
     }
 }

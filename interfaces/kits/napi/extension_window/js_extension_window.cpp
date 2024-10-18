@@ -76,6 +76,8 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName,
         JsExtensionWindow::CreateSubWindowWithOptions);
     BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsExtensionWindow::SetWaterMarkFlag);
+    BindNativeFunction(env, objValue, "hidePrivacyContentForHost", moduleName,
+                       JsExtensionWindow::HidePrivacyContentForHost);
 
     return objValue;
 }
@@ -170,6 +172,13 @@ napi_value JsExtensionWindow::SetWaterMarkFlag(napi_env env, napi_callback_info 
     TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMark is called");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::HidePrivacyContentForHost(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "enter");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnHidePrivacyContentForHost(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::LoadContent(napi_env env, napi_callback_info info)
@@ -837,6 +846,44 @@ napi_value JsExtensionWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_inf
     return NapiGetUndefined(env);
 }
 
+napi_value JsExtensionWindow::OnHidePrivacyContentForHost(napi_env env, napi_callback_info info)
+{
+    if (extensionWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "extension window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
+    if (windowImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    bool needHide = false;
+    if (!ConvertFromJsValue(env, argv[0], needHide)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to bool");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->HidePrivacyContentForHost(needHide));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+
+    TLOGI(WmsLogTag::WMS_UIEXT, "finished, window [%{public}u, %{public}s], needHide:%{public}u.",
+          windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), needHide);
+
+    return NapiGetUndefined(env);
+}
+
 napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "GetProperties is called");
@@ -900,7 +947,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         windowOption->SetOnlySupportSceneBoard(true);
-        windowOption->SetExtensionTag(true);
+        windowOption->SetIsUIExtFirstSubWindow(true);
         auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
         if (window == nullptr) {
             task.Reject(env, CreateJsError(env,

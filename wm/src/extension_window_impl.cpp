@@ -57,5 +57,12 @@ bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
     TLOGI(WmsLogTag::WMS_UIEXT, "in");
     return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
 }
+
+WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "enter");
+    return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
+}
+
 } // namespace Rosen
 } // namespace OHOS
