@@ -524,7 +524,7 @@ HWTEST_F(WindowSessionImplTest4, SetUIContentInner, Function | SmallTest | Level
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetUIContentInner");
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -835,7 +835,7 @@ HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NapiSetUIContent");
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);

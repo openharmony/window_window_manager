@@ -572,7 +572,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
             continue;
         }
         bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
-            property->GetExtensionFlag();
+            property->GetIsUIExtFirstSubWindow();
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) || isUiExtSubWindow) {
             sceneSession->SwitchFreeMultiWindow(enable);
         }
@@ -2357,7 +2357,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
-        property->GetExtensionFlag() && property->GetIsUIExtensionAbilityProcess() &&
+        property->GetIsUIExtFirstSubWindow() && property->GetIsUIExtensionAbilityProcess() &&
         SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         if (extensionParentSession == nullptr) {
@@ -3127,7 +3127,7 @@ void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSes
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+    if (sessionProperty && sessionProperty->GetIsUIExtFirstSubWindow() &&
         !sessionProperty->GetIsUIExtensionAbilityProcess()) {
         sceneSession->NotifyDestroy();
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->

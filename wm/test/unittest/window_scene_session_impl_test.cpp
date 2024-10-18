@@ -204,7 +204,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession03");
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
     
