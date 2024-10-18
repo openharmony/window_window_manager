@@ -338,6 +338,32 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
     return ret;
 }
 
+WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
+{
+    auto persistentId = GetPersistentId();
+    std::stringstream ss;
+    ss << "ID: " << persistentId << ", needHide: " << needHide;
+
+    if (surfaceNode_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    // Let rs guarantee the security and permissions of the interface
+    auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(),
+          errCode);
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    } else { // notify Render Service ok
+        TLOGI(WmsLogTag::WMS_UIEXT, "finished, %{public}s", ss.str().c_str());
+    }
+
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {

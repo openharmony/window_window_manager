@@ -32,6 +32,7 @@ public:
     sptr<Window> GetWindow() override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
+    WMError HidePrivacyContentForHost(bool needHide) override;
     
 private:
     sptr<Window> windowExtensionSessionImpl_;
