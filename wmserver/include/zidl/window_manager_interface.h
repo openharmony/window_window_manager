@@ -252,7 +252,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
+    virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
 };
 }
 }

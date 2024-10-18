@@ -2444,7 +2444,7 @@ WMError SceneSessionManagerProxy::GetDisplayIdByPersistentId(int32_t persistentI
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFreeMultiWindowMode)
+WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2464,9 +2464,9 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFr
         TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    bool replyIsPcOrPadFreeMultiWindowMode = false;
-    if (!reply.ReadBool(replyIsPcOrPadFreeMultiWindowMode)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Read replyIsPcOrPadFreeMultiWindowMode failed");
+    bool repliedValue = false;
+    if (!reply.ReadBool(repliedValue)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read isPcOrPadFreeMultiWindowMode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -2474,7 +2474,7 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool &isPcOrPadFr
         TLOGE(WmsLogTag::WMS_SUB, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    isPcOrPadFreeMultiWindowMode = replyIsPcOrPadFreeMultiWindowMode;
+    isPcOrPadFreeMultiWindowMode = repliedValue;
     return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

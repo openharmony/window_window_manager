@@ -54,7 +54,7 @@ WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
 
 bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "IsPcOrPadFreeMultiWindowMode is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "in is called");
     return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
 }
 } // namespace Rosen

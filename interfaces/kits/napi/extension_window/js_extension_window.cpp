@@ -891,20 +891,10 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     NapiAsyncTask::CompleteCallback complete =
         [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
             windowOption = option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-        if (extensionWindow == nullptr) {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
-            return;
-        }
         auto extWindow = extensionWindow->GetWindow();
         if (extWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
-            return;
-        }
-        if (windowOption == nullptr) {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
             return;
         }
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);

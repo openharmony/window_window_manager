@@ -670,12 +670,6 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     NapiAsyncTask::CompleteCallback complete =
         [where, windowScene, windowName = std::move(windowName), option]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-        if (option == nullptr) {
-            TLOGE(WmsLogTag::WMS_SUB, "option is null");
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "option is null"));
-            return;
-        }
         option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         option->SetOnlySupportSceneBoard(true);
