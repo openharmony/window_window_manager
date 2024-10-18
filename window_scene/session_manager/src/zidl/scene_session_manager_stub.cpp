@@ -1227,7 +1227,7 @@ int SceneSessionManagerStub::HandleGetDisplayIdByPersistentId(MessageParcel &dat
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcOrPadFreeMultiWindowMode = false;
     WMError errCode = IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
