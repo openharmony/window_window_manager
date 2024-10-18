@@ -123,7 +123,7 @@ HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTe
     ASSERT_NE(nullptr, windowSceneSession);
     windowSceneSession->property_->SetPersistentId(1112);
     windowSceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    windowSceneSession->property_->SetExtensionFlag(true);
+    windowSceneSession->property_->SetIsUIExtFirstSubWindow(true);
 
     std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
