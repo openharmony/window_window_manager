@@ -2028,6 +2028,45 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
     sceneSession->SetWindowAnimationFlag(true);
     ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }
+
+/**
+ * @tc.name: SetTitleAndDockHoverShowChangeCallback
+ * @tc.desc: SetTitleAndDockHoverShowChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
+    info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
+        return WSError::WS_OK;
+    };
+    sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnTitleAndDockHoverShowChange
+ * @tc.desc: OnTitleAndDockHoverShowChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
+        return WSError::WS_OK;
+    };
+    sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+    EXPECT_EQ(sceneSession->OnTitleAndDockHoverShowChange(true, true), WSError::WS_OK);
+}
 }
 }
 }

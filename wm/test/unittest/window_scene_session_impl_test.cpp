@@ -1612,24 +1612,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
 }
 
 /*
- * @tc.name: SetLayoutFullScreen02
- * @tc.desc: SetLayoutFullScreen test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowName("SetLayoutFullScreen02");
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-
-    window->hostSession_ = nullptr;
-    window->property_->SetCompatibleModeInPc(true);
-    WMError res = window->SetLayoutFullScreen(false);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
-}
-
-/*
  * @tc.name: SetTitleAndDockHoverShown
  * @tc.desc: SetTitleAndDockHoverShown test
  * @tc.type: FUNC
@@ -1658,6 +1640,24 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | Small
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTitleAndDockHoverShown(true, true));
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
+}
+
+/*
+ * @tc.name: SetLayoutFullScreen02
+ * @tc.desc: SetLayoutFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetLayoutFullScreen02");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+
+    window->hostSession_ = nullptr;
+    window->property_->SetCompatibleModeInPc(true);
+    WMError res = window->SetLayoutFullScreen(false);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 }
 
 /*

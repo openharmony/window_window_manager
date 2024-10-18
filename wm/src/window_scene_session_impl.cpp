@@ -1924,8 +1924,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
-        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(),
-        static_cast<int32_t>(isTitleHoverShown), static_cast<int32_t>(isDockHoverShown));
+        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(), isTitleHoverShown, isDockHoverShown);
     if (WindowHelper::IsSystemWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -1939,13 +1938,12 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     WindowType winType = property_->GetWindowType();
     if (!WindowHelper::IsMainWindow(winType)) {
         TLOGE(WmsLogTag::WMS_IMMS, "window is not main window");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     titleHoverShowEnabled_ = isTitleHoverShown;
     dockHoverShowEnabled_ = isDockHoverShown;
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
-        hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     }
     return WMError::WM_OK;
 }
@@ -2313,11 +2311,11 @@ WMError WindowSceneSessionImpl::Restore()
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!(windowSystemConfig_.IsPcWindow() || property_->GetIsPcAppInPad())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad,The device is not supported");
+        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (property_->GetIsAppSupportPhoneInPc()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc,The device is not supported");
+        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc, not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto hostSession = GetHostSession();
