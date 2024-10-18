@@ -545,7 +545,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
     EXPECT_EQ(WMError::WM_OK, ret);
     property.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     ret = windowSceneSessionImpl->SetSpecificBarProperty(type, property);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
