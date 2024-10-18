@@ -526,7 +526,9 @@ HWTEST_F(WindowSessionTest, OnSessionEvent02, Function | SmallTest | Level2)
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect targetRect_ = { 100, 100, 1000, 1000 };
-    sceneSession->moveDragController_->targetRect_ = targetRect_;
+    sceneSession->moveDragController_->moveDragProperty_.targetRect_ = targetRect_;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_DRAG);
     ASSERT_EQ(result, WSError::WS_OK);
 }
