@@ -1481,7 +1481,7 @@ WSError Session::Clear(bool needStartCaller)
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->isTerminating_ = true;
+        session->isTerminating = true;
         SessionInfo info = session->GetSessionInfo();
         if (session->terminateSessionFuncNew_) {
             session->terminateSessionFuncNew_(info, needStartCaller, false);
