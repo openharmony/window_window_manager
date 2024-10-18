@@ -48,7 +48,13 @@ public:
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
+
+    /*
+     * Window Privacy
+     */
     WMError SetPrivacyMode(bool isPrivacyMode) override;
+    WMError HidePrivacyContentForHost(bool needHide) override;
+
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
