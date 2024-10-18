@@ -2070,6 +2070,17 @@ public:
     }
 
     /**
+     * @brief Hide the display content when snapshot.
+     *
+     * @param needHide bool.
+     * @return WMError
+     */
+    virtual WMError HidePrivacyContentForHost(bool needHide)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.

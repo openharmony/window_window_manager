@@ -257,6 +257,161 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: CacheStartingWindowInfo01
+ * @tc.desc: Cache new starting window info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CacheStartingWindowInfo01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->startingWindowMap_.clear();
+    /**
+     * @tc.steps: step1. Build input parameter.
+     */
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.name = "abilityName";
+    abilityInfo.bundleName = "bundleName";
+    abilityInfo.moduleName = "moduleName";
+    abilityInfo.startWindowBackgroundId = 1;
+    abilityInfo.startWindowIconId = 2;
+    std::string path = "cachedPath";
+    uint32_t bgColor = 0xff000000;
+    /**
+     * @tc.steps: step2. Cache info and check result.
+     */
+    ssm_->CacheStartingWindowInfo(abilityInfo, path, bgColor);
+    auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
+    ASSERT_NE(iter, ssm_->startingWindowMap_.end());
+    auto& infoMap = iter->second;
+    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name);
+    ASSERT_NE(infoIter, infoMap.end());
+    EXPECT_EQ(infoIter->second.startingWindowBackgroundId_, 1);
+    EXPECT_EQ(infoIter->second.startingWindowIconId_, 2);
+    EXPECT_EQ(infoIter->second.startingWindowBackgroundColor_, bgColor);
+    EXPECT_EQ(infoIter->second.startingWindowIconPath_, path);
+}
+
+/**
+ * @tc.name: CacheStartingWindowInfo02
+ * @tc.desc: Execute when info is cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CacheStartingWindowInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->startingWindowMap_.clear();
+    /**
+     * @tc.steps: step1. Build input parameter.
+     */
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.name = "abilityName";
+    abilityInfo.bundleName = "bundleName";
+    abilityInfo.moduleName = "moduleName";
+    abilityInfo.startWindowBackgroundId = 1;
+    abilityInfo.startWindowIconId = 2;
+    std::string path = "cachedPath";
+    uint32_t bgColor = 0xff000000;
+    /**
+     * @tc.steps: step2. Insert one item.
+     */
+    auto key = abilityInfo.moduleName + abilityInfo.name;
+    StartingWindowInfo startingWindowInfo = {
+        .startingWindowBackgroundId_ = 0,
+        .startingWindowIconId_ = 0,
+        .startingWindowBackgroundColor_ = 0x00000000,
+        .startingWindowIconPath_ = "path",
+    };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({abilityInfo.bundleName, startingWindowInfoMap});
+    /**
+     * @tc.steps: step3. Execute and check result.
+     */
+    ssm_->CacheStartingWindowInfo(abilityInfo, path, bgColor);
+    auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
+    ASSERT_NE(iter, ssm_->startingWindowMap_.end());
+    auto& infoMap = iter->second;
+    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name);
+    ASSERT_NE(infoIter, infoMap.end());
+    EXPECT_NE(infoIter->second.startingWindowBackgroundId_, 1);
+    EXPECT_NE(infoIter->second.startingWindowIconId_, 2);
+    EXPECT_NE(infoIter->second.startingWindowBackgroundColor_, bgColor);
+    EXPECT_NE(infoIter->second.startingWindowIconPath_, path);
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: Erase cached info when bundle update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->startingWindowMap_.clear();
+    /**
+     * @tc.steps: step1. Insert item to map.
+     */
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.bundleName_ = "bundleName";
+    uint32_t cachedColor = 0xff000000;
+    std::string cachedPath = "cachedPath";
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    StartingWindowInfo startingWindowInfo = {
+        .startingWindowBackgroundId_ = 0,
+        .startingWindowIconId_ = 0,
+        .startingWindowBackgroundColor_ = cachedColor,
+        .startingWindowIconPath_ = cachedPath,
+    };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
+    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    /**
+     * @tc.steps: step2. On bundle updated and check map.
+     */
+    ssm_->OnBundleUpdated(sessionInfo.bundleName_, 0);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+}
+
+/**
+ * @tc.name: OnConfigurationUpdated
+ * @tc.desc: Clear startingWindowMap when configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->startingWindowMap_.clear();
+    /**
+     * @tc.steps: step1. Insert item to map.
+     */
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "moduleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.bundleName_ = "bundleName";
+    uint32_t cachedColor = 0xff000000;
+    std::string cachedPath = "cachedPath";
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    StartingWindowInfo startingWindowInfo = {
+        .startingWindowBackgroundId_ = 0,
+        .startingWindowIconId_ = 0,
+        .startingWindowBackgroundColor_ = cachedColor,
+        .startingWindowIconPath_ = cachedPath,
+    };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
+    ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+    /**
+     * @tc.steps: step2. On configuration updated and check map.
+     */
+    auto configuration = std::make_shared<AppExecFwk::Configuration>();
+    ssm_->OnConfigurationUpdated(configuration);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->startingWindowMap_.size(), 0);
+}
+
+/**
  * @tc.name: CreateKeyboardPanelSession
  * @tc.desc: CreateKeyboardPanelSession
  * @tc.type: FUNC
@@ -364,23 +519,6 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
     FocusChangeInfo focusInfo;
     ssm_->GetCurrentUserId();
     ssm_->GetFocusWindowInfo(focusInfo);
-}
-
-/**
- * @tc.name: UpdateSecSurfaceInfo
- * @tc.desc: UpdateSecSurfaceInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
-    std::shared_ptr<RSUIExtensionData> secExtData = std::make_shared<RSUIExtensionData>(callbackData);
-    ssm_->currentUserId_ = 101;
-    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
-
-    ssm_->currentUserId_ = 100;
-    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
 }
 
 /**
@@ -618,7 +756,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
-    
+
     ssm_->RequestSessionFocus(1, false, reason);
     ASSERT_EQ(ssm_->focusedSessionId_, 1);
     ssm_->RequestSessionFocus(3, false, reason);
@@ -1358,8 +1496,10 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
 HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<ISessionStage> sessionStage;
-    sptr<IWindowEventChannel> eventChannel;
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(sessionStage, nullptr);
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    ASSERT_NE(eventChannel, nullptr);
     std::shared_ptr<RSSurfaceNode> node = nullptr;
     sptr<ISession> session;
     SystemSessionConfig systemConfig;
@@ -1373,17 +1513,23 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_test5");
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetWindowFlags(123);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
+    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+         systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res); // create main window, property must be nullptr
+    sessionStage = new (std::nothrow) SessionStageMocker();
+
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**
@@ -1602,6 +1748,54 @@ HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | S
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->CheckModalSubWindowPermission(property);
 }
+
+/**
+ * @tc.name: RequestFocusStatusBySCB
+ * @tc.desc: SceneSessionManager request focus status from SCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RequestFocusTest";
+    info.bundleName_ = "RequestFocusTest";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetFocusable(true);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = property;
+    sceneSession->persistentId_ = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    FocusChangeReason reason = FocusChangeReason::FOREGROUND;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+
+    reason = FocusChangeReason::CLICK;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+
+    ssm_->RequestFocusStatusBySCB(1, false, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(ssm_->focusedSessionId_, 1);
+
+    reason = FocusChangeReason::MOVE_UP;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    FocusChangeReason reasonResult = sceneSession->GetPostProcessFocusState().reason_;
+    ASSERT_EQ(reasonResult, FocusChangeReason::MOVE_UP);
+
+    reason = FocusChangeReason::DEFAULT;
+    ssm_->RequestFocusStatusBySCB(1, true, false, reason);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

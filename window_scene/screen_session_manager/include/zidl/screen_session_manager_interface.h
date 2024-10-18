@@ -98,6 +98,8 @@ public:
     virtual bool SetDisplayState(DisplayState state) override { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) override {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() override { return false; }
+    virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) override { return false; }
+    virtual uint32_t GetScreenBrightness(uint64_t screenId) override { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() override { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override { return nullptr; }
     virtual void NotifyDisplayEvent(DisplayEvent event) override {}

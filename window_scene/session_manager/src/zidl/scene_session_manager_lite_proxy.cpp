@@ -187,7 +187,7 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(con
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::RegisterSessionListener");
     MessageParcel data;
@@ -1265,7 +1265,7 @@ WMError SceneSessionManagerLiteProxy::GetCurrentPiPWindowInfo(std::string& bundl
     return errorCode;
 }
 
-WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     MessageParcel data;
     MessageParcel reply;

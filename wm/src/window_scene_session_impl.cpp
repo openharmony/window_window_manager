@@ -1152,7 +1152,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     UpdateTitleButtonVisibility();
     UpdateFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
-        ret = static_cast<WMError>(hostSession->Foreground(property_, true));
+        ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         PreLayoutOnShow(type, displayInfo);
         // Add maintenance logs before the IPC process.
@@ -1223,7 +1223,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (res != WMError::WM_OK) {
             return res;
         }
-        res = static_cast<WMError>(hostSession->Background(true));
+        res = static_cast<WMError>(hostSession->Background(true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
         res = static_cast<WMError>(hostSession->Hide());
     } else {
@@ -1352,7 +1352,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 
     if (WindowHelper::IsMainWindow(GetType())) {
         if (auto hostSession = GetHostSession()) {
-            ret = static_cast<WMError>(hostSession->Disconnect(true));
+            ret = static_cast<WMError>(hostSession->Disconnect(true, identityToken_));
         }
     }
     return ret;
@@ -1481,6 +1481,11 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
 
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1662,6 +1667,11 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1686,6 +1696,11 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto hostSession = GetHostSession();
     if (hostSession == nullptr) {
         WLOGFE("failed, because of nullptr");
@@ -1711,6 +1726,11 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFI("id: %{public}d", GetPersistentId());
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
@@ -1736,6 +1756,11 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto parentId = GetParentId();
     auto currentWindowId = GetWindowId();
 
@@ -1859,9 +1884,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (property_->GetCompatibleModeInPc()) {
+    if ((windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) && property_->GetCompatibleModeInPc()) {
         TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not LayoutFullScreen");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_OK;
     }
 
     bool preStatus = property_->IsLayoutFullScreen();

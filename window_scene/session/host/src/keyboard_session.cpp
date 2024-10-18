@@ -499,7 +499,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr");
         return;
     }
-    uint32_t curSessionId = sessionProperty->GetCallingSessionId();
+    uint32_t curSessionId = GetCallingSessionId();
     // When calling window id changes, restore the old calling session, raise the new calling session.
     if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);
