@@ -231,53 +231,14 @@ public:
     WSError SetFocusedSessionId(int32_t persistentId);
     int32_t GetFocusedSessionId() const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
-
-    /**
-     * @brief request focus status
-     *
-     * This function provides the ability for window to change focus status.
-     *
-     * @param persistentId window ID
-     * @param isFocused is Focused
-     * @param byForeground byForeground
-     * @param reason focus change reason
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
-
-    /**
-     * @brief shift App window focus
-     *
-     * This function provides the ability for applications to shift focus in application.
-     *
-     * @param sourcePersistentId source persistent Id
-     * @param targetPersistentId target persistent Id
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-
-    /**
-     * @brief get the focused window info
-     *
-     * This function provides the ability for other services to get the focused window info.
-     *
-     * @param focusInfo the focused session info
-     */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-
-    /**
-     * @brief get focus session token
-     *
-     * This function provides the ability for other services to get the focused session token.
-     *
-     * @param token  the object of token
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
 
