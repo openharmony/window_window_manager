@@ -183,12 +183,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingSessionId(option->GetCallingWindow());
-    property_->SetExtensionFlag(option->GetExtensionTag());
+    property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
+    property_->SetIsUIExtAnySubWindow(option->GetIsUIExtAnySubWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -553,7 +553,7 @@ void WindowSessionImpl::DestroySubWindow()
 {
     int32_t parentPersistentId = property_->GetParentPersistentId();
     const int32_t persistentId = GetPersistentId();
-    if (property_->GetExtensionFlag() == true) {
+    if (property_->GetIsUIExtFirstSubWindow()) {
         auto extensionWindow = FindExtensionWindowWithContext();
         if (extensionWindow != nullptr) {
             parentPersistentId = extensionWindow->GetPersistentId();
@@ -589,7 +589,7 @@ void WindowSessionImpl::DestroySubWindow()
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetIsUIExtFirstSubWindow();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
                 subWindow->GetPersistentId(), isExtDestroyed);
             auto ret = subWindow->Destroy(isExtDestroyed);
@@ -1198,7 +1198,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT: {
-            if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
+            if (isUIExtensionAbilityProcess_ && property_->GetIsUIExtFirstSubWindow()) {
                 // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
@@ -2892,7 +2892,7 @@ WSError WindowSessionImpl::NotifyDestroy()
             }
         }
     } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_) {
+        if (property_->GetIsUIExtFirstSubWindow() && !isUIExtensionAbilityProcess_) {
             Destroy();
         }
     }

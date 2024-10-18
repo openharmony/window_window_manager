@@ -2032,7 +2032,7 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentSessionByParentId, Function | Sm
     ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetParentPersistentId(0);
     ASSERT_NE(nullptr, windowSession->property_);
-    windowSession->property_->SetExtensionFlag(true);
+    windowSession->property_->SetIsUIExtFirstSubWindow(true);
     EXPECT_FALSE(nullptr != windowSceneSessionImpl->FindParentSessionByParentId(1));
 }
 
