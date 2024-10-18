@@ -441,9 +441,17 @@ int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& rep
 
 int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool isTitleHoverShown = data.ReadBool();
-    bool isDockHoverShown = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown, isDockHoverShown: %{public}d, %{public}d",
+    bool isTitleHoverShown = true;
+    if (!data.ReadBool(isTitleHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isTitleHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isDockHoverShown = true;
+    if (!data.ReadBool(isDockHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isDockHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
