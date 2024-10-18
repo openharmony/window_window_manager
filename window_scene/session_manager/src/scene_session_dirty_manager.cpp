@@ -679,11 +679,11 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     WindowType windowType = windowSessionProperty->GetWindowType();
     bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isNoDialogAndDragEnabledSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
+        !(Rosen::WindowHelper::IsDialogWindow(windowType)) && windowSessionProperty->GetDragEnabled();
     bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isNoDialogSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
-        !(Rosen::WindowHelper::IsDialogWindow(windowType));
     if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogSystemWindow) &&
+        (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogAndDragEnabledSystemWindow) &&
         maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
         (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
             UpdatePointerAreas(sceneSession, pointerChangeAreas);
