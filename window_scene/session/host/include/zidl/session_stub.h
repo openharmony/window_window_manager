@@ -73,8 +73,8 @@ private:
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
-    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);

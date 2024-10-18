@@ -382,16 +382,13 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onRestoreMainWindowFunc_ = nullptr;
+    session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
     NotifyRestoreMainWindowFunc func = []() {
         return;
     };
-    sessionChangeCallback->onRestoreMainWindowFunc_ = func;
+    session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
 
