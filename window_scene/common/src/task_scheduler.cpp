@@ -38,7 +38,7 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 
 void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime)
 {
-    if (!handler_ || (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread())) {
+    if (delayTime == 0 && handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
         return;
@@ -55,7 +55,7 @@ void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t 
 
 void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
 {
-    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
         return;
@@ -72,7 +72,7 @@ void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
 
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
-    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
         return;
@@ -89,9 +89,7 @@ void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delay
 
 void TaskScheduler::RemoveTask(const std::string& name)
 {
-    if (handler_) {
-        handler_->RemoveTask("wms:" + name);
-    }
+    handler_->RemoveTask("wms:" + name);
 }
 
 void TaskScheduler::AddExportTask(std::string taskName, Task task)

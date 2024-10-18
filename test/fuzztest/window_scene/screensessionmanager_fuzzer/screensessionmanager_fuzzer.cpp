@@ -30,7 +30,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManagerFuzzTest"};
 }
 
-using DMMessage = IScreenSessionManager::DisplayManagerMessage;
+using DMMessage = DisplayManagerMessage;
 
 std::pair<sptr<IScreenSessionManager>, sptr<IRemoteObject>> GetProxy()
 {

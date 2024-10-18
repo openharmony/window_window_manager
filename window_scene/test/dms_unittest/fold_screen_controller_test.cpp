@@ -153,7 +153,7 @@ namespace {
      * @tc.desc: test function :GetDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(FoldScreenControllerTest, GetDisplayMode, Function | SmallTest | Level3)
+    HWTEST_F(FoldScreenControllerTest, GetDisplayMode01, Function | SmallTest | Level3)
     {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
@@ -164,17 +164,18 @@ namespace {
     }
 
     /**
-     * @tc.name: IsFoldable
-     * @tc.desc: test function :IsFoldable
+     * @tc.name: GetDisplayMode
+     * @tc.desc: foldScreenPolicy_ is not nullptr
      * @tc.type: FUNC
      */
-    HWTEST_F(FoldScreenControllerTest, IsFoldable, Function | SmallTest | Level3)
+    HWTEST_F(FoldScreenControllerTest, GetDisplayMode02, Function | SmallTest | Level3)
     {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
-        auto ret = fsc_.IsFoldable();
-        ASSERT_EQ(ret, true);
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        auto ret = fsc_.GetDisplayMode();
+        ASSERT_EQ(ret, FoldDisplayMode::UNKNOWN);
     }
 
     /**
@@ -229,7 +230,7 @@ namespace {
      * @tc.desc: test function :GetCurrentFoldCreaseRegion
      * @tc.type: FUNC
      */
-    HWTEST_F(FoldScreenControllerTest, GetCurrentFoldCreaseRegion, Function | SmallTest | Level3)
+    HWTEST_F(FoldScreenControllerTest, GetCurrentFoldCreaseRegion01, Function | SmallTest | Level3)
     {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
@@ -237,6 +238,21 @@ namespace {
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetCurrentFoldCreaseRegion();
         ASSERT_EQ(ret, nullptr);
+    }
+
+    /**
+     * @tc.name: GetCurrentFoldCreaseRegion
+     * @tc.desc: test function :GetCurrentFoldCreaseRegion
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetCurrentFoldCreaseRegion02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        auto ret = fsc_.GetCurrentFoldCreaseRegion();
+        ASSERT_EQ(ret, fsc_.foldScreenPolicy_->GetCurrentFoldCreaseRegion());
     }
 
     /**
