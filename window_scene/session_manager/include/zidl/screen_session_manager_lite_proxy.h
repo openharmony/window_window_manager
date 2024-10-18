@@ -36,6 +36,7 @@ public:
         DisplayManagerAgentType type) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
+    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
     bool IsFoldable() override;
     FoldStatus GetFoldStatus() override;
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
