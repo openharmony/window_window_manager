@@ -176,7 +176,7 @@ napi_value JsExtensionWindow::SetWaterMarkFlag(napi_env env, napi_callback_info 
 
 napi_value JsExtensionWindow::HidePrivacyContentForHost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "enter");
+    TLOGD(WmsLogTag::WMS_UIEXT, "enter");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnHidePrivacyContentForHost(env, info) : nullptr;
 }
