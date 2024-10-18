@@ -1249,6 +1249,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         isIgnoreSafeAreaNeedNotify_ = false;
     }
 
+    // UIContent may be nullptr on setting system bar properties, need to set menubar color on UIContent init.
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        uiContent->SetStatusBarItemColor(property.contentColor_);
+    }
+
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
