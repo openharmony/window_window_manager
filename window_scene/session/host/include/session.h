@@ -561,7 +561,6 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
-
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -580,6 +579,7 @@ protected:
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
+    bool isDirty_ = false;
     std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
@@ -617,7 +617,6 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     int32_t GetRotateAnimationDuration();
-
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
