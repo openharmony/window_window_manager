@@ -459,7 +459,7 @@ void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)
     }
 }
 
-void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
+void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(ScreenId screenId, bool& immersive)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -472,6 +472,10 @@ void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
         return;
     }
     if (remote->SendRequest(

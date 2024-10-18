@@ -135,6 +135,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(TryToCancelScreenOff());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            uint32_t level = data.ReadUint64();
+            reply.WriteBool(SetScreenBrightness(screenId, level));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            reply.WriteUint32(GetScreenBrightness(screenId));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
@@ -571,8 +582,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool immersive = false;
-            DMError ret = HasImmersiveWindow(immersive);
+            DMError ret = HasImmersiveWindow(screenId, immersive);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             reply.WriteBool(immersive);
             break;

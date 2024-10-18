@@ -51,7 +51,7 @@ public:
     virtual WMError CloseTargetFloatWindow(const std::string& bundleName) = 0;
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName) = 0;
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName) = 0;
-    virtual WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) = 0;
+    virtual WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
 };
 }

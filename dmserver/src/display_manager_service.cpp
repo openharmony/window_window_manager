@@ -492,6 +492,19 @@ bool DisplayManagerService::TryToCancelScreenOff()
     return false;
 }
 
+bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t level)
+{
+    RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
+    return true;
+}
+
+uint32_t DisplayManagerService::GetScreenBrightness(uint64_t screenId)
+{
+    uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
+    TLOGI(WmsLogTag::DMS, "GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    return level;
+}
+
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {

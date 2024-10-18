@@ -282,7 +282,7 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2
 HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
 {
     bool immersive = false;
-    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(0u, immersive);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {

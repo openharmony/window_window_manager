@@ -275,10 +275,10 @@ void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
     }
 }
 
-void ScreenSessionManagerClient::OnImmersiveStateChanged(bool& immersive)
+void ScreenSessionManagerClient::OnImmersiveStateChanged(ScreenId screenId, bool& immersive)
 {
     if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnImmersiveStateChange(immersive);
+        displayChangeListener_->OnImmersiveStateChange(screenId, immersive);
     }
 }
 

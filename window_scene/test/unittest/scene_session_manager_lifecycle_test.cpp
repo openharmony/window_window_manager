@@ -850,11 +850,11 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall03, Function
 }
 
 /**
- * @tc.name: removeFailRecoveredSession
- * @tc.desc: removeFailRecoveredSession
+ * @tc.name: RemoveFailRecoveredSession
+ * @tc.desc: RemoveFailRecoveredSession
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest, RemoveFailRecoveredSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -869,7 +869,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function 
     ssm_->failRecoveredPersistentIdSet_.insert(1);
     ssm_->failRecoveredPersistentIdSet_.insert(2);
     ssm_->failRecoveredPersistentIdSet_.insert(3);
-    ssm_->removeFailRecoveredSession();
+    ssm_->RemoveFailRecoveredSession();
     EXPECT_EQ(ssm_->failRecoveredPersistentIdSet_.size(), 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }

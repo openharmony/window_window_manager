@@ -250,6 +250,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest09, Function | Small
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    data.WriteUint64(0u);
 
     uint32_t code = static_cast<uint32_t>(
         IScreenSessionManagerClient::ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED);

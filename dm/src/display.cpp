@@ -208,7 +208,7 @@ sptr<CutoutInfo> Display::GetCutoutInfo() const
 
 DMError Display::HasImmersiveWindow(bool& immersive)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(GetScreenId(), immersive);
 }
 
 DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const
