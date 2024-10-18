@@ -62,6 +62,7 @@ namespace {
 HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("RecoverAndReconnectSceneSession");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
@@ -72,12 +73,14 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
 
     std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, context);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     context->SetAbilityInfo(abilityInfo);
     sptr<IRemoteObject> sessionToken = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, sessionToken);
     context->SetToken(sessionToken);
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     ASSERT_NE(nullptr, applicationInfo);
@@ -89,8 +92,8 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
     context->stageContext_ = stageContent;
 
     struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> windowSceneSessionSurfaceNode_ = RSSurfaceNode::Create(config);
-    windowSceneSession->surfaceNode_ = windowSceneSessionSurfaceNode_;
+    std::shared_ptr<RSSurfaceNode> windowSceneSessionSurfaceNode = RSSurfaceNode::Create(config);
+    windowSceneSession->surfaceNode_ = windowSceneSessionSurfaceNode;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(context, session));
 
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
@@ -114,6 +117,7 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
 HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("RecoverAndConnectSpecificSession");
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
@@ -123,15 +127,17 @@ HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTe
 
     std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
-
+    ASSERT_NE(nullptr, context);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     sptr<IRemoteObject> sessionToken = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(nullptr, sessionToken);
     context->SetToken(sessionToken);
     struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> windowSceneSessionSurfaceNode_ = RSSurfaceNode::Create(config);
-    windowSceneSession->surfaceNode_ = windowSceneSessionSurfaceNode_;
+    std::shared_ptr<RSSurfaceNode> windowSceneSessionSurfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, windowSceneSessionSurfaceNode);
+    windowSceneSession->surfaceNode_ = windowSceneSessionSurfaceNode;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(context, session));
 
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
