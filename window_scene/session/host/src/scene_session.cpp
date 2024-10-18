@@ -2511,6 +2511,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    auto property = GetSessionProperty();
     if (surfaceNode_ && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -2532,8 +2533,9 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode_) {
-        TLOGD(WmsLogTag::WMS_SYSTEM, "systemwindow setSurfaceBounds");
+    } else if (WindowHelper::IsSystemWindow(GetWindowType()) &&
+        property && property->GetDragEnabled() && surfaceNode_) {
+        TLOGD(WmsLogTag::WMS_SYSTEM, "drag enabled systemwindow setSurfaceBounds");
         surfaceNode_->SetGlobalPositionEnabled(isGlobal);
         surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
