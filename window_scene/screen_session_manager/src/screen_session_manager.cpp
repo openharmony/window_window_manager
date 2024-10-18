@@ -5295,7 +5295,11 @@ void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyAvailableAreaChanged(area);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER)) {
+            agent->NotifyAvailableAreaChanged(area);
+        }
     }
 }
 
