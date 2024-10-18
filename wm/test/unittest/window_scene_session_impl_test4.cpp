@@ -1174,7 +1174,7 @@ HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadCapabilityEnabled, Function | Sma
     EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
-    window->property_->SetExtensionFlag(true);
+    window->property_->SetIsUIExtFirstSubWindow(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
