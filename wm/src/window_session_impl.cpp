@@ -1546,6 +1546,9 @@ WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
 
 bool WindowSessionImpl::IsFloatingWindowAppType() const
 {
+    if (IsWindowSessionInvalid()) {
+        return false;
+    }
     return property_ != nullptr && property_->IsFloatingWindowAppType();
 }
 
