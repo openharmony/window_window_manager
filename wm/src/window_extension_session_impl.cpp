@@ -358,7 +358,6 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     } else { // notify Render Service ok
-        TLOGI(WmsLogTag::WMS_UIEXT, "finished, %{public}s", ss.str().c_str());
     }
 
     return WMError::WM_OK;
