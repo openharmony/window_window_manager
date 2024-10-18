@@ -122,7 +122,7 @@ private:
     static napi_value SetExitSplitOnBackground(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
-    static napi_value NotifyOccludeChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -180,7 +180,7 @@ private:
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
-    napi_value OnNotifyKeepScreenOnWithOcclusion(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
