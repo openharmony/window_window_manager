@@ -258,7 +258,7 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     if (!windowSystemConfig_.IsPadWindow()) {
         return windowSystemConfig_.IsPcWindow();
     }
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetIsUIExtFirstSubWindow();
     if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
         return IsFreeMultiWindowMode();
     }
