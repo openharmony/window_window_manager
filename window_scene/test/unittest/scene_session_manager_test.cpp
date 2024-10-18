@@ -1914,6 +1914,82 @@ HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function |
     auto result = ssm_->ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(result, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: UpdateAppHookDisplayInfo001
+ * @tc.desc: Test delete HookDisplayInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo001, Function | SmallTest | Level3)
+{
+    int32_t uid = 0;
+    bool enable = false;
+    HookInfo hookInfo;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 100;
+    hookInfo.density_ = 2.25;
+    hookInfo.rotation_ = 0;
+    hookInfo.enableHookRotation_ = false;
+    auto result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+
+    uid = 20221524;
+    hookInfo.width_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+
+    hookInfo.height_ = 100;
+    hookInfo.density_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+    
+    hookInfo.density_ = 2.25;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdateAppHookDisplayInfo002
+ * @tc.desc: Test add HookDisplayInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo002, Function | SmallTest | Level3)
+{
+    int32_t uid = 0;
+    bool enable = true;
+    HookInfo hookInfo;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 100;
+    hookInfo.density_ = 2.25;
+    hookInfo.rotation_ = 0;
+    hookInfo.enableHookRotation_ = false;
+    auto result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    uid = 20221524;
+    hookInfo.width_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    hookInfo.height_ = 100;
+    hookInfo.density_ = 0;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    
+    hookInfo.density_ = 2.25;
+    result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
