@@ -319,7 +319,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsSceneSession::SetWaterMarkFlag);
     BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     BindNativeFunction(env, objValue, "setPiPControlEvent", moduleName, JsSceneSession::SetPiPControlEvent);
-    BindNativeFunction(env, objValue, "notifyOccludeChange", moduleName, JsSceneSession::NotifyOccludeChange);
+    BindNativeFunction(env, objValue, "notifyPipOcclusionChange", moduleName, JsSceneSession::NotifyPipOcclusionChange);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
@@ -1878,11 +1878,11 @@ napi_value JsSceneSession::SetPiPControlEvent(napi_env env, napi_callback_info i
     return (me != nullptr) ? me->OnSetPiPControlEvent(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::NotifyOccludeChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::NotifyPipOcclusionChange(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnNotifyKeepScreenOnWithOcclusion(env, info) : nullptr;
+    return (me != nullptr) ? me->OnNotifyPipOcclusionChange(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
@@ -4263,7 +4263,7 @@ napi_value JsSceneSession::OnSetPiPControlEvent(napi_env env, napi_callback_info
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnNotifyKeepScreenOnWithOcclusion(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
@@ -4284,6 +4284,7 @@ napi_value JsSceneSession::OnNotifyKeepScreenOnWithOcclusion(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     TLOGE(WmsLogTag::WMS_PIP, "[NAPI]persistId:%{public}d, occluded:%{public}d", persistentId_, occluded);
+    // Maybe expand with session visibility&state change
     SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
     return NapiGetUndefined(env);
 }
