@@ -73,7 +73,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             return;
         }
         if (thisListener->isDeprecatedInterface_) {
-            napi_value argv[] = {avoidAreaValue};
+            napi_value argv[] = { avoidAreaValue };
             thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         } else {
             napi_value objValue = nullptr;
@@ -84,7 +84,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             }
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
             napi_set_named_property(env, objValue, "area", avoidAreaValue);
-            napi_value argv[] = {objValue};
+            napi_value argv[] = { objValue };
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     };
