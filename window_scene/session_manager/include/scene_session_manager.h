@@ -567,8 +567,8 @@ private:
     void NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession);
     bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
-
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
 
