@@ -456,6 +456,10 @@ public:
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+
+    /*
+     * Window ZOrder: PC
+     */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);

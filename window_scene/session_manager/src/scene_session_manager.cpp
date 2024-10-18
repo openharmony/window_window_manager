@@ -10877,21 +10877,21 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
             }
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
                 continue;
             }
             if (i > UINT32_MAX - startZOrder) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "Z order overflow, stop refresh");
                 break;
             }
             sceneSession->SetPcScenePanel(true);
             sceneSession->SetZOrder(i + startZOrder);
         }
         oss << "]";
-        TLOGI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
         return WSError::WS_OK;
     };
-    taskScheduler_->PostTask(task, "RefreshPcZOrderList");
+    taskScheduler_->PostTask(task, __func__);
 }
 
 void SceneSessionManager::SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func)
