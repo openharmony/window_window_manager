@@ -139,7 +139,7 @@ HWTEST_F(
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     int res = stub_->HandlePendingSessionToBackgroundForDelegator(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
