@@ -507,6 +507,8 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
+    void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
+    DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
