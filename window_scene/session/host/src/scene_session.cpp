@@ -1995,8 +1995,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())
             || isDragEnabledSystemWindow) {
-            if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || 
-                (property->GetIsPcAppInPad() && !isMainWindow) &&
+            if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
+                (property->GetIsPcAppInPad() && !isMainWindow)) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
