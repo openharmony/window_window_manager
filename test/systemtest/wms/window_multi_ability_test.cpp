@@ -260,5 +260,58 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
         ASSERT_NE(WMError::WM_OK, scene2->GoDestroy());
     }
 }
+
+/**
+ * @tc.name: MultiAbilityWindow05
+ * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
+{
+    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
+    } else {
+        ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
+    }
+    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
+    } else {
+        ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
+    }
+    DoSceneResource(scene1);
+    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
+        ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
+    } else {
+        ASSERT_NE(WMError::WM_OK, scene3->GoBackground());
+        ASSERT_NE(WMError::WM_OK, scene2->GoForeground());
+        ASSERT_NE(WMError::WM_OK, scene4->GoForeground());
+        ASSERT_NE(WMError::WM_OK, scene2->GoBackground());
+    }
+    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
+        ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
+    } else {
+        ASSERT_NE(WMError::WM_OK, scene3->GoDestroy());
+        ASSERT_NE(WMError::WM_OK, scene5->GoForeground());
+        ASSERT_NE(WMError::WM_OK, scene5->GoBackground());
+    }
+    DoSceneResource(scene4);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
+        ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
+    } else {
+        ASSERT_NE(WMError::WM_OK, scene5->GoDestroy());
+        ASSERT_NE(WMError::WM_OK, scene2->GoDestroy());
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
