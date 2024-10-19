@@ -446,6 +446,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromIcon failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (abilitySessionInfo->startWindowOption) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write startWindowOption failed");
