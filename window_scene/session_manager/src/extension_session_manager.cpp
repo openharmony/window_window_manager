@@ -15,15 +15,10 @@
 
 #include "session_manager/include/extension_session_manager.h"
 
-#include <mutex>
-
 #include <ability_manager_client.h>
 #include <hitrace_meter.h>
-#include <session_info.h>
-#include <start_options.h>
 
 #include "session/host/include/extension_session.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -61,6 +56,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->parentToken = sessionInfo.rootToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
+    abilitySessionInfo->realHostWindowId = sessionInfo.realParentId_;
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
     abilitySessionInfo->uiExtensionUsage = static_cast<AAFwk::UIExtensionUsage>(sessionInfo.uiExtensionUsage_);
     abilitySessionInfo->parentWindowType = sessionInfo.parentWindowType_;

@@ -15,7 +15,6 @@
 
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 
-#include <ipc_types.h>
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
@@ -205,7 +204,7 @@ int SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(MessageParcel& 
     WLOGFD("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }
     WSError errCode = UnRegisterSessionListener(listener);
@@ -500,7 +499,7 @@ int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetMainWinodowInfo lite");
     int32_t topN = 0;

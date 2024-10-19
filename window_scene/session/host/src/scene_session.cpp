@@ -364,7 +364,12 @@ WSError SceneSession::Disconnect(bool isFromClient)
             return WSError::WS_OK;
         }
     }
-    PostTask([weakThis = wptr(this), isFromClient]() {
+    return DisconnectTask(isFromClient, true);
+}
+
+WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
+{
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -378,11 +383,11 @@ WSError SceneSession::Disconnect(bool isFromClient)
         }
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
-        if (session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) {
+        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) && isSaveSnapshot) {
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
-        session->isTerminating = false;
+        session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
         }
@@ -524,6 +529,23 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 {
     std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
+}
+
+void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = std::move(callback);
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
@@ -3585,11 +3607,11 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "TerminateSession: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3629,11 +3651,11 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
                 session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        if (session->isTerminating) {
+        if (session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_LIFE, "NotifySessionExceptionInner: is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -3885,7 +3907,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), rect, reason, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "SceneSession::UpdatePiPRect session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3919,7 +3941,7 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), controlType, status, callingPid]() {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -3942,7 +3964,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
     auto task = [weakThis = wptr(this), isAutoStart] {
         auto session = weakThis.promote();
-        if (!session || session->isTerminating) {
+        if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
             return;
         }
@@ -4395,8 +4417,9 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
 
 uint32_t SceneSession::UpdateUIParam()
 {
+    bool lastVisible = IsVisible();
     dirtyFlags_ |= UpdateVisibilityInner(false) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
-    if (!IsVisible() && isFocused_) {
+    if (lastVisible && !IsVisible() && isFocused_) {
         postProcessFocusState_.enabled_ = true;
         postProcessFocusState_.isFocused_ = false;
         postProcessFocusState_.reason_ = FocusChangeReason::BACKGROUND;
@@ -4494,7 +4517,7 @@ void SceneSession::PostProcessNotifyAvoidArea()
 bool SceneSession::PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const
 {
     return ((dirty & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) && IsImmersiveType()) ||
-        (dirty & static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
+        ((dirty & static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) && isVisible_);
 }
 
 void SceneSession::NotifyClientToUpdateAvoidArea()

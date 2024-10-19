@@ -153,6 +153,7 @@ public:
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
+    WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
     virtual sptr<SceneSession> GetKeyboardPanelSession() const { return nullptr; };
@@ -329,6 +330,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 

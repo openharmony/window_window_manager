@@ -159,7 +159,7 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
             rsTransaction->Commit();
         }
     }
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
 }
 
@@ -170,7 +170,7 @@ void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc &fu
 
 std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex);
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     return leashWinSurfaceNode_;
 }
 
@@ -275,6 +275,11 @@ void Session::SetScreenId(uint64_t screenId)
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
     }
+}
+
+void Session::SetScreenIdOnServer(uint64_t screenId)
+{
+    sessionInfo_.screenId_ = screenId;
 }
 
 const SessionInfo& Session::GetSessionInfo() const
@@ -490,16 +495,6 @@ WSError Session::SetFocusable(bool isFocusable)
     return WSError::WS_OK;
 }
 
-void Session::SetSystemFocusable(bool systemFocusable)
-{
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, systemFocusable: %{public}d", GetPersistentId(), systemFocusable);
-    systemFocusable_ = systemFocusable;
-    if (isFocused_ && !systemFocusable) {
-        FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
-        NotifyRequestFocusStatusNotifyManager(false, true, reason);
-    }
-}
-
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -508,19 +503,6 @@ bool Session::GetFocusable() const
     }
     WLOGFD("property is null");
     return true;
-}
-
-bool Session::GetSystemFocusable() const
-{
-    if (parentSession_) {
-        return systemFocusable_ && parentSession_->GetSystemFocusable();
-    }
-    return systemFocusable_;
-}
-
-bool Session::CheckFocusable() const
-{
-    return GetFocusable() && GetSystemFocusable();
 }
 
 bool Session::IsFocused() const
@@ -730,7 +712,7 @@ bool Session::IsSystemSession() const
 
 bool Session::IsTerminated() const
 {
-    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating);
+    return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating_);
 }
 
 bool Session::IsSessionForeground() const
@@ -922,8 +904,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
 {
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating, pid);
-    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
+        static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_) {
         TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
             GetSessionState(), GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -1248,10 +1230,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             FocusChangeReason reason = FocusChangeReason::FOREGROUND;
             session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
         }
-        if (isAttach && !session->systemFocusable_) {
-            // reset systemFocusable_
-            session->SetSystemFocusable(true);
-        }
     };
     PostTask(task, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
@@ -1379,7 +1357,7 @@ WSError Session::TerminateSessionNew(
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto task = [this, abilitySessionInfo, needStartCaller, isFromBroker]() {
-        isTerminating = true;
+        isTerminating_ = true;
         SessionInfo info;
         info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1412,11 +1390,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isTerminating) {
+    if (isTerminating_) {
         TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    isTerminating = true;
+    isTerminating_ = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -1481,7 +1459,7 @@ WSError Session::Clear(bool needStartCaller)
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->isTerminating = true;
+        session->isTerminating_ = true;
         SessionInfo info = session->GetSessionInfo();
         if (session->terminateSessionFuncNew_) {
             session->terminateSessionFuncNew_(info, needStartCaller, false);
@@ -1919,7 +1897,7 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float scaleParam) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
     if (scenePersistence_ == nullptr) {
@@ -1944,7 +1922,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const float scaleParam) const
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
-    auto pixelMap = callback->GetResult(FFRT_SNAPSHOT_TIMEOUT_MS);
+    auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
@@ -1962,14 +1940,14 @@ void Session::SaveSnapshot(bool useFfrt)
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        session->snapshot_ = session->Snapshot();
+        session->snapshot_ = session->Snapshot(runInFfrt);
         if (!(session->snapshot_ && session->scenePersistence_)) {
             return;
         }
@@ -1983,11 +1961,11 @@ void Session::SaveSnapshot(bool useFfrt)
         };
         session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
     };
-    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
-    if (!useFfrt || snapshotFfrtHelper == nullptr) {
+    if (!useFfrt) {
         task();
         return;
     }
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);

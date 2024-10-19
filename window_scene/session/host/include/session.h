@@ -173,7 +173,7 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -192,6 +192,7 @@ public:
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     void SetScreenId(uint64_t screenId);
+    void SetScreenIdOnServer(uint64_t screenId);
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
@@ -246,7 +247,7 @@ public:
     WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
-    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
@@ -304,12 +305,9 @@ public:
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
-    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
-    bool GetSystemFocusable() const;
-    bool CheckFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
@@ -581,7 +579,7 @@ protected:
     bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
-    bool isTerminating = false;
+    bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
     std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
@@ -649,7 +647,6 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
-    std::atomic_bool systemFocusable_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
@@ -671,7 +668,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex;
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };

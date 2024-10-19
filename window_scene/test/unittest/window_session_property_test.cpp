@@ -216,6 +216,21 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: SetAndGetRealParentId
+ * @tc.desc: SetRealParentId and GetRealParentId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndGetRealParentId, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetRealParentId(1919);
+    EXPECT_EQ(1919, property->GetRealParentId());
+    property->SetRealParentId(810);
+    EXPECT_EQ(810, property->GetRealParentId());
+}
+
+/**
  * @tc.name: SetAndGetUIExtensionUsage
  * @tc.desc: SetUIExtensionUsage and GetUIExtensionUsage test
  * @tc.type: FUNC
