@@ -816,6 +816,10 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     scensession->sessionChangeCallback_->OnForceHideChange_ = func;
     EXPECT_NE(nullptr, &func);
     scensession->NotifyForceHideChange(true);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyForceHideChange(true);
+    ASSERT_EQ(scensession->property_, nullptr);
 }
 
 /**
