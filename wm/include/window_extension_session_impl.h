@@ -111,7 +111,7 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
