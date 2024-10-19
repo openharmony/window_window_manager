@@ -110,8 +110,8 @@ using RootSceneProcessBackEventFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
-    void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
-    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo> &debugInfos) override;
+    void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
+    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
 };
 
 class DisplayChangeListener : public IDisplayChangeListener {
@@ -225,16 +225,16 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
     void NotifySessionMovedToFront(int32_t persistentId);
-    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string& label) override;
-    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
-    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
+    WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
+    WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void InitWithRenderServiceAdded();
-    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -246,7 +246,7 @@ public:
         SessionInfoBean& sessionInfo) override;
     WSError DumpSessionAll(std::vector<std::string> &infos) override;
     WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
-    WSError GetAllAbilityInfos(const AAFwk::Want& want, int32_t userId,
+    WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
     WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
@@ -262,7 +262,7 @@ public:
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
     WSError SetVmaCacheStatus(bool flag);
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
-    WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
+    WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError LockSession(int32_t sessionId) override;
@@ -300,7 +300,7 @@ public:
      */
     void SetAbilityManagerCollaboratorRegisteredFunc(const AbilityManagerCollaboratorRegisteredFunc& func);
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
 
     bool IsInputEventEnabled();
@@ -503,7 +503,7 @@ private:
     WSError UpdateParentSessionForDialog(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(int32_t persistentId);
-    WMError UpdateTopmostProperty(const sptr<WindowSessionProperty> &property, const sptr<SceneSession> &sceneSession);
+    WMError UpdateTopmostProperty(const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
     void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
@@ -529,7 +529,7 @@ private:
     bool GetLocalDeviceId(std::string& localDeviceId);
     std::string AnonymizeDeviceId(const std::string& deviceId);
     int GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
-                              std::vector<SessionInfoBean> &sessionInfos);
+                              std::vector<SessionInfoBean>& sessionInfos);
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
     WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
 
@@ -572,8 +572,8 @@ private:
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
-    WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-        std::vector<SCBAbilityInfo> &scbAbilityInfos);
+    WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+        std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
@@ -692,7 +692,7 @@ private:
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
+    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
 
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);

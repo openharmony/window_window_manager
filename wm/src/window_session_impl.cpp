@@ -170,6 +170,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetExtensionFlag(option->GetExtensionTag());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
@@ -985,15 +986,20 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 }
 
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("display is null!");
-        return;
+    sptr<DisplayInfo> displayInfo;
+    if (info == nullptr) {
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("display is null!");
+            return;
+        }
+        displayInfo = display->GetDisplayInfo();
+    } else {
+        displayInfo = info;
     }
-    auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null!");
         return;
@@ -1241,6 +1247,12 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     } else if (isSubWindow) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
         isIgnoreSafeAreaNeedNotify_ = false;
+    }
+
+    // UIContent may be nullptr on setting system bar properties, need to set menubar color on UIContent init.
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        uiContent->SetStatusBarItemColor(property.contentColor_);
     }
 
     UpdateDecorEnable(true);
@@ -1534,6 +1546,9 @@ WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
 
 bool WindowSessionImpl::IsFloatingWindowAppType() const
 {
+    if (IsWindowSessionInvalid()) {
+        return false;
+    }
     return property_ != nullptr && property_->IsFloatingWindowAppType();
 }
 
@@ -2288,12 +2303,20 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
+        std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
+        ClearUselessListeners(windowNoInteractionListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
-        subWindowCloseListeners_[GetPersistentId()] = nullptr;
+        ClearUselessListeners(subWindowCloseListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
+        ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
     }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear successfully, id: %{public}d.", GetPersistentId());
@@ -2875,7 +2898,7 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
     return WSError::WS_OK;
 }

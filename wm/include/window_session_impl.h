@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -274,6 +275,7 @@ protected:
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);

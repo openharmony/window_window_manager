@@ -930,13 +930,14 @@ HWTEST_F(WindowSceneSessionImplTest3, GetAvoidAreaByType, Function | SmallTest |
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     AvoidArea avoidArea;
     auto ret = windowSceneSessionImpl->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidArea);
     EXPECT_EQ(WMError::WM_OK, ret);
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidArea);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
 /**

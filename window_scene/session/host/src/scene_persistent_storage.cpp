@@ -32,8 +32,8 @@ bool ScenePersistentStorage::HasKey(const std::string& key, ScenePersistentStora
         return res;
     }
     res = pref->HasKey(key);
-    WLOGD("[ScenePersistentStorage] %{public}s %{public}s", key.c_str(),
-        (res ? "Has persisted key:" : "Don't have persisted key:"));
+    WLOGD("[ScenePersistentStorage] %{public}s %{public}s", (res ? "Has persisted key:" : "Don't have persisted key:"),
+          key.c_str());
     return res;
 }
 
