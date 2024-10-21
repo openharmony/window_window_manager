@@ -1430,6 +1430,148 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest
 }
 
 /**
+ * @tc.name: HandleGetSessionInfo_ValidData_ReturnsSuccess
+ * @tc.desc: test HandleGetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo_ValidData_ReturnsSuccess, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString16("TestDeviceId");
+    data.writeInt32(123);
+
+    SessionInfoBean info;
+    info.SetSessionId(123);
+    info.SetDeviceId("TestDeviceId");
+    info.SetAppName("TestAppName");
+    info.SetSessionType(1);
+    info.SetCreateTime(123456789);
+    info.SetLastActiveTime(123456789);
+    info.SetState(0);
+    info.SetFlags(0);
+    info.SetUid(1000);
+    info.SetGid(1000);
+    info.SetAbilityName("TestAbilityName");
+    info.SetWantAgent("TestWantAgent");
+    info.SetWant("TestWant");
+    info.SetToken("TestToken");
+    info.SetMissionId(123);
+    info.SetGroupId(123);
+    info.SetGroupType(1);
+    info.SetGroupState(0);
+    info.SetGroupFlags(0);
+    info.SetGroupUid(1000);
+    info.SetGroupGid(1000);
+    info.SetGroupAbilityName("TestGroupAbilityName");
+    info.SetGroupWantAgent("TestGroupWantAgent");
+    info.SetGroupWant("TestGroupWant");
+    info.SetGroupToken("TestGroupToken");
+
+    WSError errCode = WSError::WS_OK;
+    EXPECT_CALL(stub_, GetSessionInfo(Str16ToStr8("TestDeviceId"), 123, info))
+        .WillOnce(DoAll(SetArgPointee<2>(info), Return(errCode)));
+
+    int result = stub_->HandleGetSessionInfo(data, reply);
+
+    EXPECT_EQ(result, 0);
+
+    SessionInfoBean readInfo;
+    int32_t readErrCode;
+    ASSERT_TRUE(reply.ReadParcelable(&readInfo));
+    ASSERT_TRUE(reply.ReadInt32(readErrCode));
+
+    EXPECT_EQ(readInfo.GetSessionId(), info.GetSessionId());
+    EXPECT_EQ(readInfo.GetDeviceId(), info.GetDeviceId());
+    EXPECT_EQ(readInfo.GetAppName(), info.GetAppName());
+    EXPECT_EQ(readInfo.GetSessionType(), info.GetSessionType());
+    EXPECT_EQ(readInfo.GetCreateTime(), info.GetCreateTime());
+    EXPECT_EQ(readInfo.GetLastActiveTime(), info.GetLastActiveTime());
+    EXPECT_EQ(readInfo.GetState(), info.GetState());
+    EXPECT_EQ(readInfo.GetFlags(), info.GetFlags());
+    EXPECT_EQ(readInfo.GetUid(), info.GetUid());
+    EXPECT_EQ(readInfo.GetGid(), info.GetGid());
+    EXPECT_EQ(readInfo.GetAbilityName(), info.GetAbilityName());
+    EXPECT_EQ(readInfo.GetWantAgent(), info.GetWantAgent());
+    EXPECT_EQ(readInfo.GetWant(), info.GetWant());
+    EXPECT_EQ(readInfo.GetToken(), info.GetToken());
+    EXPECT_EQ(readInfo.GetMissionId(), info.GetMissionId());
+    EXPECT_EQ(readInfo.GetGroupId(), info.GetGroupId());
+    EXPECT_EQ(readInfo.GetGroupType(), info.GetGroupType());
+    EXPECT_EQ(readInfo.GetGroupState(), info.GetGroupState());
+    EXPECT_EQ(readInfo.GetGroupFlags(), info.GetGroupFlags());
+    EXPECT_EQ(readInfo.GetGroupUid(), info.GetGroupUid());
+    EXPECT_EQ(readInfo.GetGroupGid(), info.GetGroupGid());
+    EXPECT_EQ(readInfo.GetGroupAbilityName(), info.GetGroupAbilityName());
+    EXPECT_EQ(readInfo.GetGroupWantAgent(), info.GetGroupWantAgent());
+    EXPECT_EQ(readInfo.GetGroupWant(), info.GetGroupWant());
+    EXPECT_EQ(readInfo.GetGroupToken(), info.GetGroupToken());
+
+    EXPECT_EQ(readErrCode, static_cast<int32_t>(errCode));
+}
+
+/**
+ * @tc.name: HandleGetSessionInfo_ReadPersistentIdFails_ReturnsError
+ * @tc.desc: test HandleGetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo_ReadPersistentIdFails_ReturnsError, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString16("TestDeviceId");
+    int result = stub_->HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfo_WriteParcelableFails_ReturnsError
+ * @tc.desc: test HandleGetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo_WriteParcelableFails_ReturnsError, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString16("TestDeviceId");
+    data.writeInt32(123);
+
+    SessionInfoBean info;
+    WSError errCode = WSError::WS_OK;
+    EXPECT_CALL(stub_, GetSessionInfo(Str16ToStr8("TestDeviceId"), 123, info))
+        .WillOnce(DoAll(SetArgPointee<2>(info), Return(errCode)));
+    EXPECT_CALL(reply, WriteParcelable(&info)).WillOnce(Return(false));
+
+    int result = stub_->HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfo_WriteInt32Fails_ReturnsError
+ * @tc.desc: test HandleGetSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo_WriteInt32Fails_ReturnsError, Function | SmallTest | Level2) 
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString16("TestDeviceId");
+    data.writeInt32(123);
+    SessionInfoBean info;
+    WSError errCode = WSError::WS_OK;
+    EXPECT_CALL(stub_, GetSessionInfo(Str16ToStr8("TestDeviceId"), 123, info))
+        .WillOnce(DoAll(SetArgPointee<2>(info), Return(errCode)));
+    EXPECT_CALL(reply, WriteParcelable(&info)).WillOnce(Return(true));
+    EXPECT_CALL(reply, WriteInt32(static_cast<int32_t>(errCode))).WillOnce(Return(false));
+
+    int result = stub_->HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleDumpSessionAll
  * @tc.desc: test HandleDumpSessionAll
  * @tc.type: FUNC

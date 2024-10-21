@@ -502,18 +502,22 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetSessionInfo!");
+    TLOGD(WmsLogTag::WMS_LIFE, "run HandleGetSessionInfo!");
     SessionInfoBean info;
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int32_t persistentId = data.ReadInt32();
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        WLOGFE("GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE,"GetSessionInfo error");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE,"write GetSessionInfo result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
