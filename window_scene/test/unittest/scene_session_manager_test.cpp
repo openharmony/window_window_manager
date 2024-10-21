@@ -1917,7 +1917,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, Function |
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({-1, nullptr});
-    result = ssm_->SkipSnapshotForAppProcess(100, {"TestName1"});
+    result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName1"});
     ASSERT_EQ(result, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
