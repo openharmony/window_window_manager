@@ -21,6 +21,7 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -583,6 +584,30 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
     ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
 
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: IsInSecondaryScreen
+ * @tc.desc: test IsInSecondaryScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
+
+    DisplayId displayId = 5;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
 }
 }  // namespace
 }
