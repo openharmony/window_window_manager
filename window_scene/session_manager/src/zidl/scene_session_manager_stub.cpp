@@ -477,19 +477,24 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
 
 int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetSessionInfos!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int numMax = data.ReadInt32();
+    int numMax;
+    if (!data.ReadInt32(numMax)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read numMax failed");
+        return ERR_INVALID_DATA;
+    }
     std::vector<SessionInfoBean> missionInfos;
     WSError errCode = GetSessionInfos(deviceId, numMax, missionInfos);
     reply.WriteInt32(missionInfos.size());
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
-            WLOGFE("GetSessionInfos error");
+            TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfos error");
             return ERR_INVALID_DATA;
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write GetSessionInfos result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
