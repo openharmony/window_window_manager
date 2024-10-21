@@ -1266,7 +1266,6 @@ HWTEST_F(SceneSessionTest4, IsMovable02, Function | SmallTest | Level2)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
     ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
     ASSERT_EQ(false, sceneSession->IsMovable());
-
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
 }
 
