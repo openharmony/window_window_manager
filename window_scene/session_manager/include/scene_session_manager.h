@@ -952,6 +952,12 @@ private:
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);
 
+    /*
+     * Fold screen flag
+     */
+    bool IsSmallFold();
+    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+
     struct SessionInfoList {
         int32_t uid_;
         std::string bundleName_;
