@@ -10646,7 +10646,10 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, rotation: %{public}u, "
         "enableHookRotation: %{public}d, enable: %{public}d", hookInfo.width_, hookInfo.height_, hookInfo.density_,
         hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
-
+    if (enable && (uid <= 0 || hookInfo.width_ <= 0 || hookInfo.height_ <= 0 || hookInfo.density_ <= 0)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "App hookInfo param error.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     DMHookInfo dmHookInfo;
     dmHookInfo.width_ = hookInfo.width_;
     dmHookInfo.height_ = hookInfo.height_;
