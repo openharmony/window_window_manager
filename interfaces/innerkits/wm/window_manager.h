@@ -798,7 +798,7 @@ public:
      * @param pid pid
      * @param watermarkName watermark picture name
      * @param isEnabled add or remove
-     * @return @return WM_OK means set process watermark success, others means failed.
+     * @return WM_OK means set process watermark success, others means failed.
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
 
@@ -821,6 +821,15 @@ public:
      * @return WM_OK means release success, others means failed.
      */
     WMError ReleaseForegroundSessionScreenLock();
+
+    /**
+     * @brief set process watermark.
+     *
+     * @param windowIds list of window ids that need to get screen ids
+     * @param watermarkName map of Windows and screens
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds, std::unordered_map<int32_t, DisplayId>& windowDisplayMap);
 
 private:
     WindowManager();
