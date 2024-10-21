@@ -211,7 +211,7 @@ HWTEST_F(SceneSessionTest3, UpdateRect1, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->winRect_ = rect;
-    result = sceneSession->UpdateRect(rect, reason, "SceneSessionTest3");
+    result = scensession->UpdateRect(rect, reason, "SceneSessionTest3");
     ASSERT_EQ(result, WSError::WS_OK);
 
     scensession->reason_ = SizeChangeReason::DRAG_END;
@@ -271,13 +271,13 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | Smal
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     scenceSession->SetSessionProperty(property);
-    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, scensession);
+    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, scenceSession);
     ASSERT_NE(scenceSession, nullptr);
 
     sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
     ASSERT_NE(keyboardSession, nullptr);
     property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 1);
-    sceneSession->FixKeyboardPositionByKeyboardPanel(scenceSession, keyboardSession);
+    scenceSession->FixKeyboardPositionByKeyboardPanel(scenceSession, keyboardSession);
 }
 
 /**
