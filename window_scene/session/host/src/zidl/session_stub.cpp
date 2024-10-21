@@ -748,7 +748,11 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 
 int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 {
-    bool status = static_cast<bool>(data.ReadUint32());
+    uint32_t statusId = 0;
+    if (!data.ReadUint32(statusId)) {
+        return ERR_INVALID_DATA;
+    }
+    bool status = static_cast<bool>(statusId);
     WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
     WSError errCode = OnNeedAvoid(status);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -757,7 +761,13 @@ int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
 {
-    AvoidAreaType type = static_cast<AvoidAreaType>(data.ReadUint32());
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+        return ERR_INVALID_DATA;
+    }
+    AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
