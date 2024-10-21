@@ -21,7 +21,7 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
