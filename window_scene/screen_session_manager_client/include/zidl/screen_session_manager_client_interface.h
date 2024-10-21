@@ -63,7 +63,7 @@ public:
     virtual void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
     virtual void OnScreenshot(DisplayId displayId) = 0;
-    virtual void OnImmersiveStateChanged(bool& immersive) = 0;
+    virtual void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) = 0;
     virtual void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) = 0;
     virtual void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds) = 0;

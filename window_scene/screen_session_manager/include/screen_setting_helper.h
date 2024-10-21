@@ -29,6 +29,7 @@ public:
     static void RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func);
     static void UnregisterExtendSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
+    static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
     static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingCastObserver();

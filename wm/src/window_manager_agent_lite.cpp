@@ -57,5 +57,10 @@ void WindowManagerAgentLite::UpdatePiPWindowStateChanged(const std::string& bund
     SingletonContainer::Get<WindowManagerLite>().UpdatePiPWindowStateChanged(bundleName, isForeground);
 }
 
+void WindowManagerAgentLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WindowUpdateType type)
+{
+    SingletonContainer::Get<WindowManagerLite>().NotifyAccessibilityWindowInfo(infos, type);
+}
 } // namespace Rosen
 } // namespace OHOS

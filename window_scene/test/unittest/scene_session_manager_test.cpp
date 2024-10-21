@@ -500,7 +500,7 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
 HWTEST_F(SceneSessionManagerTest, GetImmersiveState, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->GetImmersiveState();
+    ssm_->GetImmersiveState(0u);
     ASSERT_EQ(ret, 0);
 }
 
@@ -1728,14 +1728,46 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTe
  */
 HWTEST_F(SceneSessionManagerTest, SetProcessWatermark, Function | SmallTest | Level3)
 {
-    auto result = ssm_->SetProcessWatermark(100, "", true);
-    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
-
     int32_t pid = 1000;
     std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
+    auto result = ssm_->SetProcessWatermark(pid, "", isEnabled);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
     result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
     ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
+    ASSERT_NE(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
+
+    isEnabled = false;
+    result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
+    ASSERT_EQ(ssm_->processWatermarkPidMap_.find(pid), ssm_->processWatermarkPidMap_.end());
+
+    SessionInfo info;
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetCallingPid(1000);
+    sceneSession2->SetCallingPid(1001);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({-1, nullptr});
+    isEnabled = true;
+    result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    isEnabled = false;
+    result = ssm_->SetProcessWatermark(pid, watermarkName, isEnabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(-1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
+    usleep(WAIT_SYNC_IN_NS_TWO);
 }
 
 /**
@@ -1861,8 +1893,8 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     info2.bundleName_ = "test2";
     info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    sceneSession2->SetParentSession(sceneSession1);
     ASSERT_NE(nullptr, sceneSession2);
+    sceneSession2->SetParentSession(sceneSession1);
 
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
@@ -1880,6 +1912,18 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
 HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
 {
     auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level3)
+{
+    bool isPcOrPadFreeMultiWindowMode = false;
+    auto result = ssm_->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 }

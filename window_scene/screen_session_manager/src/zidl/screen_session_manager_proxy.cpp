@@ -1921,7 +1921,7 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     return info;
 }
 
-DMError ScreenSessionManagerProxy::HasImmersiveWindow(bool& immersive)
+DMError ScreenSessionManagerProxy::HasImmersiveWindow(ScreenId screenId, bool& immersive)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1935,6 +1935,9 @@ DMError ScreenSessionManagerProxy::HasImmersiveWindow(bool& immersive)
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId)) {
+        return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW),

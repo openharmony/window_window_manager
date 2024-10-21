@@ -58,59 +58,76 @@ void WindowTest::TearDown()
 namespace {
 /**
  * @tc.name: Create01
- * @tc.desc: Create window with no WindowName and no abilityToken
+ * @tc.desc: Create window with no WindowName，no option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = nullptr;
     ASSERT_EQ(nullptr, Window::Create("", option));
 }
 
 /**
  * @tc.name: Create02
- * @tc.desc: Create window with WindowName and no abilityToken
+ * @tc.desc: Create window with WindowName，no option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = new WindowOption();
+    // no option: Window::Create with defult option
+    // default option : default WindowType is WindowType::WINDOW_TYPE_APP_MAIN_WINDOW
+    //                  default onlySupportSceneBoard_ is false
+    sptr<WindowOption> option = nullptr;
     auto window = Window::Create("WindowTest02", option);
-    if (window != nullptr)
-    {
-        ASSERT_NE(nullptr, window);
-    }
-    if (window != nullptr)
-    {
-        ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    }
+    // Create app main window need context and isession
+    ASSERT_EQ(nullptr, window);
 }
 
 /**
  * @tc.name: Create03
- * @tc.desc: Mock CreateWindow return WM_ERROR_SAMGR, create window with WindowName and no abilityToken
+ * @tc.desc: Create window with WindowName, option and no context
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    // WindowType::WINDOW_TYPE_UI_EXTENSION is neither appWindow nor systemWindow
     auto window = Window::Create("WindowTest03", option);
-    if (window != nullptr) {
-        ASSERT_EQ(nullptr, Window::Create("WindowTest03", option));
-    }
+    ASSERT_EQ(nullptr, window);
 }
 
 /**
  * @tc.name: Create04
- * @tc.desc: Create window with WindowName and no option
+ * @tc.desc: Create window with WindowName and no abilityToken
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = nullptr;
-    ASSERT_EQ(nullptr, Window::Create("", option));
+    sptr<WindowOption> option = new WindowOption();
+    // Create app float window but only support sceneBoard
+    // Create app float window no need context and isession
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetOnlySupportSceneBoard(true);
+    auto window = Window::Create("WindowTest04", option);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, window);
+        ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    } else {
+        ASSERT_EQ(nullptr, window);
+    }
+}
+
+/**
+ * @tc.name: Create05
+ * @tc.desc: Create window with WindowName option and context
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_EQ(nullptr, Window::Create("WindowTest05", option, abilityContext_));
 }
 
 /**
@@ -2490,25 +2507,6 @@ HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Create05
- * @tc.desc: Create window with WindowName and no abilityToken
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = nullptr;
-    auto window = Window::Create("WindowTest02", option);
-    uint32_t version = 0;
-    if (version < 10) {
-        ASSERT_NE(10, version);
-    }
-    WindowOption windowoption;
-    windowoption.onlySupportSceneBoard_ = true;
-    ASSERT_NE(true, option->GetOnlySupportSceneBoard());
-}
-
-/**
  * @tc.name: GetMainWindowWithContext|GetWindowWithId
  *                      |GetSubWindow|UpdateConfigurationForAll
  * @tc.desc: get
@@ -2752,6 +2750,20 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
     auto ret = window->GetWindowStatus(windowStatus);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsPcOrPadCapabilityEnabled
+ * @tc.desc: IsPcOrPadCapabilityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->IsPcOrPadCapabilityEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**

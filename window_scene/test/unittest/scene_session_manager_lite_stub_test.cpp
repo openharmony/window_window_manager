@@ -52,7 +52,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override
     {
         return WSError::WS_OK;
     }
@@ -186,7 +186,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bundleName = "test";
         return WMError::WM_OK;
     }
-    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override
+    WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
     }

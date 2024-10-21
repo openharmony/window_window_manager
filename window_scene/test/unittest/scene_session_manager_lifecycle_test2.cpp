@@ -236,8 +236,23 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Funct
     ASSERT_NE(nullptr, sceneSession1);
     sceneSession1->SetCallingPid(200);
 
+    SessionInfo info2;
+    info2.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info2.bundleName_ = "NotifyWindowStateErrorFromMMI2";
+    info2.screenId_ = 0;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property2);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession2->property_ = property2;
+    sceneSession2->SetCallingPid(100);
+
     ssm_->sceneSessionMap_.insert({10086, sceneSession});
     ssm_->sceneSessionMap_.insert({10087, sceneSession1});
+    ssm_->sceneSessionMap_.insert({10088, sceneSession2});
+    ssm_->sceneSessionMap_.insert({10089, nullptr});
+    ssm_->NotifyWindowStateErrorFromMMI(-1, 10086);
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
     ASSERT_EQ(ret, 0);
 }

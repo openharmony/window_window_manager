@@ -193,6 +193,23 @@ public:
     bool SuspendEnd();
 
     /**
+     * @brief Get id of internal screen.
+     *
+     * @return Internal screen id.
+     */
+    ScreenId GetInternalScreenId();
+
+    /**
+     * @brief Set the screen power state by screen id.
+     *
+     * @param screenId Screen id.
+     * @param state Screen power state.
+     * @param reason Reason for power state change.
+     * @return True means set success, false means set failed.
+     */
+    bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
+
+    /**
      * @brief Set the Display State object
      *
      * @param state State of display.
@@ -209,6 +226,14 @@ public:
      */
     DisplayState GetDisplayState(DisplayId displayId);
     
+    /**
+     * @brief Try to cancel screenoff action before display power off.
+     *
+     * @return True means cancel screenoff action success.
+     * @return False means cancel screenoff action failed.
+     */
+    bool TryToCancelScreenOff();
+
     /**
      * @brief Set the brightness level of the target screen.
      *

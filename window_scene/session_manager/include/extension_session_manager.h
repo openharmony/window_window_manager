@@ -60,6 +60,13 @@ public:
      */
     WSError RequestExtensionSessionDestruction(
         const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
+    /**
+     * @brief destroy extension session done
+     *
+     * @param extensionSession the extension session need to be destroyed
+     * @return WSError
+     */
+    WSError RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession);
 
 private:
     ExtensionSessionManager();
