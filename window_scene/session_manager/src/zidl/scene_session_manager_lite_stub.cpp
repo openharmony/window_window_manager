@@ -355,9 +355,29 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& dat
 
 int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleSetSessionContinueState");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSetSessionContinueState");
     sptr <IRemoteObject> token = data.ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(data.ReadInt32());
+    const WSError &ret = SetSessionContinueState(token, continueState);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "HandleSetSessionContinueState");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    int32_t continueStateInt;
+    if (!data.ReadInt32(continueStateInt)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read continueStateInt failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (continueStateInt < static_cast<int32_t>(ContinueState::CONTINUESTATE_UNKNOWN) ||
+    continueStateInt > static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid continue state");
+        return ERR_INVALID_DATA;
+    }
+    auto continueState = static_cast<ContinueState>(continueStateInt);
     const WSError &ret = SetSessionContinueState(token, continueState);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
