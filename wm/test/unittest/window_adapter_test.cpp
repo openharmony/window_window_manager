@@ -723,6 +723,21 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTes
         systemConfig, token);
     ASSERT_EQ(session, nullptr);
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: WindowAdapter/IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    bool isPcOrPadFreeMultiWindowMode = false;
+    auto err = windowAdapter.IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 }
 }
 }

@@ -91,7 +91,7 @@ public:
         bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
-    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;

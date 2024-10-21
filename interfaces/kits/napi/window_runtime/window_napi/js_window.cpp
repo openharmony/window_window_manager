@@ -2518,11 +2518,9 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     bool isDockHoverShown = true;
     if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     const char* const funcName = __func__;
     NapiAsyncTask::CompleteCallback complete =
@@ -6829,6 +6827,12 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "window is null"));
         return;
     }
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowOption is null");
+        task.Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
+        return;
+    }
     if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
         !WindowHelper::IsMainWindow(windowToken->GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "This is not subWindow or mainWindow.");
@@ -6877,14 +6881,15 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> windowOption = new WindowOption();
-    if (windowOption == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "window option is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY));
-        return NapiGetUndefined(env);
-    }
     if (!ParseSubWindowOptions(env, argv[1], windowOption)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to options");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if ((windowOption->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
