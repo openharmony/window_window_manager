@@ -380,11 +380,11 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    TLOGD(WmsLogTag::WMS_LIFE, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::string label;
     if (!data.ReadString(label)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read label failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "read label failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionLabel(token, label);
@@ -394,11 +394,11 @@ int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT"In");
+    TLOGD(WmsLogTag::WMS_UIEXT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
-        WLOGFE("icon is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "icon is null");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionIcon(token, icon);
@@ -502,7 +502,7 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run HandleGetSessionInfo!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId;

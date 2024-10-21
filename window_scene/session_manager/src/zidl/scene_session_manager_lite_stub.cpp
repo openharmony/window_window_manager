@@ -355,17 +355,7 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& dat
 
 int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSetSessionContinueState");
-    sptr <IRemoteObject> token = data.ReadRemoteObject();
-    auto continueState = static_cast<ContinueState>(data.ReadInt32());
-    const WSError &ret = SetSessionContinueState(token, continueState);
-    reply.WriteUint32(static_cast<uint32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LIFE, "HandleSetSessionContinueState");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     int32_t continueStateInt;
     if (!data.ReadInt32(continueStateInt)) {

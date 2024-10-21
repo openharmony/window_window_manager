@@ -422,12 +422,12 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_SYSTEM, "in! eventId: %{public}d", eventId);
     uint32_t eventId = 0;
     if (!data.ReadUint32(eventId)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "read eventId failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSystemSessionEvent eventId: %{public}d", eventId);
     if (eventId >= static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) &&
         eventId <= static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
         WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
