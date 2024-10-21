@@ -2124,6 +2124,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
     int res = stub_->HandleIsPcOrPadFreeMultiWindowMode(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleGetWindowDisplayIds
+ * @tc.desc: test HandleGetWindowDisplayIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowDisplayIds, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    std::vector<int32_t> persistentIds = {1, 2};
+    data.ReadInt32Vector(persistentIds);
+
+    int res = stub_->HandleGetWindowDisplayIds(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

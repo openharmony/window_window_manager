@@ -222,6 +222,31 @@ HWTEST_F(SceneSessionManagerTest11, GetLastInstanceKey, Function | SmallTest | L
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     ASSERT_EQ(ssm_->GetLastInstanceKey(BUNDLE_NAME), "");
 }
+
+/**
+ * @tc.name: GetWindowDisplayIds
+ * @tc.desc: test function : GetWindowDisplayIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetWindowDisplayIds, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    DisplayId displayId = 0;
+    property->SetDisplayId(displayId);
+    scenesession1->SetSessionProperty(property);
+
+    std::vector<int32_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    ASSERT_EQ(ssm_->GetWindowDisplayIds(windowIds, windowDisplayMap), WMError::WM_OK);
+}
 }  // namespace
 }
 }
