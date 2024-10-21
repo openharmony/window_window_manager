@@ -88,6 +88,33 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: HandleSystemSessionEvent_ValidEventId
+ * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent_InvalidEventId | Function | SmallTest | Level2) {
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
+    int result = session_->HandleSystemSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSystemSessionEvent_InvalidEventId2
+ * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent_InvalidEventId2 | Function | SmallTest | Level2) {
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(0xFFFFFFFF);
+    int result = session_->HandleSystemSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+/**
  * @tc.name: ProcessRemoteRequestTest01
  * @tc.desc: sessionStub ProcessRemoteRequestTest01
  * @tc.type: FUNC
