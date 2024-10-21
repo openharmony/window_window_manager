@@ -2658,8 +2658,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea03, Function | SmallTest |
 HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | SmallTest | Level3)
 {
     DMRect area = DMRect{};
-    ssm_->NotifyAvailableAreaChanged(area);
     ASSERT_NE(ssm_, nullptr);
+    ssm_->NotifyAvailableAreaChanged(area);
 }
 
 /**
@@ -2742,9 +2742,10 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, Function | SmallTest | Leve
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, Function | SmallTest | Level3)
 {
-    ScreenId screenId = 1050;
+    ScreenId screenId = 2000;
+    ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     auto ret = ssm_->GetScreenProperty(screenId);
-    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(sizeof(ret), sizeof(ScreenProperty));
 }
 
 /**
@@ -2758,7 +2759,8 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, Function | SmallTest | L
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ssm_->screenSessionMap_[screenId] = screenSession;
-    auto ret = ssm_->GetScreenProperty(screenId);
+    ScreenProperty property = ssm_->GetScreenProperty(screenId);
+    ASSERT_EQ(sizeof(property), sizeof(screenSession->property_));
 }
 
 /**
