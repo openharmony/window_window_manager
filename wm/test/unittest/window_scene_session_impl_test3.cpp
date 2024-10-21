@@ -1912,9 +1912,7 @@ HWTEST_F(WindowSceneSessionImplTest3, GetMainWindowWithId, Function | SmallTest 
 
     sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSession);
-    ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetPersistentId(1);
-    ASSERT_NE(nullptr, windowSession->property_);
     windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair("window1", std::make_pair(1, windowSession)));
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
     auto ret = windowSceneSessionImpl->GetMainWindowWithId(1);
@@ -2032,7 +2030,7 @@ HWTEST_F(WindowSceneSessionImplTest3, FindParentSessionByParentId, Function | Sm
     ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetParentPersistentId(0);
     ASSERT_NE(nullptr, windowSession->property_);
-    windowSession->property_->SetExtensionFlag(true);
+    windowSession->property_->SetIsUIExtFirstSubWindow(true);
     EXPECT_FALSE(nullptr != windowSceneSessionImpl->FindParentSessionByParentId(1));
 }
 
