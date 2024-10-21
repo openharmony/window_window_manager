@@ -52,6 +52,12 @@ WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
     return windowExtensionSessionImpl_->SetWaterMarkFlag(isEnable);
 }
 
+bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
+}
+
 WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "enter");

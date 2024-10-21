@@ -107,7 +107,13 @@ public:
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;

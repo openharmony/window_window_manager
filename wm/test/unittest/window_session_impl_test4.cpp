@@ -325,11 +325,38 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, Function | SmallTest | Lev
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     WMError res = window->SetSubWindowModal(true, ModalityType::WINDOW_MODALITY);
     ASSERT_EQ(res, WMError::WM_OK);
     res = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 end";
+}
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadFreeMultiWindowMode start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("IsPcOrPadFreeMultiWindowMode");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(true, window->IsPcOrPadFreeMultiWindowMode());
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(false, window->IsPcOrPadFreeMultiWindowMode());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadFreeMultiWindowMode end";
 }
 
 /**

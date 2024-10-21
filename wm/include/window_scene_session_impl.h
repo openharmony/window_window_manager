@@ -148,7 +148,12 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
