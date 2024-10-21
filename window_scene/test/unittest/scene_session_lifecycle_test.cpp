@@ -314,7 +314,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Background3
- * @tc.desc:  @tc.name: Background
+ * @tc.desc:  * @tc.name: Background
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionLifecycleTest, Background3, Function | SmallTest | Level2)
