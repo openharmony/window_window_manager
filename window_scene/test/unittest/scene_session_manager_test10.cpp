@@ -604,7 +604,7 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
 
-    DisplayId displayId = 5;
+    displayId = 5;
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
