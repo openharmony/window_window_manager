@@ -1357,6 +1357,57 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleGetSessionInfos
+ * @tc.desc: test HandleGetSessionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos_ValidData_ReturnsSuccess, Function | SmallTest | Level2) 
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    const std::string deviceId = "testDeviceId";
+    const int numMax = 5;
+    data.WriteString16(String16::FromUTF8(deviceId));
+    data.writeInt32(numMax);
+
+    std::vector<SessionInfoBean> sessionInfos;
+    SessionInfoBean sessionInfo;
+    sessionInfos.push_back(sessionInfo);
+
+    int result = stub_->HandleGetSessionInfos(data, reply);
+
+    ASSERT_EQ(result, ERR_NONE);
+    ASSERT_EQ(reply.readInt32(), sessionInfos.size());
+
+    for (const auto& it : sessionInfos) {
+        SessionInfoBean readSessionInfo;
+        ASSERT_TRUE(reply.readParcelable(&readSessionInfo));
+        ASSERT_EQ(readSessionInfo, it);
+    }
+
+    ASSERT_EQ(reply.readInt32(), static_cast<int32_t>(WSError::SUCCESS));
+}
+
+/**
+ * @tc.name: HandleGetSessionInfos
+ * @tc.desc: test HandleGetSessionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos_ReadNumMaxFails_ReturnsError, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString16(String16::FromUTF8("testDeviceId"));
+    data.writeInt32(0);
+
+    int result = stub_->HandleGetSessionInfos(data, reply);
+
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleGetSessionInfo
  * @tc.desc: test HandleGetSessionInfo
  * @tc.type: FUNC
