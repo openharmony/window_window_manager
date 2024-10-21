@@ -54,7 +54,7 @@ WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
 
 WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "enter");
+    TLOGD(WmsLogTag::WMS_UIEXT, "enter");
     return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
 }
 
