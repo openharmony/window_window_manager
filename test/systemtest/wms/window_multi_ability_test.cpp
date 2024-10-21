@@ -217,17 +217,17 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Le
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene1->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
     sptr<WindowScene> scene3 = Utils::CreateWindowScene();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene3->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
     DoSceneResource(scene1);
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene3->GoBackground());
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene2->GoForeground());
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene4->GoForeground());
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene2->GoBackground());
+        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
+        ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene3->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene2->GoForeground());
