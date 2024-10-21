@@ -830,7 +830,7 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
 }
 
 bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
-    uint32_t &screenWidth, uint32_t &screenHeight)
+    uint32_t& screenWidth, uint32_t& screenHeight)
 {
     if (isScreenAngleMismatch_) {
         screenWidth = targetScreenWidth_;
@@ -838,6 +838,7 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
         TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
         return true;
     }
+
     const auto& screenSession = sessionProperty == nullptr ? nullptr :
         ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId());
     if (screenSession != nullptr) {
@@ -859,7 +860,7 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
 }
 
 bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
-    uint32_t &screenWidth, uint32_t &screenHeight)
+    uint32_t& screenWidth, uint32_t& screenHeight)
 {
     if (isScreenAngleMismatch_) {
         screenWidth = targetScreenWidth_;
@@ -867,6 +868,7 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
         TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
         return true;
     }
+
     auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo != nullptr) {
         screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
@@ -912,7 +914,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
     sessionProperty->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        if (!GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight)) {
+        if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
             return false;
         }
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
@@ -1401,7 +1403,6 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
     }
-
     return;
 }
 
@@ -2205,7 +2206,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
     if (reason == SizeChangeReason::DRAG_END) {
         if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
@@ -3708,12 +3709,12 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return oriPosYBeforeRaisedBykeyboard_;
+    return oriPosYBeforeRaisedByKeyboard_;
 }
 
 void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    oriPosYBeforeRaisedBykeyboard_ = posY;
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
