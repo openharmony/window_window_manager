@@ -88,7 +88,7 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
-    auto uiContent= Ace::UIContent::Create(nullptr,nullptr);
+    auto uiContent= Ace::UIContent::Create(nullptr, nullptr);
     rootScene.uiContent_=std::move(uiContent);
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
