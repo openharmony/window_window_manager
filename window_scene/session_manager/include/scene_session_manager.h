@@ -299,6 +299,11 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
 
+    /*
+     * PC Window
+     */
+    WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();

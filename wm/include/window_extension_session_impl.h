@@ -107,6 +107,11 @@ public:
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
+    /*
+     * PC Window
+     */
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;

@@ -1652,6 +1652,21 @@ HWTEST_F(WindowSceneSessionImplTest4, FindParentMainSession001, Function | Small
     result = toastWindow->FindParentMainSession(toastWindow->GetParentId(), toastWindow->windowSessionMap_);
     ASSERT_EQ(result, mainWindow);
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionImpl> mainWindow = CreateWindow("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 100);
+    ASSERT_NE(mainWindow, nullptr);
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

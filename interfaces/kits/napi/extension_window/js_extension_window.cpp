@@ -902,6 +902,11 @@ napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info inf
 
 napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
+    if (extensionWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]extensionWindow is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -917,6 +922,12 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
+    if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !extensionWindow_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        return NapiGetUndefined(env);
+    }
     if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
@@ -927,19 +938,16 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     NapiAsyncTask::CompleteCallback complete =
         [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
             windowOption = option](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-        if (extensionWindow == nullptr) {
+        auto extWindow = extensionWindow->GetWindow();
+        if (extWindow == nullptr) {
             task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extensionWindow is null"));
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
+            return;
         }
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         windowOption->SetOnlySupportSceneBoard(true);
         windowOption->SetIsUIExtFirstSubWindow(true);
-        auto extWindow = extensionWindow->GetWindow();
-        if (extWindow == nullptr) {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
-        }
         auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
         if (window == nullptr) {
             task.Reject(env, CreateJsError(env,
