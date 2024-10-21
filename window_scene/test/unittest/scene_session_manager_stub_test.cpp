@@ -541,6 +541,44 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | 
 }
 
 /**
+ * @tc.name: HandleSetSessionContinueState
+ * @tc.desc: test HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t x = 1;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    data.WriteInt32(x);
+
+    int res = stub_->HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState1
+ * @tc.desc: test HandleSetSessionContinueState1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t x = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    data.WriteInt32(x);
+
+    int res = stub_->HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetSessionDump
  * @tc.desc: test HandleGetSessionDump
  * @tc.type: FUNC
