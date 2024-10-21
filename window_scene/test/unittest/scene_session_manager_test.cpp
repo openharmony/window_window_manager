@@ -1896,13 +1896,13 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, Function |
     ASSERT_EQ(result, WMError::WM_OK);
     constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
     usleep(WAIT_SYNC_IN_NS_ZERO);
-    ASSERT_NE(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipPidSet_.end());
+    ASSERT_NE(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
 
     result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {});
     ASSERT_EQ(result, WMError::WM_OK);
     constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
     usleep(WAIT_SYNC_IN_NS_ONE);
-    ASSERT_EQ(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipPidSet_.end());
+    ASSERT_EQ(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
 
     SessionInfo info1;
     info1.bundleName_ = "TestName1";
