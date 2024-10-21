@@ -3827,6 +3827,7 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    ProcessWindowModeType();
     return true;
 }
 
