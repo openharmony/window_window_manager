@@ -4798,7 +4798,7 @@ bool SceneSession::CheckPermissionWithPropertyAnimation(const sptr<WindowSession
 
 void SceneSession::PcUpdateZOrderAndDirty(const uint32_t zOrder)
 {
-   dirtyFlags_ |= UpdateZOrderInner(zOrder) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0; 
+    dirtyFlags_ |= UpdateZOrderInner(zOrder) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0; 
 }
 
 uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
