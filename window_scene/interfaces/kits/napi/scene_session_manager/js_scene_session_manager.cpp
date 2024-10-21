@@ -1207,6 +1207,10 @@ static napi_value CreateWindowModes(napi_env env,
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, windowModes.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
     auto index = 0;
     for (const auto& windowMode : windowModes) {
         napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(windowMode)));
@@ -1278,6 +1282,10 @@ static napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityI
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, scbAbilityInfos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
     auto index = 0;
     for (const auto& scbAbilityInfo : scbAbilityInfos) {
         napi_set_element(env, arrayValue, index++, CreateSCBAbilityInfo(env, scbAbilityInfo));
@@ -1313,7 +1321,7 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
     }
     auto errCode = std::make_shared<int32_t>(static_cast<int32_t>(WSErrorCode::WS_OK));
     auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    auto execute = [want, userId, infos = scbAbilityInfos, errCode] () {
+    auto execute = [want, userId, infos = scbAbilityInfos, errCode]() {
         auto code = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetAllAbilityInfos(want, userId, *infos));
         *errCode = static_cast<int32_t>(code);
@@ -1337,8 +1345,8 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = { nullptr };
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -1354,7 +1362,7 @@ napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     std::vector<std::string> bundleNames;
-    if (!ParseArrayStringValue(env, argv[1], bundleNames)) {
+    if (!ParseArrayStringValue(env, argv[ARG_INDEX_ONE], bundleNames)) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to bundleNames");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1362,7 +1370,7 @@ napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_call
     }
     auto errCode = std::make_shared<WSErrorCode>(WSErrorCode::WS_OK);
     auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    auto execute = [bundleNames, userId, infos = scbAbilityInfos, errCode] {
+    auto execute = [bundleNames = std::move(bundleNames), userId, infos = scbAbilityInfos, errCode] {
         *errCode = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetBatchAbilityInfos(bundleNames, userId, *infos));
     };

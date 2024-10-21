@@ -172,6 +172,7 @@ public:
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
     virtual void OnCallingSessionUpdated() {};
+    virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
@@ -526,6 +527,12 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /*
+     * Window Lifecycle
+     */
+    bool CheckIdentityTokenIfMatched(const std::string& identityToken);
+    bool CheckPidIfMatched();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);

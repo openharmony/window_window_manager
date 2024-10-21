@@ -1335,7 +1335,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<IMainWindowCloseListener> listener12 = nullptr;
     res = window->RegisterMainWindowCloseListeners(listener12);

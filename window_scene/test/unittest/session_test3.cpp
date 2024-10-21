@@ -182,6 +182,7 @@ HWTEST_F(WindowSessionTest3, SetFocusableOnShow, Function | SmallTest | Level2)
     ASSERT_EQ(session_->IsFocusableOnShow(), true);
     bool focusableOnShow = false;
     session_->SetFocusableOnShow(focusableOnShow);
+    usleep(10000); // sleep 10ms
     ASSERT_EQ(session_->IsFocusableOnShow(), focusableOnShow);
 }
 
@@ -1308,6 +1309,69 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
     session_->SetParentSession(sessionUIState);
     session_->SetMainSessionUIStateDirty(true);
     EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
+}
+
+/**
+ * @tc.name: CompatibleFullScreenRecover
+ * @tc.desc: CompatibleFullScreenRecover Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, CompatibleFullScreenRecover, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->sessionInfo_.isSystem_ = true;
+    auto result = session_->CompatibleFullScreenRecover();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = session_->CompatibleFullScreenRecover();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: CompatibleFullScreenMinimize
+ * @tc.desc: CompatibleFullScreenMinimize Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, CompatibleFullScreenMinimize, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->sessionInfo_.isSystem_ = true;
+    auto result = session_->CompatibleFullScreenMinimize();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = session_->CompatibleFullScreenMinimize();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: CompatibleFullScreenClose
+ * @tc.desc: CompatibleFullScreenClose Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->sessionInfo_.isSystem_ = true;
+    auto result = session_->CompatibleFullScreenClose();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = session_->CompatibleFullScreenClose();
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 }
 } // namespace Rosen

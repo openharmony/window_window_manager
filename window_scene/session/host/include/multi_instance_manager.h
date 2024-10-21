@@ -18,7 +18,7 @@
 
 #include <bitset>
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <shared_mutex>
 #include <vector>
@@ -37,6 +37,7 @@ static constexpr uint32_t MAX_INSTANCE_COUNT = 10;
 class MultiInstanceManager {
 public:
     static MultiInstanceManager& GetInstance();
+    static bool IsSupportMultiInstance(const SystemSessionConfig& systemConfig);
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr, const std::shared_ptr<TaskScheduler>& taskScheduler);
     void IncreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
     void DecreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
@@ -59,20 +60,27 @@ public:
     bool IsInstanceKeyExist(const std::string& bundleName, const std::string& instanceKey);
 
 private:
-    uint32_t FindMinimumAvailableInstanceId(const std::string& bundleName, uint32_t maxInstanceCount) const;
+    uint32_t FindMinimumAvailableInstanceId(const std::string& bundleName, uint32_t maxInstanceCount);
     void RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void AddInstanceId(const std::string& bundleName, uint32_t instanceId);
     void RemoveInstanceId(const std::string& bundleName, uint32_t instanceId);
     bool ConvertInstanceKeyToInstanceId(const std::string& instanceKey, uint32_t& instanceId) const;
-    std::map<std::string, std::vector<uint32_t>> bundleInstanceIdListMap_;
-    std::map<std::string, std::bitset<MAX_INSTANCE_COUNT>> bundleInstanceUsageMap_;
-    std::map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
-    std::map<std::string, int32_t> instanceKeyRefCountMap_;
+
+    std::shared_mutex mutex_;
+    std::unordered_map<std::string, std::vector<uint32_t>> bundleInstanceIdListMap_;
+    std::unordered_map<std::string, std::bitset<MAX_INSTANCE_COUNT>> bundleInstanceUsageMap_;
+    // Above guarded by mutex_
+
+    std::shared_mutex appInfoMutex_;
+    std::unordered_map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
+    // Above guarded by appInfoMutex_
+
+    // Guarded by SceneSessionManager sceneSessionMapMutex_
+    std::unordered_map<std::string, int32_t> instanceKeyRefCountMap_;
+
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     int32_t userId_ = 0;
-    std::shared_mutex mutex_;
-    std::shared_mutex appInfoMutex_;
 };
 } // namespace OHOS::Rosen
 
