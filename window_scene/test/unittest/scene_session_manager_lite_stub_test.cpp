@@ -451,7 +451,37 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState_InvalidContinueStateInt
+ * @tc.desc: test function : HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState_InvalidContinueStateInt, Function | SmallTest | Level1) {
+    data.WriteRemoteObject(nullptr);
+    data.WriteInt32(-2);
+    int32_t result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState_ValidContinueStateInt
+ * @tc.desc: test function : HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState_ValidContinueStateInt, Function | SmallTest | Level1) {
+    sptr<IRemoteObject> token = new IRemoteObject();
+    data.WriteRemoteObject(token);
+    data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
+    int32_t result = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    uint32_t writtenError;
+    EXPECT_TRUE(reply.ReadUint32(writtenError));
+    EXPECT_EQ(writtenError, static_cast<uint32_t>(ERR_NONE));
 }
 
 /**
