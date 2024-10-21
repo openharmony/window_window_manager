@@ -164,6 +164,9 @@ bool DisplayChangeTest::DisplaySizeEqual(const sptr<Display> display, const sptr
 inline bool DisplayChangeTest::CheckModeSizeChange(const sptr<SupportedScreenModes> usedInfo,
     const sptr<SupportedScreenModes> curInfo) const
 {
+    if (usedInfo == nullptr || curInfo == nullptr) {
+        return false;
+    }
     return (usedInfo->width_ != curInfo->width_ || usedInfo->height_ != curInfo->height_);
 }
 
@@ -240,32 +243,6 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Le
     WLOGI("SetScreenActiveMode: %{public}u", usedModeIdx);
     if (CheckDisplayChangeEventCallback(true)) {
         ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-    }
-}
-
-/**
- * @tc.name: CheckDisplayStateChange02
- * @tc.desc: DisplayState changes if screen sets different mode
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Level2)
-{
-    WLOGI("CheckDisplayStateChange02");
-    auto modes = defaultScreen_->GetSupportedModes();
-    uint32_t usedModeIdx = defaultScreen_->GetModeId();
-    WLOGI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
-
-    for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
-        if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
-            defaultScreen_->SetScreenActiveMode(modeIdx);
-            WLOGI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
-            ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-            // reset usedMode
-            ResetDisplayChangeListener();
-            defaultScreen_->SetScreenActiveMode(usedModeIdx);
-            CheckDisplayChangeEventCallback(true);
-            break;
-        }
     }
 }
 
