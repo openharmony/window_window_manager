@@ -63,7 +63,13 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Success)
     int32_t pid = 2;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = 4;
-    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    int result = 0;
+    std::function<void()> func = [&]() {
+        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+        result = 1;
+    };
+    func();
+    ASSERT_EQ(result, 1);
 }
 
 /**
@@ -80,7 +86,13 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail1)
     int32_t pid = -5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = 2;
-    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    int result = 0;
+    std::function<void()> func = [&]() {
+        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+        result = 1;
+    };
+    func();
+    ASSERT_EQ(result, 1);
 }
 
 /**
@@ -97,7 +109,13 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail2)
     int32_t pid = 5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = -2;
-    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    int result = 0;
+    std::function<void()> func = [&]() {
+        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+        result = 1;
+    };
+    func();
+    ASSERT_EQ(result, 1);
 }
 
 /**
@@ -114,7 +132,13 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail3)
     int32_t pid = -5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = -2;
-    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    int result = 0;
+    std::function<void()> func = [&]() {
+        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+        result = 1;
+    };
+    func();
+    ASSERT_EQ(result, 1);
 }
 
 } // namespace
