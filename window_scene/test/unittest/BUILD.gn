@@ -51,7 +51,7 @@ group("unittest") {
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_lifecycle_test",
     ":ws_scene_session_manager_stub_test",
-    ":scene_session_manager_supplement_test",
+    ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_manager_test10",
     ":ws_scene_session_manager_test11",
