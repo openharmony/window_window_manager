@@ -937,8 +937,8 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
             TLOGE(WmsLogTag::WMS_PIP, "Unknown controlType");
             return ERR_INVALID_DATA;
         }
-        if (status > static_cast<uint32_t>(WsPiPControlStatus::PLAY) ||
-            status < static_cast<uint32_t>(WsPiPControlStatus::DISABLED)) {
+        if (status > static_cast<int32_t>(WsPiPControlStatus::PLAY) ||
+            status < static_cast<int32_t>(WsPiPControlStatus::DISABLED)) {
             TLOGE(WmsLogTag::WMS_PIP, "Unknown status");
             return ERR_INVALID_DATA;
         }
