@@ -74,14 +74,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     eventStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_DUMP_CHILD_INFO),
         parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_CHILD_TREE_REGISTER),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    eventStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::WindowEventInterfaceCode::TRANS_ID_TRANSFER_ACCESSIBILITY_DUMP_CHILD_INFO),
-        parcel, reply, option);
     return true;
 }
 } // namespace.OHOS
