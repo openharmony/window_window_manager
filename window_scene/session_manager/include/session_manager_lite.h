@@ -68,7 +68,7 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
-    void OnUserSwitch(const sptr<ISessionManagerService> &sessionManagerService);
+    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
     void DeleteAllSessionListeners();
     void ReregisterSessionListener() const;
     void RegisterSMSRecoverListener();
@@ -85,7 +85,6 @@ private:
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     sptr<FoundationDeathRecipientLite> foundationDeath_ = nullptr;
     bool recoverListenerRegistered_ = false;
-    bool destroyed_ = false;
     bool isFoundationListenerRegistered_ = false;
     // above guarded by mutex_
 

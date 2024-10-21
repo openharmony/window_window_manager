@@ -1900,6 +1900,29 @@ HWTEST_F(ScreenSessionTest, FillScreenInfo, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, info);
     GTEST_LOG_(INFO) << "ScreenSessionTest: FillScreenInfo end";
 }
+
+/**
+ * @tc.name: SetScreenScale
+ * @tc.desc: SetScreenScale test
+ * @tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
+{
+    ScreenSession session;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float pivotX = 0.5f;
+    float pivotY = 0.5f;
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+    session.SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    EXPECT_EQ(session.property_.GetScaleX(), scaleX);
+    EXPECT_EQ(session.property_.GetScaleY(), scaleY);
+    EXPECT_EQ(session.property_.GetPivotX(), pivotX);
+    EXPECT_EQ(session.property_.GetPivotY(), pivotY);
+    EXPECT_EQ(session.property_.GetTranslateX(), translateX);
+    EXPECT_EQ(session.property_.GetTranslateY(), translateY);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

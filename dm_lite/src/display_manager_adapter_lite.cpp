@@ -26,7 +26,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapterLite"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapterLite"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapterLite)
 
@@ -127,6 +127,13 @@ FoldDisplayMode DisplayManagerAdapterLite::GetFoldDisplayMode()
     INIT_PROXY_CHECK_RETURN(FoldDisplayMode::UNKNOWN);
 
     return displayManagerServiceProxy_->GetFoldDisplayMode();
+}
+
+void DisplayManagerAdapterLite::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
 sptr<DisplayInfo> DisplayManagerAdapterLite::GetDisplayInfo(DisplayId displayId)

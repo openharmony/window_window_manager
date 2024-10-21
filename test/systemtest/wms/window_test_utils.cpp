@@ -22,9 +22,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils"};
-    constexpr uint32_t EDGE_INTERVAL = 48;
-    constexpr uint32_t MID_INTERVAL = 24;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils"};
+constexpr uint32_t EDGE_INTERVAL = 48;
+constexpr uint32_t MID_INTERVAL = 24;
 }
 
 Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};

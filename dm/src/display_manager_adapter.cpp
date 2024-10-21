@@ -28,7 +28,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
@@ -354,6 +354,13 @@ DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayState(displayId);
 }
 
+bool DisplayManagerAdapter::TryToCancelScreenOff()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->TryToCancelScreenOff();
+}
+
 void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -600,6 +607,14 @@ DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mo
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
+}
+
+void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,
+    float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void DisplayManagerAdapter::SetFoldStatusLocked(bool locked)

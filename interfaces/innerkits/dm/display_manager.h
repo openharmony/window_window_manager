@@ -294,6 +294,14 @@ public:
     DisplayState GetDisplayState(DisplayId displayId);
 
     /**
+     * @brief Try to cancel screenoff action before display power off.
+     *
+     * @return True means cancel screenoff action success.
+     * @return False means cancel screenoff action failed.
+     */
+    bool TryToCancelScreenOff();
+
+    /**
      * @brief Set the brightness level of the target screen.
      *
      * @param screenId Target screen.
@@ -568,6 +576,17 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+
+    /**
+     * @brief Set display scale.
+     *
+     * @param screenId screenId used in DisplayManager.
+     * @param scaleX screen scale in x axis.
+     * @param scaleY screen scale in y axis.
+     * @param pivotX screen scale pivot in x axis.
+     * @param pivotY screen scale pivot in y axis.
+     */
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
 
     /**
      * @brief Locked fold status.

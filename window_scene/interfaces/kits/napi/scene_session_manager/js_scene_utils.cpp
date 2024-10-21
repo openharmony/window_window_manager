@@ -29,21 +29,27 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
-constexpr int32_t NUMBER_2 = 2;
-constexpr int32_t NUMBER_3 = 3;
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+// Refer to OHOS::Ace::TouchType
+enum class AceTouchType : int32_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+};
 
 int32_t GetMMITouchType(int32_t aceType)
 {
     switch (aceType) {
-        case 0:
+        case static_cast<int32_t>(AceTouchType::DOWN):
             return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case 1:
+        case static_cast<int32_t>(AceTouchType::UP):
             return MMI::PointerEvent::POINTER_ACTION_UP;
-        case NUMBER_2:
+        case static_cast<int32_t>(AceTouchType::MOVE):
             return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case NUMBER_3:
+        case static_cast<int32_t>(AceTouchType::CANCEL):
             return MMI::PointerEvent::POINTER_ACTION_CANCEL;
         default:
             return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
@@ -685,7 +691,7 @@ bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent&
     return true;
 }
 
-bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList)
 {
     bool isArray = false;
     napi_is_array(env, jsObject, &isArray);
@@ -710,7 +716,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     return true;
 }
 
-bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap)
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap)
 {
     if (value == nullptr) {
         WLOGFE("value is nullptr");
@@ -895,7 +901,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 }
 
 napi_value CreateJsSessionRecoverInfo(
-    napi_env env, const SessionInfo &sessionInfo, const sptr<WindowSessionProperty> property)
+    napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);

@@ -258,13 +258,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
@@ -322,17 +326,22 @@ struct SessionInfo {
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
-    bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+
+    /*
+     * UIExtension
+     */
+    int32_t realParentId_ = INVALID_SESSION_ID;
+    uint32_t uiExtensionUsage_ = 0;
+    bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
 };
 
@@ -459,7 +468,7 @@ struct WSRectT {
 
     inline bool IsInvalid() const
     {
-        return IsEmpty() || NearZero(width_) || NearZero(height_);
+        return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
     inline std::string ToString() const
@@ -631,8 +640,11 @@ struct SessionUIParam {
     float scaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
+    float transX_ { 0.0f }; // global translateX
+    float transY_ { 0.0f }; // global translateY
     uint32_t zOrder_ { 0 };
     std::string sessionName_;
+    bool needSync_ { true };
 };
 
 enum class SessionUIDirtyFlag {

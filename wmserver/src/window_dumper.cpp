@@ -32,12 +32,12 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Dumper"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Dumper"};
 
-    constexpr int WINDOW_NAME_MAX_LENGTH = 20;
-    const std::string ARG_DUMP_HELP = "-h";
-    const std::string ARG_DUMP_ALL = "-a";
-    const std::string ARG_DUMP_WINDOW = "-w";
+constexpr int WINDOW_NAME_MAX_LENGTH = 20;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_WINDOW = "-w";
 }
 
 WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args)

@@ -89,6 +89,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
+    bool TryToCancelScreenOff() override;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
@@ -197,6 +198,9 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
+
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
+        float pivotX, float pivotY) override;
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;
@@ -324,17 +328,9 @@ private:
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
 
     int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void ShowHelpInfo(std::string& dumpInfo);
-    void ShowIllegalArgsInfo(std::string& dumpInfo);
-    int DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo);
-    int DumpAllScreenInfo(std::string& dumpInfo);
-    int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
-    bool IsValidDigitString(const std::string& idStr) const;
-    int SetFoldDisplayMode(const std::string& modeParam);
-    int SetFoldStatusLocked(const std::string& lockParam);
+    sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
-    sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -467,10 +463,18 @@ private:
     void SetDpiFromSettingData();
     void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
+    void UpdateDisplayScaleState(ScreenId screenId);
+    void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
+                                  const float& pivotY);
+    void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                   const float& scaleY, const float& pivotX, const float& pivotY,
+                                                   float& translateX, float& translateY);
+    void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
+                                            const float& pivotX, const float& pivotY, float& translateX,
+                                            float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsDefaultMirrorMode(ScreenId screenId);
-    bool IsValidDisplayModeCommand(std::string command);
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void UnRegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);

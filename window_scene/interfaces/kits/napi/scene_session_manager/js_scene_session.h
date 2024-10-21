@@ -37,6 +37,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
+    SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
@@ -98,11 +99,11 @@ private:
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
-    static napi_value SetSystemFocusable(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value OpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     static napi_value CloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
+    static napi_value NotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
     static napi_value SetWindowLastSafeRect(napi_env env, napi_callback_info info);
     static napi_value RequestHideKeyboard(napi_env env, napi_callback_info info);
@@ -115,8 +116,12 @@ private:
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
+    static napi_value SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
+    static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -138,11 +143,11 @@ private:
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
-    napi_value OnSetSystemFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnOpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     napi_value OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
+    napi_value OnNotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLastSafeRect(napi_env env, napi_callback_info info);
     napi_value OnRequestHideKeyboard(napi_env env, napi_callback_info info);
@@ -164,6 +169,8 @@ private:
     napi_value OnIsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
+    napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
+    napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -176,6 +183,7 @@ private:
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
+    void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
     void ProcessBackPressedRegister();
@@ -223,6 +231,7 @@ private:
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
+    void OnAutoStartPiPStatusChange(bool isAutoStart);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnRaiseAboveTarget(int32_t subWindowId);
@@ -234,8 +243,8 @@ private:
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
-    void UpdateSessionLabel(const std::string &label);
-    void UpdateSessionIcon(const std::string &iconPath);
+    void UpdateSessionLabel(const std::string& label);
+    void UpdateSessionIcon(const std::string& iconPath);
     void OnSessionException(const SessionInfo& info, bool needRemoveSession);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);

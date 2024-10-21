@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStubImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStubImpl"};
 }
 
 WindowExtensionStubImpl::WindowExtensionStubImpl(const std::string& windowName) : windowName_(windowName)

@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerLifecycleTest2 : public testing::Test {
 public:
@@ -205,6 +205,41 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | S
     sceneSession->SetFocusedOnShow(false);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
+}
+
+/**
+ * @tc.name: NotifyWindowStateErrorFromMMI
+ * @tc.desc: NotifyWindowStateErrorFromMMI
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info.bundleName_ = "NotifyWindowStateErrorFromMMI";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->SetCallingPid(100);
+
+    SessionInfo info1;
+    info1.abilityName_ = "SceneSessionManagerLifecycleTest2";
+    info1.bundleName_ = "NotifyWindowStateErrorFromMMI1";
+    info1.screenId_ = 0;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->SetCallingPid(200);
+
+    ssm_->sceneSessionMap_.insert({10086, sceneSession});
+    ssm_->sceneSessionMap_.insert({10087, sceneSession1});
+    ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
+    ASSERT_EQ(ret, 0);
 }
 }
 } // namespace Rosen

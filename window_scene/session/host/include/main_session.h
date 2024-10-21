@@ -40,6 +40,7 @@ protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     void NotifyClientToUpdateInteractive(bool interactive) override;
+    bool isClientInteractive_ = true;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

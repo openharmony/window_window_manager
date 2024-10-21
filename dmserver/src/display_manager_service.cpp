@@ -33,8 +33,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
-    const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
+const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
@@ -484,6 +484,12 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayPowerController_->GetDisplayState(displayId);
+}
+
+bool DisplayManagerService::TryToCancelScreenOff()
+{
+    WLOGFE("[UL_POWER]DMS not support TryToCancelScreenOff");
+    return false;
 }
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)

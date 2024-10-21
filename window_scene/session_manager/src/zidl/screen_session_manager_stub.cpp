@@ -120,6 +120,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF: {
+            reply.WriteBool(TryToCancelScreenOff());
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
@@ -568,6 +572,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
             DMError ret = SetFoldStatusLockedFromJs(lockDisplayStatus);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto scaleX = data.ReadFloat();
+            auto scaleY = data.ReadFloat();
+            auto pivotX = data.ReadFloat();
+            auto pivotY = data.ReadFloat();
+            SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE: {

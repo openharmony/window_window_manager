@@ -380,36 +380,21 @@ HWTEST_F(SessionProxyTest, UpdatePiPControlStatus, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: GetAppForceLandscapeConfig
- * @tc.desc: normal function
+ * @tc.name: SetAutoStartPiP
+ * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
+ * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig start";
+    GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    AppForceLandscapeConfig config = {};
-    auto res = sProxy->GetAppForceLandscapeConfig(config);
-    ASSERT_EQ(res, WMError::WM_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: SetDialogSessionBackGestureEnabled
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
+    bool isAutoStartValid = true;
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid));
+    GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP end";
 }
 
 /**
@@ -425,6 +410,24 @@ HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
     WSError res = sProxy->RequestFocus(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    AppForceLandscapeConfig config = {};
+    auto res = sProxy->GetAppForceLandscapeConfig(config);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig end";
 }
 } // namespace
 } // namespace Rosen

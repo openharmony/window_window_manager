@@ -490,6 +490,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
@@ -503,6 +504,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
     ASSERT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);
@@ -551,6 +553,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
@@ -564,6 +567,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
+    ASSERT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
     ASSERT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);

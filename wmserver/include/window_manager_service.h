@@ -85,7 +85,7 @@ public:
     using Task = std::function<void()>;
     void OnStart() override;
     void OnStop() override;
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -113,7 +113,7 @@ public:
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
-    WmErrorCode RaiseToAppTop(uint32_t windowId) override;
+    WMError RaiseToAppTop(uint32_t windowId) override;
     std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override;
     WMError SetGestureNavigaionEnabled(bool enable) override;
     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override;

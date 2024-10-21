@@ -53,6 +53,7 @@ public:
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_GET_ALL_DISPLAYIDS,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
+        TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF,
         TRANS_ID_SET_FREEZE_EVENT,
         TRANS_ID_SCREEN_BASE = 1000,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
@@ -104,6 +105,7 @@ public:
         TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE,
         TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS,
         TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE,
+        TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE,
         TRANS_ID_SCENE_BOARD_IS_FOLDABLE,
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
@@ -226,6 +228,7 @@ public:
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
+    virtual bool TryToCancelScreenOff() = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
@@ -265,6 +268,8 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+
+    virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
     virtual void SetFoldStatusLocked(bool locked) {}
 

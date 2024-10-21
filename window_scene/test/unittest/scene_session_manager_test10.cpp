@@ -84,6 +84,74 @@ void SceneSessionManagerTest10::TearDown()
 
 namespace {
 /**
+ * @tc.name: RequestSceneSessionDestructionInner
+ * @tc.desc: RequestSceneSessionDestructionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<AAFwk::SessionInfo> scnSessionInfo = new AAFwk::SessionInfo();
+    bool needRemoveSession = true;
+    bool isForceClean = true;
+
+    SessionInfo sessionInfo;
+    sessionInfo.collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+
+    needRemoveSession = false;
+    isForceClean = false;
+    sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent
+ * @tc.desc: RegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
+    ASSERT_EQ(windowManagerAgent, nullptr);
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+/**
  * @tc.name: UpdateRotateAnimationConfig
  * @tc.desc: UpdateRotateAnimationConfig
  * @tc.type: FUNC
@@ -124,7 +192,7 @@ HWTEST_F(SceneSessionManagerTest10, RegisterAcquireRotateAnimationConfigFunc, Fu
     ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::ROTATION;
-    WSError result = sceneSession->UpdateRect(rect, reason);
+    WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest10");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -143,14 +211,14 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     info1.windowType_ = 1;
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info1, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    
+
     SessionInfo info2;
     info2.abilityName_ = "nextSession";
     info2.bundleName_ = "nextSession";
     info2.windowType_ = 1;
     sptr<SceneSession> nextSession = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(nextSession, nullptr);
-    
+
     ssm_->lastFocusedAppSessionId_ = nextSession->GetPersistentId();
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 
@@ -161,6 +229,72 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     nextSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession);
     ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
+}
+
+/**
+ * @tc.name: ProcessFocusZOrderChange
+ * @tc.desc: ProcessFocusZOrderChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ssm_->ProcessFocusZOrderChange(10);
+    ssm_->systemConfig_.uiType_ = "pc";
+    ssm_->ProcessFocusZOrderChange(97);
+
+    ssm_->systemConfig_.uiType_ = "phone";
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "focusedSession";
+    sessionInfo.abilityName_ = "focusedSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "voiceInteractionSession";
+    sessionInfo1.abilityName_ = "voiceInteractionSession";
+    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    sceneSession1->zOrder_ = 2109;
+    ssm_->sceneSessionMap_.emplace(2, sceneSession1);
+
+    sceneSession->lastZOrder_ = 103;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+
+    sceneSession->lastZOrder_ = 2203;
+    sceneSession->zOrder_ = 101;
+    ssm_->ProcessFocusZOrderChange(97);
+}
+
+/**
+ * @tc.name: NotifyVisibleChange
+ * @tc.desc: test NotifyVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ASSERT_FALSE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
+
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 }  // namespace
 }

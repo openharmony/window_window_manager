@@ -48,8 +48,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
-    const std::string PARAM_DUMP_HELP = "-h";
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+const std::string PARAM_DUMP_HELP = "-h";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
@@ -93,14 +93,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    std::string surfaceNodeName;
-    if (auto bundleName = option->GetBundleName(); bundleName != "") {
-        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
-    } else {
-        surfaceNodeName = property_->GetWindowName();
-    }
-    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
-    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -376,6 +369,9 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WLOGI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
     uint32_t windowId = property_->GetWindowId();
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
@@ -495,6 +491,9 @@ const Transform& WindowImpl::GetZoomTransform() const
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
         WLOGFE("Only support add show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -509,6 +508,9 @@ WMError WindowImpl::AddWindowFlag(WindowFlag flag)
 
 WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
         WLOGFE("Only support remove show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -731,18 +733,35 @@ bool WindowImpl::IsSupportWideGamut()
 
 void WindowImpl::SetColorSpace(ColorSpace colorSpace)
 {
+    if (!IsWindowValid()) {
+        return;
+    }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "surface node is nullptr, winId: %{public}u", GetWindowId());
+        return;
+    }
     auto surfaceGamut = GetSurfaceGamutFromColorSpace(colorSpace);
     surfaceNode_->SetColorSpace(surfaceGamut);
 }
 
 ColorSpace WindowImpl::GetColorSpace()
 {
+    if (!IsWindowValid()) {
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "surface node is nullptr, winId: %{public}u", GetWindowId());
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
     auto surfaceGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(surfaceGamut);
 }
 
 std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
 {
+    if (!IsWindowValid()) {
+        return nullptr;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
     std::shared_ptr<Media::PixelMap> pixelMap;
@@ -1761,6 +1780,9 @@ WMError WindowImpl::SetKeepScreenOn(bool keepScreenOn)
 
 bool WindowImpl::IsKeepScreenOn() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     return property_->IsKeepScreenOn();
 }
 
@@ -1778,6 +1800,9 @@ WMError WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 
 bool WindowImpl::IsTurnScreenOn() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     return property_->IsTurnScreenOn();
 }
 
@@ -1855,6 +1880,9 @@ WMError WindowImpl::SetTransparent(bool isTransparent)
 
 bool WindowImpl::IsTransparent() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
     WLOGFD("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
@@ -1945,6 +1973,9 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 
 WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
     property_->SetPrivacyMode(isPrivacyMode);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
@@ -1952,6 +1983,9 @@ WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 
 bool WindowImpl::IsPrivacyMode() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     return property_->GetPrivacyMode();
 }
 
@@ -1964,6 +1998,9 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 
 WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set snapshot skip permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -1975,22 +2012,23 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowImpl::RaiseToAppTop()
+/** @note @window.hierarchy */
+WMError WindowImpl::RaiseToAppTop()
 {
     auto parentId = property_->GetParentId();
     if (parentId == INVALID_WINDOW_ID) {
         WLOGFE("Only the children of the main window can be raised!");
-        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
         WLOGFE("Must be app sub window window!");
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (state_ != WindowState::STATE_SHOWN) {
         WLOGFE("The sub window must be shown!");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return WMError::WM_DO_NOTHING;
     }
 
     return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());
@@ -2097,6 +2135,9 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 
 bool WindowImpl::GetImmersiveModeEnabledState() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     return enableImmersiveMode_;
 }
 
@@ -3917,12 +3958,18 @@ bool WindowImpl::IsWindowValid() const
 
 bool WindowImpl::IsLayoutFullScreen() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     auto mode = GetMode();
     return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
 }
 
 bool WindowImpl::IsFullScreen() const
 {
+    if (!IsWindowValid()) {
+        return false;
+    }
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
