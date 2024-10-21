@@ -815,6 +815,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
     std::shared_ptr<RSTransaction> rsTransaction;
     ASSERT_NE(nullptr, window_);
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    window_->UpdateRectForOtherReason(rect, wmReason);
 }
 
 /**

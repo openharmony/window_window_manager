@@ -2353,8 +2353,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         WLOGFE("pip window is not enable to create.");
         return WSError::WS_DO_NOTHING;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name: %{public}s, type: %{public}d",
-        property->GetWindowName().c_str(), property->GetWindowType());
+    TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
+        property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
@@ -8880,11 +8880,11 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty);
             NotifyAllAccessibilityInfo();
-            FlushWindowInfoToMMI();
             AnomalyDetection::SceneZOrderCheckProcess();
         } else if (sessionMapDirty == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
             PostProcessProperty(sessionMapDirty);
         }
+        FlushWindowInfoToMMI();
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& item : sceneSessionMap_) {
@@ -9303,13 +9303,13 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
     auto task = [this, remoteExtSession]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession");
+            TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
             return;
         }
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
         if (!GetExtensionWindowIds(iter->second, persistentId, parentId)) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
 
@@ -9516,8 +9516,8 @@ void SceneSessionManager::HideNonSecureFloatingWindows()
     for (const auto& [persistentId, session] : nonSystemFloatSceneSessionMap_) {
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", session->GetWindowName().c_str(), persistentId, shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
+                session->GetWindowName().c_str(), persistentId, shouldHide);
         }
     }
 }
@@ -9543,8 +9543,8 @@ void SceneSessionManager::HideNonSecureSubWindows(const sptr<SceneSession>& scen
 
         if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !session->IsSystemSpecificSession()) {
             session->NotifyForceHideChange(shouldHide);
-            TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows name=%{public}s, persistentId=%{public}d, "
-                "shouldHide=%{public}u", session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
+            TLOGI(WmsLogTag::WMS_UIEXT, "name=%{public}s, persistentId=%{public}d, shouldHide=%{public}u",
+                session->GetWindowName().c_str(), session->GetPersistentId(), shouldHide);
         }
     }
 }
