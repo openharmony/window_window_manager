@@ -107,6 +107,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     sptr<Window> self(this);
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
+    AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
 
@@ -198,6 +199,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         context_.reset();
     }
     ClearVsyncStation();
+    SetUIContentComplete();
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed successfully, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
@@ -306,7 +308,8 @@ void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 
 WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}u, isPrivacyMode: %{public}u", GetWindowId(), isPrivacyMode);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Id: %{public}u, isPrivacyMode: %{public}u", GetPersistentId(),
+        isPrivacyMode);
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -490,6 +493,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
+    SetUIContentComplete();
     NotifyModalUIExtensionMayBeCovered(true);
 
     UpdateAccessibilityTreeInfo();
@@ -535,6 +539,8 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else if (handler_ != nullptr) {
+        UpdateRectForOtherReason(wmRect, wmReason);
     } else {
         NotifySizeChange(wmRect, wmReason);
         UpdateViewportConfig(wmRect, wmReason);
@@ -569,22 +575,11 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
-        window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
-            auto window = weak.promote();
-            if (!window) {
-                return;
-            }
-            window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
-                RSSystemProperties::SetDrawTextAsBitmap(false);
-            }
-        });
+        RSNode::OpenImplicitAnimation(protocol, curve);
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
@@ -597,6 +592,22 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
+}
+
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+{
+    auto task = [weak = wptr(this), wmReason, wmRect] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+            return;
+        }
+        window->NotifySizeChange(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason);
+    };
+    if (handler_) {
+        handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
@@ -1016,6 +1027,29 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
+}
+
+bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
+{
+    bool enable = false;
+    SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "GetFreeMultiWindowEnableState = %{public}u", enable);
+    return enable;
+}
+
+void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyExtensionTimeout(errorCode);
+}
+
+int32_t WindowExtensionSessionImpl::GetRealParentId() const
+{
+    if (property_ == nullptr) {
+        return static_cast<int32_t>(INVALID_WINDOW_ID);
+    }
+    return property_->GetRealParentId();
 }
 
 WindowType WindowExtensionSessionImpl::GetParentWindowType() const

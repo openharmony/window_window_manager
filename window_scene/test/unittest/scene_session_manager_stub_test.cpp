@@ -541,6 +541,44 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | 
 }
 
 /**
+ * @tc.name: HandleSetSessionContinueState
+ * @tc.desc: test HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t x = 1;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    data.WriteInt32(x);
+
+    int res = stub_->HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState1
+ * @tc.desc: test HandleSetSessionContinueState1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t x = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    data.WriteInt32(x);
+
+    int res = stub_->HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetSessionDump
  * @tc.desc: test HandleGetSessionDump
  * @tc.type: FUNC
@@ -896,7 +934,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function |
     data.WriteInt32(rect.height_);
 
     int res = stub_->HandleUpdateModalExtensionRect(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -919,7 +957,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Func
     data.WriteInt32(posY);
 
     int res = stub_->HandleProcessModalExtensionPointDown(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1048,7 +1086,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | Sma
     data.WriteInt32(7);
 
     int res = stub_->HandleUpdateExtWindowFlags(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1082,6 +1120,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
     data.WriteInt32Vector(persistentIds);
     data.WriteUInt64Vector(surfaceNodeIds);
     int res = stub_->HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleReleaseForegroundSessionScreenLock
+ * @tc.desc: test HandleReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }

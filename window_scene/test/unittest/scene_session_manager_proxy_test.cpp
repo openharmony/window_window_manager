@@ -520,47 +520,6 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, Function | 
 }
 
 /**
- * @tc.name: UpdateModalExtensionRect
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
-
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(token, nullptr);
-    Rect rect { 1, 2, 3, 4 };
-    sceneSessionManagerProxy->UpdateModalExtensionRect(token, rect);
-    sceneSessionManagerProxy->UpdateModalExtensionRect(nullptr, rect);
-    sceneSessionManagerProxy = nullptr;
-}
-
-/**
- * @tc.name: ProcessModalExtensionPointDown
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
-
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(token, nullptr);
-    sceneSessionManagerProxy->ProcessModalExtensionPointDown(token, 0, 0);
-    sceneSessionManagerProxy->ProcessModalExtensionPointDown(nullptr, 0, 0);
-    sceneSessionManagerProxy = nullptr;
-}
-
-/**
  * @tc.name: AddExtensionWindowStageToSCB
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -982,6 +941,47 @@ HWTEST_F(sceneSessionManagerProxyTest, GetTopWindowId, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: UpdateModalExtensionRect
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    Rect rect { 1, 2, 3, 4 };
+    sceneSessionManagerProxy->UpdateModalExtensionRect(token, rect);
+    sceneSessionManagerProxy->UpdateModalExtensionRect(nullptr, rect);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
+ * @tc.name: ProcessModalExtensionPointDown
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    sceneSessionManagerProxy->ProcessModalExtensionPointDown(token, 0, 0);
+    sceneSessionManagerProxy->ProcessModalExtensionPointDown(nullptr, 0, 0);
+    sceneSessionManagerProxy = nullptr;
+}
+
+/**
  * @tc.name: GetWindowStyleType
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1018,6 +1018,19 @@ HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Fu
     sceneSessionManagerProxy_ = nullptr;
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
+}
 }  // namespace
 }
 }

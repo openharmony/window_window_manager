@@ -90,7 +90,10 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    bool GetFreeMultiWindowModeEnabledState() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void NotifyExtensionTimeout(int32_t errorCode) override;
+    int32_t GetRealParentId() const override;
     WindowType GetParentWindowType() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
 
@@ -108,6 +111,7 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
@@ -122,7 +126,6 @@ private:
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     bool modalUIExtensionMayBeCovered_ { false };
     bool modalUIExtensionSelfLoadContent_ { false };
-    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

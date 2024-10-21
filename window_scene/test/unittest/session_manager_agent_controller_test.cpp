@@ -125,9 +125,9 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, Function |
  */
 HWTEST_F(SessionManagerAgentControllerTest, NotifyAccessibilityWindowInfo, Function | SmallTest | Level3)
 {
+    int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
-    int32_t pid = 65535;
     ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
         windowManagerAgent, type, pid));
     std::vector<sptr<AccessibilityWindowInfo>> infos;

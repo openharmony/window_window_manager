@@ -15,17 +15,10 @@
 
 #include "scene_session_dirty_manager.h"
 
-#include <cinttypes>
-#include <memory>
-#include <sstream>
-#include <parameter.h>
 #include <parameters.h>
 #include "screen_session_manager/include/screen_session_manager_client.h"
-#include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
-#include "wm_common_inner.h"
-#include "transaction/rs_uiextension_data.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -148,7 +141,7 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
     float width = screenProperty.GetBounds().rect_.GetWidth();
     float height = screenProperty.GetBounds().rect_.GetHeight();
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
-    Vector2f offset = sceneSession->GetPosition(useUIExtension);
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(useUIExtension);
     float rotate = 0.0f;
     Vector2f translate = CalRotationToTranslate(displayRotation, width, height, offset, rotate);
     transform = transform.Translate(translate).Rotate(rotate).Scale(scale, sceneSession->GetPivotX(),
@@ -169,7 +162,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
-        Vector2f translate = sceneSession->GetPosition(useUIExtension);
+        Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
         transform = transform.Translate(translate);
         transform = transform.Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY());
         transform = transform.Inverse();
@@ -187,7 +180,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         WLOGFE("sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRect();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) ||
@@ -230,7 +223,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         WLOGFE("sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRect();
     const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
     for (auto area : hotAreas) {
         MMI::Rect rect;
@@ -342,8 +335,8 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
 void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
 {
     sessionDirty_.store(true);
-    if (!hasPostTask_.load()) {
-        hasPostTask_.store(true);
+    bool hasPostTask = false;
+    if (hasPostTask_.compare_exchange_strong(hasPostTask, true)) {
         auto task = [this]() {
             hasPostTask_.store(false);
             if (!sessionDirty_.load() || flushWindowInfoCallback_ == nullptr) {
@@ -536,7 +529,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         return {};
     }
     Matrix3f transform;
-    WSRect windowRect = sceneSession->GetSessionRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRect();
     auto pid = sceneSession->GetCallingPid();
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();

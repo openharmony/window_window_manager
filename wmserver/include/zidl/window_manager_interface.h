@@ -90,6 +90,7 @@ public:
         TRANS_ID_UPDATE_EXTENSION_WINDOW_FLAGS,
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
+        TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -130,7 +131,7 @@ public:
     virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale) = 0;
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
     virtual void OffWindowZoom() = 0;
-    virtual WmErrorCode RaiseToAppTop(uint32_t windowId) = 0;
+    virtual WMError RaiseToAppTop(uint32_t windowId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
@@ -146,7 +147,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
     virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
     {
@@ -220,6 +221,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetFreeMultiWindowEnableState(bool& enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {
         return WMError::WM_OK;
@@ -237,6 +242,7 @@ public:
         return WMError::WM_OK;
     };
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
+    virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
 };
 }
 }

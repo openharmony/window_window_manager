@@ -67,6 +67,7 @@ public:
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     virtual bool SetDisplayState(DisplayState state) override;
     virtual DisplayState GetDisplayState(DisplayId displayId) override;
+    virtual bool TryToCancelScreenOff() override;
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override;
 
@@ -123,6 +124,9 @@ public:
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override;
+
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
+        float pivotX, float pivotY) override;
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;

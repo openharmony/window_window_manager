@@ -323,11 +323,9 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-          info.bundleName_ == "");
         TLOGI(WmsLogTag::WMS_SCB,
-            "root isCalledRightlyByCallerId result is: %{public}d", isCalledRightlyByCallerId);
-        info.isCalledRightlyByCallerId_ = isCalledRightlyByCallerId;
+            "update isCalledRightlyByCallerId from :%{public}d to false", info.isCalledRightlyByCallerId_);
+        info.isCalledRightlyByCallerId_ = false;
     }
 }
 
@@ -347,7 +345,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
                     info.sessionAffinity);
             } else {
                 ComparedSessionInfo compareSessionInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.isAtomicService_ };
+                    info.appIndex_, info.windowType_, info.isAtomicService_ };
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(compareSessionInfo);
             }
         }

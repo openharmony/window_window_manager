@@ -29,13 +29,13 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
-    const static uint32_t MAX_RETRY_NUM = 6;
-    const static uint32_t RETRY_WAIT_MS = 500;
-    const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 15000;
-    std::atomic<bool> g_dmIsDestroyed = false;
-    std::mutex snapBypickerMutex;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
+const static uint32_t MAX_RETRY_NUM = 6;
+const static uint32_t RETRY_WAIT_MS = 500;
+const static uint32_t MAX_DISPLAY_SIZE = 32;
+const static uint32_t MAX_INTERVAL_US = 15000;
+std::atomic<bool> g_dmIsDestroyed = false;
+std::mutex snapBypickerMutex;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -59,6 +59,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode);
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
+    void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     DMError SetFoldStatusLockedFromJs(bool locked);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -941,6 +942,17 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
 DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
 {
     return pImpl_->SetFoldDisplayModeFromJs(mode);
+}
+
+void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    pImpl_->SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+}
+
+void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
+    float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
 
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
@@ -1880,6 +1892,12 @@ bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback ca
 DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayState(displayId);
+}
+
+bool DisplayManager::TryToCancelScreenOff()
+{
+    WLOGFD("[UL_POWER]TryToCancelScreenOff start");
+    return SingletonContainer::Get<DisplayManagerAdapter>().TryToCancelScreenOff();
 }
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)

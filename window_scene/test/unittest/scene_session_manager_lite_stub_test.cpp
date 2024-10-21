@@ -130,7 +130,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
     {
     }
-    WMError CheckWindowId(int32_t windowId, int32_t &pid) override
+    WMError CheckWindowId(int32_t windowId, int32_t& pid) override
     {
         return WMError::WM_OK;
     }
@@ -139,6 +139,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         MainWindowInfo mainWindowInfo;
         topNInfo.push_back(mainWindowInfo);
         return WMError::WM_OK;
+    }
+    WSError RaiseWindowToTop(int32_t persistentId) override
+    {
+        return WSError::WS_OK;
     }
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
     {
@@ -152,10 +156,6 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         clearFailedIds.push_back(1);
         return WMError::WM_OK;
     }
-    WSError RaiseWindowToTop(int32_t persistentId) override
-    {
-        return WSError::WS_OK;
-    }
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
     {
@@ -166,6 +166,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError TerminateSessionByPersistentId(int32_t persistentId) override
     {
         return WMError::WM_OK;
     }
@@ -613,6 +617,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, Function | S
 }
 
 /**
+ * @tc.name: HandleRaiseWindowToTop
+ * @tc.desc: test function : HandleRaiseWindowToTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleGetAllMainWindowInfos
  * @tc.desc: test function : HandleGetAllMainWindowInfos
  * @tc.type: FUNC
@@ -643,22 +663,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, Function | Sm
 }
 
 /**
- * @tc.name: HandleRaiseWindowToTop
- * @tc.desc: test function : HandleRaiseWindowToTop
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, Function | SmallTest | Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleGetWindowStyleType
  * @tc.desc: test function : HandleGetWindowStyleType
  * @tc.type: FUNC
@@ -669,6 +673,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowStyleType, Function | S
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleTerminateSessionByPersistentId
+ * @tc.desc: test function : HandleTerminateSessionByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

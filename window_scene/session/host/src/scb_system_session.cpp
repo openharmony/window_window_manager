@@ -65,15 +65,16 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
 
-WSError SCBSystemSession::NotifyClientToUpdateRect(std::shared_ptr<RSTransaction> rsTransaction)
+WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
+    std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction]() {
+    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
             if (Session::IsScbCoreEnabled()) {
@@ -243,6 +244,15 @@ void SCBSystemSession::NotifyClientToUpdateAvoidArea()
     if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
         keyboardPanelRectUpdateCallback_ && isKeyboardPanelEnabled_) {
         keyboardPanelRectUpdateCallback_();
+    }
+}
+
+void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
+{
+    TLOGI(WmsLogTag::WMS_PIPELINE, "change isNeedSyncGlobalPos from %{public}d to %{public}d",
+        isNeedSyncGlobalPos_, needSync);
+    if (isNeedSyncGlobalPos_ != needSync) {
+        isNeedSyncGlobalPos_ = needSync;
     }
 }
 } // namespace OHOS::Rosen

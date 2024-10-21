@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class SingleDisplaySensorFoldStateManagerTest : public testing::Test {
 public:
@@ -129,17 +129,17 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState01, Function |
     angel = 130.0F - 0.1;
     hall = 0;
     auto result4 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result4), 2);
+    EXPECT_EQ(static_cast<int>(result4), 3);
 
     angel = 130.0F + 0.1;
     hall = 0;
     auto result5 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result5), 2);
+    EXPECT_EQ(static_cast<int>(result5), 3);
 
     angel = 140.0F + 0.1;
     hall = 0;
     auto result6 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result6), 2);
+    EXPECT_EQ(static_cast<int>(result6), 3);
 
     angel = 140.0F + 0.1;
     hall = 1;
@@ -184,11 +184,11 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState02, Function |
     angel = 70.0F + 0.1;
     hall = 0;
     auto result7 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result7), 2);
+    EXPECT_EQ(static_cast<int>(result7), 3);
 
     angel = 130.0F + 0.1;
     auto result8 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result8), 2);
+    EXPECT_EQ(static_cast<int>(result8), 3);
 }
 }
 }

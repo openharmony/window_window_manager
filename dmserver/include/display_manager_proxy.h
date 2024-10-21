@@ -76,6 +76,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
+    bool TryToCancelScreenOff() override;
     std::vector<DisplayId> GetAllDisplayIds() override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;

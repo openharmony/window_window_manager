@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
+#include "display_info.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -43,6 +44,12 @@ namespace Rosen {
 namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+
+/*
+ * DFX
+ */
+const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
+constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
 }
 
 struct WindowTitleVisibleFlags {
@@ -180,7 +187,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
-    WSError NotifyCloseExistPipWindow() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams) override;
@@ -207,11 +213,17 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
+
+    /*
+     * PiP Window
+     */
+    WSError NotifyCloseExistPipWindow() override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
-
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
+    void SetAutoStartPiP(bool isAutoStart) override;
+
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -233,6 +245,8 @@ public:
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
+    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -248,6 +262,7 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
+    void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
@@ -260,9 +275,11 @@ protected:
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const sptr<DisplayInfo>& info = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
+    void NotifySwitchFreeMultiWindow(bool enable);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
@@ -272,6 +289,7 @@ protected:
     void RegisterFrameLayoutCallback();
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
 
+    sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
     WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
@@ -330,6 +348,18 @@ protected:
     }
 
     /*
+     * DFX
+     */
+    void SetUIContentComplete();
+    void AddSetUIContentTimeoutCheck();
+    void NotifySetUIContentComplete();
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+    std::atomic_bool setUIContentCompleted_ { false };
+    enum TimeoutErrorCode : int32_t {
+        SET_UICONTENT_TIMEOUT = 1000
+    };
+
+    /*
      * Window Lifecycle
      */
     bool hasFirstNotifyInteractive_ = false;
@@ -373,6 +403,8 @@ private:
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -415,6 +447,7 @@ private:
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex subWindowCloseListenersMutex_;
+    static std::mutex switchFreeMultiWindowListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
@@ -431,6 +464,7 @@ private:
         windowTitleButtonRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
+    static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

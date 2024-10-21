@@ -143,6 +143,7 @@ int32_t WindowManagerImpl::FindWindow(std::string name, int64_t& windowId)
     }
 }
 
+/** @note @window.hierarchy */
 int32_t WindowManagerImpl::GetLastWindow(OHOS::AbilityRuntime::Context* ctx, int64_t& id)
 {
     sptr<Window> window = nullptr;

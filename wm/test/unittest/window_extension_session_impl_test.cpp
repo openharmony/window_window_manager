@@ -368,7 +368,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, Function
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    NotifyTransferComponentDataFunc func = [](const AAFwk::WantParams &wantParams) -> AAFwk::WantParams {
+    NotifyTransferComponentDataFunc func = [](const AAFwk::WantParams& wantParams) -> AAFwk::WantParams {
         AAFwk::WantParams retWantParams;
         return retWantParams;
     };
@@ -402,7 +402,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync02, Func
     ASSERT_NE(nullptr, window_->hostSession_);
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    NotifyTransferComponentDataForResultFunc func = [](const AAFwk::WantParams &wantParams) -> AAFwk::WantParams {
+    NotifyTransferComponentDataForResultFunc func = [](const AAFwk::WantParams& wantParams) -> AAFwk::WantParams {
         AAFwk::WantParams retWantParams;
         return retWantParams;
     };
@@ -815,6 +815,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
     std::shared_ptr<RSTransaction> rsTransaction;
     ASSERT_NE(nullptr, window_);
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    window_->UpdateRectForOtherReason(rect, wmReason);
 }
 
 /**
@@ -1529,6 +1530,21 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
     ASSERT_NE(window_, nullptr);
     window_->ReportModalUIExtensionMayBeCovered(true);
     window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: GetRealParentId
+ * @tc.desc: GetRealParentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->SetRealParentId(12345);
+    EXPECT_EQ(window_->GetRealParentId(), 12345);
+
+    window_->property_ = nullptr;
+    EXPECT_EQ(window_->GetRealParentId(), INVALID_WINDOW_ID);
 }
 }
 } // namespace Rosen

@@ -15,23 +15,13 @@
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/scene_session_manager_lite.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLite" };
-std::recursive_mutex g_instanceMutex;
 } // namespace
 
-SceneSessionManagerLite& SceneSessionManagerLite::GetInstance()
-{
-    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
-    static SceneSessionManagerLite* instance = nullptr;
-    if (instance == nullptr) {
-        instance = new SceneSessionManagerLite();
-    }
-    return *instance;
-}
+WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManagerLite)
 
 WSError SceneSessionManagerLite::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
@@ -211,6 +201,11 @@ WMError SceneSessionManagerLite::GetWindowModeType(WindowModeType& windowModeTyp
     return SceneSessionManager::GetInstance().GetWindowModeType(windowModeType);
 }
 
+WSError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
+{
+    return SceneSessionManager::GetInstance().RaiseWindowToTop(persistentId);
+}
+
 WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
@@ -227,11 +222,6 @@ WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& p
     return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
 }
 
-WSError SceneSessionManagerLite::RaiseWindowToTop(int32_t persistentId)
-{
-    return SceneSessionManager::GetInstance().RaiseWindowToTop(persistentId);
-}
-
 WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t type,
     const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
 {
@@ -246,5 +236,10 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
 WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
 {
     return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
+}
+
+WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace OHOS::Rosen

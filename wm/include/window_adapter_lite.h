@@ -41,17 +41,18 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
+    virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
-    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;

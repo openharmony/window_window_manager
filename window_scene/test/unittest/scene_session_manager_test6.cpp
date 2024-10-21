@@ -35,8 +35,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    using ConfigItem = WindowSceneConfig::ConfigItem;
+const std::string EMPTY_DEVICE_ID = "";
+using ConfigItem = WindowSceneConfig::ConfigItem;
 }
 class SceneSessionManagerTest6 : public testing::Test {
 public:
@@ -128,6 +128,23 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->MissionChanged(prevSession, currSession);
     EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
+    std::shared_ptr<RSUIExtensionData> secExtData = std::make_shared<RSUIExtensionData>(callbackData);
+    ssm_->currentUserId_ = 101;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+
+    ssm_->currentUserId_ = 100;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
 }
 
 /**
@@ -1216,6 +1233,44 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowStyleType, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: TerminateSessionByPersistentId
+ * @tc.desc: Success to terminate session by persistentId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId001, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    auto result = ssm_->TerminateSessionByPersistentId(sceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: TerminateSessionByPersistentId
+ * @tc.desc: Fail to terminate session by persistentId, invalid persistentId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    auto result = ssm_->TerminateSessionByPersistentId(INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: GetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC
@@ -1244,6 +1299,31 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
+}
+
+/**
+ * @tc.name: SetRootSceneProcessBackEventFunc
+ * @tc.desc: test function : SetRootSceneProcessBackEventFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "SetRootSceneProcessBackEventFunc";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->focusedSessionId_ = sceneSession->GetPersistentId();
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->ProcessBackEvent();
+
+    RootSceneProcessBackEventFunc func = []() {};
+    ssm_->SetRootSceneProcessBackEventFunc(func);
+    ssm_->ProcessBackEvent();
 }
 }
 } // namespace Rosen

@@ -459,7 +459,7 @@ HWTEST_F(WindowAdapterTest, RaiseToAppTop, Function | SmallTest | Level2)
     auto ret = windowAdapter.RaiseToAppTop(windowId);
     std::shared_ptr<MMI::KeyEvent> event = nullptr;
     windowAdapter.DispatchKeyEvent(windowId, event);
-    ASSERT_EQ(WmErrorCode::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -597,6 +597,19 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
 
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 }
 }
 }

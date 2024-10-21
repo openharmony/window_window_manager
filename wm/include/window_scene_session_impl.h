@@ -69,8 +69,8 @@ public:
     WMError MoveToAsync(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
-    WmErrorCode RaiseToAppTop() override;
-    WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
+    WMError RaiseToAppTop() override;
+    WMError RaiseAboveTarget(int32_t subWindowId) override;
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
@@ -161,6 +161,7 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
+    virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
@@ -177,7 +178,6 @@ protected:
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     bool VerifySubWindowLevel(uint32_t parentId);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
     void LimitWindowSize(uint32_t& width, uint32_t& height);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr);
     void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
@@ -215,7 +215,8 @@ private:
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
-    void NotifyDisplayInfoChange();
+    void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Window Immersive
@@ -230,7 +231,7 @@ private:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
-    void PreLayoutOnShow(WindowType type);
+    void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
     /**
      * Sub Window

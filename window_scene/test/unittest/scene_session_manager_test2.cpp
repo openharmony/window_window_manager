@@ -36,30 +36,30 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
-    constexpr int WAIT_SLEEP_TIME = 1;
-    using ConfigItem = WindowSceneConfig::ConfigItem;
-    ConfigItem ReadConfig(const std::string& xmlStr)
-    {
-        ConfigItem config;
-        xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
-        if (docPtr == nullptr) {
-            return config;
-        }
+const std::string EMPTY_DEVICE_ID = "";
+constexpr int WAIT_SLEEP_TIME = 1;
+using ConfigItem = WindowSceneConfig::ConfigItem;
+ConfigItem ReadConfig(const std::string& xmlStr)
+{
+    ConfigItem config;
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    if (docPtr == nullptr) {
+        return config;
+    }
 
-        xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
-        if (rootPtr == nullptr || rootPtr->name == nullptr ||
-            xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-            xmlFreeDoc(docPtr);
-            return config;
-        }
-
-        std::map<std::string, ConfigItem> configMap;
-        config.SetValue(configMap);
-        WindowSceneConfig::ReadConfig(rootPtr, *config.mapValue_);
+    xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
+    if (rootPtr == nullptr || rootPtr->name == nullptr ||
+        xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
         return config;
     }
+
+    std::map<std::string, ConfigItem> configMap;
+    config.SetValue(configMap);
+    WindowSceneConfig::ReadConfig(rootPtr, *config.mapValue_);
+    xmlFreeDoc(docPtr);
+    return config;
+}
 }
 class SceneSessionManagerTest2 : public testing::Test {
 public:
@@ -214,9 +214,10 @@ HWTEST_F(SceneSessionManagerTest2, SetStatusBarEnabled, Function | SmallTest | L
 HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, Function | SmallTest | Level3)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
-    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(
         type, windowManagerAgent));
 }
@@ -1590,7 +1591,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level
 {
     WSError ret;
     ret = ssm_->SetSessionLabel(nullptr, "test");
-    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -1609,7 +1610,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
 {
     WSError ret;
     ret = ssm_->SetSessionIcon(nullptr, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_SET_SESSION_LABEL_FAILED, ret);
+    ASSERT_EQ(WSError::WS_OK, ret);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";

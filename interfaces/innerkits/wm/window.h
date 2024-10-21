@@ -28,31 +28,31 @@
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
-    class Configuration;
-    class Ability;
+class Configuration;
+class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
-    class AbilityContext;
-    class Context;
+class AbilityContext;
+class Context;
 }
 
 namespace OHOS::AAFwk {
-    class Want;
-    class WantParams;
+class Want;
+class WantParams;
 }
 
 namespace OHOS::Ace {
-    class UIContent;
+class UIContent;
 }
 
 namespace OHOS::Media {
-    class PixelMap;
+class PixelMap;
 }
 
 namespace OHOS::Accessibility {
@@ -459,6 +459,21 @@ public:
      * @param terminateCloseProcess Whather need to terminate the subwindow close process.
      */
     virtual void OnSubWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
+ * @class ISwitchFreeMultiWindowListener
+ *
+ * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
+ */
+class ISwitchFreeMultiWindowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free multi window state changed.
+     *
+     * @param enable Whether free multi window state enabled.
+     */
+    virtual void OnSwitchFreeMultiWindow(bool enable) {}
 };
 
 /**
@@ -972,7 +987,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseToAppTop() { return WmErrorCode::WM_OK; }
+    virtual WMError RaiseToAppTop() { return WMError::WM_OK; }
     /**
      * @brief Set skip flag of snapshot.
      *
@@ -1629,7 +1644,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Hide non-system floating windows.
@@ -1691,6 +1706,13 @@ public:
      * @param status pip control status.
      */
     virtual void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) {}
+
+    /**
+     * @brief set auto start status for window.
+     *
+     * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     */
+    virtual void SetAutoStartPiP(bool isAutoStart) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -1990,6 +2012,24 @@ public:
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ 
+    /**
+     * @brief Unregister switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set Shaped Window Mask.
      *
      * @param windowMask Mask of the shaped window.
@@ -2135,12 +2175,26 @@ public:
     virtual WMError SetContinueState(int32_t continueState) { return WMError::WM_DO_NOTHING; }
 
     /**
+     * @brief Get whether the free multi-window mode is enabled or not.
+     *
+     * @return true means the free multi-window mode is enabled, and false means the opposite.
+     */
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+
+    /**
      * @brief Get the window status of current window.
      *
      * @param windowStatus
      * @return WMError.
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
     /*
      * @brief Get the parent window type of UIExtension

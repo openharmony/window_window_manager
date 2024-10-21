@@ -21,7 +21,8 @@
 namespace OHOS {
 namespace Rosen {
 namespace PermissionConstants {
-    constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
+constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
+constexpr const char* PERMISSION_KILL_APP_PROCESS = "ohos.permission.KILL_APP_PROCESSES";
 }
 class SessionPermission {
 public:
@@ -42,6 +43,7 @@ public:
     static bool IsBetaVersion();
     static bool IsFoundationCall();
     static std::string GetCallingBundleName();
+    static bool IsSystemAppCall();
 };
 } // Rosen
 } // OHOS
