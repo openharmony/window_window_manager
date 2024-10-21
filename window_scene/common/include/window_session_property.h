@@ -207,14 +207,14 @@ public:
     int32_t GetRealParentId() const;
     void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     UIExtensionUsage GetUIExtensionUsage() const;
-    void SetExtensionFlag(bool isExtensionFlag);
-    bool GetExtensionFlag() const;
+    void SetIsUIExtFirstSubWindow(bool isUIExtFirstSubWindow);
+    bool GetIsUIExtFirstSubWindow() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
     void SetParentWindowType(WindowType parentWindowType);
     WindowType GetParentWindowType() const;
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
-    bool GetIsUIExtensionSubWindowFlag() const;
+    void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
+    bool GetIsUIExtAnySubWindow() const;
 
     /*
      * Multi instance
@@ -362,9 +362,9 @@ private:
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
-    bool isExtensionFlag_ = false;
+    bool isUIExtFirstSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
-    bool isUIExtensionSubWindowFlag_ = false;
+    bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /*

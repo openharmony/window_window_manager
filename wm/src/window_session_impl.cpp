@@ -77,16 +77,6 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     }
     return contentInfoType;
 }
-
-bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
-{
-    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
-        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
-        wmReason == WindowSizeChangeReason::MAXIMIZE) {
-        return false;
-    }
-    return true;
-}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -193,12 +183,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingSessionId(option->GetCallingWindow());
-    property_->SetExtensionFlag(option->GetExtensionTag());
+    property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
+    property_->SetIsUIExtAnySubWindow(option->GetIsUIExtAnySubWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -215,8 +205,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
-    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
-           property_->GetIsPcAppInPad();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+}
+
+bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -563,7 +557,7 @@ void WindowSessionImpl::DestroySubWindow()
 {
     int32_t parentPersistentId = property_->GetParentPersistentId();
     const int32_t persistentId = GetPersistentId();
-    if (property_->GetExtensionFlag() == true) {
+    if (property_->GetIsUIExtFirstSubWindow()) {
         auto extensionWindow = FindExtensionWindowWithContext();
         if (extensionWindow != nullptr) {
             parentPersistentId = extensionWindow->GetPersistentId();
@@ -599,7 +593,7 @@ void WindowSessionImpl::DestroySubWindow()
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetIsUIExtFirstSubWindow();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
                 subWindow->GetPersistentId(), isExtDestroyed);
             auto ret = subWindow->Destroy(isExtDestroyed);
@@ -743,6 +737,16 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
 
+bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+        wmReason == WindowSizeChangeReason::MAXIMIZE) {
+        return false;
+    }
+    return true;
+}
+
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -763,7 +767,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
-        bool ifNeedCommitRsTransaction = CheckIfNeedCommitRsTransaction(wmReason);
+        bool ifNeedCommitRsTransaction = window->CheckIfNeedCommitRsTransaction(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
@@ -936,6 +940,11 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 
 bool WindowSessionImpl::IsFocused() const
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return false;
+    }
+
     TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_.load());
     return isFocused_;
 }
@@ -1193,7 +1202,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT: {
-            if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
+            if (isUIExtensionAbilityProcess_ && property_->GetIsUIExtFirstSubWindow()) {
                 // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
@@ -1550,6 +1559,11 @@ bool WindowSessionImpl::IsMainWindowTopmost() const
 
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1886,6 +1900,10 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (modalityType == ModalityType::APPLICATION_MODALITY && !IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     WMError modalRet = isModal ?
@@ -2882,7 +2900,7 @@ WSError WindowSessionImpl::NotifyDestroy()
             }
         }
     } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_) {
+        if (property_->GetIsUIExtFirstSubWindow() && !isUIExtensionAbilityProcess_) {
             Destroy();
         }
     }
