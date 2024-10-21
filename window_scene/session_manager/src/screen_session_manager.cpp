@@ -105,6 +105,7 @@ static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
+static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -1683,6 +1684,14 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             that.foldScreenPowerInit_();
         }
         that.RegisterSettingRotationObserver();
+        if (that.defaultDpi) {
+            auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
+            if (!ret) {
+                TLOGE(WmsLogTag::DMS, "set setting defaultDpi failed");
+            } else {
+                TLOGI(WmsLogTag::DMS, "set setting defaultDpi:%{public}d", that.defaultDpi);
+            }
+        }
     }
 }
 
