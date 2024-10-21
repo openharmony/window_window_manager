@@ -1415,6 +1415,18 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         return sessionDisplayPowerController_->SetDisplayState(state);
     }
 
+    UpdateDisplayState(screenIds, state);
+    bool ret = sessionDisplayPowerController_->SetDisplayState(state);
+    if (!ret && state == DisplayState::OFF) {
+        state = lastDisplayState_;
+        UpdateDisplayState(screenIds, state);
+    }
+    lastDisplayState_ = state;
+    return ret;
+}
+
+void ScreenSessionManager::UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state)
+{
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screenSession = GetScreenSession(screenId);
         if (screenSession == nullptr) {
@@ -1426,7 +1438,6 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         TLOGI(WmsLogTag::DMS, "[UL_POWER]set screenSession displayState property: %{public}u",
             screenSession->GetScreenProperty().GetDisplayState());
     }
-    return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
 void ScreenSessionManager::BlockScreenOnByCV(void)
