@@ -618,6 +618,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
+        return ERR_INVALID_DATA;
+    }
     bool hasStartWindowOption = false;
     if (!data.ReadBool(hasStartWindowOption)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");

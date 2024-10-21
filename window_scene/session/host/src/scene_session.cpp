@@ -3317,6 +3317,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
     info.appInstanceKey_ = abilitySessionInfo->instanceKey;
+    info.isFromIcon_ = abilitySessionInfo->isFromIcon;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
     }
@@ -3333,10 +3334,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "abilityName:%{public}s, appIndex:%{public}d, affinity:%{public}s. "
         "callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId: %{public}d "
-        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s",
+        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_,
-        info.windowMode, info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str());
+        info.windowMode, info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(),
+        info.isFromIcon_);
     return info;
 }
 
