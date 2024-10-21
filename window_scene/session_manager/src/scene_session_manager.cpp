@@ -6995,17 +6995,14 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
                 continue;
             }
             auto sceneSession = iter->second;
-            if (sceneSession == nullptr) {
-                continue;
-            }
-            if (sceneSession->GetSurfaceNode() == nullptr) {
-                continue;
-            }
-            if (isBlackList) {
-                surfaceNodeIds.push_back(missionId);
+            if (sceneSession == nullptr || sceneSession->GetSurfaceNode() == nullptr) {
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
+                surfaceNodeIds.push_back(missionId);
+                continue;
+            }
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }
@@ -10807,6 +10804,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
             auto leashWinSurfaceNode = sceneSession->GetLeashWinSurfaceNode();
             if (leashWinSurfaceNode != nullptr) {
                 surfaceNodeIds.push_back(leashWinSurfaceNode->GetId());
+                surfaceNodeIds.push_back(persistentId);
             }
         }
     }
