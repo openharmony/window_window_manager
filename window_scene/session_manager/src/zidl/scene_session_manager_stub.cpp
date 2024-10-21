@@ -512,12 +512,12 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        TLOGE(WmsLogTag::WMS_LIFE,"GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfo error");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LIFE,"write GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "write GetSessionInfo result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

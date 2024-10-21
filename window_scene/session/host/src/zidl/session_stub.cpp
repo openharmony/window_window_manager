@@ -408,10 +408,11 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
+    WSError errCode;
     TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
     if (eventId >= static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) &&
         eventId <= static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
-        WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+        errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
@@ -422,15 +423,16 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SYSTEM, "in! eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_SYSTEM, "In!");
     uint32_t eventId = 0;
     if (!data.ReadUint32(eventId)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "read eventId failed");
         return ERR_INVALID_DATA;
     }
+    WSError errCode;
     if (eventId >= static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) &&
         eventId <= static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
-        WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
+        errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
     } else {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;

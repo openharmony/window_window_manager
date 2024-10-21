@@ -455,11 +455,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
 }
 
 /**
- * @tc.name: HandleSetSessionContinueState_InvalidContinueStateInt
+ * @tc.name: HandleSetSessionContinueState1
  * @tc.desc: test function : HandleSetSessionContinueState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState_InvalidContinueStateInt, Function | SmallTest | Level1) {
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level1)
+{
     data.WriteRemoteObject(nullptr);
     data.WriteInt32(-2);
     int32_t result = sceneSessionManagerLiteStub_->
@@ -468,11 +469,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState_InvalidC
 }
 
 /**
- * @tc.name: HandleSetSessionContinueState_ValidContinueStateInt
+ * @tc.name: HandleSetSessionContinueState2
  * @tc.desc: test function : HandleSetSessionContinueState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState_ValidContinueStateInt, Function | SmallTest | Level1) {
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState2, Function | SmallTest | Level1)
+{
     sptr<IRemoteObject> token = new IRemoteObject();
     data.WriteRemoteObject(token);
     data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
