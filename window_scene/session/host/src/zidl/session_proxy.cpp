@@ -1439,7 +1439,7 @@ WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         WLOGFE("write height_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(static_cast<int32_t>(reason))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("reason write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
