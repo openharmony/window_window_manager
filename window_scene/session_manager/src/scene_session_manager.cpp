@@ -570,18 +570,17 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
-    WLOGFI("Enter");
+    TLOGI(WmsLogTag::DEFAULT, "Enter");
     auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
-            WLOGFI("fail to find session by token.");
+            TLOGE(WmsLogTag::DEFAULT, "fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoContinueState(continueState);
-        DistributedClient dmsClient;
-        dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
+        DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState));
-        WLOGFI("SetSessionContinueState id:%{public}d, continueState:%{public}d",
+        TLOGI(WmsLogTag::DEFAULT, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
@@ -6157,11 +6156,10 @@ WSError SceneSessionManager::GetMainWindowStatesByPid(int32_t pid, std::vector<M
 int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                                                std::vector<SessionInfoBean>& sessionInfos)
 {
-    WLOGFI("GetRemoteSessionInfos From Dms begin");
-    DistributedClient dmsClient;
-    int result = dmsClient.GetMissionInfos(deviceId, numMax, sessionInfos);
+    TLOGI(WmsLogTag::DEFAULT, "begin");
+    int result = DistributedClient::GetInstance().GetMissionInfos(deviceId, numMax, sessionInfos);
     if (result != ERR_OK) {
-        WLOGFE("GetRemoteMissionInfos failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
@@ -6598,11 +6596,11 @@ WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IR
 int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                                       AAFwk::MissionSnapshot& sessionSnapshot)
 {
-    WLOGFI("GetRemoteSessionSnapshotInfo begin");
-    DistributedClient dmsClient;
-    int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId, sessionId, sessionSnapshot);
+    TLOGI(WmsLogTag::DEFAULT, "begin");
+    int result = DistributedClient::GetInstance().GetRemoteMissionSnapshotInfo(deviceId,
+        sessionId, sessionSnapshot);
     if (result != ERR_OK) {
-        WLOGFE("GetRemoteMissionSnapshotInfo failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
         return result;
     }
     return ERR_OK;
