@@ -258,7 +258,6 @@ void SceneSessionManager::Init()
     taskScheduler_->SetExportHandler(eventHandler_);
 
     SetFfrtWorkerNum(ret);
-    
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
