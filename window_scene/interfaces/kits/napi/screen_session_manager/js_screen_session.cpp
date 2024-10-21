@@ -528,28 +528,27 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     PowerStateChangeReason reason)
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
-    WLOGD("[UL_POWER]Call js callback: %{public}s.", callbackType.c_str());
+    WLOGD("[UL_POWER]%{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("[UL_POWER]Callback %{public}s is unregistered!", callbackType.c_str());
+        WLOGFW("[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
         return;
     }
-
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason, env = env_]() {
+    auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPowerStatusChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("[UL_POWER]Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            WLOGFE("[UL_POWER]%{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("[UL_POWER]Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            WLOGFE("[UL_POWER]%{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("[UL_POWER]Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            WLOGFE("[UL_POWER]%{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value displayPowerEvent = CreateJsValue(env, static_cast<int32_t>(event));
@@ -560,7 +559,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
         } else {
