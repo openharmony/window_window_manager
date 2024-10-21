@@ -90,7 +90,7 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
 
     auto uiContent= Ace::UIContent::Create(nullptr,nullptr);
     rootScene.uiContent_=std::move(uiContent);
-    rootScene.UpdateViewportConfig(rect,WindowSizeChangeReason::UNDEFINED);
+    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
     rect.width_ = MOCK_LEM_SUB_WIDTH;
     rect.height_ = MOCK_LEM_SUB_HEIGHT;
@@ -200,7 +200,7 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
     
     rootScene.SetFrameLayoutFinishCallback(nullptr);
 
-    auto uiContent= Ace::UIContent::Create(nullptr,nullptr);
+    auto uiContent= Ace::UIContent::Create(nullptr, nullptr);
     rootScene.uiContent_=std::move(uiContent);
     rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
