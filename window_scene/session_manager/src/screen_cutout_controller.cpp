@@ -47,7 +47,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
 
 void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId)
 {
-    std::vector<DMRect>  finalVector;
+    std::vector<DMRect> finalVector;
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
         TLOGE(WmsLogTag::DMS, "displayInfo invalid");
@@ -55,12 +55,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         return;
     }
 
-    ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(displayInfo->GetScreenId());
-    TLOGD(WmsLogTag::DMS, "display: [W: %{public}u, H: %{public}u, R: %{public}u], screen: [W: %{public}f, "
-        "H: %{public}f, R: %{public}u]", displayInfo->GetWidth(), displayInfo->GetHeight(), displayInfo->GetRotation(),
-        screenProperty.GetBounds().rect_.GetWidth(), screenProperty.GetBounds().rect_.GetHeight(),
-        screenProperty.GetScreenRotation());
-    Rotation currentRotation = screenProperty.GetScreenRotation();
+    Rotation currentRotation = displayInfo->GetRotation();
     std::vector<DMRect> displayBoundaryRects;
     if (ScreenSessionManager::GetInstance().IsFoldable() &&
         (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
@@ -68,25 +63,25 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     } else {
         displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     }
-    CheckBoundaryRects(displayBoundaryRects, screenProperty);
+    CheckBoundaryRects(displayBoundaryRects, displayInfo);
     if (currentRotation == Rotation::ROTATION_0) {
         boundaryRects = displayBoundaryRects;
         return;
     }
 
-    uint32_t screenWidth = static_cast<uint32_t>(screenProperty.GetBounds().rect_.GetWidth());
-    uint32_t screenHeight = static_cast<uint32_t>(screenProperty.GetBounds().rect_.GetHeight());
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
-            CurrentRotation90(displayBoundaryRects, finalVector, screenWidth);
+            CurrentRotation90(displayBoundaryRects, finalVector, displayWidth);
             break;
         }
         case Rotation::ROTATION_180: {
-            CurrentRotation180(displayBoundaryRects, finalVector, screenWidth, screenHeight);
+            CurrentRotation180(displayBoundaryRects, finalVector, displayWidth, displayHeight);
             break;
         }
         case Rotation::ROTATION_270: {
-            CurrentRotation270(displayBoundaryRects, finalVector, screenHeight);
+            CurrentRotation270(displayBoundaryRects, finalVector, displayHeight);
             break;
         }
         default:
@@ -131,16 +126,21 @@ void ScreenCutoutController::CurrentRotation270(const std::vector<DMRect>& displ
     }
 }
 
-void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, ScreenProperty screenProperty)
+void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo)
 {
-    uint32_t screenWidth = static_cast<uint32_t>(screenProperty.GetBounds().rect_.GetWidth());
-    uint32_t screenHeight = static_cast<uint32_t>(screenProperty.GetBounds().rect_.GetHeight());
+    if (!displayInfo) {
+        TLOGE(WmsLogTag::DMS, "displayInfo invalid");
+        return;
+    }
+
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     for (auto iter = boundaryRects.begin(); iter != boundaryRects.end();) {
         DMRect boundaryRect = *iter;
         if (boundaryRect.posX_ < 0 || boundaryRect.posY_ < 0 ||
-            static_cast<int32_t>(boundaryRect.width_) + boundaryRect.posX_ > static_cast<int32_t>(screenWidth) ||
-            static_cast<int32_t>(boundaryRect.height_) + boundaryRect.posY_ > static_cast<int32_t>(screenHeight) ||
-            boundaryRect.width_ > screenWidth || boundaryRect.height_ > screenHeight ||
+            static_cast<int32_t>(boundaryRect.width_) + boundaryRect.posX_ > static_cast<int32_t>(displayWidth) ||
+            static_cast<int32_t>(boundaryRect.height_) + boundaryRect.posY_ > static_cast<int32_t>(displayHeight) ||
+            boundaryRect.width_ > displayWidth || boundaryRect.height_ > displayHeight ||
             boundaryRect.IsUninitializedRect()) {
             TLOGE(WmsLogTag::DMS, "boundaryRect boundary is invalid");
             iter = boundaryRects.erase(iter);
