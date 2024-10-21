@@ -380,9 +380,13 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleSetSessionLabel!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    std::string label = data.ReadString();
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read label failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetSessionLabel(token, label);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -390,7 +394,7 @@ int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleSetSessionIcon!");
+    TLOGD(WmsLogTag::WMS_LAYOUT"In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {

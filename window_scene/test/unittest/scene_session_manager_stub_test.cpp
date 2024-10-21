@@ -2124,6 +2124,28 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
     int res = stub_->HandleIsPcOrPadFreeMultiWindowMode(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel_ValidInput_Success, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+
+    std::string label = "TestLabel";
+    data.WriteString(label);
+
+    // 调用待测试的函数
+    int result = stub_->HandleSetSessionLabel(data, reply);
+
+    // 验证结果是否为0，即成功
+    EXPECT_EQ(result, 0);
+
+    // 校验reply的内容
+    int32_t errorCode = reply.ReadInt32();
+    EXPECT_EQ(errorCode, 0); // 期望没有错误
+}
 }
 }
 }
