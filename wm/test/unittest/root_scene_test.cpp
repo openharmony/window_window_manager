@@ -88,8 +88,8 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
-    auto uiContent= Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_=std::move(uiContent);
+    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
+    rootScene.uiContent_ = std::move(uiContent);
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
     rect.width_ = MOCK_LEM_SUB_WIDTH;
@@ -111,8 +111,8 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateConfiguration(configuration);
 
-    auto uiContent= Ace::UIContent::Create(nullptr,nullptr);
-    rootScene.uiContent_=std::move(uiContent);
+    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
+    rootScene.uiContent_ = std::move(uiContent);
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -200,8 +200,8 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
     
     rootScene.SetFrameLayoutFinishCallback(nullptr);
 
-    auto uiContent= Ace::UIContent::Create(nullptr, nullptr);
-    rootScene.uiContent_=std::move(uiContent);
+    auto uiContent = Ace::UIContent::Create(nullptr, nullptr);
+    rootScene.uiContent_ = std::move(uiContent);
     rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
