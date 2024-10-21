@@ -167,7 +167,7 @@ DMError ScreenSessionManagerProxy::GetDensityInCurResolution(ScreenId screenId, 
         WLOGFW("GetDensityInCurResolution: remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -609,7 +609,7 @@ DMError ScreenSessionManagerProxy::RegisterDisplayManagerAgent(const sptr<IDispl
         WLOGFE("IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    
+
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         WLOGFE("Write IDisplayManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -3073,7 +3073,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId sc
         WLOGFE("write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
-    
+
     if (!data.WriteUInt64Vector(windowIdList)) {
         WLOGFE("write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;

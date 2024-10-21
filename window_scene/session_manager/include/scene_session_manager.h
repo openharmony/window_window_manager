@@ -443,7 +443,7 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
-    
+
     /*
      * Window ZOrder: PC
      */
@@ -480,6 +480,12 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * Window displayId
+     */
+    WMError GetWindowDisplayIds(std::vector<int32_t>& persistentIds,
+        std::unordered_map<int32_t, DisplayId>& windowDisplayMap)
 
 protected:
     SceneSessionManager();

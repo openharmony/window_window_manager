@@ -1473,6 +1473,19 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
     auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: check SetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowDisplayIds, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> windowIds = {1, 2};
+    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    auto ret = WindowManager::GetInstance().GetWindowDisplayIds(windowIds, windowDisplayMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

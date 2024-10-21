@@ -738,6 +738,19 @@ HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest |
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: GetWindowDisplayIds
+ * @tc.desc: WindowAdapter/GetWindowDisplayIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetWindowDisplayIds, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> windowIds = {1, 2};
+    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    auto err = windowAdapter.GetWindowDisplayIds(windowIds, windowDisplayMap);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
 }
 }
 }

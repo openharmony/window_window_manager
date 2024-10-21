@@ -2477,4 +2477,40 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFr
     isPcOrPadFreeMultiWindowMode = repliedValue;
     return static_cast<WMError>(ret);
 }
+
+WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<int32_t>& windowIds,
+    std::unordered_map<int32_t, DisplayId>& windowDisplayMap)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32Vector(windowIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write windowIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_DISPLAYIDS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t mapSize = reply.ReadInt32();
+    for (int i = 0; i < mapSize; i++) {
+        int32_t windowId;
+        if (!reply.ReadInt32(windowId)) {
+            TLOGE(WmsLogTag::DEFAULT, "Fail to read windowId");
+            return ERR_INVALID_DATA;
+        }
+        uint64_t displayId;
+        if (!reply.ReadUint64(displayId)) {
+            TLOGE(WmsLogTag::DEFAULT, "Fail to read displayId");
+            return ERR_INVALID_DATA;
+        }
+        windowDisplayMap[windowId] = displayId;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

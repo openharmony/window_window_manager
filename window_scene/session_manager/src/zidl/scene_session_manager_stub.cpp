@@ -1241,4 +1241,35 @@ int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& d
     }
     return ERR_NONE;
 }
+
+int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> persistentIds;
+    if (!data.ReadInt32Vector(&persistentIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 persistentId");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    WMError errCode = GetWindowDisplayIds(persistentIds, windowDisplayMap);
+
+    if (!data.WriteInt32(windowDisplayMap.size())) {
+        TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayMap size faild");
+        return ERR_INVALID_DATA;
+    }
+    for (auto it = windowDisplayMap.begin(); it != windowDisplayMap.end(); ++it) {
+        if (!data.WriteInt32(it->first)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!data.WriteUint64(it->second)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen
