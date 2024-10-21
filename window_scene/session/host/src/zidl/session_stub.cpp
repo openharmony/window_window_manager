@@ -748,11 +748,10 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 
 int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t statusId = 0;
-    if (!data.ReadUint32(statusId)) {
+    bool status = false;
+    if (!data.ReadBool(status)) {
         return ERR_INVALID_DATA;
     }
-    bool status = static_cast<bool>(statusId);
     WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
     WSError errCode = OnNeedAvoid(status);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

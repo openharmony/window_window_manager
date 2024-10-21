@@ -707,7 +707,7 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
 {
     int32_t persistentId = 0;
     bool haveAvoidAreaListener = false;
-    if (!data.ReadInt32()) {
+    if (!data.ReadInt32(persistentId)) {
         return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(haveAvoidAreaListener)) {
