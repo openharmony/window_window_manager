@@ -1988,6 +1988,8 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo002, Function | SmallT
     
     hookInfo.density_ = 2.25;
     result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 
 /**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
