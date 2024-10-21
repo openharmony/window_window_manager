@@ -98,6 +98,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | L
             scrollVelocityScaleParam[displayMode] : "";
         scrollableParam.friction_ = scrollFrictionParam.count(displayMode) ?
             scrollFrictionParam[displayMode] : "";
+        ScreenSceneConfig::scrollableParams_[displayMode] = scrollableParam;
         ssm->SwitchScrollParam(displayMode);
         ret1 = system::GetParameter("persist.scrollable.velocityScale", "0");
         ret2 = system::GetParameter("persist.scrollable.friction", "0");
@@ -136,6 +137,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | L
             scrollVelocityScaleParam[displayMode] : "";
         scrollableParam.friction_ = scrollFrictionParam.count(displayMode) ?
             scrollFrictionParam[displayMode] : "";
+        ScreenSceneConfig::scrollableParams_[displayMode] = scrollableParam;
         ssm->SwitchScrollParam(displayMode);
         ret1 = system::GetParameter("persist.scrollable.velocityScale", "0");
         ret2 = system::GetParameter("persist.scrollable.friction", "0");

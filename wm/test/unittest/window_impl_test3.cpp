@@ -738,6 +738,9 @@ HWTEST_F(WindowImplTest3, RaiseToAppTop, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     option->parentId_ = INVALID_WINDOW_ID;
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RaiseToAppTop());
+
+    window->SetWindowState(WindowState::STATE_CREATED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->RaiseToAppTop());
 
     window->property_->parentId_ = 100000;
@@ -1351,7 +1354,7 @@ HWTEST_F(WindowImplTest3, SetSnapshotSkip, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, window);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillRepeatedly(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetSnapshotSkip(true));
 }
 
 /**

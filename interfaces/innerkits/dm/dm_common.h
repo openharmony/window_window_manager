@@ -34,6 +34,7 @@ const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 1000;
 constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
 constexpr uint32_t BASELINE_DENSITY = 160;
+constexpr float INCH_TO_MM = 25.4f;
 }
 
 /**

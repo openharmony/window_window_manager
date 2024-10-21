@@ -49,12 +49,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     parcel.RewindRead(0);
     std::shared_ptr<ScreenSessionManagerStub> screenStub = std::make_shared<ScreenSessionManagerStub>();
     screenStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::IDisplayManager::DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         parcel, reply, option);
     parcel.RewindRead(0);
     screenStub->OnRemoteRequest(
         static_cast<uint32_t>(
-            Rosen::IDisplayManager::DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+            DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         parcel, reply, option);
     return true;
 }

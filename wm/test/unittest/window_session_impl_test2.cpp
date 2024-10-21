@@ -616,6 +616,47 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->NotifyOccupiedAreaChangeInfo(info);
+
+    window->handler_ = nullptr;
+    window->NotifyOccupiedAreaChangeInfo(info);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyOccupiedAreaChangeInfoInner
+ * @tc.desc: NotifyOccupiedAreaChangeInfoInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfoInner");
+    ASSERT_NE(window, nullptr);
+
+    auto listeners = GetListenerList<IOccupiedAreaChangeListener, MockIOccupiedAreaChangeListener>();
+    ASSERT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
     window->Destroy();
 }
 

@@ -23,11 +23,45 @@
 namespace OHOS::Rosen {
 class ScreenManagerLite : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManagerLite);
-friend class DMSDeathRecipient;
+friend class DMSDeathRecipientLite;
 public:
     /*
      * used by powermgr
      */
+    class IScreenListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify when a new screen is connected.
+         */
+        virtual void OnConnect(ScreenId) = 0;
+
+        /**
+         * @brief Notify when a screen is disconnected.
+         */
+        virtual void OnDisconnect(ScreenId) = 0;
+
+        /**
+         * @brief Notify when state of the screen is changed.
+         */
+        virtual void OnChange(ScreenId) = 0;
+    };
+
+    /**
+     * @brief Register screen listener.
+     *
+     * @param listener IScreenListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenListener(sptr<IScreenListener> listener);
+
+    /**
+     * @brief Unregister screen listener.
+     *
+     * @param listener IScreenListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenListener(sptr<IScreenListener> listener);
+
     /**
      * @brief Set the screen power state on the specified screen.
      *
@@ -58,6 +92,9 @@ private:
     ScreenManagerLite();
     ~ScreenManagerLite();
     void OnRemoteDied();
+
+    class Impl;
+    sptr<Impl> pImpl_;
 };
 } // namespace OHOS::Rosen
 
