@@ -11198,4 +11198,27 @@ WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMul
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::GetWindowDisplayIds(std::vector<int32_t>& persistentIds,
+    std::unordered_map<int32_t, DisplayId>& windowDisplayMap)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    for (int32_t persistentId : persistentIds)
+    {
+        sptr<SceneSession> session = GetSceneSession(persistentId);
+        if (session == nullptr) {
+            continue;
+        }
+        sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            continue;
+        }
+        windowDisplayMap.push_back({persistentId, sessionProperty->GetDisplayId()});
+    }
+    return WMError::WM_OK;
+}
+
 } // namespace OHOS::Rosen

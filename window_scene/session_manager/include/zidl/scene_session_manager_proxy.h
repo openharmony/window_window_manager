@@ -129,6 +129,8 @@ public:
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+    WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds,
+        std::unordered_map<int32_t, DisplayId>& windowDisplayMap) override;
 
 private:
     template<typename T>
