@@ -12,19 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "transaction/rs_uiextension_data.h"
-#include "input_manager.h"
-#include "session_manager/include/scene_session_dirty_manager.h"
+#include "common/include/window_session_property.h"
 #include <gtest/gtest.h>
+#include "input_manager.h"
 #include <parameter.h>
 #include <parameters.h>
+#include "session_manager/include/scene_session_dirty_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "scene_input_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
 #include "window_helper.h"
-#include "common/include/window_session_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,9 +39,11 @@ public:
     void TearDown() override;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
+
 std::shared_ptr<SceneSessionDirtyManager> manager_;
 sptr<SceneSessionManager> ssm_;
 std::shared_ptr<SceneInputManager> sim_;
+
 void SceneSessionDirtyManagerTest2::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -65,6 +66,7 @@ void SceneSessionDirtyManagerTest2::TearDown()
     usleep(WAIT_SYNC_IN_NS);
     manager_ = nullptr;
 }
+
 namespace {
 
 void InitSessionInfo(MMI::DisplayInfo& displayedInfo, MMI::WindowInfo& windowInfo)
@@ -126,7 +128,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     SessionInfo info;
     info.abilityName_ = "TestWithoutHotArea";
     info.bundleName_ = "TestWithoutHotArea";
-    sptr<SceneSession> sceneSession =  new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(windowSessionProperty, nullptr);
@@ -135,7 +137,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
-    //set hotArea without info
+    // set hotArea without info
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
@@ -143,7 +145,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
                           touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
     ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                          pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
+                            pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
     ASSERT_EQ(pointerHotResult, true);
 }
 
@@ -157,16 +159,12 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     SessionInfo info;
     info.abilityName_ = "TestWithHotArea";
     info.bundleName_ = "TestWithHotArea";
-    sptr<SceneSession> sceneSession =  new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    Rect rect;
-    rect.posX_ = 0;
-    rect.posY_ = 0;
-    rect.width_ = 300;
-    rect.height_ = 500;
+    Rect rect = {0, 0, 300, 500};
     std::vector<Rect> rects;
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
@@ -181,7 +179,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
                           touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
     ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                          pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
+                            pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
     ASSERT_EQ(pointerHotResult, true);
 }
 
@@ -197,7 +195,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 30;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->zOrder_ = 55.0f;
     sceneSessionMainWindow->persistentId_ = mainWindowId;
@@ -211,7 +209,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     dialogWindowInfo.abilityName_ = "TestDialogWithType";
     dialogWindowInfo.bundleName_ = "TestDialogWithType";
     int32_t dialogWindowId = 31;
-    sptr<SceneSession> sceneSessionDialogWindow =  new (std::nothrow) SceneSession(dialogWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionDialogWindow = new (std::nothrow) SceneSession(dialogWindowInfo, nullptr);
     ASSERT_NE(sceneSessionDialogWindow, nullptr);
     sceneSessionDialogWindow->zOrder_ = 56.0f;
     sceneSessionDialogWindow->persistentId_ = dialogWindowId;
@@ -232,8 +230,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     for (MMI::WindowInfo windowInfo : windowInfoList) {
         if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == dialogWindowId &&
             windowInfo.pid == dialogWindowPid) {
-                windowTypeDialogResult = true;
-            }
+            windowTypeDialogResult = true;
+        }
     }
     ASSERT_EQ(windowTypeDialogResult, true);
 }
@@ -250,7 +248,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 32;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
@@ -263,7 +261,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     subWindowInfo.abilityName_ = "TestSubWithType";
     subWindowInfo.bundleName_ = "TestSubWithType";
     int32_t subWindowId = 33;
-    sptr<SceneSession> sceneSessionSubWindow =  new (std::nothrow) SceneSession(subWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionSubWindow = new (std::nothrow) SceneSession(subWindowInfo, nullptr);
     ASSERT_NE(sceneSessionSubWindow, nullptr);
     sceneSessionSubWindow->persistentId_ = subWindowId;
     sceneSessionSubWindow->isVisible_ = true;
@@ -283,8 +281,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     for (MMI::WindowInfo windowInfo : windowInfoList) {
         if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == subWindowId &&
             windowInfo.pid == subWindowPid) {
-                windowTypeDialogResult = true;
-            }
+            windowTypeDialogResult = true;
+        }
     }
     ASSERT_EQ(windowTypeDialogResult, false);
 }
@@ -300,7 +298,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, Func
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 34;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = false;
@@ -329,7 +327,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, Functi
     subWindowInfo.abilityName_ = "TestSubWithType";
     subWindowInfo.bundleName_ = "TestSubWithType";
     int32_t subWindowId = 35;
-    sptr<SceneSession> sceneSessionSubWindow =  new (std::nothrow) SceneSession(subWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionSubWindow = new (std::nothrow) SceneSession(subWindowInfo, nullptr);
     ASSERT_NE(sceneSessionSubWindow, nullptr);
     sceneSessionSubWindow->persistentId_ = subWindowId;
     sceneSessionSubWindow->isVisible_ = false;
@@ -358,7 +356,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndState
     subWindowInfo.abilityName_ = "TestSubWithType";
     subWindowInfo.bundleName_ = "TestSubWithType";
     int32_t subWindowId = 36;
-    sptr<SceneSession> sceneSessionSubWindow =  new (std::nothrow) SceneSession(subWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionSubWindow = new (std::nothrow) SceneSession(subWindowInfo, nullptr);
     ASSERT_NE(sceneSessionSubWindow, nullptr);
     sceneSessionSubWindow->persistentId_ = subWindowId;
     sceneSessionSubWindow->isVisible_ = false;
@@ -388,7 +386,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, Fun
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 37;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
@@ -426,7 +424,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, Funct
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 38;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
@@ -466,7 +464,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, 
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 39;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
@@ -505,7 +503,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiv
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 40;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->isVisible_ = true;
@@ -542,7 +540,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, F
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";
     int32_t mainWindowId = 41;
-    sptr<SceneSession> sceneSessionMainWindow =  new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
+    sptr<SceneSession> sceneSessionMainWindow = new (std::nothrow) SceneSession(mainWindowInfo, nullptr);
     ASSERT_NE(sceneSessionMainWindow, nullptr);
     sceneSessionMainWindow->persistentId_ = mainWindowId;
     sceneSessionMainWindow->foregroundInteractiveStatus_.store(false);
