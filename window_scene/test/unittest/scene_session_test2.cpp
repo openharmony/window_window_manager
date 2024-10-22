@@ -633,11 +633,11 @@ HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
 
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     scenesession->SetSessionProperty(property);
-    scenesession->isTerminating = true;
+    scenesession->isTerminating_ = true;
     result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    scenesession->isTerminating = false;
+    scenesession->isTerminating_ = false;
     result = scenesession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
