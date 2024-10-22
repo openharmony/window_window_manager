@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <algorithm>
+#include <securec.h>
 
 #include <ability_context.h>
 #include <ability_manager_client.h>
@@ -259,7 +260,7 @@ void SceneSessionManager::Init()
     }
     taskScheduler_->SetExportHandler(eventHandler_);
 
-    ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
+    ret = SetFfrtWorkerNum();
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
@@ -287,6 +288,16 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+}
+
+int SceneSessionManager::SetFfrtWorkerNum()
+{
+    ffrt_worker_num_param qosConfig;
+    (void)memset_s(&qosConfig, sizeof(qosConfig), -1, sizeof(qosConfig));
+    qosConfig.effectLen = 1;
+    qosConfig.qosConfigArray[0].qos = ffrt_qos_user_interactive;
+    qosConfig.qosConfigArray[0].hardLimit = FFRT_USER_INTERACTIVE_MAX_THREAD_NUM;
+    return ffrt_set_qos_worker_num(&qosConfig);
 }
 
 void SceneSessionManager::InitScheduleUtils()
