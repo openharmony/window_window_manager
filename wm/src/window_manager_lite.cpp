@@ -460,6 +460,7 @@ WMError WindowManagerLite::GetWindowModeType(WindowModeType& windowModeType) con
     }
     return ret;
 }
+
 WMError WindowManagerLite::RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener)
 {
     if (listener == nullptr) {

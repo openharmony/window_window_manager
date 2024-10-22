@@ -64,7 +64,6 @@ public:
     void OnDisconnected(int32_t userId, int32_t screenId) override {};
 }
 
-
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -263,7 +262,6 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
     WMError res10 = WindowManagerLite::GetInstance().UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, res10);
 }
-
 
 /**
  * @tc.name: Test04
@@ -729,6 +727,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Lev
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
     EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
 }
+
 /**
  * @tc.name: RegisterWindowStyleChangedListener
  * @tc.desc: check RegisterWindowStyleChangedListener
@@ -869,7 +868,6 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }
-
 
 /**
  * @tc.name: OnRemoteDied01
