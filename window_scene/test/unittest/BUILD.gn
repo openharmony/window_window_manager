@@ -803,7 +803,10 @@ ohos_unittest("ws_session_manager_test") {
 
   sources = [ "session_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_base:session_info",
@@ -828,7 +831,10 @@ ohos_unittest("ws_session_manager_lite_test") {
     "session_manager_lite_test.cpp",
   ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_base:session_info",

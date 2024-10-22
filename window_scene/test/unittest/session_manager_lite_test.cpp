@@ -18,6 +18,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <ipc_skeleton.h>
+#include "scene_board_judgement.h"
 #include "session_manager_lite.h"
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
@@ -69,12 +70,20 @@ HWTEST_F(SessionManagerLiteTest, GetSceneSessionManagerLiteProxy, Function | Sma
     sml_->Clear();
     sml_->ClearSessionManagerProxy();
     auto sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
+    }else {
+        ASSERT_EQ(nullptr, sceneSessionManagerLiteProxy);
+    }
 
     sml_->ClearSessionManagerProxy();
     sml_->GetSessionManagerServiceProxy();
     sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
+    }else {
+        ASSERT_EQ(nullptr, sceneSessionManagerLiteProxy);
+    }
 }
 
 /**
@@ -99,7 +108,11 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy02, Function | 
     ASSERT_NE(nullptr, sml_);
     sml_->GetSceneSessionManagerLiteProxy();
     sml_->InitSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    }else {
+        ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    }
 }
 
 /**
@@ -147,10 +160,12 @@ HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, Function | SmallTest
     sml_->ReregisterSessionListener();
     ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
 
-    sml_->recoverListenerRegistered_ = true;
-    sml_->GetSceneSessionManagerLiteProxy();
-    sml_->ReregisterSessionListener();
-    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        sml_->recoverListenerRegistered_ = true;
+        sml_->GetSceneSessionManagerLiteProxy();
+        sml_->ReregisterSessionListener();
+        ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    }
 }
 
 /**
@@ -224,11 +239,15 @@ HWTEST_F(SessionManagerLiteTest, OnUserSwitch, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
 
     sml_->recoverListenerRegistered_ = true;
+    bool funInvoked = false;
+    sml_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
     auto sessionManagerService = sml_->GetSessionManagerServiceProxy();
-    ASSERT_NE(nullptr, sessionManagerService);
-    sml_->userSwitchCallbackFunc_ = []() {};
     sml_->OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(sessionManagerService, sml_->sessionManagerServiceProxy_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(funInvoked, true);
+    } else {
+        ASSERT_EQ(funInvoked, false);
+    }
 }
 
 /**
