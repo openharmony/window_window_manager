@@ -1372,18 +1372,6 @@ HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | 
 }
 
 /**
- * @tc.name: SetSessionLastRect01
- * @tc.desc: SetSessionLastRect test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetSessionLastRect01, Function | SmallTest | Level2)
-{
-    WSRect rect = session_->GetSessionLastRect();
-    session_->SetSessionLastRect(rect);
-    ASSERT_EQ(rect, session_->lastWinRect_);
-}
-
-/**
  * @tc.name: SetSessionRect01
  * @tc.desc: SetSessionRect test
  * @tc.type: FUNC
@@ -1393,6 +1381,34 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
     WSRect rect = session_->GetSessionRect();
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->winRect_);
+}
+
+/**
+ * @tc.name: UpdateMaximizeMode
+ * @tc.desc: UpdateMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    auto ret = session_->UpdateMaximizeMode(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session_->SetSessionProperty(property);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    session_->SetSessionProperty(nullptr);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**

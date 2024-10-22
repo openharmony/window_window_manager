@@ -186,14 +186,14 @@ HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest 
 HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
-    
-    bool funcInvoked = false;
     sessionManager.userSwitchCallbackFunc_ = nullptr;
     sessionManager.OnUserSwitch(nullptr);
-    ASSERT_EQ(funcInvoked, false);
+
+    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
+    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
+    ASSERT_NE(nullptr, sessionManagerService);
     sessionManager.userSwitchCallbackFunc_ = []() {};
-    sessionManager.OnUserSwitch(nullptr);
-    ASSERT_EQ(funcInvoked, false);
+    sessionManager.OnUserSwitch(sessionManagerService);
 }
 
 /**
@@ -206,11 +206,15 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     SessionManager sessionManager;
     sessionManager.OnFoundationDied();
     FoundationDeathRecipient foundationDeathRecipient;
-    wptr<IRemoteObject> wptrDeath = nullptr;
+    wptr<IRemoteObject> wptrDeath;
     foundationDeathRecipient.OnRemoteDied(wptrDeath);
-
     SSMDeathRecipient sSMDeathRecipient;
     sSMDeathRecipient.OnRemoteDied(wptrDeath);
+
+    wptrDeath = nullptr;
+    foundationDeathRecipient.OnRemoteDied(wptrDeath);
+    sSMDeathRecipient.OnRemoteDied(wptrDeath);
+
     SessionManager::WMSConnectionChangedCallbackFunc callbackFunc;
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
