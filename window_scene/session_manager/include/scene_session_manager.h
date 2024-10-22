@@ -130,7 +130,7 @@ public:
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds) override;
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
 
     /*
      * Fold Screen Status Change Report
@@ -355,7 +355,7 @@ public:
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds);
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
