@@ -469,7 +469,7 @@ HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground, Function | SmallTest
  * @tc.name: ClearAllCollaboratorSessions
  * @tc.desc: SceneSesionManager clear all collaborator sessions
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | SmallTest | Level3)
 {
     std::string bundleName = "bundleName";
@@ -495,7 +495,7 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | Small
  * @tc.name: ClearAllCollaboratorSessions02
  * @tc.desc: SceneSesionManager clear all collaborator sessions
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | SmallTest | Level3)
 {
     std::string bundleName = "bundleName";
@@ -521,7 +521,7 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | Sma
  * @tc.name: ClearAllCollaboratorSessions03
  * @tc.desc: SceneSesionManager clear all collaborator sessions
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | SmallTest | Level3)
 {
     std::string bundleName = "bundleName";

@@ -219,6 +219,9 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
+
+    collaboratorDeathRecipient_ = sptr<AgentDeathRecipient>::MakeSptr(
+        [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
 }
 
 SceneSessionManager::~SceneSessionManager()
