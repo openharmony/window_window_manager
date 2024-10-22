@@ -85,9 +85,10 @@ public:
     virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for processing full-screen layout changes.
+     * @brief Callback for processing title and dock hover show changes.
      *
-     * @param isLayoutFullScreen Indicates the {@link bool}
+     * @param isTitleHoverShown Indicates the {@link bool}
+     * @param isDockHoverShown Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,

@@ -327,7 +327,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         auto taskScreenOnFullOn = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
             screenId_ = SCREEN_ID_FULL;
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");

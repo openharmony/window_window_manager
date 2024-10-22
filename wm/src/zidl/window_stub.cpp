@@ -107,8 +107,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             if (avoidArea == nullptr) {
                 return ERR_INVALID_DATA;
             }
-            uint32_t type;
-            if (!data.ReadUint32(type)) {
+            uint32_t type = 0;
+            if (!data.ReadUint32(type) ||
+                type < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+                type > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
                 return ERR_INVALID_DATA;
             }
             UpdateAvoidArea(avoidArea, static_cast<AvoidAreaType>(type));

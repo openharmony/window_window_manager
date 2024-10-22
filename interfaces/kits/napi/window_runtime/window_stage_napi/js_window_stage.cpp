@@ -632,10 +632,16 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
 
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
-    std::string windowName;
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
         WLOGFE("[NAPI]Failed to convert parameter to windowName");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
@@ -647,6 +653,12 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
+    if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowScene->GetMainWindow()->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
 
     if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
@@ -656,14 +668,8 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
 
     const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [where, weak = windowScene_, windowName = std::move(windowName), option]
+        [where, windowScene, windowName = std::move(windowName), option]
             (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-        auto windowScene = weak.lock();
-        if (windowScene == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s [NAPI]Window scene is null", where);
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
         option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         option->SetOnlySupportSceneBoard(true);
