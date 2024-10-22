@@ -1362,6 +1362,9 @@ HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, Function | Small
 {
     std::vector<sptr<WindowNode>> *nodeVec = new std::vector<sptr<WindowNode>>;
     auto result = layoutPolicy_->IsFullScreenRecentWindowExist(*nodeVec);
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    EXPECT_NE(node->GetWindowType(), WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    EXPECT_NE(node->GetWindowMode(), WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(result, false);
 }
 
@@ -1396,8 +1399,13 @@ HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function |
  */
 HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> windowNode = nullptr;
-    auto result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
+    sptr<WindowNode> *node = new sptr<WindowNode>;
+    auto result = layoutPolicy_->IsTileRectSatisfiedWithSizeLimits(*node);
+    ASSERT_EQ(true, result);
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
     ASSERT_EQ(true, result);
 }
 
@@ -1435,7 +1443,7 @@ HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, Function | SmallTest 
 HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | Level2)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    sptr<WindowNode> node = new WindowNode();
     layoutPolicy_->GetStoragedAspectRatio(node);
     auto abilityName = "";
     auto nameVector = WindowHelper::Split(abilityName, ".");
@@ -1451,7 +1459,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTest | Level2)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    sptr<WindowNode> node = new WindowNode();
     layoutPolicy_->FixWindowRectWithinDisplay(node);
     auto displayInfo = display->GetDisplayInfo();
     EXPECT_EQ(displayInfo->GetWaterfallDisplayCompressionStatus(), false);
@@ -1475,10 +1483,11 @@ HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, Function | SmallTest | Lev
  */
 HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node= CreateWindowNode(windowInfo_);
+    sptr<WindowNode> node= new WindowNode();
     Rect winRect;
-    WindowSizeChangeReason reason = WindowSizeChangeReason::DRAG;
-    EXPECT_EQ(node->GetWindowToken(), nullptr);
+    WindowSizeChangeReason reason=WindowSizeChangeReason::DRAG;
+    WindowNode windowNode;
+    EXPECT_EQ(windowNode.GetWindowToken(), nullptr);
     layoutPolicy_->NotifyClientAndAnimation(node, winRect, reason);
 }
 
