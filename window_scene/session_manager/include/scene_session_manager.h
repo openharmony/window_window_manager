@@ -580,10 +580,6 @@ private:
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
-    WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
-                                      const sptr<SceneSession>& sceneSession);
-    WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
-                                       const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
