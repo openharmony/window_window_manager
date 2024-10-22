@@ -598,7 +598,8 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
     DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
