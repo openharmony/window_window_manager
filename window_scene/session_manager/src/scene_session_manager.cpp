@@ -144,7 +144,6 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
 };
 
 const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
-static const std::string foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "");
 
 std::string GetCurrentTime()
 {
