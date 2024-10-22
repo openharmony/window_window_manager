@@ -173,7 +173,7 @@ public:
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(const float scaleParam = 0.0f) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void SaveSnapshot(bool useFfrt);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -192,6 +192,7 @@ public:
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     void SetScreenId(uint64_t screenId);
+    void SetScreenIdOnServer(uint64_t screenId);
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
@@ -243,10 +244,10 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
-    WSError Clear();
+    WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string &label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
-    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func);
@@ -304,12 +305,9 @@ public:
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);
-    virtual void SetSystemFocusable(bool systemFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
-    bool GetSystemFocusable() const;
-    bool CheckFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
@@ -356,8 +354,14 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
+
+    /*
+     * Window ZOrder
+     */
     virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder() const;
+    uint32_t GetLastZOrder() const;
+
     void SetUINodeId(uint32_t uiNodeId);
     uint32_t GetUINodeId() const;
     virtual void SetFloatingScale(float floatingScale);
@@ -451,6 +455,7 @@ public:
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
     static bool IsScbCoreEnabled();
+    static void SetScbCoreEnabled(bool enabled);
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
 protected:
@@ -557,19 +562,25 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
-
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    /*
+     * Window ZOrder
+     */
     uint32_t zOrder_ = 0;
+    uint32_t lastZOrder_ = 0;
+
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     bool blockingFocus_ {false};
     float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
-    bool isTerminating = false;
+    bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
+    bool isDirty_ = false;
     std::recursive_mutex sizeChangeMutex_;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
@@ -588,6 +599,7 @@ protected:
     uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
+    static bool isScbCoreEnabled_;
 
 private:
     void HandleDialogForeground();
@@ -606,7 +618,6 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     int32_t GetRotateAnimationDuration();
-
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
@@ -635,7 +646,6 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
-    std::atomic_bool systemFocusable_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
@@ -657,7 +667,7 @@ private:
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex;
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 };

@@ -258,13 +258,17 @@ enum class FocusChangeReason {
      */
     SCB_START_APP,
     /**
-     *focus for setting focuable.
+     * focus for setting focuable.
      */
     FOCUSABLE,
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+    /**
+     * focus for zOrder pass through VOICE_INTERACTION.
+     */
+    VOICE_INTERACTION,
     /**
      * focus change max.
      */
@@ -322,17 +326,22 @@ struct SessionInfo {
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
     bool isRotable_ = false;
-    bool isAsyncModalBinding_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     std::string continueSessionId_ = "";
     bool isCalledRightlyByCallerId_ = false;
-    uint32_t uiExtensionUsage_ = 0;
     bool fullScreenStart_ = false;
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+
+    /*
+     * UIExtension
+     */
+    int32_t realParentId_ = INVALID_SESSION_ID;
+    uint32_t uiExtensionUsage_ = 0;
+    bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
 };
 
@@ -383,6 +392,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
+    EVENT_DRAG,
 };
 
 enum class BrokerStates: uint32_t {
@@ -576,6 +586,8 @@ struct RotateAnimationConfig {
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
+    int32_t sessionWidth_ = 0;
+    int32_t sessionHeight_ = 0;
 };
 
 /**

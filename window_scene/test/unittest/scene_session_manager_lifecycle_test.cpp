@@ -214,7 +214,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegato
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr);
+    ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 }
 
@@ -416,7 +416,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
-    ssm_->HandleCastScreenDisConnection(sceneSession->GetSessionInfo().screenId_);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
@@ -510,6 +509,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionCreate, Function | Small
     ASSERT_NE(nullptr, sceneSession);
     ssm_->NotifySessionCreate(sceneSession, info);
     EXPECT_NE(info.want, nullptr);
+    AppExecFwk::AbilityInfo aInfo;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo =
+        std::make_shared<AppExecFwk::AbilityInfo>(aInfo);
+    ASSERT_NE(nullptr, abilityInfo);
+    int32_t collaboratorType = CollaboratorType::RESERVE_TYPE;
+    ssm_->NotifyLoadAbility(collaboratorType, abilitySessionInfo, abilityInfo);
 }
 
 /**

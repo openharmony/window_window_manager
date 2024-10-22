@@ -536,6 +536,16 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, Function | SmallTest |
     ASSERT_NE(WMError::WM_OK, window_->SetPrivacyMode(true));
 }
 
+HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, Function | SmallTest | Level3)
+{
+    struct RSSurfaceNodeConfig config;
+    window_->surfaceNode_ = RSSurfaceNode::Create(config);
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(WMError::WM_OK, window_->HidePrivacyContentForHost(true));
+}
+
 /**
  * @tc.name: NotifyFocusStateEvent01
  * @tc.desc: NotifyFocusStateEvent Test
@@ -815,6 +825,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
     std::shared_ptr<RSTransaction> rsTransaction;
     ASSERT_NE(nullptr, window_);
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
+    window_->UpdateRectForOtherReason(rect, wmReason);
 }
 
 /**
@@ -1529,6 +1540,21 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
     ASSERT_NE(window_, nullptr);
     window_->ReportModalUIExtensionMayBeCovered(true);
     window_->NotifyModalUIExtensionMayBeCovered(false);
+}
+
+/**
+ * @tc.name: GetRealParentId
+ * @tc.desc: GetRealParentId Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(window_->property_, nullptr);
+    window_->property_->SetRealParentId(12345);
+    EXPECT_EQ(window_->GetRealParentId(), 12345);
+
+    window_->property_ = nullptr;
+    EXPECT_EQ(window_->GetRealParentId(), INVALID_WINDOW_ID);
 }
 }
 } // namespace Rosen

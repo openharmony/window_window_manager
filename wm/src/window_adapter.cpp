@@ -578,12 +578,12 @@ void WindowAdapter::OffWindowZoom()
 }
 
 /** @note @window.hierarchy */
-WmErrorCode WindowAdapter::RaiseToAppTop(uint32_t windowId)
+WMError WindowAdapter::RaiseToAppTop(uint32_t windowId)
 {
-    INIT_PROXY_CHECK_RETURN(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->RaiseToAppTop(windowId);
 }
 
@@ -623,7 +623,7 @@ void WindowAdapter::NotifyDumpInfoResult(const std::vector<std::string>& info)
     wmsProxy->NotifyDumpInfoResult(info);
 }
 
-WMError WindowAdapter::DumpSessionAll(std::vector<std::string> &infos)
+WMError WindowAdapter::DumpSessionAll(std::vector<std::string>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
@@ -632,7 +632,7 @@ WMError WindowAdapter::DumpSessionAll(std::vector<std::string> &infos)
     return static_cast<WMError>(wmsProxy->DumpSessionAll(infos));
 }
 
-WMError WindowAdapter::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+WMError WindowAdapter::DumpSessionWithId(int32_t persistentId, std::vector<std::string>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 

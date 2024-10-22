@@ -185,7 +185,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
-    WmErrorCode RaiseToAppTop() override;
+    WMError RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
     virtual WMError ResetAspectRatio() override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;

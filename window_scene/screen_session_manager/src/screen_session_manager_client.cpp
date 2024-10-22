@@ -15,6 +15,7 @@
 
 #include "screen_session_manager_client.h"
 
+#include <hitrace_meter.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_transaction.h>
@@ -288,7 +289,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
 
     // not need update property to input manager
-    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END ||
+        screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
         return;
     }
     auto screenSession = GetScreenSession(screenId);
@@ -423,6 +425,17 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             WLOGFW("transactionProxy is null");
         }
+        ScreenId screenId = iter.first;
+        sptr<ScreenSession> screenSession = iter.second;
+        if (screenSession == nullptr) {
+            WLOGFE("screenSession is null");
+            return;
+        }
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
+        RRect bounds = screenProperty.GetBounds();
+        float rotation = screenSession->ConvertRotationToFloat(screenSession->GetRotation());
+        screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+            ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
     }
     WLOGFI("switch user callback end");
 }
@@ -528,5 +541,36 @@ void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<s
     if (displayChangeListener_) {
         displayChangeListener_->OnScreenFoldStatusChanged(screenFoldInfo);
     }
+}
+
+void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY,
+                                                    float translateX, float translateY)
+{
+    auto session = GetScreenSession(id);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is null");
+        return;
+    }
+    auto displayNode = session->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+          translateX, translateY);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                      "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64
+                      " scaleX=%f, scaleY=%f, pivotX=%f, pivotY=%f, translateX=%f, translateY=%f",
+                      id, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    displayNode->SetScale(scaleX, scaleY);
+    displayNode->SetTranslateX(translateX);
+    displayNode->SetTranslateY(translateY);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGE(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
+    session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
 } // namespace OHOS::Rosen

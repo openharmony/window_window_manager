@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSceneConfigTest : public testing::Test {
 public:
@@ -448,8 +448,8 @@ HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, Function | SmallTest | Level3)
 {
     uint64_t displayId = 0;
     ScreenSceneConfig::SetCutoutSvgPath(displayId, "oo");
-    auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
-    ASSERT_NE(0, result_.size());
+    auto result = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
+    ASSERT_NE(0, result.size());
 }
 
 /**

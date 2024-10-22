@@ -34,6 +34,7 @@ private:
     int HandleRegisterDisplayManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterDisplayManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleGetFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsFoldable(MessageParcel& data, MessageParcel& reply);
     int HandleGetFoldStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetDefaultDisplayInfo(MessageParcel& data, MessageParcel& reply);

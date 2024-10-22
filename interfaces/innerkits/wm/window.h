@@ -462,6 +462,21 @@ public:
 };
 
 /**
+ * @class ISwitchFreeMultiWindowListener
+ *
+ * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
+ */
+class ISwitchFreeMultiWindowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when free multi window state changed.
+     *
+     * @param enable Whether free multi window state enabled.
+     */
+    virtual void OnSwitchFreeMultiWindow(bool enable) {}
+};
+
+/**
  * @class IKeyboardPanelInfoChangeListener
  *
  * @brief IKeyboardPanelInfoChangeListener is used to observe the keyboard panel info.
@@ -972,7 +987,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseToAppTop() { return WmErrorCode::WM_OK; }
+    virtual WMError RaiseToAppTop() { return WMError::WM_OK; }
     /**
      * @brief Set skip flag of snapshot.
      *
@@ -1629,7 +1644,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RaiseAboveTarget(int32_t subWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Hide non-system floating windows.
@@ -1944,6 +1959,17 @@ public:
     }
 
     /**
+     * @brief Hide the display content when snapshot.
+     *
+     * @param needHide bool.
+     * @return WMError
+     */
+    virtual WMError HidePrivacyContentForHost(bool needHide)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.
@@ -1995,6 +2021,24 @@ public:
      */
     virtual WMError UnregisterSubWindowCloseListeners(
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ 
+    /**
+     * @brief Unregister switch free multi-window listener.
+     *
+     * @param listener ISwitchFreeMultiWindowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSwitchFreeMultiWindowListener(
+        const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set Shaped Window Mask.
@@ -2155,6 +2199,13 @@ public:
      * @return WMError.
      */
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /*
+     * @brief Get the real parent id of UIExtension
+     *
+     * @return Real parent id of UIExtension
+     */
+    virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
     /*
      * @brief Get the parent window type of UIExtension

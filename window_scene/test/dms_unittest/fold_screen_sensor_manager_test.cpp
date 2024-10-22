@@ -21,7 +21,6 @@
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,7 +29,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 100000;
-    constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
     constexpr float ANGLE_MIN_VAL = 0.0F;
 }
 
@@ -194,11 +192,11 @@ namespace {
     {
         FoldScreenSensorManager mgr = FoldScreenSensorManager();
         mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
-        mgr.globalHall = HALL_FOLDED_THRESHOLD;
+        mgr.registerPosture_ = false;
         mgr.TriggerDisplaySwitch();
         EXPECT_EQ(mgr.globalAngle, ANGLE_MIN_VAL);
 
-        mgr.globalHall = 10;
+        mgr.registerPosture_ = true;
         mgr.TriggerDisplaySwitch();
         EXPECT_EQ(mgr.globalAngle, 25);
     }

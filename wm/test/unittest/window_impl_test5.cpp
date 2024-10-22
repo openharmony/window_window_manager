@@ -1132,27 +1132,17 @@ HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
     option->SetBundleName("OK");
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
-    sptr<WindowProperty> property = new (std::nothrow) WindowProperty();
-    ASSERT_NE(property, nullptr);
-    property->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    window->property_ = property;
     window->DestroyFloatingWindow();
 
     std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap;
     sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(windowImpl, nullptr);
-    sptr<WindowProperty> property2 = new (std::nothrow) WindowProperty();
-    ASSERT_NE(property2, nullptr);
-    windowImpl->property_ = property2;
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
     v.push_back(windowImpl);
     appFloatingWindowMap.insert({0, v});
     appFloatingWindowMap.insert({0, v2});
     window->appFloatingWindowMap_ = appFloatingWindowMap;
-    window->DestroyFloatingWindow();
-
-    property2->windowId_ = 10;
     window->DestroyFloatingWindow();
 }
 
@@ -1172,27 +1162,17 @@ HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
     option->SetBundleName("OK");
     sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(window, nullptr);
-    sptr<WindowProperty> property = new (std::nothrow) WindowProperty();
-    ASSERT_NE(property, nullptr);
-    property->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    window->property_ = property;
     window->DestroyFloatingWindow();
 
     std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap;
     sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
     ASSERT_NE(windowImpl, nullptr);
-    sptr<WindowProperty> property2 = new (std::nothrow) WindowProperty();
-    ASSERT_NE(property2, nullptr);
-    windowImpl->property_ = property2;
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
     v.push_back(windowImpl);
     appDialogWindowMap.insert({0, v});
     appDialogWindowMap.insert({0, v2});
     window->appDialogWindowMap_ = appDialogWindowMap;
-    window->DestroyFloatingWindow();
-
-    property2->windowId_ = 10;
     window->DestroyFloatingWindow();
 }
 
