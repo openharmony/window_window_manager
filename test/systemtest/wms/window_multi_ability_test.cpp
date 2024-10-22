@@ -55,7 +55,7 @@ static void DoSceneResource(sptr<WindowScene> windowscene)
         ASSERT_EQ(WMError::WM_OK, windowscene->GoDestroy());
     } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscene->GoBackground());
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscene->GoDestroy()); 
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscene->GoDestroy());
     }
 }
 
