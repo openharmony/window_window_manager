@@ -829,7 +829,8 @@ public:
      * @param windowDisplayMap map of Windows and screens
      * @return WM_OK means get success, others means failed.
      */
-    WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds, std::unordered_map<int32_t, DisplayId>& windowDisplayMap);
+    WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap);
 
 private:
     WindowManager();

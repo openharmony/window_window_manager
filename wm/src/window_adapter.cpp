@@ -1001,8 +1001,8 @@ WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWind
     return wmsProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
 }
 
-WMError WindowAdapter::GetWindowDisplayIds(std::vector<int32_t>& windowIds,
-    std::unordered_map<int32_t, DisplayId>& windowDisplayMap)
+WMError WindowAdapter::GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayMap)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();

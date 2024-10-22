@@ -746,8 +746,8 @@ HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest |
  */
 HWTEST_F(WindowAdapterTest, GetWindowDisplayIds, Function | SmallTest | Level2)
 {
-    std::vector<int32_t> windowIds = {1, 2};
-    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayMap;
     auto err = windowAdapter.GetWindowDisplayIds(windowIds, windowDisplayMap);
     ASSERT_EQ(err, WMError::WM_OK);
 }

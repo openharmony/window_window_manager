@@ -253,8 +253,8 @@ public:
         return WMError::WM_OK;
     }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
-    virtual WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds,
-        std::unordered_map<int32_t, DisplayId>& windowDisplayMap) { return WMError::WM_OK; }
+    virtual WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap) { return WMError::WM_OK; }
 };
 }
 }

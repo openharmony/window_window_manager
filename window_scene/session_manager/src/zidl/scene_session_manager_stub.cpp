@@ -1246,20 +1246,20 @@ int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& d
 
 int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, MessageParcel& reply)
 {
-    std::vector<int32_t> persistentIds;
-    if (!data.ReadInt32Vector(&persistentIds)) {
+    std::vector<uint64_t> windowIds;
+    if (!data.ReadUInt64Vector(&windowIds)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 persistentId");
         return ERR_INVALID_DATA;
     }
     std::unordered_map<int32_t, DisplayId> windowDisplayMap;
-    WMError errCode = GetWindowDisplayIds(persistentIds, windowDisplayMap);
+    WMError errCode = GetWindowDisplayIds(windowIds, windowDisplayMap);
 
     if (!data.WriteInt32(windowDisplayMap.size())) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayMap size faild");
         return ERR_INVALID_DATA;
     }
     for (auto it = windowDisplayMap.begin(); it != windowDisplayMap.end(); ++it) {
-        if (!data.WriteInt32(it->first)) {
+        if (!data.WriteUint64(it->first)) {
             TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
             return ERR_INVALID_DATA;
         }
