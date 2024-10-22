@@ -485,7 +485,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
     }
 
     TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardRect: %{public}s, CallSession OriRect: %{public}s, NewRect: %{public}s"
-        ", OriPosYBeforeRaisedByKeyboard: %{public}d, isCallingSessionFloating: %{public}d",
+        ", oriPosYBeforeRaisedByKeyboard: %{public}d, isCallingSessionFloating: %{public}d",
         keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str(), newRect.ToString().c_str(),
         oriPosYBeforeRaisedByKeyboard, isCallingSessionFloating);
 }
