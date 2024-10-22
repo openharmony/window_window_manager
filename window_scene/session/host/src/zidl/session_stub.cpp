@@ -767,7 +767,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
         return ERR_INVALID_DATA;
     }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
-    WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
+    WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
