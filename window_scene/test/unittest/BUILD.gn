@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":ws_anomaly_detection_test",
+    ":ws_anr_handler_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_event_stage_test",
@@ -50,6 +51,7 @@ group("unittest") {
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_lifecycle_test",
     ":ws_scene_session_manager_stub_test",
+    ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_manager_test10",
     ":ws_scene_session_manager_test2",
@@ -844,6 +846,25 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
   ]
 }
 
+ohos_unittest("ws_scene_session_manager_supplement_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_supplement_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
@@ -1420,5 +1441,19 @@ ohos_static_library("ws_unittest_common") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_unittest("ws_anr_handler_test") {
+  module_out_path = module_out_path
+
+  sources = [ "anr_handler_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+  ]
 }
 ## Build ws_unittest_common.a }}}
