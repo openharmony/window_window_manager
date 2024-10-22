@@ -777,7 +777,7 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
             const auto& keyboardSession = GetKeyboardSession();
             FixKeyboardPositionByKeyboardPanel(self, keyboardSession);
             if (keyboardSession != nullptr) {
-                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, updateReason, nullptr);
+                ret = keyboardSession->Session::UpdateRect(keyboardSession->winRect_, reason_, nullptr);
             }
             return ret;
         }
@@ -2216,7 +2216,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
     if (reason == SizeChangeReason::DRAG_END) {
         if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
