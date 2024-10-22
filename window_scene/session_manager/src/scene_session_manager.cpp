@@ -5764,8 +5764,6 @@ void SceneSessionManager::ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& 
     if (IsSessionVisibleForeground(sceneSession)) {
         if (sceneSession->IsFocusableOnShow()) {
             RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
-        } else {
-            sceneSession->SetFocusableOnShow(true);
         }
     } else {
         PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
@@ -9227,7 +9225,6 @@ void SceneSessionManager::PostProcessFocus()
              session->GetPostProcessFocusState().reason_ == FocusChangeReason::APP_FOREGROUND)) {
             TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus", session->GetPersistentId());
             session->ResetPostProcessFocusState();
-            session->SetFocusableOnShow(true);
             continue;
         }
         if (focusChanged) {

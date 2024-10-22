@@ -208,8 +208,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW):
-            return HandleSetFocusableOnShow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):

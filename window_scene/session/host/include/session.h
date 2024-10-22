@@ -354,7 +354,7 @@ public:
     bool GetFocusable() const;
     void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
+    virtual WSError SetFocusableOnShow(bool isFocusableOnShow); // Used when showing window
     bool IsFocusableOnShow() const;
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
