@@ -243,8 +243,8 @@ HWTEST_F(SceneSessionManagerTest11, GetWindowDisplayIds, Function | SmallTest | 
     property->SetDisplayId(displayId);
     scenesession1->SetSessionProperty(property);
 
-    std::vector<int32_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
-    std::unordered_map<int32_t, DisplayId> windowDisplayMap;
+    std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayMap;
     ASSERT_EQ(ssm_->GetWindowDisplayIds(windowIds, windowDisplayMap), WMError::WM_OK);
 }
 }  // namespace

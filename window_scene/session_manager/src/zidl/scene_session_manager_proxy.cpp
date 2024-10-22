@@ -2478,8 +2478,8 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFr
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<int32_t>& windowIds,
-    std::unordered_map<int32_t, DisplayId>& windowDisplayMap)
+WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayMap)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2488,7 +2488,7 @@ WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<int32_t>& wind
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32Vector(windowIds)) {
+    if (!data.WriteUInt64Vector(windowIds)) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowIds failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -2497,10 +2497,14 @@ WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<int32_t>& wind
         TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t mapSize = reply.ReadInt32();
+    int32_t mapSize;
+    if (!reply.ReadInt32(mapSize)) {
+        TLOGE(WmsLogTag::DEFAULT, "Fail to read mapSize");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     for (int i = 0; i < mapSize; i++) {
-        int32_t windowId;
-        if (!reply.ReadInt32(windowId)) {
+        uint64_t windowId;
+        if (!reply.ReadUint64(windowId)) {
             TLOGE(WmsLogTag::DEFAULT, "Fail to read windowId");
             return WMError::WM_ERROR_IPC_FAILED;
         }

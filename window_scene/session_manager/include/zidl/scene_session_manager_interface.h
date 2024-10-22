@@ -315,8 +315,8 @@ public:
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
-    WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds,
-        std::unordered_map<int32_t, DisplayId>& windowDisplayMap) override { return WMError::WM_OK; }
+    WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
