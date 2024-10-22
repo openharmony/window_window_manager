@@ -88,11 +88,12 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleSystemSessionEvent_ValidEventId
+ * @tc.name: HandleSystemSessionEvent1
  * @tc.desc: sessionStub HandleSystemSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent_InvalidEventId | Function | SmallTest | Level2) {
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent1, | Function | SmallTest | Level2)
+{
     MessageParcel data;
     MessageParcel reply;
 
@@ -102,11 +103,12 @@ HWTEST_F(SessionStubTest, HandleSystemSessionEvent_InvalidEventId | Function | S
 }
 
 /**
- * @tc.name: HandleSystemSessionEvent_InvalidEventId2
+ * @tc.name: HandleSystemSessionEvent2
  * @tc.desc: sessionStub HandleSystemSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent_InvalidEventId2 | Function | SmallTest | Level2) {
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent2, | Function | SmallTest | Level2)
+{
     MessageParcel data;
     MessageParcel reply;
 
