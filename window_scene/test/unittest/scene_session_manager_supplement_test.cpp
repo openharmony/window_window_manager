@@ -249,7 +249,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CreateAndConnectSpecificSession, Fun
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    property->SetExtensionFlag(true);
+    property->SetIsUIExtFirstSubWindow(true);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
