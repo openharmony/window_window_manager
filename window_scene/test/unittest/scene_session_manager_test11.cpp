@@ -241,7 +241,7 @@ HWTEST_F(SceneSessionManagerTest11, GetWindowDisplayIds, Function | SmallTest | 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     DisplayId displayId = 0;
     property->SetDisplayId(displayId);
-    scenesession1->SetSessionProperty(property);
+    sceneSession1->SetSessionProperty(property);
 
     std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     std::unordered_map<uint64_t, DisplayId> windowDisplayMap;
