@@ -653,7 +653,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
         WLOGFE("Fail to read params");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     std::string dumpInfo;
     WSError errCode = GetSessionDumpInfo(params, dumpInfo);
@@ -664,7 +664,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
     if (infoSize != 0) {
         if (!reply.WriteRawData(info, infoSize)) {
             WLOGFE("Fail to write dumpInfo");
-            return -1;
+            return ERR_INVALID_DATA;
         }
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
