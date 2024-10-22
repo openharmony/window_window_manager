@@ -363,6 +363,33 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->ClearDialogVector();
 }
 
+
+/**
+ * @tc.name: SetSurfaceBounds01
+ * @tc.desc: SetSurfaceBounds function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceBounds01";
+    info.bundleName_ = "SetSurfaceBounds01";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    WSRect preRect = { 20, 20, 800, 800 };
+    WSRect rect = { 30, 30, 900, 900 };
+    session->SetSessionRect(preRect);
+
+    session->property_->SetDragEnabled(true);
+    session->SetSurfaceBounds(rect);
+    session->property_->SetDragEnabled(false);
+    session->SetSurfaceBounds(rect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+}
+
 /**
  * @tc.name: OnLayoutFullScreenChange
  * @tc.desc: OnLayoutFullScreenChange function
