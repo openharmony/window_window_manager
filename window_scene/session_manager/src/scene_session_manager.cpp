@@ -3829,6 +3829,7 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    ProcessWindowModeType();
     return true;
 }
 
@@ -5789,17 +5790,45 @@ void SceneSessionManager::ProcessWindowModeType()
     NotifyRSSWindowModeTypeUpdate();
 }
 
+static bool IsSmallFoldProduct()
+{
+    static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
+    if (foldScreenType.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
+        return false;
+    }
+    return foldScreenType[0] == '2';
+}
+
+bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSession)
+{
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionProperty is nullptr");
+        return false;
+    }
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    if (sessionProperty->GetDisplayId() != defaultScreenId) {
+        return true;
+    }
+    return false;
+}
+
 WindowModeType SceneSessionManager::CheckWindowModeType()
 {
     bool inSplit = false;
     bool inFloating = false;
     bool fullScreen = false;
+    bool isSmallFold = IsSmallFoldProduct();
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
             if (session.second == nullptr ||
                 !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
                 !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
+                continue;
+            }
+            if (isSmallFold && IsInSecondaryScreen(session.second)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();
