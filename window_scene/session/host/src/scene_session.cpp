@@ -215,9 +215,13 @@ WSError SceneSession::Foreground(
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
         (sessionProperty != nullptr && defaultScreenId == sessionProperty->GetDisplayId()) &&
         !IsShowWhenLocked()) {
-        if (!SessionPermission::IsSystemAppCall()) {
-            TLOGW(WmsLogTag::WMS_LIFE, "failed: screen is locked, session %{public}d show without ShowWhenLocked flag",
-                GetPersistentId());
+        if (SessionPermission::VerifyCallingPermission("ohos.permission.CALLED_BELOW_LOCK_SCREEN")) {
+            TLOGW(WmsLogTag::WMS_LIFE, "screen is locked, session %{public}d %{public}s permission verified",
+                GetPersistentId(), sessionInfo_.bundleName_.c_str());
+        } else {
+            TLOGW(WmsLogTag::WMS_LIFE,
+                "failed: screen is locked, session %{public}d %{public}s show without ShowWhenLocked flag",
+                GetPersistentId(), sessionInfo_.bundleName_.c_str());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
     }
