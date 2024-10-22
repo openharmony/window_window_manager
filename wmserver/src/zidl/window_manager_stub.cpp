@@ -343,7 +343,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER: {
-            uint32_t windowId = data.ReadUint32();
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                return ERR_INVALID_DATA;
+            }
             bool haveAvoidAreaListener = false;
             if (!data.ReadBool(haveAvoidAreaListener)) {
                 return ERR_INVALID_DATA;
