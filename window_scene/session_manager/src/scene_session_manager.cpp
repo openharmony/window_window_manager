@@ -8386,6 +8386,10 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                 WLOGFE("SceneSessionManager::ProcessVirtualPixelRatioChange null scene session");
                 continue;
             }
+            if (scnSession->GetSessionProperty() != nullptr &&
+                scnSession->GetSessionProperty()->GetDisplayId() != displayInfo->GetDisplayId()) {
+                continue;
+            }
             SessionInfo sessionInfo = scnSession->GetSessionInfo();
             if (sessionInfo.isSystem_) {
                 continue;
