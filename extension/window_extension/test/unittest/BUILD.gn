@@ -84,7 +84,7 @@ config("window_extension_unittest_common_public_config") {
     "../../../extension_connection/include",
     "../../../extension_connection/include/zidl",
     "../../../../interfaces/innerkits/extension",
-  
+
     "${window_base_path}/test/common/mock",
     "${window_base_path}/dm/include",
     "${window_base_path}/dmserver/include",
@@ -162,7 +162,6 @@ ohos_static_library("window_extension_unittest_common") {
     "input:libmmi-client",
     "ipc:ipc_single",
   ]
-
   subsystem_name = "window"
   part_name = "window_manager"
 }
