@@ -717,11 +717,18 @@ HWTEST_F(WindowSceneSessionImplTest2, DisableAppWindowDecor02, Function | SmallT
  */
 HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("RaiseAboveTarget01");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, windowSceneSession->RaiseAboveTarget(0));
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(6);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetParentPersistentId(0);
+    auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 }
 
 /**
@@ -1628,11 +1635,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     option->SetWindowName("SetTitleButtonVisible");
     sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
