@@ -631,7 +631,10 @@ int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel& data, MessagePar
 int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleSetGestureNavigationEnabled!");
-    bool enable = data.ReadBool();
+    bool enable = false;
+    if (!data.ReadBool(enable)) {
+        return ERR_INVALID_DATA;
+    }
     const WMError &ret = SetGestureNavigationEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -702,8 +705,14 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
-    bool haveAvoidAreaListener = data.ReadBool();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        return ERR_INVALID_DATA;
+    }
+    bool haveAvoidAreaListener = false;
+    if (!data.ReadBool(haveAvoidAreaListener)) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
