@@ -1648,12 +1648,16 @@ HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppProcess, Function 
     sceneSession1->SetCallingPid(1000);
     ssm_->snapshotSkipPidSet_.insert(1000);
     ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
     ASSERT_EQ(sceneSession1->GetSessionProperty()->GetSnapshotSkip(), true);
 
     SessionInfo info2;
     sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
     sceneSession2->SetCallingPid(1001);
     ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession2);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(sceneSession2->GetSessionProperty()->GetSnapshotSkip(), false);
 }
 
@@ -1938,12 +1942,16 @@ HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppBundleName, Functi
     sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info1, nullptr);
     ssm_->snapshotSkipBundleNameSet_.insert("TestName1");
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
     ASSERT_EQ(sceneSession1->GetSessionProperty()->GetSnapshotSkip(), true);
 
     SessionInfo info2;
     info2.bundleName_ = "TestName2";
     sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession2);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(sceneSession2->GetSessionProperty()->GetSnapshotSkip(), false);
 }
 
