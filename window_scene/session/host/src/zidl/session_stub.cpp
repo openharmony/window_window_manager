@@ -439,9 +439,17 @@ int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& rep
 
 int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool isTitleHoverShown = data.ReadBool();
-    bool isDockHoverShown = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown, isDockHoverShown: %{public}d, %{public}d",
+    bool isTitleHoverShown = true;
+    if (!data.ReadBool(isTitleHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isTitleHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isDockHoverShown = true;
+    if (!data.ReadBool(isDockHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isDockHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -592,6 +600,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
+        return ERR_INVALID_DATA;
+    }
     bool hasStartWindowOption = false;
     if (!data.ReadBool(hasStartWindowOption)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
@@ -734,7 +746,10 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 
 int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 {
-    bool status = static_cast<bool>(data.ReadUint32());
+    bool status = false;
+    if (!data.ReadBool(status)) {
+        return ERR_INVALID_DATA;
+    }
     WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
     WSError errCode = OnNeedAvoid(status);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -743,8 +758,14 @@ int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
 {
-    AvoidAreaType type = static_cast<AvoidAreaType>(data.ReadUint32());
-    WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+        return ERR_INVALID_DATA;
+    }
+    AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
+    WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;

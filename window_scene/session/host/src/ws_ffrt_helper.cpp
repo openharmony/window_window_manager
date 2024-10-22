@@ -29,7 +29,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WSFFRTHelper"};
 const std::unordered_map<TaskQos, ffrt::qos> FFRT_QOS_MAP = {
     { TaskQos::INHERIT, ffrt_qos_inherit },
@@ -84,15 +83,7 @@ private:
     std::shared_mutex mutex_;
 };
 
-WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>())
-{
-    static bool firstInit = [] {
-        int ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
-        WLOGI("FFRT user interactive qos max thread number = %{public}d, retcode = %{public}d",
-            FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
-        return true;
-    }();
-}
+WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>()) {}
 
 WSFFRTHelper::~WSFFRTHelper() = default;
 

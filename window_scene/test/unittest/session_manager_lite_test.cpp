@@ -34,6 +34,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    std::shared_ptr<SessionManagerLite> sml_;
 };
 
 void SessionManagerLiteTest::SetUpTestCase()
@@ -46,121 +48,35 @@ void SessionManagerLiteTest::TearDownTestCase()
 
 void SessionManagerLiteTest::SetUp()
 {
+    sml_ = std::make_shared<SessionManagerLite>();
+    ASSERT_NE(nullptr, sml_);
 }
 
 void SessionManagerLiteTest::TearDown()
 {
+    sml_ = nullptr;
 }
 
 namespace {
 /**
- * @tc.name: ClearSessionManagerProxy
+ * @tc.name: GetSceneSessionManagerLiteProxy
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, GetSceneSessionManagerLiteProxy, Function | SmallTest | Level2)
 {
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.GetSessionManagerServiceProxy();
-    
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
-/**
- * @tc.name: RecoverSessionManagerService
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.RecoverSessionManagerService(nullptr);
-    sessionManagerLite.ClearSessionManagerProxy();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.RecoverSessionManagerService(sessionManagerService);
+    ASSERT_NE(nullptr, sml_);
+    sml_->Clear();
+    sml_->ClearSessionManagerProxy();
+    auto sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
+    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
 
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
+    sml_->ClearSessionManagerProxy();
+    sml_->GetSessionManagerServiceProxy();
+    sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
+    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
 }
-/**
- * @tc.name: ReregisterSessionListener
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.ReregisterSessionListener();
-    sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.ReregisterSessionListener();
 
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
-/**
- * @tc.name: OnWMSConnectionChanged
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged01, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.OnWMSConnectionChanged(100, 100, true, sessionManagerService);
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
-/**
- * @tc.name: OnWMSConnectionChanged
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged02, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.OnWMSConnectionChanged(100, 100, false, sessionManagerService);
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
-/**
- * @tc.name: OnWMSConnectionChanged
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged03, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.OnWMSConnectionChanged(-1, -1, true, sessionManagerService);
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
-/**
- * @tc.name: OnWMSConnectionChanged
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged04, Function | SmallTest | Level2)
-{
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.OnWMSConnectionChanged(-1, -1, false, sessionManagerService);
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
-}
 /**
  * @tc.name: InitSceneSessionManagerLiteProxy
  * @tc.desc: normal function
@@ -168,14 +84,11 @@ HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged04, Function | SmallTest 
  */
 HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy01, Function | SmallTest | Level2)
 {
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.InitSceneSessionManagerLiteProxy();
-    sessionManagerLite.InitSceneSessionManagerLiteProxy();
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
+    ASSERT_NE(nullptr, sml_);
+    sml_->InitSceneSessionManagerLiteProxy();
+    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
+
 /**
  * @tc.name: InitSceneSessionManagerLiteProxy
  * @tc.desc: normal function
@@ -183,29 +96,61 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy01, Function | 
  */
 HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy02, Function | SmallTest | Level2)
 {
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.GetSceneSessionManagerLiteProxy();
-    sessionManagerLite.InitSceneSessionManagerLiteProxy();
-
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
+    ASSERT_NE(nullptr, sml_);
+    sml_->GetSceneSessionManagerLiteProxy();
+    sml_->InitSceneSessionManagerLiteProxy();
+    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
+
 /**
- * @tc.name: InitSceneSessionManagerLiteProxy
+ * @tc.name: ClearSessionManagerProxy
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy03, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
 {
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sessionManagerLite.GetSessionManagerServiceProxy();
-    sessionManagerLite.InitSceneSessionManagerLiteProxy();
-    sessionManagerLite.InitSceneSessionManagerLiteProxy();
+    ASSERT_NE(nullptr, sml_);
+    sml_->ClearSessionManagerProxy();
+    ASSERT_EQ(sml_->sessionManagerServiceProxy_, nullptr);
 
-    sessionManagerLite.ClearSessionManagerProxy();
-    sessionManagerLite.Clear();
-    ASSERT_EQ(nullptr, sessionManagerLite.sceneSessionManagerLiteProxy_);
+    sml_->recoverListenerRegistered_ = true;
+    sml_->GetSessionManagerServiceProxy();
+    sml_->ClearSessionManagerProxy();
+    ASSERT_EQ(sml_->sessionManagerServiceProxy_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverSessionManagerService
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    bool funcInvoked = false;
+    sml_->RecoverSessionManagerService(nullptr);
+    ASSERT_EQ(funcInvoked, false);
+
+    sml_->userSwitchCallbackFunc_ = [&]() { funcInvoked = true; };
+    sml_->RecoverSessionManagerService(nullptr);
+    ASSERT_EQ(funcInvoked, true);
+}
+
+/**
+ * @tc.name: ReregisterSessionListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->ReregisterSessionListener();
+    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
+
+    sml_->recoverListenerRegistered_ = true;
+    sml_->GetSceneSessionManagerLiteProxy();
+    sml_->ReregisterSessionListener();
+    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
 
 /**
@@ -215,49 +160,210 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy03, Function | 
  */
 HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
 {
-    SessionManagerLite sessionManagerLite;
-    sessionManagerLite.wmsConnectionChangedFunc_ = nullptr;
-    sessionManagerLite.OnWMSConnectionChangedCallback(0, 0, true, false);
+    ASSERT_NE(nullptr, sml_);
+    bool funcInvoked = false;
+    sml_->wmsConnectionChangedFunc_ = nullptr;
+    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
+    ASSERT_EQ(funcInvoked, false);
 
-    int32_t userId = 2;
-    int32_t screenId = 0;
-    bool isConnected = true;
-    sessionManagerLite.currentWMSUserId_ = SYSTEM_USERID;
-    sessionManagerLite.OnWMSConnectionChanged(userId, screenId, isConnected, nullptr);
+    sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
+    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
+    ASSERT_EQ(funcInvoked, true);
+}
 
-    sessionManagerLite.ClearSessionManagerProxy();
-
+/**
+ * @tc.name: OnWMSConnectionChanged1
+ * @tc.desc: wms disconnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
     sptr<ISessionManagerService> sessionManagerService;
-    sessionManagerLite.RecoverSessionManagerService(sessionManagerService);
-    sessionManagerLite.RegisterUserSwitchListener([]() {});
-    sessionManagerLite.OnUserSwitch(sessionManagerService);
-    sessionManagerLite.Clear();
+    sml_->isWMSConnected_ = true;
+    sml_->currentWMSUserId_ = 100;
+    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
+    ASSERT_EQ(sml_->isWMSConnected_, false);
 
-    sessionManagerLite.isWMSConnected_ = true;
-    sessionManagerLite.currentWMSUserId_ = SYSTEM_USERID;
-    SessionManagerLite::WMSConnectionChangedCallbackFunc callbackFunc;
-    auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    sml_->currentWMSUserId_ = 101;
+    sml_->isWMSConnected_ = true;
+    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
+    ASSERT_EQ(sml_->isWMSConnected_, true);
+}
+
+/**
+ * @tc.name: OnWMSConnectionChanged2
+ * @tc.desc: wms connected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sptr<ISessionManagerService> sessionManagerService;
+    sml_->isWMSConnected_ = false;
+    sml_->currentWMSUserId_ = INVALID_USER_ID;
+    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, true, sessionManagerService);
+    ASSERT_EQ(sml_->isWMSConnected_, true);
+
+    // user switch
+    sml_->currentWMSUserId_ = 100;
+    sml_->isWMSConnected_ = true;
+    sml_->OnWMSConnectionChanged(101, DEFAULT_SCREEN_ID, true, sessionManagerService);
+    ASSERT_EQ(sml_->isWMSConnected_, true);
+}
+
+/**
+ * @tc.name: OnUserSwitch
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnUserSwitch, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->OnUserSwitch(nullptr);
+    ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
+
+    sml_->recoverListenerRegistered_ = true;
+    auto sessionManagerService = sml_->GetSessionManagerServiceProxy();
+    ASSERT_NE(nullptr, sessionManagerService);
+    sml_->userSwitchCallbackFunc_ = []() {};
+    sml_->OnUserSwitch(sessionManagerService);
+    ASSERT_EQ(sessionManagerService, sml_->sessionManagerServiceProxy_);
+}
+
+/**
+ * @tc.name: OnRemoteDied1
+ * @tc.desc: foundation died
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    FoundationDeathRecipient foundationDeathRecipient;
+    wptr<IRemoteObject> wptrDeath;
+    foundationDeathRecipient.OnRemoteDied(wptrDeath);
+    ASSERT_EQ(false, sml_->isWMSConnected_);
+    ASSERT_EQ(false, sml_->isFoundationListenerRegistered_);
+    ASSERT_EQ(false, sml_->recoverListenerRegistered_);
+    ASSERT_EQ(nullptr, sml_->mockSessionManagerServiceProxy_);
+    ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
+    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
+}
+
+/**
+ * @tc.name: OnRemoteDied2
+ * @tc.desc: scb died
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnRemoteDied2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    SSMDeathRecipient sSMDeathRecipient;
+    wptr<IRemoteObject> wptrDeath;
+    sSMDeathRecipient.OnRemoteDied(wptrDeath);
+    ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
+}
+
+/**
+ * @tc.name: OnFoundationDied
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, OnFoundationDied, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->OnFoundationDied();
+    ASSERT_EQ(false, sml_->isWMSConnected_);
+    ASSERT_EQ(false, sml_->isFoundationListenerRegistered_);
+    ASSERT_EQ(false, sml_->recoverListenerRegistered_);
+    ASSERT_EQ(nullptr, sml_->mockSessionManagerServiceProxy_);
+    ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
+    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
 
 /**
  * @tc.name: RegisterWMSConnectionChangedListener
- * @tc.desc: normal function
+ * @tc.desc: WMSConnectionChangedCallbackFunc is null
  * @tc.type: FUNC
  */
 HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, Function | SmallTest | Level2)
 {
-    SessionManagerLite sessionManagerLite;
-    sessionManagerLite.OnFoundationDied();
-    FoundationDeathRecipientLite foundationDeathRecipientLite;
-    wptr<IRemoteObject> wptrDeath = nullptr;
-    foundationDeathRecipientLite.OnRemoteDied(wptrDeath);
-
-    SSMDeathRecipient sSMDeathRecipient;
-    sSMDeathRecipient.OnRemoteDied(wptrDeath);
-    SessionManagerLite::WMSConnectionChangedCallbackFunc callbackFunc;
-    auto ret = sessionManagerLite.RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_NE(nullptr, sml_);
+    auto ret = sml_->RegisterWMSConnectionChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RegisterWMSConnectionChangedListener1
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->recoverListenerRegistered_ = true;
+    sml_->currentWMSUserId_ = 100;
+    sml_->currentScreenId_ = 0;
+    sml_->isWMSConnected_ = true;
+    auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
+    auto ret = sml_->RegisterWMSConnectionChangedListener(callbackFunc);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RegisterSMSRecoverListener1
+ * @tc.desc: mockSessionManagerServiceProxy_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener1, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->recoverListenerRegistered_ = false;
+    sml_->mockSessionManagerServiceProxy_ = nullptr;
+    sml_->RegisterSMSRecoverListener();
+    ASSERT_EQ(sml_->recoverListenerRegistered_, false);
+}
+
+/**
+ * @tc.name: RegisterSMSRecoverListener2
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener2, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->recoverListenerRegistered_ = false;
+    sml_->InitMockSMSProxy();
+    sml_->RegisterSMSRecoverListener();
+    ASSERT_EQ(sml_->recoverListenerRegistered_, true);
+}
+
+/**
+ * @tc.name: RegisterUserSwitchListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, RegisterUserSwitchListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->RegisterUserSwitchListener(nullptr);
+    ASSERT_EQ(sml_->userSwitchCallbackFunc_, nullptr);
+
+    sml_->RegisterUserSwitchListener([]() {});
+    ASSERT_NE(sml_->userSwitchCallbackFunc_, nullptr);
+}
+
+/**
+ * @tc.name: InitMockSMSProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+    sml_->InitMockSMSProxy();
+    sml_->InitMockSMSProxy();
+    ASSERT_NE(sml_->foundationDeath_, nullptr);
 }
 }
 }

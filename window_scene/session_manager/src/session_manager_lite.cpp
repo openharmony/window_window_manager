@@ -93,12 +93,16 @@ public:
         : SceneSessionManagerLiteProxy(impl) {}
     virtual ~SceneSessionManagerLiteProxyMock() = default;
 
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override
     {
         TLOGI(WmsLogTag::DEFAULT, "called");
         auto ret = SceneSessionManagerLiteProxy::RegisterSessionListener(listener);
         if (ret != WSError::WS_OK) {
             return ret;
+        }
+        if (isRecover) {
+            TLOGI(WmsLogTag::DEFAULT, "Recover mode, no need to save listener");
+            return WSError::WS_OK;
         }
         SessionManagerLite::GetInstance().SaveSessionListener(listener);
         return WSError::WS_OK;
@@ -157,6 +161,10 @@ sptr<ISessionManagerService> SessionManagerLite::GetSessionManagerServiceProxy()
 
 void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& listener)
 {
+    if (listener == nullptr) {
+        TLOGW(WmsLogTag::DEFAULT, "listener is nullptr");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     auto it = std::find_if(sessionListeners_.begin(), sessionListeners_.end(),
         [&listener](const sptr<ISessionListener>& item) {
@@ -171,6 +179,7 @@ void SessionManagerLite::SaveSessionListener(const sptr<ISessionListener>& liste
 
 void SessionManagerLite::DeleteSessionListener(const sptr<ISessionListener>& listener)
 {
+    TLOGI(WmsLogTag::DEFAULT, "called");
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     auto it = std::find_if(sessionListeners_.begin(), sessionListeners_.end(),
         [&listener](const sptr<ISessionListener>& item) {
@@ -201,17 +210,23 @@ void SessionManagerLite::RecoverSessionManagerService(const sptr<ISessionManager
     }
 }
 
-void SessionManagerLite::ReregisterSessionListener() const
+void SessionManagerLite::ReregisterSessionListener()
 {
-    if (sceneSessionManagerLiteProxy_ == nullptr) {
+    sptr<ISceneSessionManagerLite> sceneSessionManagerLiteProxy = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        sceneSessionManagerLiteProxy = sceneSessionManagerLiteProxy_;
+    }
+    if (sceneSessionManagerLiteProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "sceneSessionManagerLiteProxy is null");
         return;
     }
 
+    std::lock_guard<std::recursive_mutex> guard(listenerLock_);
     TLOGI(WmsLogTag::WMS_RECOVER, "listener count = %{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
-        auto ret = sceneSessionManagerLiteProxy_->RegisterSessionListener(listener);
+        auto ret = sceneSessionManagerLiteProxy->RegisterSessionListener(listener, true);
         if (ret != WSError::WS_OK) {
             TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}" PRId32, ret);
         }

@@ -416,7 +416,7 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(nullptr, option);
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     option->SetSubWindowTitle("Test");
     std::string ret = option->GetSubWindowTitle();
     ASSERT_EQ(true, ret == "Test");
