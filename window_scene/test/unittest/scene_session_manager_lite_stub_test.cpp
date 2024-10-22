@@ -461,6 +461,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
  */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level1)
 {
+    MessageParcel data;
+    MessageParcel reply;
     data.WriteRemoteObject(nullptr);
     data.WriteInt32(-2);
     int32_t result = sceneSessionManagerLiteStub_->
@@ -475,7 +477,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, Functi
  */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState2, Function | SmallTest | Level1)
 {
-    sptr<IRemoteObject> token = new IRemoteObject();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
     data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
     int32_t result = sceneSessionManagerLiteStub_->
