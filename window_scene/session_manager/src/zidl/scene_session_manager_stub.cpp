@@ -15,13 +15,8 @@
 
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 
-#include <ipc_types.h>
 #include <ui/rs_surface_node.h>
 #include "marshalling_helper.h"
-#include "session/host/include/scene_session.h"
-#include "window_manager.h"
-#include "window_manager_agent_proxy.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -414,7 +409,7 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
     TLOGD(WmsLogTag::WMS_LIFE, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
         return ERR_INVALID_DATA;
     }
     bool shouldBackToCaller = true;
@@ -422,7 +417,7 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
         TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
         return ERR_INVALID_DATA;
     }
-    const WSError& errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -446,7 +441,7 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
     WLOGFI("run HandleUnRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        reply.WriteInt32(static_cast<int32_t>(WSError::WS_OK));
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         WLOGFI("listener is nullptr");
         return ERR_NONE;
     }

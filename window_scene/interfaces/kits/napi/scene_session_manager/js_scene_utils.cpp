@@ -691,7 +691,7 @@ bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent&
     return true;
 }
 
-bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t> &intList)
+bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int32_t>& intList)
 {
     bool isArray = false;
     napi_is_array(env, jsObject, &isArray);
@@ -716,7 +716,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     return true;
 }
 
-bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string> &stringMap)
+bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<std::string, std::string>& stringMap)
 {
     if (value == nullptr) {
         WLOGFE("value is nullptr");
@@ -1178,6 +1178,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 
     napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
+    napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
+    napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     return objValue;
 }
 

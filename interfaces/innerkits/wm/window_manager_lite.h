@@ -112,6 +112,13 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+    /**
+     * @brief Get window mode type.
+     *
+     * @param void
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowModeType(WindowModeType& windowModeType) const;
 
     /**
     * @brief Register camera window changed listener.
@@ -128,7 +135,6 @@ public:
    * @return WM_OK means unregister success, others means unregister failed.
    */
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
-
     /**
      * @brief raise window to top by windowId
      *
@@ -136,15 +142,6 @@ public:
      * @return WM_OK if raise success
      */
     WMError RaiseWindowToTop(int32_t persistentId);
-
-    /**
-     * @brief Get window mode type.
-     *
-     * @param void
-     * @return WM_OK means get success, others means get failed.
-     */
-    WMError GetWindowModeType(WindowModeType& windowModeType) const;
-
     /**
      * @brief Get top num main window info.
      *
@@ -153,6 +150,25 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+
+    /**
+     * @brief Register WMS connection status changed listener.
+     * @attention Callable only by u0 system user. A process only supports successful registration once.
+     * When the foundation service restarts, you need to re-register the listener.
+     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
+     *
+     * @param listener IWMSConnectionChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+
+    /**
+     * @brief Unregister WMS connection status changed listener.
+     * @attention Callable only by u0 system user.
+     *
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWMSConnectionChangedListener();
 
     /**
      * @brief Get all main window info.
@@ -180,31 +196,13 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
 
     /**
-     * @brief Register WMS connection status changed listener.
-     * @attention Callable only by u0 system user. A process only supports successful registration once.
-     * When the foundation service restarts, you need to re-register the listener.
-     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
-     *
-     * @param listener IWMSConnectionChangedListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
-
-    /**
-     * @brief Unregister WMS connection status changed listener.
-     * @attention Callable only by u0 system user.
-     *
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    WMError UnregisterWMSConnectionChangedListener();
-
-    /**
      * @brief Register WindowStyle changed listener.
      *
      * @param listener IWindowStyleChangedListener
      * @return WM_OK means register success, others means unregister failed.
      */
     WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
     /**
     * @brief Unregister WindowStyle changed listener.
     *
@@ -212,6 +210,7 @@ public:
     * @return WM_OK means unregister success, others means unregister failed.
     */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
     /**
      * @brief Get window style type.
      *
@@ -219,6 +218,14 @@ public:
      * @return @return WM_OK means get window style success, others means failed.
      */
     WindowStyleType GetWindowStyleType();
+
+    /**
+     * @brief Terminate session by persistentId and start caller.
+     * @persistentId persistentId to be terminated.
+     *
+     * @return WM_OK means Terminate success, others means Terminate failed.
+     */
+    WMError TerminateSessionByPersistentId(int32_t persistentId);
 
 private:
     WindowManagerLite();

@@ -26,6 +26,30 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScre
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
 
+JsScreenListener::JsScreenListener(napi_env env) : env_(env)
+{
+    TLOGI(WmsLogTag::DMS, "Constructor execution");
+    napi_add_env_cleanup_hook(env_, CleanEnv, this);
+}
+
+JsScreenListener::~JsScreenListener()
+{
+    TLOGI(WmsLogTag::DMS, "Destructor execution");
+    napi_remove_env_cleanup_hook(env_, CleanEnv, this);
+    env_ = nullptr;
+}
+
+void JsScreenListener::CleanEnv(void* obj)
+{
+    JsScreenListener* thisObj = reinterpret_cast<JsScreenListener*>(obj);
+    if (!thisObj) {
+        TLOGE(WmsLogTag::DMS, "obj is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "env_ is invalid, set to nullptr");
+    thisObj->env_ = nullptr;
+}
+
 void JsScreenListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
     WLOGI("JsScreenListener::AddCallback is called");
@@ -133,7 +157,7 @@ void JsScreenListener::OnDisconnect(ScreenId id)
             CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
         }
     );
-    
+
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsScreenListener::OnDisconnect", env_, std::make_unique<NapiAsyncTask>(

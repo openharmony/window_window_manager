@@ -578,40 +578,6 @@ WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
     return ret;
 }
 
-WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
-    return SingletonContainer::Get<WindowAdapterLite>().GetMainWindowInfos(topNum, topNInfo);
-}
-
-WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
-{
-    if (!infos.empty()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "infos is not empty.");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    return SingletonContainer::Get<WindowAdapterLite>().GetAllMainWindowInfos(infos);
-}
-
-WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds)
-{
-    if (persistentIds.empty()) {
-        TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
-        return WMError::WM_OK;
-    }
-    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds);
-}
-
-WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
-    std::vector<int32_t>& clearFailedIds)
-{
-    if (persistentIds.empty()) {
-        TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
-        return WMError::WM_OK;
-    }
-    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
-}
-
 WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
@@ -656,6 +622,40 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
     } else {
         pImpl_->NotifyWMSDisconnected(userId, screenId);
     }
+}
+
+WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
+    return SingletonContainer::Get<WindowAdapterLite>().GetMainWindowInfos(topNum, topNInfo);
+}
+
+WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
+{
+    if (!infos.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "infos is not empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().GetAllMainWindowInfos(infos);
+}
+
+WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds)
+{
+    if (persistentIds.empty()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
+        return WMError::WM_OK;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds);
+}
+
+WMError WindowManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    if (persistentIds.empty()) {
+        TLOGW(WmsLogTag::WMS_MAIN, "Clear main Session failed, persistentIds is empty.");
+        return WMError::WM_OK;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().ClearMainSessions(persistentIds, clearFailedIds);
 }
 
 WMError WindowManagerLite::NotifyWindowStyleChange(WindowStyleType type)
@@ -733,6 +733,15 @@ WindowStyleType WindowManagerLite::GetWindowStyleType()
         return styleType;
     }
     return styleType;
+}
+
+WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    if (persistentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "persistentId is invalid.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
 }
 } // namespace Rosen
 } // namespace OHOS

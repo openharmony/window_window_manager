@@ -477,6 +477,81 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: DisconnectTask01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisconnectTask01";
+    info.bundleName_ = "DisconnectTask01";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+
+    int resultValue = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+    specificCallback->onCreate_ =
+    [&resultValue, specificCallback](const SessionInfo& info,
+                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
+        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        EXPECT_NE(sceneSessionReturn, nullptr);
+        resultValue = 1;
+        return sceneSessionReturn;
+    };
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DisconnectTask02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisconnectTask02";
+    info.bundleName_ = "DisconnectTask02";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->DisconnectTask(true, true);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+    sceneSession->isActive_ = true;
+    result = sceneSession->DisconnectTask(false, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: Disconnect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -770,7 +845,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    sceneSession->Session::isTerminating = false;
+    sceneSession->Session::isTerminating_ = false;
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
@@ -933,14 +1008,14 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     ASSERT_NE(nullptr, abilitySessionInfo);
     OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
+    session.isTerminating_ = true;
     sceneSession->TerminateSession(abilitySessionInfo);
 
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
     NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
-    session.isTerminating = false;
+    session.isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
@@ -989,7 +1064,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
     ASSERT_NE(nullptr, abilitySessionInfo);
     bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
-    session.isTerminating = true;
+    session.isTerminating_ = true;
     sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
     sceneSession->GetLastSafeRect();
     WSRect rect;
@@ -1098,7 +1173,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     info.bundleName_ = "NotifySessionExceptionInner";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isTerminating = true;
+    sceneSession->isTerminating_ = true;
     auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession);
     ASSERT_EQ(res, WSError::WS_OK);
 
@@ -1111,11 +1186,11 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sceneSession->isTerminating = true;
+    sceneSession->isTerminating_ = true;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sceneSession->isTerminating = false;
+    sceneSession->isTerminating_ = false;
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
 

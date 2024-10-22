@@ -41,7 +41,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapterLite)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return ret;                                                   \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 #define CHECK_PROXY_RETURN_IF_NULL(proxy)                                 \
     do {                                                                  \
@@ -49,7 +49,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapterLite)
             TLOGE(WmsLogTag::DEFAULT, "window manager proxy is nullptr"); \
             return;                                                       \
         }                                                                 \
-    } while(false)
+    } while (false)
 
 WMError WindowAdapterLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
@@ -284,6 +284,15 @@ sptr<IWindowManagerLite> WindowAdapterLite::GetWindowManagerServiceProxy() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return windowManagerServiceProxy_;
+}
+
+WMError WindowAdapterLite::TerminateSessionByPersistentId(int32_t persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->TerminateSessionByPersistentId(persistentId);
 }
 
 } // namespace Rosen

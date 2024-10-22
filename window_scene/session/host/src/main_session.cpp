@@ -212,7 +212,7 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
     const auto state = GetSessionState();
     if ((state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) &&
-        (isClientInteractive_ != interactive)) {
+        isClientInteractive_ != interactive) {
         WLOGFI("%{public}d", interactive);
         sessionStage_->NotifyForegroundInteractiveStatus(interactive);
         isClientInteractive_ = interactive;

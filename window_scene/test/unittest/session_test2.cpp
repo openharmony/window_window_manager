@@ -1425,6 +1425,9 @@ HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallT
     session_->SetNotifyUIRequestFocusFunc(nullptr);
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
+
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
+    session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
@@ -1688,33 +1691,33 @@ HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest
  */
 HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
 {
-    EXPECT_NE(session_, nullptr);
+    ASSERT_NE(session_, nullptr);
     SessionInfo info;
     info.abilityName_ = "getMainSession";
     info.moduleName_ = "getMainSession";
     info.bundleName_ = "getMainSession";
     sptr<Session> session = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session, nullptr);
+    ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session->property_, nullptr);
+    ASSERT_NE(session->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(session, session->GetMainSession());
 
     sptr<Session> subSession = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(subSession, nullptr);
+    ASSERT_NE(subSession, nullptr);
     subSession->SetParentSession(session);
     subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(subSession->property_, nullptr);
+    ASSERT_NE(subSession->property_, nullptr);
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSession->GetMainSession());
 
     sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(subSubSession, nullptr);
+    ASSERT_NE(subSubSession, nullptr);
     subSubSession->SetParentSession(subSession);
     subSubSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(subSubSession->property_, nullptr);
+    ASSERT_NE(subSubSession->property_, nullptr);
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(session, subSubSession->GetMainSession());
+    EXPECT_EQ(session, subSubSession->GetMainSession());
 }
 }
 } // namespace Rosen

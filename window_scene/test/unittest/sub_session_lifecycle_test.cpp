@@ -126,6 +126,10 @@ HWTEST_F(SessionStubLifecycleTest, Reconnect01, Function | SmallTest | Level1)
     property->SetWindowState(WindowState::STATE_HIDDEN);
     result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    property->SetWindowState(WindowState::STATE_FROZEN);
+    result = subSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -258,6 +262,58 @@ HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
     ASSERT_TRUE(subSession_ != nullptr);
     auto result = subSession_->Show(property);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+/**
+ * @tc.name: Show04
+ * @tc.desc: check func Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
+
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
+
+    subSession_->SetSessionProperty(property);
+    ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
+}
+/**
+ * @tc.name: ProcessPointDownSession01
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+{
+    subSession_->Hide();
+    subSession_->SetParentSession(subSession_);
+    ASSERT_TRUE(subSession_->GetParentSession() != nullptr);
+
+    WSRect rect;
+    subSession_->UpdatePointerArea(rect);
+    subSession_->RectCheck(50, 100);
+    ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
+}
+/**
+ * @tc.name: ProcessPointDownSession02
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+{
+    subSession_->Hide();
+    WSRect rect;
+    subSession_->UpdatePointerArea(rect);
+    subSession_->RectCheck(50, 100);
+
+    auto property = subSession_->GetSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetRaiseEnabled(false);
+    ASSERT_FALSE(subSession_->GetSessionProperty()->GetRaiseEnabled());
+    ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
 }
 }
 }

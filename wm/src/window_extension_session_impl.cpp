@@ -336,6 +336,30 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
     return ret;
 }
 
+WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
+{
+    auto persistentId = GetPersistentId();
+    std::stringstream ss;
+    ss << "ID: " << persistentId << ", needHide: " << needHide;
+
+    if (surfaceNode_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    // Let rs guarantee the security and permissions of the interface
+    auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(), errCode);
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -539,6 +563,8 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else if (handler_ != nullptr) {
+        UpdateRectForOtherReason(wmRect, wmReason);
     } else {
         NotifySizeChange(wmRect, wmReason);
         UpdateViewportConfig(wmRect, wmReason);
@@ -573,22 +599,11 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
-        window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
-            auto window = weak.promote();
-            if (!window) {
-                return;
-            }
-            window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
-                RSSystemProperties::SetDrawTextAsBitmap(false);
-            }
-        });
+        RSNode::OpenImplicitAnimation(protocol, curve);
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
@@ -601,6 +616,22 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
+}
+
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+{
+    auto task = [weak = wptr(this), wmReason, wmRect] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+            return;
+        }
+        window->NotifySizeChange(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason);
+    };
+    if (handler_) {
+        handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
@@ -1035,6 +1066,14 @@ void WindowExtensionSessionImpl::NotifyExtensionTimeout(int32_t errorCode)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->NotifyExtensionTimeout(errorCode);
+}
+
+int32_t WindowExtensionSessionImpl::GetRealParentId() const
+{
+    if (property_ == nullptr) {
+        return static_cast<int32_t>(INVALID_WINDOW_ID);
+    }
+    return property_->GetRealParentId();
 }
 
 WindowType WindowExtensionSessionImpl::GetParentWindowType() const
