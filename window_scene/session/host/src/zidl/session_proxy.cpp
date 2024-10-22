@@ -898,7 +898,7 @@ WSError SessionProxy::OnNeedAvoid(bool status)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteBool(status))) {
+    if (!data.WriteBool(status)) {
         WLOGFE("Write status failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
