@@ -180,7 +180,7 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
     sptr<WindowNode> node2 = new WindowNode(property, nullptr, nullptr);
     auto actRect2 = layoutPolicy_->CalcEntireWindowHotZone(node2, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
-    Rect expRect2 = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());;
+    Rect expRect2 = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_EQ(expRect2, actRect2);
 }
 
