@@ -219,6 +219,9 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
         WLOGFE("Failed to register bundle status callback.");
     }
+
+    collaboratorDeathRecipient_ = sptr<AgentDeathRecipient>::MakeSptr(
+        [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
 }
 
 SceneSessionManager::~SceneSessionManager()
@@ -8667,6 +8670,14 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
         WLOGFW("collaborator register failed, invalid type.");
         return WSError::WS_ERROR_INVALID_TYPE;
     }
+    if (impl == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Collaborator is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (impl->AsObject() == nullptr || !impl->AsObject()->AddDeathRecipient(collaboratorDeathRecipient_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to add collaborator death recipient");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     {
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_[type] = impl;
@@ -8692,11 +8703,33 @@ WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
         WLOGFE("collaborator unregister failed, invalid type.");
         return WSError::WS_ERROR_INVALID_TYPE;
     }
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(type);
+    if (collaborator != nullptr && collaborator->AsObject() != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "Remove collaborator death recipient");
+        collaborator->AsObject()->RemoveDeathRecipient(collaboratorDeathRecipient_);
+    }
     {
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_.erase(type);
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ClearAllCollaboratorSessions()
+{
+    TLOGI(WmsLogTag::DEFAULT, "run");
+    std::vector<sptr<SceneSession>> collaboratorSessions;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession != nullptr && CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+                collaboratorSessions.push_back(sceneSession);
+            }
+        }
+    }
+    for (const auto& sceneSession : collaboratorSessions) {
+        sceneSession->Clear();
+    }
 }
 
 bool SceneSessionManager::CheckCollaboratorType(int32_t type)

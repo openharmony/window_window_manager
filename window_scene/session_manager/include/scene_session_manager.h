@@ -334,6 +334,7 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
+    void ClearAllCollaboratorSessions();
 
     bool IsInputEventEnabled();
     void SetEnableInputEvent(bool enabled);
@@ -846,6 +847,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient_;
 
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
