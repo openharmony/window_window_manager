@@ -179,6 +179,11 @@ void WindowSessionProperty::SetFocusable(bool isFocusable)
     focusable_ = isFocusable;
 }
 
+void WindowSessionProperty::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    focusableOnShow_ = isFocusableOnShow;
+}
+
 void WindowSessionProperty::SetTouchable(bool isTouchable)
 {
     touchable_ = isTouchable;
@@ -282,6 +287,11 @@ WindowType WindowSessionProperty::GetWindowType() const
 bool WindowSessionProperty::GetFocusable() const
 {
     return focusable_;
+}
+
+bool WindowSessionProperty::GetFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool WindowSessionProperty::GetTouchable() const
@@ -1018,7 +1028,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
+        parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
+        parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
@@ -1071,6 +1082,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestRect(reqRect);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
+    property->SetFocusableOnShow(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
@@ -1143,6 +1155,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowRect_ = property->windowRect_;
     type_ = property->type_;
     focusable_= property->focusable_;
+    focusable_= property->focusableOnShow_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
