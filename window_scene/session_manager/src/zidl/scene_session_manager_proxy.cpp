@@ -2502,12 +2502,12 @@ WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<int32_t>& wind
         int32_t windowId;
         if (!reply.ReadInt32(windowId)) {
             TLOGE(WmsLogTag::DEFAULT, "Fail to read windowId");
-            return ERR_INVALID_DATA;
+            return WMError::WM_ERROR_IPC_FAILED;
         }
         uint64_t displayId;
         if (!reply.ReadUint64(displayId)) {
             TLOGE(WmsLogTag::DEFAULT, "Fail to read displayId");
-            return ERR_INVALID_DATA;
+            return WMError::WM_ERROR_IPC_FAILED;
         }
         windowDisplayMap[windowId] = displayId;
     }
