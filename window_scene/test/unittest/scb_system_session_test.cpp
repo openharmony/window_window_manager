@@ -120,7 +120,13 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
  */
 HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
 {
+    scbSystemSession_->isFocused_ = true;
     bool isFocused = scbSystemSession_->isFocused_;
+
+    ASSERT_EQ(WSError::WS_OK, scbSystemSession_->UpdateFocus(!isFocused));
+
+    scbSystemSession_->isFocused_ = false;
+    isFocused = scbSystemSession_->isFocused_;
 
     ASSERT_EQ(WSError::WS_OK, scbSystemSession_->UpdateFocus(!isFocused));
 }
