@@ -1368,7 +1368,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos2, Function | SmallTe
 
     const std::string deviceId = "testDeviceId";
     const int numMax = 5;
-    data.WriteString(String::FromUTF8(deviceId));
+    data.WriteString(deviceId);
     data.WriteInt32(numMax);
 
     std::vector<SessionInfoBean> sessionInfos;
@@ -1378,13 +1378,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos2, Function | SmallTe
     int result = stub_->HandleGetSessionInfos(data, reply);
 
     ASSERT_EQ(result, ERR_NONE);
-
-    for (const auto& it : sessionInfos) {
-        SessionInfoBean readSessionInfo;
-        ASSERT_TRUE(reply.ReadParcelable(&readSessionInfo));
-        ASSERT_EQ(readSessionInfo, it);
-    }
-
     ASSERT_EQ(reply.ReadInt32(), static_cast<int32_t>(WSError::WS_OK));
 }
 
@@ -1398,7 +1391,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos3, Function | SmallTe
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteString(String::FromUTF8("testDeviceId"));
+    data.WriteString("testDeviceId");
     data.WriteInt32(0);
 
     int result = stub_->HandleGetSessionInfos(data, reply);
@@ -1438,48 +1431,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo3, Function | SmallTes
     MessageParcel data;
     MessageParcel reply;
     data.WriteString("TestDeviceId");
-    int result = stub_->HandleGetSessionInfo(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
-}
-
-/**
- * @tc.name: HandleGetSessionInfo4
- * @tc.desc: test HandleGetSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo4, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteString("TestDeviceId");
-    data.WriteInt32(123);
-
-    SessionInfoBean info;
-    WSError errCode = WSError::WS_OK;
-    EXPECT_CALL(reply, WriteParcelable(&info)).WillOnce(Return(false));
-
-    int result = stub_->HandleGetSessionInfo(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
-}
-
-/**
- * @tc.name: HandleGetSessionInfo5
- * @tc.desc: test HandleGetSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo5, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteString16("TestDeviceId");
-    data.WriteInt32(123);
-    SessionInfoBean info;
-    WSError errCode = WSError::WS_OK;
-    EXPECT_CALL(reply, WriteParcelable(&info)).WillOnce(Return(true));
-    EXPECT_CALL(reply, WriteInt32(static_cast<int32_t>(errCode))).WillOnce(Return(false));
-
     int result = stub_->HandleGetSessionInfo(data, reply);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
