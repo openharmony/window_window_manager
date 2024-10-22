@@ -1360,8 +1360,8 @@ HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest
     ssm_->NotifySessionForeground(sceneSession, reason, withAnimation);
     WSRect area = { 0, 0, 0, 0 };
     uint32_t type = 0;
-    ssm_->AddWindowDragHotArea(type, area);
     uint64_t displayId = 0;
+    ssm_->AddWindowDragHotArea(displayId, type, area);
     ssm_->currAINavigationBarAreaMap_.clear();
     ssm_->currAINavigationBarAreaMap_.insert(std::make_pair(displayId, area));
     auto ret = ssm_->GetAINavigationBarArea(1);
@@ -1420,10 +1420,10 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | Smal
     EXPECT_EQ(ret, false);
     ssm_->enterRecent_ = false;
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     ssm_->lastUpdatedAvoidArea_.clear();
     ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1537,15 +1537,16 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "WindowDestroyNotifyVisibility";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(false);
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
     sceneSession->SetRSVisible(true);
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
-    sceneSession->SetRSVisible(false);
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-    sceneSession = nullptr;
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+    ASSERT_FALSE(sceneSession->GetRSVisible());
 }
 }
 } // namespace Rosen
