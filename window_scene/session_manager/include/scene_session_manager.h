@@ -444,7 +444,7 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
-    
+
     /*
      * Window ZOrder: PC
      */
@@ -953,6 +953,11 @@ private:
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);
+
+    /*
+     * Screen Manager
+     */
+    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
 
     struct SessionInfoList {
         int32_t uid_;
