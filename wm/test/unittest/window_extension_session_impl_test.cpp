@@ -944,7 +944,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     window_->focusState_ = std::nullopt;
     window_->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+        window_->NapiSetUIContent(contentInfo, env, storage, 0, token, nullptr));
 
     auto uiContent = std::make_shared<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, uiContent);
@@ -953,7 +953,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     window_->focusState_ = true;
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK,
-    window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+        window_->NapiSetUIContent(contentInfo, env, storage, 0, token, nullptr));
 }
 
 /**
@@ -1509,17 +1509,6 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
-}
- 
-/**
- * @tc.name: HideNonSecureWindows03
- * @tc.desc: HideNonSecureWindows Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | SmallTest | Level3)
-{
-    window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
 
     sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
     ASSERT_NE(nullptr, iRemoteObject);
@@ -1531,6 +1520,17 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
     window_->property_->SetPersistentId(1);
 
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
+}
+ 
+/**
+ * @tc.name: HideNonSecureWindows03
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | SmallTest | Level3)
+{
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
 }
  
 /**
