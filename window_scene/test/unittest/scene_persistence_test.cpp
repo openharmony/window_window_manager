@@ -129,6 +129,11 @@ HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, Function | Sma
     sptr<ScenePersistence> scenePersistence2 = new ScenePersistence(bundleName, persistentId);
     scenePersistence2->RenameSnapshotFromOldPersistentId(persistentId);
     ASSERT_EQ(ret, 0);
+
+    sptr<ScenePersistence> scenePersistence3 = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence3);
+    scenePersistence3->snapshotPath_ = "/data/1.png";
+    scenePersistence3->RenameSnapshotFromOldPersistentId(persistentId);
 }
 
 /**
@@ -213,6 +218,9 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     }
     EXPECT_NE(result, nullptr);
     ASSERT_EQ(result2, true);
+
+    result = scenePersistence->GetLocalSnapshotPixelMap(0.0, 0.2);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
