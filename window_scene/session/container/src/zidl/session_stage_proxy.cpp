@@ -28,7 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageProxy"};
-constexpr int32_t MAX_INFOS_SIZE = 50;
+constexpr int32_t MAX_INFO_SIZE = 50;
 constexpr size_t MAX_PARCEL_CAPACITY = 100 * 1024 * 1024; // 100M
 
 bool CopyBufferFromRawData(void *&buffer, size_t size, const void *data)
@@ -1226,7 +1226,6 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
 bool SessionStageProxy::ReadSmallStringVectorFromParcel(
     MessageParcel& reply, std::vector<std::string>& infos)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "ReadSmallStringVectorFromParcel entry");
     if (!reply.ReadStringVector(&infos)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
         return false;
@@ -1238,7 +1237,6 @@ bool SessionStageProxy::ReadSmallStringVectorFromParcel(
 bool SessionStageProxy::ReadBigStringVectorFromParcel(
     MessageParcel& reply, std::vector<std::string>& infos)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "ReadBigStringVectorFromParcel entry");
     int32_t dataSizeInt = 0;
     if (!reply.ReadInt32(dataSizeInt) || dataSizeInt == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read dataSize failed");
@@ -1264,9 +1262,7 @@ bool SessionStageProxy::ReadBigStringVectorFromParcel(
         return false;
     }
 
-    TLOGD(WmsLogTag::WMS_UIEXT, "ReadBigStringVectorFromParcel dataSize: %{public}zu,"
-        " infoSize: %{public}d", dataSize, infoSize);
-    if (infoSize >= MAX_INFOS_SIZE) {
+    if (infoSize >= MAX_INFO_SIZE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Too big infos, infoSize: %{public}d", infoSize);
         return false;
     }
