@@ -60,6 +60,16 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+
+bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+        wmReason == WindowSizeChangeReason::MAXIMIZE) {
+        return false;
+    }
+    return true;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -672,20 +682,13 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
         GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "WindowSessionImpl::UpdateRect%d [%d, %d, %u, %u] reason:%u",
-        GetPersistentId(), wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason);
+        "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
+        wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config);
-    } else if (handler_ != nullptr) {
-        UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     } else {
-        if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
-            NotifySizeChange(wmRect, wmReason);
-            lastSizeChangeReason_ = wmReason;
-            postTaskDone_ = true;
-        }
-        UpdateViewportConfig(wmRect, wmReason, config.rsTransaction_);
+        UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
     sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
     if (layoutCallback) {
@@ -746,15 +749,27 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
-
+    if (handler_ == nullptr) {
+        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        return;
+    }
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
+        bool ifNeedCommitRsTransaction = CheckIfNeedCommitRsTransaction(wmReason);
+        if (rsTransaction && ifNeedCommitRsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
         window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        if (rsTransaction && ifNeedCommitRsTransaction) {
+            rsTransaction->Commit();
+        }
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
 }
