@@ -51,6 +51,7 @@ group("unittest") {
     ":ws_single_display_fold_policy_test",
     ":ws_single_display_pocket_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
+    ":ws_single_display_sensor_pocket_fold_state_manager_test",
   ]
 }
 
@@ -564,6 +565,7 @@ ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "hilog:libhilog",
   ]

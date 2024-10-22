@@ -261,4 +261,5 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChan
     ASSERT_EQ(stateManager.IsTentMode(), false);
 }
 }
-}
+} // namespace Rosen
+} // namespace OHOS
