@@ -566,6 +566,20 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     ReportNotifyModeChange(displayOrientation);
 }
 
+void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    property_.SetBounds(bounds);
+    property_.SetRotation(static_cast<float>(rotation));
+    property_.UpdateScreenRotation(targetRotation);
+    property_.SetDisplayOrientation(displayOrientation);
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
+        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
+        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
+        rotation, displayOrientation);
+}
+
 void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
 {
     int32_t vhMode = 1;
@@ -691,8 +705,8 @@ void ScreenSession::SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& 
 
 void ScreenSession::DestroyScreenScene()
 {
-    if (destroyScreenSceneCallback_  == nullptr) {
-        TLOGI(WmsLogTag::DMS, "destroyScreenSceneCallback_  is nullptr");
+    if (destroyScreenSceneCallback_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "destroyScreenSceneCallback_ is nullptr");
         return;
     }
     destroyScreenSceneCallback_();

@@ -464,6 +464,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY()});
         }
+        if (session->moveDragController_ && event == SessionEvent::EVENT_DRAG) {
+            WSRect rect = session->moveDragController_->GetTargetRect();
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_});
+        }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event),
                 session->sessionEventParam_);
@@ -2196,9 +2200,13 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
-    if (isCompatibleModeInPc) {
+    if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
+        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+            return;
+        }
         SetSurfaceBounds(rect);
         UpdateSizeChangeReason(reason);
         if (reason != SizeChangeReason::MOVE) {
@@ -2208,7 +2216,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
     if (reason == SizeChangeReason::DRAG_END) {
         if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedBykeyboard");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
             SetOriPosYBeforeRaisedByKeyboard(0);
         }
         NotifySessionRectChange(rect, reason);
@@ -3712,12 +3720,12 @@ void SceneSession::SetLastSafeRect(WSRect rect)
 
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
-    return oriPosYBeforeRaisedBykeyboard_;
+    return oriPosYBeforeRaisedByKeyboard_;
 }
 
 void SceneSession::SetOriPosYBeforeRaisedByKeyboard(int32_t posY)
 {
-    oriPosYBeforeRaisedBykeyboard_ = posY;
+    oriPosYBeforeRaisedByKeyboard_ = posY;
 }
 
 bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
