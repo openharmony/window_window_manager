@@ -15,12 +15,17 @@
 
 #include "screen_rotation_property.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS {
 namespace Rosen {
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     static DeviceRotation lastSensorRotationConverted_ = DeviceRotation::INVALID;
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED) {
+        deviceRotation = ConvertSinglePocketOuterRotation(deviceRotation);
+    }
     TLOGI(WmsLogTag::DMS, "DeviceRotation: %{public}d, "
         "lastSensorRotationConverted: %{public}d", deviceRotation, lastSensorRotationConverted_);
 
@@ -33,6 +38,22 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
         return;
     }
     screenSession->HandleSensorRotation(ConvertDeviceToFloat(deviceRotation));
+}
+
+DeviceRotation ScreenRotationProperty::ConvertSinglePocketOuterRotation(DeviceRotation deviceRotation)
+{
+    DeviceRotation sensorRotation = deviceRotation;
+    switch (deviceRotation) {
+        case DeviceRotation::ROTATION_LANDSCAPE:
+            sensorRotation = DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
+            break;
+        case DeviceRotation::ROTATION_LANDSCAPE_INVERTED:
+            sensorRotation = DeviceRotation::ROTATION_LANDSCAPE;
+            break;
+        default:
+            TLOGW(WmsLogTag::DMS, "no need to covert, rotation: %{public}d", deviceRotation);
+    }
+    return sensorRotation;
 }
 
 float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation)

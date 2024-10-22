@@ -39,7 +39,46 @@ HWTEST_F(SurfaceReaderTest, Init, Function | SmallTest | Level2)
     SurfaceReader* reader = new(std::nothrow) SurfaceReader();
     bool res = reader->Init();
     ASSERT_EQ(res, true);
+    delete reader;
     GTEST_LOG_(INFO) << "SurfaceReaderTest: Init end";
+}
+/**
+ * @tc.name: OnVsync
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceReaderTest, OnVsync, Function | SmallTest | Level2)
+{
+    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    bool res = reader->Init();
+    reader->OnVsync();
+    delete reader;
+    ASSERT_EQ(res, true);
+}
+/**
+ * @tc.name: GetSurface
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceReaderTest, GetSurface, Function | SmallTest | Level2)
+{
+    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    reader->Init();
+    sptr<Surface> surface = reader->GetSurface();
+    ASSERT_NE(surface, nullptr);
+    delete reader;
+}
+/**
+ * @tc.name: SetHandler
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceReaderTest, SetHandler, Function | SmallTest | Level2)
+{
+    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    reader->SetHandler(nullptr);
+    ASSERT_TRUE(true);
+    delete reader;
 }
 } // namespace
 }

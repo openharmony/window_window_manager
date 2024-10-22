@@ -21,7 +21,6 @@
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;

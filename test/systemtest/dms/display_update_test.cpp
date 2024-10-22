@@ -63,8 +63,8 @@ void DisplayUpdateTest::TearDown()
 
 namespace {
 /**
- * @tc.name: RegisterPrivateWindowListener
- * @tc.desc: Register private window listener test
+ * @tc.name: RegisterDisplayUpdateListener
+ * @tc.desc: Register display update listener test
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, Function | MediumTest | Level2)
@@ -73,6 +73,7 @@ HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, Function | MediumTest
     sptr<DisplayUpdateListener> listener_ = new DisplayUpdateListener();
     dm.RegisterDisplayUpdateListener(listener_);
     sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     auto window = Window::Create("private", option);
     if (window == nullptr) {
         WLOGFE("window is null");
