@@ -466,6 +466,84 @@ HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground, Function | SmallTest
 }
 
 /**
+ * @tc.name: ClearAllCollaboratorSessions
+ * @tc.desc: SceneSesionManager clear all collaborator sessions
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | SmallTest | Level3)
+{
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t persistentId = 1200;
+    SessionInfo info;
+    info.bundleName_ = bundleName;
+    info.abilityName_ = abilityName;
+    info.persistentId_ = persistentId;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+        ssm_->sceneSessionMap_.erase(info.persistentId_);
+    };
+    sceneSession->SetTerminateSessionListenerNew(callback);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ssm_->ClearAllCollaboratorSessions();
+    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
+}
+
+/**
+ * @tc.name: ClearAllCollaboratorSessions02
+ * @tc.desc: SceneSesionManager clear all collaborator sessions
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | SmallTest | Level3)
+{
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t persistentId = 1201;
+    SessionInfo info;
+    info.bundleName_ = bundleName;
+    info.abilityName_ = abilityName;
+    info.persistentId_ = persistentId;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
+    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+        ssm_->sceneSessionMap_.erase(info.persistentId_);
+    };
+    sceneSession->SetTerminateSessionListenerNew(callback);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ssm_->ClearAllCollaboratorSessions();
+    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
+}
+
+/**
+ * @tc.name: ClearAllCollaboratorSessions03
+ * @tc.desc: SceneSesionManager clear all collaborator sessions
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | SmallTest | Level3)
+{
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t persistentId = 1202;
+    SessionInfo info;
+    info.bundleName_ = bundleName;
+    info.abilityName_ = abilityName;
+    info.persistentId_ = persistentId;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
+    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+        ssm_->sceneSessionMap_.erase(info.persistentId_);
+    };
+    sceneSession->SetTerminateSessionListenerNew(callback);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ssm_->ClearAllCollaboratorSessions();
+    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
+}
+
+/**
  * @tc.name: MoveSessionsToForeground
  * @tc.desc: SceneSesionManager move sessions to foreground
  * @tc.type: FUNC
