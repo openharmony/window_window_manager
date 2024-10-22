@@ -672,8 +672,11 @@ bool ParseAndCheckRect(napi_env env, napi_value jsObject,
         (touchableRect.posY_ > static_cast<int32_t>(windowRect.height_)) ||
         (touchableRect.width_ > (windowRect.width_ - static_cast<uint32_t>(touchableRect.posX_))) ||
         (touchableRect.height_ > (windowRect.height_ - static_cast<uint32_t>(touchableRect.posY_)))) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Outside the window area,touchRect:%{public}s,windowRect:%{public}s",
-            touchableRect.ToString().c_str(), windowRect.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_EVENT, "Outside the window area, "
+            "touchRect:[%{public}d %{public}d %{public}u %{public}u] "
+            "windowRect:[%{public}d %{public}d %{public}u %{public}u]",
+            touchableRect.posX_, touchableRect.posY_, touchableRect.width_, touchableRect.height_,
+            windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return false;
     }
     return true;
