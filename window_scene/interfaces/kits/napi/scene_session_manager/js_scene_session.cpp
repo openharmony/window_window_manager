@@ -234,14 +234,14 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.left") {
-            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}d", value);
-                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, value));
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
             }
         } else if (item.name == "ohos.ability.window.top") {
-            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}d", value);
-                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, value));
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
             }
         }
     }
