@@ -580,7 +580,6 @@ bool SessionStageStub::CalculateDataSize(const std::vector<std::string>& infos)
 bool SessionStageStub::WriteSmallStringVector(
     const std::vector<std::string>& infos, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "WriteSmallStringVector entry");
     reply.SetMaxCapacity(CAPACITY_THRESHOLD);
     if (!reply.WriteStringVector(infos)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write infos failed");
@@ -593,7 +592,6 @@ bool SessionStageStub::WriteSmallStringVector(
 bool SessionStageStub::WriteBigStringVector(
     const std::vector<std::string>& infos, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "WriteBigStringVector entry");
     Parcel tempParcel;
     tempParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
     if (!tempParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
@@ -609,7 +607,6 @@ bool SessionStageStub::WriteBigStringVector(
     }
 
     size_t dataSize = tempParcel.GetDataSize();
-    TLOGD(WmsLogTag::WMS_UIEXT, "write big data, dataSize: %{public}zu", dataSize);
     if (!reply.WriteInt32(static_cast<int32_t>(dataSize))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write dataSize failed");
         return false;
