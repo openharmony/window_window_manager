@@ -236,8 +236,7 @@ namespace {
             sptr<DualDisplayFoldPolicy> dualDisplayFoldPolicy = new DualDisplayFoldPolicy(
                 mutex, screenPowerTaskScheduler);
             dualDisplayFoldPolicy->ChangeScreenDisplayModeToCoordination();
-            int res = 0;
-            ASSERT_EQ(res, 0);
+            ASSERT_FALSE(ssm_.keyguardDrawnDone_);
         }
     }
 
