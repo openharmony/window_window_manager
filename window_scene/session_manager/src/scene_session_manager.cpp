@@ -5787,7 +5787,7 @@ void SceneSessionManager::ProcessWindowModeType()
     NotifyRSSWindowModeTypeUpdate();
 }
 
-bool IsSmallFoldProduct()
+static bool IsSmallFoldProduct()
 {
     static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
     if (foldScreenType.empty()) {
