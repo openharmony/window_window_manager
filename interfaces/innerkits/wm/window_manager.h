@@ -826,7 +826,7 @@ public:
      * @brief Get window displayIds.
      *
      * @param windowIds list of window ids that need to get screen ids
-     * @param watermarkName map of Windows and screens
+     * @param windowDisplayMap map of Windows and screens
      * @return WM_OK means get success, others means failed.
      */
     WMError GetWindowDisplayIds(std::vector<int32_t>& windowIds, std::unordered_map<int32_t, DisplayId>& windowDisplayMap);
