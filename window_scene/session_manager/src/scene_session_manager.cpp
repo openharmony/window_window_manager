@@ -11216,7 +11216,7 @@ WMError SceneSessionManager::GetWindowDisplayIds(std::vector<int32_t>& persisten
         if (sessionProperty == nullptr) {
             continue;
         }
-        windowDisplayMap.push_back({persistentId, sessionProperty->GetDisplayId()});
+        windowDisplayMap.insert({persistentId, sessionProperty->GetDisplayId()});
     }
     return WMError::WM_OK;
 }
