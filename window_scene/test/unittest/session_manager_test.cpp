@@ -60,9 +60,6 @@ void SessionManagerTest::TearDown()
 }
 
 namespace {
-constexpr int32_t MOCK_USER_ID_ZERO = 0;
-constexpr int32_t MOCK_SCREEN_ID_ZERO = 0;
-
 /**
  * @tc.name: OnRemoteRequest
  * @tc.desc: normal function
@@ -84,7 +81,7 @@ HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
         SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
     ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(ret, 0);
-    
+
     code = 10;
     ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(0, ret);
