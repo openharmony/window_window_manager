@@ -288,7 +288,6 @@ protected:
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void RegisterFrameLayoutCallback();
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
-
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
@@ -429,8 +428,8 @@ private:
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
-    bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
+    bool IsNotifyInteractiveDuplicative(bool interactive);
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
