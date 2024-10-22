@@ -841,8 +841,7 @@ private:
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime { 0 };
-    sptr<AgentDeathRecipient> collaboratorDeathRecipient_ = sptr<AgentDeathRecipient>::MakeSptr(
-        [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient_;
 
     std::vector<uint64_t> skipSurfaceNodeIds_;
 
