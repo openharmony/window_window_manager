@@ -1643,22 +1643,19 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessSnapshotSkip, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppProcess, Function | SmallTest | Level3)
 {
-    SessionInfo info1;
-    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info1, nullptr);
-    sceneSession1->SetCallingPid(1000);
-    ssm_->snapshotSkipPidSet_.insert(1000);
-    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession1);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
-    usleep(WAIT_SYNC_IN_NS_ZERO);
-    ASSERT_EQ(sceneSession1->GetSessionProperty()->GetSnapshotSkip(), true);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession->SetCallingPid(1000);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
-    SessionInfo info2;
-    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
-    sceneSession2->SetCallingPid(1001);
-    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession2);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
-    usleep(WAIT_SYNC_IN_NS_ONE);
-    ASSERT_EQ(sceneSession2->GetSessionProperty()->GetSnapshotSkip(), false);
+    ssm_->snapshotSkipPidSet_.insert(1000);
+    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), true);
+    ssm_->snapshotSkipPidSet_.erase(1000);
 }
 
 /**
@@ -1937,22 +1934,19 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, Function |
  */
 HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppBundleName, Function | SmallTest | Level3)
 {
-    SessionInfo info1;
-    info1.bundleName_ = "TestName1";
-    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info1, nullptr);
-    ssm_->snapshotSkipBundleNameSet_.insert("TestName1");
-    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession1);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
-    usleep(WAIT_SYNC_IN_NS_ZERO);
-    ASSERT_EQ(sceneSession1->GetSessionProperty()->GetSnapshotSkip(), true);
+    SessionInfo info;
+    info.bundleName_ = "TestName";
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
-    SessionInfo info2;
-    info2.bundleName_ = "TestName2";
-    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
-    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession2);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
-    usleep(WAIT_SYNC_IN_NS_ONE);
-    ASSERT_EQ(sceneSession2->GetSessionProperty()->GetSnapshotSkip(), false);
+    ssm_->snapshotSkipBundleNameSet_.insert("TestName");
+    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), true);
+    ssm_->snapshotSkipBundleNameSet_.erase("TestName");
 }
 
 /**
