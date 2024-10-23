@@ -5819,10 +5819,7 @@ bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSes
         return false;
     }
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    if (sessionProperty->GetDisplayId() != defaultScreenId) {
-        return true;
-    }
-    return false;
+    return sessionProperty->GetDisplayId() != defaultScreenId;
 }
 
 WindowModeType SceneSessionManager::CheckWindowModeType()
