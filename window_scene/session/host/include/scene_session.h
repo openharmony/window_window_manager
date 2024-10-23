@@ -35,6 +35,7 @@ constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
 }
 class SceneSession;
+
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -150,8 +151,7 @@ public:
     WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
     WSError Background(bool isFromClient = false) override;
-    virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {};
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false) override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
@@ -169,6 +169,7 @@ public:
         uint32_t& screenWidth, uint32_t& screenHeight);
     void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
         uint32_t screenHeight);
+    virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {}
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -577,15 +578,15 @@ private:
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;
-    std::string clientIdentityToken_ = { "" };
     static std::map<uint32_t, WSRect> windowDragHotAreaMap_;
-    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
+    std::string clientIdentityToken_ = { "" };
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
     bool isScreenAngleMismatch_ = false;
