@@ -236,9 +236,10 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | Sma
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleLockSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
     int32_t sessionId = 65535;
     data.WriteInt32(sessionId);
-
     int res = stub_->HandleLockSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -257,9 +258,10 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | S
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleUnlockSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
     int32_t sessionId = 65535;
     data.WriteInt32(sessionId);
-
     int res = stub_->HandleUnlockSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
