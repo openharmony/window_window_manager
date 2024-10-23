@@ -2327,9 +2327,12 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
                     "%{public}" PRIu64"", screenId);
                 return;
             }
-            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-            TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
-            screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            {
+                std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+                sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+                TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
+                screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            }
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
             NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
             return;
@@ -2340,7 +2343,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             screenId);
         return;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+    {
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+        screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+    }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
@@ -5084,7 +5090,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
     auto task = [=] {
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
     };
-    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged", delayTime);
+    taskScheduler_->PostAsyncTask(task, "clientProxy_ SwitchUserCallback task", delayTime);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
