@@ -1765,12 +1765,12 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     int32_t persistentId = 10;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-    
+
     persistentId = 0;
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-
+    
     bool enable = true;
     auto result = ssm_->GetFreeMultiWindowEnableState(enable);
     ASSERT_EQ(result, WSError::WS_OK);
