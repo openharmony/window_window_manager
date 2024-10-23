@@ -1226,6 +1226,7 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
 bool SessionStageProxy::ReadSmallStringVectorFromParcel(
     MessageParcel& reply, std::vector<std::string>& infos)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "small data entry");
     if (!reply.ReadStringVector(&infos)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
         return false;
@@ -1262,6 +1263,7 @@ bool SessionStageProxy::ReadBigStringVectorFromParcel(
         return false;
     }
 
+    TLOGD(WmsLogTag::WMS_UIEXT, "dataSize: %{public}zu, infoSize: %{public}d", dataSize, infoSize);
     if (infoSize >= MAX_INFO_SIZE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Too big infos, infoSize: %{public}d", infoSize);
         return false;
