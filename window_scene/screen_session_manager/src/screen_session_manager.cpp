@@ -2327,10 +2327,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
                     "%{public}" PRIu64"", screenId);
                 return;
             }
+            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+            TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             {
                 std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-                sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-                TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
                 screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
             }
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
