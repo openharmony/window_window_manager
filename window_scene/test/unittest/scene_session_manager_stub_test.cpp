@@ -1459,9 +1459,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallT
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleDumpSessionWithId(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     int32_t x = 1;
     data.WriteInt32(x);
-
     int res = stub_->HandleDumpSessionWithId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
