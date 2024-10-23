@@ -6792,48 +6792,44 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                               napi_get_value_bool(env, nativeVal, &enabled));
+            napi_get_value_bool(env, nativeVal, &enabled));
         }
     }
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken = weakToken(windowToken_), enabled](napi_env env, NapiAsyncTask &task, int32_t status) {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr)
-        {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "Invalidate params."));
-            return;
-        }
-        if (!WindowHelper::IsMainWindow(windowToken_->GetType()))
-        {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set failed since invalid window type");
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "Invalid window type."));
-            return;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetLayoutFullScreen(enabled));
-        if (ret == WmErrorCode::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
-        } else if (ret != WmErrorCode::WM_OK) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Device is not support"));
-        } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set failed ret = %{public}d", ret);
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-                "window OnSetGestureBackEnabled failed."));
-        }
-    };
-
-    napi_value lastParam = (argc <= INDEX_ONE) ? nullptr :
-        ((argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_function) ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
-    auto asyncTask = CreateAsyncTask(env, lastParam, nullptr,
-        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
-    NapiAsyncTask::Schedule("JsWindow::OnSetGestureBackEnabled", env, std::move(asyncTask));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<window>(windowToken_), env, task = napiAsyncTask.get(), enable] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Invaild window param."));
+            return;
+        }
+        if (!WindowHelper::IsMainWindow()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set fail since invalid window type.");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Invaild window type."));
+            return;
+        }
+        auto ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetGestureBackEnabled(enabled));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set failed."));
+        }
+        delete task;
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WMErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+            "set failed");
+    } else {
+        napiAsyncTask.release();
+    }
     return result;
 }
 
