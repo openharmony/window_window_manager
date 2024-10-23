@@ -818,8 +818,12 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleClearSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleClearSession!");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t persistentId;
+    if(!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = ClearSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;

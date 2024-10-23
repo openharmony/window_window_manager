@@ -194,6 +194,9 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | Sm
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleClearSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     int32_t persistentId = 65535;
     data.WriteInt32(persistentId);
 
