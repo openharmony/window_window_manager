@@ -1446,9 +1446,9 @@ WMError WindowManager::ReleaseForegroundSessionScreenLock()
     return ret;
 }
 
-WMError WindowManager::GetWindowDisplayIds(std::vector<uint64_t>& windowIds, std::unordered_map<uint64_t, DisplayId>& windowDisplayMap)
+WMError WindowManager::GetWindowDisplayIds(std::vector<uint64_t>& windowIds, std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowDisplayIds(windowIds, windowDisplayMap);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowDisplayIds(windowIds, windowDisplayIdMap);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
     }

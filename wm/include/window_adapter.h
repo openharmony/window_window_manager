@@ -147,7 +147,7 @@ public:
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
 
     virtual WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
-        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap);
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

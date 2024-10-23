@@ -1112,8 +1112,8 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowDisplayIds, Function | SmallTest
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
     std::vector<uint64_t> windowIds = {1, 2};
-    std::unordered_map<uint64_t, DisplayId> windowDisplayMap;
-    ASSERT_EQ(sceneSessionManagerProxy->GetWindowDisplayIds(windowIds, windowDisplayMap), WMError::WM_OK);
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    ASSERT_EQ(sceneSessionManagerProxy->GetWindowDisplayIds(windowIds, windowDisplayIdMap), WMError::WM_OK);
 }
 }  // namespace
 }

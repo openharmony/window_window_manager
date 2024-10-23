@@ -1482,8 +1482,8 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 HWTEST_F(WindowManagerTest, GetWindowDisplayIds, Function | SmallTest | Level2)
 {
     std::vector<uint64_t> windowIds = {1, 2};
-    std::unordered_map<uint64_t, DisplayId> windowDisplayMap;
-    auto ret = WindowManager::GetInstance().GetWindowDisplayIds(windowIds, windowDisplayMap);
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManager::GetInstance().GetWindowDisplayIds(windowIds, windowDisplayIdMap);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 }

@@ -2479,7 +2479,7 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFr
 }
 
 WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
-    std::unordered_map<uint64_t, DisplayId>& windowDisplayMap)
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2513,7 +2513,7 @@ WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<uint64_t>& win
             TLOGE(WmsLogTag::DEFAULT, "Fail to read displayId");
             return WMError::WM_ERROR_IPC_FAILED;
         }
-        windowDisplayMap[windowId] = displayId;
+        windowDisplayIdMap[windowId] = displayId;
     }
     return static_cast<WMError>(reply.ReadInt32());
 }

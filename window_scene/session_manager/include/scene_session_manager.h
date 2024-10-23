@@ -486,7 +486,7 @@ public:
      * Window displayId
      */
     WMError GetWindowDisplayIds(std::vector<uint64_t>& persistentIds,
-        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap) override;
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
 protected:
     SceneSessionManager();
