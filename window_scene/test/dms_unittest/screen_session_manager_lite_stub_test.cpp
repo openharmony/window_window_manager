@@ -232,6 +232,46 @@ HWTEST_F(ScreenSessionManagerLiteStubTest, OnRemoteRequest08, Function | SmallTe
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest09
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerLiteStub::GetDescriptor());
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    data.WriteUint32(static_cast<uint32_t>(displayMode));
+
+    uint32_t code = static_cast<uint32_t>(
+        IScreenSessionManagerLite::ScreenManagerLiteMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: HandleSetFoldDisplayMode
+ * @tc.desc: HandleSetFoldDisplayMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteStubTest, HandleSetFoldDisplayMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerLiteStub::GetDescriptor());
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    data.WriteUint32(static_cast<uint32_t>(displayMode));
+
+    int ret = stub_->HandleSetFoldDisplayMode(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 }
 }
 }

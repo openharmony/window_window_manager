@@ -459,6 +459,12 @@ ohos_unittest("wm_window_scene_session_impl_test3") {
 ohos_unittest("wm_window_scene_session_impl_test4") {
   module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [ "window_scene_session_impl_test4.cpp" ]
 
   deps = [

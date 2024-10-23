@@ -340,7 +340,12 @@ private:
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void SendCastEvent(const bool &isPlugIn);
     void PhyMirrorConnectWakeupScreen();
-    void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    bool IsScreenRestored(sptr<ScreenSession> screenSession);
+    bool GetIsCurrentInUseById(ScreenId screenId);
+    bool GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
+        MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption);
+    void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
+    void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
@@ -507,6 +512,8 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
+    void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
+    DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

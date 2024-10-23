@@ -303,6 +303,7 @@ struct SessionInfo {
     sptr<IRemoteObject> rootToken_ = nullptr;
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
+    bool isFromIcon_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
     std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;

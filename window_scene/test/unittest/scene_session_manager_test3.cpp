@@ -1101,6 +1101,32 @@ HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: NotifySwitchingUser1
+ * @tc.desc: notify switching user on PC
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->systemConfig_.backgroundswitch = true;
+    SessionInfo info;
+    info.abilityName_ = "IsNeedChangeLifeCycleOnUserSwitch3";
+    info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch3";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetCallingPid(45678);
+    property->SetIsAppSupportPhoneInPc(false);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), nullptr });
+    ssm_->NotifySwitchingUser(false);
+}
+
+/**
  * @tc.name: GetSessionInfoByContinueSessionId
  * @tc.desc: SceneSesionManager GetSessionInfoByContinueSessionId
  * @tc.type: FUNC

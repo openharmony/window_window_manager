@@ -1744,6 +1744,13 @@ public:
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is pc window or pad free multi-window.
+     *
+     * @return True means pc window or pad free multi-window, false means the opposite.
+     */
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -2070,6 +2077,17 @@ public:
     }
 
     /**
+     * @brief Hide the display content when snapshot.
+     *
+     * @param needHide bool.
+     * @return WMError
+     */
+    virtual WMError HidePrivacyContentForHost(bool needHide)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.
@@ -2363,18 +2381,18 @@ public:
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
-     * @brief Get IsUIExtensionFlag of window.
+     * @brief Get isUIExtFirstSubWindow flag
      *
-     * @return true - is UIExtension window, flase - is not UIEXtension window.
+     * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
      */
-    virtual bool GetIsUIExtensionFlag() const { return false; }
+    virtual bool GetIsUIExtFirstSubWindow() const { return false; }
 
     /**
-     * @brief Get IsUIExtensionSubWindowFlag of window.
+     * @brief Get whether this window is a sub window of any level of UIExtension.
      *
      * @return true - is UIExtension sub window, false - is not UIExtension sub window.
      */
-    virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
+    virtual bool GetIsUIExtAnySubWindow() const { return false; }
 
     /**
      * @brief Set whether to enable gesture back.
