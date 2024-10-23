@@ -1737,6 +1737,28 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessSnapshotSkip, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetSessionSnapshotSkipForAppProcess
+ * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppProcess, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession->SetCallingPid(1000);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
+
+    ssm_->snapshotSkipPidSet_.insert(1000);
+    ssm_->SetSessionSnapshotSkipForAppProcess(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), true);
+    ssm_->snapshotSkipPidSet_.erase(1000);
+}
+
+/**
  * @tc.name: TestReportCorrectScreenFoldStatusChangeEvent
  * @tc.desc: Test whether report the correct screen fold status events
  * @tc.type: FUNC
@@ -1971,8 +1993,60 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
 HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    auto ret = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName"});
-    ASSERT_EQ(ret, WMError::WM_OK);
+    auto result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName"});
+    ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
+    usleep(WAIT_SYNC_IN_NS_ZERO);
+    ASSERT_NE(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
+
+    result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {});
+    ASSERT_EQ(result, WMError::WM_OK);
+    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
+    usleep(WAIT_SYNC_IN_NS_ONE);
+    ASSERT_EQ(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
+
+    SessionInfo info1;
+    info1.bundleName_ = "TestName1";
+    sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info1, nullptr);
+    SessionInfo info2;
+    info1.bundleName_ = "TestName2";
+    sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession1->SetCallingPid(1000);
+    sceneSession2->SetCallingPid(1001);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({-1, nullptr});
+    result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName1"});
+    ASSERT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(-1);
+    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
+    usleep(WAIT_SYNC_IN_NS_TWO);
+}
+
+/**
+ * @tc.name: SetSessionSnapshotSkipForAppBundleName
+ * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppBundleName, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "TestName";
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
+
+    ssm_->snapshotSkipBundleNameSet_.insert("TestName");
+    ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
+    ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), true);
+    ssm_->snapshotSkipBundleNameSet_.erase("TestName");
 }
 
 /**
