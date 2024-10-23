@@ -565,17 +565,21 @@ int SceneSessionManagerStub::HandleDumpSessionAll(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleDumpSessionWithId!");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::DEFAULT, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
     std::vector<std::string> infos;
     WSError errCode = DumpSessionWithId(persistentId, infos);
     if (!reply.WriteStringVector(infos)) {
-        WLOGFE("HandleDumpSessionWithId write info failed.");
+        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId write info failed.");
         return ERR_TRANSACTION_FAILED;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("HandleDumpSessionWithId write errcode failed.");
+        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId write errcode failed.");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
