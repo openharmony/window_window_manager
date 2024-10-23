@@ -5590,59 +5590,51 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId, const SessionState& state) {
-        this->OnSessionStateChange(persistentId, state);
-    };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
         return;
     }
-    sceneSession->SetSessionStateChangeNotifyManagerListener(func);
-    WLOGFD("RegisterSessionStateChangeFunc success");
+    sceneSession->SetSessionStateChangeNotifyManagerListener(
+        [this](int32_t persistentId, const SessionState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
+            OnSessionStateChange(persistentId, state);
+        });
+    WLOGFD("success");
 }
 
 void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    wptr<SceneSessionManager> weakSessionManager = this;
-    NotifySessionInfoChangeNotifyManagerFunc func = [weakSessionManager](int32_t persistentId) {
-        auto sceneSessionManager = weakSessionManager.promote();
-        if (sceneSessionManager == nullptr) {
-            return;
-        }
-        sceneSessionManager->NotifyWindowInfoChangeFromSession(persistentId);
-    };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
         return;
     }
-    sceneSession->SetSessionInfoChangeNotifyManagerListener(func);
+    sceneSession->SetSessionInfoChangeNotifyManagerListener([this](int32_t persistentId) {
+        NotifyWindowInfoChangeFromSession(persistentId);
+    });
 }
 
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifyRequestFocusStatusNotifyManagerFunc func =
-    [this](int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason) {
-        this->RequestFocusStatus(persistentId, isFocused, byForeground, reason);
-    };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
         return;
     }
-    sceneSession->SetRequestFocusStatusNotifyManagerListener(func);
-    WLOGFD("RegisterSessionUpdateFocusStatusFunc success");
+    sceneSession->SetRequestFocusStatusNotifyManagerListener(
+        [this](int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason) {
+            RequestFocusStatus(persistentId, isFocused, byForeground, reason);
+        });
+    WLOGFD("success");
 }
 
 void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession)
 {
     GetStateFromManagerFunc func = [this](const ManagerState key) {
-        switch (key)
-        {
-        case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
-            return this->IsScreenLocked();
-            break;
-        default:
-            return false;
-            break;
+        switch (key) {
+            case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
+                return this->IsScreenLocked();
+                break;
+            default:
+                return false;
+                break;
         }
     };
     if (sceneSession == nullptr) {
@@ -5650,7 +5642,7 @@ void SceneSessionManager::RegisterGetStateFromManagerFunc(sptr<SceneSession>& sc
         return;
     }
     sceneSession->SetGetStateFromManagerListener(func);
-    WLOGFD("RegisterGetStateFromManagerFunc success");
+    WLOGFD("success");
 }
 
 void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession)
@@ -11050,7 +11042,7 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
-    auto task = [this, pid, skip] {
+    auto task = [this, pid, skip]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (skip) {
             snapshotSkipPidSet_.insert(pid);
         } else {
@@ -11095,7 +11087,7 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     TLOGI(WmsLogTag::DEFAULT, "userId:%{public}d", userId);
-    auto task = [this, userId, bundleNameList] {
+    auto task = [this, userId, bundleNameList]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         snapshotSkipBundleNameSet_.clear();
         for (auto& bundleName : bundleNameList) {
             snapshotSkipBundleNameSet_.insert(std::move(bundleName));

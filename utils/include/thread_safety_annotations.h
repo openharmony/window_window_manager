@@ -90,7 +90,7 @@ class CAPABILITY("mutex") SingleThreadGuard {};
 
 // ONLY used for those accessed ONLY on scene session manager thread.
 // If other looper threads(NOT ffrt or ipc), define a new one.
-constexpr SingleThreadGuard SCENE_SESSION_THREAD;
+constexpr SingleThreadGuard SCENE_GUARD;
 
 template <typename Guard>
 struct SCOPED_CAPABILITY ScopedGuard final {
