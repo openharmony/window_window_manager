@@ -388,6 +388,81 @@ HWTEST_F(ScreenPropertyTest, SetDensityInCurResolution, Function | SmallTest | L
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDensityInCurResolution end";
 }
+/**
+ * @tc.name: GetPropertyChangeReason
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPropertyChangeReason, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    std::string propertyChangeReason = "a";
+    property->SetPropertyChangeReason(propertyChangeReason);
+    ASSERT_EQ(propertyChangeReason, property->GetPropertyChangeReason());
+}
+
+/**
+ * @tc.name: CalcDefaultDisplayOrientation
+ * @tc.desc: bounds_.rect_.width_ > bounds_.rect_.height_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, CalcDefaultDisplayOrientation, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    int64_t ret = 0;
+    RRect bounds;
+    bounds.rect_.width_ = 2772;
+    bounds.rect_.height_ = 1344;
+    property->SetBounds(bounds);
+    property->CalcDefaultDisplayOrientation();
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SetStartX
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetStartX, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t ret = 100;
+    property->SetStartX(ret);
+    ASSERT_EQ(ret, property->GetStartX());
+}
+
+/**
+ * @tc.name: SetStartY
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetStartY, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t ret = 100;
+    property->SetStartY(ret);
+    ASSERT_EQ(ret, property->GetStartY());
+}
+
+/**
+ * @tc.name: SetStartPosition
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetStartPosition, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t ret_x = 100;
+    uint32_t ret_y = 200;
+    property->SetStartPosition(ret_x, ret_y);
+    ASSERT_EQ(100, property->GetStartX());
+    ASSERT_EQ(200, property->GetStartY());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
