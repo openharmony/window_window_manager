@@ -94,7 +94,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest02, Function | SmallTest | L
 
 /**
  * @tc.name: OnRemoteRequest03
- * @tc.desc: test TRANS_ID_UPDATE_FOCUS success
+ * @tc.desc: test TRANS_ID_UPDATE_FOCUS failed
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
