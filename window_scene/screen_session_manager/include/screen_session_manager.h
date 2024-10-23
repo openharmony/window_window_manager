@@ -347,6 +347,7 @@ private:
     void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
