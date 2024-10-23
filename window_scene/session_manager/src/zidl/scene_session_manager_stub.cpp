@@ -890,12 +890,16 @@ int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleRegisterCollaborator!");
-    int32_t type = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_DIALOG, "In!");
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to read type");
+        return ERR_INVALID_DATA;
+    }
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
     if (collaborator == nullptr) {
-        WLOGFE("collaborator is nullptr");
+        TLOGE(WmsLogTag::WMS_DIALOG, "collaborator is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
@@ -905,8 +909,12 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleUnregisterCollaborator!");
-    int32_t type = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_DIALOG, "In!");
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to read type");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;

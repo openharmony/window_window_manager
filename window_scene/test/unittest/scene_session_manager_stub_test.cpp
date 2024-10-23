@@ -1741,6 +1741,34 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
 }
 
 /**
+ * @tc.name: HandleRegisterCollaborator
+ * @tc.desc: test HandleRegisterCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    data.WriteInt32(type);
+    int res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    sptr<RemoteObject> remoteObject = new RemoteObject();
+    data.WriteRemoteObject(remoteObject);
+    int result = stub.HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleUnregisterCollaborator
  * @tc.desc: test HandleUnregisterCollaborator
  * @tc.type: FUNC
@@ -1754,9 +1782,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, Function | S
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleUnregisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     int32_t type = CollaboratorType::RESERVE_TYPE;
     data.WriteInt32(type);
-
     int res = stub_->HandleUnregisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
