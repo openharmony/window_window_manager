@@ -790,11 +790,15 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("HandleNotifyDumpInfoResult");
+    TLOGD(WmsLogTag::DEFAULT, "In!");
     std::vector<std::string> info;
-    uint32_t vectorSize = data.ReadUint32();
+    uint32_t vectorSize;
+    if (!data.ReadUint32(vectorSize)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read vectorSize");
+        return ERR_INVALID_DATA;
+    }
     if (vectorSize > MAX_VECTOR_SIZE) {
-        WLOGFI("Vector is too big!");
+        TLOGE(WmsLogTag::DEFAULT, "Vector is too big!");
         return ERR_INVALID_DATA;
     }
     for (uint32_t i = 0; i < vectorSize; i++) {
@@ -806,7 +810,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
         info.emplace_back(curInfo);
-        WLOGFD("HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
+        TLOGD(WmsLogTag::DEFAULT, "HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
     NotifyDumpInfoResult(info);
     return ERR_NONE;
