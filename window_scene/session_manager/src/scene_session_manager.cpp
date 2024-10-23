@@ -1526,9 +1526,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 "abilityName: %{public}s, appIndex: %{public}d",
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
                 sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_);
-            ComparedSessionInfo compareSessionInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_,
-                sessionInfo.abilityName_, sessionInfo.appIndex_, sessionInfo.windowType_,
-                sessionInfo.isAtomicService_ };
+            ComparedSessionInfo compareSessionInfo = { sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_,
+                sessionInfo.appIndex_, sessionInfo.windowType_, sessionInfo.isAtomicService_ };
             auto sceneSession = GetSceneSessionByName(compareSessionInfo);
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
