@@ -917,7 +917,7 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    int32_t reason = 0;
+    uint32_t reason = 0;
     if (!data.ReadInt32(posX)) {
         TLOGE(WmsLogTag::WMS_PIP, "read posX error");
         return ERR_INVALID_DATA;
@@ -935,8 +935,12 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     Rect rect = {posX, posY, width, height};
-    if (!data.ReadInt32(reason)) {
+    if (!data.ReadUint32(reason)) {
         TLOGE(WmsLogTag::WMS_PIP, "read reason error");
+        return ERR_INVALID_DATA;
+    }
+    if (reason > static_cast<uint32_t>(SizeChangeReason::END)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Unknown reason");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
@@ -950,6 +954,15 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     uint32_t controlType = 0;
     int32_t status = 0;
     if (data.ReadUint32(controlType) && data.ReadInt32(status)) {
+        if (controlType > static_cast<uint32_t>(WsPiPControlType::END)) {
+            TLOGE(WmsLogTag::WMS_PIP, "Unknown controlType");
+            return ERR_INVALID_DATA;
+        }
+        if (status > static_cast<int32_t>(WsPiPControlStatus::PLAY) ||
+            status < static_cast<int32_t>(WsPiPControlStatus::DISABLED)) {
+            TLOGE(WmsLogTag::WMS_PIP, "Unknown status");
+            return ERR_INVALID_DATA;
+        }
         WSError errCode = UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
             static_cast<WsPiPControlStatus>(status));
         reply.WriteInt32(static_cast<int32_t>(errCode));
