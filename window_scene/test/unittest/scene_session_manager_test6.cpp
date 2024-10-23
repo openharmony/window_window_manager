@@ -28,6 +28,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1770,7 +1771,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-    
+
     bool enable = true;
     auto result = ssm_->GetFreeMultiWindowEnableState(enable);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1944,7 +1945,7 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-    
+
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
