@@ -7885,19 +7885,16 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
 {
     auto task = [this, persistentId, type] {
         auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
-            TLOGD(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
+        if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
             return;
         }
         if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGD(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
             return;
         }
-        auto windowType = sceneSession->GetWindowType();
-        if (windowType == WindowType::WINDOW_TYPE_STATUS_BAR ||
-            windowType == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
-            windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            TLOGD(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
+        if (sceneSession->IsImmersiveType()) {
+            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
             return;
         }
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
