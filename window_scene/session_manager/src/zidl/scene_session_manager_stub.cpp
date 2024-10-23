@@ -839,16 +839,24 @@ int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleLockSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleLockSession!");
-    int32_t sessionId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t sessionId;
+    if (!data.ReadInt32(sessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read sessionId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = LockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 int SceneSessionManagerStub::HandleUnlockSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleUnlockSession!");
-    int32_t sessionId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t sessionId;
+    if (!data.ReadInt32(sessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read sessionId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UnlockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
