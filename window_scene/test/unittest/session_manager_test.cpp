@@ -236,7 +236,7 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
 
     bool funInvoked = false;
-    sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };      
+    sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sm_->OnUserSwitch(sessionManagerService);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
