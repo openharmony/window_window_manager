@@ -3701,10 +3701,6 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
 
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
