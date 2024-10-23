@@ -6857,7 +6857,7 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s], enable = %{public}u",
-          windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
     return CreateJsValue(env, enable);
 }
 
