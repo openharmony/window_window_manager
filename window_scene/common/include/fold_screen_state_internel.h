@@ -24,9 +24,11 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
+static const std::string PHY_ROTATION_OFFSET = system::GetParameter("const.window.phyrotation.offset", "0");
 static const  std::string SINGLE_DISPLAY = "1";
 static const std::string DUAL_DISPLAY = "2";
 static const std::string SINGLE_POCKET_DISPLAY = "4";
+static const std::string DEFAULT_OFFSET = "0";
 }
 class FoldScreenStateInternel {
 public:
@@ -87,6 +89,36 @@ public:
             elems.push_back(str.substr(previous));
         }
         return elems;
+    }
+
+    static std::vector<std::string> GetPhyRotationOffset()
+    {
+        static std::vector<std::string> phyOffsets;
+        if (phyOffsets.empty()) {
+            std::vector<std::string> elems = StringSplit(PHY_ROTATION_OFFSET, ';');
+            for (auto& num : elems) {
+                if (IsNumber(num)) {
+                    phyOffsets.push_back(num);
+                } else {
+                    phyOffsets.push_back(DEFAULT_OFFSET);
+                }
+            }
+        }
+        return phyOffsets;
+    }
+
+    static bool IsNumber(const std::string& str)
+    {
+        int32_t length = static_cast<int32_t>(str.size());
+        if (length == 0) {
+            return false;
+        }
+        for (int32_t i = 0; i < length; i++) {
+            if (str.at(i) < '0' || str.at(i) > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
     static bool IsValidFoldType(const std::string& foldTypeStr)
