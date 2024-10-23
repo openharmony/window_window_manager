@@ -210,7 +210,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property, bool isFr
     if (isFromClient && SessionHelper::IsMainWindow(GetWindowType())) {
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         if (callingPid != -1 && callingPid != GetCallingPid()) {
-            TLOGW(WmsLogTag::WMS_LIFE,"Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, "
+            TLOGW(WmsLogTag::WMS_LIFE, "Foreground failed, callingPid_: %{public}d, callingPid: %{public}d, "
                 "bundleName: %{public}s", GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
             return WSError::WS_OK;
         }
@@ -628,11 +628,11 @@ WSError SceneSession::SetAspectRatio(float ratio)
     auto task = [weakThis = wptr(this), ratio]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            WLOGE("SetAspectRatio failed because property is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "SetAspectRatio failed because property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
@@ -651,8 +651,8 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect fixedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s",
-            session->GetPersistentId(), fixedRect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s, "
+            "ratio: %{public}f", session->GetPersistentId(), fixedRect.ToString().c_str(), ratio);
         if (session->FixRectByAspectRatio(fixedRect)) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
                 session->GetPersistentId(), fixedRect.ToString().c_str());
@@ -809,7 +809,7 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
     auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
@@ -1330,7 +1330,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (Session::GetFloatingScale() <= miniScale) {
             return;
         }
-        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && rect.height_ < rect.width_) {
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            rect.height_ < rect.width_) {
             return;
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
@@ -1840,6 +1841,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFI("Do not dispatch this pointer event");
         return WSError::WS_DO_NOTHING;
     }
+
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr && isPointDown) {
@@ -1850,7 +1852,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property == nullptr) {
         return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
     }
-
     auto windowType = property->GetWindowType();
     bool isMovableWindowType = IsMovableWindowType();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
