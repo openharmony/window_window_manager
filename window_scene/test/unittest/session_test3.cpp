@@ -977,7 +977,7 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
     auto result = session_->SetIsPcAppInPad(isPcAppInPad);
     EXPECT_EQ(result, WSError::WS_OK);
 }
-s
+
 /**
  * @tc.name: SetBufferAvailable
  * @tc.desc: SetBufferAvailable Test
