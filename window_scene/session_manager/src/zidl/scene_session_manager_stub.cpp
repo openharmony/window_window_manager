@@ -939,7 +939,7 @@ int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "In!")
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     auto pid;
     if (!data.ReadInt32(pid)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read pid failed");
