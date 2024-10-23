@@ -1939,7 +1939,7 @@ HWTEST_F(SceneSessionManagerTest, SetSessionSnapshotSkipForAppBundleName, Functi
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    sceneSession->surfaceNode_ = surfaceNode;
     ssm_->SetSessionSnapshotSkipForAppBundleName(sceneSession);
     ASSERT_EQ(sceneSession->GetSessionProperty()->GetSnapshotSkip(), false);
 
