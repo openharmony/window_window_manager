@@ -6801,7 +6801,7 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
 
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<window>(windowToken_), env, task = napiAsyncTask.get(), enable] {
+    auto asyncTask = [weakToken = wptr<window>(windowToken_), env, task = std::move(napiAsyncTask), enable] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
@@ -6827,8 +6827,6 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WMErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
             "set failed");
-    } else {
-        napiAsyncTask.release();
     }
     return result;
 }
