@@ -84,6 +84,7 @@ const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
+
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
@@ -2132,28 +2133,6 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     nonSystemFloatSceneSessionMap_.erase(persistentId);
 }
 
-void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
-{
-    auto& sessionInfo = sceneSession->GetSessionInfo();
-    if (sessionInfo.want != nullptr) {
-        const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
-        const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
-        const auto& keySessionId = sessionInfo.want->GetStringParam(KEY_SESSION_ID);
-        auto want = std::make_shared<AAFwk::Want>();
-        if (want != nullptr) {
-            AppExecFwk::ElementName element;
-            element.SetBundleName(bundleName);
-            element.SetAbilityName(abilityName);
-            want->SetElement(element);
-            want->SetBundle(bundleName);
-            if (!keySessionId.empty()) {
-                want->SetParam(KEY_SESSION_ID, keySessionId);
-            }
-            sceneSession->SetSessionInfoWant(want);
-        }
-    }
-}
-
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
     bool needRemoveSession, bool isSaveSnapshot, bool isForceClean)
 {
@@ -2197,6 +2176,28 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
+{
+    auto& sessionInfo = sceneSession->GetSessionInfo();
+    if (sessionInfo.want != nullptr) {
+        const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
+        const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
+        const auto& keySessionId = sessionInfo.want->GetStringParam(KEY_SESSION_ID);
+        auto want = std::make_shared<AAFwk::Want>();
+        if (want != nullptr) {
+            AppExecFwk::ElementName element;
+            element.SetBundleName(bundleName);
+            element.SetAbilityName(abilityName);
+            want->SetElement(element);
+            want->SetBundle(bundleName);
+            if (!keySessionId.empty()) {
+                want->SetParam(KEY_SESSION_ID, keySessionId);
+            }
+            sceneSession->SetSessionInfoWant(want);
+        }
+    }
 }
 
 void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
@@ -3475,36 +3476,6 @@ WMError SceneSessionManager::GetTopWindowId(uint32_t mainWinId, uint32_t& topWin
         }
     }
     return taskScheduler_->PostSyncTask(task, "GetTopWindowId");
-}
-
-WMError SceneSessionManager::UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
-                                                       const sptr<SceneSession>& sceneSession)
-{
-    if (!property->GetSystemCalling()) {
-        WLOGFE("Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetDragEnabled(property->GetDragEnabled());
-    }
-    return WMError::WM_OK;
-}
-
-WMError SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
-                                                        const sptr<SceneSession>& sceneSession)
-{
-    if (!property->GetSystemCalling()) {
-        WLOGFE("Update property raiseEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
-    }
-    return WMError::WM_OK;
 }
 
 static WMError GetParentMainWindowIdInner(const std::map<int32_t, sptr<SceneSession>>& sceneSessionMap,
@@ -7083,6 +7054,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyWindowInfoChange:id:" + std::to_string(persistentId));
+
     auto notifySceneInputTask = [weakSceneSession, type]() {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
@@ -7762,8 +7734,8 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
-    if ((sceneSession == nullptr) || (enterRecent_.load())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "scene session null or in recent no need update avoid area");
+    if (sceneSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "scene session null no need update avoid area");
         return false;
     }
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
