@@ -102,6 +102,36 @@ class MockIWindowNoInteractionListener : public IWindowNoInteractionListener {
 public:
     MOCK_METHOD0(OnWindowNoInteractionCallback, void());
 };
+
+class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
+public:
+    MOCK_CONST_METHOD0(OnDialogDeathRecipient, void());
+};
+
+class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
+public:
+    MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
+};
+
+class MockIScreenshotListener : public IScreenshotListener {
+public:
+    MOCK_METHOD0(OnScreenshot, void());
+};
+
+class MockISubWindowCloseListener : public ISubWindowCloseListener {
+public:
+    MOCK_METHOD1(OnSubWindowClose, void(bool&));
+};
+
+class MockIMainWindowCloseListener : public IMainWindowCloseListener {
+public:
+    MOCK_METHOD1(OnMainWindowClose, void(bool&));
+};
+
+class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener {
+public:
+    MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));
+};
 } // Rosen
 } // OHOS
 
