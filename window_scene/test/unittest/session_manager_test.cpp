@@ -20,6 +20,7 @@
 #include <system_ability_definition.h>
 #include <ipc_skeleton.h>
 
+#include "scene_board_judgement.h"
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
@@ -98,12 +99,20 @@ HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, Function | SmallTest |
     sm_->Clear();
     sm_->ClearSessionManagerProxy();
     auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    } else {
+        ASSERT_EQ(nullptr, sceneSessionManagerProxy);
+    }
 
     sm_->ClearSessionManagerProxy();
     sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    } else {
+        ASSERT_EQ(nullptr, sceneSessionManagerProxy);
+    }
 }
 
 /**
@@ -226,11 +235,15 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     sm_->OnUserSwitch(nullptr);
     ASSERT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
 
+    bool funInvoked = false;
+    sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
-    ASSERT_NE(nullptr, sessionManagerService);
-    sm_->userSwitchCallbackFunc_ = []() {};
     sm_->OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(sessionManagerService, sm_->sessionManagerServiceProxy_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(funInvoked, true);
+    } else {
+        ASSERT_EQ(funInvoked, false);
+    }
 }
 
 /**
