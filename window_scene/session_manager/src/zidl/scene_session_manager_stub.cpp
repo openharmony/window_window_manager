@@ -766,7 +766,11 @@ int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, M
 int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "Called");
-    int32_t persistentId = data.ReadInt32();
+    int32_t persistentId;
+    if(!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read persistentId");
+        return ERR_INVALID_DATA;
+    }
     sptr<IRemoteObject> uiContentRemoteObj;
     WSError ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
     reply.WriteRemoteObject(uiContentRemoteObj);
