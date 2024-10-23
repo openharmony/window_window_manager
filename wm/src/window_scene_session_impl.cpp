@@ -4280,19 +4280,19 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     return hostSession->SetGestureBackEnabled(enable);
 }
 
-bool WindowSceneSessionImpl::GetGestureBackEnabled() const
+WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
-        return true;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
-        return true;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
-        GetWindowId(), gestureBackEnabled_);
-    return gestureBackEnabled_;
+    enable = gestureBackEnabled_;
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), gestureBackEnabled_);
+    return WMError::WM_OK;
 }
 
 } // namespace Rosen

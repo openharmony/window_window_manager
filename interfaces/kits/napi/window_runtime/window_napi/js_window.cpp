@@ -6802,22 +6802,92 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     }
     return NapiGetUndefined(env);
 }
- 
+
+napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    bool enabled = true;
+    if (errCode == WmErrorCode::WM_OK) {
+        napi_value nativeVal = argv[0];
+        if (nativeVal == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enabled");
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        } else {
+            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                               napi_get_value_bool(env, nativeVal, &enabled));
+        }
+    }
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    NapiAsyncTask::CompleteCallback complete =
+        [weakToken = weakToken(windowToken_), enabled](napi_env env, NapiAsyncTask &task, int32_t status) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr)
+        {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Invalidate params."));
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(windowToken_->GetType()))
+        {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set failed since invalid window type");
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Invalid window type."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetLayoutFullScreen(enabled));
+        if (ret == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else if (ret != WmErrorCode::WM_OK) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Device is not support"));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set failed ret = %{public}d", ret);
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "window OnSetGestureBackEnabled failed."));
+        }
+    };
+
+    napi_value lastParam = (argc <= INDEX_ONE) ? nullptr :
+        ((argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_function) ? argv[INDEX_ONE] : nullptr);
+    napi_value result = nullptr;
+    auto asyncTask = CreateAsyncTask(env, lastParam, nullptr,
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindow::OnSetGestureBackEnabled", env, std::move(asyncTask));
+    return result;
+}
+
 napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "[NAPI] get failed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    bool isEnabled = windowToken_->GetGestureBackEnabled();
+    bool enable = true;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGestureBackEnabled(enable));
+    if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    } else if (ret != WmErrorCode::WM_OK) {
+        TLOGI(WmsLogTag::WMS_IMMS, "get fail, ret = %{public}d", ret);
+        return return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s], enable = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
-    return CreateJsValue(env, isEnabled);
+    return CreateJsValue(env, enable);
 }
 
 static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::string& windowName,
