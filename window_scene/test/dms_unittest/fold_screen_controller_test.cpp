@@ -96,8 +96,8 @@ namespace {
 
         fsc_.foldScreenPolicy_ = nullptr;
         FoldDisplayMode displayMode = FoldDisplayMode::FULL;
-        ASSERT_EQ(fsc_.foldScreenPolicy_, nullptr);
         fsc_.SetDisplayMode(displayMode);
+        ASSERT_EQ(fsc_.GetDisplayMode(), FoldDisplayMode::UNKNOWN);
     }
 
     /**
@@ -110,10 +110,16 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
-        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
-        FoldDisplayMode displayMode = FoldDisplayMode::FULL;
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+        auto mode = fsc_.GetDisplayMode();
+        FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
         fsc_.SetDisplayMode(displayMode);
+        if (ssm_.IsFoldable()) {
+            ASSERT_EQ(fsc_.GetDisplayMode(), displayMode);
+            fsc_.SetDisplayMode(mode);
+        } else {
+            ASSERT_EQ(fsc_.GetDisplayMode(), FoldDisplayMode::UNKNOWN);
+        }
     }
 
     /**
@@ -145,7 +151,7 @@ namespace {
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         bool locked = false;
         fsc_.LockDisplayStatus(locked);
-        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+        ASSERT_EQ((fsc_.foldScreenPolicy_)->lockDisplayStatus_, locked);
     }
 
     /**
@@ -207,6 +213,7 @@ namespace {
         fsc_.foldScreenPolicy_ = nullptr;
         fsc_.SetFoldStatus(foldStatus);
         ASSERT_EQ(fsc_.foldScreenPolicy_, nullptr);
+        ASSERT_EQ(fsc_.GetFoldStatus(), FoldStatus::UNKNOWN);
     }
 
     /**
@@ -222,7 +229,7 @@ namespace {
         FoldStatus foldStatus = FoldStatus::HALF_FOLD;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.SetFoldStatus(foldStatus);
-        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+        ASSERT_EQ(fsc_.GetFoldStatus(), foldStatus);
     }
 
     /**
@@ -311,10 +318,10 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
-        bool onBootAnimation = false;
+        bool onBootAnimation = true;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.SetOnBootAnimation(onBootAnimation);
-        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+        ASSERT_EQ(onBootAnimation, true);
     }
 
     /**

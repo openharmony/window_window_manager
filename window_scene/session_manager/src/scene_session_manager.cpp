@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <algorithm>
+#include <securec.h>
 
 #include <ability_context.h>
 #include <ability_manager_client.h>
@@ -259,7 +260,7 @@ void SceneSessionManager::Init()
     }
     taskScheduler_->SetExportHandler(eventHandler_);
 
-    ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
+    ret = SetFfrtWorkerNum();
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
@@ -287,6 +288,16 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+}
+
+int SceneSessionManager::SetFfrtWorkerNum()
+{
+    ffrt_worker_num_param qosConfig;
+    (void)memset_s(&qosConfig, sizeof(qosConfig), -1, sizeof(qosConfig));
+    qosConfig.effectLen = 1;
+    qosConfig.qosConfigArray[0].qos = ffrt_qos_user_interactive;
+    qosConfig.qosConfigArray[0].hardLimit = FFRT_USER_INTERACTIVE_MAX_THREAD_NUM;
+    return ffrt_set_qos_worker_num(&qosConfig);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -3829,6 +3840,7 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    ProcessWindowModeType();
     return true;
 }
 
@@ -5789,17 +5801,42 @@ void SceneSessionManager::ProcessWindowModeType()
     NotifyRSSWindowModeTypeUpdate();
 }
 
+static bool IsSmallFoldProduct()
+{
+    static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
+    if (foldScreenType.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
+        return false;
+    }
+    return foldScreenType[0] == '2';
+}
+
+bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSession)
+{
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionProperty is nullptr");
+        return false;
+    }
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    return sessionProperty->GetDisplayId() != defaultScreenId;
+}
+
 WindowModeType SceneSessionManager::CheckWindowModeType()
 {
     bool inSplit = false;
     bool inFloating = false;
     bool fullScreen = false;
+    bool isSmallFold = IsSmallFoldProduct();
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
             if (session.second == nullptr ||
                 !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
                 !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
+                continue;
+            }
+            if (isSmallFold && IsInSecondaryScreen(session.second)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();
@@ -7015,20 +7052,20 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
 }
 
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
-    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+    SceneSessionManager::GetInstance().GetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
 }
 
 WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
     auto isSaCall = SessionPermission::IsSACalling();
     if (!isSaCall) {
         WLOGFE("The interface only support for sa call");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &missionIds, &surfaceNodeIds]() {
+    auto task = [this, &missionIds, &surfaceNodeIds, isBlackList]() {
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto missionId : missionIds) {
@@ -7037,13 +7074,14 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
                 continue;
             }
             auto sceneSession = iter->second;
-            if (sceneSession == nullptr) {
-                continue;
-            }
-            if (sceneSession->GetSurfaceNode() == nullptr) {
+            if (sceneSession == nullptr || sceneSession->GetSurfaceNode() == nullptr) {
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
+                surfaceNodeIds.push_back(missionId);
+                continue;
+            }
             if (sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(sceneSession->GetLeashWinSurfaceNode()->GetId());
             }
@@ -8354,6 +8392,10 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
             auto scnSession = item.second;
             if (scnSession == nullptr) {
                 WLOGFE("SceneSessionManager::ProcessVirtualPixelRatioChange null scene session");
+                continue;
+            }
+            if (scnSession->GetSessionProperty() != nullptr &&
+                scnSession->GetSessionProperty()->GetDisplayId() != displayInfo->GetDisplayId()) {
                 continue;
             }
             SessionInfo sessionInfo = scnSession->GetSessionInfo();
@@ -10900,6 +10942,7 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
             auto leashWinSurfaceNode = sceneSession->GetLeashWinSurfaceNode();
             if (leashWinSurfaceNode != nullptr) {
                 surfaceNodeIds.push_back(leashWinSurfaceNode->GetId());
+                surfaceNodeIds.push_back(persistentId);
             }
         }
     }
@@ -10928,7 +10971,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
                 break;
             }
             sceneSession->SetPcScenePanel(true);
-            sceneSession->SetZOrder(i + startZOrder);
+            sceneSession->PcUpdateZOrderAndDirty(i + startZOrder);
         }
         oss << "]";
         TLOGNI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
