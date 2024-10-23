@@ -1065,10 +1065,6 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
 {
     auto defaultDragEnable = false;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        defaultDragEnable = sessionProperty->GetDragEnabled();
-    }
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());

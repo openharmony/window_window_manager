@@ -690,9 +690,10 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
+    bool isBlackList = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**
@@ -704,10 +705,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
+    bool isBlackList = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**

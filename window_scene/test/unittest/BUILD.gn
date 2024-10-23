@@ -51,6 +51,7 @@ group("unittest") {
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_lifecycle_test",
     ":ws_scene_session_manager_stub_test",
+    ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_manager_test10",
     ":ws_scene_session_manager_test11",
@@ -620,6 +621,12 @@ ohos_unittest("ws_scene_session_manager_test4") {
 ohos_unittest("ws_scene_session_manager_test5") {
   module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [ "scene_session_manager_test5.cpp" ]
 
   deps = [
@@ -797,7 +804,10 @@ ohos_unittest("ws_session_manager_test") {
 
   sources = [ "session_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_base:session_info",
@@ -822,7 +832,10 @@ ohos_unittest("ws_session_manager_lite_test") {
     "session_manager_lite_test.cpp",
   ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ability_base:session_info",
@@ -844,6 +857,25 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
 
   external_deps = [
     "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_supplement_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_supplement_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
   ]

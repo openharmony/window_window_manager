@@ -205,6 +205,7 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
     } else {
         EXPECT_NE(mgr.globalAngle, 25);
     }
+    usleep(SLEEP_TIME_US);
 }
 }
 } // namespace Rosen

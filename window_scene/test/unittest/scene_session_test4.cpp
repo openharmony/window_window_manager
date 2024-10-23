@@ -1233,6 +1233,59 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction02, Function | SmallTes
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
 }
+
+/**
+ * @tc.name: IsMovable01
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, isMovable01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "isMovable01";
+    info.bundleName_ = "isMovable01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(false, sceneSession->IsMovable());
+}
+
+/**
+ * @tc.name: IsMovable02
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable02";
+    info.bundleName_ = "IsMovable02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
+    ASSERT_EQ(false, sceneSession->IsMovable());
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+}
+
+/**
+ * @tc.name: IsMovable03
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable03";
+    info.bundleName_ = "IsMovable03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+    ASSERT_EQ(false, sceneSession->IsMovable());
+}
 }
 }
 }

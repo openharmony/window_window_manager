@@ -66,7 +66,7 @@ public:
     virtual void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) = 0;
     virtual void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) = 0;
     virtual void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds) = 0;
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) = 0;
     virtual void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) = 0;
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
