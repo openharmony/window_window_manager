@@ -870,9 +870,13 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
     vectorSize = static_cast<uint32_t>(info.size());
@@ -1710,9 +1714,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     MessageParcel data;
     MessageParcel reply;
 
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
     std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
     vectorSize = static_cast<uint32_t>(info.size());
