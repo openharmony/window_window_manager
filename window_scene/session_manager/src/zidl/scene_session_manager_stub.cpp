@@ -939,9 +939,23 @@ int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply)
 {
-    auto pid = data.ReadInt32();
-    auto uid = data.ReadInt32();
-    bool visible = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!")
+    auto pid;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read pid failed");
+        return ERR_INVALID_DATA;
+    }
+    auto uid;
+    if (!data.ReadInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read uid failed");
+        return ERR_INVALID_DATA;
+    }
+    bool visible;
+    if (!data.ReadBool(visible)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read visible failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_UIEXT, "pid:%{public}d, uid:%{public}d, visible:%{public}d", pid, uid, visible);
     WSError ret = NotifyWindowExtensionVisibilityChange(pid, uid, visible);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
