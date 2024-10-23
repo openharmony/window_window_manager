@@ -767,7 +767,7 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
 {
     TLOGD(WmsLogTag::DEFAULT, "Called");
     int32_t persistentId;
-    if(!data.ReadInt32(persistentId)) {
+    if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read persistentId");
         return ERR_INVALID_DATA;
     }
@@ -820,7 +820,7 @@ int SceneSessionManagerStub::HandleClearSession(MessageParcel& data, MessageParc
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
     int32_t persistentId;
-    if(!data.ReadInt32(persistentId)) {
+    if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentId");
         return ERR_INVALID_DATA;
     }
