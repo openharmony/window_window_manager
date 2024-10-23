@@ -1021,14 +1021,19 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
 
 int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     if (sessionStage == nullptr) {
-        WLOGFE("sessionStage is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    uint64_t surfaceNodeId = data.ReadUint64();
+    uint64_t surfaceNodeId;
+    if (!data.ReadUint64(surfaceNodeId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read surfaceNodeId failed");
+        return ERR_INVALID_DATA;
+    }
     AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId);
     return ERR_NONE;
 }
