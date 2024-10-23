@@ -280,11 +280,13 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, F
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
     data.WriteInt32Vector(sessionIds);
     int32_t topSessionId = 1;
     data.WriteInt32(topSessionId);
-
     int res = stub_->HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
