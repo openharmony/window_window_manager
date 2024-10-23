@@ -11233,7 +11233,7 @@ WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMul
 }
 
 WMError SceneSessionManager::GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
-    std::unordered_map<uint64_t, DisplayId>& windowDisplayMap)
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
@@ -11249,7 +11249,9 @@ WMError SceneSessionManager::GetWindowDisplayIds(std::vector<uint64_t>& windowId
         if (sessionProperty == nullptr) {
             continue;
         }
-        windowDisplayMap.insert({windowId, sessionProperty->GetDisplayId()});
+        TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64", displayId:%{public}" PRIu64"",
+            windowId, sessionProperty->GetDisplayId());
+        windowDisplayIdMap.insert({windowId, sessionProperty->GetDisplayId()});
     }
     return WMError::WM_OK;
 }

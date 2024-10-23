@@ -826,11 +826,11 @@ public:
      * @brief Get window displayIds.
      *
      * @param windowIds list of window ids that need to get screen ids
-     * @param windowDisplayMap map of Windows and screens
+     * @param windowDisplayIdMap map of Windows and screens
      * @return WM_OK means get success, others means failed.
      */
     WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
-        std::unordered_map<uint64_t, DisplayId>& windowDisplayMap);
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
 private:
     WindowManager();
