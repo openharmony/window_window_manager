@@ -863,10 +863,14 @@ int SceneSessionManagerStub::HandleUnlockSession(MessageParcel& data, MessagePar
 }
 int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleMoveSessionsToForeground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
-    int32_t topSessionId = data.ReadInt32();
+    int32_t topSessionId;
+    if (!data.ReadInt32(topSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read topSessionId");
+        return ERR_INVALID_DATA;
+    }
     const WSError &ret = MoveSessionsToForeground(sessionIds, topSessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
