@@ -44,6 +44,7 @@
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
 #include "screen_fold_data.h"
+#include "thread_safety_annotations.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -804,7 +805,7 @@ private:
     bool IsNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
-    void OnSessionStateChange(int32_t persistentId, const SessionState& state);
+    void OnSessionStateChange(int32_t persistentId, const SessionState& state) REQUIRES(SCENE_GUARD);
     void ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession);
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
@@ -890,9 +891,9 @@ private:
     /*
      * Window Snapshot
      */
-    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession);
-    void RemoveProcessSnapshotSkip(int32_t pid);
-    void SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession);
+    void SetSessionSnapshotSkipForAppProcess(const sptr<SceneSession>& sceneSession) REQUIRES(SCENE_GUARD);
+    void RemoveProcessSnapshotSkip(int32_t pid) REQUIRES(SCENE_GUARD);
+    void SetSessionSnapshotSkipForAppBundleName(const sptr<SceneSession>& sceneSession) REQUIRES(SCENE_GUARD);
 
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
@@ -931,8 +932,8 @@ private:
     /*
      * Window Snapshot
      */
-    std::unordered_set<int32_t> snapshotSkipPidSet_; // ONLY Accessed on OS_sceneSession thread
-    std::unordered_set<std::string> snapshotSkipBundleNameSet_; // ONLY Accessed on OS_sceneSession thread
+    std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread
+    std::unordered_set<std::string> snapshotSkipBundleNameSet_ GUARDED_BY(SCENE_GUARD);
 
     int32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
