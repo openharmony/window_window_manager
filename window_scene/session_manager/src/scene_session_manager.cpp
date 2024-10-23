@@ -23,7 +23,6 @@
 #include <hitrace_meter.h>
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
-#include "screen_manager.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -2143,7 +2142,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             TLOGE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        HandleCastScreenDisConnection(scnSession->GetSessionInfo().screenId_);
         auto persistentId = scnSession->GetPersistentId();
         TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
@@ -2200,27 +2198,6 @@ void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
     }
 }
 
-void SceneSessionManager::HandleCastScreenDisConnection(uint64_t screenId)
-{
-    auto task = [screenId] {
-        ScreenId defScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-        if (defScreenId == screenId) {
-            return;
-        }
-        auto flag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
-        if (flag != VirtualScreenFlag::CAST) {
-            return;
-        }
-        std::vector<uint64_t> mirrorIds { screenId };
-        ScreenId groupId;
-        DMError ret = ScreenManager::GetInstance().MakeMirror(0, mirrorIds, groupId);
-        if (ret != Rosen::DMError::DM_OK) {
-            TLOGI(WmsLogTag::WMS_LIFE, "MakeMirror failed, ret: %{public}d", ret);
-            return;
-        }
-    };
-    eventHandler_->PostTask(task, "HandleCastScreenDisConnection: ScreenId:" + std::to_string(screenId));
-}
 
 WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& scnSession,
     sptr<AAFwk::SessionInfo> scnSessionInfo, const bool needRemoveSession, const bool isForceClean)
