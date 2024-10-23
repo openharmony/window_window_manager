@@ -2061,9 +2061,10 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteString("test_01");
-
     int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    data.WriteString("test_01");
+    res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
