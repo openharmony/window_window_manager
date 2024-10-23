@@ -1923,16 +1923,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(sessionStage, nullptr);
+
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     data.WriteRemoteObject(sessionStage->AsObject());
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
-    data.WriteRemoteObject(token);
-    data.WriteUint64(12345);
 
-    int res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    data.WriteRemoteObject(token);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteUint64(12345);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
