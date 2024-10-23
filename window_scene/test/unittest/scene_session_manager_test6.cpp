@@ -1765,7 +1765,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     int32_t persistentId = 10;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-
+    
     persistentId = 0;
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
@@ -1944,7 +1944,7 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-
+    
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
