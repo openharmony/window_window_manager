@@ -1226,7 +1226,7 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
 bool SessionStageProxy::ReadSmallStringVectorFromParcel(
     MessageParcel& reply, std::vector<std::string>& infos)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "small data entry");
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
     if (!reply.ReadStringVector(&infos)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
         return false;
