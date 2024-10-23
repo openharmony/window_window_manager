@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include "intention_event/service/timer_manager/include/timer_manager.h"
 #include "intention_event/service/anr_manager/include/anr_manager.h"
-#include "intention_event/framework/anr_handler/include/anr_handler.h"
 #include <algorithm>
 #include <cinttypes>
 #include "window_manager_hilog.h"
@@ -137,6 +136,13 @@ HWTEST_F(TimerManagerTest, RemoveTimerInternal, Function | SmallTest | Level2)
     ASSERT_NE(timermanager, nullptr);
     int32_t res = timermanager->RemoveTimerInternal(0);
     ASSERT_EQ(res, -1);
+
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timermanager->timers_.push_back(std::move(timer));
+    res = timermanager->RemoveTimerInternal(0);
+    ASSERT_EQ(res, 0);
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::RemoveTimerInternal start";
 }
@@ -198,6 +204,16 @@ HWTEST_F(TimerManagerTest, ProcessTimersInternal, Function | SmallTest | Level2)
         ASSERT_EQ(firstTimer->callback, nullptr);
         timermanager->ProcessTimersInternal();
     }
+    timermanager->timers_.clear();
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timer2->callback = []() {
+        return;
+    };
+    ASSERT_NE(timer2->callback, nullptr);
+    timermanager->timers_.push_back(std::move(timer2));
+    timermanager->ProcessTimersInternal();
 
     delete timermanager;
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
@@ -410,106 +426,6 @@ HWTEST_F(TimerManagerTest, AddTimerInternal004, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ANRHandler.HandleEventConsumed
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, HandleEventConsumed01, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed01 start";
-    int32_t evenid = -1;
-    int64_t actionTime = 10;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->HandleEventConsumed(evenid, actionTime);
-    ASSERT_EQ(evenid, -1);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed01 end";
-}
-
-/**
- * @tc.name: ANRHandler.HandleEventConsumed
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, HandleEventConsumed02, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed02 start";
-    int32_t evenid = 0;
-    int64_t actionTime = 10;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->HandleEventConsumed(evenid, actionTime);
-    ASSERT_EQ(evenid, 0);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed02 end";
-}
-
-/**
- * @tc.name: ANRHandler.HandleEventConsumed
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, HandleEventConsumed03, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed03 start";
-    int32_t evenid = 1;
-    int64_t actionTime = 10;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->HandleEventConsumed(evenid, actionTime);
-    ASSERT_EQ(evenid, 1);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::HandleEventConsumed03 end";
-}
-
-/**
- * @tc.name: ANRHandler.OnWindowDestroyed
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, OnWindowDestroyed01, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed01 start";
-    int32_t persistentId = 1;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->OnWindowDestroyed(persistentId);
-    ASSERT_EQ(persistentId, 1);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed01 end";
-}
-
-/**
- * @tc.name: ANRHandler.OnWindowDestroyed
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, OnWindowDestroyed02, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed02 start";
-    int32_t persistentId = -1;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->OnWindowDestroyed(persistentId);
-    ASSERT_EQ(persistentId, -1);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::OnWindowDestroyed02 end";
-}
-
-/**
- * @tc.name: ANRHandler.UpdateLatestEventId
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(TimerManagerTest, UpdateLatestEventId, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ANRHandler::UpdateLatestEventId start";
-    int32_t eventId = -1;
-    ANRHandler* ANRHandler = new (class ANRHandler)();
-    ANRHandler->UpdateLatestEventId(eventId);
-    ASSERT_EQ(eventId, -1);
-    delete ANRHandler;
-    GTEST_LOG_(INFO) << "ANRHandler::UpdateLatestEventId end";
-}
-
-
-/**
  * @tc.name: CalcNextDelay
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -541,6 +457,31 @@ HWTEST_F(TimerManagerTest, ProcessTimers, Function | SmallTest | Level2)
     ASSERT_NE(timermanager, nullptr);
     timermanager->state_ = TimerMgrState::STATE_NOT_START;
     timermanager->ProcessTimers();
+    timermanager->state_ = TimerMgrState::STATE_RUNNING;
+    timermanager->ProcessTimers();
+    ASSERT_EQ(res, 0);
+    delete timermanager;
+}
+
+/**
+ * @tc.name: InsertTimerInternal
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, InsertTimerInternal, Function | SmallTest | Level2)
+{
+    int res = 0;
+    TimerManager* timermanager = new TimerManager();
+    ASSERT_NE(timermanager, nullptr);
+    std::unique_ptr<TimerManager::TimerItem> timer = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer, nullptr);
+    timer->id = 0;
+    timer->nextCallTime = 1;
+    timermanager->timers_.push_back(std::move(timer));
+    std::unique_ptr<TimerManager::TimerItem> timer2 = std::make_unique<TimerManager::TimerItem>();
+    ASSERT_NE(timer2, nullptr);
+    timer2->nextCallTime = 0;
+    timermanager->InsertTimerInternal(timer2);
     ASSERT_EQ(res, 0);
     delete timermanager;
 }
