@@ -4291,7 +4291,7 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     enable = gestureBackEnabled_;
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), gestureBackEnabled_);
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
     return WMError::WM_OK;
 }
 

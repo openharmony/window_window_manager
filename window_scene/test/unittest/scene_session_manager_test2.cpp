@@ -2183,8 +2183,8 @@ HWTEST_F(SceneSessionManagerTest2, NotifyEnterRecentTask, Function | SmallTest |
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, property);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
-    ssm_->gestureBackEnableWindowIdSet_insert(1);
-    ssm_->gestureBackEnableWindowIdSet_insert(2);
+    ssm_->gestureBackEnableWindowIdSet_.insert(1);
+    ssm_->gestureBackEnableWindowIdSet_.insert(2);
     ASSERT_EQ(ssm_->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(ssm_->NotifyEnterRecentTask(false), WSError::WS_OK);
 }

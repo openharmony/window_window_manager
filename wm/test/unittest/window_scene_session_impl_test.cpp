@@ -1758,7 +1758,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     bool enable = true;
     ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
     ASSERT_EQ(false, enable);
-    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(false));
+    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
     ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
     ASSERT_EQ(true, enable);
 }
