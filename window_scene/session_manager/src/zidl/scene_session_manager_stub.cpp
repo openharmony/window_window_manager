@@ -1254,16 +1254,16 @@ int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, Mess
     std::unordered_map<int32_t, DisplayId> windowDisplayIdMap;
     WMError errCode = GetWindowDisplayIds(windowIds, windowDisplayIdMap);
 
-    if (!data.WriteInt32(windowDisplayIdMap.size())) {
+    if (!reply.WriteInt32(windowDisplayIdMap.size())) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
         return ERR_INVALID_DATA;
     }
     for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
-        if (!data.WriteUint64(it->first)) {
+        if (!reply.WriteUint64(it->first)) {
             TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
             return ERR_INVALID_DATA;
         }
-        if (!data.WriteUint64(it->second)) {
+        if (!reply.WriteUint64(it->second)) {
             TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
             return ERR_INVALID_DATA;
         }
