@@ -31,6 +31,7 @@ config("we_systemtest_common_public_config") {
     "../../../extension/window_extension/include/zidl",
     "../../../interfaces/innerkits/extension",
     "../../../interfaces/innerkits/wm",
+    "../../../utils/include",
     "../../common/mock",
     "//third_party/googletest/googlemock/include",
   ]
@@ -39,7 +40,12 @@ config("we_systemtest_common_public_config") {
 ohos_systemtest("modal_system_ui_extension_test") {
   module_out_path = module_out_path
 
-  sources = [ "modal_system_ui_extension_test.cpp" ]
+  sources = [
+    "../../../window_scene/test/mock/mock_message_parcel.cpp",
+    "modal_system_ui_extension_test.cpp",
+  ]
+
+  include_dirs = [ "../../../window_scene/test/mock" ]
 
   public_configs = [
     ":we_systemtest_common_public_config",
