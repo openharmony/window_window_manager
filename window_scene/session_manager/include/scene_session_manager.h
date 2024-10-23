@@ -130,7 +130,7 @@ public:
     void OnScreenshot(DisplayId displayId) override;
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds) override;
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
 
     /*
      * Fold Screen Status Change Report
@@ -355,7 +355,7 @@ public:
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds);
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
@@ -422,6 +422,7 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
+    int SetFfrtWorkerNum();
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
@@ -444,7 +445,7 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
-    
+
     /*
      * Window ZOrder: PC
      */
@@ -953,6 +954,11 @@ private:
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);
+
+    /*
+     * Screen Manager
+     */
+    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
 
     struct SessionInfoList {
         int32_t uid_;
