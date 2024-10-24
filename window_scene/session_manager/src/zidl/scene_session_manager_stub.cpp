@@ -1086,13 +1086,22 @@ int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    int32_t posX = data.ReadInt32();
-    int32_t posY = data.ReadInt32();
+    int32_t posX;
+    if (!data.ReadInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read posX failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t posY;
+    if (!data.ReadInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read posY failed");
+        return ERR_INVALID_DATA;
+    }
     ProcessModalExtensionPointDown(token, posX, posY);
     return ERR_NONE;
 }
