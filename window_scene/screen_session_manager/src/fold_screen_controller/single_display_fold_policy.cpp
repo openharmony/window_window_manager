@@ -241,6 +241,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
+    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(UserActivityType::SWITCH);
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         ReportFoldStatusChangeBegin(static_cast<int32_t>(SCREEN_ID_FULL),
@@ -256,7 +257,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdMain ON.");
             screenId_ = SCREEN_ID_MAIN;
             ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "screenOnMainTask");
@@ -294,6 +294,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, FULL_TP.c_str());
 #endif
+    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(UserActivityType::SWITCH);
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         auto taskScreenOnFull = [=] {
@@ -307,7 +308,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdFull ON.");
             screenId_ = SCREEN_ID_FULL;
             ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFull, "screenOnFullTask");
