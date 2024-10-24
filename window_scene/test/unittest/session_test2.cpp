@@ -27,6 +27,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "process_options.h"
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
