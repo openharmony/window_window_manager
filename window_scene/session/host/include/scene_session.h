@@ -242,7 +242,8 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-
+    // Provide the ability to prohibit dragging for scb
+    WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
