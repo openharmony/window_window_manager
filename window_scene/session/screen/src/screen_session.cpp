@@ -1304,8 +1304,8 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         UpdatePropertyByActiveMode();
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetFrame(0, 0, width, height);
-            displayNode_->SetBounds(0, 0, width, height);
+            displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+            displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
         }
         RSTransaction::FlushImplicitTransaction();
     }
