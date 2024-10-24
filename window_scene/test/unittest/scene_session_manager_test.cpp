@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string EMPTY_DEVICE_ID = "";
+const std::string EMPTY_DEVICE_ID = "";
 }
 class SceneSessionManagerTest : public testing::Test {
 public:
@@ -48,7 +48,7 @@ public:
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
     static bool gestureNavigationEnabled_;
-    static bool ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
+    static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -1283,7 +1283,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(nullptr, sceneSessionManager);
-
+    
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
