@@ -4806,7 +4806,7 @@ napi_value JsSceneSession::OnSetWindowEnableDragBySystem(napi_env env, napi_call
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -4814,13 +4814,13 @@ napi_value JsSceneSession::OnSetWindowEnableDragBySystem(napi_env env, napi_call
 
     bool enableDrag = true;
     if (!ConvertFromJsValue(env, argv[0], enableDrag)) {
-        WLOGFE("[NAPI]Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->SetWindowEnableDragBySystem(enableDrag);

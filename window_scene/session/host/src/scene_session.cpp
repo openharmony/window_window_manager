@@ -4753,7 +4753,6 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
     return WMError::WM_OK;
 }
 
-
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
