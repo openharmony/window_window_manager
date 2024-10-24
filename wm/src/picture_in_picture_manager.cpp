@@ -49,8 +49,6 @@ sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nu
 wptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
 std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
 std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
-std::shared_mutex PictureInPictureManager::controllerMapMutex_;
-std::mutex PictureInPictureManager::mutex_;
 std::shared_ptr<NativeReference> PictureInPictureManager::innerCallbackRef_ = nullptr;
 
 PictureInPictureManager::PictureInPictureManager()
@@ -68,27 +66,23 @@ bool PictureInPictureManager::IsSupportPiP()
 
 bool PictureInPictureManager::ShouldAbortPipStart()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     return activeController_ != nullptr && activeController_->GetControllerState() == PiPWindowState::STATE_STARTING;
 }
 
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "PutPipControllerInfo called, windowId %{public}u", windowId);
-    std::unique_lock<std::shared_mutex> lock(controllerMapMutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "PutPipControllerInfo called, windowId %{public}u", windowId);
     windowToControllerMap_.insert(std::make_pair(windowId, pipController));
 }
 
 void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called, windowId %{public}u", windowId);
-    std::unique_lock<std::shared_mutex> lock(controllerMapMutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "called, windowId %{public}u", windowId);
     windowToControllerMap_.erase(windowId);
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
 {
-    std::shared_lock<std::shared_mutex> lock(controllerMapMutex_);
     if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "GetPipControllerInfo error, %{public}d not registered!", windowId);
         return nullptr;
@@ -104,7 +98,6 @@ bool PictureInPictureManager::HasActiveController()
 
 bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return false;
     }
@@ -116,7 +109,6 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
 void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     activeController_ = pipController;
 }
 
@@ -157,8 +149,7 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
 
 bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called %{public}u", windowId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "called %{public}u", windowId);
     if (!HasActiveController()) {
         return false;
     }
@@ -167,7 +158,6 @@ bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 
 sptr<Window> PictureInPictureManager::GetCurrentWindow()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return nullptr;
     }
@@ -177,7 +167,6 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
 void PictureInPictureManager::DoPreRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -187,7 +176,6 @@ void PictureInPictureManager::DoPreRestore()
 void PictureInPictureManager::DoRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -197,7 +185,6 @@ void PictureInPictureManager::DoRestore()
 void PictureInPictureManager::DoPrepareSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -207,7 +194,6 @@ void PictureInPictureManager::DoPrepareSource()
 void PictureInPictureManager::DoLocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }
@@ -216,8 +202,7 @@ void PictureInPictureManager::DoLocateSource()
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     if (!HasActiveController()) {
         return;
     }
@@ -247,11 +232,10 @@ void PictureInPictureManager::DoDestroy()
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "called");
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
-        std::lock_guard<std::mutex> lock(mutex_);
         if (HasActiveController()) {
             activeController_->DoActionEvent(actionName, status);
         }
@@ -263,7 +247,6 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
 void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    std::lock_guard<std::mutex> lock(mutex_);
     if (!HasActiveController()) {
         return;
     }

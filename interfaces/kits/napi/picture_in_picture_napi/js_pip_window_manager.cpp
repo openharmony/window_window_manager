@@ -224,6 +224,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
+            delete task;
             return;
         }
         sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
@@ -231,12 +232,14 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         if (context == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
+            delete task;
             return;
         }
         sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
         if (mainWindow == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
+            delete task;
             return;
         }
         sptr<PictureInPictureController> pipController =
