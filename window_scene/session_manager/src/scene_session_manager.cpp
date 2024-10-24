@@ -10044,7 +10044,7 @@ WMError SceneSessionManager::GetCallingWindowWindowStatus(int32_t persistentId, 
         callingSession = GetSceneSession(focusedSessionId_);
         if (callingSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "callingsSession obtained through focusedSession fail");
-            return WMError::WM_ERROR_INVALID_PARAM;
+            return WMError::WM_ERROR_INVALID_WINDOW;
         }
     }
     if (callingSession->IsSystemSession()) {
