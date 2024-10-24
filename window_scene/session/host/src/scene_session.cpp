@@ -4611,5 +4611,4 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
         }
     }
 }
-
 } // namespace OHOS::Rosen
