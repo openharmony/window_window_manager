@@ -1053,15 +1053,32 @@ int SceneSessionManagerStub::HandleRemoveExtensionWindowStageFromSCB(MessageParc
 
 int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    int32_t rectX = data.ReadInt32();
-    int32_t rectY = data.ReadInt32();
-    int32_t rectWidth = data.ReadInt32();
-    int32_t rectHeight = data.ReadInt32();
+    int32_t rectX;
+    if (!data.ReadInt32(rectX)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectX failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectY;
+    if (!data.ReadInt32(rectY)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectY failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectWidth;
+    if (!data.ReadInt32(rectWidth)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectWidth failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectHeight;
+    if (!data.ReadInt32(rectHeight)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectHeight failed");
+        return ERR_INVALID_DATA;
+    }
     Rect windowRect{rectX, rectY, rectWidth, rectHeight};
     UpdateModalExtensionRect(token, windowRect);
     return ERR_NONE;
