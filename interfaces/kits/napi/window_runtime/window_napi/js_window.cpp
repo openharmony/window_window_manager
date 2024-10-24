@@ -6792,7 +6792,7 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            napi_get_value_bool(env, nativeVal, &enabled));
+                napi_get_value_bool(env, nativeVal, &enabled));
         }
     }
     if (errCode != WmErrorCode::WM_OK) {
