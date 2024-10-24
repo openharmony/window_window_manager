@@ -28,6 +28,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -394,6 +395,8 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    sceneSession->property_->SetDisplayId(displayId);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ASSERT_NE(nullptr, ssm_);
@@ -415,6 +418,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -424,6 +428,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -437,6 +442,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession1->property_);
     sceneSession1->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession1->property_->SetDisplayId(displayId);
     sceneSession1->isVisible_ = true;
     sceneSession1->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -459,6 +465,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -468,6 +475,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -494,6 +502,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -501,6 +510,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -1761,7 +1771,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-    
+
     bool enable = true;
     auto result = ssm_->GetFreeMultiWindowEnableState(enable);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1935,7 +1945,7 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-    
+
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
 }

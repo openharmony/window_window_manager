@@ -1386,7 +1386,7 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 end";
 }
- 
+
 /**
  * @tc.name: SetWindowContainerColor02
  * @tc.desc: SetWindowContainerColor
@@ -1407,7 +1407,7 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 end";
 }
- 
+
 /**
  * @tc.name: SetWindowContainerColor03
  * @tc.desc: SetWindowContainerColor
@@ -1432,7 +1432,7 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 end";
 }
- 
+
 /**
  * @tc.name: SetWindowContainerColor04
  * @tc.desc: SetWindowContainerColor
@@ -1657,6 +1657,403 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindow, Function | SmallTest | Level2)
     ASSERT_EQ(1, subWindows.size());
     WindowSessionImpl::subWindowSessionMap_.erase(101); // 101
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
+}
+
+/**
+ * @tc.name: ClearListenersById_displayMoveListeners
+ * @tc.desc: ClearListenersById_displayMoveListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_displayMoveListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_displayMoveListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_displayMoveListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IDisplayMoveListener> listener_ = new (std::nothrow) MockIDisplayMoveListener();
+    window_->RegisterDisplayMoveListener(listener_);
+    ASSERT_NE(window_->displayMoveListeners_.find(persistentId), window_->displayMoveListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->displayMoveListeners_.find(persistentId), window_->displayMoveListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_displayMoveListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_lifecycleListeners
+ * @tc.desc: ClearListenersById_lifecycleListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_lifecycleListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_lifecycleListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_lifecycleListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowLifeCycle> listener_ = new (std::nothrow) MockWindowLifeCycleListener();
+    window_->RegisterLifeCycleListener(listener_);
+    ASSERT_NE(window_->lifecycleListeners_.find(persistentId), window_->lifecycleListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->lifecycleListeners_.find(persistentId), window_->lifecycleListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_lifecycleListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_windowChangeListeners
+ * @tc.desc: ClearListenersById_windowChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowChangeListener> listener_ = new (std::nothrow) MockWindowChangeListener();
+    window_->RegisterWindowChangeListener(listener_);
+    ASSERT_NE(window_->windowChangeListeners_.find(persistentId), window_->windowChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowChangeListeners_.find(persistentId), window_->windowChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_avoidAreaChangeListeners
+ * @tc.desc: ClearListenersById_avoidAreaChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_avoidAreaChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_avoidAreaChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_avoidAreaChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IAvoidAreaChangedListener> listener_ = new (std::nothrow) MockAvoidAreaChangedListener();
+    window_->RegisterExtensionAvoidAreaChangeListener(listener_);
+    ASSERT_NE(window_->avoidAreaChangeListeners_.find(persistentId), window_->avoidAreaChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->avoidAreaChangeListeners_.find(persistentId), window_->avoidAreaChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_avoidAreaChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_dialogDeathRecipientListeners
+ * @tc.desc: ClearListenersById_dialogDeathRecipientListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_dialogDeathRecipientListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_dialogDeathRecipientListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_dialogDeathRecipientListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IDialogDeathRecipientListener> listener_ = new (std::nothrow) MockIDialogDeathRecipientListener();
+    window_->RegisterDialogDeathRecipientListener(listener_);
+    ASSERT_NE(window_->dialogDeathRecipientListeners_.find(persistentId),
+              window_->dialogDeathRecipientListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->dialogDeathRecipientListeners_.find(persistentId),
+              window_->dialogDeathRecipientListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_dialogDeathRecipientListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_dialogTargetTouchListener
+ * @tc.desc: ClearListenersById_dialogTargetTouchListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_dialogTargetTouchListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_dialogTargetTouchListener start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_dialogTargetTouchListener");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IDialogTargetTouchListener> listener_ = new (std::nothrow) MockIDialogTargetTouchListener();
+    window_->RegisterDialogTargetTouchListener(listener_);
+    ASSERT_NE(window_->dialogTargetTouchListener_.find(persistentId), window_->dialogTargetTouchListener_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->dialogTargetTouchListener_.find(persistentId), window_->dialogTargetTouchListener_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_dialogTargetTouchListener end";
+}
+
+/**
+ * @tc.name: ClearListenersById_screenshotListeners
+ * @tc.desc: ClearListenersById_screenshotListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_screenshotListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_screenshotListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_screenshotListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IScreenshotListener> listener_ = new (std::nothrow) MockIScreenshotListener();
+    window_->RegisterScreenshotListener(listener_);
+    ASSERT_NE(window_->screenshotListeners_.find(persistentId), window_->screenshotListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->screenshotListeners_.find(persistentId), window_->screenshotListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_screenshotListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_windowStatusChangeListeners
+ * @tc.desc: ClearListenersById_windowStatusChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowStatusChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowStatusChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowStatusChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowStatusChangeListener> listener_ = new (std::nothrow) MockWindowStatusChangeListener();
+    window_->RegisterWindowStatusChangeListener(listener_);
+    ASSERT_NE(window_->windowStatusChangeListeners_.find(persistentId), window_->windowStatusChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowStatusChangeListeners_.find(persistentId), window_->windowStatusChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowStatusChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_windowTitleButtonRectChangeListeners
+ * @tc.desc: ClearListenersById_windowTitleButtonRectChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowTitleButtonRectChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowTitleButtonRectChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowTitleButtonRectChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowTitleButtonRectChangedListener> listener_ =
+        new (std::nothrow) MockWindowTitleButtonRectChangedListener();
+    window_->windowTitleButtonRectChangeListeners_[persistentId].emplace_back(listener_);
+    ASSERT_NE(window_->windowTitleButtonRectChangeListeners_.find(persistentId),
+              window_->windowTitleButtonRectChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowTitleButtonRectChangeListeners_.find(persistentId),
+              window_->windowTitleButtonRectChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowTitleButtonRectChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_windowNoInteractionListeners
+ * @tc.desc: ClearListenersById_windowNoInteractionListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowNoInteractionListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowNoInteractionListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowNoInteractionListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowNoInteractionListener> listener_ = new (std::nothrow) MockWindowNoInteractionListener();
+    window_->RegisterWindowNoInteractionListener(listener_);
+    ASSERT_NE(window_->windowNoInteractionListeners_.find(persistentId), window_->windowNoInteractionListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowNoInteractionListeners_.find(persistentId), window_->windowNoInteractionListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowNoInteractionListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_windowRectChangeListeners
+ * @tc.desc: ClearListenersById_windowRectChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowRectChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowRectChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowRectChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowRectChangeListener> listener_ = new (std::nothrow) MockWindowRectChangeListener();
+    window_->RegisterWindowRectChangeListener(listener_);
+    ASSERT_NE(window_->windowRectChangeListeners_.find(persistentId), window_->windowRectChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowRectChangeListeners_.find(persistentId), window_->windowRectChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowRectChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_subWindowCloseListeners
+ * @tc.desc: ClearListenersById_subWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_subWindowCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_subWindowCloseListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_subWindowCloseListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<ISubWindowCloseListener> listener_ = new (std::nothrow) MockISubWindowCloseListener();
+    window_->subWindowCloseListeners_[persistentId] = listener_;
+    ASSERT_NE(window_->subWindowCloseListeners_.find(persistentId), window_->subWindowCloseListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->subWindowCloseListeners_.find(persistentId), window_->subWindowCloseListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_subWindowCloseListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_mainWindowCloseListeners
+ * @tc.desc: ClearListenersById_mainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_mainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_mainWindowCloseListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_mainWindowCloseListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IMainWindowCloseListener> listener_ = new (std::nothrow) MockIMainWindowCloseListener();
+    window_->mainWindowCloseListeners_[persistentId] = listener_;
+    ASSERT_NE(window_->mainWindowCloseListeners_.find(persistentId), window_->mainWindowCloseListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->mainWindowCloseListeners_.find(persistentId), window_->mainWindowCloseListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_mainWindowCloseListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_occupiedAreaChangeListeners
+ * @tc.desc: ClearListenersById_occupiedAreaChangeListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_occupiedAreaChangeListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_occupiedAreaChangeListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_occupiedAreaChangeListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IOccupiedAreaChangeListener> listener_ = new (std::nothrow) MockIOccupiedAreaChangeListener();
+    window_->RegisterOccupiedAreaChangeListener(listener_);
+    ASSERT_NE(window_->occupiedAreaChangeListeners_.find(persistentId), window_->occupiedAreaChangeListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->occupiedAreaChangeListeners_.find(persistentId), window_->occupiedAreaChangeListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_occupiedAreaChangeListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_switchFreeMultiWindowListeners
+ * @tc.desc: ClearListenersById_switchFreeMultiWindowListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_switchFreeMultiWindowListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_switchFreeMultiWindowListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_switchFreeMultiWindowListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    ASSERT_NE(window_, nullptr);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<ISwitchFreeMultiWindowListener> listener_ = new (std::nothrow) MockISwitchFreeMultiWindowListener();
+    window_->RegisterSwitchFreeMultiWindowListener(listener_);
+    ASSERT_NE(window_->switchFreeMultiWindowListeners_.find(persistentId),
+              window_->switchFreeMultiWindowListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->switchFreeMultiWindowListeners_.find(persistentId),
+              window_->switchFreeMultiWindowListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_switchFreeMultiWindowListeners end";
 }
 }
 } // namespace Rosen
