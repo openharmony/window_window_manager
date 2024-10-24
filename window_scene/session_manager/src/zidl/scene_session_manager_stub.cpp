@@ -721,12 +721,12 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
-    std::string deviceId = "";
-    if(!ReadString16(deviceId)) {
+    std::u16string deviceIdData;
+    if(!ReadString16(deviceIdData)) {
         WLOGE("read deviceId fail");
         return ERR_INVALID_DATA;
     }
-    deviceId = Str16ToStr8(deviceId);
+    std::string deviceId = Str16ToStr8(deviceIdData);
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         WLOGE("read persistentId fail");
