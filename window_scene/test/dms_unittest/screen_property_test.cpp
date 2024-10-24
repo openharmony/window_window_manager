@@ -388,6 +388,7 @@ HWTEST_F(ScreenPropertyTest, SetDensityInCurResolution, Function | SmallTest | L
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDensityInCurResolution end";
 }
+
 /**
  * @tc.name: GetPropertyChangeReason
  * @tc.desc: normal function
@@ -398,8 +399,10 @@ HWTEST_F(ScreenPropertyTest, GetPropertyChangeReason, Function | SmallTest | Lev
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
     std::string propertyChangeReason = "a";
+    std::string propertyChangeReason_copy = property->GetPropertyChangeReason();
     property->SetPropertyChangeReason(propertyChangeReason);
     ASSERT_EQ(propertyChangeReason, property->GetPropertyChangeReason());
+    property->SetPropertyChangeReason(propertyChangeReason_copy);
 }
 
 /**
@@ -411,13 +414,14 @@ HWTEST_F(ScreenPropertyTest, CalcDefaultDisplayOrientation, Function | SmallTest
 {
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
-    int64_t ret = 0;
+    RRect bounds_temp = property->GetBounds();
     RRect bounds;
     bounds.rect_.width_ = 2772;
     bounds.rect_.height_ = 1344;
     property->SetBounds(bounds);
     property->CalcDefaultDisplayOrientation();
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(DisplayOrientation::LANDSCAPE, property->GetDisplayOrientation());
+    property->SetBounds(bounds_temp);
 }
 
 /**
@@ -430,8 +434,10 @@ HWTEST_F(ScreenPropertyTest, SetStartX, Function | SmallTest | Level2)
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
     uint32_t ret = 100;
+    uint32_t ret_copy = property->GetStartX();
     property->SetStartX(ret);
     ASSERT_EQ(ret, property->GetStartX());
+    property->SetStartX(ret_copy);
 }
 
 /**
@@ -444,8 +450,10 @@ HWTEST_F(ScreenPropertyTest, SetStartY, Function | SmallTest | Level2)
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
     uint32_t ret = 100;
+    uint32_t ret_copy = property->GetStartY();
     property->SetStartY(ret);
     ASSERT_EQ(ret, property->GetStartY());
+    property->SetStartY(ret_copy);
 }
 
 /**
@@ -459,9 +467,12 @@ HWTEST_F(ScreenPropertyTest, SetStartPosition, Function | SmallTest | Level2)
     ASSERT_NE(property, nullptr);
     uint32_t ret_x = 100;
     uint32_t ret_y = 200;
+    uint32_t retx_copy = property->GetStartX();
+    uint32_t rety_copy = property->GetStartY();
     property->SetStartPosition(ret_x, ret_y);
     ASSERT_EQ(100, property->GetStartX());
     ASSERT_EQ(200, property->GetStartY());
+    property->SetStartPosition(retx_copy, rety_copy);
 }
 } // namespace
 } // namespace Rosen
