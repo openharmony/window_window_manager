@@ -3083,6 +3083,29 @@ HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | L
     ssm->SetCoordinationFlag(true);
     ASSERT_EQ(ssm->isCoordinationFlag_, true);
 }
+
+/**
+ * @tc.name: GetTentMode
+ * @tc.desc: Test get tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetTentMode, Function | SmallTest | Level1)
+{
+    auto tentMode = ssm_->GetTentMode();
+    ASSERT_EQ(tentMode, false);
+}
+
+/**
+ * @tc.name: OnTentModeChanged
+ * @tc.desc: Test change tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Level1)
+{
+    bool isTentMode = false;
+    ssm_->OnTentModeChanged(isTentMode);
+    ASSERT_EQ(ssm_->GetTentMode(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
