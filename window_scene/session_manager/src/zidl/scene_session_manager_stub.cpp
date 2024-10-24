@@ -1173,7 +1173,12 @@ int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& 
 
 int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&data, MessageParcel&reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     WMError ret = GetCallingWindowWindowStatus(persistentId, windowStatus);
     reply.WriteUint32(static_cast<int32_t>(ret));
