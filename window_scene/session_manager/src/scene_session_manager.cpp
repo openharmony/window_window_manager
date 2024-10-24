@@ -3662,6 +3662,7 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    ProcessWindowModeType();
     return true;
 }
 
@@ -5516,6 +5517,27 @@ void SceneSessionManager::ProcessWindowModeType()
     NotifyRSSWindowModeTypeUpdate();
 }
 
+static bool IsSmallFoldProduct()
+{
+    static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
+    if (foldScreenType.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
+        return false;
+    }
+    return foldScreenType[0] == '2';
+}
+
+bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSession)
+{
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "sessionProperty is nullptr");
+        return false;
+    }
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    return sessionProperty->GetDisplayId() != defaultScreenId;
+}
+
 WindowModeType SceneSessionManager::CheckWindowModeType()
 {
     bool inSplit = false;
@@ -7229,7 +7251,7 @@ bool SceneSessionManager::GetSessionRSVisible(const sptr<Session>& session,
         }
         if (session->GetWindowId() == visibilitySession->GetWindowId()) {
             if (isVisible) {
-                sessionRSVisible = true;   
+                sessionRSVisible = true;
             }
             break;
         }
