@@ -1108,8 +1108,17 @@ int SceneSessionManagerStub::HandleProcessModalExtensionPointDown(MessageParcel&
 
 int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
-    bool shouldHide = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool shouldHide;
+    if (!data.ReadBool(shouldHide)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read shouldHide failed");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = AddOrRemoveSecureSession(persistentId, shouldHide);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;

@@ -2023,11 +2023,15 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function |
 {
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
+    res = stub_->HandleAddOrRemoveSecureSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
     data.WriteInt32(12345);
+    res = stub_->HandleAddOrRemoveSecureSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
     data.WriteBool(true);
-
-    int res = stub_->HandleAddOrRemoveSecureSession(data, reply);
+    res = stub_->HandleAddOrRemoveSecureSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
