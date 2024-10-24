@@ -1283,7 +1283,7 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTes
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
     ASSERT_NE(nullptr, sceneSessionManager);
-    
+
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(sceneSessionManager->enterRecent_.load(), true);
 }
@@ -1382,14 +1382,14 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo01, Function | SmallTes
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
+ 
     int32_t windowId = sceneSession->GetPersistentId();
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(1, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo02
  * @tc.desc: SceneSesionManager get unreliable window info, toast window
@@ -1407,14 +1407,14 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo02, Function | SmallTes
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
+ 
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(1, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo03
  * @tc.desc: SceneSesionManager get unreliable window info, app sub window
@@ -1431,7 +1431,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
+ 
     SessionInfo info2;
     info2.windowType_ = 1001;
     sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
@@ -1442,14 +1442,14 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
     ASSERT_NE(nullptr, sceneSession2);
     sceneSession2->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-
+ 
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(1, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo04
  * @tc.desc: SceneSesionManager get unreliable window info, input method window
@@ -1467,14 +1467,14 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo04, Function | SmallTes
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
+ 
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(1, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo05
  * @tc.desc: SceneSesionManager get unreliable window info, not correct window type, not visible
@@ -1493,7 +1493,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({0, nullptr});
-
+ 
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
@@ -1503,7 +1503,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(0, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo06
  * @tc.desc: SceneSesionManager satisfy FillUnreliableWindowInfo branches coverage
@@ -1517,19 +1517,19 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
     sptr<SceneSession> sceneSession1 = ssm_->CreateSceneSession(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-
+ 
     SessionInfo info2;
     info2.bundleName_ = "SCBGestureNavBar";
     sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-
+ 
     SessionInfo info3;
     info3.bundleName_ = "SCBGestureTopBar";
     sptr<SceneSession> sceneSession3 = ssm_->CreateSceneSession(info3, nullptr);
     ASSERT_NE(nullptr, sceneSession3);
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-
+ 
     std::vector<sptr<UnreliableWindowInfo>> infos;
     ssm_->GetUnreliableWindowInfo(sceneSession1->GetPersistentId(), infos);
     ssm_->GetUnreliableWindowInfo(sceneSession2->GetPersistentId(), infos);
@@ -1632,7 +1632,7 @@ HWTEST_F(SceneSessionManagerTest, TestReportCorrectScreenFoldStatusChangeEvent, 
     result = ssm_->CheckAndReportScreenFoldStatus(screenFoldData2);
     ASSERT_EQ(result, WMError::WM_OK);
 }
-
+ 
 /**
  * @tc.name: TestReportIncompleteScreenFoldStatusChangeEvent
  * @tc.desc: Test whether block the incomplete screen fold status events
@@ -1645,7 +1645,7 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
     std::vector<std::string> screenFoldInfo {"-1", "3", "0", "67.0", "0"};
     WMError result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
-
+ 
     screenFoldInfo.clear();
     result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
