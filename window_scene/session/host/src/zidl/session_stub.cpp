@@ -1108,6 +1108,11 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
         TLOGE(WmsLogTag::DEFAULT, "read action error");
         return ERR_INVALID_DATA;
     }
+    if (actionValue > static_cast<uint32_t>(WSPropertyChangeAction::END) ||
+        actionValue < static_cast<uint32_t>(WSPropertyChangeAction::START)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid action");
+        return ERR_INVALID_DATA;
+    }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
