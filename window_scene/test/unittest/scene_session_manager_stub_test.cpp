@@ -2136,7 +2136,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowDisplayIds, Function | Smal
     MessageParcel reply;
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     std::vector<uint64_t> persistentIds = {1, 2};
-    data.ReadUInt64Vector(persistentIds);
+    data.WriteUInt64Vector(persistentIds);
 
     int res = stub_->HandleGetWindowDisplayIds(data, reply);
     EXPECT_EQ(res, ERR_NONE);
