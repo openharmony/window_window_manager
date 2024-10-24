@@ -85,9 +85,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 return ERR_INVALID_DATA;
             }
             if (windowMode < static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED) ||
-                windowMode > static_cast<uint32_t>(WindowMode::WINDOW_MODE_PIP) ||
-                (windowMode > static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) &&
-                windowMode < static_cast<uint32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY))) {
+                windowMode > static_cast<uint32_t>(WindowMode::WINDOW_MODE_PIP)) {
                 WLOGE("invalid windowMode: %{public}d", windowMode);
                 return ERR_INVALID_DATA;
             }
