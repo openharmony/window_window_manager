@@ -2417,8 +2417,10 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
         displayInfo->GetScreenId(), displayInfo->GetRotation());
+    IPCSkeleton::SetCallingIdentity(identity);
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
