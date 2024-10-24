@@ -285,6 +285,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WSError SetEnableDragBySystem(bool enableDrag) override;
 
 protected:
     WMError Connect();

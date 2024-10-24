@@ -3458,7 +3458,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+            GetImmersiveModeEnabledState() &&
             keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
@@ -4127,6 +4127,13 @@ void WindowSessionImpl::NotifySetUIContentComplete()
             mainWindow->SetUIContentComplete();
         }
     }
+}
+
+WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
+{
+    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
+    property_->SetDragEnabled(enableDrag);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -4722,6 +4722,38 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
     return WMError::WM_OK;
 }
 
+WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto task = [weakThis = wptr(this), enableDrag]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        if (!sessionProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
+    };
+    PostTask(task, "SetWindowEnableDragBySystem");
+    return WMError::WM_OK;
+}
+
+
 WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
