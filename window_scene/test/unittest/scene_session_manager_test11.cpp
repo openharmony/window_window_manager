@@ -158,6 +158,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainWindowStatesByPid03, Function | Small
     sceneSession->SetSessionState(sessionState);
     sceneSession->SetRSVisible(isVisible);
     sceneSession->SetForegroundInteractiveStatus(isForegroundInteractive);
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(isPcOrPadEnableActivation);
     sceneSession->SetCallingPid(callingPid);
     ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
     std::vector<MainWindowState> windowStates;
