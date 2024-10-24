@@ -1119,6 +1119,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
