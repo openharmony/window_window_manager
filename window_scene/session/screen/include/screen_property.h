@@ -108,6 +108,9 @@ public:
     DisplayOrientation GetDisplayOrientation() const;
     void CalcDefaultDisplayOrientation();
 
+    void SetPhysicalRotation(float rotation);
+    float GetPhysicalRotation() const;
+
     float GetXDpi() const;
     float GetYDpi() const;
 
@@ -148,6 +151,7 @@ private:
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
     float rotation_ { 0.0f };
+    float physicalRotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
 

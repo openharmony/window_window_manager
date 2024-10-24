@@ -582,6 +582,24 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     }
 }
 
+void ScreenSession::SetPhysicalRotation(int rotation, FoldStatus foldStatus)
+{
+    int32_t realRotation = static_cast<int32_t>(rotation);
+    std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+    int32_t offsetRotation = 0;
+    if (phyOffsets.size() == 1 || foldStatus == FoldStatus::FOLDED) {
+        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[0]));
+    }
+    if ((foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) &&
+        phyOffsets.size() == 2) { // 2 is arg number
+        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[1]));
+    }
+    realRotation = (rotation + offsetRotation) % 360; // 360 is 360 degree
+    property_.SetPhysicalRotation(static_cast<float>(realRotation));
+    WLOGFI("physicalrotation :%{public}f , rotation: %{public}d , phyOffset: %{public}d",
+        property_.GetPhysicalRotation(), rotation, offsetRotation);
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
@@ -822,31 +840,29 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    // vertical: phone(Plugin screen); horizontal: pad & external screen
-    bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
-    if (foldDisplayMode != FoldDisplayMode::UNKNOWN
-        && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
-        WLOGD("foldDisplay is verticalScreen when width is greater than height");
-        isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
-    }
+    DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {
         case Rotation::ROTATION_0: {
-            return isVerticalScreen ? DisplayOrientation::PORTRAIT : DisplayOrientation::LANDSCAPE;
+            displayRotation = DisplayOrientation::PORTRAIT;
+            break;
         }
         case Rotation::ROTATION_90: {
-            return isVerticalScreen ? DisplayOrientation::LANDSCAPE : DisplayOrientation::PORTRAIT;
+            displayRotation = DisplayOrientation::LANDSCAPE;
+            break;
         }
         case Rotation::ROTATION_180: {
-            return isVerticalScreen ? DisplayOrientation::PORTRAIT_INVERTED : DisplayOrientation::LANDSCAPE_INVERTED;
+            displayRotation = DisplayOrientation::PORTRAIT_INVERTED;
+            break;
         }
         case Rotation::ROTATION_270: {
-            return isVerticalScreen ? DisplayOrientation::LANDSCAPE_INVERTED : DisplayOrientation::PORTRAIT_INVERTED;
+            displayRotation = DisplayOrientation::LANDSCAPE_INVERTED;
+            break;
         }
         default: {
             WLOGE("unknown rotation %{public}u", rotation);
-            return DisplayOrientation::UNKNOWN;
         }
     }
+    return displayRotation;
 }
 
 ScreenSourceMode ScreenSession::GetSourceMode() const
