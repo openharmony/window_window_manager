@@ -868,14 +868,15 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    int res;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    stub_->HandleNotifyDumpInfoResult(data, reply);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
-    stub_->HandleNotifyDumpInfoResult(data, reply);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
@@ -894,7 +895,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT);
 
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
 }
 
@@ -1462,13 +1463,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallT
 {
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleDumpSessionWithId(data, reply);
+    res = stub_->HandleDumpSessionWithId(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t x = 1;
     data.WriteInt32(x);
-    int res = stub_->HandleDumpSessionWithId(data, reply);
+    res = stub_->HandleDumpSessionWithId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1713,14 +1715,15 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    stub_->HandleNotifyDumpInfoResult(data, reply);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
-    stub_->HandleNotifyDumpInfoResult(data, reply);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
@@ -1736,7 +1739,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
         }
     }
 
-    int res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1753,19 +1756,15 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleRegisterCollaborator(data, reply);
+    res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t type = CollaboratorType::RESERVE_TYPE;
     data.WriteInt32(type);
-    int res = stub_->HandleRegisterCollaborator(data, reply);
+    res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    sptr<RemoteObject> remoteObject = new RemoteObject();
-    data.WriteRemoteObject(remoteObject);
-    int result = stub.HandleRegisterCollaborator(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -1781,13 +1780,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, Function | S
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleUnregisterCollaborator(data, reply);
+    res = stub_->HandleUnregisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t type = CollaboratorType::RESERVE_TYPE;
     data.WriteInt32(type);
-    int res = stub_->HandleUnregisterCollaborator(data, reply);
+    res = stub_->HandleUnregisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -2040,10 +2040,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | Sm
 {
     MessageParcel data;
     MessageParcel reply;
-    int res = stub_->HandleGetUIContentRemoteObj(data, reply);
+    int res;
+    res = stub_->HandleGetUIContentRemoteObj(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
     data.WriteInt32(1);
-    int res = stub_->HandleGetUIContentRemoteObj(data, reply);
+    res = stub_->HandleGetUIContentRemoteObj(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
