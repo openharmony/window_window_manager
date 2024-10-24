@@ -110,6 +110,7 @@ public:
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;
     void SetRotation(Rotation rotation);
+    void SetRotationOnly(Rotation rotation);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
