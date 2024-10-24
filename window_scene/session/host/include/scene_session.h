@@ -32,6 +32,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 
 class SceneSession;
+
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -677,14 +678,14 @@ private:
     int32_t customDecorHeight_ = 0;
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    std::string clientIdentityToken_ = { "" };
-    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
+    std::string clientIdentityToken_ = { "" };
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
