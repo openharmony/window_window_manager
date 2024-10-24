@@ -722,7 +722,7 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, Messa
 {
     WLOGFI("run HandleGetSessionSnapshot!");
     std::u16string deviceIdData;
-    if(!ReadString16(deviceIdData)) {
+    if (!ReadString16(deviceIdData)) {
         WLOGE("read deviceId fail");
         return ERR_INVALID_DATA;
     }
