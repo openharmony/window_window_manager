@@ -237,7 +237,7 @@ void ScreenProperty::SetScreenRotation(Rotation rotation)
     screenRotation_ = rotation;
 }
 
-void ScreenProperty::SetScreenRotationOnly(Rotation rotation)
+void ScreenProperty::SetRotationAndScreenRotationOnly(Rotation rotation)
 {
     bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
     if (!enableRotation) {

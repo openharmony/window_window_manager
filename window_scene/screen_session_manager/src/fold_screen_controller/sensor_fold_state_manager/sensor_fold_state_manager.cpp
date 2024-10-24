@@ -54,7 +54,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     }
     WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_SWITCH);
+    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
     
