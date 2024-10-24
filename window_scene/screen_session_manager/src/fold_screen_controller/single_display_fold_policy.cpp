@@ -241,7 +241,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_SWITCH);
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         ReportFoldStatusChangeBegin(static_cast<int32_t>(SCREEN_ID_FULL),
@@ -294,7 +293,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, FULL_TP.c_str());
 #endif
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_SWITCH);
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         auto taskScreenOnFull = [=] {
@@ -347,7 +345,7 @@ void SingleDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(property, reason);
-    screenSession->SetRotation(Rotation::ROTATION_0);
+    screenSession->SetRotationOnly(Rotation::ROTATION_0);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);

@@ -95,6 +95,7 @@ public:
     float GetVirtualPixelRatio() const;
 
     void SetScreenRotation(Rotation rotation);
+    void SetScreenRotationOnly(Rotation rotation);
     Rotation GetScreenRotation() const;
     void UpdateScreenRotation(Rotation rotation);
 

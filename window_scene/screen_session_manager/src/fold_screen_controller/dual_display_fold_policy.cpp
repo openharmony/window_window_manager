@@ -320,7 +320,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, tp.c_str());
 #endif
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_SUB);
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_SWITCH);
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
@@ -354,7 +353,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
 
 void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
 {
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity(PowerMgr::UserActivityType::USER_ACTIVITY_TYPE_SWITCH);
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
 #ifdef TP_FEATURE_ENABLE
