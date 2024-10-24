@@ -30,7 +30,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class WindowSessionImplTest2 : public testing::Test {
+class WindowSessionImplTwoTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -42,19 +42,19 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
-void WindowSessionImplTest2::SetUpTestCase()
+void WindowSessionImplTwoTest::SetUpTestCase()
 {
 }
 
-void WindowSessionImplTest2::TearDownTestCase()
+void WindowSessionImplTwoTest::TearDownTestCase()
 {
 }
 
-void WindowSessionImplTest2::SetUp()
+void WindowSessionImplTwoTest::SetUp()
 {
 }
 
-void WindowSessionImplTest2::TearDown()
+void WindowSessionImplTwoTest::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
     if (window_ != nullptr) {
