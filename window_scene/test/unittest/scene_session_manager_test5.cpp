@@ -781,7 +781,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission, Function | Sma
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetWinodwFlags(123);
+    property->SetWindowFlags(123);
     ssm_->CheckModalSubWindowPermission(property);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ssm_->CheckModalSubWindowPermission(property);
@@ -801,7 +801,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | Sm
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    property->SetWinodwFlags(123);
+    property->SetWindowFlags(123);
     ssm_->CheckSessionPropertyOnRecovery(property, false);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetParentPersistentId(111);
