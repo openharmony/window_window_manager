@@ -14,6 +14,7 @@
  */
 
 #include <parameters.h>
+#include <hisysevent.h>
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
@@ -251,9 +252,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
     }
 
     if (isTent) {
+        ReportTentStatusChange(ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
         FoldStatus currentState = GetCurrentState();
         foldScreenPolicy->ChangeOnTentMode(currentState);
     } else {
+        ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
     }
 }
@@ -261,11 +264,13 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
 bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int hall)
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
+        ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL);
         WLOGI("Exit tent mode due to hall sensor report folded");
         return true;
     }
 
     if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
+        ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE);
         WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
         return true;
     }
@@ -280,6 +285,20 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
         FoldStatus nextState = GetNextFoldState(angle, hall);
         HandleSensorChange(nextState, angle, foldScreenPolicy);
         SetTentMode(false);
+    }
+}
+
+void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTentModeStatus tentStatus)
+{
+    int32_t status = static_cast<int32_t>(tentStatus);
+    TLOGI(WmsLogTag::DMS, "report tentStatus: %{public}d", status);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "TENT_MODE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "TENT_STATUS", status);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
