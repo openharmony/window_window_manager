@@ -738,9 +738,15 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, 
 {
     MessageParcel data;
     MessageParcel reply;
+    int res;
+
+    res = sceneSessionManagerLiteStub_->
+    SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
     int32_t persistentId = 1;
     data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }

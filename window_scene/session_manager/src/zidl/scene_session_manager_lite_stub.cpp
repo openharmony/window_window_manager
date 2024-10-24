@@ -649,7 +649,12 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WMError errCode = TerminateSessionByPersistentId(persistentId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
