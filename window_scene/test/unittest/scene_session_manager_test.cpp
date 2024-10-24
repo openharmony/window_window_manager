@@ -1278,7 +1278,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFilterTwoWindowCovered, Function 
  * @tc.desc: Test whether the enterRecent_ is set correctly;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
@@ -1311,7 +1311,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallT
  * @tc.desc: Test whether the enterRecent_ is set correctly;
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask01, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
     sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
@@ -1371,50 +1371,6 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
 }
 
 /**
- * @tc.name: GetAllMainWindowInfos001
- * @tc.desc: SceneSessionManager get all main window infos.
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test1";
-    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
-    info.persistentId_ = 1;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
-    abilityInfo->applicationInfo = applicationInfo;
-    info.abilityInfo = abilityInfo;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    std::vector<MainWindowInfo> infos;
-    WMError result = ssm_->GetAllMainWindowInfos(infos);
-    EXPECT_EQ(result, WMError::WM_OK);
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-}
-
-/**
- * @tc.name: GetAllMainWindowInfos002
- * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos002, Function | SmallTest | Level3)
-{
-    std::vector<MainWindowInfo> infos;
-    MainWindowInfo info;
-    info.pid_ = 1000;
-    info.bundleName_ = "test";
-    infos.push_back(info);
-    WMError result = ssm_->GetAllMainWindowInfos(infos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
-}
-
-/**
  * @tc.name: GetUnreliableWindowInfo01
  * @tc.desc: SceneSesionManager get unreliable window info, windowId correct
  * @tc.type: FUNC
@@ -1449,7 +1405,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo02, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetVisible(true);
+    sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     int32_t windowId = 0;
@@ -1484,7 +1440,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
     property2->SetParentId(sceneSession->GetPersistentId());
     sptr<SceneSession> sceneSession2 = ssm_->CreateSceneSession(info2, property2);
     ASSERT_NE(nullptr, sceneSession2);
-    sceneSession2->SetVisible(true);
+    sceneSession2->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
     int32_t windowId = 0;
@@ -1509,7 +1465,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo04, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetVisible(true);
+    sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     int32_t windowId = 0;
@@ -1534,7 +1490,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetVisible(true);
+    sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ssm_->sceneSessionMap_.insert({0, nullptr});
 
@@ -1542,7 +1498,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
-    sceneSession->SetVisible(false);
+    sceneSession->SetRSVisible(false);
     result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(0, infos.size());
@@ -1591,7 +1547,7 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
     int32_t topNum = 1024;
     std::vector<MainWindowInfo> topNInfos;
     auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 
     topNum = 0;
     ssm_->GetMainWindowInfos(topNum, topNInfos);
@@ -1603,75 +1559,47 @@ HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: ClearMainSessions001
- * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.name: GetAllMainWindowInfos001
+ * @tc.desc: SceneSessionManager get all main window infos.
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, ClearMainSessions001, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test1";
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    info.persistentId_ = 1;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    abilityInfo->applicationInfo = applicationInfo;
+    info.abilityInfo = abilityInfo;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    std::vector<int32_t> clearFailedIds;
+    if (sceneSession == nullptr) {
+        return;
+    }
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId()};
-    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
+    std::vector<MainWindowInfo> infos;
+    WMError result = ssm_->GetAllMainWindowInfos(infos);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(clearFailedIds.size(), 0);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 
 /**
- * @tc.name: ClearMainSessions002
- * @tc.desc: SceneSessionManager clear main session by persistentid.
+ * @tc.name: GetAllMainWindowInfos002
+ * @tc.desc: SceneSessionManager get all main window infos, input params are not empty.
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest, ClearMainSessions002, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos002, Function | SmallTest | Level3)
 {
-    SessionInfo info1;
-    info1.abilityName_ = "test1";
-    info1.bundleName_ = "test1";
-    info1.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
-    ASSERT_NE(nullptr, sceneSession1);
-    SessionInfo info2;
-    info2.abilityName_ = "test1";
-    info2.bundleName_ = "test1";
-    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
-    ASSERT_NE(nullptr, sceneSession2);
-
-    std::vector<int32_t> clearFailedIds;
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-    std::vector<int32_t> persistentIds = {sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
-    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
-    EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(clearFailedIds.size(), 1);
-}
-
-/**
- * @tc.name: ClearMainSessions003
- * @tc.desc: SceneSessionManager clear main session by persistentid.
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, ClearMainSessions003, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test1";
-    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    int32_t invalidPersistentId = -1;
-    std::vector<int32_t> clearFailedIds;
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    std::vector<int32_t> persistentIds = {sceneSession->GetPersistentId(), invalidPersistentId};
-    auto result = ssm_->ClearMainSessions(persistentIds, clearFailedIds);
-    EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(clearFailedIds.size(), 1);
+    std::vector<MainWindowInfo> infos;
+    MainWindowInfo info;
+    info.pid_ = 1000;
+    info.bundleName_ = "test";
+    infos.push_back(info);
+    WMError result = ssm_->GetAllMainWindowInfos(infos);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1731,6 +1659,17 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
     screenFoldInfo = {"3", "1", "18", "147.3", "2"};
     result = ssm_->ReportScreenFoldStatusChange(screenFoldInfo);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: release screen lock of foreground session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+{
+    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 }
 } // namespace Rosen
