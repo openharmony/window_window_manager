@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MOCK_ROOT_SCENE_CONTEXT_H
+#define MOCK_ROOT_SCENE_CONTEXT_H
 
 #include <gmock/gmock.h>
 #include "session_manager/include/scene_session_manager.h"
@@ -25,23 +27,23 @@ public:
     ~RootSceneContextMocker() {};
 
     MOCK_CONST_METHOD0(GetResourceManager, std::shared_ptr<Global::Resource::ResourceManager>());
-    MOCK_CONST_METHOD0(CreateBundleName, std::string());
+    MOCK_CONST_METHOD0(GetBundleName, std::string());
     MOCK_METHOD1(CreateBundleContext, std::shared_ptr<Context>(const std::string& bundleName));
     MOCK_CONST_METHOD0(GetApplicationInfo, std::shared_ptr<AppExecFwk::ApplicationInfo>());
-    MOCK_CONST_METHOD0(CreateBundleCodePath, std::string());
-    MOCK_CONST_METHOD0(CreateHapModuleInfo, std::shared_ptr<AppExecFwk::HapModuleInfo>());
-    MOCK_METHOD0(CreateBundleCodeDir, std::string());
-    MOCK_METHOD0(CreateCacheDir, std::string());
-    MOCK_METHOD0(CreateTempDir, std::string());
-    MOCK_METHOD0(CreateFilesDir, std::string());
-    MOCK_METHOD0(CreateResourceDir, std::string());
-    MOCK_METHOD0(CreateDatabaseDir, std::string());
-    MOCK_METHOD0(CreatePreferencesDir, std::string());
+    MOCK_CONST_METHOD0(GetBundleCodePath, std::string());
+    MOCK_CONST_METHOD0(GetHapModuleInfo, std::shared_ptr<AppExecFwk::HapModuleInfo>());
+    MOCK_METHOD0(GetBundleCodeDir, std::string());
+    MOCK_METHOD0(GetCacheDir, std::string());
+    MOCK_METHOD0(GetTempDir, std::string());
+    MOCK_METHOD0(GetFilesDir, std::string());
+    MOCK_METHOD0(GetResourceDir, std::string());
+    MOCK_METHOD0(GetDatabaseDir, std::string());
+    MOCK_METHOD0(GetPreferencesDir, std::string());
     MOCK_METHOD0(IsUpdatingConfigurations, bool());
-    MOCK_METHOD0(PringDrawnCompleted, bool());
-    MOCK_METHOD3(GetSystemDatabaseDir, int32_t(const std:string& groupId, bool checkExist,
+    MOCK_METHOD0(PrintDrawnCompleted, bool());
+    MOCK_METHOD3(GetSystemDatabaseDir, int32_t(const std::string& groupId, bool checkExist,
         std::string& databaseDir));
-    MOCK_METHOD3(GetSystemPreferencesDir, int32_t(const std:string& groupId, bool checkExist,
+    MOCK_METHOD3(GetSystemPreferencesDir, int32_t(const std::string& groupId, bool checkExist,
         std::string& preferencesDir));
     MOCK_METHOD1(GetGroupDir, std::string(std::string groupId));
     MOCK_METHOD0(GetDistributedFilesDir, std::string());
@@ -50,10 +52,12 @@ public:
     MOCK_METHOD1(SetToken, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(SwitchArea, void(int mode));
     MOCK_METHOD1(CreateModuleContext, std::shared_ptr<Context>(const std::string& moduleName));
+    MOCK_METHOD2(CreateModuleContext, std::shared_ptr<Context>(const std::string& bundleName,
+        const std::string& moduleName));
     MOCK_METHOD2(CreateModuleResourceManager, std::shared_ptr<Global::Resource::ResourceManager>
         (const std::string& bundleName, const std::string& moduleName));
     MOCK_METHOD3(CreateSystemHspModuleResourceManager, int32_t(const std::string& bundleName,
-        const std::string& moduleName, std::shared_ptr<Global::Resource::ResourceManager>));
+        const std::string& moduleName, std::shared_ptr<Global::Resource::ResourceManager>& ResourceManager));
     MOCK_METHOD0(GetArea, int());
     MOCK_CONST_METHOD0(GetConfiguration, std::shared_ptr<AppExecFwk::Configuration>());
     MOCK_CONST_METHOD0(GetBaseDir, std::string());
@@ -61,3 +65,4 @@ public:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
+#endif

@@ -48,9 +48,6 @@ public:
 
     void TearDown() override;
 
-    static bool gestureNavigationEnabled_;
-
-    static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
     std::shared_ptr<AbilityRuntime::RootSceneContextMocker> mockRootSceneContext_;
     std::string path;
@@ -62,25 +59,6 @@ private:
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest12::ssm_ = nullptr;
-bool SceneSessionManagerTest12::gestureNavigationEnabled_ = true;
-
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest12::callbackFunc_ = [](bool enable,
-    const std::string& bundleName, GestureBackType type) {
-    gestureNavigationEnabled_ = enable;
-};
-
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
-
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
 
 void SceneSessionManagerTest12::SetUpTestCase()
 {
@@ -94,35 +72,35 @@ void SceneSessionManagerTest12::TearDownTestCase()
 
 void SceneSessionManagerTest12::SetUp()
 {
-    ssm_->sceneSessionMap_.clear();
     mockRootSceneContext_ = std::make_shared<AbilityRuntime::RootSceneContextMocker>();
-    std::string path = "testPath";
-    uint32_t bgColor = 0;
+    path = "testPath";
+    bgColor = 0;
     abilityInfo.bundleName = "testBundle";
     abilityInfo.moduleName = "testmodule";
-    abilityInfo.resourcePath = "test/resource/path";
+    abilityInfo.resourcePath = "/test/resource/path";
     abilityInfo.startWindowBackgroundId = 1;
     abilityInfo.startWindowIconId = 1;
 }
 
 void SceneSessionManagerTest12::TearDown()
 {
-    ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
 }
 
-std::shared_ptr<Global::Resource::ResourceManagerMocker> mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
+std::shared_ptr<Global::Resource::ResourceManagerMocker>
+    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
 
-Class SceneSessionManagerMocker : public SceneSessionManager {
+class SceneSessionManagerMocker : public SceneSessionManager {
 public:
-    SceneSessionManagerMocker();
-    ~SceneSessionManagerMocker();
+    SceneSessionManagerMocker() {};
+    ~SceneSessionManagerMocker() {};
 
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& ability) {
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo)
+    {
         return mockResourceManager_;
-    }
+    };
 };
-std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = make_shared<SceneSessionManagerMocker>();
+std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
 
 namespace {
 /**
@@ -164,12 +142,12 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager03, Function | SmallTest |
     ssm_->rootSceneContextWeak_ = std::weak_ptr<AbilityRuntime::RootSceneContextMocker>(mockRootSceneContext_);
     EXPECT_CALL(*mockRootSceneContext_, GetResourceManager()).WillOnce(Return(mockResourceManager_));
     auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
  * @tc.name: GetStartupPageFromResource01
- * @tc.desc: GetStartupPageFromResource
+ * @tc.desc: GetStartupPageFromResource ResourceManager nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | SmallTest | Level3)
@@ -178,12 +156,13 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | Sma
     mockResourceManager_ = nullptr;
     EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), nullptr);
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
+    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
     EXPECT_EQ(result, false);
 }
 
 /**
  * @tc.name: GetStartupPageFromResource02
- * @tc.desc: GetStartupPageFromResource
+ * @tc.desc: GetStartupPageFromResource ResourceManager GetColorById ERROR
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource02, Function | SmallTest | Level3)
@@ -197,7 +176,7 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource02, Function | Sma
 
 /**
  * @tc.name: GetStartupPageFromResource03
- * @tc.desc: GetStartupPageFromResource
+ * @tc.desc: GetStartupPageFromResource ResourceManager GetMediaById ERROR
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | SmallTest | Level3)
@@ -205,7 +184,8 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | Sma
     ASSERT_NE(mockSceneSessionManager_, nullptr);
     ASSERT_NE(mockResourceManager_, nullptr);
     EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), mockResourceManager_);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId, bgColor)).WillOnce(return(Global::Resource::RState::SUCCESS));
+    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
+        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
@@ -219,8 +199,10 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | Sma
     ASSERT_NE(mockSceneSessionManager_, nullptr);
     ASSERT_NE(mockResourceManager_, nullptr);
     EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), mockResourceManager_);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId, bgColor)).WillOnce(return(Global::Resource::RState::SUCCESS));
-    EXPECT_CALL(*mockResourceManager_, GetMediaById(abilityInfo.startWindowIconId, path, 0)).WillOnce(return(Global::Resource::RState::SUCCESS));
+    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
+        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
+    EXPECT_CALL(*mockResourceManager_, GetMediaById(abilityInfo.startWindowIconId, path,
+        0)).WillOnce(Return(Global::Resource::RState::SUCCESS));
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
