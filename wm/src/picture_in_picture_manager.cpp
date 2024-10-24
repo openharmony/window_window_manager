@@ -71,23 +71,23 @@ bool PictureInPictureManager::ShouldAbortPipStart()
 
 void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "PutPipControllerInfo called, windowId %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "windowId %{public}u", windowId);
     windowToControllerMap_.insert(std::make_pair(windowId, pipController));
 }
 
 void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called, windowId %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "windowId %{public}u", windowId);
     windowToControllerMap_.erase(windowId);
 }
 
 sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
 {
     if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "GetPipControllerInfo error, %{public}d not registered!", windowId);
+        TLOGE(WmsLogTag::WMS_PIP, "error, windowId: %{public}d not registered!", windowId);
         return nullptr;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "windowId: %{public}d", windowId);
     return windowToControllerMap_[windowId];
 }
 
@@ -102,19 +102,19 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
         return false;
     }
     bool res = pipController.GetRefPtr() == activeController_.GetRefPtr();
-    TLOGD(WmsLogTag::WMS_PIP, "IsActiveController %{public}u", res);
+    TLOGD(WmsLogTag::WMS_PIP, "res: %{public}u", res);
     return res;
 }
 
 void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called");
+    TLOGD(WmsLogTag::WMS_PIP, "in");
     activeController_ = pipController;
 }
 
 void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "called");
+    TLOGD(WmsLogTag::WMS_PIP, "in");
     if (HasActiveController() && pipController.GetRefPtr() == activeController_.GetRefPtr()) {
         activeController_ = nullptr;
     }
@@ -123,7 +123,7 @@ void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureContro
 void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
     wptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "AttachAutoStartController, %{public}u", handleId);
+    TLOGD(WmsLogTag::WMS_PIP, "handleId: %{public}u", handleId);
     if (pipController == nullptr) {
         return;
     }
@@ -134,7 +134,7 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
 void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     wptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "Detach active pipController, %{public}u", handleId);
+    TLOGD(WmsLogTag::WMS_PIP, "handleId: %{public}u", handleId);
     autoStartControllerMap_.erase(handleId);
     if (autoStartController_ == nullptr) {
         return;
@@ -149,7 +149,7 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
 
 bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "windowId: %{public}u", windowId);
     if (!HasActiveController()) {
         return false;
     }
@@ -166,7 +166,7 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
 
 void PictureInPictureManager::DoPreRestore()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (!HasActiveController()) {
         return;
     }
@@ -175,7 +175,7 @@ void PictureInPictureManager::DoPreRestore()
 
 void PictureInPictureManager::DoRestore()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (!HasActiveController()) {
         return;
     }
@@ -193,7 +193,7 @@ void PictureInPictureManager::DoPrepareSource()
 
 void PictureInPictureManager::DoLocateSource()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (!HasActiveController()) {
         return;
     }
@@ -202,7 +202,7 @@ void PictureInPictureManager::DoLocateSource()
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (!HasActiveController()) {
         return;
     }
@@ -217,13 +217,13 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 
 void PictureInPictureManager::DoActionClose()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     DoClose(true, false);
 }
 
 void PictureInPictureManager::DoDestroy()
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     if (!HasActiveController()) {
         return;
     }
@@ -232,7 +232,7 @@ void PictureInPictureManager::DoDestroy()
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "in");
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
@@ -257,7 +257,7 @@ void PictureInPictureManager::AutoStartPipWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
     if (autoStartController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
+        TLOGE(WmsLogTag::WMS_PIP, "autoStartController is null");
         return;
     }
     if (autoStartController_->GetPiPNavigationId().empty() || autoStartController_->IsTypeNodeEnabled()) {
@@ -278,7 +278,7 @@ void PictureInPictureManager::AutoStartPipWindow()
             int handleId = navController->GetTopHandle();
             if (autoStartControllerMap_.empty() ||
                 autoStartControllerMap_.find(handleId) == autoStartControllerMap_.end()) {
-                TLOGE(WmsLogTag::WMS_PIP, "GetNAvController info error, %{public}d not registered", handleId);
+                TLOGE(WmsLogTag::WMS_PIP, "GetNavController info error, %{public}d not registered", handleId);
                 return;
             }
             auto pipController = autoStartControllerMap_[handleId];
