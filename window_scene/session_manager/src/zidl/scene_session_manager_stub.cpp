@@ -338,7 +338,11 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run");
-    int32_t persistentId = data.ReadInt32();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     bool isFocused = data.ReadBool();
     WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
@@ -878,7 +882,11 @@ int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParc
 
 int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
+    auto persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = RaiseWindowToTop(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -896,7 +904,11 @@ int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(Message
 
 int SceneSessionManagerStub::HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t mainWinId = data.ReadUint32();
+    uint32_t mainWinId = 0;
+    if (!data.ReadUint32(mainWinId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read mainWinId failed");
+        return ERR_INVALID_DATA;
+    }
     uint32_t topWinId;
     WMError ret = GetTopWindowId(mainWinId, topWinId);
     reply.WriteUint32(topWinId);
@@ -933,8 +945,12 @@ int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(Message
 
 int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t sourcePersistentId = data.ReadInt32();
-    int32_t targetPersistentId = data.ReadInt32();
+    int32_t sourcePersistentId = 0;
+    int32_t targetPersistentId = 0;
+    if (!data.ReadInt32(sourcePersistentId) ||!data.ReadInt32(targetPersistentId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read sourcePersistentId or targetPersistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
