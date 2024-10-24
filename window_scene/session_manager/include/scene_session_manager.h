@@ -485,7 +485,7 @@ public:
     /*
      * Window displayId
      */
-    WMError GetWindowDisplayIds(std::vector<uint64_t>& persistentIds,
+    WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
 protected:
