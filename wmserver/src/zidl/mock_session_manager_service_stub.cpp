@@ -91,7 +91,11 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
 int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNames(
     MessageParcel& data, MessageParcel& reply)
 {
-    int32_t userId = data.ReadInt32();
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        WLOGE("Failed to readInt32 userId");
+        return ERR_INVALID_DATA;
+    }
     std::vector<std::string> bundleNameList;
     if (!data.ReadStringVector(&bundleNameList)) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
@@ -104,7 +108,11 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNam
 
 int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t mapSize = data.ReadInt32();
+    int32_t mapSize = 0;
+    if (!data.ReadInt32(mapSize)) {
+        WLOGE("Fail to read mapSize");
+        return ERR_INVALID_DATA;
+    }
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
     if (mapSize > MAX_USER_SIZE) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Too many users!");
