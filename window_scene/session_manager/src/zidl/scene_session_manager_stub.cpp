@@ -938,7 +938,7 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
     int32_t targetPersistentId = 0;
     if (!data.ReadInt32(sourcePersistentId) ||!data.ReadInt32(targetPersistentId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read sourcePersistentId or targetPersistentId failed");
-        return ERR_INVALID_DATA;    
+        return ERR_INVALID_DATA;
     }
     WSError ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
