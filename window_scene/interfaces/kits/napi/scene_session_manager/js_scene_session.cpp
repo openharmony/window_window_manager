@@ -3121,6 +3121,7 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfo(info);
         }
     }
+    sceneSession->SetSessionInfoProcessOptions(info.processOptions);
     return sceneSession;
 }
 
