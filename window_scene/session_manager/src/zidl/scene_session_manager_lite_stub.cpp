@@ -295,7 +295,11 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
     SessionInfoBean info;
-    std::string continueSessionId = data.ReadString();
+    std::string continueSessionId;
+    if (!data.ReadString16(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read continueSessionId fail");
+        return ERR_INVALID_DATA;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
