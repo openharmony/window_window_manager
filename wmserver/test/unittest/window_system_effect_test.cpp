@@ -132,6 +132,14 @@ HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, Function | Sm
     WindowSystemEffect::SetWindowRoot(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, WindowSystemEffect::SetCornerRadius(node_));
 }
+/**
+ * @tc.name: SetWindowEffectAndCornerRadius01
+ * @tc.desc: set window corner radius with different parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, Function | SmallTest | Level2)
+{
+}
 }
 }
 }
