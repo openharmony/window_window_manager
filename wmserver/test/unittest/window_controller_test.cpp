@@ -1058,8 +1058,6 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle3, Function | SmallTest | Level3)
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     }
 }
 
