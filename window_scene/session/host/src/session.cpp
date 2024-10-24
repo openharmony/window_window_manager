@@ -1153,7 +1153,6 @@ void Session::HandleDialogBackground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Background dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_BACKGROUND);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
@@ -1178,7 +1177,6 @@ void Session::HandleDialogForeground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Foreground dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_ACTIVE);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
