@@ -1499,6 +1499,8 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
 
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->SetSessionProperty(property);
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    ASSERT_NE(nullptr, sceneSession->specificCallback_);
     sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
         WSRect rect = {1, 1, 1, 1};
         return rect;

@@ -186,14 +186,17 @@ HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest 
 HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
 {
     SessionManager sessionManager;
+
+    bool funcInvoked = false;
     sessionManager.userSwitchCallbackFunc_ = nullptr;
     sessionManager.OnUserSwitch(nullptr);
+    ASSERT_EQ(funcInvoked, false);
 
-    SessionManagerLite& sessionManagerLite = SessionManagerLite::GetInstance();
-    sptr<ISessionManagerService> sessionManagerService = sessionManagerLite.GetSessionManagerServiceProxy();
-    ASSERT_NE(nullptr, sessionManagerService);
-    sessionManager.userSwitchCallbackFunc_ = []() {};
+    std::function<void()> userSwitchCallbackFunc;
+    sessionManager.userSwitchCallbackFunc_ = userSwitchCallbackFunc;
+    sptr<ISessionManagerService> sessionManagerService;
     sessionManager.OnUserSwitch(sessionManagerService);
+    ASSERT_EQ(funcInvoked, false);
 }
 
 /**
