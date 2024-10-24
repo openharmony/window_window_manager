@@ -443,7 +443,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Leve
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
-    ASSERT_EQ(FocusChangeInfo, nullptr);
+    ASSERT_EQ(focusChangeInfo, nullptr);
     focusChangeInfo = new (std::nothrow) FocusChangeInfo();
     lite.pImpl_->focusChangedListeners_.push_back(nullptr);
     sptr<TestFocusChangedListener> testFocusChangedListener = new (std::nothrow) TestFocusChangedListener();
