@@ -940,12 +940,12 @@ int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, Message
 int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "In!");
-    auto pid = 0;
+    int32_t pid;
     if (!data.ReadInt32(pid)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read pid failed");
         return ERR_INVALID_DATA;
     }
-    auto uid = 0 ;
+    int32_t uid;
     if (!data.ReadInt32(uid)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read uid failed");
         return ERR_INVALID_DATA;
