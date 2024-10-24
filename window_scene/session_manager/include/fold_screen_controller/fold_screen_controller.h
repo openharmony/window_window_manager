@@ -46,6 +46,8 @@ public:
     void LockDisplayStatus(bool locked);
     void SetOnBootAnimation(bool onBootAnimation);
     void UpdateForPhyScreenPropertyChange();
+    void ExitCoordination();
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     /*
      *    Avoid fold to expand process queues public interface
      */

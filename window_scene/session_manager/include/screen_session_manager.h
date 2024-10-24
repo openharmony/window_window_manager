@@ -215,6 +215,9 @@ public:
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
+    void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
+    void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
+    void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
@@ -315,7 +318,6 @@ private:
     void SendCastEvent(const bool &isPlugIn);
     void PhyMirrorConnectWakeupScreen();
     void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
-
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
@@ -335,14 +337,12 @@ private:
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
-    void ShowFoldStatusChangedInfo(int errCode, std::string& dumpInfo);
-    void SetMirrorScreenIds(std::vector<ScreenId>& mirrorScreenIds);
-    int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
-        PowerStateChangeReason reason);
     bool IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType);
     void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
     void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
+    int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -479,6 +479,7 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void UnRegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
+    void ExitCoordination(const std::string& reason);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
