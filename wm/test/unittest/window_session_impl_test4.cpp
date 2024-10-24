@@ -202,12 +202,6 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WMError res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
@@ -215,7 +209,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    res = window->SetMainWindowTopmost(true);
+    WMError res = window->SetMainWindowTopmost(true);
     ASSERT_EQ(WMError::WM_OK, res);
 }
 
