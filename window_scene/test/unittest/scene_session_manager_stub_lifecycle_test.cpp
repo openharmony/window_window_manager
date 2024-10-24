@@ -193,14 +193,15 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | Sm
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleClearSession(data, reply);
+    res = stub_->HandleClearSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t persistentId = 65535;
     data.WriteInt32(persistentId);
 
-    int res = stub_->HandleClearSession(data, reply);
+    res = stub_->HandleClearSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -235,12 +236,13 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleLockSession(data, reply);
+    res = stub_->HandleLockSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
     int32_t sessionId = 65535;
     data.WriteInt32(sessionId);
-    int res = stub_->HandleLockSession(data, reply);
+    res = stub_->HandleLockSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -257,12 +259,13 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | S
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleUnlockSession(data, reply);
+    res = stub_->HandleUnlockSession(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
     int32_t sessionId = 65535;
     data.WriteInt32(sessionId);
-    int res = stub_->HandleUnlockSession(data, reply);
+    res = stub_->HandleUnlockSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -279,15 +282,16 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, F
 
     MessageParcel data;
     MessageParcel reply;
+    int res;
 
-    int res = stub_->HandleMoveSessionsToForeground(data, reply);
+    res = stub_->HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
     data.WriteInt32Vector(sessionIds);
     int32_t topSessionId = 1;
     data.WriteInt32(topSessionId);
-    int res = stub_->HandleMoveSessionsToForeground(data, reply);
+    res = stub_->HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
