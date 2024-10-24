@@ -1126,13 +1126,22 @@ int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    uint32_t extWindowFlags = data.ReadUint32();
+    uint32_t extWindowFlags;
+    if (!data.ReadUint32(extWindowFlags)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read extWindowFlags failed");
+        return ERR_INVALID_DATA;
+    }
     uint32_t extWindowActions = data.ReadUint32();
+    if (!data.ReadUint32(extWindowActions)) {
+        WLOGFE("read extWindowActions failed");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UpdateExtWindowFlags(token, extWindowFlags, extWindowActions);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
