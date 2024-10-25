@@ -531,7 +531,7 @@ HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     WSError res = sProxy->RequestFocus(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";

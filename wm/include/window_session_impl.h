@@ -107,7 +107,13 @@ public:
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
@@ -455,6 +461,7 @@ private:
     inline void DestroyExistUIContent();
     std::string GetRestoredRouterStack();
 
+    bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,

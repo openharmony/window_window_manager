@@ -19,7 +19,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":wm_extension_window_impl_test",
     ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
     ":wm_pattern_detach_callback_proxy_test",
@@ -35,7 +34,6 @@ group("unittest") {
     ":wm_window_agent_test",
     ":wm_window_display_change_adapter_test",
     ":wm_window_effect_test",
-    ":wm_window_extension_session_impl_test",
     ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
@@ -59,6 +57,8 @@ group("unittest") {
     ":wm_window_session_impl_test4",
     ":wm_window_stub_test",
     ":wm_window_test",
+    "ui_extension:wm_extension_window_impl_test",
+    "ui_extension:wm_window_extension_session_impl_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
@@ -459,6 +459,12 @@ ohos_unittest("wm_window_scene_session_impl_test3") {
 ohos_unittest("wm_window_scene_session_impl_test4") {
   module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [ "window_scene_session_impl_test4.cpp" ]
 
   deps = [
@@ -508,21 +514,6 @@ ohos_unittest("wm_window_agent_test") {
 
   external_deps = [
     "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("wm_window_extension_session_impl_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_extension_session_impl_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_context",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -599,16 +590,6 @@ ohos_unittest("wm_picture_in_picture_option_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-}
-
-ohos_unittest("wm_extension_window_impl_test") {
-  module_out_path = module_out_path
-
-  sources = [ "extension_window_impl_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = [ "c_utils:utils" ]
 }
 
 ohos_unittest("wm_window_manager_agent_proxy_test") {
@@ -715,7 +696,11 @@ config("wm_unittest_common_public_config") {
 }
 
 ohos_static_library("wm_unittest_common") {
-  visibility = [ ":*" ]
+  visibility = [
+    ":*",
+    "ui_extension:*",
+  ]
+
   testonly = true
 
   public_configs = [

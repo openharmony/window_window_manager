@@ -1084,6 +1084,23 @@ HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Funct
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
     ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    bool isPcOrPadFreeMultiWindowMode = false;
+    ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode),
+        WMError::WM_ERROR_IPC_FAILED);
+    ASSERT_EQ(isPcOrPadFreeMultiWindowMode, false);
+}
 }  // namespace
 }
 }

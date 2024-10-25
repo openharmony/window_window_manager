@@ -134,6 +134,7 @@ void ScreenSessionDumper::ExcuteInjectCmd()
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
+        dumpInfo_.append("dms.hidumper.supportdebug false\n");
         return;
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {

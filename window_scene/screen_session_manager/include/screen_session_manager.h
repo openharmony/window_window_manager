@@ -87,6 +87,8 @@ public:
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
+    uint32_t GetScreenBrightness(uint64_t screenId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
@@ -327,6 +329,8 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
+    void InitScreenDensity(sptr<ScreenSession> session, const ScreenProperty& property);
+    float CalcDefaultExtendScreenDensity(const ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);
@@ -336,8 +340,14 @@ private:
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void SendCastEvent(const bool &isPlugIn);
     void PhyMirrorConnectWakeupScreen();
-    void HandleScreenEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    bool IsScreenRestored(sptr<ScreenSession> screenSession);
+    bool GetIsCurrentInUseById(ScreenId screenId);
+    bool GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
+        MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption);
+    void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
+    void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
@@ -503,6 +513,8 @@ private:
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
+    void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
+    DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

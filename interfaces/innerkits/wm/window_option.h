@@ -231,11 +231,11 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
-     * @brief Set ExtensionSubWindow tag.
+     * @brief Set whether this window is the first sub window of UIExtension.
      *
-     * @param isExtensionTag ExtensionSubWindow tag.
+     * @param isUIExtFirstSubWindow whether is the first sub window of UIExtension.
      */
-    void SetExtensionTag(bool isExtensionTag);
+    void SetIsUIExtFirstSubWindow(bool isUIExtFirstSubWindow);
 
     /**
      * @brief Set UIExtension usage.
@@ -427,11 +427,11 @@ public:
     bool GetOnlySupportSceneBoard() const;
 
     /**
-     * @brief Get only sceneboard supported
+     * @brief Get isUIExtFirstSubWindow flag
      *
-     * @return Return ExtensionTag of subwindow.
+     * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
     */
-    bool GetExtensionTag() const;
+    bool GetIsUIExtFirstSubWindow() const;
 
     /**
      * @brief Get UIExtension usage.
@@ -476,17 +476,20 @@ public:
     virtual WindowType GetParentWindowType() const;
 
     /**
-     * @brief Set whether this window is a sub window of the UIExtension.
+     * @brief Set whether this window is a sub window of any level of UIExtension.
      *
-     * @return isUIExtensionSubWindowFlag.
+     * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
+     *                            false - is not any sub window of UIExtension.
     */
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
+    void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
+
     /**
-     * @brief Get IsUIExtensionSubWindowFlag of window.
+     * @brief Get whether this window is a sub window of any level of UIExtension.
      *
-     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     * @return true - is a sub window of any level of UIExtension,
+     *         false - is not a sub window of any level of UIExtension.
      */
-    bool GetIsUIExtensionSubWindowFlag() const;
+    bool GetIsUIExtAnySubWindow() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
@@ -524,8 +527,8 @@ private:
      */
     int32_t realParentId_ = INVALID_WINDOW_ID;
     uint32_t uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::EMBEDDED);
-    bool isExtensionTag_ = false;
-    bool isUIExtensionSubWindowFlag_ = false;
+    bool isUIExtFirstSubWindow_ = false;
+    bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 };
 } // namespace Rosen

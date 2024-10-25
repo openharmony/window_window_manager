@@ -32,6 +32,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 
 class SceneSession;
+
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -170,6 +171,7 @@ public:
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
     virtual void OnCallingSessionUpdated() {};
+    virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
@@ -456,7 +458,12 @@ public:
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+
+    /*
+     * Window ZOrder: PC
+     */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
+    void PcUpdateZOrderAndDirty(const uint32_t zOrder);
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
@@ -526,6 +533,12 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /*
+     * Window Lifecycle
+     */
+    bool CheckIdentityTokenIfMatched(const std::string& identityToken);
+    bool CheckPidIfMatched();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -670,14 +683,14 @@ private:
     int32_t customDecorHeight_ = 0;
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    std::string clientIdentityToken_ = { "" };
-    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
+    std::string clientIdentityToken_ = { "" };
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
