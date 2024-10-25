@@ -398,7 +398,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfoByContinueSessionI
         SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    std::string continueSessionId = "testSessionId"
+    std::string continueSessionId = "testSessionId";
     data.WriteString(continueSessionId);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
