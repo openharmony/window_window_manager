@@ -752,6 +752,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         UpdateFrameLayoutCallbackIfNeeded(wmReason);
         return;
     }
+
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
@@ -1187,7 +1188,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == "pc") {
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         return;
     }
     uiContent_->SetLatestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
