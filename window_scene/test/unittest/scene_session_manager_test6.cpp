@@ -1859,8 +1859,6 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->GetSceneSession(1);
     result = ssm_->DestroyDialogWithMainWindow(sceneSession);
