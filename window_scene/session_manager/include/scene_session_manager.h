@@ -800,6 +800,11 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Screen Manager
+     */
+    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 
