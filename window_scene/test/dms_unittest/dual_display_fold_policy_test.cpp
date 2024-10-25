@@ -18,6 +18,7 @@
 #include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "screen_session_manager/include/screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -228,13 +229,15 @@ namespace {
      */
     HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeToCoordination, Function | SmallTest | Level3)
     {
-        std::recursive_mutex mutex;
-        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>(
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            std::recursive_mutex mutex;
+            std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>(
             DUAL_DISPLAY_FOLD_POLICY_TEST);
-        sptr<DualDisplayFoldPolicy> dualDisplayFoldPolicy = new DualDisplayFoldPolicy(mutex, screenPowerTaskScheduler);
-        dualDisplayFoldPolicy->ChangeScreenDisplayModeToCoordination();
-        int res = 0;
-        ASSERT_EQ(res, 0);
+            sptr<DualDisplayFoldPolicy> dualDisplayFoldPolicy = new DualDisplayFoldPolicy(
+                mutex, screenPowerTaskScheduler);
+            dualDisplayFoldPolicy->ChangeScreenDisplayModeToCoordination();
+            ASSERT_FALSE(ssm_.keyguardDrawnDone_);
+        }
     }
 
     /**

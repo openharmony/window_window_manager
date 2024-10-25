@@ -342,7 +342,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_ON);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
@@ -367,7 +366,6 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPower(ScreenPowerStatus::POWER_STATUS_ON,
                 PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
         } else {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }

@@ -1379,20 +1379,20 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
 {
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken = windowToken_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (weakToken == nullptr) {
+        [windowToken = windowToken_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (windowToken == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            if (!WindowHelper::IsMainWindow(weakToken->GetType())) {
+            if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "Restore fail, not main window");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
                 return ;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakToken->Restore());
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken->Restore());
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -3696,6 +3696,10 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]device not support");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
@@ -6668,14 +6672,14 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RequestFocusByClient(isFocused));
-        TLOGI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
+        TLOGNI(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] request focus end, err = %{public}d",
+            window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
@@ -6825,6 +6829,12 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "window is null"));
         return;
     }
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowOption is null");
+        task.Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
+        return;
+    }
     if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
         !WindowHelper::IsMainWindow(windowToken->GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "This is not subWindow or mainWindow.");
@@ -6873,14 +6883,15 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> windowOption = new WindowOption();
-    if (windowOption == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "window option is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY));
-        return NapiGetUndefined(env);
-    }
     if (!ParseSubWindowOptions(env, argv[1], windowOption)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to options");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if ((windowOption->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {

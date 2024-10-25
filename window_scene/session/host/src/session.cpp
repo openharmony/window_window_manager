@@ -217,6 +217,12 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
+void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.processOptions = processOptions;
+}
+
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -481,6 +487,14 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_INACTIVE ||
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
+    }
+    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
+     * already background, which may cause performance deterioration.
+     */
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
+        state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
+        return;
     }
     state_ = state;
     SetMainSessionUIStateDirty(true);
@@ -1057,10 +1071,6 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
 {
     auto defaultDragEnable = false;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        defaultDragEnable = sessionProperty->GetDragEnabled();
-    }
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());

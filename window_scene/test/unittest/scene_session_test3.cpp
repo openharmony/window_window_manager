@@ -225,6 +225,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
+    sceneSession->isScbCoreEnabled_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
@@ -615,22 +616,13 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, Function | SmallTest |
     info.abilityName_ = "SetRestoreMainWindowCallback";
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
 
-    NotifyRestoreMainWindowFunc func;
-    sceneSession->SetRestoreMainWindowCallback(func);
-
-    NotifyRestoreMainWindowFunc func1 = [sceneSession]() {
+    NotifyRestoreMainWindowFunc func = []() {
         return;
     };
-    sceneSession->SetRestoreMainWindowCallback(func1);
-    ASSERT_EQ(nullptr, sceneSession->sessionChangeCallback_);
 
-    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    sceneSession->RegisterSessionChangeCallback(sessionchangeCallback);
-    sceneSession->SetRestoreMainWindowCallback(func1);
-    ASSERT_NE(nullptr, sceneSession->sessionChangeCallback_);
+    sceneSession->SetRestoreMainWindowCallback(func);
+    ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);
 }
 
 /**

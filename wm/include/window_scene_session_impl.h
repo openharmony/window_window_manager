@@ -70,7 +70,7 @@ public:
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
-    
+
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
@@ -153,7 +153,12 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
@@ -163,8 +168,8 @@ public:
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
-    bool GetIsUIExtensionFlag() const override;
-    bool GetIsUIExtensionSubWindowFlag() const override;
+    bool GetIsUIExtFirstSubWindow() const override;
+    bool GetIsUIExtAnySubWindow() const override;
 
     /*
      * Gesture Back

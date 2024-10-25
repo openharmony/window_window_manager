@@ -1942,6 +1942,49 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetSessionModalTypeChangeCallback
+ * @tc.desc: SetSessionModalTypeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionModalTypeChangeCallback";
+    info.bundleName_ = "SetSessionModalTypeChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
+        return WSError::WS_OK;
+    };
+    sceneSession->SetSessionModalTypeChangeCallback(func);
+    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+}
+
+/**
+ * @tc.name: OnSessionModalTypeChange
+ * @tc.desc: OnSessionModalTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSessionModalTypeChange";
+    info.bundleName_ = "OnSessionModalTypeChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
+        return WSError::WS_OK;
+    };
+    sceneSession->SetSessionModalTypeChangeCallback(func);
+    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetSubWindowModalType
  * @tc.desc: GetSubWindowModalType
  * @tc.type: FUNC
@@ -2040,9 +2083,8 @@ HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | S
     info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
     info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
-        return WSError::WS_OK;
+        return;
     };
     sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
     EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
@@ -2059,9 +2101,8 @@ HWTEST_F(SceneSessionTest2, OnTitleAndDockHoverShowChange, Function | SmallTest 
     info.abilityName_ = "OnTitleAndDockHoverShowChange";
     info.bundleName_ = "OnTitleAndDockHoverShowChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
-        return WSError::WS_OK;
+        return;
     };
     sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
     EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);

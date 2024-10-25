@@ -204,7 +204,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession03");
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
     
@@ -1619,15 +1619,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
 HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
 
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
 
@@ -1637,7 +1634,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | Small
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTitleAndDockHoverShown(true, true));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
 }
@@ -1759,6 +1756,81 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     ASSERT_EQ(true, window->GetGestureBackEnabled());
     ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(false));
     ASSERT_EQ(false, window->GetGestureBackEnabled());
+}
+
+/*
+ * @tc.name: CompatibleFullScreenRecover
+ * @tc.desc: CompatibleFullScreenRecover test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenRecover, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("CompatibleFullScreenRecover");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenRecover());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenRecover());
+
+    window->property_->SetCompatibleModeInPc(true);
+    ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenRecover());
+}
+
+/*
+ * @tc.name: CompatibleFullScreenMinimize
+ * @tc.desc: CompatibleFullScreenMinimize test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenMinimize, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("CompatibleFullScreenMinimize");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenMinimize());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenMinimize());
+
+    window->property_->SetCompatibleModeInPc(true);
+    ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenMinimize());
+}
+
+/*
+ * @tc.name: CompatibleFullScreenClose
+ * @tc.desc: CompatibleFullScreenClose test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("CompatibleFullScreenClose");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenClose());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->CompatibleFullScreenClose());
+
+    window->property_->SetCompatibleModeInPc(true);
+    ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenClose());
 }
 }
 } // namespace Rosen

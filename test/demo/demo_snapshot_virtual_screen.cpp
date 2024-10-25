@@ -32,7 +32,7 @@ const int SLEEP_US = 10 * 1000; // 10ms
 const int MAX_SNAPSHOT_COUNT = 10;
 const int MAX_WAIT_COUNT = 200;
 const float DEFAULT_DENSITY = 2.0;
-const std::string FILE_NAME = "/data/snapshot_virtual_screen";
+const std::string FILE_NAME = "/data/local/tmp/snapshot_virtual_screen";
 }
 
 static ScreenId mainId;

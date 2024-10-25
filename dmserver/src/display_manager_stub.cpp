@@ -193,6 +193,17 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint32(static_cast<uint32_t>(state));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            uint32_t level = data.ReadUint64();
+            reply.WriteBool(SetScreenBrightness(screenId, level));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            reply.WriteUint32(GetScreenBrightness(screenId));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT: {
             DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
             NotifyDisplayEvent(event);
