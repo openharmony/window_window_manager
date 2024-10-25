@@ -899,6 +899,13 @@ public:
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
+     * @brief Get window global scaled rect.
+     *
+     * @param Rect
+     * @return WMError
+     */
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
