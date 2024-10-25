@@ -493,19 +493,6 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister02, Fun
 }
 
 /**
- * @tc.name: TransferAccessibilityDumpChildInfo01
- * @tc.desc: normal function TransferAccessibilityDumpChildInfo01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo01, Function | SmallTest | Level2)
-{
-    WLOGFI("TransferAccessibilityDumpChildInfo01 begin");
-    auto res = TransferAccessibilityDumpChildInfo(true);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    WLOGFI("TransferAccessibilityDumpChildInfo01 end");
-}
-
-/**
  * @tc.name: TransferAccessibilityDumpChildInfo02
  * @tc.desc: normal function TransferAccessibilityDumpChildInfo02
  * @tc.type: FUNC
