@@ -757,6 +757,42 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
     return true;
 }
 
+bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
+{
+    if (value == nullptr || !CheckTypeForNapiValue(env, value, napi_object)) {
+        WLOGFE("The type of value is not napi_object or is nullptr.");
+        return false;
+    }
+
+    napi_value array = nullptr;
+    napi_get_property_names(env, value, &array);
+    std::vector<std::string> propNames;
+    if (!ParseArrayStringValue(env, array, propNames)) {
+        WLOGFE("Failed to property names");
+        return false;
+    }
+
+    for (const auto& propName : propNames) {
+        napi_value prop = nullptr;
+        napi_get_named_property(env, value, propName.c_str(), &prop);
+        if (prop == nullptr) {
+            WLOGFW("prop is null: %{public}s", propName.c_str());
+            continue;
+        }
+        if (!CheckTypeForNapiValue(env, prop, napi_string)) {
+            WLOGFW("prop is not string: %{public}s", propName.c_str());
+            continue;
+        }
+        std::string valName;
+        if (!ConvertFromJsValue(env, prop, valName)) {
+            WLOGFW("Failed to ConvertFromJsValue: %{public}s", propName.c_str());
+            continue;
+        }
+        payload[propName] = std::move(valName);
+    }
+    return true;
+}
+
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
 {
     napi_value jsDuration = nullptr;
@@ -1178,6 +1214,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
 
     napi_set_named_property(env, objValue, "pointerX", CreateJsValue(env, param.pointerX_));
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
+    napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
+    napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     return objValue;
 }
 

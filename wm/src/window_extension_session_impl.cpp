@@ -99,14 +99,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
+        InputTransferStation::GetInstance().AddInputWindow(this);
     }
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
         property_->GetWindowName().c_str(), GetPersistentId());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
     AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
@@ -159,11 +157,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    if (needRemoveWindowInputChannel_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d Destroy", GetPersistentId());
-        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
-        needRemoveWindowInputChannel_ = false;
-    }
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -334,6 +328,30 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
         extensionWindowFlags_ = updateFlags;
     }
     return ret;
+}
+
+WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
+{
+    auto persistentId = GetPersistentId();
+    std::stringstream ss;
+    ss << "ID: " << persistentId << ", needHide: " << needHide;
+
+    if (surfaceNode_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    // Let rs guarantee the security and permissions of the interface
+    auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(), errCode);
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    return WMError::WM_OK;
 }
 
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)

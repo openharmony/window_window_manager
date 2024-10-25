@@ -27,6 +27,7 @@ enum class ActionType : uint32_t {
     SINGLE_CLOSE,
     MOVE_DISPLAY,
     STACK_EMPTY,
+    SINGLE_BACKGROUND,
 };
 
 class DisplayChangeInfo : public Parcelable {
