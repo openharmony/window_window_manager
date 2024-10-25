@@ -402,6 +402,14 @@ public:
      * @return the value true means to enable gesture back, and false means the opposite.
      */
     virtual bool GetGestureBackEnabled() const { return true; }
+
+    /**
+     * @brief Flush layout size.
+     *
+     * @param width The width after layout
+     * @param height The height after layout
+     */
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
 };
 }
 }

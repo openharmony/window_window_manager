@@ -323,7 +323,6 @@ protected:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    void RegisterFrameLayoutCallback();
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
@@ -403,6 +402,7 @@ protected:
     /*
      * Window Layout
      */
+    void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
 
 private:
