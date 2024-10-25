@@ -34,7 +34,7 @@ std::map<DeviceRotationValue, Rotation> ScreenCutoutController::deviceToDisplayR
 
 sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DMS, "get screen cutout info.");
+    TLOGD(WmsLogTag::DMS, "start");
     std::vector<DMRect> boundaryRects;
     if (!ScreenSceneConfig::GetCutoutBoundaryRect(displayId).empty()) {
         ConvertBoundaryRectsByRotation(boundaryRects, displayId);
@@ -250,7 +250,7 @@ DMRect ScreenCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, 
 
 RectF ScreenCutoutController::CalculateCurvedCompression(const ScreenProperty& screenProperty)
 {
-    TLOGI(WmsLogTag::DMS, "calculate curved compression");
+    TLOGI(WmsLogTag::DMS, "start");
     RectF finalRect = RectF(0, 0, 0, 0);
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
     uint32_t iCurvedSize = 0;
