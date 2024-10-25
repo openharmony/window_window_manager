@@ -59,6 +59,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
                 return ERR_INVALID_DATA;
             }
+            if (changeReason < static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED) ||
+                changeReason > static_cast<uint32_t>(WindowSizeChangeReason::END)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
+                return ERR_INVALID_DATA;
+            }
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(changeReason);
             bool hasRSTransaction = false;
             if (!data.ReadBool(hasRSTransaction)) {
@@ -82,6 +87,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             uint32_t windowMode = 0;
             if (!data.ReadUint32(windowMode)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read windowMode failed");
+                return ERR_INVALID_DATA;
+            }
+            if (windowMode < static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED) ||
+                windowMode > static_cast<uint32_t>(WindowMode::WINDOW_MODE_PIP)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "invalid windowMode: %{public}d", windowMode);
                 return ERR_INVALID_DATA;
             }
             WindowMode mode = static_cast<WindowMode>(windowMode);

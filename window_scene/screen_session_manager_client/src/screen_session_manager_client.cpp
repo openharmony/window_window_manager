@@ -320,6 +320,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
+    auto foldStatus = screenSessionManager_->GetFoldStatus();
+    screenSession->SetPhysicalRotation(rotation, foldStatus);
     screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
 }
 

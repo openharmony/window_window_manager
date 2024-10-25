@@ -754,7 +754,7 @@ public:
      * @param isTopmost whether main window is topmost
      * @return WMError
      */
-    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Get whether main window is topmost
      *

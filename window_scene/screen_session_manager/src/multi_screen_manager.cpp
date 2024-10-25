@@ -23,19 +23,19 @@ const std::string SCREEN_MIRROR = "mirror";
 }
 MultiScreenManager::MultiScreenManager()
 {
-    TLOGI(WmsLogTag::DMS, "init multi screen manager");
+    TLOGI(WmsLogTag::DMS, "init");
     lastScreenMode_ = std::make_pair(SCREEN_ID_INVALID, MultiScreenMode::SCREEN_MIRROR);
 }
 
 MultiScreenManager::~MultiScreenManager()
 {
-    TLOGI(WmsLogTag::DMS, "destructor multi screen manager");
+    TLOGI(WmsLogTag::DMS, "destructor");
 }
 
 void MultiScreenManager::FilterPhysicalAndVirtualScreen(const std::vector<ScreenId>& allScreenIds,
     std::vector<ScreenId>& physicalScreenIds, std::vector<ScreenId>& virtualScreenIds)
 {
-    TLOGI(WmsLogTag::DMS, "filter physical and virtual screen enter allScreen size: %{public}u",
+    TLOGI(WmsLogTag::DMS, "enter allScreen size: %{public}u",
         static_cast<uint32_t>(allScreenIds.size()));
     sptr<ScreenSession> defaultSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (defaultSession == nullptr) {
@@ -59,13 +59,13 @@ void MultiScreenManager::FilterPhysicalAndVirtualScreen(const std::vector<Screen
             TLOGI(WmsLogTag::DMS, "mirror screen type error");
         }
     }
-    TLOGI(WmsLogTag::DMS, "filter physical and virtual screen end");
+    TLOGI(WmsLogTag::DMS, "end");
 }
 
 DMError MultiScreenManager::VirtualScreenMirrorSwitch(const ScreenId mainScreenId,
     const std::vector<ScreenId>& screenIds, ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS, "virtual screen mirror switch enter size: %{public}u",
+    TLOGI(WmsLogTag::DMS, "enter size: %{public}u",
         static_cast<uint32_t>(screenIds.size()));
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenMirrorSwitch start");
     auto mainScreen = ScreenSessionManager::GetInstance().GetScreenSession(mainScreenId);
@@ -75,7 +75,7 @@ DMError MultiScreenManager::VirtualScreenMirrorSwitch(const ScreenId mainScreenI
     }
     DMError ret = ScreenSessionManager::GetInstance().SetMirror(mainScreenId, screenIds);
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "virtual screen mirror switch error: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "error: %{public}d", ret);
         return ret;
     }
     if (ScreenSessionManager::GetInstance().GetAbstractScreenGroup(mainScreen->groupSmsId_) == nullptr) {
@@ -83,7 +83,7 @@ DMError MultiScreenManager::VirtualScreenMirrorSwitch(const ScreenId mainScreenI
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupId = mainScreen->groupSmsId_;
-    TLOGI(WmsLogTag::DMS, "virtual screen mirror switch end");
+    TLOGI(WmsLogTag::DMS, "end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenMirrorSwitch end");
     return ret;
 }
@@ -120,7 +120,7 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
 
 DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds)
 {
-    TLOGI(WmsLogTag::DMS, "enter physical screen unique switch screen size: %{public}u",
+    TLOGI(WmsLogTag::DMS, "enter screen size: %{public}u",
         static_cast<uint32_t>(screenIds.size()));
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenUniqueSwitch start");
     for (ScreenId physicalScreenId : screenIds) {
@@ -138,7 +138,7 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         screenSession->CreateDisplayNode(config);
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
     }
-    TLOGI(WmsLogTag::DMS, "physical screen unique switch end");
+    TLOGI(WmsLogTag::DMS, "end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenUniqueSwitch end");
     return DMError::DM_OK;
 }
@@ -151,7 +151,7 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         return DMError::DM_ERROR_NULLPTR;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch start");
-    TLOGI(WmsLogTag::DMS, "start virtual screen unique switch size: %{public}u",
+    TLOGI(WmsLogTag::DMS, "start size: %{public}u",
         static_cast<uint32_t>(screenIds.size()));
     auto group = ScreenSessionManager::GetInstance().GetAbstractScreenGroup(screenSession->groupSmsId_);
     if (group == nullptr) {
@@ -180,7 +180,7 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch end");
-    TLOGI(WmsLogTag::DMS, "virtual screen switch to unique and notify scb end");
+    TLOGI(WmsLogTag::DMS, "to unique and notify scb end");
     return DMError::DM_OK;
 }
 
@@ -190,10 +190,10 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds)
     std::vector<ScreenId> virtualScreenIds;
     std::vector<ScreenId> physicalScreenIds;
     if (screenIds.empty()) {
-        TLOGI(WmsLogTag::DMS, "mirror to unique switch screen size empty");
+        TLOGI(WmsLogTag::DMS, "mirror to screen size empty");
         return switchStatus;
     }
-    TLOGI(WmsLogTag::DMS, "enter mirror to unique switch screen size: %{public}u",
+    TLOGI(WmsLogTag::DMS, "enter mirror to screen size: %{public}u",
         static_cast<uint32_t>(screenIds.size()));
     FilterPhysicalAndVirtualScreen(screenIds, physicalScreenIds, virtualScreenIds);
 
@@ -216,10 +216,10 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
     std::vector<ScreenId> virtualScreenIds;
     std::vector<ScreenId> physicalScreenIds;
     if (screenIds.empty()) {
-        TLOGI(WmsLogTag::DMS, "mirror switch screen size empty");
+        TLOGI(WmsLogTag::DMS, "screen size empty");
         return switchStatus;
     }
-    TLOGI(WmsLogTag::DMS, "enter mirror switch screen size: %{public}u", static_cast<uint32_t>(screenIds.size()));
+    TLOGI(WmsLogTag::DMS, "enter screen size: %{public}u", static_cast<uint32_t>(screenIds.size()));
     FilterPhysicalAndVirtualScreen(screenIds, physicalScreenIds, virtualScreenIds);
 
     if (!virtualScreenIds.empty()) {
@@ -231,7 +231,7 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
         switchStatus = PhysicalScreenMirrorSwitch(physicalScreenIds);
         TLOGI(WmsLogTag::DMS, "physical screen switch to mirror result: %{public}d", switchStatus);
     }
-    TLOGI(WmsLogTag::DMS, "mirror switch end switchStatus: %{public}d", switchStatus);
+    TLOGI(WmsLogTag::DMS, "end switchStatus: %{public}d", switchStatus);
     return switchStatus;
 }
 

@@ -640,6 +640,11 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
         return ERR_INVALID_DATA;
     }
+    if (changeReason < static_cast<uint32_t>(SizeChangeReason::UNDEFINED) ||
+        changeReason > static_cast<uint32_t>(SizeChangeReason::END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
+        return ERR_INVALID_DATA;
+    }
     SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
     bool isGlobal = false;
     if (!data.ReadBool(isGlobal)) {
@@ -1106,6 +1111,11 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     uint32_t actionValue = 0;
     if (!data.ReadUint32(actionValue)) {
         TLOGE(WmsLogTag::DEFAULT, "read action error");
+        return ERR_INVALID_DATA;
+    }
+    if (actionValue < static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
+        actionValue > static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid action");
         return ERR_INVALID_DATA;
     }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
