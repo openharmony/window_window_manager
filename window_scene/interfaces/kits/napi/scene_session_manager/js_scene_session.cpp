@@ -234,14 +234,14 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.left") {
-            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}d", value);
-                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, value));
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
             }
         } else if (item.name == "ohos.ability.window.top") {
-            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}d", value);
-                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, value));
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
             }
         }
     }
@@ -329,6 +329,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsSceneSession::SetWaterMarkFlag);
     BindNativeFunction(env, objValue, "setPipActionEvent", moduleName, JsSceneSession::SetPipActionEvent);
     BindNativeFunction(env, objValue, "setPiPControlEvent", moduleName, JsSceneSession::SetPiPControlEvent);
+    BindNativeFunction(env, objValue, "notifyPipOcclusionChange", moduleName, JsSceneSession::NotifyPipOcclusionChange);
     BindNativeFunction(env, objValue, "notifyDisplayStatusBarTemporarily", moduleName,
         JsSceneSession::NotifyDisplayStatusBarTemporarily);
     BindNativeFunction(env, objValue, "setTemporarilyShowWhenLocked", moduleName,
@@ -1885,6 +1886,13 @@ napi_value JsSceneSession::SetPiPControlEvent(napi_env env, napi_callback_info i
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPiPControlEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::NotifyPipOcclusionChange(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnNotifyPipOcclusionChange(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info)
@@ -4262,6 +4270,32 @@ napi_value JsSceneSession::OnSetPiPControlEvent(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     session->SetPiPControlEvent(controlType, status);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool occluded = false;
+    if (!ConvertFromJsValue(env, argv[0], occluded)) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert parameter, keep default: false");
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]persistId:%{public}d, occluded:%{public}d", persistentId_, occluded);
+    // Maybe expand with session visibility&state change
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
     return NapiGetUndefined(env);
 }
 
