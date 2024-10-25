@@ -4288,7 +4288,7 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
     }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_TYPE;
     }
     enable = gestureBackEnabled_;
     TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
