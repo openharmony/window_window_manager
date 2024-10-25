@@ -4725,10 +4725,6 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
 
     auto task = [weakThis = wptr(this), enableDrag]() {
         auto session = weakThis.promote();
