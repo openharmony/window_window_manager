@@ -15,24 +15,12 @@
 
 #include "picture_in_picture_controller.h"
 
-#include <event_handler.h>
 #include <refbase.h>
-#include <power_mgr_client.h>
 #include <transaction/rs_sync_transaction_controller.h>
 #include "picture_in_picture_manager.h"
-#include "picture_in_picture_option.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
-#include "window.h"
-#include "wm_common.h"
 #include "singleton_container.h"
-#include "datashare_predicates.h"
-#include "datashare_result_set.h"
-#include "datashare_helper.h"
-#include "iservice_registry.h"
-#include "result_set.h"
-#include "system_ability_definition.h"
-#include "uri.h"
 
 namespace OHOS {
 namespace Rosen {
