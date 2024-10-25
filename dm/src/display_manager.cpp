@@ -613,14 +613,41 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
     WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    if (displayId != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = displayMap_.find(displayId);
+        if (iter != displayMap_.end()) {
+            WLOGFI("Get display from displayMap_");
+            return displayMap_[displayId];
+        }
+    }
+    uint32_t retryTimes = 0;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    while (retryTimes < MAX_RETRY_NUM) {
+        displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+        if (displayInfo != nullptr) {
+            break;
+        }
+        retryTimes++;
+        WLOGFW("Current get display info is null, retry %{public}u times", retryTimes);
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
+    }
+    if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
+        WLOGFE("Get display info failed, please check whether the onscreenchange event is triggered");
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
         displayMap_.erase(displayId);
         return nullptr;
     }
+    lastRequestTime = currentTime;
     return displayMap_[displayId];
 }
+
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
