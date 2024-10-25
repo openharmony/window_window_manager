@@ -14,12 +14,6 @@
  */
 
 #include "publish/scb_dump_subscriber.h"
-#include <sstream>
-
-#include "common_event_manager.h"
-#include "interfaces/include/ws_common.h"
-#include "interfaces/include/ws_common_inner.h"
-#include "matching_skills.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
