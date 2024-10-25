@@ -1119,6 +1119,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
@@ -2361,6 +2362,10 @@ WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAre
 
 WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("register touch outside listener permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(touchOutsideListeners_[GetWindowId()], listener);
@@ -2368,6 +2373,10 @@ WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListene
 
 WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("register touch outside listener permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(touchOutsideListeners_[GetWindowId()], listener);
