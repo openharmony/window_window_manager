@@ -1323,6 +1323,149 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
     ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
 }
+
+/**
+ * @tc.name: NotifyOccupiedAreaChangeInfo
+ * @tc.desc: NotifyOccupiedAreaChangeInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+    session_->NotifyOccupiedAreaChangeInfo(nullptr, nullptr);
+    EXPECT_NE(session_->sessionStage_, nullptr);
+}
+
+/**
+ * @tc.name: ProcessBackEvent
+ * @tc.desc: ProcessBackEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->ProcessBackEvent();
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: ProcessBackGetAndSetSessionRequestRectEvent
+ * @tc.desc: GetSessionRequestRectEvent, SetSessionRequestRectEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    session_->GetSessionRequestRect();
+    ASSERT_EQ(session_->property_, nullptr);
+
+    WSRect rect = {0, 0, 0, 0};
+    session_->SetSessionRequestRect(rect);
+    ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: SetSessionRect01
+ * @tc.desc: SetSessionRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
+{
+    WSRect rect = session_->GetSessionRect();
+    session_->SetSessionRect(rect);
+    ASSERT_EQ(rect, session_->winRect_);
+}
+
+/**
+ * @tc.name: UpdateMaximizeMode
+ * @tc.desc: UpdateMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    auto ret = session_->UpdateMaximizeMode(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session_->SetSessionProperty(property);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    session_->SetSessionProperty(nullptr);
+    ret = session_->UpdateMaximizeMode(false);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateTitleInTargetPos
+ * @tc.desc: UpdateTitleInTargetPos test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateTitleInTargetPos, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->UpdateTitleInTargetPos(true, 20);
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SwitchFreeMultiWindow
+ * @tc.desc: SwitchFreeMultiWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->SwitchFreeMultiWindow(true);
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = true;
+    ret = session_->SwitchFreeMultiWindow(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SetTouchHotAreas
+ * @tc.desc: SetTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    std::vector<Rect> touchHotAreas;
+    session_->SetTouchHotAreas(touchHotAreas);
+    ASSERT_EQ(session_->property_, nullptr);
+
+    session_->property_ = new WindowSessionProperty();
+    touchHotAreas = session_->property_->touchHotAreas_;
+    session_->property_->SetTouchHotAreas(touchHotAreas);
+    ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
