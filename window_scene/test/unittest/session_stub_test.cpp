@@ -521,11 +521,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
     data.WriteUint32(30);
     data.WriteUint32(height);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdatePiPRect002
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
     data.WriteInt32(10);
     data.WriteInt32(20);
     data.WriteUint32(30);
     data.WriteUint32(40);
-    data.WriteInt32(-1);
+    data.WriteUint32(22);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(40);
+    data.WriteUint32(3);
     ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPRect(data, reply));
 }
 
@@ -540,11 +558,27 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | L
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
-    auto status = WsPiPControlStatus::PLAY;
-    data.WriteUint32(static_cast<uint32_t>(controlType));
-    data.WriteInt32(static_cast<int32_t>(status));
+    uint32_t controlType = -1;
+    int32_t status = 1;
+    data.WriteUint32(controlType);
+    data.WriteInt32(status);
     auto res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(10);
+    data.WriteInt32(status);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(-4);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(4);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(1);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 

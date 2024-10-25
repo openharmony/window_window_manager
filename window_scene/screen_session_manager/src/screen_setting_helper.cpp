@@ -24,6 +24,13 @@ sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
+constexpr int32_t PARAM_NUM_TEN = 10;
+constexpr int32_t EXPECT_SCREEN_MODE_SIZE = 2;
+constexpr int32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
+constexpr int32_t EXPECT_RESOLUTION_SIZE = 3;
+constexpr int32_t RESOLVED_DATA_INDEX_ZERO = 0;
+constexpr int32_t RESOLVED_DATA_INDEX_ONE = 1;
+constexpr int32_t RESOLVED_DATA_INDEX_TWO = 2;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -224,6 +231,218 @@ bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const st
         return false;
     }
     TLOGE(WmsLogTag::DMS, "current rotation screen id:%{public}d", screenId);
+    return true;
+}
+
+void ScreenSettingHelper::RemoveInvalidChar(std::string& dataStr, const std::string& inputString)
+{
+    for (char character : inputString) {
+        if (!std::isdigit(character) && character != ' ' && character != ',' && character != '.') {
+            continue;
+        }
+        dataStr += character;
+    }
+    TLOGI(WmsLogTag::DMS, "process done, dataStr: %{public}s", dataStr.c_str());
+}
+
+bool ScreenSettingHelper::SplitString(std::vector<std::string>& splitValues, const std::string& inputString)
+{
+    TLOGI(WmsLogTag::DMS, "input value: %{public}s", inputString.c_str());
+    std::string dataStr;
+    RemoveInvalidChar(dataStr, inputString);
+    int32_t strLength = dataStr.size();
+    int32_t beginIdx = 0;
+    std::string currentValue;
+    for (int32_t currentIdx = 0; currentIdx < strLength; currentIdx++) {
+        if (dataStr[currentIdx] != ',') {
+            continue;
+        }
+        currentValue = dataStr.substr(beginIdx, currentIdx - beginIdx);
+        if (currentValue.size() > 0) {
+            splitValues.push_back(currentValue);
+            TLOGI(WmsLogTag::DMS, "resolving current value success, currentValue: %{public}s",
+                currentValue.c_str());
+        }
+        beginIdx = currentIdx + 1;
+    }
+    currentValue = dataStr.substr(beginIdx, strLength - beginIdx);
+    if (currentValue.size() > 0) {
+        splitValues.push_back(currentValue);
+        TLOGI(WmsLogTag::DMS, "resolving current value success, currentValue: %{public}s",
+            currentValue.c_str());
+    }
+    if (splitValues.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "resolving split values failed");
+        return false;
+    }
+    return true;
+}
+
+int32_t ScreenSettingHelper::GetDataFromString(std::vector<uint64_t>& datas, const std::string& inputString)
+{
+    TLOGI(WmsLogTag::DMS, "begin to resolve string, value: %{public}s", inputString.c_str());
+    int32_t strLength = inputString.size();
+    int32_t beginIdx = 0;
+    for (int32_t currentIdx = 0; currentIdx < strLength; currentIdx++) {
+        if (inputString[currentIdx] != ' ') {
+            continue;
+        }
+        std::string dataStr = inputString.substr(beginIdx, currentIdx - beginIdx);
+        if (dataStr.size() > 0) {
+            uint64_t data = static_cast<uint64_t>(strtoll(dataStr.c_str(), nullptr, PARAM_NUM_TEN));
+            datas.push_back(data);
+            TLOGI(WmsLogTag::DMS, "resolving data success, data: %{public}d", static_cast<uint32_t>(data));
+        }
+        beginIdx = currentIdx + 1;
+    }
+    std::string dataStr = inputString.substr(beginIdx, strLength - beginIdx);
+    if (dataStr.size() > 0) {
+        uint64_t data = static_cast<uint64_t>(strtoll(dataStr.c_str(), nullptr, PARAM_NUM_TEN));
+        datas.push_back(data);
+        TLOGI(WmsLogTag::DMS, "resolving data success, data: %{public}d", static_cast<uint32_t>(data));
+    }
+    return datas.size();
+}
+
+bool ScreenSettingHelper::GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionString,
+    const std::string& key)
+{
+    std::string value;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "get setting recovery resolution failed, ret=%{public}d", ret);
+        return false;
+    }
+    bool ret1 = SplitString(resolutionString, value);
+    if (!ret1) {
+        TLOGE(WmsLogTag::DMS, "resolving resolution string failed");
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingRecoveryResolutionMap
+    (std::map<uint64_t, std::pair<int32_t, int32_t>>& resolution)
+{
+    std::vector<std::string> resolutionStrings;
+    bool ret = GetSettingRecoveryResolutionString(resolutionStrings);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get resolution string failed");
+        return false;
+    }
+    for (auto& resolutionString : resolutionStrings) {
+        std::vector<uint64_t> resolutionData;
+        int32_t dataSize = GetDataFromString(resolutionData, resolutionString);
+        if (dataSize != EXPECT_RESOLUTION_SIZE) {
+            TLOGE(WmsLogTag::DMS, "get data failed");
+            continue;
+        }
+        uint64_t screenId = resolutionData[RESOLVED_DATA_INDEX_ZERO];
+        int32_t width = static_cast<int32_t>(resolutionData[RESOLVED_DATA_INDEX_ONE]);
+        int32_t height = static_cast<int32_t>(resolutionData[RESOLVED_DATA_INDEX_TWO]);
+        TLOGI(WmsLogTag::DMS, "get data success, screenId: %{public}d, width: %{public}d, height: %{public}d",
+            static_cast<uint32_t>(screenId), width, height);
+        resolution[screenId] = std::make_pair(width, height);
+    }
+    if (resolution.empty()) {
+        TLOGE(WmsLogTag::DMS, "no resolution found");
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
+    const std::string& key)
+{
+    std::string value;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "get setting screen mode failed, ret=%{public}d", ret);
+        return false;
+    }
+    bool ret1 = SplitString(screenModeStrings, value);
+    if (!ret1) {
+        TLOGE(WmsLogTag::DMS, "resolving screen mode failed");
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingScreenModeMap(std::map<uint64_t, uint32_t>& screenMode)
+{
+    std::vector<std::string> screenModeStrings;
+    bool ret = GetSettingScreenModeString(screenModeStrings);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get last screen mode string failed");
+        return false;
+    }
+    for (auto& screenModeString : screenModeStrings) {
+        std::vector<uint64_t> screenModeData;
+        int32_t dataSize = GetDataFromString(screenModeData, screenModeString);
+        if (dataSize != EXPECT_SCREEN_MODE_SIZE) {
+            TLOGE(WmsLogTag::DMS, "get data failed");
+            continue;
+        }
+        uint64_t screenId = screenModeData[RESOLVED_DATA_INDEX_ZERO];
+        uint32_t mode = static_cast<int32_t>(screenModeData[RESOLVED_DATA_INDEX_ONE]);
+        TLOGI(WmsLogTag::DMS, "get data success, screenId: %{public}d, mode: %{public}d",
+            static_cast<uint32_t>(screenId), mode);
+        screenMode[screenId] = mode;
+    }
+    if (screenMode.empty()) {
+        TLOGE(WmsLogTag::DMS, "no last screen mode found");
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingRelativePositionString(std::vector<std::string>& relativePositionStrings,
+    const std::string& key)
+{
+    std::string value;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "get setting relative position failed, ret=%{public}d", ret);
+        return false;
+    }
+    bool ret1 = SplitString(relativePositionStrings, value);
+    if (!ret1) {
+        TLOGE(WmsLogTag::DMS, "resolving relative position failed");
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingRelativePositionMap
+    (std::map<uint64_t, std::pair<uint32_t, uint32_t>>& relativePosition)
+{
+    std::vector<std::string> relativePositionStrings;
+    bool ret = GetSettingRelativePositionString(relativePositionStrings);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get relative position string failed");
+        return false;
+    }
+    for (auto& relativePositionString : relativePositionStrings) {
+        std::vector<uint64_t> relativePositionData;
+        int32_t dataSize = GetDataFromString(relativePositionData, relativePositionString);
+        if (dataSize != EXPECT_RELATIVE_POSITION_SIZE) {
+            TLOGE(WmsLogTag::DMS, "get data failed");
+            continue;
+        }
+        uint64_t screenId = relativePositionData[RESOLVED_DATA_INDEX_ZERO];
+        uint32_t startX = static_cast<uint32_t>(relativePositionData[RESOLVED_DATA_INDEX_ONE]);
+        uint32_t startY = static_cast<uint32_t>(relativePositionData[RESOLVED_DATA_INDEX_TWO]);
+        TLOGI(WmsLogTag::DMS, "get data success, screenId: %{public}d, startX: %{public}d, startY: %{public}d",
+            static_cast<uint32_t>(screenId), startX, startY);
+        relativePosition[screenId] = std::make_pair(startX, startY);
+    }
+    if (relativePosition.empty()) {
+        TLOGE(WmsLogTag::DMS, "no relative position found");
+        return false;
+    }
     return true;
 }
 } // namespace Rosen

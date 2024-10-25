@@ -1496,8 +1496,10 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
 HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<ISessionStage> sessionStage;
-    sptr<IWindowEventChannel> eventChannel;
+    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(sessionStage, nullptr);
+    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
+    ASSERT_NE(eventChannel, nullptr);
     std::shared_ptr<RSSurfaceNode> node = nullptr;
     sptr<ISession> session;
     SystemSessionConfig systemConfig;
@@ -1511,17 +1513,23 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_test5");
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetWindowFlags(123);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
+    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+         systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res); // create main window, property must be nullptr
+    sessionStage = new (std::nothrow) SessionStageMocker();
+
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**

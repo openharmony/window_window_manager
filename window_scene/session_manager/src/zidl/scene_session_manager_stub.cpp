@@ -183,6 +183,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleReleaseForegroundSessionScreenLock(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PARENT_DISPLAYID):
             return HandleGetDisplayIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
+            return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -629,7 +631,10 @@ int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel& data, MessagePar
 int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleSetGestureNavigationEnabled!");
-    bool enable = data.ReadBool();
+    bool enable = false;
+    if (!data.ReadBool(enable)) {
+        return ERR_INVALID_DATA;
+    }
     const WMError &ret = SetGestureNavigationEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -700,8 +705,14 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
-    bool haveAvoidAreaListener = data.ReadBool();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        return ERR_INVALID_DATA;
+    }
+    bool haveAvoidAreaListener = false;
+    if (!data.ReadBool(haveAvoidAreaListener)) {
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1222,6 +1233,21 @@ int SceneSessionManagerStub::HandleGetDisplayIdByPersistentId(MessageParcel &dat
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    bool isPcOrPadFreeMultiWindowMode = false;
+    WMError errCode = IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
+    if (!reply.WriteBool(isPcOrPadFreeMultiWindowMode)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write isPcOrPadFreeMultiWindowMode fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

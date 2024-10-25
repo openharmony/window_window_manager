@@ -511,6 +511,29 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnSessionEvent02
+ * @tc.desc: OnSessionEvent drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, OnSessionEvent02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.bundleName_ = "testSession3";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = new MoveDragController(1);
+    ASSERT_TRUE(sceneSession->moveDragController_);
+    sceneSession->moveDragController_->InitMoveDragProperty();
+    WSRect targetRect_ = { 100, 100, 1000, 1000 };
+    sceneSession->moveDragController_->moveDragProperty_.targetRect_ = targetRect_;
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_DRAG);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: ConsumeMoveEvent01
  * @tc.desc: ConsumeMoveEvent, abnormal scene
  * @tc.type: FUNC

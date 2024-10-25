@@ -48,7 +48,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         curZOrder = session->GetZOrder();
         // callingSession check for input method
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            uint32_t callingWindowId = session->GetSessionProperty()->GetCallingSessionId();
+            uint32_t callingWindowId = session->GetCallingSessionId();
             const auto& callingSession =
                 SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
             if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
@@ -87,24 +87,6 @@ void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)
             focusedId, nextId);
         ReportFocusException("invalid id", focusedId, nextId, nullptr);
     }
-    bool focusSessionFlag = false;
-    auto func = [&focusSessionFlag, focusedId, nextId](sptr<SceneSession> session) {
-        if (session == nullptr) {
-            return false;
-        }
-        if (session->IsFocused()) {
-            focusSessionFlag = true;
-            return false;
-        }
-        if (focusSessionFlag && session->GetBlockingFocus() && session->GetSystemTouchable() &&
-            SceneSessionManager::GetInstance().IsSessionVisibleForeground(session)) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "FocusCheck err: blockingFocus, sessionId:%{public}d",
-                session->GetPersistentId());
-            ReportFocusException("check blockingFocus", focusedId, nextId, session);
-        }
-        return false;
-    };
-    SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
 }
 
 void AnomalyDetection::ReportZOrderException(const std::string& errorReason, sptr<SceneSession> session)
