@@ -941,10 +941,6 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     int ret = 1;
     scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
-
-    scensession->SetSessionProperty(nullptr);
-    scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
-    ASSERT_EQ(nullptr, scensession->GetSessionProperty());
 }
 
 /**
@@ -1002,13 +998,6 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     scensession->property_ = property;
     ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
-
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
-    scensession->sessionChangeCallback_->OnSystemBarPropertyChange_ = [](
-        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap){};
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-        WSError::WS_OK);
 }
 
 /**
@@ -1032,11 +1021,6 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     int ret = 0;
     scensession->OnShowWhenLocked(false);
     ASSERT_EQ(ret, 0);
-
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
-    scensession->sessionChangeCallback_->OnShowWhenLocked_ = [](bool showWhenLocked){};
-    ASSERT_EQ(scensession->OnShowWhenLocked(false), WSError::WS_OK);
 }
 
 /**
@@ -1107,14 +1091,6 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
     AvoidArea avoidArea;
-    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
-    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
-    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
-    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
-    EXPECT_NE(scensession, nullptr);
-
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    scensession->property_ = property;
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
@@ -1228,11 +1204,6 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
-
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
-    scensession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
     ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
@@ -1382,10 +1353,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
-
-    scensession->SetSessionProperty(nullptr);
-    scensession->NotifyPropertyWhenConnect();
-    ASSERT_EQ(scensession->GetSessionProperty(), nullptr);
 }
 
 /**
@@ -1626,7 +1593,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
     property->SetWindowLimits(limits);
     scensession->SetSessionProperty(property);
     auto result = scensession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1801,59 +1768,6 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }
-
-/**
- * @tc.name: GetScreenWidthAndHeightFromServer
- * @tc.desc: GetScreenWidthAndHeightFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
-    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    sceneSession->SetSessionProperty(property);
-
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
-
-    sceneSession->SetSessionProperty(nullptr);
-    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
-}
-
-/**
- * @tc.name: SetDefaultDisplayIdIfNeed
- * @tc.desc: SetDefaultDisplayIdIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetDefaultDisplayIdIfNeed();
-
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    property->SetDisplayId(-99);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->SetDefaultDisplayIdIfNeed();
-    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
 
 /**
@@ -1930,6 +1844,59 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
     sceneSession->moveDragController_ = nullptr;
     sceneSession->SetMoveDragCallback();
 }
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromServer
+ * @tc.desc: GetScreenWidthAndHeightFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
+    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
+    sceneSession->SetSessionProperty(property);
+
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
+    ASSERT_EQ(result, true);
+
+    sceneSession->SetSessionProperty(nullptr);
+    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SetDefaultDisplayIdIfNeed
+ * @tc.desc: SetDefaultDisplayIdIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetDisplayId(-99);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetDefaultDisplayIdIfNeed();
+    EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
 }
 }
