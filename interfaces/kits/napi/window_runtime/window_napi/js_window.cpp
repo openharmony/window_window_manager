@@ -6780,15 +6780,16 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < INDEX_ONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "argc is invaild: %{public}zu.", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVAILD_PARAM);
+        TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu.", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool enabled = true;
     if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    auto execute = [weakToken = wptr<Window>(WindowToken_), errCodePtr, enabled] {
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled] {
         auto self = weakToken.promote();
         if (self == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
@@ -6797,13 +6798,13 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         }
         if (!WindowHelper::IsMainWindow(self->GetType())) {
             TLOGNE(WmsLogTag::WMS_IMMS, "invalid window type.");
-            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(self->SetGestureBackEnabled(enabled));
     };
-    auto complete = [env, errCodePtr] (NapiAsyncTask& task, int32_t status) {
-        if (*errCodePtr ==WmErrorCode::WM_OK) {
+    auto complete = [errCodePtr] (napi_env env, & task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d.", *errCodePtr);
