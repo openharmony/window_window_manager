@@ -298,6 +298,8 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+    NodeId nodeId = 0;
+    vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -1696,6 +1698,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
     RegisterAcquireRotateAnimationConfigFunc(sceneSession);
+    RegisterRequestVsyncFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -4120,6 +4123,18 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("success, id: %{public}d", sceneSession->GetPersistentId());
 }
+
+void SceneSessionManager::RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        return;
+    }
+    RequestVsyncFunc requestVsyncFunc = [this](std::shared_ptr<VsyncCallback> callback) {
+        vsyncStation_->RequestVsync(callback);
+    };
+    sceneSession->SetRequestNextVsyncFunc(requestVsyncFunc);
+};
 
 void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
 {

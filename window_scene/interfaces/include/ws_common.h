@@ -685,6 +685,7 @@ enum class SessionUIDirtyFlag {
     TOUCH_HOT_AREA = 1 << 4,
     Z_ORDER = 1 << 5,
     AVOID_AREA = 1 << 6,
+    DRAG_RECT = 1 << 7,
 };
 
 /**
