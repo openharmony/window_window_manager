@@ -53,7 +53,7 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false,
+    WSError UpdateSessionRect(const WSRect &rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
