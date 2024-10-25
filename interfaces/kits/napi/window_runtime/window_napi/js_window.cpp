@@ -6830,7 +6830,7 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     bool enable = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGestureBackEnabled(enable));
     if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
-        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        TLOGE(WmsLogTag::WMS_IMMS, "device is not support.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     } else if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret = %{public}d", ret);
