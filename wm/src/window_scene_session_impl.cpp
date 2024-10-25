@@ -320,7 +320,8 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
     if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
         (type == WindowType::WINDOW_TYPE_TOAST)) {
         property_->SetParentPersistentId(GetFloatingWindowParentId());
-        WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "parentId: %{public}d, type: %{public}d",
+            property_->GetParentPersistentId(), type);
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr && mainWindow->GetProperty() != nullptr) {
@@ -478,8 +479,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
         }
         if (property_->GetIsNeedUpdateWindowMode()) {
             WLOGFI("UpdateWindowMode %{public}u mode %{public}u",
-                GetWindowId(),
-                static_cast<uint32_t>(property_->GetWindowMode()));
+                GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
             UpdateWindowModeImmediately(property_->GetWindowMode());
             property_->SetIsNeedUpdateWindowMode(false);
         } else {
@@ -510,7 +510,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), state_, GetMode());
     // allow iSession is nullptr when create window by innerkits
     if (!context) {
-        WLOGFW("context is nullptr!");
+        TLOGW(WmsLogTag::WMS_LIFE, "context is nullptr");
     }
     WMError ret = WindowSessionCreateCheck();
     if (ret != WMError::WM_OK) {
@@ -536,7 +536,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (GetHostSession()) { // main window
         ret = Connect();
     } else { // system or sub window
-        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}u", GetType());
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
@@ -1117,14 +1117,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         return res;
     }
 
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
-        RSTransaction::FlushImplicitTransaction();
-    }
-
     /*
-     * delete after replace WSError with WMError
      * main window no need to notify host, since host knows hide first
      * main window notify host temporarily, since host background may failed
      * need to SetActive(false) for host session before background
@@ -1150,6 +1143,11 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (!interactive_) {
             hasFirstNotifyInteractive_ = false;
         }
+    }
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        animationTransitionController_->AnimationForHidden();
+        RSTransaction::FlushImplicitTransaction();
     }
     NotifyWindowStatusChange(GetMode());
     escKeyEventTriggered_ = false;
@@ -1850,6 +1848,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         return WMError::WM_OK;
     }
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Id: %{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property &&
         property.settingFlag_ == SystemBarSettingFlag::DEFAULT_SETTING) {
@@ -1868,13 +1867,14 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
     if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "property_ is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "Id:%{public}u, errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
