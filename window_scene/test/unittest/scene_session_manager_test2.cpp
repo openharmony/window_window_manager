@@ -2178,11 +2178,10 @@ HWTEST_F(SceneSessionManagerTest2, NotifyEnterRecentTask, Function | SmallTest |
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "NotifyEnterRecentTask";
     sessionInfo.abilityName_ = "NotifyEnterRecentTask";
-    sptr<WindowSessionProperty> property;
-    property->SetPersistentId(1);
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, property);
-    ASSERT_NE(nullptr, sceneSession);
-    ASSERT_NE(nullptr, sceneSession->property_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->gestureBackEnableWindowIdSet_.insert(1);
     ssm_->gestureBackEnableWindowIdSet_.insert(2);
     ASSERT_EQ(ssm_->NotifyEnterRecentTask(true), WSError::WS_OK);
