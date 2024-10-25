@@ -1212,6 +1212,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    SetIsPendingToBackgroundState(false);
     NotifyBackground();
     return WSError::WS_OK;
 }
@@ -1344,6 +1345,18 @@ void Session::SetForegroundInteractiveStatus(bool interactive)
 bool Session::GetForegroundInteractiveStatus() const
 {
     return foregroundInteractiveStatus_.load();
+}
+
+bool Session::GetIsPendingToBackgroundState() const
+{
+    return isPendingToBackgroundState_.load();
+}
+
+void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
+        GetPersistentId(), isPendingToBackgroundState);
+    return isPendingToBackgroundState_.store(isPendingToBackgroundState);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
