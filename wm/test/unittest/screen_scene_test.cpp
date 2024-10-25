@@ -121,20 +121,6 @@ HWTEST_F(ScreenSceneTest, RequestVsync, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: RequestVsyncErr
- * @tc.desc: RequestVsync Test Err
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
-{
-    ScreenScene screenScene("UNKNOWN");
-    std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
-    screenScene.vsyncStation_ = nullptr;
-    screenScene.RequestVsync(vsyncCallback);
-    ASSERT_EQ(1, screenScene.GetWindowId());
-}
-
-/**
  * @tc.name: GetVSyncPeriod
  * @tc.desc: GetVSyncPeriod Test
  * @tc.type: FUNC

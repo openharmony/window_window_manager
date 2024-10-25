@@ -47,6 +47,7 @@
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
 #include "pattern_detach_callback.h"
+#include "picture_in_picture_manager.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
 
@@ -382,13 +383,18 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     const WindowType type = GetType();
-    if (WindowHelper::IsSubWindow(type)) { // sub window
+    if (WindowHelper::IsSubWindow(type) && (property_->GetExtensionFlag() == false)) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }
+    }
+    if (WindowHelper::IsPipWindow(type)) {
+        TLOGI(WmsLogTag::WMS_RECOVER, "pipWindow");
+        PictureInPictureManager::DoClose(true, true);
+        return WMError::WM_OK;
     }
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
@@ -557,13 +563,11 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsMainWindow(GetType())) {
             AddSetUIContentTimeoutCheck();
         }
+        InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
     return ret;
 }
 
@@ -1298,10 +1302,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    if (needRemoveWindowInputChannel_) {
-        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
-        needRemoveWindowInputChannel_ = false;
-    }
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1749,9 +1750,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (property_->GetCompatibleModeInPc()) {
+    if ((windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode()) && property_->GetCompatibleModeInPc()) {
         TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not LayoutFullScreen");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_OK;
     }
 
     bool preStatus = property_->IsLayoutFullScreen();

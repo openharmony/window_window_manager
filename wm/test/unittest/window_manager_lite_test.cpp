@@ -57,6 +57,12 @@ public:
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override {};
 };
 
+class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
+public:
+    void OnConnected(int32_t userId, int32_t screenId) override {};
+    void OnDisconnected(int32_t userId, int32_t screenId) override {};
+}
+
 class TestWindowStyleChangedListener : public IWindowStyleChangedListener {
 public:
     void OnWindowStyleUpdate(WindowStyleType styleType)
@@ -264,6 +270,7 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
 HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
 {
     WindowManagerLite lite;
+    ASSERT_NE(lite.pImpl_, nullptr);
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
@@ -414,29 +421,36 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: TestUpdateFocusChangeInfo
- * @tc.desc: TestUpdateFocusChangeInfo
+ * @tc.name: GetWindowModeType
+ * @tc.desc: GetWindowModeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2)
 {
-    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
-    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
-    sptr<FocusChangeInfo> focusChangeInfo1 = new FocusChangeInfo();
-    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, true);
-    WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, false);
-    std::vector<sptr<WindowVisibilityInfo>> infos;
-    WindowManagerLite::GetInstance().UpdateWindowVisibilityInfo(infos);
-    std::vector<sptr<WindowDrawingContentInfo>> infos1;
-    WindowManagerLite::GetInstance().UpdateWindowDrawingContentInfo(infos1);
+    WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
+    auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: NotifyFocusedWithUn
+ * @tc.desc: NotifyFocused With MotifyUnFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Level2)
+{
     WindowManagerLite lite;
-    lite.destroyed_ = true;
-    lite.OnRemoteDied();
-    lite.destroyed_ = false;
-    lite.OnRemoteDied();
-    ASSERT_EQ(nullptr, lite.pImpl_->focusChangedListenerAgent_);
-    ASSERT_EQ(nullptr, lite.pImpl_->windowUpdateListenerAgent_);
-    ASSERT_EQ(nullptr, lite.pImpl_->windowDrawingContentListenerAgent_);
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    ASSERT_EQ(focusChangeInfo, nullptr);
+    focusChangeInfo = new (std::nothrow) FocusChangeInfo();
+    lite.pImpl_->focusChangedListeners_.push_back(nullptr);
+    sptr<TestFocusChangedListener> testFocusChangedListener = new (std::nothrow) TestFocusChangedListener();
+    lite.pImpl_->focusChangedListeners_.push_back(testFocusChangedListener);
+    lite.pImpl_->NotifyFocused(focusChangeInfo);
+    lite.pImpl_->NotifyUnfocused(focusChangeInfo);
+    ASSERT_NE(focusChangeInfo, nullptr);
 }
 
 /**
@@ -543,7 +557,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest |
 
     EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
         Return(WMError::WM_OK)));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_OK, errorCode);
     auto it1 = infos.begin();
@@ -571,7 +585,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest |
     infos.push_back(info1);
 
     EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }
@@ -587,7 +601,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -603,7 +617,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -619,7 +633,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -635,21 +649,9 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
-}
-
-/**
- * @tc.name: GetWindowModeType
- * @tc.desc: GetWindowModeType
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2)
-{
-    WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
-    auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -709,6 +711,20 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Lev
     int32_t screenId = 0;
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(userId, screenId);
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(userId, screenId);
+}
+
+/**
+ * @tc.name: NotifyWMSConnected03
+ * @tc.desc: NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Level2)
+{
+    WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = new IWMSConnectionChangedListenerSon();
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
+    WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
+    EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
 }
 
 /**
@@ -833,7 +849,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, Function | Sm
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 1;
     EXPECT_CALL(m->Mock(), TerminateSessionByPersistentId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -847,7 +863,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 0;
-    
+
     auto errorCode = WindowManagerLite::GetInstance().TerminateSessionByPersistentId(persistentId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }

@@ -99,14 +99,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         MakeSubOrDialogWindowDragableAndMoveble();
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
         windowExtensionSessionSet_.insert(this);
+        InputTransferStation::GetInstance().AddInputWindow(this);
     }
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d successfully.",
         property_->GetWindowName().c_str(), GetPersistentId());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
     AddSetUIContentTimeoutCheck();
     return WMError::WM_OK;
 }
@@ -159,11 +157,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    if (needRemoveWindowInputChannel_) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d Destroy", GetPersistentId());
-        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
-        needRemoveWindowInputChannel_ = false;
-    }
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -334,6 +328,30 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
         extensionWindowFlags_ = updateFlags;
     }
     return ret;
+}
+
+WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
+{
+    auto persistentId = GetPersistentId();
+    std::stringstream ss;
+    ss << "ID: " << persistentId << ", needHide: " << needHide;
+
+    if (surfaceNode_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    // Let rs guarantee the security and permissions of the interface
+    auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(), errCode);
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    return WMError::WM_OK;
 }
 
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
@@ -539,6 +557,8 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    } else if (handler_ != nullptr) {
+        UpdateRectForOtherReason(wmRect, wmReason);
     } else {
         NotifySizeChange(wmRect, wmReason);
         UpdateViewportConfig(wmRect, wmReason);
@@ -573,22 +593,11 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
-        window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
-            auto window = weak.promote();
-            if (!window) {
-                return;
-            }
-            window->rotationAnimationCount_--;
-            if (window->rotationAnimationCount_ == 0) {
-                RSSystemProperties::SetDrawTextAsBitmap(false);
-            }
-        });
+        RSNode::OpenImplicitAnimation(protocol, curve);
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
@@ -601,6 +610,22 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
+}
+
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+{
+    auto task = [weak = wptr(this), wmReason, wmRect] {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
+            return;
+        }
+        window->NotifySizeChange(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason);
+    };
+    if (handler_) {
+        handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 WSError WindowExtensionSessionImpl::NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
