@@ -110,6 +110,7 @@ public:
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;
     void SetRotation(Rotation rotation);
+    void SetRotationAndScreenRotationOnly(Rotation rotation);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
@@ -236,6 +237,7 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
+    void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
     void SetStartPosition(uint32_t startX, uint32_t startY);
 
 private:

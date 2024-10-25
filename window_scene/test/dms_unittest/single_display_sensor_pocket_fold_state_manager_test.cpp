@@ -260,6 +260,19 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChan
     stateManager.TentModeHandleSensorChange(4.0F, 0, nullptr);
     ASSERT_EQ(stateManager.IsTentMode(), false);
 }
+
+/**
+ * @tc.name: ReportTentStatusChange
+ * @tc.desc: test function : ReportTentStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, ReportTentStatusChange, Function | SmallTest | Level1)
+{
+    SingleDisplaySensorPocketFoldStateManager stateManager;
+    ReportTentModeStatus tentStatus = ReportTentModeStatus::NORMAL_ENTER_TENT_MODE;
+    stateManager.ReportTentStatusChange(tentStatus);
+    ASSERT_EQ(tentStatus, ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
