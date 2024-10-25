@@ -2259,6 +2259,14 @@ public:
     }
 
     /**
+     * @brief Flush layout size.
+     *
+     * @param width The width after layout
+     * @param height The height after layout
+     */
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
      * @brief get callingWindow windowStatus.
      * @param windowStatus
      * @return WM_OK means set success, others means set Failed.
