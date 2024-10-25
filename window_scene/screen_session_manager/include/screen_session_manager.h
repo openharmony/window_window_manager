@@ -301,6 +301,7 @@ public:
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
 
+    void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
      * multi user
      */
@@ -310,7 +311,6 @@ public:
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
 
-    void SetMultiScreenStatus(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -367,6 +367,7 @@ private:
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
+    void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
