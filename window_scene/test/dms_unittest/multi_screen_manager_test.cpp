@@ -53,6 +53,7 @@ public:
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override {};
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
+    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
