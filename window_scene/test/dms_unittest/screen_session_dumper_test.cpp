@@ -799,7 +799,7 @@ HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest |
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     
     dumper->SetEnterOrExitTentMode("-offtent");
-    bool tentMode = ScreenSession::GetInstance().GetTentMode();
+    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
     ASSERT_EQ(tentMode, false);
 }
 }
