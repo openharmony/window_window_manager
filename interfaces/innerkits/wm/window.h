@@ -2388,7 +2388,7 @@ public:
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
-    virtual WMError GetGestureBackEnabled(bool &enable) { return WMError::WM_OK; }
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 };
 }
 }
