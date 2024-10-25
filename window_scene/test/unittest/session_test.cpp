@@ -58,18 +58,18 @@ private:
     class TLifecycleListener : public ILifecycleListener {
         public:
             virtual ~TLifecycleListener() {}
-            void OnActivation() override() {}
-            void Onconnect() override() {}
-            void OnForeground() override() {}
-            void OnBackground() override() {}
-            void OnDisconnect() override() {}
+            void OnActivation() override {}
+            void Onconnect() override {}
+            void OnForeground() override {}
+            void OnBackground() override {}
+            void OnDisconnect() override {}
             void OnExtensionDied() override() {}
-            void OnExtensionTimeout(int32_t errCode) override {}
+            void OnExtensionTimeout(int32_t errorCode) override {}
             void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
                 int64_t uiExtensionIdLevel) override {}
             void OnDrawingCompleted() override {}
     };
-    std::shared_ptr<TLifecycle> lifecycleListener_ = std::make_shared<TLifecycleListener>();
+    std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 
     sptr<SessionStageMocker> mockSessionStage_ = nullptr;
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
@@ -102,7 +102,7 @@ void WindowSessionTest::SetUp()
     mockSessionStage_ = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage_, nullptr);
 
-    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSession);
+    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSessionStage_);
     ASSERT_NE(mockEventChannel_, nullptr);
 }
 
@@ -259,20 +259,20 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetIsNeedUpdateWindow(true);
+    property->SetIsNeedUpdateWindowMode(true);
     session_->SetScreenId(233);
     session_->SetSessionProperty(property);
-    auto res = session_->ConnectInner(mockSessionStage_, mockEventChanel_,
+    auto res = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->isTerminating_ = true;
     auto res2 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res2, WSError::WS_OK);
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    property->SetIsNeedUpdateWindow(true);
+    property->SetIsNeedUpdateWindowMode(true);
     session_->SetScreenId(SCREEN_ID_INVALID);
     session_->SetSessionProperty(property);
     auto res3 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
@@ -282,10 +282,10 @@ HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
 
 /**
  * @tc.name: RemoveLifeCycleTask
- * @tc.desc: RemoveLifeCycleTask
+ * @tc.desc: RemoveLifeCycleTask & PostLifeCycleTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, RemoveLifeCycleTask, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, LifeCycleTask, Function | SmallTest | Level2)
 {
     auto task = []() {};
     session_->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
@@ -1248,33 +1248,6 @@ HWTEST_F(WindowSessionTest, TransferBackPressedEventForConsumed02, Function | Sm
 }
 
 /**
- * @tc.name: TransferFocusActiveEvent02
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFocusActiveEvent02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->windowEventChannel_ = new TestWindowEventChannel();
-
-    ASSERT_EQ(WSError::WS_OK, session_->TransferFocusActiveEvent(false));
-}
-
-/**
- * @tc.name: TransferFocusStateEvent02
- * @tc.desc: windowEventChannel_ is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferFocusStateEvent02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->windowEventChannel_ = new TestWindowEventChannel();
-
-    ASSERT_EQ(WSError::WS_OK, session_->TransferFocusStateEvent(false));
-}
-/**
  * @tc.name: CreateDetectStateTask001
  * @tc.desc: Create detection task when there are no pre_existing tasks.
  * @tc.type: FUNC
@@ -1419,6 +1392,34 @@ HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, Function | SmallTest 
 }
 
 /**
+ * @tc.name: TransferFocusActiveEvent02
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusActiveEvent02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->windowEventChannel_ = new TestWindowEventChannel();
+
+    ASSERT_EQ(WSError::WS_OK, session_->TransferFocusActiveEvent(false));
+}
+
+/**
+ * @tc.name: TransferFocusStateEvent02
+ * @tc.desc: windowEventChannel_ is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransferFocusStateEvent02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->windowEventChannel_ = new TestWindowEventChannel();
+
+    ASSERT_EQ(WSError::WS_OK, session_->TransferFocusStateEvent(false));
+}
+
+/**
  * @tc.name: SetCompatibleModeInPc
  * @tc.desc: SetCompatibleModeInPc test
  * @tc.type: FUNC
@@ -1433,65 +1434,6 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2
     ASSERT_EQ(property->GetCompatibleModeInPc(), true);
     property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
     ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
-}
-
-/**
- * @tc.name: NotifyOccupiedAreaChangeInfo
- * @tc.desc: NotifyOccupiedAreaChangeInfo test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
-{
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(mockSessionStage, nullptr);
-    session_->sessionStage_ = mockSessionStage;
-    session_->NotifyOccupiedAreaChangeInfo(nullptr, nullptr);
-    EXPECT_NE(session_->sessionStage_, nullptr);
-}
-
-/**
- * @tc.name: ProcessBackEvent
- * @tc.desc: ProcessBackEvent test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
-{
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(mockSessionStage, nullptr);
-    session_->sessionStage_ = mockSessionStage;
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->state_ = SessionState::STATE_FOREGROUND;
-    auto ret = session_->ProcessBackEvent();
-    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
-}
-
-/**
- * @tc.name: ProcessBackGetAndSetSessionRequestRectEvent
- * @tc.desc: GetSessionRequestRectEvent, SetSessionRequestRectEvent test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
-{
-    session_->SetSessionProperty(nullptr);
-    session_->GetSessionRequestRect();
-    ASSERT_EQ(session_->property_, nullptr);
-
-    WSRect rect = {0, 0, 0, 0};
-    session_->SetSessionRequestRect(rect);
-    ASSERT_EQ(session_->property_, nullptr);
-}
-
-/**
- * @tc.name: SetSessionRect01
- * @tc.desc: SetSessionRect test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
-{
-    WSRect rect = session_->GetSessionRect();
-    session_->SetSessionRect(rect);
-    ASSERT_EQ(rect, session_->winRect_);
 }
 
 /**
@@ -1576,6 +1518,64 @@ HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
     touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
+}
+/**
+ * @tc.name: NotifyOccupiedAreaChangeInfo
+ * @tc.desc: NotifyOccupiedAreaChangeInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+    session_->NotifyOccupiedAreaChangeInfo(nullptr, nullptr);
+    EXPECT_NE(session_->sessionStage_, nullptr);
+}
+
+/**
+ * @tc.name: ProcessBackEvent
+ * @tc.desc: ProcessBackEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    auto ret = session_->ProcessBackEvent();
+    ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: ProcessBackGetAndSetSessionRequestRectEvent
+ * @tc.desc: GetSessionRequestRectEvent, SetSessionRequestRectEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    session_->GetSessionRequestRect();
+    ASSERT_EQ(session_->property_, nullptr);
+
+    WSRect rect = {0, 0, 0, 0};
+    session_->SetSessionRequestRect(rect);
+    ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: SetSessionRect01
+ * @tc.desc: SetSessionRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
+{
+    WSRect rect = session_->GetSessionRect();
+    session_->SetSessionRect(rect);
+    ASSERT_EQ(rect, session_->winRect_);
 }
 }
 } // namespace Rosen
