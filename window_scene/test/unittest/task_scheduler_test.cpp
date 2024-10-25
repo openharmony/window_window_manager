@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c)  Huawei Technologies Co., Ltd. 2023. All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,44 @@ HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level
     ASSERT_EQ(res, 0);
     delete taskScheduler;
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
+}
+
+/**
+ * @tc.name: GetEventHandler
+ * @tc.desc: GetEventHandler function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSchedulerText, GetEventHandler, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    ASSERT_NE(taskScheduler, nullptr);
+    EXPECT_NE(taskScheduler->GetEventHandler(), nullptr);
+}
+
+/**
+ * @tc.name: PostTask
+ * @tc.desc: PostTask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSchedulerText, PostTask, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    ASSERT_NE(taskScheduler, nullptr);
+    int resultValue = 0;
+    auto taskFunc = [&resultValue]() {
+        GTEST_LOG_(INFO) << "START_TASK";
+        resultValue = 1;
+    };
+    taskScheduler->PostAsyncTask(taskFunc);
+    EXPECT_NE(taskScheduler->handler_, nullptr);
+    EXPECT_EQ(resultValue, 0);
+
+    std::string name = "ssmTask";
+    int64_t delayTime = 1;
+    taskScheduler->PostAsyncTask(taskFunc, name, delayTime);
+    EXPECT_EQ(resultValue, 0);
 }
 } // namespace
 } // namespace Rosen
