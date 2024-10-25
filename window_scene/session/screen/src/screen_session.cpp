@@ -1472,4 +1472,14 @@ void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 {
     property_.SetStartPosition(startX, startY);
 }
+
+void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
+    }
+}
 } // namespace OHOS::Rosen

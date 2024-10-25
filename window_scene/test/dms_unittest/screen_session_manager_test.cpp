@@ -3106,6 +3106,36 @@ HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Lev
     ssm_->OnTentModeChanged(isTentMode);
     ASSERT_EQ(ssm_->GetTentMode(), false);
 }
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode errCode;
+    std::shared_ptr<Media::PixelMap> bitMap = ssm->GetScreenCapture(option, &errCode);
+    ASSERT_NE(bitMap, nullptr);
+}
+
+/**
+ * @tc.name: OnScreenCaptureNotify
+ * @tc.desc: OnScreenCaptureNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+    ssm->OnScreenCaptureNotify(screenId, uid, clientName);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
