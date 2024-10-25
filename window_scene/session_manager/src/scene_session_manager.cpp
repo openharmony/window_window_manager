@@ -9501,25 +9501,16 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
         return nullptr;
     }
 
-    wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, persistentId, scaleParam, weakSceneSession]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
-        auto sceneSession = weakSceneSession.promote();
-        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-        if (sceneSession == nullptr) {
-            WLOGFE("session is nullptr");
-            return pixelMap;
-        }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
 
-        bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
-        pixelMap = sceneSession->Snapshot(false, scaleParam, isPc);
-        if (!pixelMap) {
-            WLOGFI("get local snapshot pixelmap start");
-            pixelMap = sceneSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
-        }
-        return pixelMap;
-    };
-    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotPixelMap" + std::to_string(persistentId));
+    bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
+    pixelMap = sceneSession->Snapshot(false, scaleParam, isPc);
+    if (!pixelMap) {
+        WLOGFI("get local snapshot pixelmap start");
+        pixelMap = sceneSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
+    }
+    return pixelMap;
 }
 
 const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSessionMap()
