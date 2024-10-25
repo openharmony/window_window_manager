@@ -373,6 +373,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         }
     }
+    sceneSession->SetSessionInfoProcessOptions(info.processOptions);
     return sceneSession;
 }
 } // namespace OHOS::Rosen
