@@ -1355,7 +1355,7 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
-        } else if (WindowHelper::IsSubWindow(GetType()) && property_->GetIsUIExtFirstSubWindow()) {
+        } else if (WindowHelper::IsSubWindow(GetType()) && !property_->GetIsUIExtFirstSubWindow()) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
