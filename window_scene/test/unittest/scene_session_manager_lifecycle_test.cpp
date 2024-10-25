@@ -430,12 +430,12 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-    sptr<AAFwk::SessionInfo> scnSessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, scnSessionInfo);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
+    sptr<AAFwk::SessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(nullptr, sceneSessionInfo);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
     ASSERT_EQ(AncoSceneState::DEFAULT_STATE, sceneSession->GetSessionInfo().ancoSceneState);
 }
