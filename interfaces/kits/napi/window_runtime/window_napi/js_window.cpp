@@ -6790,20 +6790,20 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled] {
-        auto self = weakToken.promote();
-        if (self == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsMainWindow(self->GetType())) {
+        if (!WindowHelper::IsMainWindow(window->GetType())) {
             TLOGNE(WmsLogTag::WMS_IMMS, "invalid window type.");
             *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(self->SetGestureBackEnabled(enabled));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGestureBackEnabled(enabled));
     };
-    auto complete = [errCodePtr] (napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
