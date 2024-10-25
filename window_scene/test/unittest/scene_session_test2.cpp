@@ -1076,6 +1076,16 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     res = sceneSession->SetPiPControlEvent(controlType, status);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetPiPControlEvent(controlType, status), WSError::WS_ERROR_INVALID_TYPE);
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetPiPControlEvent(controlType, status), WSError::WS_OK);
 }
 
 /**
@@ -1408,6 +1418,9 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
     bool showWhenLocked = true;
     sceneSession->OnShowWhenLocked(showWhenLocked);
     sceneSession->NotifyPropertyWhenConnect();
+
+    sceneSession->focusedOnShow_ = false;
+    sceneSession->RaiseAppMainWindowToTop();
 }
 
 /**
@@ -1469,6 +1482,29 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
 
     WSRect rect;
     AvoidArea avoidArea;
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    sceneSession->SetIsDisplayStatusBarTemporarily(true);
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+    ASSERT_EQ(sceneSession->GetIsDisplayStatusBarTemporarily(), true);
+
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->property_ = property;
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->GetAINavigationBarArea(rect, avoidArea);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
+    ASSERT_NE(nullptr, sceneSession->specificCallback_);
+    sceneSession->specificCallback_->onGetAINavigationBarArea_ = [](uint64_t displayId) {
+        WSRect rect = {1, 1, 1, 1};
+        return rect;
+    };
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
 }
 
