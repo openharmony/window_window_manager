@@ -21,6 +21,7 @@
 #include "session_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
+#include <hitrace_meter.h>
 #include "parameters.h"
 #include "xcollie/xcollie.h"
 
@@ -189,6 +190,8 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
         TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return false;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:PointerEvent id:%d action:%d",
+        pointerEvent->GetId(), pointerEvent->GetPointerAction());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent_ is null");
         pointerEvent->MarkProcessed();
@@ -302,6 +305,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The key event is nullptr");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEM:KeyEvent id:%d", keyEvent->GetId());
     if (!SceneSessionManager::GetInstance().IsInputEventEnabled()) {
         TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "OnInputEvent is disabled temporarily");
         keyEvent->MarkProcessed();
@@ -370,9 +374,9 @@ bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
-    TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d isKeyFN:%{public}d, isKeyboard:%{public}d",
-        keyEvent->GetId(), isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard || isKeyBack);
+    bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
+    TLOGI(WmsLogTag::WMS_EVENT, "isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(
