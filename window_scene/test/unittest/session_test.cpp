@@ -59,11 +59,11 @@ private:
         public:
             virtual ~TLifecycleListener() {}
             void OnActivation() override {}
-            void Onconnect() override {}
+            void OnConnect() override {}
             void OnForeground() override {}
             void OnBackground() override {}
             void OnDisconnect() override {}
-            void OnExtensionDied() override() {}
+            void OnExtensionDied() override {}
             void OnExtensionTimeout(int32_t errorCode) override {}
             void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
                 int64_t uiExtensionIdLevel) override {}
@@ -1519,6 +1519,7 @@ HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
 }
+
 /**
  * @tc.name: NotifyOccupiedAreaChangeInfo
  * @tc.desc: NotifyOccupiedAreaChangeInfo test
