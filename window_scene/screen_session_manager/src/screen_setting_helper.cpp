@@ -35,7 +35,7 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
     dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
     ErrCode ret = provider.RegisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "register setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         dpiObserver_ = nullptr;
     }
 }
@@ -50,7 +50,7 @@ void ScreenSettingHelper::RegisterExtendSettingDpiObserver(SettingObserver::Upda
     extendDpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY_EXTEND, func);
     ErrCode ret = provider.RegisterObserver(extendDpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "register extend setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         extendDpiObserver_ = nullptr;
     }
 }
@@ -64,7 +64,7 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.UnregisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "unregister setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     dpiObserver_ = nullptr;
 }
@@ -78,7 +78,7 @@ void ScreenSettingHelper::UnregisterExtendSettingDpiObserver()
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.UnregisterObserver(extendDpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "unregister extend setting dpi observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     extendDpiObserver_ = nullptr;
 }
@@ -94,7 +94,7 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
     int32_t getValue;
     ErrCode ret = settingData.GetIntValue(key, getValue);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "get setting value failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     value = static_cast<uint32_t>(getValue);
@@ -122,7 +122,7 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
     castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
     ErrCode ret = castProvider.RegisterObserver(castObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "register setting cast observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         castObserver_ = nullptr;
     }
 }
@@ -136,7 +136,7 @@ void ScreenSettingHelper::UnregisterSettingCastObserver()
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = castProvider.UnregisterObserver(castObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "unregister setting cast observer failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     castObserver_ = nullptr;
 }
@@ -146,7 +146,7 @@ bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = castProvider.GetBoolValue(key, enable);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "get setting dpi failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -162,7 +162,7 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
     rotationObserver_ = settingProvider.CreateObserver(SETTING_ROTATION_KEY, func);
     ErrCode ret = settingProvider.RegisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "register setting rotation observer failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         rotationObserver_ = nullptr;
     }
 }
@@ -176,7 +176,7 @@ void ScreenSettingHelper::UnregisterSettingRotationObserver()
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.UnregisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "unregister setting rotation observer failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
     }
     rotationObserver_ = nullptr;
 }
@@ -186,10 +186,10 @@ void ScreenSettingHelper::SetSettingRotation(int32_t rotation)
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.PutIntValue(SETTING_ROTATION_KEY, rotation, true);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "set setting rotation failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS, "set setting rotation succeed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotation(int32_t& rotation, const std::string& key)
@@ -197,7 +197,7 @@ bool ScreenSettingHelper::GetSettingRotation(int32_t& rotation, const std::strin
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValue(key, rotation);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "get setting rotation failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
     TLOGE(WmsLogTag::DMS, "current rotation:%{public}d", rotation);
@@ -209,10 +209,10 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.PutIntValue(SETTING_ROTATION_SCREEN_ID_KEY, screenId, false);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "set setting rotation screen id failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS, "set setting rotation screen id succeed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "ssucceed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
@@ -220,7 +220,7 @@ bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const st
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValue(key, screenId);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "get setting rotation screen id failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
     TLOGE(WmsLogTag::DMS, "current rotation screen id:%{public}d", screenId);
