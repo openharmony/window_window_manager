@@ -58,7 +58,7 @@ void ScreenSensorConnector::UnsubscribeRotationSensor()
 
 void ScreenSensorConnector::SubscribeTentSensor()
 {
-    TLOGD(WmsLogTag::DMS, "subscribe tent sensor");
+    TLOGD(WmsLogTag::DMS, "start");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionTentSubscriber::SubscribeMotionSensor();
 #endif
@@ -75,7 +75,7 @@ void ScreenSensorConnector::UnsubscribeTentSensor()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    TLOGI(WmsLogTag::DMS, "Subscribe motion Sensor");
+    TLOGI(WmsLogTag::DMS, "start");
     if (isMotionSensorSubscribed_) {
         TLOGE(WmsLogTag::DMS, "motion sensor's already subscribed");
         return;
@@ -95,7 +95,7 @@ void MotionSubscriber::SubscribeMotionSensor()
 void MotionSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "Unsubscribe motion sensor");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);
@@ -157,7 +157,7 @@ void MotionTentSubscriber::SubscribeMotionSensor()
 void MotionTentSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "Unsubscribe tent motion sensor");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
     int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_TENT, motionEventCallback_);
