@@ -1362,31 +1362,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTes
 }
 
 /**
- * @tc.name: HandleGetSessionInfos2
- * @tc.desc: test HandleGetSessionInfos
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos2, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    const std::string deviceId = "testDeviceId";
-    const int numMax = 5;
-    data.WriteString(deviceId);
-    data.WriteInt32(numMax);
-
-    std::vector<SessionInfoBean> sessionInfos;
-    SessionInfoBean sessionInfo;
-    sessionInfos.push_back(sessionInfo);
-
-    int result = stub_->HandleGetSessionInfos(data, reply);
-
-    ASSERT_EQ(result, ERR_NONE);
-    ASSERT_EQ(reply.ReadInt32(), static_cast<int32_t>(WSError::WS_OK));
-}
-
-/**
  * @tc.name: HandleGetSessionInfos3
  * @tc.desc: test HandleGetSessionInfos
  * @tc.type: FUNC
