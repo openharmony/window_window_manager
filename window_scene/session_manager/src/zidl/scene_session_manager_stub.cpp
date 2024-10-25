@@ -732,10 +732,23 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
 
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetSessionSnapshot!");
-    std::string deviceId = Str16ToStr8(data.ReadString16());
-    int32_t persistentId = data.ReadInt32();
-    bool isLowResolution = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
+    std::u16string deviceIdData;
+    if (!data.ReadString16(deviceIdData)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
+        return ERR_INVALID_DATA;
+    }
+    std::string deviceId = Str16ToStr8(deviceIdData);
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool isLowResolution = false;
+    if (!data.ReadBool(isLowResolution)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
+        return ERR_INVALID_DATA;
+    }
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
@@ -745,8 +758,12 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel& data, Messa
 
 int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Handled!");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
     const WMError ret = GetSessionSnapshotById(persistentId, *snapshot);
     reply.WriteParcelable(snapshot.get());
@@ -944,8 +961,17 @@ int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, Me
 
 int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
-    bool haveListener = data.ReadBool();
+    TLOGD(WmsLogTag::DEFAULT, "Handled!");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read persistentId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool haveListener = false;
+    if (!data.ReadBool(haveListener)) {
+        TLOGE(WmsLogTag::DEFAULT, "read haveListener fail");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UpdateSessionWindowVisibilityListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -1057,8 +1083,12 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "run HandleGetHostWindowRect!");
-    int32_t hostWindowId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_UIEXT, "Handled!");
+    int32_t hostWindowId = 0;
+    if (!data.ReadInt32(hostWindowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read hostWindowId fail");
+        return ERR_INVALID_DATA;
+    }
     Rect rect;
     WSError ret = GetHostWindowRect(hostWindowId, rect);
     reply.WriteInt32(rect.posX_);
@@ -1138,9 +1168,17 @@ int SceneSessionManagerStub::HandleGetWindowStyleType(MessageParcel& data, Messa
 
 int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t pid = data.ReadInt32();
+    TLOGD(WmsLogTag::DEFAULT, "Handled!");
+    int32_t pid = 0;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
     std::vector<int32_t> persistentIds;
-    data.ReadInt32Vector(&persistentIds);
+    if (!data.ReadInt32Vector(&persistentIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32Vector persistentIds");
+        return ERR_INVALID_DATA;
+    }
     std::vector<uint64_t> surfaceNodeIds;
     WMError errCode = GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
