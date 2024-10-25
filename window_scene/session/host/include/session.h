@@ -195,6 +195,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions);
     void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
