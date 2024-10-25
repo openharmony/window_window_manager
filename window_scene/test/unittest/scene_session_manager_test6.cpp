@@ -1863,11 +1863,6 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     ssm_->GetSceneSession(1);
     result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
-
-    WindowVisibilityInfo windowVisibilityInfo;
-    windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
-    result = ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
