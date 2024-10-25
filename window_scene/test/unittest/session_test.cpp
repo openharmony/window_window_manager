@@ -54,6 +54,25 @@ private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+
+    class TLifecycleListener : public ILifecycleListener {
+        public:
+            virtual ~TLifecycleListener() {}
+            void OnActivation() override() {}
+            void Onconnect() override() {}
+            void OnForeground() override() {}
+            void OnBackground() override() {}
+            void OnDisconnect() override() {}
+            void OnExtensionDied() override() {}
+            void OnExtensionTimeout(int32_t errCode) override {}
+            void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+                int64_t uiExtensionIdLevel) override {}
+            void OnDrawingCompleted() override {}
+    };
+    std::shared_ptr<TLifecycle> lifecycleListener_ = std::make_shared<TLifecycleListener>();
+
+    sptr<SessionStageMocker> mockSessionStage_ = nullptr;
+    sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
 void WindowSessionTest::SetUpTestCase()
@@ -79,6 +98,12 @@ void WindowSessionTest::SetUp()
         return ssm_->IsScreenLocked();
     };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+
+    mockSessionStage_ = new (std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage_, nullptr);
+
+    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSession);
+    ASSERT_NE(mockEventChannel_, nullptr);
 }
 
 void WindowSessionTest::TearDown()
@@ -158,6 +183,20 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    bool enable = true;
+    property->SetCompatibleModeEnableInPad(enable);
+    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: update rect
  * @tc.type: FUNC
@@ -169,7 +208,7 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(0).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
@@ -186,6 +225,12 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
         SizeChangeReason::UNDEFINED, "WindowSessionTest"));
     ASSERT_EQ(rect, session_->winRect_);
+
+    session_->UpdateSessionState(SessionState::STATE_ACTIVE);
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
+
+    session_->sessionStage_ = nullptr;
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
 }
 
 /**
@@ -199,6 +244,64 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
     ASSERT_FALSE(session_->IsSessionValid());
     session_->state_ = SessionState::STATE_CONNECT;
     ASSERT_TRUE(session_->IsSessionValid());
+}
+
+/**
+ * @tc.name: ConnectInner
+ * @tc.desc: ConnectInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, ConnectInner, Function | SmallTest | Level2)
+{
+    SystemSessionConfig sessionConfig;
+    session_->state_ = SessionState::STATE_CONNECT;
+    session_->isTerminating_ = false;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsNeedUpdateWindow(true);
+    session_->SetScreenId(233);
+    session_->SetSessionProperty(property);
+    auto res = session_->ConnectInner(mockSessionStage_, mockEventChanel_,
+        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->isTerminating_ = true;
+    auto res2 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
+        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    property->SetIsNeedUpdateWindow(true);
+    session_->SetScreenId(SCREEN_ID_INVALID);
+    session_->SetSessionProperty(property);
+    auto res3 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
+        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    ASSERT_EQ(res3, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RemoveLifeCycleTask
+ * @tc.desc: RemoveLifeCycleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RemoveLifeCycleTask, Function | SmallTest | Level2)
+{
+    auto task = []() {};
+    session_->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
+    ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 1);
+
+    auto task2 = []() {};
+    session_->PostLifeCycleTask(task2, "task2", LifeCycleTaskType::START);
+    ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 2);
+
+    LifeCycleTaskType taskType = LifeCycleTaskType{0};
+
+    session_->RemoveLifeCycleTask(taskType);
+    ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 1);
+
+    session_->RemoveLifeCycleTask(taskType);
+    ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 0);
 }
 
 /**
@@ -783,6 +886,10 @@ HWTEST_F(WindowSessionTest, NotifyExtensionTimeout, Function | SmallTest | Level
     session_->state_ = SessionState::STATE_DISCONNECT;
     session_->NotifyExtensionTimeout(3);
 
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->NotifyExtensionTimeout(3);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -1072,7 +1179,8 @@ HWTEST_F(WindowSessionTest, SetSessionLabel, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->updateSessionLabelFunc_ = nullptr;
+    NofitySessionLabelUpdatedFunc func = [](const std::string& label) {};
+    session_->updateSessionLabelFunc_ = func;
     ASSERT_EQ(WSError::WS_OK, session_->SetSessionLabel("SetSessionLabel Test"));
 }
 
@@ -1115,6 +1223,9 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionStage_ = nullptr;
+    session_->NotifyScreenshot();
+
+    session_->sessionStage_ = mockSessionStage_;
     session_->NotifyScreenshot();
 
     session_->property_ = new WindowSessionProperty();
