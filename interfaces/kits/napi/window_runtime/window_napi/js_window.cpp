@@ -6779,54 +6779,40 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (argc < INDEX_ONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        TLOGE(WmsLogTag::WMS_IMMS, "argc is invaild: %{public}zu.", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVAILD_PARAM);
     }
     bool enabled = true;
-    if (errCode == WmErrorCode::WM_OK) {
-        napi_value nativeVal = argv[0];
-        if (nativeVal == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enabled");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &enabled));
-        }
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled.");
     }
-    if (errCode != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, enabled] {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    auto execute = [weakToken = wptr<Window>(WindowToken_), errCodePtr, enabled] {
+        auto self = weakToken.promote();
+        if (self == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "Invaild window param."));
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsMainWindow(weakWindow->GetType())) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set fail since invalid window type.");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "Invaild window type."));
+        if (!WindowHelper::IsMainWindow(self->GetType())) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "invalid window type.");
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        auto ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetGestureBackEnabled(enabled));
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(self->SetGestureBackEnabled(enabled));
+    };
+    auto complete = [env, errCodePtr] (NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr ==WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set failed."));
+            TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d.", *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-            "set failed"));
-    }
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetGestureBackEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
