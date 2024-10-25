@@ -1041,6 +1041,821 @@ HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange03, Function | SmallTest | L
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
+
+/**
+ * @tc.name: SetLastScreenMode
+ * @tc.desc: SetLastScreenMode func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, SetLastScreenMode, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 0;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    ScreenId realId = MultiScreenManager::GetInstance().lastScreenMode_.first;
+    MultiScreenMode realScreenMode = MultiScreenManager::GetInstance().lastScreenMode_.second;
+    EXPECT_EQ(realId, mainScreenId);
+    EXPECT_EQ(realScreenMode, secondaryScreenMode);
+}
+
+/**
+ * @tc.name: InternalScreenOnChange01
+ * @tc.desc: external mirror to internal mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange01, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    ScreenId mainScreenId = internalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOnChange02
+ * @tc.desc: no need to change or paramater error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange02, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    ScreenId mainScreenId = externalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOnChange03
+ * @tc.desc: external mirror to internal extend
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange03, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    ScreenId mainScreenId = internalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_EXTEND;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOnChange04
+ * @tc.desc: external mirror to external extend
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange04, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    ScreenId mainScreenId = externalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_EXTEND;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOnChange05
+ * @tc.desc: mode not restored
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange05, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    ScreenId mainScreenId = SCREEN_ID_INVALID;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    ScreenId realId = MultiScreenManager::GetInstance().lastScreenMode_.first;
+    MultiScreenMode realScreenMode = MultiScreenManager::GetInstance().lastScreenMode_.second;
+    EXPECT_EQ(realId, mainScreenId);
+    EXPECT_EQ(realScreenMode, secondaryScreenMode);
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOnChange06
+ * @tc.desc: session nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange06, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    sptr<ScreenSession> externalSession = nullptr;
+
+    ScreenId mainScreenId = internalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOnChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOffChange01
+ * @tc.desc: internal mirror to external mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetIsCurrentInUse(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(true);
+    externalSession->SetIsCurrentInUse(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOffChange02
+ * @tc.desc: internal extend to external mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetIsCurrentInUse(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetIsCurrentInUse(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOffChange03
+ * @tc.desc: paramater error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetIsCurrentInUse(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(true);
+    externalSession->SetIsCurrentInUse(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOffChange04
+ * @tc.desc: external extend to external mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetIsCurrentInUse(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetIsCurrentInUse(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
+
+    EXPECT_EQ(true, internalSession->GetIsExtend());
+    EXPECT_EQ(false, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: InternalScreenOffChange05
+ * @tc.desc: session nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange05, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    sptr<ScreenSession> externalSession = nullptr;
+
+    ScreenId mainScreenId = internalId;
+    MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    MultiScreenManager::GetInstance().SetLastScreenMode(mainScreenId, secondaryScreenMode);
+    MultiScreenManager::GetInstance().InternalScreenOffChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+    }
+}
+
+/**
+ * @tc.name: ExternalScreenDisconnectChange01
+ * @tc.desc: paramater error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange01, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: ExternalScreenDisconnectChange02
+ * @tc.desc: external mirror to internal mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange02, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: ExternalScreenDisconnectChange03
+ * @tc.desc: internal extend to internal mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange03, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(true);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: ExternalScreenDisconnectChange04
+ * @tc.desc: external extend to internal mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange04, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(true);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    ScreenId externalId = 11;
+    ScreenSessionConfig externalConfig = {
+        .screenId = externalId,
+    };
+    sptr<ScreenSession> externalSession = new ScreenSession(externalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    externalSession->SetIsInternal(false);
+    externalSession->SetIsExtend(false);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[externalId] = externalSession;
+    }
+
+    MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(true, externalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, externalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(externalId);
+    }
+}
+
+/**
+ * @tc.name: ExternalScreenDisconnectChange05
+ * @tc.desc: session nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, Function | SmallTest | Level1)
+{
+    ScreenId internalId = 0;
+    ScreenSessionConfig internalConfig = {
+        .screenId = internalId,
+    };
+    sptr<ScreenSession> internalSession = new ScreenSession(internalConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    internalSession->SetIsInternal(true);
+    internalSession->SetIsExtend(false);
+    internalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_[internalId] = internalSession;
+    }
+
+    sptr<ScreenSession> externalSession = nullptr;
+
+    MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, externalSession);
+
+    EXPECT_EQ(false, internalSession->GetIsExtend());
+    EXPECT_EQ(ScreenCombination::SCREEN_MAIN, internalSession->GetScreenCombination());
+    {
+        std::lock_guard<std::recursive_mutex>
+            lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS
