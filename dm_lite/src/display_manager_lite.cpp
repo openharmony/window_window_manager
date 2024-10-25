@@ -619,7 +619,6 @@ bool DisplayManagerLite::Impl::SetDisplayState(DisplayState state, DisplayStateC
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
-            WLOGFI("[UL_POWER]previous callback not called or callback invalid");
             if (displayStateCallback_ != nullptr) {
                 WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
