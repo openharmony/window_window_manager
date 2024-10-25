@@ -6803,7 +6803,7 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(self->SetGestureBackEnabled(enabled));
     };
-    auto complete = [errCodePtr] (napi_env env, & task, int32_t status) {
+    auto complete = [errCodePtr] (napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
