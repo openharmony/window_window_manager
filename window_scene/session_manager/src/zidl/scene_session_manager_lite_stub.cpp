@@ -296,7 +296,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(Message
 {
     SessionInfoBean info;
     std::string continueSessionId;
-    if (!data.ReadString16(continueSessionId)) {
+    if (!data.ReadString(continueSessionId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "read continueSessionId fail");
         return ERR_INVALID_DATA;
     }
