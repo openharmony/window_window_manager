@@ -353,6 +353,34 @@ namespace {
         fsc_.UpdateForPhyScreenPropertyChange();
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
     }
+
+    /**
+     * @tc.name: GetTentMode
+     * @tc.desc: test function :GetTentMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode, Function | SmallTest | Level1)
+    {
+        if (ssm_.IsFoldable()) {
+            ASSERT_NE(ssm_.foldScreenController_, nullptr);
+            auto tentMode = ssm_.foldScreenController_->GetTentMode();
+            ASSERT_EQ(tentMode, false);
+        }
+    }
+
+    /**
+     * @tc.name: OnTentModeChanged
+     * @tc.desc: test function :OnTentModeChanged
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, OnTentModeChanged, Function | SmallTest | Level1)
+    {
+        if (ssm_.IsFoldable()) {
+            bool isTentMode = false;
+            ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+            ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
