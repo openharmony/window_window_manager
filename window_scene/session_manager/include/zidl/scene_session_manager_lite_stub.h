@@ -63,10 +63,10 @@ private:
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply);
-    int HandleClearMainSessions(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAllMainWindowInfos(MessageParcel& data, MessageParcel& reply);
+    int HandleClearMainSessions(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply);
 
