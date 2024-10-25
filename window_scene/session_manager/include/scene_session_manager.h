@@ -489,6 +489,8 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
+    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -522,6 +524,8 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);

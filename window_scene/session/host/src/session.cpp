@@ -3350,6 +3350,11 @@ void Session::ResetDirtyFlags()
     }
 }
 
+void Session::ResetDragDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+}
+
 void Session::SetUIStateDirty(bool dirty)
 {
     mainUIStateDirty_.store(dirty);
