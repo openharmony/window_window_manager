@@ -44,6 +44,44 @@ HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level
     delete taskScheduler;
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
 }
+
+/**
+ * @tc.name: GetEventHandler
+ * @tc.desc: GetEventHandler function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSchedulerText, GetEventHandler, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    ASSERT_NE(taskScheduler, nullptr);
+    EXPECT_NE(taskScheduler->GetEventHandler(), nullptr);
+}
+
+/**
+ * @tc.name: PostTask
+ * @tc.desc: PostTask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSchedulerText, PostTask, Function | SmallTest | Level2)
+{
+    std::string threadName = "threadName";
+    std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
+    ASSERT_NE(taskScheduler, nullptr);
+    int resultValue = 0;
+    auto taskFunc = [&resultValue]() {
+        GTEST_LOG_(INFO) << "START_TASK";
+        resultValue = 1;
+    };
+    taskScheduler->PostAsyncTask(taskFunc);
+    EXPECT_NE(taskScheduler->handler_, nullptr);
+    EXPECT_EQ(resultValue, 0);
+
+    std::string name = "ssmTask";
+    int64_t delayTime = 1;
+    taskScheduler->PostAsyncTask(taskFunc, name, delayTime);
+    EXPECT_EQ(resultValue, 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
