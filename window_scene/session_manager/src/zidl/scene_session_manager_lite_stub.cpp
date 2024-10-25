@@ -365,21 +365,21 @@ int SceneSessionManagerLiteStub::HandleSetSessionContinueState(MessageParcel& da
 
 int SceneSessionManagerLiteStub::HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetSessionSnapshot!");
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Handled!");
     std::u16string deviceIdData;
     if (!data.ReadString16(deviceIdData)) {
-        WLOGE("read deviceId fail");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read deviceId fail");
         return ERR_INVALID_DATA;
     }
     std::string deviceId = Str16ToStr8(deviceIdData);
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
-        WLOGE("read persistentId fail");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read persistentId fail");
         return ERR_INVALID_DATA;
     }
     bool isLowResolution = false;
     if (!data.ReadBool(isLowResolution)) {
-        WLOGE("read isLowResolution fail");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read isLowResolution fail");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
