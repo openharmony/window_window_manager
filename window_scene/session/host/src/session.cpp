@@ -2659,6 +2659,17 @@ WSRect Session::GetSessionRect() const
 }
 
 /** @note @window.layout */
+Rect Session::GetSessionGlobalScaledRect() const
+{
+    WSRect globalScaledRect = GetSessionGlobalRect();
+    globalScaledRect.width_ *= scaleX_;
+    globalScaledRect.height_ *= scaleY_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+        GetPersistentId(), globalScaledRect.ToString().c_str());
+    return { globalScaledRect.posX_, globalScaledRect.posY_, globalScaledRect.width_, globalScaledRect.height_ };
+}
+
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {

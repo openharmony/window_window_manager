@@ -1197,6 +1197,21 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 }
 
 /** @note @window.layout */
+WMError SceneSession::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        globalScaledRect = session->GetSessionGlobalScaledRect();
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
+}
+
+/** @note @window.layout */
 WSError SceneSession::UpdateClientRect(const WSRect& rect)
 {
     const char* const funcName = __func__;
