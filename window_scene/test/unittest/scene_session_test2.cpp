@@ -1280,11 +1280,11 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     bool res = sceneSession->AddSubSession(sceneSession);
     EXPECT_EQ(true, res);
     EXPECT_EQ(sceneSession, (sceneSession->GetSubSession())[0]);
-    sceneSession->moveDragController_ = new MoveDragController(1024);
+    sceneSession->moveDragController_ = new MoveDragController(1024, WindowType::WINDOW_TYPE_FLOAT);
     WSRect rectResult = sceneSession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [sceneSession](DisplayId displayId, int32_t type, const SizeChangeReason reason) {
+    auto dragHotAreaFunc = [sceneSession](DisplayId displayId, int32_t type, SizeChangeReason reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1419,7 +1419,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
 
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
 
@@ -1662,7 +1662,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
     Session session(info);
     WSRect rect;
     sceneSession->UpdateWinRectForSystemBar(rect);
-    sceneSession->SetSurfaceBounds(rect);
+    sceneSession->SetSurfaceBounds(rect, false);
     sceneSession->GetWindowNameAllType();
     session.scenePersistence_ = new ScenePersistence("aa", 0);
     sceneSession->GetUpdatedIconPath();
@@ -1738,7 +1738,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     bool isPreImeEvent = true;
     sceneSession->SendKeyEventToUI(keyEvent, isPreImeEvent);
     sceneSession->IsDirtyWindow();
-    sceneSession->moveDragController_ = new MoveDragController(0);
+    sceneSession->moveDragController_ = new MoveDragController(0, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->NotifyUILostFocus();
 }
 
