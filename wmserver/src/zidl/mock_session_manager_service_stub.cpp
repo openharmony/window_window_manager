@@ -93,7 +93,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByUserIdAndBundleNam
 {
     int32_t userId = 0;
     if (!data.ReadInt32(userId)) {
-        WLOGE("Failed to readInt32 userId");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to readInt32 userId");
         return ERR_INVALID_DATA;
     }
     std::vector<std::string> bundleNameList;
@@ -110,7 +110,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(Message
 {
     int32_t mapSize = 0;
     if (!data.ReadInt32(mapSize)) {
-        WLOGE("Fail to read mapSize");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read mapSize");
         return ERR_INVALID_DATA;
     }
     std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
