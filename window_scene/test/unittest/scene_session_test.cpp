@@ -2050,6 +2050,41 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: HandleCompatibleModeDrag
+ * @tc.desc: HandleCompatibleModeDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleCompatibleModeDrag";
+    info.bundleName_ = "HandleCompatibleModeDrag";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    WSRect rect = {1, 1, 1, 1};
+    WSRect rect2 = {2, 1, 1, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 2, 1, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 1, 2, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+}
+
+/**
  * @tc.name: SetMoveDragCallback
  * @tc.desc: SetMoveDragCallback
  * @tc.type: FUNC
