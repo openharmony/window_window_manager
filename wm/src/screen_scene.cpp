@@ -30,6 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr float MIN_DPI = 1e-6;
+std::atomic<bool> g_ssIsDestroyed = false;
 } // namespace
 
 ScreenScene::ScreenScene(std::string name) : name_(name)
@@ -38,10 +39,12 @@ ScreenScene::ScreenScene(std::string name) : name_(name)
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    g_ssIsDestroyed = false;
 }
 
 ScreenScene::~ScreenScene()
 {
+    g_ssIsDestroyed = true;
     Destroy();
 }
 
@@ -53,10 +56,7 @@ WMError ScreenScene::Destroy()
     }
     std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
     uiContent_ = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        vsyncStation_ = nullptr;
-    }
+    vsyncStation_->Destroy();
     auto task = [uiContent]() {
         if (uiContent != nullptr) {
             uiContent->Destroy();
@@ -74,6 +74,10 @@ WMError ScreenScene::Destroy()
 void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
     AbilityRuntime::Context* context)
 {
+    if (g_ssIsDestroyed) {
+        TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
+        return;
+    }
     if (context == nullptr) {
         TLOGE(WmsLogTag::DMS, "context is nullptr!");
         return;
@@ -114,6 +118,10 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
 
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
+    if (g_ssIsDestroyed) {
+        TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
+        return;
+    }
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return;
@@ -128,6 +136,10 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
 
 void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    if (g_ssIsDestroyed) {
+        TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
+        return;
+    }
     if (uiContent_) {
         TLOGD(WmsLogTag::DMS, "notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
@@ -136,36 +148,25 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
 
 void ScreenScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Receive vsync request failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 int64_t ScreenScene::GetVSyncPeriod()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Get vsync period failed, vsyncStation is nullptr");
-        return 0;
-    }
     return vsyncStation_->GetVSyncPeriod();
 }
 
 void ScreenScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "FlushFrameRate failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)
 {
+    if (g_ssIsDestroyed) {
+        TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
+        return;
+    }
     TLOGD(WmsLogTag::DMS, "bundle %{public}s updated", bundleName.c_str());
     if (uiContent_) {
         uiContent_->UpdateResource();
@@ -174,6 +175,10 @@ void ScreenScene::OnBundleUpdated(const std::string& bundleName)
 
 void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
 {
+    if (g_ssIsDestroyed) {
+        TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
+        return;
+    }
     frameLayoutFinishCb_ = callback;
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));

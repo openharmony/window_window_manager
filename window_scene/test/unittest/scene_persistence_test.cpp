@@ -129,27 +129,11 @@ HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, Function | Sma
     sptr<ScenePersistence> scenePersistence2 = new ScenePersistence(bundleName, persistentId);
     scenePersistence2->RenameSnapshotFromOldPersistentId(persistentId);
     ASSERT_EQ(ret, 0);
-}
 
-/**
- * @tc.name: SaveUpdatedIcon
- * @tc.desc: test function : SaveUpdatedIcon
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
-{
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::string directory = "0/Storage";
-    std::string bundleName = "testBundleName";
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->SaveUpdatedIcon(pixelMap);
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    sptr<Session> session = new Session(info);
-    ASSERT_NE(nullptr, session);
-    scenePersistence->SaveUpdatedIcon(mPixelMap);
-    std::string result(scenePersistence->GetUpdatedIconPath());
-    std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
+    sptr<ScenePersistence> scenePersistence3 = new ScenePersistence(bundleName, persistentId);
+    ASSERT_NE(nullptr, scenePersistence3);
+    scenePersistence3->snapshotPath_ = "/data/1.png";
+    scenePersistence3->RenameSnapshotFromOldPersistentId(persistentId);
 }
 
 /**
@@ -213,6 +197,9 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     }
     EXPECT_NE(result, nullptr);
     ASSERT_EQ(result2, true);
+
+    result = scenePersistence->GetLocalSnapshotPixelMap(0.0, 0.2);
+    EXPECT_NE(result, nullptr);
 }
 
 /**

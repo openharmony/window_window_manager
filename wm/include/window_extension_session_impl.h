@@ -47,7 +47,13 @@ public:
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
+
+    /*
+     * Window Privacy
+     */
     WMError SetPrivacyMode(bool isPrivacyMode) override;
+    WMError HidePrivacyContentForHost(bool needHide) override;
+
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
         napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
@@ -111,6 +117,7 @@ private:
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason);
     void UpdateAccessibilityTreeInfo();
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
@@ -125,7 +132,6 @@ private:
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
     bool modalUIExtensionMayBeCovered_ { false };
     bool modalUIExtensionSelfLoadContent_ { false };
-    int16_t rotationAnimationCount_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

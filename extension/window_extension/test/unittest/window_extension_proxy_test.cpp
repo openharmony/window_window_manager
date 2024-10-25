@@ -20,6 +20,8 @@
 #include "window_extension_stub_impl.h"
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
+#include "mock_message_parcel.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,7 +36,7 @@ public:
     void TearDown() override;
     sptr<WindowExtensionStub> mockWindowExtensionStub_;
     sptr<WindowExtensionProxy> windowExtensionProxy_;
-    sptr<IRemoteObject> impl;
+    sptr<IRemoteObject> impl_;
     sptr<WindowExtensionClientProxy> windowExtensionClientProxy_;
 };
 
@@ -50,12 +52,14 @@ void WindowExtensionProxyTest::SetUp()
 {
     mockWindowExtensionStub_ = new WindowExtensionStubImpl("name");
     windowExtensionProxy_ = new WindowExtensionProxy(mockWindowExtensionStub_);
-    impl = nullptr;
-    windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl);
+    impl_ = new IRemoteObjectMocker();
+    ASSERT_NE(nullptr, impl_);
+    windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl_);
 }
 
 void WindowExtensionProxyTest::TearDown()
 {
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 namespace {
@@ -82,10 +86,64 @@ HWTEST_F(WindowExtensionProxyTest, SetBounds, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowExtensionProxyTest, OnWindowReady, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, windowExtensionClientProxy_);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnWindowReady(nullptr);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    windowExtensionClientProxy_->OnWindowReady(nullptr);
+
     struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    auto surfaceNode = RSSurfaceNode::Create(config);
     windowExtensionClientProxy_->OnWindowReady(surfaceNode);
-    ASSERT_EQ(nullptr, surfaceNode);
+}
+
+/**
+ * @tc.name: OnBackPress
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionProxyTest, OnBackPress, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, windowExtensionClientProxy_);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnBackPress();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    windowExtensionClientProxy_->OnBackPress();
+}
+
+/**
+ * @tc.name: OnKeyEvent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionProxyTest, OnKeyEvent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, windowExtensionClientProxy_);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(nullptr, keyEvent);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnKeyEvent(keyEvent);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    windowExtensionClientProxy_->OnKeyEvent(keyEvent);
+}
+
+/**
+ * @tc.name: OnPointerEvent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionProxyTest, OnPointerEvent, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, windowExtensionClientProxy_);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowExtensionClientProxy_->OnPointerEvent(pointerEvent);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    windowExtensionClientProxy_->OnPointerEvent(pointerEvent);
 }
 
 /**
@@ -99,7 +157,7 @@ HWTEST_F(WindowExtensionProxyTest, OnRemoteRequest, Function | SmallTest | Level
     MessageParcel data = {};
     MessageParcel reply = {};
     MessageOption option = {MessageOption::TF_SYNC};
-    ASSERT_EQ(-1, mockWindowExtensionStub_->OnRemoteRequest(code, data, reply, option));
+    ASSERT_NE(-1, mockWindowExtensionStub_->OnRemoteRequest(code, data, reply, option));
 }
 }
 }

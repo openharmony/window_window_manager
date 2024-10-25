@@ -21,6 +21,7 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -84,6 +85,74 @@ void SceneSessionManagerTest10::TearDown()
 
 namespace {
 /**
+ * @tc.name: RequestSceneSessionDestructionInner
+ * @tc.desc: RequestSceneSessionDestructionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<AAFwk::SessionInfo> scnSessionInfo = new AAFwk::SessionInfo();
+    bool needRemoveSession = true;
+    bool isForceClean = true;
+
+    SessionInfo sessionInfo;
+    sessionInfo.collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+
+    needRemoveSession = false;
+    isForceClean = false;
+    sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent
+ * @tc.desc: RegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+
+    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
+    ASSERT_EQ(windowManagerAgent, nullptr);
+    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+/**
  * @tc.name: UpdateRotateAnimationConfig
  * @tc.desc: UpdateRotateAnimationConfig
  * @tc.type: FUNC
@@ -124,7 +193,7 @@ HWTEST_F(SceneSessionManagerTest10, RegisterAcquireRotateAnimationConfigFunc, Fu
     ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
     WSRect rect({1, 1, 1, 1});
     SizeChangeReason reason = SizeChangeReason::ROTATION;
-    WSError result = sceneSession->UpdateRect(rect, reason);
+    WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest10");
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -172,10 +241,10 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
 {
     ssm_->sceneSessionMap_.clear();
     ssm_->ProcessFocusZOrderChange(10);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.uiType_ = "pc";
     ssm_->ProcessFocusZOrderChange(97);
 
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.uiType_ = "phone";
     ssm_->ProcessFocusZOrderChange(97);
 
     SessionInfo sessionInfo;
@@ -186,7 +255,7 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->focusedSessionId_ = 1;
     ssm_->ProcessFocusZOrderChange(97);
-    
+
     sceneSession->lastZOrder_ = 2203;
     sceneSession->zOrder_ = 101;
     ssm_->ProcessFocusZOrderChange(97);
@@ -227,6 +296,31 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
     ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
 
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: IsInSecondaryScreen
+ * @tc.desc: test IsInSecondaryScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
+
+    displayId = 5;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
 }
 }  // namespace
 }

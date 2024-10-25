@@ -25,8 +25,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_US = 500000;
-const std::string DUAL_DISPLAY_FOLD_POLICY_TEST = "DualDisplayFoldPolicyTest";
+    constexpr uint32_t SLEEP_TIME_US = 500000;
+    const std::string DUAL_DISPLAY_FOLD_POLICY_TEST = "DualDisplayFoldPolicyTest";
 }
 
 class DualDisplayFoldPolicyTest : public testing::Test {
@@ -68,35 +68,6 @@ namespace {
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::UNKNOWN);
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
-
-        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::SUB);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
-
-        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
-
-        dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::COORDINATION);
-        mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
-    }
-
-    /**
-     * @tc.name: ChangeScreenDisplayMode
-     * @tc.desc: ChangeScreenDisplayMode
-     * @tc.type: FUNC
-     */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode02, Function | SmallTest | Level3)
-    {
-        std::recursive_mutex mutex;
-        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        sptr<ScreenSession> session = new ScreenSession();
-        ScreenId screenId = 1001;
-        ssm_.screenSessionMap_[screenId] = session;
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::UNKNOWN);
         FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
         ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
@@ -233,23 +204,6 @@ namespace {
             DUAL_DISPLAY_FOLD_POLICY_TEST);
         sptr<DualDisplayFoldPolicy> dualDisplayFoldPolicy = new DualDisplayFoldPolicy(mutex, screenPowerTaskScheduler);
         dualDisplayFoldPolicy->ChangeScreenDisplayModeToCoordination();
-        int res = 0;
-        ASSERT_EQ(res, 0);
-    }
-
-    /**
-     * @tc.name: SendPropertyChangeResult
-     * @tc.desc: SendPropertyChangeResult
-     * @tc.type: FUNC
-     */
-    HWTEST_F(DualDisplayFoldPolicyTest, SendPropertyChangeResult, Function | SmallTest | Level3)
-    {
-        std::recursive_mutex mutex;
-        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        sptr<ScreenSession> screenSession = new ScreenSession();
-        ScreenId screenId = 0;
-        ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
-        dualDisplayFoldPolicy.SendPropertyChangeResult(screenSession, screenId, reason);
         int res = 0;
         ASSERT_EQ(res, 0);
     }

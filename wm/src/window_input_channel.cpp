@@ -126,7 +126,8 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG ||
          WindowHelper::IsModalSubWindow(window_->GetType(), window_->GetWindowFlags())) &&
-        (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
+        (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId()) &&
+        action != MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         if (isPointDown && isValidPointItem) {
             window_->NotifyTouchDialogTarget(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
@@ -159,8 +160,9 @@ bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& k
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
     WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard || isKeyBack);
+    return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 }
 }

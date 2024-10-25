@@ -204,6 +204,7 @@ enum class WMError : int32_t {
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
+    WM_ERROR_SYSTEM_ABNORMALLY,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -303,6 +304,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_PIP_REPEAT_OPERATION,           WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION   },
     {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING        },
     {WMError::WM_ERROR_INVALID_SESSION,                WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
+    {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
 };
 
 /**
@@ -490,7 +492,7 @@ struct MainWindowInfo : public Parcelable {
 /**
  * @struct MainWindowState.
  *
- * @brief main window state info.
+ * @brief Main window state info.
  */
 struct MainWindowState : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
