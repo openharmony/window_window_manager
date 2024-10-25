@@ -2186,6 +2186,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifyEnterRecentTask, Function | SmallTest |
     ssm_->gestureBackEnableWindowIdSet_.insert(2);
     ASSERT_EQ(ssm_->NotifyEnterRecentTask(true), WSError::WS_OK);
     ASSERT_EQ(ssm_->NotifyEnterRecentTask(false), WSError::WS_OK);
+    ssm_->sceneSessionMap_.erase(1);
 }
 }
 } // namespace Rosen
