@@ -26,7 +26,6 @@
 #include "window_scene_session_impl.h"
 #include "singleton_mocker.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -113,7 +112,7 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
  * @tc.name: RecoverAndConnectSpecificSession
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
