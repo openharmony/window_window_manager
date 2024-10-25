@@ -706,6 +706,11 @@ void ScreenSession::SetRotation(Rotation rotation)
     property_.SetScreenRotation(rotation);
 }
 
+void ScreenSession::SetRotationAndScreenRotationOnly(Rotation rotation)
+{
+    property_.SetRotationAndScreenRotationOnly(rotation);
+}
+
 void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 {
     property_.SetScreenRequestedOrientation(orientation);

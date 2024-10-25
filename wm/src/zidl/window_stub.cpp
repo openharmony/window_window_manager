@@ -89,6 +89,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read windowMode failed");
                 return ERR_INVALID_DATA;
             }
+            if (windowMode < static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED) ||
+                windowMode > static_cast<uint32_t>(WindowMode::WINDOW_MODE_PIP)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "invalid windowMode: %{public}d", windowMode);
+                return ERR_INVALID_DATA;
+            }
             WindowMode mode = static_cast<WindowMode>(windowMode);
             UpdateWindowMode(mode);
             break;
