@@ -317,7 +317,11 @@ int SceneSessionManagerStub::HandleRecoverAndReconnectSceneSession(MessageParcel
 
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_TRANSACTION_FAILED;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     WSError ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -327,7 +331,11 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessagePar
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data,
     MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_TRANSACTION_FAILED;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", persistentId);
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
