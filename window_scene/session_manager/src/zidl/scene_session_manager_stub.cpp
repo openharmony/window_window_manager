@@ -1161,7 +1161,7 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_UIEXT, "read extWindowFlags failed");
         return ERR_INVALID_DATA;
     }
-    uint32_t extWindowActions = data.ReadUint32();
+    uint32_t extWindowActions;
     if (!data.ReadUint32(extWindowActions)) {
         WLOGFE("read extWindowActions failed");
         return ERR_INVALID_DATA;
