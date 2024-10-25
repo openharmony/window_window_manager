@@ -1471,8 +1471,9 @@ float ScreenSessionManager::CalcDefaultExtendScreenDensity(const ScreenProperty&
         int32_t width = phyBounds.rect_.GetWidth();
         int32_t height = phyBounds.rect_.GetHeight();
         float PPI = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_TO_MM / phyDiagonal;
-        float density = PPI * PHYSICAL_MASS / BASELINE_DENSITY;
-        TLOGI(WmsLogTag::DMS, "PPI:%{public}f", PPI);
+        float DPI = std::ceil(PPI * PHYSICAL_MASS);
+        TLOGI(WmsLogTag::DMS, "DPI:%{public}f", DPI);
+        float density = DPI / BASELINE_DENSITY;
         return density;
     } else {
         return densityDpi_;
