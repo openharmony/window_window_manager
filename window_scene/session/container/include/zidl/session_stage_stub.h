@@ -80,6 +80,7 @@ private:
         const std::vector<std::string>& infos, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply);
+    int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H
