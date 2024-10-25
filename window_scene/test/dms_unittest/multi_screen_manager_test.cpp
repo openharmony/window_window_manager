@@ -16,6 +16,9 @@
 #include <gtest/gtest.h>
 
 #include "multi_screen_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
+#include "display_manager_agent_default.h"
+#include "zidl/screen_session_manager_client_interface.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,12 +28,41 @@ namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
+class TestClient : public IScreenSessionManagerClient {
+public:
+    void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override {};
+    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
+        ScreenId rsId, const std::string& name, bool isExtend) override {};
+    void OnPropertyChanged(ScreenId screenId,
+        const ScreenProperty& property, ScreenPropertyChangeReason reason) override {};
+    void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
+        PowerStateChangeReason reason) override {};
+    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override {};
+    void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) override {};
+    void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override {};
+    void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override {};
+    void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override {};
+
+    void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override {};
+    void OnScreenshot(DisplayId displayId) override {};
+    void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override {};
+    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override {};
+    void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override {};
+    void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override {};
+    void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
+    void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
+    sptr<IRemoteObject> AsObject() override {return testPtr;};
+    sptr<IRemoteObject> testPtr;
+};
 class MultiScreenManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    sptr<TestClient> testClient_;
 };
 
 void MultiScreenManagerTest::SetUpTestCase()
@@ -59,7 +91,7 @@ namespace {
  */
 HWTEST_F(MultiScreenManagerTest, FilterPhysicalAndVirtualScreen, Function | SmallTest | Level1)
 {
-    std::vector<ScreenId> allScreenIds = {1, 2, 3};
+    std::vector<ScreenId> allScreenIds = {2000, 2001, 0};
     std::vector<ScreenId> physicalScreenIds;
     std::vector<ScreenId> virtualScreenIds;
     MultiScreenManager::GetInstance().FilterPhysicalAndVirtualScreen(allScreenIds,
@@ -558,6 +590,456 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, Function | SmallTest | Level1)
     ScreenId screenGroupId = 0;
     DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: MultiScreenModeChange
+ * @tc.desc: firstSession == nullptr,secondarySession == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange01, Function | SmallTest | Level1)
+{
+    sptr<ScreenSession> firstSession = nullptr;
+    sptr<ScreenSession> secondarySession = nullptr;
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
+
+    secondarySession = new ScreenSession();
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
+
+    firstSession = new ScreenSession();
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
+    EXPECT_NE(secondarySession, nullptr);
+}
+
+/**
+ * @tc.name: MultiScreenModeChange
+ * @tc.desc: firstSession == nullptr,secondarySession == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    testClient_ = new TestClient();
+    ScreenSessionManager::GetInstance().SetClient(testClient_);
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+
+    firstSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "extend");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    firstSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+
+    firstSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "extend");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: scbClient null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange01, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
+
+    ScreenSessionManager::GetInstance().clientProxy_ = nullptr;
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "unknown");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: param error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
+
+    testClient_ = new TestClient();
+    ScreenSessionManager::GetInstance().SetClient(testClient_);
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "unknown");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: DoFirstMainChangeExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange03, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "extend");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: main change extend, no need to change
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange04, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_ALONE);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "extend");
+    ASSERT_NE(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: DoFirstMainChangeMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange05, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "mirror");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMainChange
+ * @tc.desc: main change mirror, no need to change
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange06, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_ALONE);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "mirror");
+    ASSERT_NE(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMirrorChange
+ * @tc.desc: scbClient null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange01, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
+
+    ScreenSessionManager::GetInstance().clientProxy_ = nullptr;
+    MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "unknown");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMirrorChange
+ * @tc.desc: param error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
+
+    testClient_ = new TestClient();
+    ScreenSessionManager::GetInstance().SetClient(testClient_);
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "unknown");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+
+/**
+ * @tc.name: DoFirstMirrorChange
+ * @tc.desc: DoFirstMirrorChangeExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange03, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "extend");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstMirrorChange
+ * @tc.desc: DoFirstMirrorChangeMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
+    MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "mirror");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+
+/**
+ * @tc.name: DoFirstExtendChange
+ * @tc.desc: param error
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange01, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
+
+    MultiScreenManager::GetInstance().DoFirstExtendChange(firstSession, secondarySession, "unknown");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), secondaryCombination);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstExtendChange
+ * @tc.desc: extend change extend
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange02, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    MultiScreenManager::GetInstance().DoFirstExtendChange(firstSession, secondarySession, "extend");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: DoFirstExtendChange
+ * @tc.desc: extend change mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange03, Function | SmallTest | Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    MultiScreenManager::GetInstance().DoFirstExtendChange(firstSession, secondarySession, "mirror");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
 }
 } // namespace Rosen
