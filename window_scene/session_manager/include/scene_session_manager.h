@@ -153,8 +153,8 @@ public:
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
         bool isSaveSnapshot = true, const bool isForceClean = false);
-    WSError RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession, sptr<AAFwk::SessionInfo> sceneSessionInfo,
-        const bool needRemoveSession, const bool isForceClean = false);
+    WSError RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
+        sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean = false);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
