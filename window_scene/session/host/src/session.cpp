@@ -942,7 +942,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetWindowMode(sessionProperty->GetWindowMode());
     }
     if (SessionHelper::IsMainWindow(GetWindowType()) &&
-        GetSessionInfo().screenId_ != -1 && property) {
+        GetSessionInfo().screenId_ != SCREEN_ID_INVALID && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     SetSessionProperty(property);
@@ -1112,8 +1112,8 @@ WSError Session::Disconnect(bool isFromClient)
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
-    bufferAvailable_ = false;
     isStarting_ = false;
+    bufferAvailable_ = false;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1430,7 +1430,7 @@ void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc&
     updateSessionLabelFunc_ = func;
 }
 
-WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFD("run Session::SetSessionIcon, id: %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
@@ -2425,14 +2425,6 @@ void Session::RectCheckProcess()
     }
 }
 
-WSRect Session::GetSessionGlobalRect() const
-{
-    if (IsScbCoreEnabled()) {
-        return globalRect_;
-    }
-    return winRect_;
-}
-
 void Session::SetSessionRect(const WSRect& rect)
 {
     if (winRect_ == rect) {
@@ -2446,6 +2438,14 @@ void Session::SetSessionRect(const WSRect& rect)
 
 WSRect Session::GetSessionRect() const
 {
+    return winRect_;
+}
+
+WSRect Session::GetSessionGlobalRect() const
+{
+    if (IsScbCoreEnabled()) {
+        return globalRect_;
+    }
     return winRect_;
 }
 
@@ -2616,6 +2616,10 @@ WSError Session::UpdateMaximizeMode(bool isMaximize)
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetMaximizeMode(mode);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->UpdateMaximizeMode(mode);
 }
 
@@ -2935,6 +2939,10 @@ WSError Session::UpdateTitleInTargetPos(bool isShow, int32_t height)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return sessionStage_->UpdateTitleInTargetPos(isShow, height);
 }
 
@@ -2959,6 +2967,10 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SwitchFreeMultiWindow(enable);
 }

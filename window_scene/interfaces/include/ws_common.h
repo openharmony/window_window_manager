@@ -297,15 +297,15 @@ struct SessionInfo {
     uint64_t screenId_ = -1ULL; // -1ULL: SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
 
-    mutable std::shared_ptr<AAFwk::Want> want; // want for ability start
-    std::shared_ptr<AAFwk::Want> closeAbilityWant;
+    mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
+    std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
     mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode = -1;
-    int32_t requestCode;
-    int32_t errorCode;
-    std::string errorReason;
+    int32_t requestCode = -1;
+    int32_t errorCode = -1;
+    std::string errorReason = "";
     int32_t persistentId_ = INVALID_SESSION_ID;
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     std::string callerBundleName_ = "";
@@ -316,12 +316,12 @@ struct SessionInfo {
     int32_t windowMode = 0;
     StartMethod startMethod = StartMethod::START_NORMAL;
     bool lockedState = false;
-    std::string time;
+    std::string time = "";
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
-    int32_t ancoSceneState;
+    int32_t ancoSceneState = 0;
     bool isClearSession = false;
-    std::string sessionAffinity;
+    std::string sessionAffinity = "";
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
@@ -392,6 +392,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_PRIMARY,
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
+    EVENT_DRAG,
 };
 
 enum class BrokerStates: uint32_t {
@@ -585,6 +586,8 @@ struct RotateAnimationConfig {
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
+    int32_t sessionWidth_ = 0;
+    int32_t sessionHeight_ = 0;
 };
 
 /**

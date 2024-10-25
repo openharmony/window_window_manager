@@ -897,6 +897,10 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     int ret = 1;
     scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(nullptr, scensession->GetSessionProperty());
 }
 
 /**
@@ -1052,6 +1056,14 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
     EXPECT_NE(scensession, nullptr);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    scensession->property_ = property;
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
+    EXPECT_NE(scensession, nullptr);
 }
 
 /**
@@ -1160,6 +1172,11 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
+
+    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(scensession->sessionChangeCallback_, nullptr);
+    scensession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
     ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
@@ -1302,6 +1319,10 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
+
+    scensession->SetSessionProperty(nullptr);
+    scensession->NotifyPropertyWhenConnect();
+    ASSERT_EQ(scensession->GetSessionProperty(), nullptr);
 }
 
 /**

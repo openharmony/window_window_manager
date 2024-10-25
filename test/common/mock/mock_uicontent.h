@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_TEST_COMMON_MOCK_IREMOTE_OBJECT_MOCKER
-#define OHOS_ROSEN_TEST_COMMON_MOCK_IREMOTE_OBJECT_MOCKER
+#ifndef OHOS_ROSEN_TEST_COMMON_MOCK_UICONTENT_MOCKER
+#define OHOS_ROSEN_TEST_COMMON_MOCK_UICONTENT_MOCKER
 
 #include "ui_content.h"
 #include "native_engine/native_value.h"

@@ -2705,8 +2705,6 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
-        bool isCalledRightlyByCallerId = ((info.callerToken_ == callerSession->GetAbilityToken()) &&
-          info.bundleName_ == "");
         TLOGI(WmsLogTag::WMS_SCB,
             "update isCalledRightlyByCallerId from :%{public}d to false", info.isCalledRightlyByCallerId_);
         info.isCalledRightlyByCallerId_ = false;
@@ -3050,18 +3048,18 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
     auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, shouldBackToCaller] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         napi_value jsShouldBackToCaller = CreateJsValue(env, shouldBackToCaller);
         if (jsSessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo, jsShouldBackToCaller};
