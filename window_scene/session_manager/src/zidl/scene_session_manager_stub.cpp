@@ -185,6 +185,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetDisplayIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
+            return HandleGetDisplayIdByWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1308,6 +1310,37 @@ int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& d
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<uint64_t> windowIds;
+    if (!data.ReadUInt64Vector(&windowIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read windowIds Failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    WMError errCode = GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+
+    if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
+        TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
+        return ERR_INVALID_DATA;
+    }
+    for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
+        if (!reply.WriteUint64(it->first)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!reply.WriteUint64(it->second)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::DEFAULT, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
