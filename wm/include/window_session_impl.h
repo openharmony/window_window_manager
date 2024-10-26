@@ -290,10 +290,10 @@ public:
     /*
      * FreeMultiWindow
      */
-     void SetFreeMultiWindowMode(bool enable)
-     {
-        windowSystemConfig_.freeMultiWindowEnable_ = enable;
-     }
+    void SetFreeMultiWindowMode(bool enable)
+    {
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    }
 
 protected:
     WMError Connect();

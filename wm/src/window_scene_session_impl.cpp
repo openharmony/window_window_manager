@@ -2109,8 +2109,8 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (WindowHelper::IsMainWindow(GetType()) && 
-         (IsFreeMultiWindowMode() || windowSystemConfig_.IsPcWindow())) {
+    if (WindowHelper::IsMainWindow(GetType()) &&
+        (IsFreeMultiWindowMode() || windowSystemConfig_.IsPcWindow())) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
