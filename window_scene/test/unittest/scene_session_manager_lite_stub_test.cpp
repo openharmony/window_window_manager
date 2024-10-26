@@ -144,6 +144,16 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WSError RegisterIAbilityManagerCollaborator(int32_t type,
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
+    {
+        return WSError::WS_OK;
+    }
+    
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override
     {
         MainWindowInfo mainWindowInfo;
@@ -155,15 +165,6 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         clearFailedIds.push_back(1);
         return WMError::WM_OK;
-    }
-    WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
-    {
-        return WSError::WS_OK;
-    }
-    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override
-    {
-        return WSError::WS_OK;
     }
     WMError GetWindowStyleType(WindowStyleType& windowStyleType) override
     {

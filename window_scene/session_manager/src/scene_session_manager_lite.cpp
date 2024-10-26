@@ -211,17 +211,6 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
-WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
-{
-    return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
-}
-
-WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
-    std::vector<int32_t>& clearFailedIds)
-{
-    return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
-}
-
 WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t type,
     const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
 {
@@ -231,6 +220,17 @@ WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t typ
 WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t type)
 {
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
+}
+
+WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
+}
+
+WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
 }
 
 WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
