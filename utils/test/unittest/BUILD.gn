@@ -35,6 +35,20 @@ group("unittest") {
     ":utils_window_transition_info_test",
     ":utils_wm_math_test",
     ":utils_wm_occlusion_region_test",
+    ":wm_window_frame_trace_impl_test",
+  ]
+}
+
+ohos_unittest("wm_window_frame_trace_impl_test") {
+  module_out_path = module_out_path
+  defines = [ "FRAME_TRACE_ENABLE" ]
+  sources = [ "window_frame_trace_impl_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

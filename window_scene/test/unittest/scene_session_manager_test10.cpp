@@ -610,6 +610,23 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
 }
+
+/**
+ * @tc.name: RegisterRequestVsyncFunc
+ * @tc.desc: test RegisterRequestVsyncFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, Function | SmallTest | Level3)
+{
+    ssm_->RegisterRequestVsyncFunc(nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestVsyncFunc01";
+    info.bundleName_ = "RegisterRequestVsyncFunc01";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterRequestVsyncFunc(sceneSession);
+    ASSERT_NE(nullptr, sceneSession->requestNextVsyncFunc_);
+}
 }  // namespace
 }
 }
