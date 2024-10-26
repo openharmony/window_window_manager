@@ -591,4 +591,15 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
     }
     session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
+
+void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(mainScreenId);
+    if (!screenSession) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    WLOGFI("capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
+    screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
+}
 } // namespace OHOS::Rosen

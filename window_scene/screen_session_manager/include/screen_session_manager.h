@@ -311,6 +311,10 @@ public:
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
 
+    std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr) override;
+    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

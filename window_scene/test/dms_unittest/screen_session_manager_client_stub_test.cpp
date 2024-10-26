@@ -785,5 +785,26 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnFoldStatusChangedReportUE, 
     int ret = screenSessionManagerClientStub_->HandleOnFoldStatusChangedReportUE(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleScreenCaptureNotify
+ * @tc.desc: HandleScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    data.WriteInt32(0);
+    data.WriteString("test");
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    int ret = screenSessionManagerClientStub_->HandleScreenCaptureNotify(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -397,6 +397,12 @@ struct SupportedScreenModes : public RefBase {
     uint32_t refreshRate_;
 };
 
+struct CaptureOption {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool isNeedNotify_ = true;
+    bool isNeedPointer_ = true;
+};
+
 struct ExpandOption {
     ScreenId screenId_;
     uint32_t startX_;
