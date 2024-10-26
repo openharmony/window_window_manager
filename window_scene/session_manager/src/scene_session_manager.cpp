@@ -9505,7 +9505,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
 
     bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
-    pixelMap = sceneSession->Snapshot(false, scaleParam, isPc);
+    pixelMap = sceneSession->Snapshot(true, scaleParam, isPc);
     if (!pixelMap) {
         WLOGFI("get local snapshot pixelmap start");
         pixelMap = sceneSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
