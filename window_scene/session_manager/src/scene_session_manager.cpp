@@ -6830,7 +6830,7 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
-        auto oriSnapshot = sceneSession->Snapshot();
+        auto oriSnapshot = sceneSession->Snapshot(false, sceneSession->GetFloatingScale(), false);
         if (oriSnapshot != nullptr) {
             snapshot.snapshot = oriSnapshot;
             return WMError::WM_OK;
@@ -11259,4 +11259,32 @@ WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMul
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    auto task = [this, windowIds, &windowDisplayIdMap]() {
+        for (const uint64_t windowId : windowIds) {
+            sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
+            if (session == nullptr) {
+                continue;
+            }
+            sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                continue;
+            }
+            TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64", displayId:%{public}" PRIu64"",
+                windowId, sessionProperty->GetDisplayId());
+            windowDisplayIdMap.insert({windowId, sessionProperty->GetDisplayId()});
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
+}
+
 } // namespace OHOS::Rosen
