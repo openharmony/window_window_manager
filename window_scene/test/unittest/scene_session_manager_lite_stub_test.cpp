@@ -174,6 +174,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;

@@ -242,4 +242,9 @@ WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persiste
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
 }
+
+WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAccessibilityWindowInfo(infos);
+}
 } // namespace OHOS::Rosen

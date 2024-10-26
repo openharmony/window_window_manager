@@ -114,6 +114,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
             return HandleTerminateSessionByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO):
+            return HandleGetAccessibilityWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -613,6 +615,18 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessagePar
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError errCode = GetAccessibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("Write window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

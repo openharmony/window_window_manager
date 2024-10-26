@@ -80,6 +80,7 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WMError GetWindowStyleType(WindowStyleType& windowModeType) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
 private:
     template<typename T>
