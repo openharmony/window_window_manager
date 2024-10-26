@@ -993,6 +993,29 @@ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Leve
     session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
     ASSERT_EQ(session_->property_, nullptr);
 }
+
+/**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->property_ = nullptr;
+    bool enable = true;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
+
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+
+    enable = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

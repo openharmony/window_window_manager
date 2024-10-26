@@ -294,6 +294,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
+        reply.WriteBool(property->GetCompatibleModeEnableInPad());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
