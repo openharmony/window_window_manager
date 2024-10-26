@@ -2478,7 +2478,7 @@ WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFr
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
     MessageParcel data;

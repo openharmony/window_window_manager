@@ -823,13 +823,13 @@ public:
     WMError ReleaseForegroundSessionScreenLock();
 
     /**
-     * @brief Get window displayIds.
+     * @brief Get displayId by windowId.
      *
      * @param windowIds list of window ids that need to get screen ids
      * @param windowDisplayIdMap map of windows and displayIds
      * @return WM_OK means get success, others means failed.
      */
-    WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
 private:

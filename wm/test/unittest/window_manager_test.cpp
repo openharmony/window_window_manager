@@ -1479,11 +1479,11 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
  * @tc.desc: check SetProcessWatermark
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetWindowDisplayIds, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
 {
-    std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = {1, 2};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    auto ret = WindowManager::GetInstance().GetWindowDisplayIds(windowIds, windowDisplayIdMap);
+    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
