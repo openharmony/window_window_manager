@@ -192,6 +192,7 @@ bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, cons
     AvoidAreaType avoidAreaType)
 {
     if (!node->currentVisibility_) {
+        WLOGFD("window: %{public}u is not visible, dont't update avoid area", node->GetWindowId());
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(node->GetWindowId());
