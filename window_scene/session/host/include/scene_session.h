@@ -474,6 +474,11 @@ public:
     WSError SetSplitButtonVisible(bool isVisible);
 
     /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
+
+    /*
      * Gesture Back
      */
     bool GetGestureBackEnabled();

@@ -4406,6 +4406,13 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+void SceneSession::ResetSizeChangeReasonIfDirty()
+{
+    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG) {
+        UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+    }
+}
+
 bool SceneSession::IsDirtyWindow()
 {
     return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::RECT);

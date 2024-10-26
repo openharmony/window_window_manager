@@ -163,13 +163,6 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
         }
 
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
