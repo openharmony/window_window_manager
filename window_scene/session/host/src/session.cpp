@@ -3213,7 +3213,17 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->SwitchFreeMultiWindow(enable);
+    auto property = sceneSession->GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        property->GetIsUIExtFirstSubWindow();
+    if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
+        return sessionStage_->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
@@ -3381,19 +3391,5 @@ void Session::SetScbCoreEnabled(bool enabled)
 bool Session::IsVisible() const
 {
     return isVisible_;
-}
-
-bool Session::IsFreeMultiWindowMode() const
-{
-    if (!systemConfig_.IsPadWindow()) {
-        return false;
-    }
-    if (parentSession_) {
-        sptr<Session> mainSession = parentSession_->GetMainSession();
-        if (mainSession != nullptr) {
-            return mainSession->GetSystemConfig().IsFreeMultiWindowMode();
-        }
-    }
-    return GetSystemConfig().IsFreeMultiWindowMode();
 }
 } // namespace OHOS::Rosen
