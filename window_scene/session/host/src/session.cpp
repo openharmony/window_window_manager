@@ -3213,7 +3213,7 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto property = sceneSession->GetSessionProperty();
+    auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return WSError::WS_ERROR_NULLPTR;
