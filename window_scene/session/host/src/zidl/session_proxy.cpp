@@ -308,6 +308,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
+        property->SetDragEnabled(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

@@ -484,7 +484,12 @@ ohos_systemtest("wms_window_system_toast_window_test") {
 
 ohos_systemtest("wms_window_animation_transition_test") {
   module_out_path = module_out_path
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [ "window_animation_transition_test.cpp" ]
 
   deps = [

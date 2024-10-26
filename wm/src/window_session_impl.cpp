@@ -1389,8 +1389,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         WLOGFD("decorVisible:%{public}d", decorVisible);
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-            decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                    (property_->GetIsPcAppInPad() && isSubWindow));
+            decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
         }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -1417,8 +1417,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                        (property_->GetIsPcAppInPad() && isSubWindow));
+                decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                    (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
             }
             WLOGFD("decorVisible:%{public}d", decorVisible);
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
@@ -2533,11 +2533,11 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();
@@ -3455,7 +3455,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+            GetImmersiveModeEnabledState() &&
             keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
@@ -4124,6 +4124,13 @@ void WindowSessionImpl::NotifySetUIContentComplete()
             mainWindow->SetUIContentComplete();
         }
     }
+}
+
+WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
+{
+    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
+    property_->SetDragEnabled(enableDrag);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

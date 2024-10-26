@@ -1219,7 +1219,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
-    WindowState validState = WindowHelper::IsSubWindow(type) ? requestState_ : state_;
+    WindowState validState = state_;
+    if (WindowHelper::IsSubWindow(type) || WindowHelper::IsDialogWindow(type)) {
+        validState = requestState_;
+    }
     if (validState == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window is alreay hidden, id:%{public}d", property_->GetPersistentId());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
@@ -3756,9 +3759,8 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         if (state_ == WindowState::STATE_SHOWN) {
             return WSError::WS_OK;
         }
-        if (state_ == WindowState::STATE_HIDDEN) {
+        if (state_ == WindowState::STATE_HIDDEN && requestState_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_SHOWN;
-            requestState_ = WindowState::STATE_SHOWN;
             NotifyAfterForeground();
         }
     } else {
@@ -3767,7 +3769,6 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         }
         if (state_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_HIDDEN;
-            requestState_ = WindowState::STATE_HIDDEN;
             NotifyAfterBackground();
         }
     }
@@ -4355,19 +4356,19 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     return hostSession->SetGestureBackEnabled(enable);
 }
 
-bool WindowSceneSessionImpl::GetGestureBackEnabled() const
+WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
-        return true;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
-        return true;
+        return WMError::WM_ERROR_INVALID_TYPE;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u",
-        GetWindowId(), gestureBackEnabled_);
-    return gestureBackEnabled_;
+    enable = gestureBackEnabled_;
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
 }
 
 } // namespace Rosen
