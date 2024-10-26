@@ -63,30 +63,7 @@ enum class WmsLogTag : uint8_t {
     END = 256,                 // Last one, do not use
 };
 
-inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
-    { WmsLogTag::DEFAULT, "WMS" },
-    { WmsLogTag::DMS, "DMS" },
-    { WmsLogTag::WMS_MAIN, "WMSMain" },
-    { WmsLogTag::WMS_SUB, "WMSSub" },
-    { WmsLogTag::WMS_SCB, "WMSScb" },
-    { WmsLogTag::WMS_DIALOG, "WMSDialog" },
-    { WmsLogTag::WMS_SYSTEM, "WMSSystem" },
-    { WmsLogTag::WMS_FOCUS, "WMSFocus" },
-    { WmsLogTag::WMS_LAYOUT, "WMSLayout" },
-    { WmsLogTag::WMS_IMMS, "WMSImms" },
-    { WmsLogTag::WMS_LIFE, "WMSLife" },
-    { WmsLogTag::WMS_KEYBOARD, "WMSKeyboard" },
-    { WmsLogTag::WMS_EVENT, "WMSEvent" },
-    { WmsLogTag::WMS_UIEXT, "WMSUiext" },
-    { WmsLogTag::WMS_PIP, "WMSPiP" },
-    { WmsLogTag::WMS_RECOVER, "WMSRecover" },
-    { WmsLogTag::WMS_MULTI_USER, "WMSMultiUser" },
-    { WmsLogTag::WMS_TOAST, "WMSToast" },
-    { WmsLogTag::WMS_MULTI_WINDOW, "WMSMultiWindow" },
-    { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
-    { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
-    { WmsLogTag::WMS_HIERARCHY, "WMSHierarchy" },
-};
+extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
