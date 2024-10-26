@@ -577,7 +577,7 @@ HWTEST_F(SceneSessionTest2, AddToastSession, Function | SmallTest | Level2)
  * @tc.desc: RemoveToastSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, AddToastSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RemoveToastSession, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySessionException";
