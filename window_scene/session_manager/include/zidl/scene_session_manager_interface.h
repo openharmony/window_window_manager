@@ -119,7 +119,7 @@ public:
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
         TRANS_ID_GET_PARENT_DISPLAYID,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
-        TRANS_ID_GET_DISPLAYID_BY_WINDOW,
+        TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
