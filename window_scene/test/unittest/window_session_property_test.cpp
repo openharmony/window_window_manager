@@ -509,7 +509,7 @@ HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionPropertyTest, SetFocusable, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetFocusable(), true);
     property->SetFocusable(false);
     ASSERT_EQ(property->GetFocusable(), false);
@@ -523,7 +523,7 @@ HWTEST_F(WindowSessionPropertyTest, SetFocusable, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionPropertyTest, SetTouchable, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetTouchable(), true);
     property->SetTouchable(false);
     ASSERT_EQ(property->GetTouchable(), false);
@@ -537,7 +537,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchable, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionPropertyTest, SetForceHide, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetForceHide(), false);
     property->SetForceHide(true);
     ASSERT_EQ(property->GetForceHide(), true);
@@ -551,7 +551,7 @@ HWTEST_F(WindowSessionPropertyTest, SetForceHide, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionPropertyTest, SetSystemCalling, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetSystemCalling(), false);
     property->SetSystemCalling(true);
     ASSERT_EQ(property->GetSystemCalling(), true);
@@ -565,7 +565,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemCalling, Function | SmallTest | Lev
 HWTEST_F(WindowSessionPropertyTest, SetIsNeedUpdateWindowMode, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetIsNeedUpdateWindowMode(), false);
     property->SetIsNeedUpdateWindowMode(true);
     ASSERT_EQ(property->GetIsNeedUpdateWindowMode(), true);
@@ -579,7 +579,7 @@ HWTEST_F(WindowSessionPropertyTest, SetIsNeedUpdateWindowMode, Function | SmallT
 HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetIsShaped(), false);
     property->SetIsShaped(true);
     ASSERT_EQ(property->GetIsShaped(), true);
@@ -593,7 +593,7 @@ HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), false);
     property->SetHideNonSystemFloatingWindows(true);
     ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), true);
@@ -607,7 +607,7 @@ HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows, Function | 
 HWTEST_F(WindowSessionPropertyTest, KeepKeyboardOnFocus, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetKeepKeyboardFlag(), false);
     property->KeepKeyboardOnFocus(true);
     ASSERT_EQ(property->GetKeepKeyboardFlag(), true);
@@ -621,7 +621,7 @@ HWTEST_F(WindowSessionPropertyTest, KeepKeyboardOnFocus, Function | SmallTest | 
 HWTEST_F(WindowSessionPropertyTest, SetTextFieldPositionY, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     property->SetTextFieldPositionY(5.5);
     ASSERT_EQ(property->GetTextFieldPositionY(), 5.5);
 }
@@ -634,7 +634,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTextFieldPositionY, Function | SmallTest 
 HWTEST_F(WindowSessionPropertyTest, SetTextFieldHeight, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     property->SetTextFieldHeight(5.5);
     ASSERT_EQ(property->GetTextFieldHeight(), 5.5);
 }
@@ -647,7 +647,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTextFieldHeight, Function | SmallTest | L
 HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(nullptr, property);
+    ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->IsLayoutFullScreen(), false);
     property->SetIsLayoutFullScreen(true);
     ASSERT_EQ(property->IsLayoutFullScreen(), true);
