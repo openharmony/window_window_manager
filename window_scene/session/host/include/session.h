@@ -302,6 +302,7 @@ public:
     WSError SetIsPcAppInPad(bool enable);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    WSError SetCompatibleModeEnableInPad(bool enable);
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
     bool GetBlockingFocus() const;
     WSError SetFocusable(bool isFocusable);

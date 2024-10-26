@@ -119,8 +119,8 @@ HWTEST_F(PictureInPictureOptionTest, NavigationId, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: NavigationId
- * @tc.desc: SetNavigationId/GetNavigationId
+ * @tc.name: ControlGroup
+ * @tc.desc: SetControlGroup/GetControlGroup
  * @tc.type: FUNC
  */
 HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, Function | SmallTest | Level2)

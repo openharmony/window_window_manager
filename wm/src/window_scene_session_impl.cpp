@@ -95,6 +95,8 @@ constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
+constexpr int32_t MAX_POINTERS = 16;
+constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -320,7 +322,8 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
     if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
         (type == WindowType::WINDOW_TYPE_TOAST)) {
         property_->SetParentPersistentId(GetFloatingWindowParentId());
-        WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "parentId: %{public}d, type: %{public}d",
+            property_->GetParentPersistentId(), type);
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr && mainWindow->GetProperty() != nullptr) {
@@ -478,8 +481,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
         }
         if (property_->GetIsNeedUpdateWindowMode()) {
             WLOGFI("UpdateWindowMode %{public}u mode %{public}u",
-                GetWindowId(),
-                static_cast<uint32_t>(property_->GetWindowMode()));
+                GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
             UpdateWindowModeImmediately(property_->GetWindowMode());
             property_->SetIsNeedUpdateWindowMode(false);
         } else {
@@ -510,7 +512,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), state_, GetMode());
     // allow iSession is nullptr when create window by innerkits
     if (!context) {
-        WLOGFW("context is nullptr!");
+        TLOGW(WmsLogTag::WMS_LIFE, "context is nullptr");
     }
     WMError ret = WindowSessionCreateCheck();
     if (ret != WMError::WM_OK) {
@@ -536,7 +538,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (GetHostSession()) { // main window
         ret = Connect();
     } else { // system or sub window
-        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}u", GetType());
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
@@ -563,13 +565,11 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsMainWindow(GetType())) {
             AddSetUIContentTimeoutCheck();
         }
+        InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
-    sptr<Window> self(this);
-    InputTransferStation::GetInstance().AddInputWindow(self);
-    needRemoveWindowInputChannel_ = true;
     return ret;
 }
 
@@ -695,7 +695,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const MMI::PointerEvent::PointerItem& pointerItem)
+    MMI::PointerEvent::PointerItem& pointerItem)
 {
     const int32_t& action = pointerEvent->GetPointerAction();
     const auto& sourceType = pointerEvent->GetSourceType();
@@ -703,6 +703,9 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool needNotifyEvent = true;
+    if (property_->GetCompatibleModeEnableInPad()) {
+        HandleEventForCompatibleMode(pointerEvent, pointerItem);
+    }
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -1119,14 +1122,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         return res;
     }
 
-    uint32_t animationFlag = property_->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTransitionController_->AnimationForHidden();
-        RSTransaction::FlushImplicitTransaction();
-    }
-
     /*
-     * delete after replace WSError with WMError
      * main window no need to notify host, since host knows hide first
      * main window notify host temporarily, since host background may failed
      * need to SetActive(false) for host session before background
@@ -1152,6 +1148,11 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (!interactive_) {
             hasFirstNotifyInteractive_ = false;
         }
+    }
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        animationTransitionController_->AnimationForHidden();
+        RSTransaction::FlushImplicitTransaction();
     }
     NotifyWindowStatusChange(GetMode());
     escKeyEventTriggered_ = false;
@@ -1304,10 +1305,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id: %{public}d, state_:%{public}u, needNotifyServer: %{public}d, "
         "needClearListener: %{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
-    if (needRemoveWindowInputChannel_) {
-        InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
-        needRemoveWindowInputChannel_ = false;
-    }
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1855,6 +1853,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         return WMError::WM_OK;
     }
     if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Id: %{public}u state is invalid", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property &&
         property.settingFlag_ == SystemBarSettingFlag::DEFAULT_SETTING) {
@@ -1873,13 +1872,14 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
 
     if (property_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "property_ is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifySpecificWindowSessionProperty(type, property);
     if (ret != WMError::WM_OK) {
-        WLOGFE("NotifySpecificWindowSessionProperty winId:%{public}u errCode:%{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "Id:%{public}u, errCode:%{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
@@ -2089,6 +2089,9 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (windowSystemConfig_.uiType_ == UI_TYPE_PC && surfaceNode_ != nullptr) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
@@ -3300,6 +3303,17 @@ bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
         windowSystemConfig_.freeMultiWindowSupport_;
 }
 
+WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, enable: %{public}d", GetPersistentId(), enable);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "window session invalid!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    property_->SetCompatibleModeEnableInPad(enable);
+    return WSError::WS_OK;
+}
+
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     WLOGFI("NotifySessionForeground");
@@ -3845,6 +3859,188 @@ bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
         return false;
     }
     return enableImmersiveMode_;
+}
+
+template <typename K, typename V>
+static V GetValueByKey(const std::unordered_map<K, V>& map, K key)
+{
+    auto it = map.find(key);
+    return it != map.end() ? it->second : V{};
+}
+
+void WindowSceneSessionImpl::HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    int32_t action = pointerEvent->GetPointerAction();
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            HandleDownForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_MOVE:
+            HandleMoveForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+            HandleUpForCompatibleMode(pointerEvent, pointerItem);
+            break;
+        default:
+            break;
+    }
+}
+
+void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    int32_t displayX = pointerItem.GetDisplayX();
+    int32_t displayY = pointerItem.GetDisplayY();
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerCount = pointerEvent->GetPointerCount();
+    if (pointerCount == 1) {
+        eventMapTriggerByDisplay_[displayId] = std::vector<bool>(MAX_POINTERS);
+        eventMapDeltaXByDisplay_[displayId] = std::vector<int32_t>(MAX_POINTERS);
+        downPointerByDisplay_[displayId] = std::vector<PointInfo>(MAX_POINTERS);
+        isOverTouchSlop_ = false;
+        isDown_ = true;
+    }
+
+    if (IsInMappingRegionForCompatibleMode(displayX, displayY)) {
+        int32_t pointerId = pointerEvent->GetPointerId();
+        if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+            pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size() ||
+            pointerId >= GetValueByKey(downPointerByDisplay_, displayId).size()) {
+            TLOGE(WmsLogTag::DEFAULT, "pointerId: %{public}d out of range", pointerId);
+            return;
+        }
+        eventMapTriggerByDisplay_[displayId][pointerId] = true;
+        downPointerByDisplay_[displayId][pointerId] = {displayX, displayY};
+        const auto& windowRect = GetRect();
+        float xMappingScale = 1.0f;
+        if (windowRect.posX_ != 0) {
+            xMappingScale = static_cast<float>(windowRect.width_) / windowRect.posX_;
+        }
+        int32_t windowLeft = windowRect.posX_;
+        int32_t windowRight = windowRect.posX_ + windowRect.width_;
+        int32_t transferX;
+        if (displayX <= windowLeft) {
+            transferX = windowRight - xMappingScale * (windowLeft - displayX);
+        } else {
+            transferX = windowLeft + xMappingScale * (displayX - windowRight);
+        }
+        if (transferX < 0) {
+            transferX = 0;
+        }
+        TLOGI(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{public}d, transferX: %{public}d, "
+            "pointerId: %{public}d", displayX, transferX, pointerId);
+        eventMapDeltaXByDisplay_[displayId][pointerId] = transferX - displayX;
+        ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+    }
+}
+
+void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    if (!isDown_) {
+        TLOGW(WmsLogTag::DEFAULT, "receive move before down, skip");
+        return;
+    }
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+        pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size() ||
+        !GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId]) {
+        return;
+    }
+
+    int32_t displayX = pointerItem.GetDisplayX();
+    int32_t displayY = pointerItem.GetDisplayY();
+    const auto& windowRect = GetRect();
+    if (!isOverTouchSlop_ && CheckTouchSlop(pointerId, displayX, displayY, windowRect.width_ / TOUCH_SLOP_RATIO)) {
+        TLOGD(WmsLogTag::DEFAULT, "reach touch slop, threshold: %{public}d", windowRect.width_ / TOUCH_SLOP_RATIO);
+        isOverTouchSlop_ = true;
+    }
+    int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
+    TLOGD(WmsLogTag::DEFAULT, "MOVE, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+        displayX, transferX, pointerId);
+    ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+}
+
+void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem)
+{
+    if (!isDown_) {
+        TLOGW(WmsLogTag::DEFAULT, "receive up before down, skip");
+        return;
+    }
+    int32_t displayId = property_->GetDisplayId();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+        pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size()) {
+        return;
+    }
+    if (GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId]) {
+        int32_t displayX = pointerItem.GetDisplayX();
+        int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
+        ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
+        TLOGI(WmsLogTag::DEFAULT, "UP, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+            displayX, transferX, pointerId);
+        GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId] = 0;
+        GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId] = false;
+        IgnoreClickEvent(pointerEvent);
+    }
+    int32_t pointerCount = pointerEvent->GetPointerCount();
+    if (pointerCount == 1) {
+        eventMapDeltaXByDisplay_.erase(displayId);
+        eventMapTriggerByDisplay_.erase(displayId);
+        downPointerByDisplay_.erase(displayId);
+        isDown_ = false;
+    }
+}
+
+void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem, int32_t transferX)
+{
+    const auto& windowRect = GetRect();
+    int32_t pointerId = pointerEvent->GetPointerId();
+
+    pointerItem.SetDisplayX(transferX);
+    pointerItem.SetDisplayXPos(static_cast<double>(transferX));
+    pointerItem.SetWindowX(transferX - windowRect.posX_);
+    pointerItem.SetWindowXPos(static_cast<double>(transferX - windowRect.posX_));
+    pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+}
+
+bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
+{
+    const auto& windowRect = GetRect();
+    Rect pointerRect = { displayX, displayY, 0, 0 };
+    return !pointerRect.IsInsideOf(windowRect);
+}
+
+bool WindowSceneSessionImpl::CheckTouchSlop(int32_t pointerId, int32_t displayX, int32_t displayY, int32_t threshold)
+{
+    int32_t displayId = property_->GetDisplayId();
+    if (downPointerByDisplay_.find(displayId) == downPointerByDisplay_.end()) {
+        return false;
+    }
+    std::vector<PointInfo> downPointers = downPointerByDisplay_[displayId];
+    return pointerId < downPointers.size() &&
+        (std::abs(displayX - downPointers[pointerId].x) >= threshold ||
+        std::abs(displayY - downPointers[pointerId].y) >= threshold);
+}
+
+void WindowSceneSessionImpl::IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_UP) {
+        return;
+    }
+    if (isOverTouchSlop_) {
+        if (pointerEvent->GetPointerCount() == 1) {
+            isOverTouchSlop_ = false;
+        }
+    } else {
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        TLOGI(WmsLogTag::DEFAULT, "transfer UP to CANCEL for not over touch slop");
+    }
 }
 
 WMError WindowSceneSessionImpl::GetWindowStatus(WindowStatus& windowStatus)

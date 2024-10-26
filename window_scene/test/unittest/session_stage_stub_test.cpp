@@ -433,6 +433,23 @@ HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | Smal
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleSetUniqueVirtualPixelRatio(data, reply));
 }
+
+/**
+ * @tc.name: HandleNotifyCompatibleModeEnableInPad
+ * @tc.desc: test function : HandleNotifyCompatibleModeEnableInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
 }
 }
 }

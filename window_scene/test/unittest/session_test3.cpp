@@ -875,6 +875,10 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     EXPECT_EQ(result, WSError::WS_OK);
+    
+    session_->state_ = SessionState::STATE_CONNECT;
+    result = session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -946,6 +950,72 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
+/**
+ * @tc.name: SetBufferAvailable
+ * @tc.desc: SetBufferAvailable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetBufferAvailable, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
+        resultValue = 1;
+    };
+    session_->SetBufferAvailableChangeListener(func);
+    session_->SetBufferAvailable(true);
+    ASSERT_EQ(session_->bufferAvailable_, true);
+}
+
+/**
+ * @tc.name: NotifySessionInfoChange
+ * @tc.desc: NotifySessionInfoChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
+        resultValue = 1;
+    };
+    session_->SetSessionInfoChangeNotifyManagerListener(func);
+    session_->NotifySessionInfoChange();
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: RectSizeCheckProcess01
+ * @tc.desc: RectSizeCheckProcess Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Level2)
+{
+    session_->SetSessionProperty(nullptr);
+    session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
+    ASSERT_EQ(session_->property_, nullptr);
+}
+
+/**
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    session_->property_ = nullptr;
+    bool enable = true;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
+
+    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+
+    enable = false;
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -147,7 +147,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_) {
-        WLOGFD("notify root scene ace");
+        WLOGFD("in");
         uiContent_->UpdateConfiguration(configuration);
         if (configuration == nullptr) {
             return;
@@ -163,7 +163,7 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
 
 void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    WLOGD("notify root scene ace for all");
+    WLOGFD("in");
     if (staticRootScene_) {
         staticRootScene_->UpdateConfiguration(configuration);
         if (configurationUpdatedCallback_) {
@@ -195,31 +195,16 @@ void RootScene::RegisterInputEventListener()
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Receive vsync request failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->RequestVsync(vsyncCallback);
 }
 
 int64_t RootScene::GetVSyncPeriod()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Get vsync period failed, vsyncStation is nullptr");
-        return 0;
-    }
     return vsyncStation_->GetVSyncPeriod();
 }
 
 void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
@@ -243,16 +228,11 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "SetFrameLayoutFinishCallback end");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
 }
 
 void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (vsyncStation_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "set dvsync switch failed, vsyncStation is nullptr");
-        return;
-    }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 

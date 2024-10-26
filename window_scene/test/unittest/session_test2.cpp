@@ -1341,6 +1341,26 @@ HWTEST_F(WindowSessionTest2, SetShowRecent003, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetShowRecent004
+ * @tc.desc: SetShowRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
+{
+    session_->systemConfig_.uiType_ = "phone";
+    ssm_->SetScreenLocked(false);
+
+    session_->property_ = new WindowSessionProperty();
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    bool showRecent = false;
+    session_->showRecent_ = true;
+    session_->SetAttachState(true);
+    session_->SetShowRecent(showRecent);
+    ASSERT_EQ(session_->GetShowRecent(), showRecent);
+}
+
+/**
  * @tc.name: GetAttachState001
  * @tc.desc: GetAttachState001
  * @tc.type: FUNC
@@ -1718,6 +1738,100 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     ASSERT_NE(subSubSession->property_, nullptr);
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSubSession->GetMainSession());
+}
+
+/*
+ * @tc.name: IsSupportDetectWindow
+ * @tc.desc: IsSupportDetectWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level2)
+{
+    session_->systemConfig_.uiType_ = "phone";
+    ssm_->SetScreenLocked(true);
+    bool ret = session_->IsSupportDetectWindow(true);
+    ASSERT_EQ(ret, false);
+
+    ssm_->SetScreenLocked(false);
+    session_->property_ = new WindowSessionProperty();
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = session_->IsSupportDetectWindow(true);
+    ASSERT_EQ(ret, false);
+
+    ssm_->SetScreenLocked(false);
+    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session_->systemConfig_.uiType_ = "pc";
+    ret = session_->IsSupportDetectWindow(false);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ShouldCreateDetectTask
+ * @tc.desc: ShouldCreateDetectTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ShouldCreateDetectTask, Function | SmallTest | Level2)
+{
+    DetectTaskInfo detectTaskInfo;
+    detectTaskInfo.taskState = DetectTaskState::ATTACH_TASK;
+    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    bool ret = session_->ShouldCreateDetectTask(true, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, true);
+    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
+    session_->SetDetectTaskInfo(detectTaskInfo);
+    ret = session_->ShouldCreateDetectTask(false, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, true);
+    ret = session_->ShouldCreateDetectTask(true, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ShouldCreateDetectTaskInRecent
+ * @tc.desc: ShouldCreateDetectTaskInRecent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ShouldCreateDetectTaskInRecent, Function | SmallTest | Level2)
+{
+    bool ret = session_->ShouldCreateDetectTaskInRecent(true, true, true);
+    ASSERT_EQ(ret, false);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, true, true);
+    ASSERT_EQ(ret, true);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, true, false);
+    ASSERT_EQ(ret, false);
+    ret = session_->ShouldCreateDetectTaskInRecent(false, false, false);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CreateWindowStateDetectTask
+ * @tc.desc: CreateWindowStateDetectTask Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, CreateWindowStateDetectTask, Function | SmallTest | Level2)
+{
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
+    session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
+    session_->SetSessionState(SessionState::STATE_CONNECT);
+    bool isAttach = true;
+    session_->CreateWindowStateDetectTask(isAttach, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(isAttach, true);
+
+    session_->handler_ = nullptr;
+    session_->CreateWindowStateDetectTask(false, WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(session_->handler_, nullptr);
+}
+
+/**
+ * @tc.name: SetOffset01
+ * @tc.desc: SetOffset Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetOffset01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetOffset(0, 0);
+    ASSERT_EQ(session_->GetOffsetX(), 0);
 }
 }
 } // namespace Rosen

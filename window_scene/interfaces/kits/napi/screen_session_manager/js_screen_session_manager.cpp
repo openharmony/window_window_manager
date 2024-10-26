@@ -15,6 +15,7 @@
 
 #include "js_screen_session_manager.h"
 
+#include <hitrace_meter.h>
 #include <js_runtime_utils.h>
 
 #include "display_manager.h"
@@ -211,31 +212,34 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenConnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [callback_, screenSession](napi_env env, NapiAsyncTask& task, int32_t status) {
-            napi_value objValue = nullptr;
-            napi_create_object(env, &objValue);
-            if (objValue == nullptr) {
-                TLOGE(WmsLogTag::DMS, "Object is null!");
-                return;
-            }
+    auto asyncTask = [callback_, screenSession, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnScreenConnected");
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::DMS, "Object is null!");
+            return;
+        }
 
-            napi_set_named_property(env, objValue, "screenSession", JsScreenSession::Create(env, screenSession));
-            napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 0));
+        napi_set_named_property(env, objValue, "screenSession", JsScreenSession::Create(env, screenSession));
+        napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 0));
 
-            napi_value argv[] = { objValue };
-            napi_value method = callback_->GetNapiValue();
-            if (method == nullptr) {
-                TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
-                return;
-            }
-            napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value argv[] = { objValue };
+        napi_value method = callback_->GetNapiValue();
+        if (method == nullptr) {
+            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
+            return;
+        }
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnScreenConnected: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnScreenConnected: env is nullptr");
+    }
 }
 
 void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
@@ -432,7 +436,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
     if (argc > ARGC_THREE) {
         if (!ConvertFromJsValue(env, argv[ARGC_THREE], type) || type < ScreenPropertyChangeType::UNSPECIFIED ||
-            type > ScreenPropertyChangeType::ROTATION_END) { // 3: the 4rd argv
+            type > ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) { // 3: the 4rd argv
             TLOGE(WmsLogTag::DMS, "[NAPI]screenPropertyChangeType is invalid");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
