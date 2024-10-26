@@ -29,6 +29,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
 const static uint32_t MAX_SCREEN_SIZE = 32;
+const static uint32_t DLCLOSE_TIMEOUT = 300000;
 }
 class ScreenManager::Impl : public RefBase {
 public:
@@ -57,6 +58,7 @@ private:
     void NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos);
     bool UpdateScreenInfoLocked(sptr<ScreenInfo>);
     std::string GetScreenInfoSrting(sptr<ScreenInfo> screenInfo);
+    void DlcloseTimeout();
 
     bool isAllListenersRemoved() const;
 
@@ -202,6 +204,10 @@ private:
 };
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
+extern "C" __attribute__((destructor)) void ScreenManager::Impl::DlcloseTimeout()
+{
+        usleep(DLCLOSE_TIMEOUT);
+}
 
 ScreenManager::ScreenManager()
 {

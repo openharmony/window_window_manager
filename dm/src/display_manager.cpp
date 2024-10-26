@@ -648,7 +648,6 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     return displayMap_[displayId];
 }
 
-
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
     if (g_dmIsDestroyed) {
@@ -2085,6 +2084,23 @@ DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenI
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
         screenId, pid, windowIdList);
+}
+
+sptr<Display> DisplayManager::GetPrimaryDisplaySync()
+{
+    return pImpl_->GetDefaultDisplaySync();
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenCapture =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetScreenCapture(captureOption, errorCode);
+    if (screenCapture == nullptr) {
+        WLOGFE("screen capture failed!");
+        return nullptr;
+    }
+    return screenCapture;
 }
 } // namespace OHOS::Rosen
 

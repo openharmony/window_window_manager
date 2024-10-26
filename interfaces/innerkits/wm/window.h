@@ -2402,11 +2402,11 @@ public:
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
 
     /**
-     * @brief Get whether the gesture back is enabled or not.
-     *
-     * @return the value true means to enable gesture back, and false means the opposite.
+     * @brief Get whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
      */
-    virtual bool GetGestureBackEnabled() const { return true; }
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 };
 }
 }
