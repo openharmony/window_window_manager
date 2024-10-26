@@ -44,6 +44,7 @@ ohos_shared_library("libmodal_system_ui_extension_client") {
   deps = [
     "../../window_scene/session:scene_session",
     "../../wm:libwm",
+    "../../utils:libwmutil_base",
   ]
 
   external_deps = [
