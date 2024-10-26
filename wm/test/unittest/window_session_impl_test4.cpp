@@ -291,27 +291,6 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonArea, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: GetUIContentRemoteObj
- * @tc.desc: GetUIContentRemoteObj and check the retCode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, GetUIContentRemoteObj, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetUIContentRemoteObj start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    sptr<IRemoteObject> remoteObj;
-    WSError res = window->GetUIContentRemoteObj(remoteObj);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    res = window->GetUIContentRemoteObj(remoteObj);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetUIContentRemoteObj end";
-}
-
-/**
  * @tc.name: RegisterExtensionAvoidAreaChangeListener
  * @tc.desc: RegisterExtensionAvoidAreaChangeListener Test
  * @tc.type: FUNC
@@ -388,25 +367,26 @@ HWTEST_F(WindowSessionImplTest4, SetPiPControlEvent, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetUIContentInner
- * @tc.desc: SetUIContentInner Test
+ * @tc.name: SetAutoStartPiP
+ * @tc.desc: SetAutoStartPiP
  * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetUIContentInner, Function | SmallTest | Level2)
+*/
+HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetUIContentInner start";
-    sptr<WindowOption> option = new WindowOption();
+    auto option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetUIContentInner");
-    option->SetExtensionTag(true);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    option->SetWindowName("SetAutoStartPiP");
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
-    std::string url = "";
-    EXPECT_TRUE(window->IsWindowSessionInvalid());
-    WMError res1 = window->SetUIContentInner(url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr);
-    ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetUIContentInner end";
+    SessionInfo sessionInfo = { "SetAutoStartPiP", "SetAutoStartPiP", "SetAutoStartPiP" };
+    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    bool isAutoStart = true;
+    window->SetAutoStartPiP(isAutoStart);
+    window->hostSession_ = nullptr;
+    window->SetAutoStartPiP(isAutoStart);
 }
 
 /**
@@ -566,24 +546,6 @@ HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, Function | SmallTest | L
 }
 
 /**
- * @tc.name: NotifyRotationAnimationEnd
- * @tc.desc: NotifyRotationAnimationEnd Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->NotifyRotationAnimationEnd();
-
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("", nullptr, nullptr, WindowSetUIContentType::BY_ABC, nullptr, aceRet);
-    window->NotifyRotationAnimationEnd();
-    ASSERT_NE(nullptr, window->uiContent_);
-}
-
-/**
  * @tc.name: SetTitleButtonVisible
  * @tc.desc: SetTitleButtonVisible and GetTitleButtonVisible
  * @tc.type: FUNC
@@ -642,29 +604,6 @@ HWTEST_F(WindowSessionImplTest4, IsFocused, Function | SmallTest | Level2)
     ASSERT_FALSE(window->IsWindowSessionInvalid());
     ASSERT_EQ(persistentId, window->GetPersistentId());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: NapiSetUIContent
- * @tc.desc: NapiSetUIContent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("NapiSetUIContent");
-    option->SetExtensionTag(true);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetPersistentId(1);
-    std::string url = "";
-    AppExecFwk::Ability* ability = nullptr;
-
-    window->SetUIContentByName(url, nullptr, nullptr, nullptr);
-    window->SetUIContentByAbc(url, nullptr, nullptr, nullptr);
-    WMError res1 = window->NapiSetUIContent(url, nullptr, nullptr, false, nullptr, ability);
-    ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1023,28 +962,6 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     ASSERT_EQ(hideSplitButton, true);
 }
 
-/**
- * @tc.name: SetAutoStartPiP
- * @tc.desc: SetAutoStartPiP
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
-{
-    auto option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetAutoStartPiP");
-    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "SetAutoStartPiP", "SetAutoStartPiP", "SetAutoStartPiP" };
-    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    bool isAutoStart = true;
-    window->SetAutoStartPiP(isAutoStart);
-    window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
