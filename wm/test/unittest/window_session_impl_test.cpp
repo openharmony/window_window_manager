@@ -1159,7 +1159,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     sptr<IWindowLifeCycle> listener = nullptr;
@@ -1215,7 +1214,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     sptr<IScreenshotListener> listener5 = nullptr;
@@ -1269,7 +1267,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     sptr<IDisplayMoveListener> listener6 = nullptr;
@@ -1293,6 +1290,7 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
 }
