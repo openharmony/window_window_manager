@@ -201,7 +201,7 @@ SceneSessionManager::~SceneSessionManager()
 void SceneSessionManager::Init()
 {
     auto deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    bool isScbCoreEnabled = deviceType == UI_TYPE_PHONE &&
+    bool isScbCoreEnabled = (deviceType == UI_TYPE_PHONE || deviceType == "tablet") &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
     Session::SetScbCoreEnabled(isScbCoreEnabled);
 
