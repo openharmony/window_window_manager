@@ -113,6 +113,7 @@ void SceneSessionManagerTest3::SetUp()
 void SceneSessionManagerTest3::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
