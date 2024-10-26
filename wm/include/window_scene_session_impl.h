@@ -175,7 +175,7 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
-    bool GetGestureBackEnabled() const override;
+    WMError GetGestureBackEnabled(bool& enable) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();

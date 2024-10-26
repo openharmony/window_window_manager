@@ -61,6 +61,12 @@ static napi_value GetDefaultDisplaySync(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetDefaultDisplaySync(env, info) : nullptr;
 }
 
+static napi_value GetPrimaryDisplaySync(napi_env env, napi_callback_info info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetPrimaryDisplaySync(env, info) : nullptr;
+}
+
 static napi_value GetDisplayByIdSync(napi_env env, napi_callback_info info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -185,6 +191,20 @@ napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
     NapiAsyncTask::Schedule("JsDisplayManager::OnGetDefaultDisplay",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+napi_value OnGetPrimaryDisplaySync(napi_env env, napi_callback_info info)
+{
+    WLOGD("OnGetPrimaryDisplaySync called");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetPrimaryDisplaySync");
+    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetPrimaryDisplaySync();
+    if (display == nullptr) {
+        WLOGFE("[NAPI]Display info is nullptr, js error will be happen");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
+            "invalid screen id"));
+        return NapiGetUndefined(env);
+    }
+    return CreateJsDisplayObject(env, display);
 }
 
 napi_value OnGetDefaultDisplaySync(napi_env env, napi_callback_info info)
@@ -1167,6 +1187,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
     BindNativeFunction(env, exportObj, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
+    BindNativeFunction(env, exportObj, "getPrimaryDisplaySync", moduleName, JsDisplayManager::GetPrimaryDisplaySync);
     BindNativeFunction(env, exportObj, "getDisplayByIdSync", moduleName, JsDisplayManager::GetDisplayByIdSync);
     BindNativeFunction(env, exportObj, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
     BindNativeFunction(env, exportObj, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);

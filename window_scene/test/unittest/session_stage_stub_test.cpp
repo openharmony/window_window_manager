@@ -813,6 +813,25 @@ HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetSplitButtonVisible(data, reply));
 }
+
+/**
+ * @tc.name: HandleSetEnableDragBySystem
+ * @tc.desc: test function : HandleSetEnableDragBySystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteBool(false);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetEnableDragBySystem(data, reply));
+}
 }
 }
 }

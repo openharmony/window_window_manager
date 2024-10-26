@@ -121,6 +121,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDumpInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE):
             return HandleSetSplitButtonVisible(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
+            return HandleSetEnableDragBySystem(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -580,7 +582,7 @@ bool SessionStageStub::CalculateDataSize(const std::vector<std::string>& infos)
 bool SessionStageStub::WriteSmallStringVector(
     const std::vector<std::string>& infos, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "WriteSmallStringVector entry");
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
     reply.SetMaxCapacity(CAPACITY_THRESHOLD);
     if (!reply.WriteStringVector(infos)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write infos failed");
@@ -593,7 +595,6 @@ bool SessionStageStub::WriteSmallStringVector(
 bool SessionStageStub::WriteBigStringVector(
     const std::vector<std::string>& infos, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "WriteBigStringVector entry");
     Parcel tempParcel;
     tempParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
     if (!tempParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
@@ -609,7 +610,7 @@ bool SessionStageStub::WriteBigStringVector(
     }
 
     size_t dataSize = tempParcel.GetDataSize();
-    TLOGD(WmsLogTag::WMS_UIEXT, "write big data, dataSize: %{public}zu", dataSize);
+    TLOGD(WmsLogTag::WMS_UIEXT, "dataSize: %{public}zu", dataSize);
     if (!reply.WriteInt32(static_cast<int32_t>(dataSize))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write dataSize failed");
         return false;
@@ -669,6 +670,18 @@ int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     SetSplitButtonVisible(isVisible);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool enableDrag = true;
+    if (!data.ReadBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read enableDrag failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetEnableDragBySystem(enableDrag);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -42,6 +42,8 @@ public:
 
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
 
 protected:
