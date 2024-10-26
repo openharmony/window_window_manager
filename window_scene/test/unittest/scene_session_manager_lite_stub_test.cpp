@@ -539,7 +539,27 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
+    int32_t res;
+
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    std::u16string deviceIdData = "deviceId"
+    data.WriteString16(deviceIdData);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    int32_t persistentId = 0;
+    data.WriteInt32(persistentId);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    bool isLowResolution = true;
+    data.WriteBool(isLowResolution);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
