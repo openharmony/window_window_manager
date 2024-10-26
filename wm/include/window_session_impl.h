@@ -292,7 +292,7 @@ public:
      */
     void SetFreeMultiWindowMode(bool enable)
     {
-    windowSystemConfig_.freeMultiWindowEnable_ = enable;
+        windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
 
 protected:
