@@ -631,7 +631,15 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSession, Function | SmallT
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
+    int32_t res;
+
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t sessionId = 0;
+    data.WriteInt32(sessionId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
