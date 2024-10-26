@@ -953,6 +953,18 @@ uint32_t WindowSessionProperty::GetSubWindowLevel() const
     return subWindowLevel_;
 }
 
+void WindowSessionProperty::SetCompatibleModeEnableInPad(bool enable)
+{
+    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
+    compatibleModeEnableInPad_ = enable;
+}
+
+bool WindowSessionProperty::GetCompatibleModeEnableInPad() const
+{
+    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
+    return compatibleModeEnableInPad_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -1031,7 +1043,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) &&
+        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         MarshallingFutureCallback(parcel);
 }
 
@@ -1104,6 +1116,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
                                           parcel.ReadInt32(), parcel.ReadInt32());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
+    property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     UnmarshallingFutureCallback(parcel, property);
     return property;
 }
