@@ -185,7 +185,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetDisplayIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_DISPLAYIDS):
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOW):
             return HandleGetDisplayIdByWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
