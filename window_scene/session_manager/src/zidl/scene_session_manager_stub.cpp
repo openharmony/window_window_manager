@@ -361,8 +361,14 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
 
 int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
-    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS) ||
+        typeId >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
+        return ERR_INVALID_DATA;
+    }
+    WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
+    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -373,8 +379,14 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& dat
 
 int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
-    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS) ||
+        typeId >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
+        return ERR_INVALID_DATA;
+    }
+    WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
+    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -787,7 +799,11 @@ int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, Me
 int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleBindDialogTarget!");
-    uint64_t persistentId = data.ReadUint64();
+    uint64_t persistentId = 0;
+    if (!data.ReadUint64(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_TRANSACTION_FAILED;
+    }
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     WSError ret = BindDialogSessionTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
