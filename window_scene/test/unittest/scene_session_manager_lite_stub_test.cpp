@@ -470,9 +470,28 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
+    int res;
+    sptr <IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t continueStateValue = -3;
+    data.WriteInt32(continueStateValue);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    MessageParcel data2;
+    continueStateValue = 1;
+    data2.WriteRemoteObject(token);
+    data2.WriteInt32(continueStateValue);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data2, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
 }
 
 /**
