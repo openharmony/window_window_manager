@@ -191,7 +191,7 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
 bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, const sptr<WindowNode>& node,
     AvoidAreaType avoidAreaType)
 {
-    if (!node->currentVisibility) {
+    if (!node->currentVisibility_) {
         return false;
     }
     auto iter = lastUpdatedAvoidArea_.find(node->GetWindowId());
