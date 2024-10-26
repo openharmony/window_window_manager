@@ -2513,7 +2513,7 @@ WMError SceneSessionManagerProxy::GetWindowDisplayIds(std::vector<uint64_t>& win
             TLOGE(WmsLogTag::DEFAULT, "Fail to read displayId");
             return WMError::WM_ERROR_IPC_FAILED;
         }
-        windowDisplayIdMap[windowId] = displayId;
+        windowDisplayIdMap[windowId] = std::move(displayId);
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
