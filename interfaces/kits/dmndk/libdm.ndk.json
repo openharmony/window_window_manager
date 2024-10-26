@@ -78,5 +78,29 @@
     {
         "first_instroduced":"12",
         "name":"OH_NativeDisplayManager_UnregisterDisplayChangeListener"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_CreatePrimaryDisplay"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_CreateDisplayInfoById"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_DestroyDisplayInfo"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_CreateAllDisplays"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_DestroyAllDisplays"
+    },
+    {
+        "first_instroduced":"14",
+        "name":"OH_NativeDisplayManager_CreateScreenCapture"
     }
 ]

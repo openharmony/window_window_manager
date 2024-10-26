@@ -1752,10 +1752,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGestureBackEnabled(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
-    ASSERT_EQ(true, window->GetGestureBackEnabled());
     ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(false));
-    ASSERT_EQ(false, window->GetGestureBackEnabled());
+    bool enable = true;
+    ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    ASSERT_EQ(false, enable);
+    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
+    ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    ASSERT_EQ(true, enable);
 }
 
 /*

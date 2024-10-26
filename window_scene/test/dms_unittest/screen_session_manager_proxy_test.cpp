@@ -2127,6 +2127,33 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorSpace, Function | SmallTes
     func();
     EXPECT_EQ(resultValue, 1);
 }
+
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    std::shared_ptr<Media::PixelMap> res = nullptr;
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode* errorCode = nullptr;
+    std::function<void()> func = [&]() {
+        res = screenSessionManagerProxy->GetScreenCapture(option, errorCode);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, nullptr);
+    } else {
+        ASSERT_EQ(res, nullptr);
+    }
+}
 }
 }
 }

@@ -369,6 +369,25 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive02, Function | SmallTes
 }
 
 /**
+ * @tc.name: OnTitleAndDockHoverShowChange
+ * @tc.desc: OnTitleAndDockHoverShowChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
+        return;
+    };
+    sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+    EXPECT_EQ(sceneSession->OnTitleAndDockHoverShowChange(true, true), WSError::WS_OK);
+}
+
+/**
  * @tc.name: OnRestoreMainWindow
  * @tc.desc: OnRestoreMainWindow function01
  * @tc.type: FUNC

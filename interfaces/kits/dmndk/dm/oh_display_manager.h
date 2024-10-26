@@ -311,6 +311,64 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterFoldDisplayModeCh
  */
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterFoldDisplayModeChangeListener(uint32_t listenerIndex);
 
+/**
+ * @brief Obtain all displays.
+ *
+ * @param { allDisplays } the result of all displays.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
+    NativeDisplayManager_DisplaysInfo **allDisplays);
+
+/**
+ * @brief Destroy all displays.
+ *
+ * @param { allDisplays } all displays to be free.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+void OH_NativeDisplayManager_DestroyAllDisplays(NativeDisplayManager_DisplaysInfo *allDisplays);
+
+/**
+ * @brief Obtain the target display by display id.
+ *
+ * @param { displayId } the display id.
+ * @param { displayInfo } the result of all displays.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayInfoById(uint32_t displayId,
+    NativeDisplayManager_DisplayInfo **displayInfo);
+
+/**
+ * @brief Destroy the target display.
+ *
+ * @param { displayInfo } the target display to be free.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+void OH_NativeDisplayManager_DestroyDisplayInfo(NativeDisplayManager_DisplayInfo *displayInfo);
+
+/**
+ * @brief Obtain the primary display.
+ *
+ * @param { displayInfo } the result of primary display.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreatePrimaryDisplay(
+    NativeDisplayManager_DisplayInfo **displayInfo);
+
 #ifdef __cplusplus
 }
 #endif

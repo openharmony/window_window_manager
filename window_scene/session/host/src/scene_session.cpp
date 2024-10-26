@@ -4587,25 +4587,6 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
-{
-    const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
-            return;
-        }
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
-            isTitleHoverShown, isDockHoverShown);
-        if (session->onTitleAndDockHoverShowChangeFunc_) {
-            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
-        }
-    };
-    PostTask(task, funcName);
-    return WSError::WS_OK;
-}
-
 void SceneSession::SetForceHideState(ForceHideState forceHideState)
 {
     forceHideState_ = forceHideState;
@@ -4733,6 +4714,32 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
         sessionProperty->SetDragEnabled(enableDrag);
     };
     PostTask(task, "SetSystemWindowEnableDrag");
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
+
+    auto task = [weakThis = wptr(this), enableDrag]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        auto sessionProperty = session->GetSessionProperty();
+        if (!sessionProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
+    };
+    PostTask(task, "SetWindowEnableDragBySystem");
     return WMError::WM_OK;
 }
 

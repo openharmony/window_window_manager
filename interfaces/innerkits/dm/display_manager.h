@@ -699,6 +699,23 @@ public:
      */
     void RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken);
 
+    /**
+     * @brief Get primary display object by means of sync.
+     *
+     * @return primary display.
+     */
+    sptr<Display> GetPrimaryDisplaySync();
+
+    /**
+     * @brief Get screen capture of the target display.
+     *
+     * @param captureOption screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap object of screen capture.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+
 private:
     DisplayManager();
     ~DisplayManager();
