@@ -1343,29 +1343,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTes
 }
 
 /**
- * @tc.name: HandleGetSessionInfos3
- * @tc.desc: test HandleGetSessionInfos
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos3, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteString("testDeviceId");
-    data.WriteInt32(0);
-
-    int result = stub_->HandleGetSessionInfos(data, reply);
-
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-}
-
-/**
- * @tc.name: HandleGetSessionInfos4
+ * @tc.name: HandleGetSessionInfos2
  * @tc.desc: test HandleGetSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos4, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos2, Function | SmallTest | Level2)
 {
     if (stub_ == nullptr) {
         return;
@@ -1383,11 +1365,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos4, Function | SmallTe
 }
 
 /**
- * @tc.name: HandleGetSessionInfo3
+ * @tc.name: HandleGetSessionInfo
  * @tc.desc: test HandleGetSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo3, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
