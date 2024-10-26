@@ -71,6 +71,7 @@ public:
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
         std::vector<std::string>& info));
     MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
+    MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
 };
 } // namespace Rosen
 } // namespace OHOS

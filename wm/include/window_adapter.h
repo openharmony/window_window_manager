@@ -143,7 +143,10 @@ public:
      * PC Window
      */
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
-    
+
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();

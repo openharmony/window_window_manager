@@ -35,6 +35,7 @@ public:
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
     void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override {}
+    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -2259,6 +2260,21 @@ HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, Function | SmallTest | Le
     session->RegisterScreenChangeListener(screenChangeListener);
     int32_t hoverStatus = 0;
     session->HandleHoverStatusChange(hoverStatus);
+}
+
+/**
+ * @tc.name: ScreenCaptureNotify
+ * @tc.desc: ScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+    session->ScreenCaptureNotify(screenId, uid, clientName);
 }
 } // namespace
 } // namespace Rosen

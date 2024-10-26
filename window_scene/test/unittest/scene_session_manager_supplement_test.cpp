@@ -144,17 +144,17 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCollaboratorAfterStart,
 {
     int res = 0;
     sptr<SceneSession> sceneSession;
-    sptr<AAFwk::SessionInfo> scnSessionInfo;
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, scnSessionInfo);
+    sptr<AAFwk::SessionInfo> sceneSessionInfo;
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
     SessionInfo info;
     info.bundleName_ = "test1";
     info.abilityName_ = "test2";
     ssm_->RequestSceneSessionBackground(sceneSession, true, true);
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, scnSessionInfo);
-    scnSessionInfo = new AAFwk::SessionInfo();
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, scnSessionInfo);
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, scnSessionInfo);
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
+    sceneSessionInfo = new AAFwk::SessionInfo();
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
     ssm_->RequestSceneSessionBackground(sceneSession, true, true);
     ssm_->RequestSceneSessionBackground(sceneSession, true, false);
     ssm_->brightnessSessionId_ = sceneSession->GetPersistentId();

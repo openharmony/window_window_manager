@@ -206,6 +206,8 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
+
+    virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
