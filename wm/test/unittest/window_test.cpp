@@ -2612,7 +2612,6 @@ HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-
 /**
  * @tc.name: Test04
  * @tc.desc: Test04
