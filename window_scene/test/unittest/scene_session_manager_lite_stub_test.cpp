@@ -653,7 +653,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, Functi
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
+    int32_t res;
+
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    std::vector<int32_t> sessionIds;
+    sessionIds.push_back(0);
+    data.WriteInt32Vector(sessionIds);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t topSessionId = 0;
+    data.WriteInt32(topSessionId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
