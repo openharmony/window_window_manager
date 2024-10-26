@@ -20,10 +20,10 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-class TaskSchedulerText : public testing::Test {
+class TaskSchedulerTest : public testing::Test {
   public:
-    TaskSchedulerText() {}
-    ~TaskSchedulerText() {}
+    TaskSchedulerTest() {}
+    ~TaskSchedulerTest() {}
 };
 
 namespace {
@@ -32,9 +32,9 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, task_scheduler_test001, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 start";
+    GTEST_LOG_(INFO) << "TaskSchedulerTest: task_scheduler_test001 start";
     std::string threadName = "threadName";
     std::string name = "name";
     TaskScheduler* taskScheduler = new(std::nothrow) TaskScheduler(threadName);
@@ -42,7 +42,7 @@ HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level
     taskScheduler->RemoveTask(name);
     ASSERT_EQ(res, 0);
     delete taskScheduler;
-    GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
+    GTEST_LOG_(INFO) << "TaskSchedulerTest: task_scheduler_test001 end";
 }
 
 /**
@@ -50,7 +50,7 @@ HWTEST_F(TaskSchedulerText, task_scheduler_test001, Function | SmallTest | Level
  * @tc.desc: GetEventHandler function
  * @tc.type: FUNC
  */
-HWTEST_F(TaskSchedulerText, GetEventHandler, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, GetEventHandler, Function | SmallTest | Level2)
 {
     std::string threadName = "threadName";
     std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
@@ -63,7 +63,7 @@ HWTEST_F(TaskSchedulerText, GetEventHandler, Function | SmallTest | Level2)
  * @tc.desc: PostTask function
  * @tc.type: FUNC
  */
-HWTEST_F(TaskSchedulerText, PostTask, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, PostTask, Function | SmallTest | Level2)
 {
     std::string threadName = "threadName";
     std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
@@ -83,7 +83,7 @@ HWTEST_F(TaskSchedulerText, PostTask, Function | SmallTest | Level2)
     EXPECT_EQ(resultValue, 0);
 }
 
-HWTEST_F(TaskSchedulerText, AddExportTask1, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, AddExportTask1, Function | SmallTest | Level2)
 {
     std::string threadName = "threadName";
     std::string funcName = "funcName";
@@ -102,7 +102,7 @@ HWTEST_F(TaskSchedulerText, AddExportTask1, Function | SmallTest | Level2)
 }
 
 
-HWTEST_F(TaskSchedulerText, AddExportTask2, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, AddExportTask2, Function | SmallTest | Level2)
 {
     std::string threadName = "threadName";
     std::string funcName = "funcName";
@@ -121,7 +121,7 @@ HWTEST_F(TaskSchedulerText, AddExportTask2, Function | SmallTest | Level2)
     ASSERT_NE(taskScheduler->exportFuncMap_.size(), 0);
 }
 
-HWTEST_F(TaskSchedulerText, SetExportHandler, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, SetExportHandler, Function | SmallTest | Level2)
 {
     std::string exportThreadName = "exportThread";
     auto eventRunner = AppExecFwk::EventRunner::Create(exportThreadName);
@@ -132,7 +132,7 @@ HWTEST_F(TaskSchedulerText, SetExportHandler, Function | SmallTest | Level2)
     ASSERT_EQ(eventHandler.get(), taskScheduler->exportHandler_.get());
 }
 
-HWTEST_F(TaskSchedulerText, ExecuteExportTask, Function | SmallTest | Level2)
+HWTEST_F(TaskSchedulerTest, ExecuteExportTask, Function | SmallTest | Level2)
 {
     std::string threadName = "threadName";
     std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);

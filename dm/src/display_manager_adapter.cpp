@@ -850,4 +850,10 @@ DMError ScreenManagerAdapter::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
     return displayManagerServiceProxy_->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
 }
 
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
+}
 } // namespace OHOS::Rosen

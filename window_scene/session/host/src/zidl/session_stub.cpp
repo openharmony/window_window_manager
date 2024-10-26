@@ -380,6 +380,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
+        reply.WriteBool(property->GetDragEnabled());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1111,6 +1112,11 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
     uint32_t actionValue = 0;
     if (!data.ReadUint32(actionValue)) {
         TLOGE(WmsLogTag::DEFAULT, "read action error");
+        return ERR_INVALID_DATA;
+    }
+    if (actionValue < static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
+        actionValue > static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid action");
         return ERR_INVALID_DATA;
     }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
