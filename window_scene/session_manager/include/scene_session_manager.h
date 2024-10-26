@@ -483,6 +483,12 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
 
+    /*
+     * Window displayId
+     */
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
