@@ -326,6 +326,18 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: NotifyCompatibleModeEnableInPad
+ * @tc.desc: test function : NotifyCompatibleModeEnableInPad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyCompatibleModeEnableInPad(true);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: NotifyDensityFollowHost
  * @tc.desc: test function : NotifyDensityFollowHost
  * @tc.type: FUNC

@@ -96,6 +96,7 @@ public:
         int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
+    void SetCompatibleModeEnableInPad(bool enable);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -153,6 +154,7 @@ public:
     int32_t GetCompatibleInPcLandscapeHeight() const;
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
+    bool GetCompatibleModeEnableInPad() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -331,6 +333,8 @@ private:
     int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
+    mutable std::mutex compatibleModeMutex_;
+    bool compatibleModeEnableInPad_ = false;
 
     /**
      * Sub Window
