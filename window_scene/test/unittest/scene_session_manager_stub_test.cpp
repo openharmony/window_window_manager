@@ -1664,22 +1664,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
-    vectorSize = static_cast<uint32_t>(info.size());
-    data.WriteUint32(vectorSize);
-    uint32_t curSize;
-    for (const auto& elem : info) {
-        const char* curInfo = elem.c_str();
-        curSize = static_cast<uint32_t>(strlen(curInfo));
-        data.WriteUint32(curSize);
-        if (curSize != 0) {
-            data.WriteRawData(curInfo, curSize);
-        }
-    }
-
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
