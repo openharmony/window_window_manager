@@ -61,6 +61,7 @@ if (!ispreview) {
     sources = [
       "../utils/src/window_transition_info.cpp",
       "../utils/src/wm_math.cpp",
+      "../utils/src/window_manager_hilog.cpp",
       "src/vsync_station.cpp",
       "src/window.cpp",
       "src/window_display.cpp",
@@ -82,8 +83,6 @@ if (!ispreview) {
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:ipc_core",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:utils",
     ]
-
-    deps = [ "../utils:libwmutil_base" ]
 
     external_deps = [
       "ace_engine:ace_uicontent",
