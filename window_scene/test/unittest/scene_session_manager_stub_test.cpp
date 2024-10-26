@@ -1373,9 +1373,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("TestDeviceId");
+
+    data.WriteString16(static_cast<std::u16string>(u"TestDeviceId"));
+    data.WriteInt32(123456789);
     int result = stub_->HandleGetSessionInfo(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
