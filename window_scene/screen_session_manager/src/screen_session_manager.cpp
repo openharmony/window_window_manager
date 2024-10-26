@@ -55,6 +55,7 @@
 #include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
+#include "plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -306,6 +307,10 @@ void ScreenSessionManager::Init()
 
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
         g_isPcDevice = true;
+    }
+
+    if (!LoadMotionSensor()) {
+        TLOGw(WmsLogTag::DMS, "load motion plugin failed.");
     }
 
     RegisterScreenChangeListener();
