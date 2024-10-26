@@ -2104,11 +2104,11 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | Small
 }
 
 /**
- * @tc.name: GetWindowDisplayIds
- * @tc.desc: test function : GetWindowDisplayIds
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: test function : GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, GetWindowDisplayIds, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -2123,9 +2123,9 @@ HWTEST_F(SceneSessionManagerTest, GetWindowDisplayIds, Function | SmallTest | Le
     property->SetDisplayId(displayId);
     sceneSession1->SetSessionProperty(property);
 
-    std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    ASSERT_EQ(ssm_->GetWindowDisplayIds(windowIds, windowDisplayIdMap), WMError::WM_OK);
+    ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
 }
 }
 } // namespace Rosen

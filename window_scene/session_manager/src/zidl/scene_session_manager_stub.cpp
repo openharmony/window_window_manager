@@ -186,7 +186,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_DISPLAYIDS):
-            return HandleGetWindowDisplayIds(data, reply);
+            return HandleGetDisplayIdByWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1244,7 +1244,7 @@ int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& d
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<uint64_t> windowIds;
     if (!data.ReadUInt64Vector(&windowIds)) {
@@ -1252,7 +1252,7 @@ int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    WMError errCode = GetWindowDisplayIds(windowIds, windowDisplayIdMap);
+    WMError errCode = GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
 
     if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
@@ -1269,7 +1269,7 @@ int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, Mess
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        TLOGE(WmsLogTag::DEFAULT, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

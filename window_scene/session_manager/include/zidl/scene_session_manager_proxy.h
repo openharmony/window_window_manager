@@ -129,7 +129,7 @@ public:
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
-    WMError GetWindowDisplayIds(std::vector<uint64_t>& windowIds,
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
 private:
