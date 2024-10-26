@@ -76,6 +76,8 @@ ohos_static_library("libwmutil_static") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
+  deps = [ ":libwmutil_base" ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
