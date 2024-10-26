@@ -1838,13 +1838,13 @@ HWTEST_F(WindowSessionTest2, PostExportTask02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->leashWinSurfaceNode_ = WindowSessionTest2::CreateRSSurfeceNode();
+    session_->leashWinSurfaceNode_ = WindowSessionTest2::CreateRSSurfaceNode();
     session_->SetLeashWinSurfaceNode(nullptr);
 
     session_->leashWinSurfaceNode_ = nullptr;
     session_->SetLeashWinSurfaceNode(nullptr);
     auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(resulr, false);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -1860,7 +1860,7 @@ HWTEST_F(WindowSessionTest2, GetCloseAbilityWantAndClean, Function | SmallTest |
     session_->GetCloseAbilityWantAndClean(outWant);
 
     session_->sessionInfo_.closeAbilityWant = nullptr;
-    session_->GetCloseAbilityWantAndClean(nullptr);
+    session_->GetCloseAbilityWantAndClean(outWant);
     auto result = session_->GetBufferAvailable();
     ASSERT_EQ(result, false);
 }
@@ -1907,7 +1907,7 @@ HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
     bool isFocusable = true;
 
     auto result = session_->SetFocusable(isFocusable);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(session_->GetFocusable(), true);
 }
 
@@ -1935,7 +1935,7 @@ HWTEST_F(WindowSessionTest2, GetFocused, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, UpdatePointerArea, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    WSRect rect = {0, 0, 0, 0};
+    WSRect rect = { 0, 0, 0, 0 };
     session_->preRect_ = rect;
     session_->UpdatePointerArea(rect);
     ASSERT_EQ(session_->GetFocused(), false);
@@ -1950,7 +1950,7 @@ HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason02, Function | SmallTest | Le
 {
     ASSERT_NE(session_, nullptr);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = sesson_->UpdateSizeChangeReason(reason);
+    WSError result = session_->UpdateSizeChangeReason(reason);
     ASSERT_EQ(result, WSError::WS_DO_NOTHING);
 }
 
@@ -1965,12 +1965,12 @@ HWTEST_F(WindowSessionTest2, UpdateDensity, Function | SmallTest | Level2)
 
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_FALSE(session_->IsSessionValid());
-    WSError result = session_>UpdateDensity();
+    WSError result = session_->UpdateDensity();
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_CONNECT;
     ASSERT_TRUE(session_->IsSessionValid());
-    session_->sessionState_ = nullptr;
+    session_->sessionStage_ = nullptr;
     WSError result02 = session_->UpdateDensity();
     ASSERT_EQ(result02, WSError::WS_ERROR_NULLPTR);
 }
