@@ -772,13 +772,25 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        if (wmReason == WindowSizeChangeReason::DRAG) {
+            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->isDragTaskUpdateDone_ = true;
+        } else {
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        }
         window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    if (wmReason == WindowSizeChangeReason::DRAG) {
+        if (isDragTaskUpdateDone_) {
+            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            isDragTaskUpdateDone_ = false;
+        }
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
