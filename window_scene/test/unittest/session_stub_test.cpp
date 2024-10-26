@@ -178,7 +178,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_VALUE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA), data, reply, option);
     ASSERT_EQ(ERR_INVALID_VALUE, res);
