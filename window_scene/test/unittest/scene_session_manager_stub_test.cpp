@@ -1773,15 +1773,16 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChang
     MessageParcel data;
     MessageParcel reply;
     int res;
+
     res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    int32_t pid = 65535;
+    int32_t pid = 123;
     data.WriteInt32(pid);
     res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    int32_t uid = 12345;
+    int32_t uid = 1231;
     data.WriteInt32(uid);
     res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
