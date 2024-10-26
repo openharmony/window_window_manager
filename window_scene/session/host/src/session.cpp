@@ -3210,12 +3210,12 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     auto property = sceneSession->GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "property is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
