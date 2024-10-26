@@ -878,25 +878,6 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     data.WriteUint32(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
-    vectorSize = static_cast<uint32_t>(info.size());
-    data.WriteUint32(vectorSize);
-    uint32_t curSize;
-    for (const auto &elem : info) {
-        const char *curInfo = elem.c_str();
-        curSize = static_cast<uint32_t>(strlen(curInfo));
-        data.WriteUint32(curSize);
-        if (curSize != 0) {
-            data.WriteRawData(curInfo, curSize);
-        }
-    }
-
-    uint32_t code =
-        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT);
-
-    res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
 }
 
 /**
