@@ -134,17 +134,17 @@ void PictureInPictureManager::AttachAutoStartController(int32_t handleId,
 void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
     wptr<PictureInPictureController> pipController)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "handleId: %{public}u", handleId);
-    autoStartControllerMap_.erase(handleId);
+    TLOGI(WmsLogTag::WMS_PIP, "handleId: %{public}u", handleId);
     if (autoStartController_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_PIP, "detach failed as none autoStartController exist");
         return;
     }
-    if (pipController != nullptr &&
-        pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
-        TLOGE(WmsLogTag::WMS_PIP, "not same pip controller or no active pip controller");
+    if (pipController != nullptr && pipController.GetRefPtr() != autoStartController_.GetRefPtr()) {
+        TLOGW(WmsLogTag::WMS_PIP, "not same pip controller");
         return;
     }
     autoStartController_ = nullptr;
+    autoStartControllerMap_.erase(handleId);
 }
 
 bool PictureInPictureManager::IsAttachedToSameWindow(uint32_t windowId)
