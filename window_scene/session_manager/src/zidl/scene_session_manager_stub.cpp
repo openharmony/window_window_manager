@@ -1248,7 +1248,7 @@ int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, Mess
 {
     std::vector<uint64_t> windowIds;
     if (!data.ReadUInt64Vector(&windowIds)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write windowIds Failed");
+        TLOGE(WmsLogTag::DEFAULT, "Read windowIds Failed");
         return ERR_INVALID_DATA;
     }
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
