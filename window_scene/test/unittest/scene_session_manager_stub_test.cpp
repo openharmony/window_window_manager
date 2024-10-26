@@ -2134,7 +2134,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowDisplayIds, Function | Smal
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     std::vector<uint64_t> windowIds = {1, 2};
     data.WriteUInt64Vector(windowIds);
 
