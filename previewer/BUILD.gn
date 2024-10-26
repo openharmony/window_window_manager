@@ -83,6 +83,8 @@ if (!ispreview) {
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:utils",
     ]
 
+    deps = [ "../utils:libwmutil_base" ]
+
     external_deps = [
       "ace_engine:ace_uicontent",
       "graphic_2d:librender_service_client",
