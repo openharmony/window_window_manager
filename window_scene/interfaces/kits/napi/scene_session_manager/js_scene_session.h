@@ -112,6 +112,7 @@ private:
     static napi_value SetExitSplitOnBackground(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -124,6 +125,7 @@ private:
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
+    static napi_value SetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlankFlag(napi_env env, napi_callback_info info);
@@ -157,12 +159,14 @@ private:
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
+    napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlankFlag(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);

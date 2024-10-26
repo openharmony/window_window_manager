@@ -113,6 +113,7 @@ void SceneSessionManagerTest3::SetUp()
 void SceneSessionManagerTest3::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -1839,6 +1840,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | Small
     mainFloat02.SetValue({{"miniHeight", mainFloat02}});
     ssm_->ConfigSubWindowSizeLimits(mainFloat02);
 }
+
 }
 } // namespace Rosen
 } // namespace OHOS

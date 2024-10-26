@@ -114,6 +114,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
             return HandleTerminateSessionByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO):
+            return HandleGetAccessibilityWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -304,7 +306,7 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, 
     }
     bool needStartCaller = data.ReadBool();
     bool isFromBroker = data.ReadBool();
-    const WSError& errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
+    WSError errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller, isFromBroker);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -313,7 +315,7 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel& data,
 {
     WLOGFD("run HandleGetFocusSessionToken!");
     sptr<IRemoteObject> token = nullptr;
-    const WSError& errCode = GetFocusSessionToken(token);
+    WSError errCode = GetFocusSessionToken(token);
     reply.WriteRemoteObject(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -346,7 +348,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionSnapshot(MessageParcel& data, M
     int32_t persistentId = data.ReadInt32();
     bool isLowResolution = data.ReadBool();
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
-    const WSError& ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
+    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -356,7 +358,7 @@ int SceneSessionManagerLiteStub::HandleClearSession(MessageParcel& data, Message
 {
     WLOGFD("run HandleClearSession!");
     int32_t persistentId = data.ReadInt32();
-    const WSError& ret = ClearSession(persistentId);
+    WSError ret = ClearSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -364,7 +366,7 @@ int SceneSessionManagerLiteStub::HandleClearSession(MessageParcel& data, Message
 int SceneSessionManagerLiteStub::HandleClearAllSessions(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleClearAllSessions!");
-    const WSError& ret = ClearAllSessions();
+    WSError ret = ClearAllSessions();
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -373,7 +375,7 @@ int SceneSessionManagerLiteStub::HandleLockSession(MessageParcel& data, MessageP
 {
     WLOGFD("run HandleLockSession!");
     int32_t sessionId = data.ReadInt32();
-    const WSError& ret = LockSession(sessionId);
+    WSError ret = LockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -382,7 +384,7 @@ int SceneSessionManagerLiteStub::HandleUnlockSession(MessageParcel& data, Messag
 {
     WLOGFD("run HandleUnlockSession!");
     int32_t sessionId = data.ReadInt32();
-    const WSError& ret = UnlockSession(sessionId);
+    WSError ret = UnlockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -499,6 +501,7 @@ int SceneSessionManagerLiteStub::HandleRaiseWindowToTop(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+
 int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, MessageParcel &reply)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "run HandleGetMainWinodowInfo lite");
@@ -528,6 +531,31 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel &data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    sptr<IRemoteObject> collaboratorObject = data.ReadRemoteObject();
+    if (collaboratorObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaboratorObject is null.");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(collaboratorObject);
+    WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "called.");
+    int32_t type = data.ReadInt32();
+    WSError ret = UnregisterIAbilityManagerCollaborator(type);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
@@ -567,31 +595,6 @@ int SceneSessionManagerLiteStub::HandleClearMainSessions(MessageParcel& data, Me
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "called.");
-    int32_t type = data.ReadInt32();
-    sptr<IRemoteObject> collaboratorObject = data.ReadRemoteObject();
-    if (collaboratorObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "collaboratorObject is null.");
-        return ERR_NULL_OBJECT;
-    }
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
-        iface_cast<AAFwk::IAbilityManagerCollaborator>(collaboratorObject);
-    WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerLiteStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "called.");
-    int32_t type = data.ReadInt32();
-    WSError ret = UnregisterIAbilityManagerCollaborator(type);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
 int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply)
 {
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -612,6 +615,18 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessagePar
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError errCode = GetAccessibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("Write window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
