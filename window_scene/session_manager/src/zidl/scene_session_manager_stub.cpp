@@ -1248,13 +1248,13 @@ int SceneSessionManagerStub::HandleGetWindowDisplayIds(MessageParcel& data, Mess
 {
     std::vector<uint64_t> windowIds;
     if (!data.ReadUInt64Vector(&windowIds)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 persistentId");
+        TLOGE(WmsLogTag::DEFAULT, "Write windowIds Failed");
         return ERR_INVALID_DATA;
     }
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     WMError errCode = GetWindowDisplayIds(windowIds, windowDisplayIdMap);
 
-    if (!reply.WriteInt32(windowDisplayIdMap.size())) {
+    if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
         return ERR_INVALID_DATA;
     }
