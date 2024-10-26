@@ -362,8 +362,17 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     option->SetWindowName("GetTitleButtonArea");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    WSError res = window->SetPipActionEvent("close", 0);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(10000));
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(window->FindWindowById(1), nullptr);
+    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
@@ -1021,6 +1030,90 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
+}
+
+/**
+ * @tc.name: SetUiDvsyncSwitch
+ * @tc.desc: SetUiDvsyncSwitch
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, SetUiDvsyncSwitch, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUiDvsyncSwitch");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUiDvsyncSwitch(true);
+    window->vsyncStation_ = nullptr;
+    window->SetUiDvsyncSwitch(true);
+}
+
+/**
+ * @tc.name: GetVSyncPeriod
+ * @tc.desc: GetVSyncPeriod
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, GetVSyncPeriod, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetVSyncPeriod");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->GetVSyncPeriod();
+    window->vsyncStation_ = nullptr;
+    window->GetVSyncPeriod();
+}
+
+/**
+ * @tc.name: UpdatePiPControlStatus01
+ * @tc.desc: UpdatePiPControlStatus
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdatePiPControlStatus01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
+    auto status = PiPControlStatus::ENABLED;
+    window->UpdatePiPControlStatus(controlType, status);
+    window->hostSession_ = nullptr;
+    window->UpdatePiPControlStatus(controlType, status);
+}
+
+/**
+ * @tc.name: NotifyWindowVisibility01
+ * @tc.desc: NotifyWindowVisibility
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyWindowVisibility01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->NotifyWindowVisibility(false);
+    sptr<IWindowVisibilityChangedListener> listener = new IWindowVisibilityChangedListener();
+    window->RegisterWindowVisibilityChangeListener(listener);
+    window->NotifyWindowVisibility(false);
+    window->UnregisterWindowVisibilityChangeListener(listener);
 }
 
 /**
