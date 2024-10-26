@@ -59,9 +59,9 @@ if (!ispreview) {
       "${ability_runtime_path}/frameworks/simulator/common:ability_simulator_common_config",
     ]
     sources = [
+      "../utils/src/window_manager_hilog.cpp",
       "../utils/src/window_transition_info.cpp",
       "../utils/src/wm_math.cpp",
-      "../utils/src/window_manager_hilog.cpp",
       "src/vsync_station.cpp",
       "src/window.cpp",
       "src/window_display.cpp",
