@@ -11241,8 +11241,7 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
     }
 
     auto task = [this, windowIds, &windowDisplayIdMap]() {
-        for (uint64_t windowId : windowIds)
-        {
+        for (uint64_t windowId : windowIds) {
             sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
             if (session == nullptr) {
                 continue;
