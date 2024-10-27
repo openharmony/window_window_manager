@@ -3119,7 +3119,11 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Leve
     option.displayId_ = 0;
     DmErrorCode errCode;
     std::shared_ptr<Media::PixelMap> bitMap = ssm->GetScreenCapture(option, &errCode);
-    ASSERT_NE(bitMap, nullptr);
+    if (errCode == DmErrorCode::DM_OK) {
+        ASSERT_NE(bitMap, nullptr);
+    } else {
+        ASSERT_EQ(bitMap, nullptr);
+    }
 }
 
 /**

@@ -45,7 +45,7 @@
 extern "C" {
 #endif
 
-/* display name length */
+/** display name length */
 #define OH_DISPLAY_NAME_LENGTH 32
 
 /**
@@ -153,13 +153,13 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    /* rect left */
+    /** rect left */
     int32_t left;
-    /* rect top */
+    /** rect top */
     int32_t top;
-    /* rect width */
+    /** rect width */
     uint32_t width;
-    /* rect height */
+    /** rect height */
     uint32_t height;
 } NativeDisplayManager_Rect;
 
@@ -170,16 +170,16 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    /* waterfall left rect */
+    /** waterfall left rect */
     NativeDisplayManager_Rect left;
 
-    /* waterfall top rect */
+    /** waterfall top rect */
     NativeDisplayManager_Rect top;
 
-    /* waterfall right rect */
+    /** waterfall right rect */
     NativeDisplayManager_Rect right;
 
-    /* waterfall bottom rect */
+    /** waterfall bottom rect */
     NativeDisplayManager_Rect bottom;
 } NativeDisplayManager_WaterfallDisplayAreaRects;
 
@@ -190,13 +190,13 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    /* boundingRects length */
+    /** boundingRects length */
     int32_t boundingRectsLength;
 
-    /* boundingRects info pointer */
+    /** boundingRects info pointer */
     NativeDisplayManager_Rect *boundingRects;
 
-    /* waterfallDisplayAreaRects info */
+    /** waterfallDisplayAreaRects info */
     NativeDisplayManager_WaterfallDisplayAreaRects waterfallDisplayAreaRects;
 } NativeDisplayManager_CutoutInfo;
 
@@ -236,10 +236,10 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    /* hdrFormat length */
+    /** hdrFormat length */
     uint32_t hdrFormatLength;
 
-    /* hdrFormat pointer */
+    /** hdrFormat pointer */
     uint32_t *hdrFormats;
 } NativeDisplayManager_DisplayHdrFormat;
 
@@ -250,10 +250,10 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    /* color space length */
+    /** color space length */
     uint32_t colorSpaceLength;
 
-    /* color space pointer */
+    /** color space pointer */
     uint32_t *colorSpaces;
 } NativeDisplayManager_DisplayColorSpace;
 
@@ -264,64 +264,64 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    /* display id */
+    /** display id */
     uint32_t id;
 
-    /* display name */
+    /** display name */
     char name[OH_DISPLAY_NAME_LENGTH + 1];
 
-    /* display is alive */
+    /** display is alive */
     bool isAlive;
 
-    /* display width */
+    /** display width */
     int32_t width;
 
-    /* display height */
+    /** display height */
     int32_t height;
 
-    /* display physical width */
+    /** display physical width */
     int32_t physicalWidth;
 
-    /* display physical height */
+    /** display physical height */
     int32_t physicalHeight;
 
-    /* display refresh rate */
+    /** display refresh rate */
     uint32_t refreshRate;
 
-    /* display available width */
+    /** display available width */
     uint32_t availableWidth;
 
-    /* display available height */
+    /** display available height */
     uint32_t availableHeight;
 
-    /* display density dpi */
+    /** display density dpi */
     float densityDPI;
 
-    /* display density pixels */
+    /** display density pixels */
     float densityPixels;
 
-    /* display scale density */
+    /** display scale density */
     float scaledDensity;
 
-    /* display xdpi*/
+    /** display xdpi*/
     float xDPI;
 
-    /* display ydpi */
+    /** display ydpi */
     float yDPI;
 
-    /* display rotation */
+    /** display rotation */
     NativeDisplayManager_Rotation rotation;
 
-    /* display state */
+    /** display state */
     NativeDisplayManager_DisplayState state;
 
-    /* display orientation */
+    /** display orientation */
     NativeDisplayManager_Orientation orientation;
 
-    /* display hdr format */
+    /** display hdr format */
     NativeDisplayManager_DisplayHdrFormat *hdrFormat;
 
-    /* display color space */
+    /** display color space */
     NativeDisplayManager_DisplayColorSpace *colorSpace;
 } NativeDisplayManager_DisplayInfo;
 
@@ -332,10 +332,10 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    /* displays length */
+    /** displays length */
     uint32_t displaysLength;
 
-    /* displays pointer */
+    /** displays pointer */
     NativeDisplayManager_DisplayInfo *displaysInfo;
 } NativeDisplayManager_DisplaysInfo;
 

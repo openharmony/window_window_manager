@@ -6070,6 +6070,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return nullptr;
     }
+    if (!ScreenSceneConfig::IsSupportCapture()) {
+        TLOGW(WmsLogTag::DMS, "device not support capture.");
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
     if (!Permission::CheckCallingPermission(CUSTOM_SCREEN_CAPTURE_PERMISSION) && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d.",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingRealPid());
