@@ -2149,7 +2149,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest |
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, nullptr);
+        if (errorCode == DmErrorCode::DM_OK) {
+            ASSERT_NE(res, nullptr);
+        } else {
+            ASSERT_EQ(res, nullptr);
+        }
     } else {
         ASSERT_EQ(res, nullptr);
     }

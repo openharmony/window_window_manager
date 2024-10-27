@@ -272,13 +272,35 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     napi_value result;
     napi_value error;
     napi_value code;
-    if (param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM) {
+    bool isThrowError = true;
+    if (param->wret != DmErrorCode::DM_OK) {
         napi_create_error(env, nullptr, nullptr, &error);
-        napi_create_int32(env, (int32_t)DmErrorCode::DM_ERROR_INVALID_PARAM, &code);
-        napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+        napi_create_int32(env, (int32_t)param->wret, &code);
+    }
+    switch (param->wret) {
+        case DmErrorCode::DM_ERROR_NO_PERMISSION:
+            napi_set_named_property(env, error, "DM_ERROR_NO_PERMISSION", code);
+            break;
+        case DmErrorCode::DM_ERROR_INVALID_PARAM:
+            napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+            break;
+        case DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT:
+            napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+            break;
+        case DmErrorCode::DM_ERROR_SYSTEM_INNORMAL:
+            napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            break;
+        default:
+            isThrowError = false;
+            WLOGFI("screen shot default.");
+            break;
+    }
+    WLOGFI("screen shot ret=%{public}d.", param->wret);
+    if (isThrowError) {
         napi_throw(env, error);
         return error;
-    } else if (param->wret != DmErrorCode::DM_OK) {
+    }
+    if (param->wret != DmErrorCode::DM_OK) {
         NAPI_CALL(env, napi_get_undefined(env, &result));
         return result;
     }
