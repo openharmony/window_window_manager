@@ -298,6 +298,8 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+    NodeId nodeId = 0;
+    vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -1696,6 +1698,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
     RegisterAcquireRotateAnimationConfigFunc(sceneSession);
+    RegisterRequestVsyncFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -1773,6 +1776,12 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             static_cast<int>(sessionProperty->GetDisplayId()));
     }
     abilitySessionInfo->instanceKey = sessionInfo.appInstanceKey_;
+    if (sessionInfo.callState_ >= static_cast<int32_t>(AAFwk::CallToState::UNKNOW) &&
+        sessionInfo.callState_ <= static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+        abilitySessionInfo->state = static_cast<AAFwk::CallToState>(sessionInfo.callState_);
+    } else {
+        TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
+    }
     return abilitySessionInfo;
 }
 
@@ -4120,6 +4129,18 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
     sceneSession->SetSessionSnapshotListener(sessionSnapshotFunc);
     WLOGFD("success, id: %{public}d", sceneSession->GetPersistentId());
 }
+
+void SceneSessionManager::RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        return;
+    }
+    RequestVsyncFunc requestVsyncFunc = [this](std::shared_ptr<VsyncCallback> callback) {
+        vsyncStation_->RequestVsync(callback);
+    };
+    sceneSession->SetRequestNextVsyncFunc(requestVsyncFunc);
+};
 
 void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
 {
@@ -6905,13 +6926,6 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
                 "RequestSceneSessionByCall abilitySessionInfo is null, id:%{public}d", persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (sessionInfo.callState_ == static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
-            sceneSession->SetActive(false);
-        } else if (sessionInfo.callState_ == static_cast<uint32_t>(AAFwk::CallToState::FOREGROUND)) {
-            sceneSession->SetActive(true);
-        } else {
-            WLOGFE("wrong callState_");
-        }
         TLOGI(WmsLogTag::WMS_MAIN, "RequestSceneSessionByCall state:%{public}d, id:%{public}d",
             sessionInfo.callState_, persistentId);
         bool isColdStart = false;
@@ -9501,25 +9515,16 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
         return nullptr;
     }
 
-    wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, persistentId, scaleParam, weakSceneSession]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
-        auto sceneSession = weakSceneSession.promote();
-        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-        if (sceneSession == nullptr) {
-            WLOGFE("session is nullptr");
-            return pixelMap;
-        }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
 
-        bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
-        pixelMap = sceneSession->Snapshot(false, scaleParam, isPc);
-        if (!pixelMap) {
-            WLOGFI("get local snapshot pixelmap start");
-            pixelMap = sceneSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
-        }
-        return pixelMap;
-    };
-    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotPixelMap" + std::to_string(persistentId));
+    bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
+    pixelMap = sceneSession->Snapshot(true, scaleParam, isPc);
+    if (!pixelMap) {
+        WLOGFI("get local snapshot pixelmap start");
+        pixelMap = sceneSession->GetSnapshotPixelMap(snapshotScale_, scaleParam);
+    }
+    return pixelMap;
 }
 
 const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSessionMap()
@@ -11268,4 +11273,32 @@ WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMul
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    auto task = [this, windowIds, &windowDisplayIdMap]() {
+        for (const uint64_t windowId : windowIds) {
+            sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
+            if (session == nullptr) {
+                continue;
+            }
+            sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                continue;
+            }
+            TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64", displayId:%{public}" PRIu64"",
+                windowId, sessionProperty->GetDisplayId());
+            windowDisplayIdMap.insert({windowId, sessionProperty->GetDisplayId()});
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
+}
+
 } // namespace OHOS::Rosen

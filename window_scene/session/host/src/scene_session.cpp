@@ -231,6 +231,15 @@ WSError SceneSession::Foreground(
     return ForegroundTask(property);
 }
 
+void SceneSession::SetRequestNextVsyncFunc(const RequestVsyncFunc& func)
+{
+    if (func == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "func is nullptr");
+        return;
+    }
+    requestNextVsyncFunc_ = func;
+}
+
 WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property)
 {
     auto task = [weakThis = wptr(this), property]() {
@@ -2355,11 +2364,38 @@ void SceneSession::InitializeCrossMoveDrag()
 void SceneSession::HandleMoveDrag(WSRect& rect, WSRect& globalRect, const SizeChangeReason reason,
     bool isGlobal, bool needFlush)
 {
+    const char* const funcName = __func__;
     SetSurfaceBounds(globalRect, isGlobal, needFlush);
     UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::MOVE) {
-        UpdateRect(rect, reason, "OnMoveDragCallback");
+        UpdateRectForDrag(rect);
+        std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
+        nextVsyncDragCallback ->onCallback = [weakThis = wptr(this), funcName = __func__](int64_t, int64_t) {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s, session is null", funcName);
+                return;
+            }
+            session->OnNextVsyncDragReceived();
+        };
+        requestNextVsyncFunc_(nextVsyncDragCallback);
     }
+}
+
+void SceneSession::OnNextVsyncDragReceived()
+{
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        if (session->IsDirtyDragWindow()) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "OnMoveDragCallback id:%{public}u", session->GetPersistentId());
+            session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+            session->ResetDragDirtyFlags();
+        }
+    });
 }
 
 void SceneSession::HandleMoveDragEnd(WSRect& rect, const SizeChangeReason reason)
@@ -2458,6 +2494,12 @@ void SceneSession::HandleMoveDragSurfaceNode(const SizeChangeReason reason)
                 movedSurfaceNode, moveDragController_->GetInitParentNodeId());
         }
     }
+}
+
+void SceneSession::UpdateRectForDrag(WSRect& rect)
+{
+    winRect_ = rect;
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
@@ -4414,6 +4456,11 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 bool SceneSession::IsDirtyWindow()
 {
     return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+}
+
+bool SceneSession::IsDirtyDragWindow()
+{
+    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void SceneSession::NotifyUILostFocus()

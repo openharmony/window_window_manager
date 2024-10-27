@@ -18,6 +18,7 @@ import("../../../windowmanager_aafwk.gni")
 ohos_ndk_headers("display_manager_header") {
   dest_dir = "$ndk_headers_out_dir/window_manager"
   sources = [
+    "oh_display_capture.h",
     "oh_display_info.h",
     "oh_display_manager.h",
   ]
@@ -29,6 +30,7 @@ ohos_ndk_library("native_display_manager") {
   ndk_description_file = "./libdm.ndk.json"
   system_capability = "SystemCapability.Window.SessionManager"
   system_capability_headers = [
+    "oh_display_capture.h",
     "oh_display_info.h",
     "oh_display_manager.h",
   ]

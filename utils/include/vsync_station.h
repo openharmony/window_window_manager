@@ -20,14 +20,16 @@
 #include <unordered_set>
 
 #include <event_handler.h>
-#include <ui/rs_display_node.h>
-#include <vsync_receiver.h>
 
 #include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
+class VSyncReceiver;
+
+using FrameRateLinkerId = uint64_t;
+using NodeId = uint64_t;
 
 class VsyncStation : public std::enable_shared_from_this<VsyncStation> {
 public:

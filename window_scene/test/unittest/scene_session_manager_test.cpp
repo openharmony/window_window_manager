@@ -2072,7 +2072,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo001, Function | SmallT
     hookInfo.density_ = 0;
     result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
     ASSERT_EQ(result, WMError::WM_OK);
-    
+
     hookInfo.density_ = 2.25;
     result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
     ASSERT_EQ(result, WMError::WM_OK);
@@ -2110,7 +2110,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo002, Function | SmallT
     hookInfo.density_ = 0;
     result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
-    
+
     hookInfo.density_ = 2.25;
     result = ssm_->UpdateAppHookDisplayInfo(uid, hookInfo, enable);
     ASSERT_EQ(result, WMError::WM_OK);
@@ -2126,6 +2126,31 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | Small
     bool isPcOrPadFreeMultiWindowMode = false;
     auto result = ssm_->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
     ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: test function : GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    DisplayId displayId = 0;
+    property->SetDisplayId(displayId);
+    sceneSession1->SetSessionProperty(property);
+
+    const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
 }
 }
 } // namespace Rosen

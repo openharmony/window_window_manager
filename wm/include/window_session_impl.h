@@ -370,6 +370,7 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
+    std::atomic_bool isDragTaskUpdateDone_ = true;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
