@@ -228,11 +228,13 @@ void ScreenSessionManager::FoldScreenPowerInit()
         std::string fullTpChange = "0";
         std::string mainTpChange = "1";
 #endif
-        if (rsInterface_.GetActiveScreenId() == SCREEN_ID_FULL) {
+        if (!foldScreenController_) {
+            TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
+            return;
+        }
+        ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
+        if (currentScreenId == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
-#ifdef TP_FEATURE_ENABLE
-            rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
-#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
@@ -245,11 +247,8 @@ void ScreenSessionManager::FoldScreenPowerInit()
                 foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
             }
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
-        } else if (rsInterface_.GetActiveScreenId() == SCREEN_ID_MAIN) {
+        } else if (currentScreenId == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
-#ifdef TP_FEATURE_ENABLE
-            rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
-#endif
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
