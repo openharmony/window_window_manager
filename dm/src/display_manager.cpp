@@ -629,16 +629,17 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             }
         }
     }
-    WLOGFI("Get display not from displayMap_");
+    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
-        WLOGFW("GetDisplayById : displayinfo is null");
+        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
         return nullptr;
     }
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
         displayMap_.erase(displayId);
+        //map erase函数删除不存在key行为安全
         displayUptateTimeMap_.erase(displayId);
         return nullptr;
     }
