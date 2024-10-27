@@ -287,6 +287,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
+    sessionInfo_.callState_ = info.callState_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -1160,7 +1161,6 @@ void Session::HandleDialogBackground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Background dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_BACKGROUND);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
@@ -1185,7 +1185,6 @@ void Session::HandleDialogForeground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Foreground dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_ACTIVE);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
@@ -3350,6 +3349,11 @@ void Session::ResetDirtyFlags()
     } else {
         dirtyFlags_ = 0;
     }
+}
+
+void Session::ResetDragDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void Session::SetUIStateDirty(bool dirty)

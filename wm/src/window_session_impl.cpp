@@ -772,13 +772,25 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        if (wmReason == WindowSizeChangeReason::DRAG) {
+            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->isDragTaskUpdateDone_ = true;
+        } else {
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        }
         window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    if (wmReason == WindowSizeChangeReason::DRAG) {
+        if (isDragTaskUpdateDone_) {
+            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            isDragTaskUpdateDone_ = false;
+        }
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -1380,8 +1392,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         WLOGFD("decorVisible:%{public}d", decorVisible);
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-            decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                    (property_->GetIsPcAppInPad() && isSubWindow));
+            decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
         }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -1408,8 +1420,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                        (property_->GetIsPcAppInPad() && isSubWindow));
+                decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                    (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
             }
             WLOGFD("decorVisible:%{public}d", decorVisible);
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
@@ -2524,11 +2536,11 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();

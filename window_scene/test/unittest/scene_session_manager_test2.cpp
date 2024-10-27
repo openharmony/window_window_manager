@@ -2197,6 +2197,28 @@ HWTEST_F(SceneSessionManagerTest2, UpdateGestureBackEnabled, Function | SmallTes
     sleep(WAIT_SLEEP_TIME);
     ssm_->sceneSessionMap_.erase(1);
 }
+
+/**
+ * @tc.name: NotifyEnterRecentTask
+ * @tc.desc: NotifyEnterRecentTask;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, NotifyEnterRecentTask, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "NotifyEnterRecentTask";
+    sessionInfo.abilityName_ = "NotifyEnterRecentTask";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->gestureBackEnableWindowIdSet_.insert(1);
+    ssm_->gestureBackEnableWindowIdSet_.insert(2);
+    ASSERT_EQ(ssm_->NotifyEnterRecentTask(true), WSError::WS_OK);
+    ASSERT_EQ(ssm_->NotifyEnterRecentTask(false), WSError::WS_OK);
+    ssm_->sceneSessionMap_.erase(1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

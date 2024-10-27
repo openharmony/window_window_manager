@@ -40,7 +40,7 @@ public:
 
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
 
-    void SetMultiScreenStatus(ScreenId mainScreenId, const std::string& status);
+    void SetLastScreenMode(ScreenId mainScreenId, MultiScreenMode secondaryScreenMode);
 
     void InternalScreenOnChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
 
@@ -83,7 +83,7 @@ private:
     void DoFirstExtendChangeExtend(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 
-    std::pair<ScreenId, std::string> multiScreenStatus_;  // main screen id & other screen status
+    std::pair<ScreenId, MultiScreenMode> lastScreenMode_;  // main screen id & secondary screen mode
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H
