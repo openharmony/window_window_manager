@@ -158,6 +158,10 @@ public:
     sptr<ScreenSessionGroup> RemoveFromGroupLocked(sptr<ScreenSession> screen);
     sptr<ScreenSessionGroup> GetAbstractScreenGroup(ScreenId smsScreenId);
 
+    void SetMultiScreenFrameControl(void);
+    bool IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const;
+    bool HandleFoldScreenSessionCreate(ScreenId screenId);
+
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
         const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
 
