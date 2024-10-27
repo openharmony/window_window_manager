@@ -58,7 +58,8 @@ enum XmlNodeElement {
     CAST_BUNDLE_NAME,
     CAST_ABILITY_NAME,
     PHYSICAL_DISPLAY_RESOLUTION,
-    SCROLLABLE_PARAM
+    SCROLLABLE_PARAM,
+    IS_SUPPORT_CAPTURE
 };
 }
 
@@ -71,6 +72,7 @@ std::vector<DisplayPhysicalResolution> ScreenSceneConfig::displayPhysicalResolut
 std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::scrollableParams_;
 std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
+bool ScreenSceneConfig::isSupportCapture_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
 std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
@@ -95,7 +97,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {CAST_BUNDLE_NAME, "castBundleName"},
     {CAST_ABILITY_NAME, "castAbilityName"},
     {PHYSICAL_DISPLAY_RESOLUTION, "physicalDisplayResolution"},
-    {SCROLLABLE_PARAM, "scrollableParam"}
+    {SCROLLABLE_PARAM, "scrollableParam"},
+    {IS_SUPPORT_CAPTURE, "isSupportCapture"}
 };
 
 
@@ -177,6 +180,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     bool enableConfigCheck = (xmlNodeMap_[IS_WATERFALL_DISPLAY] == nodeName) ||
         (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) ||
         (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName) ||
+        (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) ||
         (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName);
     bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
         (xmlNodeMap_[SUB_DPI] == nodeName) ||
@@ -360,6 +364,8 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
             isWaterfallDisplay_ = true;
         } else if (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) {
             isScreenCompressionEnableInLandscape_ = true;
+        } else if (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) {
+            isSupportCapture_ = true;
         }
     } else {
         enableConfig_[nodeName] = false;
@@ -506,6 +512,11 @@ std::vector<DMRect> ScreenSceneConfig::GetSubCutoutBoundaryRect()
 bool ScreenSceneConfig::IsWaterfallDisplay()
 {
     return isWaterfallDisplay_;
+}
+
+bool ScreenSceneConfig::IsSupportCapture()
+{
+    return isSupportCapture_;
 }
 
 void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()

@@ -53,10 +53,9 @@ void SnapshotDisplayTest::SetUpTestCase()
         WLOGFE("GetDefaultDisplay: failed!\n");
         return;
     }
-    WLOGI("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-        display->GetHeight(), display->GetRefreshRate());
-
     defaultId_ = display->GetId();
+    WLOGI("GetDefaultDisplay: id[%{public}" PRIu64"], w:[%{public}d], h[%{public}d], fps[%{public}u]",
+        defaultId_, display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
 
     CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
     const char** perms = new const char *[1];
@@ -120,7 +119,8 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, Function | MediumTest | Leve
         }
     }
 
-    (void)system(defaultCmd_.c_str());
+    const std::string cmd = defaultCmd_ + " -i " + std::to_string(defaultId_) + " -f " + imgPath[0];
+    (void)system(cmd.c_str());
 
     for (i = 0; i < testTimeCount_; i++) {
         if (CheckFileExist(imgPath[i])) {  // ok
@@ -149,7 +149,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Leve
         }
     }
 
-    const std::string cmd = defaultCmd_ + " -i " + std::to_string(defaultId_);
+    const std::string cmd = defaultCmd_ + " -i " + std::to_string(defaultId_) + " -f " + imgPath[0];
     (void)system(cmd.c_str());
 
     for (i = 0; i < testTimeCount_; i++) {
@@ -251,7 +251,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid09, Function | MediumTest | Leve
         }
     }
 
-    const std::string cmd = defaultCmd_ + " -t png";
+    const std::string cmd = defaultCmd_  + " -f " + imgPath[0] + " -t png";
     (void)system(cmd.c_str());
 
     for (i = 0; i < testTimeCount_; i++) {
