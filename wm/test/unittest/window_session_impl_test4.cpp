@@ -370,7 +370,7 @@ HWTEST_F(WindowSessionImplTest4, SetPiPControlEvent, Function | SmallTest | Leve
  * @tc.name: SetAutoStartPiP
  * @tc.desc: SetAutoStartPiP
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
 {
     auto option = sptr<WindowOption>::MakeSptr();
