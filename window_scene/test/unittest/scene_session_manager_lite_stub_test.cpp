@@ -492,7 +492,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data2, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
-}
 
 /**
  * @tc.name: HandleSetSessionContinueState1
@@ -552,12 +551,15 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     int32_t persistentId = 0;
+    data.WriteString16(deviceIdData);
     data.WriteInt32(persistentId);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     bool isLowResolution = true;
+    data.WriteString16(deviceIdData);
+    data.WriteInt32(persistentId);
     data.WriteBool(isLowResolution);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
