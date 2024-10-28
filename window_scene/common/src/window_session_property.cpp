@@ -1154,8 +1154,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     requestRect_ = property->requestRect_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
-    focusable_= property->focusable_;
-    focusable_= property->focusableOnShow_;
+    focusable_ = property->focusable_;
+    focusableOnShow_ = property->focusableOnShow_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
