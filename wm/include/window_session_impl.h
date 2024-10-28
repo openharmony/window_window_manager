@@ -287,6 +287,14 @@ public:
     WSError SetSplitButtonVisible(bool isVisible) override;
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
+    /*
+     * FreeMultiWindow
+     */
+    void SetFreeMultiWindowMode(bool enable)
+    {
+        windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    }
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
