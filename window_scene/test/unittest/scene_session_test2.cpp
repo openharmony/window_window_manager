@@ -1220,7 +1220,7 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
  * @tc.desc: RegisterProcessPrepareClosePiPCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, RegisterProcessPrepareClosePiPCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterProcessPrepareClosePiPCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "RegisterProcessPrepareClosePiPCallback";
@@ -1240,7 +1240,6 @@ HWTEST_F(SceneSessionTest3, RegisterProcessPrepareClosePiPCallback, Function | S
     });
     sceneSession->NotifyPiPWindowPrepareClose();
 }
-
 
 /**
  * @tc.name: SetShouldHideNonSecureWindows
