@@ -3206,15 +3206,25 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->SwitchFreeMultiWindow(enable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        property->GetIsUIExtFirstSubWindow();
+    if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
+        return sessionStage_->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
