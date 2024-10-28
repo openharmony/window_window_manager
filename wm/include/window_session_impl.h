@@ -317,6 +317,7 @@ protected:
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     float GetVirtualPixelRatio() override;
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
+    WMError GetVirtualPixelRatio(float& vpr);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const sptr<DisplayInfo>& info = nullptr,
