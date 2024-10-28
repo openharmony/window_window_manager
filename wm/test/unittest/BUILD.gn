@@ -437,7 +437,9 @@ ohos_unittest("wm_window_extension_session_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:app_context",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -490,7 +492,10 @@ ohos_unittest("wm_picture_in_picture_manager_test") {
 
   sources = [ "picture_in_picture_manager_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "ace_engine:ace_xcomponent_controller",

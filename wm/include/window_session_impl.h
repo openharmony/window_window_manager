@@ -332,7 +332,6 @@ protected:
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
-    bool needRemoveWindowInputChannel_ = false;
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;

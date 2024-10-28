@@ -49,6 +49,8 @@ public:
     void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        WindowUpdateType type);
 
     static inline SingletonDelegator<WindowManagerLite> delegator_;
 
@@ -185,6 +187,41 @@ void WindowManagerLite::Impl::NotifyWindowModeChange(WindowModeType type)
     }
     for (auto &listener : windowModeListeners) {
         listener->OnWindowModeUpdate(type);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WindowUpdateType type)
+{
+    if (infos.empty()) {
+        WLOGFE("infos is empty");
+        return;
+    }
+    for (auto& info : infos) {
+        if (info == nullptr) {
+            TLOGD(WmsLogTag::WMS_MAIN, "info is nullptr");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_MAIN, "wid[%{public}u], innerWid[%{public}u], "
+            "uiNodeId[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d], "
+            "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64 "], layer[%{public}u], "
+            "mode[%{public}u], type[%{public}u, updateType[%{public}d], bundle[%{public}s]",
+            info->wid_, info->innerWid_, info->uiNodeId_, info->windowRect_.width_, info->windowRect_.height_,
+            info->windowRect_.posX_, info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_,
+            info->layer_, info->mode_, info->type_, type, info->bundleName_.c_str());
+        for (const auto& rect : info->touchHotAreas_) {
+            TLOGD(WmsLogTag::WMS_MAIN, "window touch hot areas rect[x=%{public}d, y=%{public}d, "
+            "w=%{public}d, h=%{public}d]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
+    }
+
+    std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowUpdateListeners = windowUpdateListeners_;
+    }
+    for (auto& listener : windowUpdateListeners) {
+        listener->OnWindowUpdate(infos, type);
     }
 }
 
@@ -452,6 +489,12 @@ void WindowManagerLite::UpdateWindowModeTypeInfo(WindowModeType type) const
     pImpl_->NotifyWindowModeChange(type);
 }
 
+void WindowManagerLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WindowUpdateType type) const
+{
+    pImpl_->NotifyAccessibilityWindowInfo(infos, type);
+}
+
 WMError WindowManagerLite::GetWindowModeType(WindowModeType& windowModeType) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapterLite>().GetWindowModeType(windowModeType);
@@ -578,6 +621,12 @@ WMError WindowManagerLite::RaiseWindowToTop(int32_t persistentId)
     return ret;
 }
 
+WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
+    return SingletonContainer::Get<WindowAdapterLite>().GetMainWindowInfos(topNum, topNInfo);
+}
+
 WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
@@ -622,12 +671,6 @@ void WindowManagerLite::OnWMSConnectionChanged(int32_t userId, int32_t screenId,
     } else {
         pImpl_->NotifyWMSDisconnected(userId, screenId);
     }
-}
-
-WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "Get main window info lite");
-    return SingletonContainer::Get<WindowAdapterLite>().GetMainWindowInfos(topNum, topNInfo);
 }
 
 WMError WindowManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
@@ -742,6 +785,65 @@ WMError WindowManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<WindowAdapterLite>().TerminateSessionByPersistentId(persistentId);
+}
+
+WMError WindowManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().GetAccessibilityWindowInfo(infos);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("get window info failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
+        pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgentLite();
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        WLOGFW("RegisterWindowManagerAgent failed!");
+        pImpl_->windowUpdateListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
+        if (iter != pImpl_->windowUpdateListeners_.end()) {
+            WLOGI("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowUpdateListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
+    if (iter == pImpl_->windowUpdateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->windowUpdateListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowUpdateListeners_.empty() && pImpl_->windowUpdateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowUpdateListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -2219,12 +2219,7 @@ WMError SceneSessionManagerProxy::GetWindowStyleType(WindowStyleType& windowStyl
         TLOGE(WmsLogTag::WMS_LIFE, "GetwindowStyleType Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
+    if (Remote()->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STYLE_TYPE), data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }

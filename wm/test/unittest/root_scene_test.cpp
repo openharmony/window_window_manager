@@ -227,7 +227,6 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    rootScene.vsyncStation_ = nullptr;
     rootScene.SetUiDvsyncSwitch(true);
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
