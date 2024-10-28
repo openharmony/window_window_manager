@@ -414,7 +414,6 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
             thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
-
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
