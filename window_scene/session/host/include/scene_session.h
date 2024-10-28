@@ -409,8 +409,6 @@ public:
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
-    static const wptr<SceneSession> GetEnterWindow();
-    static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
@@ -664,8 +662,6 @@ private:
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
-    static wptr<SceneSession> enterSession_;
-    static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     mutable std::mutex sessionChangeCbMutex_;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
