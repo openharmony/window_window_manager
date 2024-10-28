@@ -1892,7 +1892,7 @@ napi_value JsSceneSession::SetPiPControlEvent(napi_env env, napi_callback_info i
 
 napi_value JsSceneSession::NotifyPipOcclusionChange(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyPipOcclusionChange(env, info) : nullptr;
 }
