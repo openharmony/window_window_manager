@@ -196,12 +196,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
+bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    return windowSystemConfig_.uiType_ == UI_TYPE_PC ||
+           IsFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+}
+
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -1093,11 +1097,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true);
         return;
@@ -2369,9 +2372,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(isPC || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
