@@ -418,7 +418,11 @@ ohos_shared_library("libwm_ndk") {
 
   sources = [ "src/oh_window_event_filter.cpp" ]
 
-  deps = [ ":libwm" ]
+  deps = [
+    ":libwm",
+    "${window_base_path}/utils:libwmutil_base",
+  ]
+
   innerapi_tags = [ "ndk" ]
 
   external_deps = [
