@@ -113,7 +113,7 @@ void SessionStubTestSetCode(sptr<Session> sessionStub, MessageParcel& parcel)
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
         parcel, reply, option);
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT),
         parcel, reply, option);
     parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_BACKPRESSED),

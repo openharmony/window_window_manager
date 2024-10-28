@@ -501,15 +501,11 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
+WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
         return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [weakThis = wptr(this), event]() {
         auto session = weakThis.promote();
@@ -524,7 +520,7 @@ WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
         session->OnSessionEvent(event);
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "OnSystemSessionEvent");
+    return PostSyncTask(task, "SyncSessionEvent");
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
