@@ -1593,6 +1593,21 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     WLOGFD("%{public}d", raiseEnabled);
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Only the children of the main window can be raised!");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Must be app sub window window!");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "The sub window must be shown!");
+        return WMError::WM_DO_NOTHING;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
