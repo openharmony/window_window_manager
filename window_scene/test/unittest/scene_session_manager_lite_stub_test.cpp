@@ -379,23 +379,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, Function | Small
 {
     MessageParcel data;
     MessageParcel reply;
-
     int res;
+
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
-    std::u16string deviceIdU16;
+    std::u16string deviceIdU16 = u"testDeviceId";
     data.WriteString16(deviceIdU16);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t persistentId = 0;
+    data.WriteString16(deviceIdU16);
     data.WriteInt32(persistentId);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
