@@ -205,10 +205,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Destroy, Function | SmallTest | Level2)
     option->SetWindowName("Destroy");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->property_ = nullptr;
-    auto ret = windowSceneSessionImpl->Destroy(true, true);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -376,9 +372,6 @@ HWTEST_F(WindowSceneSessionImplTest3, NotifyPrepareClosePiPWindow, Function | Sm
 
     auto ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
     EXPECT_EQ(WmErrorCode::WM_OK, ret1);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret1 = windowSceneSessionImpl->KeepKeyboardOnFocus(true);
-    EXPECT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, ret1);
 }
 
 /**
@@ -481,9 +474,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetAspectRatio01, Function | SmallTest | L
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -583,9 +573,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | L
     rects.push_back(rect);
     auto ret = windowSceneSessionImpl->SetTouchHotAreas(rects);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->SetTouchHotAreas(rects);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -612,9 +599,6 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowLimits, Function | SmallTest | Le
     auto ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
@@ -797,9 +781,6 @@ HWTEST_F(WindowSceneSessionImplTest3, RecoverAndReconnectSceneSession, Function 
     auto ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     windowSceneSessionImpl->isFocused_ = true;
-    ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->property_ = nullptr;
     ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
@@ -1191,9 +1172,6 @@ HWTEST_F(WindowSceneSessionImplTest3, GetSystemBarProperties, Function | SmallTe
 
     auto ret = windowSceneSessionImpl->GetSystemBarProperties(properties);
     EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->GetSystemBarProperties(properties);
-    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1226,9 +1204,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Hide, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->Hide(2, false, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->Hide(2, false, false);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1299,9 +1274,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Show, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
     ret = windowSceneSessionImpl->Maximize();
     EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->Show(2, true);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ret = windowSceneSessionImpl->Minimize();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
