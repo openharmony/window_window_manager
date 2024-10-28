@@ -267,11 +267,6 @@ private:
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
 
-    /*
-     * system window
-    */
-    WMError SetSystemWindowDisplayId(WindowType type);
-
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     static std::mutex keyboardPanelInfoChangeListenerMutex_;

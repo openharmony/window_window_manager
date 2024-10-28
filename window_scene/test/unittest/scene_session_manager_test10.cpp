@@ -610,6 +610,59 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
 }
+
+/**
+ * @tc.name: RegisterRequestVsyncFunc
+ * @tc.desc: test RegisterRequestVsyncFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, Function | SmallTest | Level3)
+{
+    ssm_->RegisterRequestVsyncFunc(nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestVsyncFunc01";
+    info.bundleName_ = "RegisterRequestVsyncFunc01";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterRequestVsyncFunc(sceneSession);
+    ASSERT_NE(nullptr, sceneSession->requestNextVsyncFunc_);
+}
+
+/**
+ * @tc.name: EraseSceneSessionAndMarkDirtyLockFree
+ * @tc.desc: test function : EraseSceneSessionAndMarkDirtyLockFree
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Function | SmallTest | Level1)
+{
+    // init
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sessionMapDirty_ = 0;
+
+    SessionInfo info;
+    info.abilityName_ = "EraseSceneSessionAndMarkDirtyLockFree";
+    info.bundleName_ = "EraseSceneSessionAndMarkDirtyLockFree";
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    const int32_t validId = 100;
+    const int32_t invalidId = 101;
+    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    // erase id not exist
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(invalidId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, 0);
+    ASSERT_NE(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+    // erase invisible session
+    sceneSession->isVisible_ = false;
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, 0);
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+    // erase visible session
+    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    sceneSession->isVisible_ = true;
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+}
 }  // namespace
 }
 }

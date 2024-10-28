@@ -2143,13 +2143,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest |
     std::shared_ptr<Media::PixelMap> res = nullptr;
     CaptureOption option;
     option.displayId_ = 0;
-    DmErrorCode* errorCode = nullptr;
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
     std::function<void()> func = [&]() {
-        res = screenSessionManagerProxy->GetScreenCapture(option, errorCode);
+        res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, nullptr);
+        if (errorCode == DmErrorCode::DM_OK) {
+            ASSERT_NE(res, nullptr);
+        } else {
+            ASSERT_EQ(res, nullptr);
+        }
     } else {
         ASSERT_EQ(res, nullptr);
     }

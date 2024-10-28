@@ -284,7 +284,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
             CreateJsValue(env, static_cast<int32_t>(sessionProperty->GetDisplayId())));
     } else {
         napi_set_named_property(env, objValue, "screenId",
-            CreateJsValue(env, static_cast<int32_t>(0)));
+            CreateJsValue(env, static_cast<int32_t>(SCREEN_ID_INVALID)));
         TLOGE(WmsLogTag::WMS_LIFE, "sessionProperty is nullptr!");
     }
     const char* moduleName = "JsSceneSession";

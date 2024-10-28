@@ -29,7 +29,6 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
-#include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
 #include "display_manager.h"
@@ -76,6 +75,17 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
             break;
     }
     return contentInfoType;
+}
+
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, int32_t transformHint)
+{
+    Ace::ViewportConfig config;
+    config.SetSize(rect.width_, rect.height_);
+    config.SetPosition(rect.posX_, rect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    return config;
 }
 }
 
@@ -688,7 +698,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
-    layoutCallback_->OnUpdateSessionRect(rect);
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
+    }
 
     return WSError::WS_OK;
 }
@@ -772,13 +784,25 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        if (wmReason == WindowSizeChangeReason::DRAG) {
+            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->isDragTaskUpdateDone_ = true;
+        } else {
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        }
         window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    if (wmReason == WindowSizeChangeReason::DRAG) {
+        if (isDragTaskUpdateDone_) {
+            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            isDragTaskUpdateDone_ = false;
+        }
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -801,6 +825,27 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
         task();
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyRotationAnimationEnd");
+    }
+}
+
+void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
+{
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return;
+    }
+    if (windowSizeChanged_ || enableFrameLayoutFinishCb_) {
+        WSRect rect = {0, 0, width, height};
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        TLOGI(WmsLogTag::WMS_LAYOUT,
+            "NotifyFrameLayoutFinishFromApp, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        if (auto session = GetHostSession()) {
+            session->NotifyFrameLayoutFinishFromApp(enableFrameLayoutFinishCb_, rect);
+        }
+        windowSizeChanged_ = false;
+        enableFrameLayoutFinishCb_ = false;
     }
 }
 
@@ -1055,7 +1100,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     if (rect.width_ <= 0 || rect.height_ <= 0) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid width: %{public}d, height: %{public}d, id: %{public}d",
+              rect.width_, rect.height_, GetPersistentId());
         return;
     }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
@@ -1066,12 +1112,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "config[%{public}u,%{public}u,%{public}u,%{public}f]",
         rotation, deviceRotation, transformHint, virtualPixelRatio_);
-    Ace::ViewportConfig config;
-    config.SetSize(rect.width_, rect.height_);
-    config.SetPosition(rect.posX_, rect.posY_);
-    config.SetDensity(density);
-    config.SetOrientation(orientation);
-    config.SetTransformHint(transformHint);
+    auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
@@ -1233,40 +1274,10 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     return WMError::WM_OK;
-}
-
-void WindowSessionImpl::RegisterFrameLayoutCallback()
-{
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.IsPcWindow()) {
-        return;
-    }
-    uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window == nullptr) {
-            return;
-        }
-        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
-            auto windowRect = window->GetRect();
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            TLOGI(WmsLogTag::WMS_LAYOUT,
-                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            WSRect rect = { windowRect.posX_, windowRect.posY_,
-                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
-            if (auto session = window->GetHostSession()) {
-                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
-            }
-            window->windowSizeChanged_ = false;
-            window->enableFrameLayoutFinishCb_ = false;
-        }
-    });
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,

@@ -129,7 +129,7 @@ HWTEST_F(TaskSchedulerTest, SetExportHandler, Function | SmallTest | Level2)
     std::string threadName = "threadName";
     std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
     taskScheduler->SetExportHandler(eventHandler);
-    ASSERT_EQ(eventHandler.get(), taskScheduler->exportHandler_.lock().get());
+    ASSERT_EQ(eventHandler.get(), taskScheduler->exportHandler_.get());
 }
 
 HWTEST_F(TaskSchedulerTest, ExecuteExportTask, Function | SmallTest | Level2)

@@ -529,8 +529,14 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
 
 int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
-    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS) ||
+        typeId >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
+        return ERR_INVALID_DATA;
+    }
+    WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
+    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -541,8 +547,14 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
 
 int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
-    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", static_cast<uint32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS) ||
+        typeId >= static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_END)) {
+        return ERR_INVALID_DATA;
+    }
+    WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
+    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);

@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "vsync_station.h"
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
@@ -343,6 +344,7 @@ public:
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
+    bool IsDirtyDragWindow();
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
@@ -473,6 +475,14 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
+    void SetRequestNextVsyncFunc(const RequestVsyncFunc& func);
+    void OnNextVsyncDragReceived();
+
+    /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
+
     /*
      * Gesture Back
      */
@@ -579,6 +589,7 @@ private:
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
+    void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,

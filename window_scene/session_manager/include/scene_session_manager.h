@@ -468,7 +468,6 @@ public:
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
     WMError SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
-    WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
 
     /*
      * Multi instance
@@ -482,6 +481,14 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * Window displayId
+     */
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
+
+    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
 
 protected:
     SceneSessionManager();
@@ -516,6 +523,8 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
@@ -682,7 +691,13 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
+    /*
+     * UIExtension
+     */
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
+    WSError CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
+        sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage);
 
     /*
      * Multi User
