@@ -2753,6 +2753,20 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsPcOrPadCapabilityEnabled
+ * @tc.desc: IsPcOrPadCapabilityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->IsPcOrPadCapabilityEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: RegisterMainWindowCloseListeners
  * @tc.desc: RegisterMainWindowCloseListeners
  * @tc.type: FUNC
@@ -2780,6 +2794,26 @@ HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | 
     auto ret = window->UnregisterMainWindowCloseListeners(listener);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Marshalling
+ * @tc.desc: Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
+{
+    OccupiedAreaType type = OccupiedAreaType::TYPE_INPUT;
+    Rect rect = { 0, 0, 0, 0 };
+    auto safeHeight = 0;
+    auto textFieldPositionY = 0.0;
+    auto textFieldHeight = 0.0;
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(type, rect, safeHeight,
+        textFieldPositionY, textFieldHeight);
+    ASSERT_NE(info, nullptr);
+    Parcel parcel;
+    auto ret = info->Marshalling(parcel);
+    EXPECT_EQ(true, ret);
 }
 }
 } // namespace Rosen

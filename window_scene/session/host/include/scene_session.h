@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "vsync_station.h"
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
@@ -32,6 +33,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 
 class SceneSession;
+
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -172,6 +174,7 @@ public:
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
     virtual void OnCallingSessionUpdated() {};
+    virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
@@ -241,7 +244,8 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-
+    // Provide the ability to prohibit dragging for scb
+    WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
@@ -340,6 +344,7 @@ public:
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
+    bool IsDirtyDragWindow();
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
@@ -456,7 +461,12 @@ public:
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+
+    /*
+     * Window ZOrder: PC
+     */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
+    void PcUpdateZOrderAndDirty(const uint32_t zOrder);
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
@@ -464,6 +474,14 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+
+    void SetRequestNextVsyncFunc(const RequestVsyncFunc& func);
+    void OnNextVsyncDragReceived();
+
+    /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
 
     /*
      * Gesture Back
@@ -509,7 +527,7 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
-    NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /*
      * Window Hierarchy
@@ -526,6 +544,12 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /*
+     * Window Lifecycle
+     */
+    bool CheckIdentityTokenIfMatched(const std::string& identityToken);
+    bool CheckPidIfMatched();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -565,6 +589,7 @@ private:
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
+    void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -665,14 +690,14 @@ private:
     int32_t customDecorHeight_ = 0;
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    std::string clientIdentityToken_ = { "" };
-    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
+    std::string clientIdentityToken_ = { "" };
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;

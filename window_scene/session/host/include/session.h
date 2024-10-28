@@ -31,6 +31,7 @@
 #include "occupied_area_change_info.h"
 #include "window_visibility_info.h"
 #include "pattern_detach_callback_interface.h"
+#include "vsync_station.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -47,6 +48,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
+class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     const SizeChangeReason reason, const DisplayId displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
@@ -87,6 +89,7 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
+using RequestVsyncFunc = std::function<void(std::shared_ptr<VsyncCallback>& callback)>;
 
 class ILifecycleListener {
 public:
@@ -195,6 +198,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions);
     void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
@@ -494,6 +498,7 @@ public:
     void SetMainSessionUIStateDirty(bool dirty);
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
+    void ResetDragDirtyFlags();
     static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
@@ -620,6 +625,8 @@ protected:
      * Window Rotate Animation
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
+
+    RequestVsyncFunc requestNextVsyncFunc_;
 
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;

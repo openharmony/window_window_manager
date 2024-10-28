@@ -567,24 +567,24 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
 
     sceneSession02->property_ = nullptr;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(sceneSession02->property_, nullptr);
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->state_ = SessionState::STATE_ACTIVE;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->state_ = SessionState::STATE_FOREGROUND;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
-    EXPECT_EQ(true, ssm_->GetImmersiveState());
+    EXPECT_EQ(true, ssm_->GetImmersiveState(0u));
     sceneSession02->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
-    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
 }
 
 /**
@@ -1251,22 +1251,6 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallT
 }
 
 /**
- * @tc.name: GetStartupPageFromResource
- * @tc.desc: GetStartupPageFromResource
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, GetStartupPageFromResource, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    AppExecFwk::AbilityInfo abilityInfo;
-    EXPECT_EQ(ssm_->GetResourceManager(abilityInfo), nullptr);
-    std::string path = "testPath";
-    uint32_t bgColor = 0;
-    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: HandleHideNonSystemFloatingWindows
  * @tc.type: FUNC
@@ -1488,11 +1472,11 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionDumpInfo, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: CheckParentSessionVisible
- * @tc.desc: CheckParentSessionVisible
+ * @tc.name: IsParentSessionVisible
+ * @tc.desc: IsParentSessionVisible
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, CheckParentSessionVisible, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, IsParentSessionVisible, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -1504,7 +1488,7 @@ HWTEST_F(SceneSessionManagerTest4, CheckParentSessionVisible, Function | SmallTe
     sceneSession->property_->SetParentPersistentId(1);
     sceneSession->isVisible_ = false;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    bool result = ssm_->CheckParentSessionVisible(sceneSession);
+    bool result = ssm_->IsParentSessionVisible(sceneSession);
     EXPECT_EQ(result, false);
 
     bool testRet = sceneSession->IsScbCoreEnabled();
@@ -1513,16 +1497,16 @@ HWTEST_F(SceneSessionManagerTest4, CheckParentSessionVisible, Function | SmallTe
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->isVisible_ = true;
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = ssm_->CheckParentSessionVisible(sceneSession);
+    result = ssm_->IsParentSessionVisible(sceneSession);
     EXPECT_EQ(result, true);
 
     sceneSession->property_->SetParentPersistentId(2);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    result = ssm_->CheckParentSessionVisible(sceneSession);
+    result = ssm_->IsParentSessionVisible(sceneSession);
     EXPECT_EQ(result, true);
 
     sceneSession->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    result = ssm_->CheckParentSessionVisible(sceneSession);
+    result = ssm_->IsParentSessionVisible(sceneSession);
     EXPECT_EQ(result, true);
 }
 

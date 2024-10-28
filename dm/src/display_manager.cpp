@@ -118,6 +118,7 @@ private:
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
+    std::map<DisplayId, std::chrono::steady_clock::time_point> displayUptateTimeMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex& mutex_;
     std::set<sptr<IDisplayListener>> displayListeners_;
@@ -613,12 +614,37 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
     WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    auto currentTime = std::chrono::steady_clock::now();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto lastRequestIter = displayUptateTimeMap_.find(displayId);
+        if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
+            auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
+                .count();
+            if (interval < MAX_INTERVAL_US) {
+                auto iter = displayMap_.find(displayId);
+                if (iter != displayMap_.end()) {
+                    return displayMap_[displayId];
+                }
+            }
+        }
+    }
+    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        return nullptr;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
         displayMap_.erase(displayId);
+        //map erase函数删除不存在key行为安全
+        displayUptateTimeMap_.erase(displayId);
         return nullptr;
     }
+
+    displayUptateTimeMap_[displayId] = currentTime;
     return displayMap_[displayId];
 }
 
@@ -1871,7 +1897,6 @@ bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallb
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
-            WLOGFI("[UL_POWER]previous callback not called or callback invalid");
             if (displayStateCallback_ != nullptr) {
                 WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
@@ -1937,11 +1962,11 @@ bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
 {
     WLOGFD("freeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("freeze display fail, num of display is 0");
+        WLOGFE("freeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("freeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        WLOGFE("freeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
@@ -1951,11 +1976,11 @@ bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
 {
     WLOGFD("unfreeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("unfreeze display fail, num of display is 0");
+        WLOGFE("unfreeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("unfreeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        WLOGFE("unfreeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
@@ -2059,6 +2084,23 @@ DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenI
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
         screenId, pid, windowIdList);
+}
+
+sptr<Display> DisplayManager::GetPrimaryDisplaySync()
+{
+    return pImpl_->GetDefaultDisplaySync();
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenCapture =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetScreenCapture(captureOption, errorCode);
+    if (screenCapture == nullptr) {
+        WLOGFE("screen capture failed!");
+        return nullptr;
+    }
+    return screenCapture;
 }
 } // namespace OHOS::Rosen
 

@@ -21,6 +21,7 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -113,20 +114,20 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> scnSession = new SceneSession(info, specificCallback);
-    sptr<AAFwk::SessionInfo> scnSessionInfo = new AAFwk::SessionInfo();
+    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback);
+    sptr<AAFwk::SessionInfo> sceneSessionInfo = new AAFwk::SessionInfo();
     bool needRemoveSession = true;
     bool isForceClean = true;
 
     SessionInfo sessionInfo;
     sessionInfo.collaboratorType_ = CollaboratorType::RESERVE_TYPE;
-    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
 
     needRemoveSession = false;
     isForceClean = false;
     sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
-    ssm_->RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
 }
 
 /**
@@ -583,6 +584,84 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
     ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
 
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: IsInSecondaryScreen
+ * @tc.desc: test IsInSecondaryScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
+
+    displayId = 5;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
+}
+
+/**
+ * @tc.name: RegisterRequestVsyncFunc
+ * @tc.desc: test RegisterRequestVsyncFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, Function | SmallTest | Level3)
+{
+    ssm_->RegisterRequestVsyncFunc(nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestVsyncFunc01";
+    info.bundleName_ = "RegisterRequestVsyncFunc01";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterRequestVsyncFunc(sceneSession);
+    ASSERT_NE(nullptr, sceneSession->requestNextVsyncFunc_);
+}
+
+/**
+ * @tc.name: EraseSceneSessionAndMarkDirtyLockFree
+ * @tc.desc: test function : EraseSceneSessionAndMarkDirtyLockFree
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Function | SmallTest | Level1)
+{
+    // init
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sessionMapDirty_ = 0;
+
+    SessionInfo info;
+    info.abilityName_ = "EraseSceneSessionAndMarkDirtyLockFree";
+    info.bundleName_ = "EraseSceneSessionAndMarkDirtyLockFree";
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    const int32_t validId = 100;
+    const int32_t invalidId = 101;
+    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    // erase id not exist
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(invalidId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, 0);
+    ASSERT_NE(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+    // erase invisible session
+    sceneSession->isVisible_ = false;
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, 0);
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+    // erase visible session
+    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    sceneSession->isVisible_ = true;
+    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
 }  // namespace
 }

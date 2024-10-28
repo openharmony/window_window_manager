@@ -40,7 +40,6 @@ ohos_shared_library("intention_event_anr_manager") {
   }
   sources = [
     "../dfx/src/dfx_hisysevent.cpp",
-    "../framework/anr_handler/src/anr_handler.cpp",
     "../utils/src/util.cpp",
   ]
 

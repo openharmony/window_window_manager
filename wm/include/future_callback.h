@@ -18,17 +18,22 @@
 
 #include <future.h>
 #include "interfaces/include/ws_common.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 class FutureCallback : public RefBase {
 public:
-    WSError OnUpdateSessionRect(const WSRect& rect);
-    WSRect GetResult(long timeOut);
-    void ResetLock();
+    WSError OnUpdateSessionRect(
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
+    Rect GetResizeAsyncResult(long timeOut);
+    Rect GetMoveToAsyncResult(long timeOut);
+    void ResetResizeLock();
+    void ResetMoveToLock();
     
 private:
-    RunnableFuture<WSRect> future_{};
+    RunnableFuture<Rect> resizeFuture_{};
+    RunnableFuture<Rect> moveToFuture_{};
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -256,7 +256,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdMain ON.");
             screenId_ = SCREEN_ID_MAIN;
             ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "screenOnMainTask");
@@ -307,7 +306,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdFull ON.");
             screenId_ = SCREEN_ID_FULL;
             ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
-            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFull, "screenOnFullTask");
@@ -327,7 +325,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         auto taskScreenOnFullOn = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
             screenId_ = SCREEN_ID_FULL;
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
@@ -347,7 +345,7 @@ void SingleDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(property, reason);
-    screenSession->SetRotation(Rotation::ROTATION_0);
+    screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);

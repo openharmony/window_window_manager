@@ -107,7 +107,13 @@ public:
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
@@ -284,6 +290,15 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WSError SetEnableDragBySystem(bool enableDrag) override;
+
+    /*
+     * FreeMultiWindow
+     */
+    void SetFreeMultiWindowMode(bool enable)
+    {
+        windowSystemConfig_.freeMultiWindowEnable_ = enable;
+    }
 
 protected:
     WMError Connect();
@@ -374,6 +389,7 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
+    std::atomic_bool isDragTaskUpdateDone_ = true;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
@@ -465,6 +481,7 @@ private:
     inline void DestroyExistUIContent();
     std::string GetRestoredRouterStack();
 
+    bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,

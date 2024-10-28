@@ -163,13 +163,6 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
         }
 
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
@@ -499,7 +492,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr");
         return;
     }
-    uint32_t curSessionId = sessionProperty->GetCallingSessionId();
+    uint32_t curSessionId = GetCallingSessionId();
     // When calling window id changes, restore the old calling session, raise the new calling session.
     if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);

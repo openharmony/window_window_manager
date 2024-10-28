@@ -55,6 +55,12 @@ public:
     MOCK_METHOD2(DispatchKeyEvent, void(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event));
     MOCK_METHOD0(GetMaximizeMode,  MaximizeMode());
     MOCK_METHOD1(GetWindowModeType, WMError(WindowModeType& windowModeType));
+    MOCK_METHOD6(RecoverAndReconnectSceneSession, WMError(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token));
+    MOCK_METHOD6(RecoverAndConnectSpecificSession, void(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token));
 };
 }
 } // namespace OHOS

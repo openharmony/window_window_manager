@@ -38,6 +38,7 @@ const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange
 const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
 const std::string ON_SCREEN_EXTEND_CHANGE = "screenExtendChange";
 const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
+const std::string ON_SCREEN_CAPTURE_NOTIFY = "screenCaptureNotify";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -569,7 +570,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
             WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
         } else {
@@ -686,6 +687,41 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
         }
     } else {
         WLOGFE("OnHoverStatusChange: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+{
+    const std::string callbackType = ON_SCREEN_CAPTURE_NOTIFY;
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFW("Callback is unregistered!");
+        return;
+    }
+    auto jsCallbackRef = mCallback_[callbackType];
+    auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, uid, clientName, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenCaptureNotify");
+        if (jsCallbackRef == nullptr) {
+            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            WLOGFE("Call js callback failed, method is null!");
+            return;
+        }
+        napi_value mainId = CreateJsValue(env, static_cast<int64_t>(mainScreenId));
+        napi_value clientUid = CreateJsValue(env, uid);
+        napi_value client = CreateJsValue(env, clientName);
+        napi_value argv[] = { mainId, clientUid, client };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnScreenCaptureNotify: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnScreenCaptureNotify: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

@@ -23,6 +23,7 @@
 #include "session_permission.h"
 #include "screen_rotation_property.h"
 #include "parameters.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -31,6 +32,7 @@ constexpr int LINE_WIDTH = 30;
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
+constexpr int SUPER_FOLD_CHANGE_EVENT_MAX = 10;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
@@ -52,6 +54,7 @@ const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
+const std::string ARG_SET_SUPER_FOLD_STATUS = "-trans";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -134,6 +137,7 @@ void ScreenSessionDumper::ExcuteInjectCmd()
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
+        dumpInfo_.append("dms.hidumper.supportdebug false\n");
         return;
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
@@ -669,5 +673,30 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
         TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
     }
 }
+
+void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SUPER_FOLD_STATUS)) {
+        std::string valueStr = input.substr(commaPos + 1, MOTION_SENSOR_PARAM_SIZE);
+        if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        if (valueStr.size() == MOTION_SENSOR_PARAM_SIZE && valueStr != "-1") {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value <  static_cast<int32_t>(SuperFoldStatusChangeEvents::UNDEFINED) ||
+            value >= static_cast<int32_t>(SUPER_FOLD_CHANGE_EVENT_MAX)) {
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
+            return;
+        }
+        SuperFoldStateManager::GetInstance().
+            HandleSuperFoldStatusChange(static_cast<SuperFoldStatusChangeEvents>(value));
+        TLOGI(WmsLogTag::DMS, "state: %{public}d, event: %{public}d",
+            SuperFoldStateManager::GetInstance().GetCurrentStatus(), value);
+    }
+}
+
 } // Rosen
 } // OHOS

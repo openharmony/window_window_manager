@@ -19,6 +19,7 @@ config("libwmutil_private_config") {
     "../dmserver/include",
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
+    "${window_base_path}/wm/include",
   ]
 }
 
@@ -60,7 +61,9 @@ ohos_static_library("libwmutil_static") {
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
     "src/unreliable_window_info.cpp",
+    "src/vsync_station.cpp",
     "src/window_drawing_content_info.cpp",
+    "src/window_frame_trace_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
     "src/window_visibility_info.cpp",
@@ -76,6 +79,8 @@ ohos_static_library("libwmutil_static") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
+  deps = [ ":libwmutil_base" ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
@@ -84,6 +89,7 @@ ohos_static_library("libwmutil_static") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
@@ -99,6 +105,10 @@ ohos_static_library("libwmutil_static") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 }
 
 ## Build libwmutil_base.so
@@ -124,6 +134,7 @@ ohos_shared_library("libwmutil_base") {
     "src/string_util.cpp",
     "src/unreliable_window_info.cpp",
     "src/window_drawing_content_info.cpp",
+    "src/window_manager_hilog.cpp",
     "src/window_pid_visibility_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_common.cpp",
@@ -163,6 +174,8 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
     "src/typec_port_info.cpp",
+    "src/vsync_station.cpp",
+    "src/window_frame_trace_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
   ]
@@ -184,6 +197,7 @@ ohos_shared_library("libwmutil") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
@@ -208,6 +222,9 @@ ohos_shared_library("libwmutil") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
+
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 }
 
 group("test") {
