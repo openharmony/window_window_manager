@@ -4215,7 +4215,7 @@ void SceneSession::NotifyPiPWindowPrepareClose()
             TLOGW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
             return;
         }
-        if(session->onPrepareClosePiPSession_) {
+        if (session->onPrepareClosePiPSession_) {
             session->onPrepareClosePiPSession_();
         }
         TLOGD(WmsLogTag::WMS_PIP, "NotifyPiPWindowPrepareClose, id: %{public}d", session->GetPersistentId());
