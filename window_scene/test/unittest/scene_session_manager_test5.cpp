@@ -913,9 +913,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | S
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(123);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
     session->SetSessionInfoPersistentId(0);
-    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true));
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
 }
 
 /**
