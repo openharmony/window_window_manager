@@ -547,7 +547,7 @@ WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
             TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+        TLOGND(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
             session->GetPersistentId(), isFocusableOnShow);
         session->focusableOnShow_ = isFocusableOnShow;
     };

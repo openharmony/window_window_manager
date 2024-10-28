@@ -252,6 +252,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         if (property && sessionProperty) {
             sessionProperty->SetWindowMode(property->GetWindowMode());
             sessionProperty->SetDecorEnable(property->IsDecorEnable());
+            session->SetFocusableOnShow(property->GetFocusableOnShow());
         }
         int32_t persistentId = session->GetPersistentId();
         auto ret = session->Session::Foreground(property);
