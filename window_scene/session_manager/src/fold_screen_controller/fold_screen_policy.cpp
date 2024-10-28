@@ -28,6 +28,7 @@ void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
 
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
 {
+    std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
     return lastDisplayMode_;
 }
 
@@ -68,6 +69,10 @@ void FoldScreenPolicy::ClearState()
     currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     currentFoldStatus_ = FoldStatus::UNKNOWN;
 }
+
+void FoldScreenPolicy::ExitCoordination() {};
+
+void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
 
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {

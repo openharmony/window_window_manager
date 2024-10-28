@@ -101,6 +101,10 @@ public:
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
+    virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
+    {
+        return WSError::WS_OK;
+    }
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;

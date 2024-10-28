@@ -1070,7 +1070,6 @@ HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | L
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-
 /*
  * @tc.name: SetFullScreen
  * @tc.desc: SetFullScreen test

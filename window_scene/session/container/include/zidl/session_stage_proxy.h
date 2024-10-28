@@ -66,6 +66,7 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
 

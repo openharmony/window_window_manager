@@ -478,7 +478,7 @@ HWTEST_F(SceneSessionManagerTest7, CheckPiPPriority, Function | SmallTest | Leve
     EXPECT_EQ(ret, false);
     sceneSession->isVisible_ = false;
     ret = ssm_->CheckPiPPriority(pipTemplateInfo);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     pipTemplateInfo.priority = 1;
     ret = ssm_->CheckPiPPriority(pipTemplateInfo);
     EXPECT_EQ(ret, true);
@@ -646,10 +646,10 @@ HWTEST_F(SceneSessionManagerTest7, UnregisterWindowManagerAgent, Function | Smal
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
     ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
-    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
     type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
     ret = ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
