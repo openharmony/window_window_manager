@@ -645,23 +645,27 @@ HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: StartMoveSystemWindow01
- * @tc.desc: StartMoveSystemWindow
+ * @tc.name: StartMoveWindow01
+ * @tc.desc: StartMoveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, StartMoveSystemWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("StartMoveSystemWindow01");
+    option->SetWindowName("StartMoveWindow01");
     sptr<WindowSceneSessionImpl> windowSceneSession = new WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->windowSystemConfig_.uiType_ = "pc";
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new SessionMocker(sessionInfo);
     windowSceneSession->hostSession_ = session;
-    windowSceneSession->StartMoveSystemWindow();
+    windowSceneSession->StartMoveWindow();
     ASSERT_NE(nullptr, session);
+
+    windowSceneSession->windowSystemConfig_.uiType_ = "phone";
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, windowSceneSession->StartMoveWindow());
 }
 
 /**

@@ -522,15 +522,11 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::OnSystemSessionEvent(SessionEvent event)
+WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
         return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGW(WmsLogTag::WMS_SYSTEM, "This is not system window, permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     const char* const funcName = __func__;
     return PostSyncTask([weakThis = wptr(this), event, funcName] {
