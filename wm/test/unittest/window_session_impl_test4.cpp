@@ -354,6 +354,35 @@ HWTEST_F(WindowSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | SmallT
 }
 
 /**
+ * @tc.name: GetVirtualPixelRatio01
+ * @tc.desc: GetVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("GetVirtualPixelRatio01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    float vpr = 0;
+    window->property_->SetDisplayId(-1);
+    auto res = window->GetVirtualPixelRatio(vpr);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    window->property_->SetDisplayId(0);
+    res = window->GetVirtualPixelRatio(vpr);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio01 end";
+}
+
+/**
  * @tc.name: GetDecorHeight
  * @tc.desc: GetDecorHeight and check the retCode
  * @tc.type: FUNC
