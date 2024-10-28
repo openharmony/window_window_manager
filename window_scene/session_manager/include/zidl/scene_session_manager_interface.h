@@ -117,7 +117,6 @@ public:
         TRANS_ID_SET_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
-        TRANS_ID_GET_PARENT_DISPLAYID,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
     };
@@ -307,11 +306,6 @@ public:
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
     WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
-
-    virtual WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override
-    {
-        return WMError::WM_OK;
-    }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 

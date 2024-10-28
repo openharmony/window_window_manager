@@ -110,8 +110,7 @@ void TaskScheduler::ExecuteExportTask()
     if (exportFuncMap_.empty()) {
         return;
     }
-    std::shared_ptr<AppExecFwk::EventHandler> exportHandler = exportHandler_.lock();
-    if (!exportHandler) {
+    if (!exportHandler_) {
         return;
     }
     auto task = [funcMap = std::move(exportFuncMap_)]() {
@@ -121,7 +120,7 @@ void TaskScheduler::ExecuteExportTask()
         }
     };
     exportFuncMap_.clear();
-    exportHandler->PostTask(task, "wms:exportTask");
+    exportHandler_->PostTask(task, "wms:exportTask");
 }
 
 void StartTraceForSyncTask(std::string name)

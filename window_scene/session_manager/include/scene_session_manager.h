@@ -468,7 +468,6 @@ public:
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override;
     WMError SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
-    WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override;
 
     /*
      * Multi instance
@@ -692,7 +691,13 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
+    /*
+     * UIExtension
+     */
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
+    WSError CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
+        sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage);
 
     /*
      * Multi User
