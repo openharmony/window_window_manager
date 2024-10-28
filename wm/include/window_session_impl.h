@@ -273,8 +273,6 @@ public:
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
-    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
-    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -288,8 +286,10 @@ public:
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
     /*
-     * FreeMultiWindow
+     * Free Multi Window
      */
+    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
+    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     void SetFreeMultiWindowMode(bool enable)
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
@@ -305,7 +305,13 @@ protected:
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
+
+    /*
+     * Free Multi Window
+     */
     void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
+    void NotifySwitchFreeMultiWindow(bool enable);
+
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
@@ -324,7 +330,6 @@ protected:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifySubWindowClose(bool& terminateCloseProcess);
     WMError NotifyMainWindowClose(bool& terminateCloseProcess);
-    void NotifySwitchFreeMultiWindow(bool enable);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
