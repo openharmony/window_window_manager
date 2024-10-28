@@ -167,14 +167,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     manager_->IsFilterSession(sceneSession);
     info.sceneType_ = SceneType::PANEL_SCENE;
     info.isSystem_ = true;
-    sceneSession->UpdateVisibilityInner(true);
+    sceneSession->isVisible_ = true;
     sceneSession->SetSystemActive(true);
     manager_->IsFilterSession(sceneSession);
     info.isSystem_ = false;
-    sceneSession->UpdateVisibilityInner(false);
+    sceneSession->isVisible_ = false;
     sceneSession->SetSystemActive(false);
     manager_->IsFilterSession(sceneSession);
-    sceneSession->UpdateVisibilityInner(false);
+    sceneSession->isVisible_ = false;
     manager_->IsFilterSession(sceneSession);
     ASSERT_EQ(ret, 0);
 }
@@ -472,7 +472,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTe
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
