@@ -156,8 +156,8 @@ public:
     bool IsPcOrPadFreeMultiWindowMode() const override;
 
     /*
-    * Free Multi Window
-    */
+     * Free Multi Window
+     */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
 
