@@ -1485,6 +1485,14 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         this->OnRootSceneBackEvent();
     };
     SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
+    auto onFlushUIParamsFunc = []() {
+        RootScene::staticRootScene_->OnFlushUIParams();
+    };
+    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc(onFlushUIParamsFunc);
+    auto getIsLayoutFinishedFunc = []() {
+        return RootScene::staticRootScene_->IsLayoutFinished();
+    };
+    SceneSessionManager::GetInstance().SetGetIsLayoutFinishedFunc(getIsLayoutFinishedFunc);
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
     });

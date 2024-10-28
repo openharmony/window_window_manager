@@ -1215,7 +1215,7 @@ WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(AvoidAreaType type)
         const WSRect rect = session->GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect: %{public}s", type, rect.ToString().c_str());
         return rect;
-    }
+}
     return {};
 }
 
@@ -1526,6 +1526,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         if (sceneSession->moveDragController_) {
             sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
         }
+        sceneSession->SetGetIsLayoutFinishedFunc([this](bool& isLayoutFinished) {
+            return this->IsLayoutFinished(isLayoutFinished);
+        });
     }
     return sceneSession;
 }
@@ -4540,6 +4543,16 @@ WSError SceneSessionManager::GetTotalUITreeInfo(const std::string& strId, std::s
 void SceneSessionManager::SetDumpUITreeFunc(const DumpUITreeFunc& func)
 {
     dumpUITreeFunc_ = func;
+}
+
+void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
+{
+    onFlushUIParamsFunc_ = std::move(func);
+}
+
+void SceneSessionManager::SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedOnRootSceneFunc&& func)
+{
+    getIsLayoutFinishedOnRootSceneFunc_ = std::move(func);
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
@@ -9194,6 +9207,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     if (!Session::IsScbCoreEnabled()) {
         return;
     }
+    if (onFlushUIParamsFunc_ != nullptr) {
+        onFlushUIParamsFunc_();
+    }
     auto task = [this, screenId, uiParams = std::move(uiParams)]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushUIParams");
         TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams");
@@ -11298,4 +11314,13 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
     return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
 }
 
+WSError SceneSessionManager::IsLayoutFinished(bool& isLayoutFinished)
+{
+    if (getIsLayoutFinishedOnRootSceneFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedOnRootSceneFunc_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    isLayoutFinished = getIsLayoutFinishedOnRootSceneFunc_();
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
