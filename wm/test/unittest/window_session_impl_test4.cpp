@@ -366,13 +366,12 @@ HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio01, Function | SmallTest | 
     option->SetWindowName("GetVirtualPixelRatio01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    float vpr = 0;
+    float vpr = 0.f;
     window->property_->SetDisplayId(-1);
     auto res = window->GetVirtualPixelRatio(vpr);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);

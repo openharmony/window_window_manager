@@ -1969,7 +1969,7 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    float vpr = 0;
+    float vpr = 0.f;
     auto err = GetVirtualPixelRatio(vpr);
     if (err != WMError::WM_OK) {
         return err;
@@ -2005,7 +2005,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         TLOGE(WmsLogTag::DEFAULT, "Get app window decor height failed");
         return WMError::WM_OK;
     }
-    float vpr = 0;
+    float vpr = 0.f;
     auto err = GetVirtualPixelRatio(vpr);
     if (err != WMError::WM_OK) {
         return err;
@@ -2034,7 +2034,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
         titleButtonRect.IsUninitializedRect();
         return WMError::WM_OK;
     }
-    float vpr = 0;
+    float vpr = 0.f;
     auto err = GetVirtualPixelRatio(vpr);
     if (err != WMError::WM_OK) {
         return err;
@@ -2080,20 +2080,33 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             return ret;
         }
     }
-    float vpr = 0;
-    auto err = GetVirtualPixelRatio(vpr);
-    if (err != WMError::WM_OK) {
-        return err;
-    }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        const char* const where = __func__;
         uiContent->SubscribeContainerModalButtonsRectChange(
-            [weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            [where, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
             auto window = weakThis.promote();
             if (!window) {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
                 return;
             }
-            window->GetVirtualPixelRatio();
+            auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->GetDisplayId());
+            if (display == nullptr) {
+                TLOGNE(WmsLogTag::DEFAULT, "%{public}s get display failed displayId: %{public}" PRIu64,
+                    where, window->GetDisplayId());
+                return;
+            }
+            auto displayInfo = display->GetDisplayInfo();
+            if (displayInfo == nullptr) {
+                TLOGNE(WmsLogTag::DEFAULT, "%{public}s get display info failed displayId: %{public}" PRIu64,
+                    where, window->GetDisplayId());
+                return;
+            }
+            float vpr = display->GetVirtualPixelRatio();
+            if (MathHelper::NearZero(vpr)) {
+                TLOGNE(WmsLogTag::DEFAULT, "%{public}s failed, because of wrong vpr: %{public}f",
+                    where, vpr);
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
