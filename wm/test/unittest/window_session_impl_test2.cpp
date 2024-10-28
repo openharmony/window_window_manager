@@ -1836,21 +1836,6 @@ HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetKeyboardAnimationConfig end";
 }
 
-/**
- * @tc.name: SetWindowGravity
- * @tc.desc: SetWindowGravity
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetWindowGravity, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: SetWindowGravity start";
-    window_ = GetTestWindowImpl("SetWindowGravity");
-    ASSERT_NE(window_, nullptr);
-    ASSERT_NE(window_->GetHostSession(), nullptr);
-    window_->hostSession_ = nullptr;
-    ASSERT_EQ(window_->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 100), WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: SetWindowGravity end";
-}
 
 /**
  * @tc.name: GetSubWindow

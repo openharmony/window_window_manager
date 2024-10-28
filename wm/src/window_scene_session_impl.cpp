@@ -4025,7 +4025,6 @@ WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams&
         params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
         params.PortraitPanelRect_.ToString().c_str());
     property_->SetKeyboardLayoutParams(params);
-    property_->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
     auto ret = MoveAndResizeKeyboard(params);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard move and resize failed");
