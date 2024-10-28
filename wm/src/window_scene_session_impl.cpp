@@ -2237,10 +2237,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        if (surfaceNode_ != nullptr &&
-            (windowSystemConfig_.IsPcWindow() || GetFreeMultiWindowModeEnabledState())) {
-            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
-        }
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
@@ -3414,13 +3410,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     WMError ret = UpdateWindowModeImmediately(mode);
 
     if (windowSystemConfig_.IsPcWindow()) {
-        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            surfaceNode_->SetFrameGravity(Gravity::LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
-        } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
