@@ -20,75 +20,111 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientStub" };
-} // namespace
+}  // namespace
+
+void ScreenSessionManagerClientStub::InitScreenChangeMap()
+{
+    if (HandleScreenChangeMap_.size() != 0) {
+        WLOGFI("screen change map has init!");
+        return;
+    }
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+            return HandleOnScreenConnectionChanged(data, reply);
+        };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnPropertyChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnPowerStatusChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_EXTEND_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenExtendChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSensorRotationChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_HOVER_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnHoverStatusChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenOrientationChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ROTATION_LOCKED_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenRotationLockedChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnDisplayStateChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_SHOT] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenshot(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnImmersiveStateChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_DISPLAY_NODE_SCREEN_ID] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSetDisplayNodeScreenId(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnUpdateFoldDisplayMode(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SWITCH_USER_CMD] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleSwitchUserCallback(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleSetVirtualPixelRatioSystem(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnFoldStatusChangedReportUE(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CAPTURE_NOTIFY] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleScreenCaptureNotify(data, reply);
+    };
+}
+
+ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
+{
+    InitScreenChangeMap();
+}
 
 int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
+    int handleRet = ERR_INVALID_STATE;
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
+        return handleRet;
     }
     ScreenSessionManagerClientMessage msgId = static_cast<ScreenSessionManagerClientMessage>(code);
-    switch (msgId) {
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED: {
-            return HandleOnScreenConnectionChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_PROPERTY_CHANGED: {
-            return HandleOnPropertyChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_POWER_STATUS_CHANGED: {
-            return HandleOnPowerStatusChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_EXTEND_CHANGED: {
-            return HandleOnScreenExtendChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SENSOR_ROTATION_CHANGED: {
-            return HandleOnSensorRotationChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_HOVER_STATUS_CHANGED: {
-            return HandleOnHoverStatusChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED: {
-            return HandleOnScreenOrientationChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ROTATION_LOCKED_CHANGED: {
-            return HandleOnScreenRotationLockedChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_DISPLAY_STATE_CHANGED: {
-            return HandleOnDisplayStateChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_SHOT: {
-            return HandleOnScreenshot(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_IMMERSIVE_STATE_CHANGED: {
-            return HandleOnImmersiveStateChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_SET_DISPLAY_NODE_SCREEN_ID: {
-            return HandleOnSetDisplayNodeScreenId(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID: {
-            return HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE: {
-            return HandleOnUpdateFoldDisplayMode(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_SWITCH_USER_CMD: {
-            return HandleSwitchUserCallback(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM: {
-            return HandleSetVirtualPixelRatioSystem(data, reply);
-        }
-        case ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE: {
-            return HandleOnFoldStatusChangedReportUE(data, reply);
-        }
-        default: {
-            WLOGFE("Failed to find function handler!");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-        }
+    auto handleCall = HandleScreenChangeMap_.find(msgId);
+    if (handleCall != HandleScreenChangeMap_.end() && handleCall->second != nullptr) {
+        auto handleFunc = handleCall->second;
+        handleRet = handleFunc(data, reply);
+    } else {
+        WLOGFE("Failed to find function handler!");
+        handleRet = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-
-    return 0;
+    return handleRet;
 }
 
 int ScreenSessionManagerClientStub::HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply)
@@ -205,7 +241,8 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
     data.ReadUInt64Vector(&missionIds);
     std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
-    OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    bool isBlackList = data.ReadBool();
+    OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
         WLOGFE("Write surfaceNodeIds failed");
         return ERR_TRANSACTION_FAILED;
@@ -224,8 +261,9 @@ int ScreenSessionManagerClientStub::HandleOnScreenshot(MessageParcel& data, Mess
 int ScreenSessionManagerClientStub::HandleOnImmersiveStateChanged(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleOnImmersiveStateChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
     bool immersive = false;
-    OnImmersiveStateChanged(immersive);
+    OnImmersiveStateChanged(screenId, immersive);
     if (!reply.WriteBool(immersive)) {
         WLOGFE("Write immersive failed");
         return ERR_TRANSACTION_FAILED;
@@ -265,6 +303,16 @@ int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& da
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto hoverStatus = data.ReadInt32();
     OnHoverStatusChanged(screenId, hoverStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto uid = data.ReadInt32();
+    auto clientName = data.ReadString();
+    WLOGI("notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
+    ScreenCaptureNotify(screenId, uid, clientName);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

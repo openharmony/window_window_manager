@@ -304,42 +304,6 @@ void IsFocusedTest(sptr<SceneSessionManager> ssm_)
     ssm_->sceneSessionMap_.clear();
 }
 
-void BlockingFocusTest(sptr<SceneSessionManager> ssm_)
-{
-    int32_t id = 1;
-    auto sceneSession1 = GetSceneSession("BlockingFocusTest1");
-    ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->SetSessionInfoPersistentId(id++);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-
-    auto sceneSession2 = GetSceneSession("BlockingFocusTest2");
-    ASSERT_NE(sceneSession2, nullptr);
-    sceneSession2->SetSessionInfoPersistentId(id++);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
-    sceneSession1->isFocused_ = true;
-    sceneSession2->blockingFocus_ = false;
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
-    sceneSession2->blockingFocus_ = true;
-    sceneSession2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession2->isVisible_ = false;
-    sceneSession2->state_ = SessionState::STATE_INACTIVE;
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
-    sceneSession2->isVisible_ = true;
-    sceneSession2->state_ = SessionState::STATE_ACTIVE;
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
-    sceneSession2->SetSystemTouchable(false);
-    AnomalyDetection::FocusCheckProcess(0, 1);
-
-    sceneSession2->SetSystemTouchable(true);
-    AnomalyDetection::FocusCheckProcess(0, 1);
-    ssm_->sceneSessionMap_.clear();
-}
-
 /**
 * @tc.name: FocusCheckProcess
 * @tc.desc: check func FocusCheckProcess
@@ -354,7 +318,6 @@ HWTEST_F(AnomalyDetectionTest, FocusCheckProcess, Function | SmallTest | Level1)
 
     FocusNullTest(ssm_);
     IsFocusedTest(ssm_);
-    BlockingFocusTest(ssm_);
 
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: FocusCheckProcess end";

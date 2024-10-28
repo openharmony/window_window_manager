@@ -29,7 +29,6 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
-#include "anr_handler.h"
 #include "color_parser.h"
 #include "display_info.h"
 #include "display_manager.h"
@@ -76,16 +75,6 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
             break;
     }
     return contentInfoType;
-}
-
-bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
-{
-    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
-        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
-        wmReason == WindowSizeChangeReason::MAXIMIZE) {
-        return false;
-    }
-    return true;
 }
 }
 
@@ -193,12 +182,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingSessionId(option->GetCallingWindow());
-    property_->SetExtensionFlag(option->GetExtensionTag());
+    property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
+    property_->SetIsUIExtAnySubWindow(option->GetIsUIExtAnySubWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -215,8 +204,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
-    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
-           property_->GetIsPcAppInPad();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+}
+
+bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -563,7 +556,7 @@ void WindowSessionImpl::DestroySubWindow()
 {
     int32_t parentPersistentId = property_->GetParentPersistentId();
     const int32_t persistentId = GetPersistentId();
-    if (property_->GetExtensionFlag() == true) {
+    if (property_->GetIsUIExtFirstSubWindow()) {
         auto extensionWindow = FindExtensionWindowWithContext();
         if (extensionWindow != nullptr) {
             parentPersistentId = extensionWindow->GetPersistentId();
@@ -599,7 +592,7 @@ void WindowSessionImpl::DestroySubWindow()
                 subWindows.erase(iter);
                 continue;
             }
-            bool isExtDestroyed = subWindow->property_->GetExtensionFlag();
+            bool isExtDestroyed = subWindow->property_->GetIsUIExtFirstSubWindow();
             TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d, isExtDestroyed: %{public}d",
                 subWindow->GetPersistentId(), isExtDestroyed);
             auto ret = subWindow->Destroy(isExtDestroyed);
@@ -694,7 +687,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
-    layoutCallback_->OnUpdateSessionRect(rect);
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
+    }
 
     return WSError::WS_OK;
 }
@@ -743,6 +738,16 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
 
+bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
+{
+    if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
+        wmReason == WindowSizeChangeReason::FULL_TO_FLOATING || wmReason == WindowSizeChangeReason::RECOVER ||
+        wmReason == WindowSizeChangeReason::MAXIMIZE) {
+        return false;
+    }
+    return true;
+}
+
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -763,18 +768,30 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
-        bool ifNeedCommitRsTransaction = CheckIfNeedCommitRsTransaction(wmReason);
+        bool ifNeedCommitRsTransaction = window->CheckIfNeedCommitRsTransaction(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        if (wmReason == WindowSizeChangeReason::DRAG) {
+            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->isDragTaskUpdateDone_ = true;
+        } else {
+            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        }
         window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
     };
-    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    if (wmReason == WindowSizeChangeReason::DRAG) {
+        if (isDragTaskUpdateDone_) {
+            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            isDragTaskUpdateDone_ = false;
+        }
+    } else {
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+    }
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -936,6 +953,11 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 
 bool WindowSessionImpl::IsFocused() const
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return false;
+    }
+
     TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_.load());
     return isFocused_;
 }
@@ -1193,7 +1215,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     switch (setUIContentType) {
         default:
         case WindowSetUIContentType::DEFAULT: {
-            if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
+            if (isUIExtensionAbilityProcess_ && property_->GetIsUIExtFirstSubWindow()) {
                 // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
@@ -1380,8 +1402,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         WLOGFD("decorVisible:%{public}d", decorVisible);
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-            decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                    (property_->GetIsPcAppInPad() && isSubWindow));
+            decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
         }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -1408,8 +1430,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                        (property_->GetIsPcAppInPad() && isSubWindow));
+                decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                    (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
             }
             WLOGFD("decorVisible:%{public}d", decorVisible);
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
@@ -1530,9 +1552,6 @@ bool WindowSessionImpl::IsTopmost() const
 /** @note @window.hierarchy */
 WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1550,6 +1569,11 @@ bool WindowSessionImpl::IsMainWindowTopmost() const
 
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1886,6 +1910,10 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (modalityType == ModalityType::APPLICATION_MODALITY && !IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     WMError modalRet = isModal ?
@@ -2518,11 +2546,11 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
     UpdateTitleButtonVisibility();
@@ -2882,7 +2910,7 @@ WSError WindowSessionImpl::NotifyDestroy()
             }
         }
     } else if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-        if (property_->GetExtensionFlag() == true && !isUIExtensionAbilityProcess_) {
+        if (property_->GetIsUIExtFirstSubWindow() && !isUIExtensionAbilityProcess_) {
             Destroy();
         }
     }
@@ -3440,7 +3468,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+            GetImmersiveModeEnabledState() &&
             keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
@@ -4109,6 +4137,13 @@ void WindowSessionImpl::NotifySetUIContentComplete()
             mainWindow->SetUIContentComplete();
         }
     }
+}
+
+WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
+{
+    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
+    property_->SetDragEnabled(enableDrag);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

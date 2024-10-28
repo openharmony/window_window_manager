@@ -22,7 +22,8 @@
 #include "display_lite.h"
 #include "dm_common.h"
 #include "singleton_delegator.h"
-#include "zidl/screen_session_manager_lite_interface.h"
+#include "display_manager_lite_proxy.h"
+#include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS::Rosen {
 class BaseAdapterLite {
@@ -36,7 +37,7 @@ public:
 protected:
     bool InitDMSProxy();
     std::recursive_mutex mutex_;
-    sptr<IScreenSessionManagerLite> displayManagerServiceProxy_ = nullptr;
+    sptr<DisplayManagerLiteProxy> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     bool isProxyValid_ { false };
 };
@@ -67,8 +68,11 @@ public:
     virtual bool WakeUpEnd();
     virtual bool SuspendBegin(PowerStateChangeReason reason);
     virtual bool SuspendEnd();
+    virtual ScreenId GetInternalScreenId();
+    virtual bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
+    virtual bool TryToCancelScreenOff();
     virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     virtual uint32_t GetScreenBrightness(uint64_t screenId);
 private:

@@ -47,6 +47,7 @@ public:
     static std::string GetExternalScreenDefaultMode();
     static std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalConfig();
     static std::map<FoldDisplayMode, ScrollableParam> GetAllScrollableParam();
+    static bool IsSupportCapture();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -61,6 +62,7 @@ private:
     static uint32_t curvedAreaInLandscape_;
     static std::vector<DisplayPhysicalResolution> displayPhysicalResolution_;
     static std::map<FoldDisplayMode, ScrollableParam> scrollableParams_;
+    static bool isSupportCapture_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);

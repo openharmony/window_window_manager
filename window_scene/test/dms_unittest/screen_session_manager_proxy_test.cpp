@@ -1299,6 +1299,91 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, Function 
 }
 
 /**
+ * @tc.name: SetMultiScreenMode
+ * @tc.desc: SetMultiScreenMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    ScreenId mainScreenId = 0;
+    ScreenId secondaryScreenId = 1;
+    MultiScreenMode screenMode = MultiScreenMode::SCREEN_EXTEND;
+
+    DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
+    std::function<void()> func = [&]()
+    {
+        res = screenSessionManagerProxy->SetMultiScreenMode(mainScreenId, secondaryScreenId, screenMode);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+    }
+}
+
+/**
+ * @tc.name: SetMultiScreenRelativePosition
+ * @tc.desc: SetMultiScreenRelativePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    ScreenId testId = 2060;
+    ScreenId testId1 = 3060;
+    MultiScreenPositionOptions mainScreenOptions = {testId, 100, 100};
+    MultiScreenPositionOptions secondScreenOption = {testId1, 100, 100};
+
+    DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
+    std::function<void()> func = [&]()
+    {
+        res = screenSessionManagerProxy->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+    }
+}
+
+/**
+ * @tc.name: SetVirtualScreenMaxRefreshRate
+ * @tc.desc: SetVirtualScreenMaxRefreshRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    ScreenId id = 0;
+    uint32_t refreshRate = 12;
+    uint32_t actualRefreshRate = 0;
+
+    DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
+    std::function<void()> func = [&]()
+    {
+        res = screenSessionManagerProxy->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+    }
+}
+
+/**
  * @tc.name: IsScreenRotationLocked
  * @tc.desc: IsScreenRotationLocked
  * @tc.type: FUNC
@@ -1360,10 +1445,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, Function | SmallTest
     bool immersive = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(immersive));
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     } else {
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(immersive));
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     }
 }
 
@@ -2041,6 +2126,37 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorSpace, Function | SmallTes
     };
     func();
     EXPECT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    std::shared_ptr<Media::PixelMap> res = nullptr;
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
+    std::function<void()> func = [&]() {
+        res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        if (errorCode == DmErrorCode::DM_OK) {
+            ASSERT_NE(res, nullptr);
+        } else {
+            ASSERT_EQ(res, nullptr);
+        }
+    } else {
+        ASSERT_EQ(res, nullptr);
+    }
 }
 }
 }

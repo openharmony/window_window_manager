@@ -545,11 +545,11 @@ bool DisplayManagerAdapter::ConvertScreenIdToRsScreenId(ScreenId screenId, Scree
     return displayManagerServiceProxy_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
 }
 
-DMError DisplayManagerAdapter::HasImmersiveWindow(bool& immersive)
+DMError DisplayManagerAdapter::HasImmersiveWindow(ScreenId screenId, bool& immersive)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->HasImmersiveWindow(immersive);
+    return displayManagerServiceProxy_->HasImmersiveWindow(screenId, immersive);
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
@@ -850,4 +850,10 @@ DMError ScreenManagerAdapter::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
     return displayManagerServiceProxy_->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
 }
 
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
+}
 } // namespace OHOS::Rosen

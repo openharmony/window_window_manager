@@ -1019,6 +1019,9 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::VERTICAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1047,7 +1050,7 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
     Orientation ret6 = window->GetRequestedOrientation();
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
@@ -1062,8 +1065,19 @@ HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetRequestedOrientation");
+
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::HORIZONTAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1335,7 +1349,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<IMainWindowCloseListener> listener12 = nullptr;
     res = window->RegisterMainWindowCloseListeners(listener12);

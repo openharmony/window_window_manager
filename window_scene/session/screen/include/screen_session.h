@@ -51,6 +51,7 @@ public:
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnHoverStatusChange(int32_t hoverStatus, ScreenId extendScreenId) = 0;
+    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -110,6 +111,7 @@ public:
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;
     void SetRotation(Rotation rotation);
+    void SetRotationAndScreenRotationOnly(Rotation rotation);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
@@ -119,6 +121,8 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    void SetDefaultDensity(float DefaultDensity);
+    void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
 
     void SetScreenSceneDestroyListener(const DestroyScreenSceneFunc& func);
@@ -234,7 +238,9 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
+    void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
     void SetStartPosition(uint32_t startX, uint32_t startY);
+    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
 
 private:
     ScreenProperty property_;

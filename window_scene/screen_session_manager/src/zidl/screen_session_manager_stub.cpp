@@ -135,6 +135,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(TryToCancelScreenOff());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            uint32_t level = data.ReadUint64();
+            reply.WriteBool(SetScreenBrightness(screenId, level));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_BRIGHTNESS: {
+            uint64_t screenId = data.ReadUint64();
+            reply.WriteUint32(GetScreenBrightness(screenId));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
@@ -571,8 +582,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool immersive = false;
-            DMError ret = HasImmersiveWindow(immersive);
+            DMError ret = HasImmersiveWindow(screenId, immersive);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             reply.WriteBool(immersive);
             break;
@@ -852,6 +864,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE: {
+            ProcGetScreenCapture(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -951,5 +967,17 @@ void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParc
     data.ReadUInt64Vector(&windowIdList);
     DMError ret = SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+}
+
+void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, MessageParcel& reply)
+{
+    CaptureOption option;
+    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
+    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
+    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
+    reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
+    static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
 }
 } // namespace OHOS::Rosen

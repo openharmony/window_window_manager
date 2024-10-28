@@ -44,7 +44,7 @@ public:
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(GetSupportedHDRFormats, DMError(ScreenId screenId, std::vector<uint32_t>& hdrFormats));
     MOCK_METHOD2(GetSupportedColorSpaces, DMError(ScreenId screenId, std::vector<uint32_t>& colorSpaces));
-    MOCK_METHOD1(HasImmersiveWindow, DMError(bool& immersive));
+    MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {

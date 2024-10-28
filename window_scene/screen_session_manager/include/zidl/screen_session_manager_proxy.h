@@ -119,7 +119,7 @@ public:
     virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    virtual DMError HasImmersiveWindow(bool& immersive) override;
+    virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
@@ -180,6 +180,8 @@ public:
         std::vector<uint64_t>& windowIdList) override;
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

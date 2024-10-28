@@ -308,6 +308,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
+        property->SetDragEnabled(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -444,6 +445,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     if (!data.WriteString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromIcon failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->startWindowOption) {
@@ -894,7 +899,7 @@ WSError SessionProxy::OnNeedAvoid(bool status)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(status)))) {
+    if (!data.WriteBool(status)) {
         WLOGFE("Write status failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1439,7 +1444,7 @@ WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         WLOGFE("write height_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(static_cast<int32_t>(reason))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("reason write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }

@@ -161,9 +161,15 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     Transform trans_;
-    window->SetTransform(trans_);
-    ASSERT_TRUE(trans_ == window->GetTransform());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransform(trans_));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
 }
 
 /**
@@ -259,13 +265,8 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
     windowSceneSession->hostSession_ = session;
 
-    auto surfaceNode = windowSceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(0.0));
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
 }
 
 /**
@@ -718,6 +719,9 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     windowSceneSessionImpl->property_->SetPersistentId(6);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
     auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 
@@ -745,7 +749,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
 
     windowSceneSessionImpl->property_->SetPersistentId(3);
     ret = windowSceneSessionImpl->RaiseAboveTarget(6);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowSessionImpl::subWindowSessionMap_.erase(1);
 }
@@ -1794,11 +1798,14 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->SetTitleButtonVisible(false, false, false, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
     res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_OK);
 }

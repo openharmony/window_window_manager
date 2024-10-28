@@ -217,6 +217,12 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
+void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.processOptions = processOptions;
+}
+
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -281,6 +287,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
+    sessionInfo_.callState_ = info.callState_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -481,6 +488,14 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_INACTIVE ||
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
+    }
+    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
+     * already background, which may cause performance deterioration.
+     */
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
+        state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
+        return;
     }
     state_ = state;
     SetMainSessionUIStateDirty(true);
@@ -1048,6 +1063,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
+        property->SetDragEnabled(sessionProperty->GetDragEnabled());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -1057,10 +1073,6 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
 {
     auto defaultDragEnable = false;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        defaultDragEnable = sessionProperty->GetDragEnabled();
-    }
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
     bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
@@ -1149,7 +1161,6 @@ void Session::HandleDialogBackground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Background dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_BACKGROUND);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
@@ -1174,7 +1185,6 @@ void Session::HandleDialogForeground()
         }
         TLOGI(WmsLogTag::WMS_DIALOG, "Foreground dialog, id: %{public}d, dialogId: %{public}d",
             GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetSessionState(SessionState::STATE_ACTIVE);
         if (!dialog->sessionStage_) {
             TLOGE(WmsLogTag::WMS_DIALOG, "dialog session stage is nullptr");
             return;
@@ -3196,15 +3206,25 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->SwitchFreeMultiWindow(enable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        property->GetIsUIExtFirstSubWindow();
+    if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
+        return sessionStage_->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
@@ -3339,6 +3359,11 @@ void Session::ResetDirtyFlags()
     } else {
         dirtyFlags_ = 0;
     }
+}
+
+void Session::ResetDragDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void Session::SetUIStateDirty(bool dirty)

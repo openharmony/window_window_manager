@@ -86,11 +86,11 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener uiContent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
         return false;
     }
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener eventHandler is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null");
         return false;
     }
     auto listener =
@@ -109,7 +109,7 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "UpdateLastMouseEvent pointerEvent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null");
         return;
     }
     g_lastLeaveWindowId = -1;

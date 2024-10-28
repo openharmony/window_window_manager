@@ -40,7 +40,7 @@ public:
     Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
         Return ret;
-        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
             StartTraceForSyncTask(name);
             ret = task();
             FinishTraceForSyncTask();

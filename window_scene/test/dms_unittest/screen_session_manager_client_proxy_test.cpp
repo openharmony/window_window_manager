@@ -87,6 +87,20 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SwitchUserCallback, Function | Sma
 }
 
 /**
+ * @tc.name: OnScreenExtendChanged
+ * @tc.desc: OnScreenExtendChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenExtendChanged, Function | SmallTest | Level2)
+{
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 0;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnScreenExtendChanged(mainScreenId, extendScreenId);
+}
+
+/**
  * @tc.name: OnPropertyChanged
  * @tc.desc: OnPropertyChanged test
  * @tc.type: FUNC
@@ -199,9 +213,9 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsC
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
-
+    bool isBlackList = false;
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**
@@ -240,7 +254,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnImmersiveStateChanged, Function 
     bool immersive = false;
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClientProxy_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**
@@ -269,6 +283,34 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetVirtualPixelRatioSystem, Functi
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
     screenSessionManagerClientProxy_->SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
+}
+
+/**
+ * @tc.name: OnFoldStatusChangedReportUE
+ * @tc.desc: OnFoldStatusChangedReportUE test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnFoldStatusChangedReportUE, Function | SmallTest | Level2)
+{
+    std::vector<std::string> screenFoldInfo = {"0", "0", "0", "0"};
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnFoldStatusChangedReportUE(screenFoldInfo);
+}
+
+/**
+ * @tc.name: ScreenCaptureNotify
+ * @tc.desc: ScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName);
 }
 } // namespace Rosen
 } // namespace OHOS
