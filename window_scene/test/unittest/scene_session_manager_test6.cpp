@@ -1470,11 +1470,12 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
 HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
-    SessionInfo sessionInfo;
+    SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new (std::throw) SecneSession(info, specificCallback);
-    ssm_->sceneSessionMap_.insert(0, sceneSession);
-    ssm_->RequestInputMethodCloseKeyBoard(persistentId);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SecneSession(info, specificCallback);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    int32_t persistentId = 10;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
 
     persistentId = 0;
     sptr<Session> session = new Session(info);
@@ -1499,9 +1500,9 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
 
     sessionInfo.persistentId_ = 1;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> SceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(1, sceneSession);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->RequestSceneSession(sessionInfo, property);
 
     ssm_->sceneSessionMap_.clear();
@@ -1513,11 +1514,11 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
 }
 
 /**
- * @tc.name: IsKeyBoardForeground
- * @tc.desc: IsKeyBoardForeground
+ * @tc.name: IsKeyboardForeground
+ * @tc.desc: IsKeyboardForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, IsKeyBoardForeground, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -1527,10 +1528,10 @@ HWTEST_F(SceneSessionManagerTest6, IsKeyBoardForeground, Function | SmallTest | 
     sptr<Session> session = new Session(info);
     ASSERT_NE(session, nullptr);
     session->property_ = nullptr;
-    auto result = ssm_->IsKeyBoardForeground();
+    auto result = ssm_->IsKeyboardForeground();
     ASSERT_EQ(result, false);
 
-    ssm_->sceneSessionMap_.insert(0, sceneSession);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
     session->property_ = new WindowSessionProperty();
     ASSERT_NE(session->property_, nullptr);
 
@@ -1557,18 +1558,19 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
     scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(scnSession, nullptr);
 
     sptr<Session> session = new Session(info);
     ASSERT_NE(session, nullptr);
     session->GetDialogVector().clear();
     ssm_->DestroyDialogWithMainWindow(scnSession);
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info， specificCallback);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(0, sceneSession);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->GetSceneSession(1);
     result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_NE(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     WindowVisibilityInfo windowVisibilityInfo;
     windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
@@ -1590,7 +1592,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | Sm
     ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession, isSaveSnapshot, isForceClean);
 
     SessionInfo info;
-    sptr<SceneSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession::SpecificSenssionCallback> specificCallback = nullptr;
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
@@ -1615,8 +1617,8 @@ HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function 
 
     persistentId = 0;
     Session session(info);
-    session.isVisible = true;
-    session.state_ = SessionStage::STATE_FOREGROUND;
+    session.isVisible_ = true;
+    session.state_ = SessionState::STATE_FOREGROUND;
     ssm_->NotifySessionAINavigationBarChange(persistentId);
 }
 
@@ -1649,6 +1651,73 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
+}
+
+/**
+ * @tc.name: OnScreenFoldStatusChanged
+ * @tc.desc: OnScreenFoldStatusChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, OnScreenFoldStatusChanged, Function | SmallTest | Level3)
+{
+    std::vector<std::string> screenFoldInfo;
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnScreenFoldStatusChanged(screenFoldInfo);
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_UpdateDisplayHookInfo(0, 50, 50, 0.0f, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ssm_->CheckSceneZOrder();
+}
+
+/**
+ * @tc.name: NotifySessionForeground
+ * @tc.desc: NotifySessionForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "NotifySessionForeground";
+    sptr<SceneSession> sceneSession = sptr<sceneSession>::MakeSptr(sessionInfo, nullptr);
+    uint32_t reason = 0;
+    bool withAnimation = false;
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->NotifySessionForeground(sceneSession, reason, withAnimation);
+    WSRect area = { 0, 0, 0, 0 };
+    uint32_t type = 0;
+    ssm_->AddWindowDragHotArea(type, area);
+    uint64_t displayId = 0;
+    ssm_->currAINavigationBarAreaMap_.clear();
+    ssm_->currAINavigationBarAreaMap_.insert(std::make_pair(displayId, area));
+    auto ret = ssm_->GetAINavigationBarArea(1);
+    EXPECT_TRUE(ret.IsEmpty());
+    ret = ssm_->GetAINavigationBarArea(displayId);
+    EXPECT_EQ(ret, area);
+}
+
+/**
+ * @tc.name: OnDisplayStatechange
+ * @tc.desc: OnDisplayStatechange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest | Level3)
+{
+    DisplayChangeListener listener;
+    DisplayId displayId = 0;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(nullptr, displayInfo); 
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    displayInfoMap.insert(std::make_pair(displayId,displayInfo));
+    DisplayStateChangeType type = DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE;
+    listener.OnDisplayStatechange(displayId, displayInfo, displayInfoMap, type);
+    type = DisplayStateChangeType::UPDATE_ROTATION;
+    listener.OnDisplayStatechange(displayId, displayInfo, displayInfoMap, type);
+    type = DisplayStateChangeType::UPDATE_SCALE;
+    listener.OnDisplayStatechange(displayId, displayInfo, displayInfoMap, type);
+    type = DisplayStateChangeType::UNKNOWN;
+    listener.OnDisplayStatechange(displayId, displayInfo, displayInfoMap, type);
 }
 }
 } // namespace Rosen
