@@ -1137,7 +1137,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return ret;
     }
     UpdateTitleButtonVisibility();
-    UpdateFocusableOnShow(withFocus);
+    property_->SetFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
@@ -3252,22 +3252,6 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
     // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
-}
-
-void WindowSceneSessionImpl::UpdateFocusableOnShow(bool withFocus)
-{
-    if (withFocus) {
-        return; // default value of focusableOnShow
-    }
-    if (auto hostSession = GetHostSession()) {
-        auto ret = hostSession->SetFocusableOnShow(withFocus);
-        if (ret != WSError::WS_OK) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
-                static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
-        }
-    } else {
-        TLOGE(WmsLogTag::WMS_FOCUS, "failed because of nullptr");
-    }
 }
 
 WMError WindowSceneSessionImpl::SetAlpha(float alpha)
