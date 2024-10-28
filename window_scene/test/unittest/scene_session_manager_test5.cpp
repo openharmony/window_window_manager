@@ -953,10 +953,8 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
 HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<ISessionStage> sessionStage = new (std::nothrow) SessionStageMocker();
-    ASSERT_NE(sessionStage, nullptr);
-    sptr<IWindowEventChannel> eventChannel = new (std::nothrow) WindowEventChannelMocker(sessionStage);
-    ASSERT_NE(eventChannel, nullptr);
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
     std::shared_ptr<RSSurfaceNode> node = nullptr;
     sptr<ISession> session;
     SystemSessionConfig systemConfig;
@@ -1208,7 +1206,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckModalSubWindowPermission02, Function | S
 HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    WindowSceneConfig::ConfigItem *item = new WindowSceneConfig::ConfigItem;
+    WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
     ASSERT_NE(item, nullptr);
     ssm_->ConfigDecor(*item, false);
     delete item;
