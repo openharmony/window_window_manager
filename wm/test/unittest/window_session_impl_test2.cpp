@@ -976,7 +976,6 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
     ASSERT_NE(window, nullptr);
     int32_t height = 50;
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
@@ -1003,7 +1002,6 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2
     ASSERT_NE(window, nullptr);
     int32_t height = -1;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
@@ -1026,7 +1024,6 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
     ASSERT_NE(window, nullptr);
     int32_t height = -1;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
@@ -1054,7 +1051,6 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Le
     ASSERT_NE(window, nullptr);
     TitleButtonRect titleButtonRect;
     EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
@@ -1078,7 +1074,6 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Le
     ASSERT_NE(window, nullptr);
     TitleButtonRect titleButtonRect;
     EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     window->property_->SetDisplayId(0);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
