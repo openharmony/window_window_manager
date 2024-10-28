@@ -669,6 +669,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, Functi
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t topSessionId = 0;
+    data.WriteInt32Vector(sessionIds);
     data.WriteInt32(topSessionId);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
