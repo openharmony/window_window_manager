@@ -2529,7 +2529,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             surfaceNode_->MarkUifirstNode(true);
         }
         UpdateGestureBackEnabled();
-        UpdateGravityWhenUpdateWindowMode();
+        UpdateGravityWhenUpdateWindowMode(mode);
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
