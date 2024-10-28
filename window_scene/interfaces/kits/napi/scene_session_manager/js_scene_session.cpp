@@ -3872,7 +3872,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->RegisterProcessPrepareClosePiPCallback([weakThis = wptr(this)] {
