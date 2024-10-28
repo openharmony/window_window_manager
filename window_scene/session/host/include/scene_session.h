@@ -479,6 +479,11 @@ public:
     void OnNextVsyncDragReceived();
 
     /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
+
+    /*
      * Gesture Back
      */
     bool GetGestureBackEnabled();

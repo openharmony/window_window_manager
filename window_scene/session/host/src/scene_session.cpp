@@ -873,11 +873,6 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
                     session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
                 }
             }
-            // clear after use
-            if (session->reason_ != SizeChangeReason::DRAG) {
-                session->reason_ = SizeChangeReason::UNDEFINED;
-                session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-            }
         }
         return ret;
     };
@@ -4451,6 +4446,13 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
     };
     PostTask(task, "UpdateSizeChangeReason");
     return WSError::WS_OK;
+}
+
+void SceneSession::ResetSizeChangeReasonIfDirty()
+{
+    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG) {
+        UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+    }
 }
 
 bool SceneSession::IsDirtyWindow()
