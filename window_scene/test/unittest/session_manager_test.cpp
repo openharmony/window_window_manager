@@ -222,6 +222,33 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
     auto ret = sessionManager.RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
+
+/**
+ * @tc.name: RegisterSMSRecoverListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.isRecoverListenerRegistered_ = false;
+    sessionManager.mockSessionManagerServiceProxy_ = nullptr;
+    sessionManager.RegisterSMSRecoverListener();
+    ASSERT_EQ(sessionManager.mockSessionManagerServiceProxy_, nullptr);
+}
+
+/**
+ * @tc.name: InitMockSMSProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
+{
+    SessionManager sessionManager;
+    sessionManager.InitMockSMSProxy();
+    sessionManager.InitMockSMSProxy();
+    ASSERT_NE(sessionManager.foundationDeath_, nullptr);
+}
 }
 }
 }

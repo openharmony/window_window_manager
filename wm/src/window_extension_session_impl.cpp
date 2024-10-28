@@ -337,7 +337,7 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     ss << "ID: " << persistentId << ", needHide: " << needHide;
 
     if (surfaceNode_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -345,9 +345,9 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
     TLOGI(WmsLogTag::WMS_UIEXT,
         "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(), errCode);
-    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { //  not system app calling
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { //  other error
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 
@@ -441,8 +441,14 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         auto isConsumedFuture = isConsumedPromise->get_future().share();
         auto isTimeout = std::make_shared<bool>(false);
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent,
-            [this, isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed) {
-                this->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
+            [weakThis = wptr(this), isConsumedPromise, isTimeout](const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+                bool consumed) {
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
+                    return;
+                }
+                window->InputMethodKeyEventResultCallback(keyEvent, consumed, isConsumedPromise, isTimeout);
             });
         if (ret != 0) {
             WLOGFW("DispatchKeyEvent failed, ret:%{public}" PRId32 ", id:%{public}" PRId32, ret, keyEvent->GetId());
