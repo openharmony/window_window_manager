@@ -34,7 +34,6 @@ group("unittest") {
     ":wm_window_agent_test",
     ":wm_window_display_change_adapter_test",
     ":wm_window_effect_test",
-    ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
     ":wm_window_impl_test2",
@@ -483,19 +482,6 @@ ohos_unittest("wm_window_manager_stub_proxy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_manager_agent_stub_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("wm_window_frame_trace_impl_test") {
-  module_out_path = module_out_path
-  defines = [ "FRAME_TRACE_ENABLE" ]
-  sources = [ "window_frame_trace_impl_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

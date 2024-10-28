@@ -287,6 +287,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
+    sessionInfo_.callState_ = info.callState_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -2521,11 +2522,6 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
-            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-                surfaceNode_->MarkUifirstNode(false);
-            }
-        } else {
-            surfaceNode_->MarkUifirstNode(true);
         }
         UpdateGestureBackEnabled();
         if (!sessionStage_) {
@@ -3205,15 +3201,25 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->SwitchFreeMultiWindow(enable);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        property->GetIsUIExtFirstSubWindow();
+    if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
+        return sessionStage_->SwitchFreeMultiWindow(enable);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
@@ -3348,6 +3354,11 @@ void Session::ResetDirtyFlags()
     } else {
         dirtyFlags_ = 0;
     }
+}
+
+void Session::ResetDragDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void Session::SetUIStateDirty(bool dirty)
