@@ -1216,6 +1216,33 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RegisterProcessPrepareClosePiPCallback
+ * @tc.desc: RegisterProcessPrepareClosePiPCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterProcessPrepareClosePiPCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterProcessPrepareClosePiPCallback";
+    info.bundleName_ = "RegisterProcessPrepareClosePiPCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->RegisterProcessPrepareClosePiPCallback([sceneSession] {
+        return;
+    });
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->RegisterSessionChangeCallback(nullptr);
+    sceneSession->NotifyPiPWindowPrepareClose();
+
+    sceneSession->RegisterSessionChangeCallback(sessionChangeCallback);
+    sceneSession->RegisterProcessPrepareClosePiPCallback([sceneSession] {
+        return;
+    });
+    sceneSession->NotifyPiPWindowPrepareClose();
+}
+
+
+/**
  * @tc.name: SetShouldHideNonSecureWindows
  * @tc.desc: SetShouldHideNonSecureWindows
  * @tc.type: FUNC
