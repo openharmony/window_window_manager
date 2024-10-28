@@ -1306,13 +1306,38 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
-    bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, need notify %{public}u",
-          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    isStatusBarVisible_ = isVisible;
-    if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
-        specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+    auto task = [weakThis = wptr(this), isVisible]() {
+        sptr<SceneSession> self = weakThis.promote();
+        if (self == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session %{public}d is null", self->GetPersistentId());
+        }
+        bool isNeedNotify = isStatusBarVisible_ != isVisible;
+        TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
+            "need notify %{public}u", GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+        isStatusBarVisible_ = isVisible;
+        if (isNeedNotify) {
+            if (self->getIsLayoutFinishedFunc_ == nullptr) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ is null, id: %{public}d",
+                    self->GetPersistentId());
+                return;
+            }
+            bool isLayoutFinished = false;
+            WSError ret = self->getIsLayoutFinishedFunc_(isLayoutFinished);
+            if (ret != WSError::WS_OK) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ failed: %{public}d", ret);
+                return;
+            }
+            if (isLayoutFinished) {
+                if (self->specificCallback_ && self->specificCallback_->onUpdateAvoidAreaByType_) {
+                    self->specificCallBack_->onUpdateAvoidAreaByType_(
+                        self->GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+                }
+            } else {
+                self->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+            }
+        }
     }
+    PostTask(task, __func__);
 }
 
 void SceneSession::NotifyPropertyWhenConnect()
@@ -4661,6 +4686,11 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+void SceneSession::SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedFunc&& getIsLayoutFinishedFunc)
+{
+    getIsLayoutFinishedFunc_ = std::move(getIsLayoutFinishedFunc);
 }
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)

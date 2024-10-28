@@ -16,6 +16,7 @@
 #ifndef OHOS_VSYNC_STATION_H
 #define OHOS_VSYNC_STATION_H
 
+#include <atomic>
 #include <memory>
 #include <unordered_set>
 
@@ -48,6 +49,11 @@ public:
     void SetFrameRateLinkerEnable(bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
+    void OnFlushUIParams();
+    uint32_t GetRequestTimes()
+    {
+        return requestTimes_.load();
+    }
 
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
@@ -65,6 +71,7 @@ private:
     bool isFirstVsyncBack_ = true;
     bool destroyed_ = false;
     bool hasRequestedVsync_ = false;
+    std::atomic<uint32_t> requestTimes_;
     std::shared_ptr<VSyncReceiver> receiver_ = nullptr;
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
