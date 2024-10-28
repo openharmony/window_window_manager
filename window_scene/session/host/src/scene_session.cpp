@@ -1306,13 +1306,44 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
+    auto task = [weakThis = wptr(this), isVisible]() {
+        sptr<SceneSession> self = weakThis.promote();
+        if (self == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return;
+        }
+        self->SetIsStatusBarVisibleTask(isVisible);
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::SetIsStatusBarVisibleTask(bool isVisible)
+{
     bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, need notify %{public}u",
-          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
+        "need notify %{public}u", GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
     isStatusBarVisible_ = isVisible;
-    if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
-        specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+    if (!isNeedNotify) {
+        return WSError::WS_OK;
     }
+    if (getIsLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ is null, id: %{public}d", GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isLayoutFinished = false;
+    WSError ret = getIsLayoutFinishedFunc_(isLayoutFinished);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ failed: %{public}d", ret);
+        return ret;
+    }
+    if (isLayoutFinished) {
+        if (specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
+            specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+        }
+    } else {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+    }
+    return WSError::WS_OK;
 }
 
 void SceneSession::NotifyPropertyWhenConnect()
@@ -4661,6 +4692,11 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+void SceneSession::SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedFunc&& getIsLayoutFinishedFunc)
+{
+    getIsLayoutFinishedFunc_ = std::move(getIsLayoutFinishedFunc);
 }
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)

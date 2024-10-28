@@ -184,6 +184,18 @@ void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate,
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
+bool RootScene::IsLayoutFinished()
+{
+    uint32_t requestTimes = vsyncStation_->GetRequestTimes();
+    WLOGI("RootScene vsync request times: %{public}d", requestTimes);
+    return requestTimes == 0;
+}
+
+void RootScene::OnFlushUIParams()
+{
+    vsyncStation_->OnFlushUIParams();
+}
+
 void RootScene::OnBundleUpdated(const std::string& bundleName)
 {
     WLOGFD("bundle %{public}s updated", bundleName.c_str());

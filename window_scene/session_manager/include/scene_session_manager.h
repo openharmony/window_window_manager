@@ -117,6 +117,8 @@ using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
+using OnFlushUIParamsFunc = std::function<void()>;
+using GetIsLayoutFinishedOnRootSceneFunc = std::function<bool()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -279,11 +281,9 @@ public:
     WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
-    WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
 
     WSError TerminateSessionNew(
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override;
-    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                SessionSnapshot& snapshot, bool isLowResolution) override;
@@ -364,10 +364,15 @@ public:
     /*
      * Window Immersive
      */
+    WSError GetIsLayoutFullScreen(bool &isLayoutFullScreen);
+    WSError UpdateSessionAvoidAreaListener(int32_t &persistentId, bool haveListener) override;
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSRect GetAINavigationBarArea(uint64_t displayId);
+    void ClearDisplayStatusBarTemporarilyFlags();
+    void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
+    void SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedOnRootSceneFunc&& func);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -416,7 +421,6 @@ public:
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
     const SystemSessionConfig& GetSystemSessionConfig() const;
-    void ClearDisplayStatusBarTemporarilyFlags();
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
@@ -614,6 +618,9 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
+    WSError IsLayoutFinished(bool& isLayoutFinished);
+    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty> &property,
+        const sptr<SceneSession> &sceneSession);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -636,8 +643,6 @@ private:
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
-    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
-        const sptr<SceneSession>& sceneSession);
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
     void UpdateForceHideState(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property,
@@ -795,9 +800,6 @@ private:
     std::mutex privacyBundleMapMutex_;
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleMap_;
 
-    bool isAINavigationBarVisible_ = false;
-    std::shared_mutex currAINavigationBarAreaMapMutex_;
-    std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     // Multi User
@@ -974,6 +976,15 @@ private:
      * Screen Manager
      */
     bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+
+    /**
+     * Window Immersive
+     */
+    OnFlushUIParamsFunc onFlushUIParamsFunc_;
+    GetIsLayoutFinishedOnRootSceneFunc getIsLayoutFinishedOnRootSceneFunc_;
+    bool isAINavigationBarVisible_ = false;
+    std::shared_mutex currAINavigationBarAreaMapMutex_;
+    std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
 
     struct SessionInfoList {
         int32_t uid_;

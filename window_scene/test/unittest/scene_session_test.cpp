@@ -2173,6 +2173,57 @@ HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
     sceneSession->SetScbCoreEnabled(true);
     EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
 }
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleTask01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsStatusBarVisibleTask01";
+    info.bundleName_ = "SetIsStatusBarVisibleTask01";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(true), WSError::WS_OK);
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        return WSError::WS_ERROR_NULLPTR;
+    };
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = false;
+        return WSError::WS_OK;
+    };
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
+
+    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = true;
+        return WSError::WS_OK;
+    }
+    sceneSession->isStatusBarVisible_ = true;
+    sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) { };
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
+
+    sceneSession->specificCallback_ = nullptr;
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
+
+    sceneSession->getIsLayoutFinishedFunc = nullptr;
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
+}
 } // namespace
 } // Rosen
 } // OHOS
