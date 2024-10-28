@@ -76,6 +76,17 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     }
     return contentInfoType;
 }
+
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, int32_t transformHint)
+{
+    Ace::ViewportConfig config;
+    config.SetSize(rect.width_, rect.height_);
+    config.SetPosition(rect.posX_, rect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    return config;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -1068,7 +1079,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     if (rect.width_ <= 0 || rect.height_ <= 0) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "window rect width: %{public}d, height: %{public}d", rect.width_, rect.height_);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid width: %{public}d, height: %{public}d, id: %{public}d",
+              rect.width_, rect.height_, GetPersistentId());
         return;
     }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
@@ -1079,12 +1091,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "config[%{public}u,%{public}u,%{public}u,%{public}f]",
         rotation, deviceRotation, transformHint, virtualPixelRatio_);
-    Ace::ViewportConfig config;
-    config.SetSize(rect.width_, rect.height_);
-    config.SetPosition(rect.posX_, rect.posY_);
-    config.SetDensity(density);
-    config.SetOrientation(orientation);
-    config.SetTransformHint(transformHint);
+    auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
