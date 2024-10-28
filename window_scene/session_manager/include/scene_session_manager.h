@@ -526,6 +526,7 @@ private:
     void LoadFreeMultiWindowConfig(bool enable);
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void InitVsyncStation();
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);

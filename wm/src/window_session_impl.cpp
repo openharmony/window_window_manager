@@ -77,7 +77,7 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     return contentInfoType;
 }
 
-Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, int32_t transformHint)
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, uint32_t transformHint)
 {
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
