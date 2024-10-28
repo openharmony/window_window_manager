@@ -3872,18 +3872,18 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr");
+        TLOGNE(WmsLogTag::WMS_PIP, "session is nullptr");
         return;
     }
     session->RegisterProcessPrepareClosePiPCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
             return;
         }
         jsSceneSession->OnPrepareClosePiPSession();
     });
-    TLOGD(WmsLogTag::WMS_PIP, "success");
+    TLOGND(WmsLogTag::WMS_PIP, "success");
 }
 
 void JsSceneSession::OnPrepareClosePiPSession()
