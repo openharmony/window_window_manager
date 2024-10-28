@@ -298,6 +298,11 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+    InitVsyncStation();
+}
+
+void SceneSessionManager::InitVsyncStation()
+{
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
