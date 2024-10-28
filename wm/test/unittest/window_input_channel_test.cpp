@@ -68,10 +68,9 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
-    if (!window_ || !pointerEvent || !inputChannel) {
-        GTEST_LOG_(INFO) << "Null Pointer";
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(pointerEvent, nullptr);
+    ASSERT_NE(inputChannel, nullptr);
     window_->ConsumePointerEvent(pointerEvent);
     auto tempPointer = pointerEvent;
     pointerEvent = nullptr;
@@ -96,6 +95,21 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
     inputChannel->HandlePointerEvent(pointerEvent);
     window_->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
     inputChannel->HandlePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->AddPointerItem(item);
+    inputChannel->HandlePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    inputChannel->HandlePointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    inputChannel->HandlePointerEvent(pointerEvent);
+
+    window_->GetWindowProperty()->SetWindowRect({0, 0, 8, 8});
+    inputChannel->HandlePointerEvent(pointerEvent);
+    inputChannel->Destroy();
 }
 
 /**
@@ -107,10 +121,9 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
-    if (!window_ || !keyEvent || !inputChannel) {
-        GTEST_LOG_(INFO) << "Null Pointer";
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
+    ASSERT_NE(keyEvent, nullptr);
+    ASSERT_NE(inputChannel, nullptr);
     window_->ConsumeKeyEvent(keyEvent);
     auto tempKeyEvent = keyEvent;
     keyEvent = nullptr;
@@ -139,10 +152,8 @@ HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest 
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
     auto keyEvent = MMI::KeyEvent::Create();
-    if (!keyEvent || !inputChannel) {
-        GTEST_LOG_(INFO) << "Null Pointer";
-        return;
-    }
+    ASSERT_NE(inputChannel, nullptr);
+    ASSERT_NE(keyEvent, nullptr);
     auto tempKeyEvent = keyEvent;
     keyEvent = nullptr;
     inputChannel->DispatchKeyEventCallback(keyEvent, false);
@@ -163,10 +174,7 @@ HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest 
 HWTEST_F(WindowInputChannelTest, GetWindowRect, Function | SmallTest | Level2)
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
-    if (!inputChannel) {
-        GTEST_LOG_(INFO) << "Null Pointer";
-        return;
-    }
+    ASSERT_NE(inputChannel, nullptr);
     inputChannel->window_ = nullptr;
     auto rect = inputChannel->GetWindowRect();
     Rect tempTect;
