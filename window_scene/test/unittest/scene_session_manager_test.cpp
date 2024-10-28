@@ -1472,7 +1472,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
  * @tc.name: GetAllMainWindowInfos
  * @tc.desc: GetAllMainWindowInfos
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos, Function | SmallTest | Level3)
 {
     SessionInfo info;
