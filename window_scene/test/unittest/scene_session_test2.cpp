@@ -1372,7 +1372,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     ASSERT_EQ(0, rectResult.width_);
 }
 
-/*
+/**
  * @tc.name: SetPipActionEvent
  * @tc.desc:  * @tc.name: SetPipActionEvent
  * @tc.type: FUNC

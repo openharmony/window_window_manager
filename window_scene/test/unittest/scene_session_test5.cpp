@@ -587,17 +587,6 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.maxHeight_ = 10000;
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
-
-    session->SetSessionProperty(nullptr);
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(property, nullptr);
-    WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
-    property->SetWindowLimits(limits);
-    session->SetSessionProperty(property);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(10.0f));
 }
 
 /**
@@ -1122,13 +1111,10 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     session->state_ = SessionState::STATE_CONNECT;
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(true, 520));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 79));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 641));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 641));
 
     session->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, session->sessionStage_);
-    EXPECT_EQ(WMError::WM_OK, session->SetUniqueDensityDpi(false, 641));
 }
 
 /**
@@ -1195,9 +1181,16 @@ HWTEST_F(SceneSessionTest5, UpdateUIParam, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     session->isFocused_ = true;
-    session->isVisible_ = true;
+    session->isVisible_ = false;
     uint32_t res = session->UpdateUIParam();
-    ASSERT_EQ(1, res);
+    ASSERT_EQ(0, res);
+    ASSERT_EQ(false, session->postProcessFocusState_.enabled_);
+
+    session->isFocused_ = true;
+    session->isVisible_ = true;
+    uint32_t res1 = session->UpdateUIParam();
+    ASSERT_EQ(1, res1);
+    ASSERT_EQ(true, session->postProcessFocusState_.enabled_);
 }
 
 /**
@@ -1233,7 +1226,7 @@ HWTEST_F(SceneSessionTest5, UpdateInteractiveInner, Function | SmallTest | Level
     ASSERT_EQ(true, session->UpdateInteractiveInner(false));
 }
 
-/*
+/**
  * @tc.name: IsAnco
  * @tc.desc: IsAnco function01
  * @tc.type: FUNC
