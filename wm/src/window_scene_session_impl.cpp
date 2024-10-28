@@ -212,6 +212,48 @@ bool WindowSceneSessionImpl::VerifySubWindowLevel(uint32_t parentId)
     return false;
 }
 
+static sptr<WindowSessionImpl> FindMainWindowOrExtensionSubWindow(uint32_t parentId,
+    const WindowSessionImplMap& sessionMap)
+{
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGW(WmsLogTag::WMS_SUB, "invalid parent id");
+        return nullptr;
+    }
+    for (const auto& [_, pair] : sessionMap) {
+        auto& window = pair.second;
+        if (window && window->GetWindowId() == parentId) {
+            if (WindowHelper::IsMainWindow(window->GetType()) ||
+                (WindowHelper::IsSubWindow(window->GetType()) && window->GetProperty()->GetExtensionFlag())) {
+                TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
+                return window;
+            }
+            return FindMainWindowOrExtensionSubWindow(window->GetParentId(), sessionMap);
+        }
+    }
+    TLOGW(WmsLogTag::WMS_SUB, "don't find main session, parentId:%{public}u", parentId);
+    return nullptr;
+}
+
+bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    if (windowSystemConfig_.uiType_ != UI_TYPE_PAD) {
+        return windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    }
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
+    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
+        return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+    }
+    sptr<WindowSessionImpl> parentWindow = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentWindow = FindMainWindowOrExtensionSubWindow(property_->GetParentId(), windowSessionMap_);
+    }
+    if (parentWindow == nullptr) {
+        return false;
+    }
+    return parentWindow->WindowSessionImpl::IsPcOrPadCapabilityEnabled();
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_
@@ -222,6 +264,27 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
     }
+}
+
+WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession)
+{
+    if (isToast) {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
+    } else {
+        parentSession = FindParentSessionByParentId(property_->GetParentId());
+    }
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
+            property_->GetWindowName().c_str(), GetType());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!isToast && parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
@@ -261,16 +324,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
         sptr<WindowSessionImpl> parentSession = nullptr;
-        if (isToastFlag) {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            parentSession = FindParentMainSession(property_->GetParentId(), windowSessionMap_);
-        } else {
-            parentSession = FindParentSessionByParentId(property_->GetParentId());
-        }
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "parent of sub window is nullptr, name: %{public}s, type: %{public}d",
-                property_->GetWindowName().c_str(), type);
-            return WMError::WM_ERROR_NULLPTR;
+        auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
@@ -2190,10 +2246,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    bool isValidWindow = isMainWindow ||
-            ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);

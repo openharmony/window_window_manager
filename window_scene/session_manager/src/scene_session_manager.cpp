@@ -550,10 +550,15 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        auto property = sceneSession->GetSessionProperty();
+        if (property == nullptr) {
             continue;
         }
-        sceneSession->SwitchFreeMultiWindow(enable);
+        bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+            property->GetExtensionFlag();
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) || isUiExtSubWindow) {
+            sceneSession->SwitchFreeMultiWindow(enable);
+        }
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
