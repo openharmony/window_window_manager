@@ -2080,7 +2080,7 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
 
 WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "run SceneSessionManagerProxy::GetFreeMultiWindowEnableState");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

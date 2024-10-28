@@ -3480,7 +3480,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     NotifySwitchFreeMultiWindow(enable);
-    //Switch process finish, update system config
+    // Switch process finish, update system config
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
