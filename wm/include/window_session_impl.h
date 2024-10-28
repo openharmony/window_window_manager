@@ -273,13 +273,6 @@ public:
     WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
     WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
-
-    /*
-    * Free Multi Window
-    */
-    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
-    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
-
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -293,8 +286,10 @@ public:
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
     /*
-     * FreeMultiWindow
+     * Free Multi Window
      */
+    WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
+    WMError UnregisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
     void SetFreeMultiWindowMode(bool enable)
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
@@ -312,8 +307,8 @@ protected:
     void ClearListenersById(int32_t persistentId);
 
     /*
-    * Free Multi Window
-    */
+     * Free Multi Window
+     */
     void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
     void NotifySwitchFreeMultiWindow(bool enable);
 
