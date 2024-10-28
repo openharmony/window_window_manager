@@ -1814,15 +1814,11 @@ void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPS
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        if (session->sessionChangeCallback_) {
-            session->sessionChangeCallback_->onPrepareClosePiPSession_ = std::move(callback);
-            session->sessionChangeCallback_->onPrepareClosePiPSession_();
-        }
-        return WSError::WS_OK;
+        session->onPrepareClosePiPSession_ = std::move(callback);
     };
-    PostTask(task, "RegisterProcessPrepareClosePiPCallback");
+    PostTask(task, __func__);
 }
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
@@ -4219,8 +4215,8 @@ void SceneSession::NotifyPiPWindowPrepareClose()
             TLOGW(WmsLogTag::WMS_PIP, "permission denied, not call by the same process");
             return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onPrepareClosePiPSession_) {
-            session->sessionChangeCallback_->onPrepareClosePiPSession_();
+        if(session->onPrepareClosePiPSession_) {
+            session->onPrepareClosePiPSession_();
         }
         TLOGD(WmsLogTag::WMS_PIP, "NotifyPiPWindowPrepareClose, id: %{public}d", session->GetPersistentId());
         return;
@@ -5079,7 +5075,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
             session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
-            session->sessionChangeCallback_->onPrepareClosePiPSession_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;

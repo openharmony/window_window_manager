@@ -1226,19 +1226,10 @@ HWTEST_F(SceneSessionTest2, RegisterProcessPrepareClosePiPCallback, Function | S
     info.abilityName_ = "RegisterProcessPrepareClosePiPCallback";
     info.bundleName_ = "RegisterProcessPrepareClosePiPCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->RegisterProcessPrepareClosePiPCallback([sceneSession] {
-        return;
-    });
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    sceneSession->RegisterSessionChangeCallback(nullptr);
-    sceneSession->NotifyPiPWindowPrepareClose();
 
-    sceneSession->RegisterSessionChangeCallback(sessionChangeCallback);
-    sceneSession->RegisterProcessPrepareClosePiPCallback([sceneSession] {
-        return;
-    });
-    sceneSession->NotifyPiPWindowPrepareClose();
+    NotifyPrepareClosePiPSessionFunc func;
+    sceneSession->RegisterProcessPrepareClosePiPCallback(func);
+    ASSERT_TRUE(session->onPrepareClosePiPSession_ != nullptr);
 }
 
 /**
