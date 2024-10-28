@@ -20,7 +20,6 @@ group("unittest") {
 
   deps = [
     ":ws_anomaly_detection_test",
-    ":ws_anr_handler_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_extension_session_manager_test",
