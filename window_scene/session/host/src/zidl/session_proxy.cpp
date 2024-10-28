@@ -273,6 +273,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
                                               reply.ReadInt32(), reply.ReadInt32());
         property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
+        property->SetCompatibleModeEnableInPad(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

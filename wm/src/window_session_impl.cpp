@@ -752,6 +752,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         UpdateFrameLayoutCallbackIfNeeded(wmReason);
         return;
     }
+
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
@@ -1187,7 +1188,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == "pc") {
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         return;
     }
     uiContent_->SetLatestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
@@ -1938,7 +1939,6 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -1948,7 +1948,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
-        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             WLOGFE("register the listener of window title button rect change failed");
             return ret;
@@ -1969,9 +1969,14 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent != nullptr) {
-        uiContent->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SubscribeContainerModalButtonsRectChange(
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -1979,10 +1984,10 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
             titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
             titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+            window->NotifyWindowTitleButtonRectChange(titleButtonRect);
         });
     }
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
@@ -3556,8 +3561,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == UI_TYPE_PHONE ||
-                 (windowSystemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.uiType_ == "phone" ||
+                 (windowSystemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;

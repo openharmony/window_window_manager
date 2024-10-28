@@ -463,6 +463,14 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
     }
+    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
+     * already background, which may cause performance deterioration.
+     */
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
+        state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
+        return;
+    }
     state_ = state;
     SetMainSessionUIStateDirty(true);
     NotifySessionStateChange(state);
@@ -959,6 +967,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         if (sessionProperty->GetCompatibleModeInPc()) {
             property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
         }
+        property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
@@ -1002,8 +1011,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u",
-        GetPersistentId(), static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u, isTerminating:%{public}d",
+        GetPersistentId(), static_cast<uint32_t>(state), isTerminating_);
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
@@ -1023,6 +1032,8 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
 
     NotifyForeground();
+
+    isTerminating_ = false;
     return WSError::WS_OK;
 }
 
@@ -1453,11 +1464,16 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 WSError Session::Clear(bool needStartCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [this, needStartCaller]() {
-        isTerminating_ = true;
-        SessionInfo info = GetSessionInfo();
-        if (terminateSessionFuncNew_) {
-            terminateSessionFuncNew_(info, needStartCaller, false);
+    auto task = [weakThis = wptr(this), needStartCaller]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->isTerminating_ = true;
+        SessionInfo info = session->GetSessionInfo();
+        if (session->terminateSessionFuncNew_) {
+            session->terminateSessionFuncNew_(info, needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -2254,6 +2270,28 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
         property->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeEnableInPad(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, enable: %{public}d", persistentId_, enable);
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    auto property = GetSessionProperty();
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetCompatibleModeEnableInPad(enable);
+
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_SCB, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyCompatibleModeEnableInPad(enable);
 }
 
 WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
