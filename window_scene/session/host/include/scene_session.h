@@ -130,7 +130,6 @@ public:
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
-        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
@@ -522,6 +521,11 @@ protected:
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
+
+    /*
+     * PiP Window
+     */
+    NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
