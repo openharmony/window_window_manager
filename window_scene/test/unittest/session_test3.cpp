@@ -779,13 +779,13 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
     session_->property_ = nullptr;
     auto enable = true;
     auto isSupportDragInPcCompatibleMode = true;
-    ASSERT_NE(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     enable = false;
-    ASSERT_NE(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 }
 
 /**
