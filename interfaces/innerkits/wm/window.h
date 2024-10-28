@@ -1581,11 +1581,11 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move system window. It is called by application.
+     * @brief Start move window. It is called by application.
      *
      * @return Errorcode of window.
      */
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.

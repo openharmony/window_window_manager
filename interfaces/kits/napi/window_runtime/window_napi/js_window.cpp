@@ -6899,12 +6899,14 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: This is not system window.", funcName);
+        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: This is not valid window.", funcName);
             *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
-        *err = window->StartMoveSystemWindow();
+        *err = window->StartMoveWindow();
     };
 
     NapiAsyncTask::CompleteCallback complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -6916,7 +6918,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         if (*err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err), "Move system window failed."));
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err), "Move window failed."));
         }
     };
     napi_value result = nullptr;
