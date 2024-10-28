@@ -1275,7 +1275,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Show, Function | SmallTest | Level2)
     ret = windowSceneSessionImpl->Maximize();
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = windowSceneSessionImpl->Minimize();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
