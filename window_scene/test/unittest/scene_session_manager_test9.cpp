@@ -307,7 +307,7 @@ HWTEST_F(SceneSessionManagerTest9, UpdateFocus04, Function | SmallTest | Level3)
     ssm_->listenerController_ = nullptr;
     ssm_->UpdateFocus(1, true);
 
-    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<>(SessionListenerController);
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
     ssm_->listenerController_ = listenerController;
     ssm_->UpdateFocus(1, true);
 
