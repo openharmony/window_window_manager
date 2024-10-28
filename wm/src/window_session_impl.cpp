@@ -828,6 +828,27 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     }
 }
 
+void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
+{
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return;
+    }
+    if (windowSizeChanged_ || enableFrameLayoutFinishCb_) {
+        WSRect rect = {0, 0, width, height};
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        TLOGI(WmsLogTag::WMS_LAYOUT,
+            "NotifyFrameLayoutFinishFromApp, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        if (auto session = GetHostSession()) {
+            session->NotifyFrameLayoutFinishFromApp(enableFrameLayoutFinishCb_, rect);
+        }
+        windowSizeChanged_ = false;
+        enableFrameLayoutFinishCb_ = false;
+    }
+}
+
 void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
     bool& hideSplitButton, bool& hideCloseButton)
 {
@@ -1253,40 +1274,10 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        RegisterFrameLayoutCallback();
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     return WMError::WM_OK;
-}
-
-void WindowSessionImpl::RegisterFrameLayoutCallback()
-{
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.IsPcWindow()) {
-        return;
-    }
-    uiContent_->SetLastestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window == nullptr) {
-            return;
-        }
-        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
-            auto windowRect = window->GetRect();
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            TLOGI(WmsLogTag::WMS_LAYOUT,
-                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            WSRect rect = { windowRect.posX_, windowRect.posY_,
-                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
-            if (auto session = window->GetHostSession()) {
-                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
-            }
-            window->windowSizeChanged_ = false;
-            window->enableFrameLayoutFinishCb_ = false;
-        }
-    });
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
