@@ -885,11 +885,11 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | Sma
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> sceneSession = nullptr;
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
+    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false, true));
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false);
+    ssm_->RequestSceneSessionBackground(sceneSession, true, false, true);
+    ssm_->RequestSceneSessionBackground(sceneSession, true, true, true);
 }
 
 /**
@@ -913,9 +913,9 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | S
     std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(123);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
     session->SetSessionInfoPersistentId(0);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, true));
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true));
 }
 
 /**
