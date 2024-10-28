@@ -3872,7 +3872,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGNE(WmsLogTag::WMS_PIP, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr");
         return;
     }
     session->RegisterProcessPrepareClosePiPCallback([weakThis = wptr(this)] {
@@ -3883,7 +3883,7 @@ void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
         }
         jsSceneSession->OnPrepareClosePiPSession();
     });
-    TLOGND(WmsLogTag::WMS_PIP, "success");
+    TLOGD(WmsLogTag::WMS_PIP, "success");
 }
 
 void JsSceneSession::OnPrepareClosePiPSession()
