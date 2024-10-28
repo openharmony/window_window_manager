@@ -165,7 +165,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     manager_->IsFilterSession(sceneSession);
     sceneSession->isSystemActive_ = true;
     manager_->IsFilterSession(sceneSession);
-    info.sceneType_ = SceneType::PANEL_SCENE;
     info.isSystem_ = true;
     sceneSession->isVisible_ = true;
     sceneSession->SetSystemActive(true);
@@ -480,6 +479,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTe
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     sceneSession->SetSessionProperty(property);
     sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
     sceneSession->SetParentSession(session);
     std::map<int32_t, sptr<SceneSession>> sessionMap;
     sessionMap.emplace(1, sceneSession);
