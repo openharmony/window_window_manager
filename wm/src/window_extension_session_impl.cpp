@@ -23,7 +23,6 @@
 #include "window_manager_hilog.h"
 #include "display_info.h"
 #include "parameters.h"
-#include "anr_handler.h"
 #include "hitrace_meter.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
