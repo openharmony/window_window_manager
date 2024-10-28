@@ -99,8 +99,8 @@ public:
     Rect GetHostWindowRect(int32_t hostWindowId) override;
 
     /*
-    * Free Multi Window
-    */
+     * Free Multi Window
+     */
     bool GetFreeMultiWindowModeEnabledState() override;
 
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
