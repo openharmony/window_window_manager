@@ -79,6 +79,8 @@ ohos_static_library("libwmutil_static") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
+  deps = [ ":libwmutil_base" ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
@@ -132,6 +134,7 @@ ohos_shared_library("libwmutil_base") {
     "src/string_util.cpp",
     "src/unreliable_window_info.cpp",
     "src/window_drawing_content_info.cpp",
+    "src/window_manager_hilog.cpp",
     "src/window_pid_visibility_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_common.cpp",
