@@ -123,7 +123,6 @@ public:
         NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifyNeedAvoidFunc OnNeedAvoid_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
@@ -369,6 +368,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
+    void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
@@ -528,6 +528,7 @@ protected:
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    NotifyNeedAvoidFunc onNeedAvoid_;
 
     /*
      * Window Hierarchy
