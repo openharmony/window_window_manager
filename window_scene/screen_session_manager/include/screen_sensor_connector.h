@@ -40,6 +40,7 @@ public:
     static void UnsubscribeTentSensor();
 };
 
+#ifdef WM_SUBSCRIBE_MOTION_ENABLE
 class MotionSubscriber {
 friend ScreenSensorConnector;
 public:
@@ -63,6 +64,7 @@ private:
 
     static bool isMotionSensorSubscribed_;
 };
+#endif
 } // Rosen
 } // OHOS
 #endif // OHOS_ROSEN_SCREEN_CONNECTOR_H

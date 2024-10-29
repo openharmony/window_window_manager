@@ -55,7 +55,7 @@
 #include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
-#include "plugin.h"
+#include "screen_sensor_plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -310,7 +310,8 @@ void ScreenSessionManager::Init()
     }
 
     if (!LoadMotionSensor()) {
-        TLOGw(WmsLogTag::DMS, "load motion plugin failed.");
+        screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
+        TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
 
     RegisterScreenChangeListener();
