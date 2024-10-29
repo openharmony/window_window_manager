@@ -695,6 +695,22 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
+void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
+{
+    if(display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null when rotation");
+        return;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if(displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null when rotation");
+        return;
+    }
+    virtualPixelRatio_ = GetVirtualPixelRatio(displayInfo);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio_: %{public}f", virtualPixelRatio_);
+}
+
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
 {
@@ -704,6 +720,9 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         if (!window) {
             return;
         }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        window->UpdateVirtualPixelRatio(display);
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
@@ -728,7 +747,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
