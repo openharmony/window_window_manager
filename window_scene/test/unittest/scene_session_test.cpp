@@ -1301,9 +1301,7 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(sceneSession->OnNeedAvoid(false), WSError::WS_OK);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    sceneSession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
+    sceneSession->onNeedAvoid_ = [](bool state){};
     ASSERT_EQ(sceneSession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
