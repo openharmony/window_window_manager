@@ -70,6 +70,17 @@ bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
     }
     return true;
 }
+
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, uint32_t transformHint)
+{
+    Ace::ViewportConfig config;
+    config.SetSize(rect.width_, rect.height_);
+    config.SetPosition(rect.posX_, rect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    return config;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -1018,6 +1029,11 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFE("displayInfo is null!");
         return;
     }
+    if (rect.width_ <= 0 || rect.height_ <= 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid width: %{public}d, height: %{public}d, id: %{public}d",
+              rect.width_, rect.height_, GetPersistentId());
+        return;
+    }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -1026,12 +1042,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation,deviceRotation,transformHint,virtualPixelRatio]:[%{public}u,"
         "%{public}u,%{public}u,%{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
-    Ace::ViewportConfig config;
-    config.SetSize(rect.width_, rect.height_);
-    config.SetPosition(rect.posX_, rect.posY_);
-    config.SetDensity(density);
-    config.SetOrientation(orientation);
-    config.SetTransformHint(transformHint);
+    auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
     if (reason == WindowSizeChangeReason::ROTATION) {
         if (auto hostSession = GetHostSession()) {
