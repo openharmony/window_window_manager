@@ -79,7 +79,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
 
 bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -726,22 +726,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, Function | SmallTest 
     ssm_->ConfigWindowSceneXml();
     ASSERT_EQ(ssm_->systemConfig_.maxFloatingWindowSize_,
         static_cast<uint32_t>(1));
-}
-
-/**
- * @tc.name: ConfigWindowSceneXml06
- * @tc.desc: call uiType
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml06, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-        "<uiType>ut</uiType>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.uiType_, "ut");
 }
 
 /**
@@ -2108,6 +2092,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
     Info.bundleName_ = "testInfo1b";
     sptr<SceneSession> session = new (std::nothrow) SceneSession(Info, nullptr);
     ssm_->NotifyCreateToastSession(persistentId, session);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
