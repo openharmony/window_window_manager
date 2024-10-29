@@ -39,7 +39,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
-constexpr HiviewDFX::HilogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest2"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest2"};
 }
 
 class WindowSessionTest2 : public testing::Test {
@@ -516,7 +516,7 @@ HWTEST_F(WindowSessionTest2, TransferKeyEventForConsumed01, Function | SmallTest
 
     session_->windowEventChannel_ = nullptr;
 
-    auto keyEvent = MMi::KeyEvent::Create();
+    auto keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
 }
@@ -1048,7 +1048,7 @@ HWTEST_F(WindowSessionTest2, UnregisterLifecycleListener, Function | SmallTest |
  * @tc.name: NotifyActivation02
  * @tc.desc: NotifyActivation
  * @tc.type: FUNC
- * /
+ */
 HWTEST_F(WindowSesionTest2, NotifyActivation02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
@@ -1063,9 +1063,9 @@ HWTEST_F(WindowSesionTest2, NotifyActivation02, Function | SmallTest | Level2)
  * @tc.desc: NotifyConnect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest2, NotifyConnect, Function | Small | Level2)
+HWTEST_F(WindowSessionTest2, NotifyConnect, Function | SmallTest | Level2)
 {
-    ASSRET_NE(session_, nullptr);
+    ASSERT_NE(session_, nullptr);
     session_->NotifyConnect();
     uint64_t screenId = 0;
     session_->SetScreenId(screenId);
@@ -1220,11 +1220,15 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
         resultValue = 2;
     };
 
-    session_->SetChangeSessionVisibilityWithStatusBarFunc_(func1);
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
+    SessionInfo info;
+    session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
+    ASSERT_EQ(resultValue, 1);
+
     session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
-    ASSERT_NE(session_->changeSessinVisibilityWithStatusBarFunc_, nullptr);
+    ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 2);
 }
@@ -1399,7 +1403,7 @@ HWTEST_F(WindowSessionTest2, IsSystemSession, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, Hide, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    bool res = session_->Hide();
+    auto res = session_->Hide();
     ASSERT_EQ(res, WSError::WS_OK);
 }
 
@@ -1654,7 +1658,7 @@ HWTEST_F(WindowSessionTest2, SetShowRecent003, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(false);
 
     session_->property_ = new WindowSessionProperty();
@@ -1674,7 +1678,7 @@ HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, CreateDetectStateTask001, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
     DetectTaskInfo detectTaskInfo;
     detectTaskInfo.taskState = DetectTaskState::NO_TASK;
@@ -1697,7 +1701,7 @@ HWTEST_F(WindowSessionTest2, CreateDetectStateTask001, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionTest2, CreateDetectStateTask002, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
     auto task = [](){};
     int64_t delayTime = 3000;
@@ -1726,7 +1730,7 @@ HWTEST_F(WindowSessionTest2, CreateDetectStateTask002, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionTest2, CreateDetectStateTask003, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
     DetectTaskInfo detectTaskInfo;
     detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
@@ -1750,7 +1754,7 @@ HWTEST_F(WindowSessionTest2, CreateDetectStateTask003, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionTest2, CreateDetectStateTask004, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
     DetectTaskInfo detectTaskInfo;
     int32_t beforeTaskNum = GetTaskCount();
@@ -1760,7 +1764,7 @@ HWTEST_F(WindowSessionTest2, CreateDetectStateTask004, Function | SmallTest | Le
     session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
 
     ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
-    ASSERT_EQ(DetectTaskState::ATTACH_TASK_TASK, session_->GetDetectTaskInfo().taskState);
+    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
     session_->handler_->RemoveTask(taskName);
 
     session_->showRecent_ = true;
@@ -2219,11 +2223,11 @@ HWTEST_F(WindowSessionTest2, NotifyContextTransparent, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: UpdateSessionInfoLockedStateChange
- * @tc.desc: UpdatePointerArea Test
+ * @tc.name: NotifySessionInfoLockedStateChange
+ * @tc.desc: NotifySessionInfoLockedStateChange Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest2, UpdatePointerArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, NotifySessionInfoLockedStateChange, Function | SmallTest | Level2)
 {
     WLOGFI("NotifySessionInfoLockedStateChange begin!");
     ASSERT_NE(session_, nullptr);
@@ -2285,7 +2289,7 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level2)
 {
-    session_->systemConfig_.uiType_ = "phone";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(true);
     bool ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
@@ -2298,7 +2302,7 @@ HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level
 
     ssm_->SetScreenLocked(false);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    session_->systemConfig_.uiType_ = "pc";
+    session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session_->IsSupportDetectWindow(false);
     ASSERT_EQ(ret, false);
 }
