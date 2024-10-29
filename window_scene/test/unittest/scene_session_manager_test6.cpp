@@ -135,7 +135,7 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
  * @tc.name: UpdateSecSurfaceInfo
  * @tc.desc: UpdateSecSurfaceInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1698,18 +1698,18 @@ HWTEST_F(SceneSessionManagerTest6, NotifySessionForeground, Function | SmallTest
 }
 
 /**
- * @tc.name: OnDisplayStatechange
- * @tc.desc: OnDisplayStatechange
+ * @tc.name: OnDisplayStateChange
+ * @tc.desc: OnDisplayStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, OnDisplayStatechange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | Level3)
 {
     DisplayChangeListener listener;
     DisplayId displayId = 0;
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     ASSERT_NE(nullptr, displayInfo); 
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
-    displayInfoMap.insert(std::make_pair(displayId,displayInfo));
+    displayInfoMap.insert(std::make_pair(displayId, displayInfo));
     DisplayStateChangeType type = DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE;
     listener.OnDisplayStateChange(displayId, displayInfo, displayInfoMap, type);
     type = DisplayStateChangeType::UPDATE_ROTATION;
