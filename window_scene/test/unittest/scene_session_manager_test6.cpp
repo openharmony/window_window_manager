@@ -1480,7 +1480,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     persistentId = 0;
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
-    ssm_->RequestInputMethodCloseKeyBoard(persistentId);
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
 
     bool enable = true;
     auto result = ssm_->GetFreeMultiWindowEnableState(enable);
@@ -1535,7 +1535,7 @@ HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | 
     session->property_ = new WindowSessionProperty();
     ASSERT_NE(session->property_, nullptr);
 
-    if(session->property_) {
+    if (session->property_) {
         auto result1 = session->GetWindowType();
         result1 = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
         ASSERT_EQ(result1, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -1771,7 +1771,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed01, Function | Sm
     ASSERT_NE(nullptr, ssm_);
     ssm_->enterRecent_ = false;
     std::map<AvoidAreaType, AvoidArea> mapAvoidAreaType;
-    mapAvoidAreaType.insert(std::make_pair({avoidAreaType, avoidArea}));
+    mapAvoidAreaType.insert(std::make_pair(avoidAreaType, avoidArea));
     ssm_->lastUpdatedAvoidArea_.insert(std::make_pair(persistentId, mapAvoidAreaType));
     auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
     EXPECT_EQ(ret, false);
@@ -1850,7 +1850,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateMaximizeMode, Function | SmallTest | Le
     displayInfo = sptr<DisplayInfo>::MakeSptr();
     ASSERT_NE(nullptr, displayInfo);
     ssm_->ProcessDisplayScale(displayInfo);
-    ProcessVirtualPixelRatioChangeFunc func= nullptr;
+    ProcessVirtualPixelRatioChangeFunc func = nullptr;
     ssm_->SetVirtualPixelRatioChangeListener(func);
 }
 
