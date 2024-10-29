@@ -1016,6 +1016,7 @@ float WindowSessionImpl::GetVirtualPixelRatio()
     return virtualPixelRatio_;
 }
 
+/** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 {
     if (useUniqueDensity_) {
