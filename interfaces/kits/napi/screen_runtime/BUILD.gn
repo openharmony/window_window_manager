@@ -50,6 +50,7 @@ ohos_shared_library("screen_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "graphic_surface:surface",  # use for SurfaceUtils
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",

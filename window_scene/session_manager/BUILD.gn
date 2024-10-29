@@ -132,6 +132,10 @@ ohos_shared_library("scene_session_manager") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "safwk:system_ability_fwk",
+    "bundle_framework:libappexecfwk_common",
+    "preferences:native_preferences",
+    "graphic_2d:librender_service_base",
   ]
 
   defines = []
@@ -232,6 +236,7 @@ ohos_shared_library("session_manager") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "graphic_2d:librender_service_base",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

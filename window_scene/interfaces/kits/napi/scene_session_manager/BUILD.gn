@@ -69,6 +69,9 @@ ohos_shared_library("scenesessionmanager_napi") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "libxml2:libxml2",
+    "preferences:native_preferences",
+    "graphic_2d:librender_service_base",
   ]
 
   defines = []

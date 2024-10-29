@@ -114,6 +114,7 @@ ohos_shared_library("window_napi") {
     cfi_vcall_icall_only = true
     debug = false
   }
+  defines = ["SUPPORT_SCREEN"]
   sources = [
     "window_manager_napi/js_window_manager.cpp",
     "window_manager_napi/window_manager_module.cpp",
@@ -144,6 +145,8 @@ ohos_shared_library("window_napi") {
     "hitrace:hitrace_meter",
     "image_framework:image",
     "napi:ace_napi",
+    "ability_runtime:wantagent_innerkits",
+    "graphic_2d:librender_service_base",
   ]
 
   relative_install_dir = "module"
@@ -181,6 +184,7 @@ ohos_shared_library("windowstage_kit") {
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
+    "ability_runtime:ability_manager",
   ]
 
   innerapi_tags = [ "platformsdk" ]

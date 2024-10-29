@@ -132,6 +132,7 @@ ohos_static_library("libwm_static") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "bundle_framework:libappexecfwk_common",
   ]
 
   defines = []
@@ -268,6 +269,8 @@ ohos_shared_library("libwm") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "bundle_framework:libappexecfwk_common",
+    "graphic_2d:librender_service_base",
   ]
 
   defines = []
@@ -427,6 +430,7 @@ ohos_shared_library("libwm_ndk") {
     "hilog:libhilog",
     "input:libmmi-client",
     "input:oh_input_manager",
+    "ipc:ipc_core",
   ]
 
   part_name = "window_manager"

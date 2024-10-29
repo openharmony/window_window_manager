@@ -54,6 +54,7 @@ ohos_shared_library("screensessionmanager_napi") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "graphic_2d:librender_service_base",
   ]
 
   defines = []
