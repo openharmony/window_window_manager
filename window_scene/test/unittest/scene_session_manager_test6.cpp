@@ -1322,7 +1322,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify4, Function | Smal
     ssm_->UpdatePrivateStateAndNotify(1);
     ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
     sceneSession->property_->SetDisplayId(2);
-    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->GetParentSession()->SetSessionState(SessionState::STATE_BACKGROUND);
     ssm_->UpdatePrivateStateAndNotify(2);
     ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 0);
 }
