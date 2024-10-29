@@ -423,6 +423,28 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: OnDefaultDensityEnabled
+ * @tc.desc: OnDefaultDensityEnabled function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, OnDefaultDensityEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnDefaultDensityEnabled";
+    info.bundleName_ = "OnDefaultDensityEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
+
+    session->onDefaultDensityEnabledFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
+
+    NotifyDefaultDensityEnabledFunc func = [](bool isLDefaultDensityEnabled) {};
+    session->onDefaultDensityEnabledFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
+}
+
+/**
  * @tc.name: UpdateSessionPropertyByAction
  * @tc.desc: UpdateSessionPropertyByAction function01
  * @tc.type: FUNC
