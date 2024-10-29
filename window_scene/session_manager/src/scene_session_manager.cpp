@@ -9812,7 +9812,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         if (parentSession) {
             parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
         }
-        if (usage == UIExtensionUsage::MODAL && parentSession) {
+        if (usage == UIExtensionUsage::MODAL && parentSession && parentSession->GetCallingPid() != GetPid()) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
