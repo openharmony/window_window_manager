@@ -49,11 +49,9 @@ public:
     void SetFrameRateLinkerEnable(bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
-    void OnFlushUIParams();
-    uint32_t GetRequestTimes()
-    {
-        return requestTimes_.load();
-    }
+
+    void DecreaseRequestVsyncTimes() { requestVsyncTimes_--; }
+    int32_t GetRequestVsyncTimes() { return requestVsyncTimes_.load(); }
 
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
@@ -71,12 +69,13 @@ private:
     bool isFirstVsyncBack_ = true;
     bool destroyed_ = false;
     bool hasRequestedVsync_ = false;
-    std::atomic<uint32_t> requestTimes_;
     std::shared_ptr<VSyncReceiver> receiver_ = nullptr;
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
     // Above guarded by mutex_
+
+    std::atomic<int32_t> requestVsyncTimes_;
 };
 } // namespace Rosen
 } // namespace OHOS

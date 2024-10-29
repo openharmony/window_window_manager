@@ -184,16 +184,16 @@ void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate,
     vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
-bool RootScene::IsLayoutFinished()
+bool RootScene::IsLastFrameLayoutFinished()
 {
-    uint32_t requestTimes = vsyncStation_->GetRequestTimes();
-    WLOGI("RootScene vsync request times: %{public}d", requestTimes);
+    int32_t requestTimes = vsyncStation_->GetRequestVsyncTimes();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "RootScene vsync request times: %{public}d", requestTimes);
     return requestTimes == 0;
 }
 
 void RootScene::OnFlushUIParams()
 {
-    vsyncStation_->OnFlushUIParams();
+    vsyncStation_->DecreaseRequestVsyncTimes();
 }
 
 void RootScene::OnBundleUpdated(const std::string& bundleName)
