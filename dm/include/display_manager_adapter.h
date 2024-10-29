@@ -100,6 +100,7 @@ public:
         std::vector<uint64_t>& windowIdList);
     virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
+    virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

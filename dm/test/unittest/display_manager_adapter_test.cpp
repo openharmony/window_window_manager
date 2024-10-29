@@ -833,6 +833,18 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, Function | SmallTest | Leve
     ScreenId screenId = displayInfo->GetScreenId();
     displayManagerAdapter.SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest | Level2)
+{
+    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
+    sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+}
 }
 }
 }

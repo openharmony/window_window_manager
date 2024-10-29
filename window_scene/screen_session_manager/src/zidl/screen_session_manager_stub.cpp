@@ -868,6 +868,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetScreenCapture(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO: {
+            auto info = GetPrimaryDisplayInfo();
+            reply.WriteParcelable(info);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -318,6 +318,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
 
 protected:
     ScreenSessionManager();
