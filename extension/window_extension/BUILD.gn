@@ -80,6 +80,9 @@ ohos_shared_library("libwindow_extension") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "ipc:ipc_napi",
+    "ability_runtime:wantagent_innerkits",
+    "graphic_2d:librender_service_base",
   ]
 
   part_name = "window_manager"

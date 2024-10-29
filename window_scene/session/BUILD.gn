@@ -94,6 +94,7 @@ ohos_shared_library("scene_session") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "graphic_2d:librender_service_base",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
@@ -183,6 +184,7 @@ ohos_shared_library("screen_session") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
+    "graphic_2d:librender_service_base",
   ]
   public_external_deps = [
     "ability_base:base",

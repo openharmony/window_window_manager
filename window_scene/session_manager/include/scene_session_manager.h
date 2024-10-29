@@ -21,6 +21,12 @@
 #include <mutex>
 #include <shared_mutex>
 
+#ifndef OHOS_BUILD_ENABLE_SECURITY_COMPONENT // pointer_envent.h
+#define OHOS_BUILD_ENABLE_SECURITY_COMPONENT
+#endif
+#ifndef SUPPORT_SCREEN
+#define SUPPORT_SCREEN
+#endif
 #include "mission_snapshot.h"
 #include "transaction/rs_interfaces.h"
 

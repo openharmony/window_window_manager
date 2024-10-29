@@ -69,6 +69,8 @@ ohos_shared_library("cj_window_ffi") {
       "napi:ace_napi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
+      "ability_runtime:wantagent_innerkits",
+      "graphic_2d:librender_service_base",
     ]
   } else {
     defines += [ "PREVIEWER" ]

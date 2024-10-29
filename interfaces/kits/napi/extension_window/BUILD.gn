@@ -107,6 +107,8 @@ ohos_shared_library("extensionwindow_napi") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",
+    "bundle_framework:appexecfwk_base",
+    "ability_runtime:ability_manager",
   ]
 
   innerapi_tags = [ "platformsdk" ]

@@ -138,6 +138,7 @@ ohos_shared_library("libdm") {
     "image_framework:image_native",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "graphic_2d:librender_service_base",
   ]
 
   innerapi_tags = [ "platformsdk" ]

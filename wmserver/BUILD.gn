@@ -114,6 +114,7 @@ ohos_shared_library("sms") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "graphic_2d:librender_service_base",
   ]
   public_external_deps = [
     "ability_runtime:ability_manager",
@@ -148,7 +149,10 @@ if (window_manager_use_sceneboard) {
       cfi_vcall_icall_only = true
       debug = false
     }
-    defines = []
+    defines = [
+      "SUPPORT_SCREEN",
+      "SUPPORT_GRAPHICS",
+    ]
     if (use_musl) {
       if (musl_use_jemalloc && musl_use_jemalloc_dfx_intf) {
         defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
@@ -223,10 +227,12 @@ if (window_manager_use_sceneboard) {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
       "image_framework:image_native",
+      "preferences:native_preferences",
       "input:libmmi-client",
       "ipc:ipc_single",
       "libxml2:libxml2",
       "safwk:system_ability_fwk",
+      "graphic_2d:librender_service_base",
     ]
 
     if (defined(global_parts_info) &&

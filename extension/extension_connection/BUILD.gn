@@ -67,6 +67,7 @@ ohos_shared_library("libwindow_extension_client") {
     "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "graphic_2d:librender_service_base",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

@@ -95,7 +95,7 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
-        int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
+        [[maybe_unused]] int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
             FREQUENT_CLICK_COUNT_LIMIT);
     }
     return true;

@@ -54,6 +54,7 @@ ohos_shared_library("intention_event_anr_manager") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "bundle_framework:appexecfwk_base",
   ]
 
   if (defined(global_parts_info) &&

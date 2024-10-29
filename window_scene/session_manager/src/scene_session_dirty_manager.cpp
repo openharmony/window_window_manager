@@ -256,7 +256,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         WLOGFE("sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    [[maybe_unused]] WSRect windowRect = sceneSession->GetSessionGlobalRect();
     const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
     for (auto area : hotAreas) {
         MMI::Rect rect;
