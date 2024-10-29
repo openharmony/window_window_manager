@@ -182,7 +182,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
 
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    } 
+    }
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
@@ -219,7 +219,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    } 
+    }
 
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
@@ -264,7 +264,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(nullptr, scene->GetMainWindow());
         ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    } 
+    }
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
@@ -334,7 +334,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
     }
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    } 
+    }
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
@@ -372,7 +372,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    } 
+    }
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
     } else {
