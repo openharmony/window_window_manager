@@ -698,12 +698,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 /** @note @window.layout */
 void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
 {
-    if(display == nullptr) {
+    if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null when rotation!");
         return;
     }
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    if(displayInfo == nullptr) {
+    if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null when rotation!");
         return;
     }
