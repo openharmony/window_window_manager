@@ -5073,6 +5073,23 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     }
 }
 
+void ScreenSessionManager::NotifyScreenMagneticStateChanged(bool isMagneticState)
+{
+    TLOGI(WmsLogTag::DMS, "IsScreenMagneticState:%{public}u", static_cast<uint32_t>(isMagneticState));
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        TLOGI(WmsLogTag::DMS, "Agents is empty");
+        return;
+    }
+    for (auto& agent : agents) {
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER)) {
+            agent->NotifyScreenMagneticStateChanged(isMagneticState);
+        }
+    }
+}
+
 void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " displayNodeScreenId: %{public}" PRIu64,
