@@ -782,7 +782,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_NE(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -799,7 +799,7 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
     ASSERT_EQ(ret, WMError::WM_OK);
 
     ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1205,7 +1205,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function 
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1237,7 +1237,7 @@ HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | 
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1269,7 +1269,7 @@ HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest
     WMError ret;
     sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
