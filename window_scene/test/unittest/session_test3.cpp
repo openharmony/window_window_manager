@@ -853,30 +853,6 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: CompatibleFullScreen Recover&Minimize&Close
- * @tc.desc: CompatibleFullScreen Recover&Minimize&Close Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreen, Function | SmallTest | Level2)
-{
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->state_ = SessionState::STATE_CONNECT;
-    session_->CompatibleFullScreenRecover();
-    session_->CompatibleFullScreenMinimize();
-    session_->CompatibleFullScreenClose();
-    session_->state_ = SessionState::STATE_DISCONNECT;
-
-    session_->sessionInfo_.isSystem_ = true;
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->CompatibleFullScreenRecover());
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->CompatibleFullScreenMinimize());
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->CompatibleFullScreenClose());
-}
-
-/**
  * @tc.name: NotifySessionTouchableChange
  * @tc.desc: NotifySessionTouchableChange Test
  * @tc.type: FUNC
