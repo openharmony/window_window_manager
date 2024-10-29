@@ -11052,6 +11052,10 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (pid < 0) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid pid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
     auto task = [this, pid, skip]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (skip) {
