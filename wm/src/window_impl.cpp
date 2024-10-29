@@ -1256,7 +1256,7 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
     if (displayId == DISPLAY_ID_INVALID) {
         auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
-        defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID)? 0 : defaultDisplayId;
+        defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
         TLOGI(WmsLogTag::WMS_LIFE, "Reset displayId: %{public}" PRIu64, defaultDisplayId);
     }
