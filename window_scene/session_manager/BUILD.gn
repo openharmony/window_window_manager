@@ -114,11 +114,14 @@ ohos_shared_library("scene_session_manager") {
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
     "hilog:libhilog",
@@ -130,12 +133,10 @@ ohos_shared_library("scene_session_manager") {
     "ipc:ipc_single",
     "libxml2:libxml2",
     "napi:ace_napi",
-    "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
-    "safwk:system_ability_fwk",
-    "bundle_framework:libappexecfwk_common",
     "preferences:native_preferences",
-    "graphic_2d:librender_service_base",
+    "resource_management:global_resmgr",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = []
@@ -230,13 +231,13 @@ ohos_shared_library("session_manager") {
     "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "graphic_2d:librender_service_base",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

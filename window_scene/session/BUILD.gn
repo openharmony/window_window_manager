@@ -83,9 +83,11 @@ ohos_shared_library("scene_session") {
     "ability_runtime:start_window_option",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -94,7 +96,7 @@ ohos_shared_library("scene_session") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "graphic_2d:librender_service_base",
+    "samgr:samgr_proxy",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
@@ -178,13 +180,13 @@ ohos_shared_library("screen_session") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
-    "graphic_2d:librender_service_base",
   ]
   public_external_deps = [
     "ability_base:base",
