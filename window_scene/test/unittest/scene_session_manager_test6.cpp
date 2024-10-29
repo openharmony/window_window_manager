@@ -57,7 +57,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest6::ssm_ = nullptr;
 
 bool SceneSessionManagerTest6::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -1949,6 +1949,7 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
     ASSERT_FALSE(sceneSession->GetRSVisible());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
