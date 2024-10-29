@@ -237,6 +237,7 @@ public:
     int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
+    void NotifyScreenMagneticStateChanged(bool isMagneticState);
     void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterExtendSettingDpiObserver();

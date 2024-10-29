@@ -86,6 +86,8 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
@@ -154,6 +156,11 @@ private:
     sptr<DisplayManagerDisplayModeAgent> displayModeListenerAgent_;
     class DisplayManagerAvailableAreaAgent;
     sptr<DisplayManagerAvailableAreaAgent> availableAreaListenerAgent_;
+
+    void NotifyScreenMagneticStateChanged(bool isMagneticState);
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners_;
+    class DisplayManagerScreenMagneticStateAgent;
+    sptr<DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -354,7 +361,6 @@ private:
     sptr<Impl> pImpl_;
 };
 
-
 class DisplayManager::Impl::DisplayManagerDisplayModeAgent : public DisplayManagerAgentDefault {
 public:
     explicit DisplayManagerDisplayModeAgent(sptr<Impl> impl) : pImpl_(impl)
@@ -365,6 +371,21 @@ public:
     virtual void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override
     {
         pImpl_->NotifyDisplayModeChanged(displayMode);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerScreenMagneticStateAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerScreenMagneticStateAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerScreenMagneticStateAgent() = default;
+
+    virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override
+    {
+        pImpl_->NotifyScreenMagneticStateChanged(isMagneticState);
     }
 private:
     sptr<Impl> pImpl_;
@@ -1619,6 +1640,18 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     }
 }
 
+void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState)
+{
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenMagneticStateListeners = screenMagneticStateListeners_;
+    }
+    for (auto& listener : screenMagneticStateListeners) {
+        listener->OnScreenMagneticStateChanged(isMagneticState);
+    }
+}
+
 void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
 {
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
@@ -1684,6 +1717,63 @@ DMError DisplayManager::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeLis
             displayModeListenerAgent_,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
         displayModeListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+DMError DisplayManager::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListenerAgent_ == nullptr) {
+        screenMagneticStateListenerAgent_ = new DisplayManagerScreenMagneticStateAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterScreenMagneticStateListener failed !");
+        screenMagneticStateListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IScreenMagneticStateListener register success");
+        screenMagneticStateListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(screenMagneticStateListeners_.begin(), screenMagneticStateListeners_.end(), listener);
+    if (iter == screenMagneticStateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenMagneticStateListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListeners_.empty() && screenMagneticStateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+        screenMagneticStateListenerAgent_ = nullptr;
     }
     return ret;
 }
