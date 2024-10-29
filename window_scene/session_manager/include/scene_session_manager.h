@@ -118,7 +118,7 @@ using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
-using GetIsLayoutFinishedOnRootSceneFunc = std::function<bool()>;
+using IsLayoutFinishedOnRootSceneFunc = std::function<bool()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -364,15 +364,15 @@ public:
     /*
      * Window Immersive
      */
-    WSError GetIsLayoutFullScreen(bool &isLayoutFullScreen);
-    WSError UpdateSessionAvoidAreaListener(int32_t &persistentId, bool haveListener) override;
+    WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
+    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
-    void SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedOnRootSceneFunc&& func);
+    void SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedOnRootSceneFunc&& func);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -618,9 +618,9 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
-    WSError IsLayoutFinished(bool& isLayoutFinished);
-    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty> &property,
-        const sptr<SceneSession> &sceneSession);
+    WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
+    void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
@@ -981,7 +981,7 @@ private:
      * Window Immersive
      */
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
-    GetIsLayoutFinishedOnRootSceneFunc getIsLayoutFinishedOnRootSceneFunc_;
+    IsLayoutFinishedOnRootSceneFunc isLayoutFinishedOnRootSceneFunc_;
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;

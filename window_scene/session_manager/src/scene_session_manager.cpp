@@ -1526,8 +1526,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         if (sceneSession->moveDragController_) {
             sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
         }
-        sceneSession->SetGetIsLayoutFinishedFunc([this](bool& isLayoutFinished) {
-            return this->IsLayoutFinished(isLayoutFinished);
+        sceneSession->SetGetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
+            return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
     }
     return sceneSession;
@@ -4550,9 +4550,9 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
     onFlushUIParamsFunc_ = std::move(func);
 }
 
-void SceneSessionManager::SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedOnRootSceneFunc&& func)
+void SceneSessionManager::SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedOnRootSceneFunc&& func)
 {
-    getIsLayoutFinishedOnRootSceneFunc_ = std::move(func);
+    isLayoutFinishedOnRootSceneFunc_ = std::move(func);
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
@@ -11314,13 +11314,13 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
     return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
 }
 
-WSError SceneSessionManager::IsLayoutFinished(bool& isLayoutFinished)
+WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 {
-    if (getIsLayoutFinishedOnRootSceneFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedOnRootSceneFunc_ is null");
+    if (isLayoutFinishedOnRootSceneFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedOnRootSceneFunc is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    isLayoutFinished = getIsLayoutFinishedOnRootSceneFunc_();
+    isLayoutFinished = isLayoutFinishedOnRootSceneFunc_();
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

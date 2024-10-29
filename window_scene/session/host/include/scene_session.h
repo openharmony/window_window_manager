@@ -90,7 +90,7 @@ using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
-using GetIsLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using IsLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 
 class SceneSession : public Session {
 public:
@@ -284,13 +284,13 @@ public:
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
-    WSError SetIsStatusBarVisibleTask(bool isVisible);
+    WSError SetIsStatusBarVisibleInner(bool isVisible);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
-    void SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedFunc&& getIsLayoutFinishedFunc);
+    void SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedFunc&& isLayoutFinishedFunc);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -554,11 +554,11 @@ private:
     /**
      * Window Immersive
      */
-    void CalculateAvoidAreaRect(WSRect &rect, WSRect &avoidRect, AvoidArea &avoidArea) const;
-    void GetSystemAvoidArea(WSRect &rect, AvoidArea &avoidArea);
-    void GetCutoutAvoidArea(WSRect &rect, AvoidArea &avoidArea);
-    void GetKeyboardAvoidArea(WSRect &rect, AvoidArea &avoidArea);
-    void GetAINavigationBarArea(WSRect rect, AvoidArea &avoidArea) const;
+    void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea) const;
+    void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
 
     /*
      * Window Lifecycle
@@ -759,7 +759,7 @@ private:
      */
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
-    GetIsLayoutFinishedFunc getIsLayoutFinishedFunc_;
+    IsLayoutFinishedFunc isLayoutFinishedFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

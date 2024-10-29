@@ -1307,17 +1307,17 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
     auto task = [weakThis = wptr(this), isVisible]() {
-        sptr<SceneSession> self = weakThis.promote();
-        if (self == nullptr) {
+        sptr<SceneSession> sceneSession = weakThis.promote();
+        if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return;
         }
-        self->SetIsStatusBarVisibleTask(isVisible);
+        sceneSession->SetIsStatusBarVisibleInner(isVisible);
     };
     PostTask(task, __func__);
 }
 
-WSError SceneSession::SetIsStatusBarVisibleTask(bool isVisible)
+WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
     bool isNeedNotify = isStatusBarVisible_ != isVisible;
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
@@ -1326,14 +1326,14 @@ WSError SceneSession::SetIsStatusBarVisibleTask(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
-    if (getIsLayoutFinishedFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ is null, id: %{public}d", GetPersistentId());
+    if (isLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedFunc is null, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
     bool isLayoutFinished = false;
-    WSError ret = getIsLayoutFinishedFunc_(isLayoutFinished);
+    WSError ret = isLayoutFinishedFunc_(isLayoutFinished);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "getIsLayoutFinishedFunc_ failed: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedFunc failed: %{public}d", ret);
         return ret;
     }
     if (isLayoutFinished) {
@@ -4694,9 +4694,9 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
     return isDisplayStatusBarTemporarily_.load();
 }
 
-void SceneSession::SetGetIsLayoutFinishedFunc(GetIsLayoutFinishedFunc&& getIsLayoutFinishedFunc)
+void SceneSession::SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedFunc&& isLayoutFinishedFunc)
 {
-    getIsLayoutFinishedFunc_ = std::move(getIsLayoutFinishedFunc);
+    isLayoutFinishedFunc_ = std::move(isLayoutFinishedFunc);
 }
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)

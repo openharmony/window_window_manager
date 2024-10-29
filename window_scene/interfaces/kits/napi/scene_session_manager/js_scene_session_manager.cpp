@@ -562,32 +562,29 @@ void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
     SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
 }
 
-void JsSceneSessionManager::ProcessSSMCallbackOnRootScene()
+void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
 {
     RegisterDumpRootSceneElementInfoListener();
     RegisterVirtualPixelRatioChangeListener();
-    RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([this] {
+        TLOGND(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
         this->OnRootSceneBackEvent();
-    };
-    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
-    auto onFlushUIParamsFunc = []() {
+    });
+    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
         RootScene::staticRootScene_->OnFlushUIParams();
-    };
-    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc(onFlushUIParamsFunc);
-    auto getIsLayoutFinishedFunc = []() {
-        return RootScene::staticRootScene_->IsLayoutFinished();
-    };
-    SceneSessionManager::GetInstance().SetGetIsLayoutFinishedFunc(getIsLayoutFinishedFunc);
+    });
+    SceneSessionManager::GetInstance().SetGetIsLastFrameLayoutFinishedFunc([] {
+        return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
+    });
 }
 
-void JsSceneSessionManager::ProcessRootSceneCallbackOnSSM()
+void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 {
     rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
         return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
     });
     if (!Session::IsScbCoreEnabled()) {
-        rootScene_->SetFrameLayoutFinishCallback([]() {
+        rootScene_->SetFrameLayoutFinishCallback([] {
             SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
             SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
         });
@@ -1504,8 +1501,8 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-    ProcessSSMCallbackOnRootScene();
-    ProcessRootSceneCallbackOnSSM();
+    RegisterRootSceneCallbacksOnSSManager();
+    RegisterSSManagerCallbacksOnRootScene();
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
