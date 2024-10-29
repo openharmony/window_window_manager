@@ -1215,7 +1215,7 @@ WSRect SceneSessionManager::GetRootSessionAvoidSessionRect(AvoidAreaType type)
         const WSRect rect = session->GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}u, rect: %{public}s", type, rect.ToString().c_str());
         return rect;
-}
+    }
     return {};
 }
 

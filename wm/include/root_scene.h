@@ -52,7 +52,7 @@ public:
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
     bool IsLayoutFinished();
-    bool OnFlushUIParams();
+    void OnFlushUIParams();
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
