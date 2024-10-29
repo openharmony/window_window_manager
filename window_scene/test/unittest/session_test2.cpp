@@ -1049,7 +1049,7 @@ HWTEST_F(WindowSessionTest2, UnregisterLifecycleListener, Function | SmallTest |
  * @tc.desc: NotifyActivation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSesionTest2, NotifyActivation02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, NotifyActivation02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyActivation();
@@ -2243,7 +2243,7 @@ HWTEST_F(WindowSessionTest2, NotifySessionInfoLockedStateChange, Function | Smal
     session_->SetSessionInfoLockedStateChangeListener(sessionInfoLockedStateChangeFunc);
     session_->NotifySessionInfoLockedStateChange(true);
 
-    WLOGFI("NotifySessionInfoLockedStateChange end!")
+    WLOGFI("NotifySessionInfoLockedStateChange end!");
 }
 
 /**
