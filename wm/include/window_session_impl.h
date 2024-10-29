@@ -364,6 +364,11 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
 
+    /*
+     * Window Layout
+     */
+    void UpdateVirtualPixelRatio(const sptr<Display>& display);
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
