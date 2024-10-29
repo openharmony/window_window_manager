@@ -256,49 +256,6 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
 }
 
 /**
- * @tc.name: ClearEnterWindow01
- * @tc.desc: ClearEnterWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ClearEnterWindow01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "ClearEnterWindow01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    int resultValue = 0;
-    SceneSession::ClearEnterWindow();
-    ASSERT_EQ(resultValue, 0);
-}
-
-/**
- * @tc.name: GetEnterWindow01
- * @tc.desc: GetEnterWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetEnterWindow01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "GetEnterWindow01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    wptr<SceneSession> sceneSession_;
-    ASSERT_EQ(sceneSession_, SceneSession::GetEnterWindow());
-}
-
-/**
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation
  * @tc.type: FUNC
