@@ -1012,18 +1012,8 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
 
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
-    float vpr = 1.0f;
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
-        return vpr;
-    }
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
-        return vpr;
-    }
-    return GetVirtualPixelRatio(displayInfo);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+    return virtualPixelRatio_;
 }
 
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
