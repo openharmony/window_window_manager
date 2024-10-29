@@ -77,8 +77,6 @@ bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
-wptr<SceneSession> SceneSession::enterSession_ = nullptr;
-std::mutex SceneSession::enterSessionMutex_;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
@@ -1959,19 +1957,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 
     int32_t action = pointerEvent->GetPointerAction();
-    {
-        bool isSystemWindow = GetSessionInfo().isSystem_;
-        std::lock_guard<std::mutex> guard(enterSessionMutex_);
-        if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
-            WLOGFD("Set enter session, persistentId:%{public}d", GetPersistentId());
-            enterSession_ = wptr<SceneSession>(this);
-        }
-        if ((enterSession_ != nullptr) &&
-            (isSystemWindow && (action != MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW))) {
-            WLOGFD("Remove enter session, persistentId:%{public}d", GetPersistentId());
-            enterSession_ = nullptr;
-        }
-    }
 
     if (!CheckPointerEventDispatch(pointerEvent)) {
         WLOGFI("Do not dispatch this pointer event");
@@ -2113,18 +2098,6 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
     };
     PostTask(task, "RequestSessionBack:" + std::to_string(needMoveToBackground));
     return WSError::WS_OK;
-}
-
-const wptr<SceneSession> SceneSession::GetEnterWindow()
-{
-    std::lock_guard<std::mutex> guard(enterSessionMutex_);
-    return enterSession_;
-}
-
-void SceneSession::ClearEnterWindow()
-{
-    std::lock_guard<std::mutex> guard(enterSessionMutex_);
-    enterSession_ = nullptr;
 }
 
 #ifdef DEVICE_STATUS_ENABLE
