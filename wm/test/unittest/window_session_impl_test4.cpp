@@ -1071,12 +1071,12 @@ HWTEST_F(WindowSessionImplTest4, UpdateVirtualPixelRatio, Function | SmallTest |
 
     window->property_->SetDisplayId(-1);
     sptr<Display> display = nullptr;
-    vpr = window->UpdateVirtualPixelRatio(display);
+    window->UpdateVirtualPixelRatio(display);
     ASSERT_EQ(window->virtualPixelRatio_, 1.0f);
 
-    window->property_->SetDisplayId(-1);
-    display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId(window->property_->GetDisplayId());
-    vpr = window->UpdateVirtualPixelRatio(display);
+    window->property_->SetDisplayId(0);
+    display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    window->UpdateVirtualPixelRatio(display);
     ASSERT_NE(window->virtualPixelRatio_, 1.0f);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio end";
 }
