@@ -3056,8 +3056,8 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
     GetSessionProperty()->SetRequestedOrientation(orientation);
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
-        sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    if (onRequestedOrientationChange_) {
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
 }
 
@@ -4806,6 +4806,18 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
+void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback) {
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onRequestedOrientationChange_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5119,7 +5131,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
-            session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
