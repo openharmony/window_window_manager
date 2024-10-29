@@ -1010,13 +1010,13 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
     return virtualPixelRatio_;
 }
 
-/** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 {
     if (useUniqueDensity_) {
