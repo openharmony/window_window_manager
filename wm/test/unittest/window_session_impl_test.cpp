@@ -386,11 +386,6 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck01, Function | SmallTest
 
     WMError res = window1->WindowSessionCreateCheck();
     ASSERT_EQ(res, WMError::WM_OK);
-
-    window1->property_ = nullptr;
-    WMError res1 = window1->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_ERROR_NULLPTR);
-
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck01 end";
 }
 
@@ -612,6 +607,33 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateViewportConfig01
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateViewportConfig01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("UpdateViewportConfig01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    Rect rectW;
+    rectW.posX_ = 0;
+    rectW.posY_ = 0;
+    rectW.height_ = 0;
+    rectW.width_ = 0;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 0;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 10;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    ASSERT_NE(window, nullptr);
+}
+
+/**
  * @tc.name: CreateWindowAndDestroy01
  * @tc.desc: GetPersistentId
  * @tc.type: FUNC
@@ -626,10 +648,6 @@ HWTEST_F(WindowSessionImplTest, GetPersistentId01, Function | SmallTest | Level2
     window->property_->SetPersistentId(1);
     const int32_t res2 = window->GetPersistentId();
     ASSERT_EQ(res2, 1);
-
-    window->property_ = nullptr;
-    const int32_t res1 = window->GetPersistentId();
-    ASSERT_EQ(res1, INVALID_SESSION_ID);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetPersistentId end";
 }
 

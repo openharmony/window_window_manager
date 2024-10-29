@@ -5542,12 +5542,16 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
     bool inSplit = false;
     bool inFloating = false;
     bool fullScreen = false;
+    bool isSmallFold = IsSmallFoldProduct();
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
             if (session.second == nullptr ||
                 !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
                 !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
+                continue;
+            }
+            if (isSmallFold && IsInSecondaryScreen(session.second)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();
