@@ -1056,28 +1056,29 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
 }
 
 /**
- * @tc.name: GetVirtualPixelRatio
- * @tc.desc: test GetVirtualPixelRatio
+ * @tc.name: UpdateVirtualPixelRatio
+ * @tc.desc: test UpdateVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, UpdateVirtualPixelRatio, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetVirtualPixelRatio");
+    option->SetWindowName("UpdateVirtualPixelRatio");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
-    float vpr = 0.0f;
     window->property_->SetDisplayId(-1);
-    vpr = window->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, 1.0f);
+    sptr<Display> display = nullptr;
+    vpr = window->UpdateVirtualPixelRatio(display);
+    ASSERT_EQ(window->virtualPixelRatio_, 1.0f);
 
-    window->property_->SetDisplayId(0);
-    vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 1.0f);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
+    window->property_->SetDisplayId(-1);
+    display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId(window->property_->GetDisplayId());
+    vpr = window->UpdateVirtualPixelRatio(display);
+    ASSERT_NE(window->virtualPixelRatio_, 1.0f);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio end";
 }
 
 /**
