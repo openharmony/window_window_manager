@@ -183,9 +183,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     auto layoutCallback = sptr<FutureCallback>::MakeSptr();
     property_->SetLayoutCallback(layoutCallback);
+    property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -193,9 +193,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
-        if (WindowHelper::IsSubWindow(GetType())) {
-            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-        }
     }
 }
 
@@ -280,7 +277,8 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((GetHostSession() == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        WLOGW("[WMSCom]already destroyed or not created! id: %{public}d state_: %{public}u", GetPersistentId(), state_);
+        TLOGW(WmsLogTag::WMS_LIFE, "already destroyed or not created! id: %{public}d state_: %{public}u",
+            GetPersistentId(), state_);
     }
     return res;
 }
@@ -754,6 +752,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         UpdateFrameLayoutCallbackIfNeeded(wmReason);
         return;
     }
+
     auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
         auto window = weak.promote();
         if (!window) {
@@ -1205,7 +1204,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterFrameLayoutCallback()
 {
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == "pc") {
+    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         return;
     }
     uiContent_->SetLatestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
@@ -1635,7 +1634,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
         return;
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation: %{public}u target:%{public}u state_:%{public}u",
+    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
     bool isUserOrientation = IsUserOrientation(orientation);
     if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
@@ -1649,10 +1648,6 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
-        return Orientation::UNSPECIFIED;
-    }
-    if (!property_) {
-        WLOGFE("property_ is nullptr id: %{public}d", GetPersistentId());
         return Orientation::UNSPECIFIED;
     }
     return property_->GetRequestedOrientation();
@@ -1960,7 +1955,6 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
     WLOGFD("Start register windowTitleButtonRectChange listener, id:%{public}d", persistentId);
     if (listener == nullptr) {
@@ -1970,7 +1964,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
 
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
-        ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
+        WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             WLOGFE("register the listener of window title button rect change failed");
             return ret;
@@ -1991,9 +1985,14 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         WLOGFE("register title button rect change listener failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent != nullptr) {
-        uiContent->SubscribeContainerModalButtonsRectChange([vpr, this](Rect& decorRect, Rect& titleButtonLeftRect) {
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SubscribeContainerModalButtonsRectChange(
+            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                return;
+            }
             TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -2001,10 +2000,10 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
             titleButtonRect.posY_ = static_cast<int32_t>(titleButtonLeftRect.posY_ / vpr);
             titleButtonRect.width_ = static_cast<uint32_t>(titleButtonLeftRect.width_ / vpr);
             titleButtonRect.height_ = static_cast<uint32_t>(titleButtonLeftRect.height_ / vpr);
-            NotifyWindowTitleButtonRectChange(titleButtonRect);
+            window->NotifyWindowTitleButtonRectChange(titleButtonRect);
         });
     }
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
@@ -2346,7 +2345,7 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
     }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
-    TLOGI(WmsLogTag::WMS_LIFE, "Clear successfully, id: %{public}d.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
 
 void WindowSessionImpl::ClearSwitchFreeMultiWindowListenersById(int32_t persistentId)
@@ -2422,8 +2421,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
 
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (needNotifyListeners && !isPcAppInPad) {
+    if (needNotifyListeners) {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
@@ -3375,8 +3373,9 @@ bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& ke
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    bool isKeySound = (keyCode == MMI::KeyEvent::KEYCODE_SOUND);
     WLOGD("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard || isKeyBack);
+    return (isKeyFN || isKeyboard || isKeyBack || isKeySound);
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
@@ -3578,8 +3577,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == UI_TYPE_PHONE ||
-                 (windowSystemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.uiType_ == "phone" ||
+                 (windowSystemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;

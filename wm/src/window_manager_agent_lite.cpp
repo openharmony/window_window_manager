@@ -52,5 +52,10 @@ void WindowManagerAgentLite::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManagerLite>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgentLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WindowUpdateType type)
+{
+    SingletonContainer::Get<WindowManagerLite>().NotifyAccessibilityWindowInfo(infos, type);
+}
 } // namespace Rosen
 } // namespace OHOS

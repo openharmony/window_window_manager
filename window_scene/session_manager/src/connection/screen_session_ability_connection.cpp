@@ -17,6 +17,8 @@
 
 #include <chrono>
 #include <want.h>
+#include <iservice_registry.h>
+#include <system_ability_definition.h>
 
 #include "ability_connection.h"
 #include "extension_manager_client.h"
@@ -195,13 +197,36 @@ void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(
     const std::string &bundleName, const std::string &abilityName)
 {
+    return ScreenSessionConnectExtension(bundleName, abilityName, {});
+}
+
+bool ScreenSessionAbilityConnection::ScreenSessionConnectExtension(const std::string &bundleName,
+    const std::string &abilityName, const std::vector<std::pair<std::string, std::string>> &params)
+{
     TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s", bundleName.c_str(), abilityName.c_str());
+    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    OHOS::sptr<OHOS::IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetSystemAbility BMS failed");
+        return false;
+    }
     if (abilityConnectionStub_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "screen session ability extension is already connected");
         return true;
     }
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
+    for (auto param : params) {
+        std::string paramKey = param.first;
+        std::string paramValue = param.second;
+        if (!paramKey.empty() && !paramValue.empty()) {
+            want.SetParam(paramKey, paramValue);
+            TLOGI(WmsLogTag::DMS, "add want param. paramKey=%{public}s, paramValue=%{public}s",
+                paramKey.c_str(), paramValue.c_str());
+        }
+    }
     abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>(new (std::nothrow)
         ScreenSessionAbilityConnectionStub());
     if (abilityConnectionStub_ == nullptr) {

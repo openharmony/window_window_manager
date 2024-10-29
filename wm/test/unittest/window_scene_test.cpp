@@ -123,11 +123,11 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneTest, Init04, Function | SmallTest | Level2)
 {
+    sptr<IRemoteObject> iSession = nullptr;
     sptr<WindowOption> optionTest = nullptr;
-    DisplayId displayId = 0;
+    DisplayId displayId = 1;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
-    sptr<IRemoteObject> iSession = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext_, listener, optionTest, iSession));
 }
 
@@ -138,11 +138,11 @@ HWTEST_F(WindowSceneTest, Init04, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneTest, Init05, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> optionTest = new WindowOption();
-    DisplayId displayId = 0;
-    sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> optionTest = new WindowOption();
     sptr<IRemoteObject> iSession = new IPCObjectStub();
+    DisplayId displayId = 1;
+    sptr<IWindowLifeCycle> listener = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->Init(displayId, abilityContext, listener, optionTest, iSession));
 }
@@ -424,9 +424,9 @@ HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneTest, GoForeground02, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::unique_ptr<Mocker> m1 = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    EXPECT_CALL(m1->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
     DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
@@ -453,9 +453,9 @@ HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneTest, GoBackground02, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::unique_ptr<Mocker> m2 = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    EXPECT_CALL(m2->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
     DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
@@ -482,9 +482,9 @@ HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneTest, RequestFocus02, Function | SmallTest | Level2)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    std::unique_ptr<Mocker> m3 = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    EXPECT_CALL(m3->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
     DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
@@ -525,7 +525,7 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
 
 /**
  * @tc.name: NotifyMemoryLevel03
- * @tc.desc: NotifyMemoryLevel with windowSceneSession
+ * @tc.desc: NotifyMemoryLevel with windowsession
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */

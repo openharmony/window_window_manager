@@ -30,7 +30,7 @@ public:
         nameT = __PRETTY_FUNCTION__;
         nameT = nameT.substr(nameT.find("T = "));
         nameT = nameT.substr(sizeof("T ="), nameT.length() - sizeof("T = "));
-        SingletonContainer::GetInstance().AddSingleton(nameT, &T::GetInstance());
+        SingletonContainer::GetInstance().SetSingleton(nameT, &T::GetInstance());
     }
     ~SingletonDelegator() = default;
 
