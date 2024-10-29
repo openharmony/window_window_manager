@@ -1707,7 +1707,7 @@ HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | 
     DisplayChangeListener listener;
     DisplayId displayId = 0;
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
-    ASSERT_NE(nullptr, displayInfo); 
+    ASSERT_NE(nullptr, displayInfo);
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     displayInfoMap.insert(std::make_pair(displayId, displayInfo));
     DisplayStateChangeType type = DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE;
