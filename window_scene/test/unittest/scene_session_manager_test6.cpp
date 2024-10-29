@@ -1390,7 +1390,7 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
  * @tc.name: GetWindowStyleType
  * @tc.desc: GetWindowStyleType
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetWindowStyleType, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
