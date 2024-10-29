@@ -127,7 +127,7 @@ public:
     friend class HidumpController;
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
-    virtual ~Session() = default;
+    virtual ~Session();
     bool isKeyboardPanelEnabled_ = false;
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
