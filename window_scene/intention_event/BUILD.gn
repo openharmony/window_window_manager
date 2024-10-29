@@ -46,6 +46,7 @@ ohos_shared_library("libintention_event") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hicollie:libhicollie",
@@ -55,7 +56,6 @@ ohos_shared_library("libintention_event") {
     "init:libbegetutil",
     "input:libmmi-client",
     "libxml2:libxml2",
-    "graphic_2d:librender_service_base",
   ]
 
   defines = []

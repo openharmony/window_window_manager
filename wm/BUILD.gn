@@ -119,6 +119,7 @@ ohos_static_library("libwm_static") {
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
@@ -132,7 +133,6 @@ ohos_static_library("libwm_static") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
-    "bundle_framework:libappexecfwk_common",
   ]
 
   defines = []
@@ -256,8 +256,10 @@ ohos_shared_library("libwm") {
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hilog:libhilog",
@@ -269,8 +271,6 @@ ohos_shared_library("libwm") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
-    "bundle_framework:libappexecfwk_common",
-    "graphic_2d:librender_service_base",
   ]
 
   defines = []
