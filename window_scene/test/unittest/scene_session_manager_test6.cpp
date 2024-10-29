@@ -1284,11 +1284,9 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify3, Function | Smal
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
     ssm_->UpdatePrivateStateAndNotify(1);
     ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
-    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession->property_->SetPrivacyMode(false);
     sceneSession->GetCombinedExtWindowFlags().privacyModeFlag = true;
     sceneSession->property_->SetDisplayId(2);
-    sceneSession->isVisible_ = true;
     ssm_->UpdatePrivateStateAndNotify(2);
     ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 1);
 }
