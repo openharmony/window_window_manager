@@ -3737,6 +3737,11 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        hostSession->OnDefaultDensityEnabled(enabled);
+    }
+
     if (isDefaultDensityEnabled_ == enabled) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
         return WMError::WM_OK;
