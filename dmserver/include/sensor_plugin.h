@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCREEN_SENSOR_PLUGIN_H
-#define SCREEN_SENSOR_PLUGIN_H
+#ifndef SENSOR_PLUGIN_H
+#define SENSOR_PLUGIN_H
 
 #include <string>
 #include <stdio.h>
@@ -49,4 +49,4 @@ bool SubscribeCallback(int32_t motionType, OnMotionChangedPtr callback);
 bool UnsubscribeCallback(int32_t motionType, OnMotionChangedPtr callback);
 }
 }
-#endif /* SCREEN_SENSOR_PLUGIN_H */
+#endif /* SENSOR_PLUGIN_H */
