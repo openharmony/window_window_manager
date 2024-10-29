@@ -1240,9 +1240,6 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     sceneSession->property_->SetPrivacyMode(true);
     sceneSession->property_->SetDisplayId(1);
     sceneSession->isVisible_ = false;
-    std::unordered_set<std::string> privacyBundles1;
-    std::unordered_set<std::string> privacyBundles2;
-    std::unordered_set<std::string> privacyBundles3;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
@@ -1259,6 +1256,78 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     sceneSession->property_->SetDisplayId(3);
     ssm_->UpdatePrivateStateAndNotify(3);
     ASSERT_EQ(ssm_->privacyBundleMap_[3].size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify3
+ * @tc.desc: UpdatePrivateStateAndNotify3
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify3, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->privacyBundleMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession->property_->SetPrivacyMode(false);
+    sceneSession->GetCombinedExtWindowFlags().privacyModeFlag = true;
+    sceneSession->property_->SetDisplayId(2);
+    sceneSession->isVisible_ = true;
+    ssm_->UpdatePrivateStateAndNotify(2);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 1);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify4
+ * @tc.desc: UpdatePrivateStateAndNotify4
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify4, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->privacyBundleMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetParentSession(sceneSession2);
+    ASSERT_NE(nullptr, sceneSession->GetParentSession());
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
+    sceneSession->property_->SetDisplayId(2);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->UpdatePrivateStateAndNotify(2);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 0);
 }
 
 /**
