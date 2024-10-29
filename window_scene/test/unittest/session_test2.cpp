@@ -1788,8 +1788,6 @@ HWTEST_F(WindowSessionTest2, GetAttachState001, Function | SmallTest | Level2)
 /**
  * @tc.name: ResetSessionConnectState
  * @tc.desc: ResetSessionConnectState
-<<<<<<< HEAD
-=======
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest2, ResetSessionConnectState, Function | SmallTest | Level2)
@@ -1805,7 +1803,7 @@ HWTEST_F(WindowSessionTest2, ResetSessionConnectState, Function | SmallTest | Le
  * @tc.desc: PostExportTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, PostExportTask02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     std::string name = "sessionExportTask";
@@ -1829,7 +1827,7 @@ HWTEST_F(WindowSessionTest, PostExportTask02, Function | SmallTest | Level2)
  * @tc.desc: SetLeashWinSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetLeashWinSurfaceNode02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->leashWinSurfaceNode_ = WindowSessionTest2::CreateRSSurfaceNode();
@@ -1846,7 +1844,7 @@ HWTEST_F(WindowSessionTest, SetLeashWinSurfaceNode02, Function | SmallTest | Lev
  * @tc.desc: GetCloseAbilityWantAndClean
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, GetCloseAbilityWantAndClean, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     AAFwk::Want outWant;
@@ -1864,7 +1862,7 @@ HWTEST_F(WindowSessionTest, GetCloseAbilityWantAndClean, Function | SmallTest | 
  * @tc.desc: SetScreenId Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetScreenId02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     uint64_t screenId = 0;
@@ -1878,7 +1876,7 @@ HWTEST_F(WindowSessionTest, SetScreenId02, Function | SmallTest | Level2)
  * @tc.desc: SetSessionState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetSessionState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetSessionState, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
@@ -1892,7 +1890,7 @@ HWTEST_F(WindowSessionTest, SetSessionState, Function | SmallTest | Level2)
  * @tc.desc: SetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->isFocused_ = true;
@@ -1909,7 +1907,7 @@ HWTEST_F(WindowSessionTest, SetFocusable03, Function | SmallTest | Level2)
  * @tc.desc: GetFocused Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, GetFocused, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool result = session_->GetFocused();
@@ -1925,7 +1923,7 @@ HWTEST_F(WindowSessionTest, GetFocused, Function | SmallTest | Level2)
  * @tc.desc: UpdatePointerArea Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdatePointerArea, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 0, 0 };
@@ -1939,7 +1937,7 @@ HWTEST_F(WindowSessionTest, UpdatePointerArea, Function | SmallTest | Level2)
  * @tc.desc: UpdateSizeChangeReason Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -1952,7 +1950,7 @@ HWTEST_F(WindowSessionTest, UpdateSizeChangeReason02, Function | SmallTest | Lev
  * @tc.desc: UpdateDensity Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdateDensity, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest2, UpdateDensity, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
@@ -2161,395 +2159,6 @@ HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
 /**
  * @tc.name: SetBackPressedListenser
  * @tc.desc: SetBackPressedListenser Test
->>>>>>> 43b80af5e4a9d6760f033a033e58d1926f0cd323
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetBackPressedListenser, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WLOGFI("SetBackPressedListenser begin!");
-
-    session_->SetBackPressedListenser(session_->backPressedFunc_);
-
-    WLOGFI("SetBackPressedListenser end!");
-}
-
-/**
- * @tc.name: SetUpdateSessionIconListener
- * @tc.desc: SetUpdateSessionIconListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetUpdateSessionIconListener, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WLOGFI("SetUpdateSessionIconListener begin!");
-
-<<<<<<< HEAD
-    session_->PostExportTask(task, name, delayTime);
-    auto result = session_->GetBufferAvailable();
-    ASSERT_EQ(result, false);
-
-    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
-    session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
-    session_->PostExportTask(task, name, delayTime);
-    auto result2 = session_->GetBufferAvailable();
-    ASSERT_EQ(result2, false);
-=======
-    session_->SetUpdateSessionIconListener(session_->updateSessionIconFunc_);
-
-    WLOGFI("SetUpdateSessionIconListener end!");
->>>>>>> 43b80af5e4a9d6760f033a033e58d1926f0cd323
-}
-
-/**
- * @tc.name: ResetSnapshot
- * @tc.desc: ResetSnapshot Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, ResetSnapshot, Function | SmallTest | Level2)
-{
-    WLOGFI("ResetSnapshot begin!");
-    ASSERT_NE(session_, nullptr);
-
-    if (session_->snapshot_ == nullptr) {
-        session_->snapshot_ = std::make_shared<Media::PixelMap>();
-    }
-    session_->ResetSnapshot();
-
-    WLOGFI("ResetSnapshot end!");
-}
-
-/**
- * @tc.name: NotifyContextTransparent
- * @tc.desc: NotifyContextTransparent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyContextTransparent, Function | SmallTest | Level2)
-{
-    WLOGFI("NotifyContextTransparent begin!");
-    ASSERT_NE(session_, nullptr);
-
-    NotifyContextTransparentFunc contextTransparentFunc = session_->contextTransparentFunc_;
-    if (contextTransparentFunc == nullptr) {
-        contextTransparentFunc = []() {};
-    }
-    session_->contextTransparentFunc_ = nullptr;
-    session_->NotifyContextTransparent();
-
-    session_->SetContextTransparentFunc(contextTransparentFunc);
-    session_->NotifyContextTransparent();
-
-    WLOGFI("NotifyContextTransparent end!");
-}
-
-/**
- * @tc.name: NotifySessionInfoLockedStateChange
- * @tc.desc: NotifySessionInfoLockedStateChange Test
- * @tc.type: FUNC
- */
-<<<<<<< HEAD
-HWTEST_F(WindowSessionTest2, SetScreenId02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    uint64_t screenId = 0;
-    session_->sessionStage_ = new (std::nothrow) SessionStageMocker();
-    session_->SetScreenId(screenId);
-    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
-}
-
-/**
- * @tc.name: SetSessionState
- * @tc.desc: SetSessionState
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetSessionState, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-
-    SessionState state03 = SessionState::STATE_CONNECT;
-    session_->SetSessionState(state03);
-    ASSERT_EQ(state03, session_->state_);
-}
-
-/**
- * @tc.name: SetFocusable03
- * @tc.desc: SetFocusable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->isFocused_ = true;
-    session_->property_ = new (std::nothrow) WindowSessionProperty();
-    session_->property_->focusable_ = false;
-    bool isFocusable = true;
-
-    auto result = session_->SetFocusable(isFocusable);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetFocused
- * @tc.desc: GetFocused Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, GetFocused, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool result = session_->GetFocused();
-    ASSERT_EQ(result, false);
-
-    session_->isFocused_ = true;
-    bool result2 = session_->GetFocused();
-    ASSERT_EQ(result2, true);
-}
-
-/**
- * @tc.name: UpdatePointerArea
- * @tc.desc: UpdatePointerArea Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, UpdatePointerArea, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 0, 0 };
-    session_->preRect_ = rect;
-    session_->UpdatePointerArea(rect);
-    ASSERT_EQ(session_->GetFocused(), false);
-}
-
-/**
- * @tc.name: UpdateSizeChangeReason02
- * @tc.desc: UpdateSizeChangeReason Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSError result = session_->UpdateSizeChangeReason(reason);
-    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
-}
-
-/**
- * @tc.name: UpdateDensity
- * @tc.desc: UpdateDensity Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, UpdateDensity, Function | SmallTest | Level2)
-=======
-HWTEST_F(WindowSessionTest2, NotifySessionInfoLockedStateChange, Function | SmallTest | Level2)
->>>>>>> 43b80af5e4a9d6760f033a033e58d1926f0cd323
-{
-    WLOGFI("NotifySessionInfoLockedStateChange begin!");
-    ASSERT_NE(session_, nullptr);
-
-    NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc =
-        session_->sessionInfoLockedStateChangeFunc_;
-    if (sessionInfoLockedStateChangeFunc == nullptr) {
-        sessionInfoLockedStateChangeFunc = [](const bool lockedState) {};
-    }
-    session_->sessionInfoLockedStateChangeFunc_ = nullptr;
-    session_->NotifySessionInfoLockedStateChange(true);
-
-    session_->SetSessionInfoLockedStateChangeListener(sessionInfoLockedStateChangeFunc);
-    session_->NotifySessionInfoLockedStateChange(true);
-
-<<<<<<< HEAD
-/**
- * @tc.name: UpdateSizeChangeReason
- * @tc.desc: UpdateSizeChangeReason UpdateDensity
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason, Function | SmallTest | Level2)
-{
-    SizeChangeReason reason = SizeChangeReason{1};
-    ASSERT_EQ(session_->UpdateSizeChangeReason(reason), WSError::WS_OK);
-}
-
-/**
- * @tc.name: SetPendingSessionActivationEventListener
- * @tc.desc: SetPendingSessionActivationEventListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetPendingSessionActivationEventListener, Function | SmallTest | Level2)
-{
-    int resultValue = 0;
-    NotifyPendingSessionActivationFunc callback = [&resultValue](const SessionInfo& info) {
-        resultValue = 1;
-    };
-
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->SetPendingSessionActivationEventListener(callback);
-    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info) {
-        resultValue = 2;
-    };
-    session_->SetTerminateSessionListener(callback1);
-    LifeCycleTaskType taskType = LifeCycleTaskType{0};
-    session_->RemoveLifeCycleTask(taskType);
-    ASSERT_EQ(resultValue, 0);
-}
-
-/**
- * @tc.name: SetSessionIcon
- * @tc.desc: SetSessionIcon UpdateDensity
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetSessionIcon, Function | SmallTest | Level2)
-{
-    std::shared_ptr<Media::PixelMap> icon;
-    session_->SetSessionIcon(icon);
-    ASSERT_EQ(session_->Clear(), WSError::WS_OK);
-    session_->SetSessionSnapshotListener(nullptr);
-    NotifyPendingSessionActivationFunc func = [](const SessionInfo& info) {};
-    session_->pendingSessionActivationFunc_ = func;
-    ASSERT_EQ(session_->PendingSessionToForeground(), WSError::WS_OK);
-
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("SetSessionIcon", 1);
-    session_->updateSessionIconFunc_ = nullptr;
-    ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
-
-    NofitySessionIconUpdatedFunc func2 = [](const std::string& iconPath) {};
-    session_->updateSessionIconFunc_ = func2;
-    ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
-
-    NotifyTerminateSessionFuncNew func3 = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
-    session_->terminateSessionFuncNew_ = func3;
-    ASSERT_EQ(WSError::WS_OK, session_->Clear());
-}
-
-/**
- * @tc.name: SetSessionExceptionListener
- * @tc.desc: SetSessionExceptionListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest | Level2)
-{
-    session_->SetSessionExceptionListener(nullptr, true);
-
-    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession) {};
-    session_->SetSessionExceptionListener(func, true);
-
-    ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
-}
-
-/**
- * @tc.name: SetRaiseToAppTopForPointDownFunc
- * @tc.desc: SetRaiseToAppTopForPointDownFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetRaiseToAppTopForPointDownFunc, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetRaiseToAppTopForPointDownFunc(nullptr);
-
-    NotifyRaiseToTopForPointDownFunc func = []() {};
-    session_->raiseToTopForPointDownFunc_ = func;
-    session_->RaiseToAppTopForPointDown();
-    session_->HandlePointDownDialog();
-    session_->ClearDialogVector();
-
-    session_->SetBufferAvailableChangeListener(nullptr);
-    session_->UnregisterSessionChangeListeners();
-    session_->SetSessionStateChangeNotifyManagerListener(nullptr);
-    session_->SetSessionInfoChangeNotifyManagerListener(nullptr);
-    session_->NotifyFocusStatus(true);
-
-    session_->SetRequestFocusStatusNotifyManagerListener(nullptr);
-    session_->SetNotifyUIRequestFocusFunc(nullptr);
-    session_->SetNotifyUILostFocusFunc(nullptr);
-    session_->UnregisterSessionChangeListeners();
-
-    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
-    session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
-    ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: NotifyCloseExistPipWindow
- * @tc.desc: check func NotifyCloseExistPipWindow
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, NotifyCloseExistPipWindow, Function | SmallTest | Level2)
-{
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
-    ASSERT_NE(mockSessionStage, nullptr);
-    ManagerState key = ManagerState{0};
-    session_->GetStateFromManager(key);
-    session_->NotifyUILostFocus();
-    session_->SetSystemSceneBlockingFocus(true);
-
-    session_->lostFocusFunc_ = []() {};
-    session_->NotifyUILostFocus();
-
-    session_->GetBlockingFocus();
-    session_->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*(mockSessionStage), NotifyCloseExistPipWindow()).Times(1).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WSError::WS_OK, session_->NotifyCloseExistPipWindow());
-    session_->sessionStage_ = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyCloseExistPipWindow());
-}
-
-/**
- * @tc.name: SetSystemConfig
- * @tc.desc: SetSystemConfig Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetSystemConfig, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SystemSessionConfig systemConfig;
-    session_->SetSystemConfig(systemConfig);
-    float snapshotScale = 0.5;
-    session_->SetSnapshotScale(snapshotScale);
-    session_->ProcessBackEvent();
-    session_->NotifyOccupiedAreaChangeInfo(nullptr);
-    session_->UpdateMaximizeMode(true);
-    ASSERT_EQ(session_->GetZOrder(), 0);
-
-    session_->SetUINodeId(0);
-    session_->GetUINodeId();
-    session_->SetShowRecent(true);
-    session_->GetShowRecent();
-    session_->SetBufferAvailable(true);
-
-    session_->SetNeedSnapshot(true);
-    session_->SetFloatingScale(0.5);
-    ASSERT_EQ(session_->GetFloatingScale(), 0.5f);
-    session_->SetScale(50, 100, 50, 100);
-    session_->GetScaleX();
-    session_->GetScaleY();
-    session_->GetPivotX();
-    session_->GetPivotY();
-    session_->SetSCBKeepKeyboard(true);
-    session_->GetSCBKeepKeyboardFlag();
-    ASSERT_EQ(WSError::WS_OK, session_->MarkProcessed(11));
-}
-
-/**
- * @tc.name: SetOffset
- * @tc.desc: SetOffset Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetOffset(50, 100);
-    session_->GetOffsetX();
-    session_->GetOffsetY();
-    WSRectF bounds;
-    session_->SetBounds(bounds);
-    session_->GetBounds();
-    session_->UpdateTitleInTargetPos(true, 100);
-    session_->SetNotifySystemSessionPointerEventFunc(nullptr);
-    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
-    ASSERT_EQ(session_->GetBufferAvailable(), false);
-}
-
-/**
- * @tc.name: SetBackPressedListenser
- * @tc.desc: SetBackPressedListenser Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest2, SetBackPressedListenser, Function | SmallTest | Level2)
@@ -2639,8 +2248,6 @@ HWTEST_F(WindowSessionTest2, NotifySessionInfoLockedStateChange, Function | Smal
     session_->SetSessionInfoLockedStateChangeListener(sessionInfoLockedStateChangeFunc);
     session_->NotifySessionInfoLockedStateChange(true);
 
-=======
->>>>>>> 43b80af5e4a9d6760f033a033e58d1926f0cd323
     WLOGFI("NotifySessionInfoLockedStateChange end!");
 }
 
