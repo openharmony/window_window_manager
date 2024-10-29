@@ -2198,30 +2198,22 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleTask01, Function | SmallTest | L
     sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         return WSError::WS_ERROR_NULLPTR;
     };
-    sceneSession->isStatusBarVisible_ = true;
-    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(true), WSError::WS_ERROR_NULLPTR);
 
     sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         isLayoutFinished = false;
         return WSError::WS_OK;
     };
-    sceneSession->isStatusBarVisible_ = true;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
 
     sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         isLayoutFinished = true;
         return WSError::WS_OK;
-    }
-    sceneSession->isStatusBarVisible_ = true;
+    };
     sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) { };
-    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(true), WSError::WS_OK);
 
     sceneSession->specificCallback_ = nullptr;
-    sceneSession->isStatusBarVisible_ = true;
-    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
-
-    sceneSession->getIsLayoutFinishedFunc = nullptr;
-    sceneSession->isStatusBarVisible_ = true;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleTask(false), WSError::WS_OK);
 }
 } // namespace
