@@ -3663,6 +3663,11 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled_ not change");
         return WMError::WM_OK;
     }
+
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnDefaultDensityEnabled(enabled);
+    }
+
     isDefaultDensityEnabled_ = enabled;
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
