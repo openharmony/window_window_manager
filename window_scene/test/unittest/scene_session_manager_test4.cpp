@@ -1188,6 +1188,31 @@ HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: AddOrRemoveSecureSession02
+ * @tc.desc: AddOrRemoveSecureSession
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t persistentId = 1;
+    bool shouldHide = true;
+    SessionInfo info;
+    info.abilityName_ = "secureSession";
+    info.bundleName_ = "secureSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
+    auto result = ssm_->AddOrRemoveSecureSession(0, shouldHide);
+    EXPECT_EQ(result, WSError::WS_OK);
+    result = ssm_->AddOrRemoveSecureSession(persistentId, shouldHide);
+    EXPECT_EQ(result, WSError::WS_OK);
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
  * @tc.name: GetSessionSnapshotPixelMap
  * @tc.desc: GetSessionSnapshotPixelMap
  * @tc.type: FUNC
@@ -1218,31 +1243,6 @@ HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, Function | SmallT
     sceneSession->bufferAvailable_ = true;
     result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
     EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: AddOrRemoveSecureSession02
- * @tc.desc: AddOrRemoveSecureSession
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    int32_t persistentId = 1;
-    bool shouldHide = true;
-    SessionInfo info;
-    info.abilityName_ = "secureSession";
-    info.bundleName_ = "secureSession";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
-    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
-    auto result = ssm_->AddOrRemoveSecureSession(0, shouldHide);
-    EXPECT_EQ(result, WSError::WS_OK);
-    result = ssm_->AddOrRemoveSecureSession(persistentId, shouldHide);
-    EXPECT_EQ(result, WSError::WS_OK);
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
-    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
