@@ -32,6 +32,7 @@
 #include "js_root_scene_session.h"
 #include "js_scene_session.h"
 #include "js_scene_utils.h"
+#include "js_rss_session.h"
 #include "js_window_scene_config.h"
 #ifdef SOC_PERF_ENABLE
 #include "socperf_client.h"
@@ -45,9 +46,10 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
-constexpr int ARG_INDEX_1 = 1;
+constexpr int DEFAULT_ARG_COUNT = 4;
+constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
-constexpr int ARG_INDEX_3 = 3;
+constexpr int ARG_INDEX_THREE = 3;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -156,6 +158,9 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
     BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
     BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
+    BindNativeFunction(env, exportObj, "getRssData", moduleName, JsSceneSessionManager::GetRssData);
+    BindNativeFunction(env, exportObj, "registerRssData", moduleName, JsSceneSessionManager::RegisterRssData);
+    BindNativeFunction(env, exportObj, "unregisterRssData", moduleName, JsSceneSessionManager::UnregisterRssData);
     BindNativeFunction(env, exportObj, "updateSessionDisplayId", moduleName,
         JsSceneSessionManager::UpdateSessionDisplayId);
     BindNativeFunction(env, exportObj, "notifyStackEmpty", moduleName, JsSceneSessionManager::NotifyStackEmpty);
@@ -846,6 +851,27 @@ napi_value JsSceneSessionManager::ReportData(napi_env env, napi_callback_info in
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnReportData(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetRssData(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetRssData(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::RegisterRssData(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterRssData(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::UnregisterRssData(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUnregisterRssData(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::UpdateSessionDisplayId(napi_env env, napi_callback_info info)
@@ -2369,7 +2395,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     bool isFocused = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isFocused)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isFocused)) {
         WLOGFE("[NAPI]Failed to convert parameter to isFocused");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2384,7 +2410,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
     }
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     if (argc > MIN_ARG_COUNT) {
-        if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], reason)) {
+        if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], reason)) {
             TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]Failed to convert parameter to reason");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
@@ -2697,7 +2723,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_INDEX_3) { // ReportData args must be greater than three
+    if (argc < ARG_INDEX_THREE) { // ReportData args must be greater than three
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2711,7 +2737,7 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     int32_t value;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], value)) { // second args is int value
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], value)) { // second args is int value
         WLOGFE("[NAPI]Failed to convert parameter to value");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2737,6 +2763,57 @@ napi_value JsSceneSessionManager::OnReportData(napi_env env, napi_callback_info 
     }
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, value, mapPayload);
+#endif
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnGetRssData(napi_env env, napi_callback_info info)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_INDEX_TWO) { // OnGetRssData args must be greater than two
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t resType;
+    if (!ConvertFromJsValue(env, argv[0], resType)) { // first args is int value
+        WLOGFE("[NAPI]Failed to convert parameter to resType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    nlohmann::json payload;
+    if (!ConvertJsonFromJs(env, argv[ARG_INDEX_ONE], payload)) {
+        WLOGFE("[NAPI]Failed to convert parameter to payload");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    static std::string pid = std::to_string(getprocpid());
+    payload["srcPid"] = pid;
+    nlohmann::json reply;
+    ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    return RssSession::DealRssReply(env, payload, reply);
+#endif
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnRegisterRssData(napi_env env, napi_callback_info info)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    return RssSession::RegisterRssData(env, info);
+#endif
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnUnregisterRssData(napi_env env, napi_callback_info info)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    return RssSession::UnregisterRssData(env, info);
 #endif
     return NapiGetUndefined(env);
 }

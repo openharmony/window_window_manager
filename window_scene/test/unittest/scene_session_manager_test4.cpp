@@ -1177,11 +1177,6 @@ HWTEST_F(SceneSessionManagerTest4, GetIsLayoutFullScreen, Function | SmallTest |
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
-/**
- * @tc.name: UpdateExtWindowFlags
- * @tc.desc: UpdateExtWindowFlags
- * @tc.type: FUNC
-*/
 HWTEST_F(SceneSessionManagerTest4, UpdateExtWindowFlags, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);

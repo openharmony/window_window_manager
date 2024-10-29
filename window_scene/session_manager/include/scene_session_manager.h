@@ -104,9 +104,9 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
-using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
+using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -258,7 +258,7 @@ public:
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                               SessionSnapshot& snapshot, bool isLowResolution) override;
+        SessionSnapshot& snapshot, bool isLowResolution) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
     WSError SetVmaCacheStatus(bool flag);
     WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
@@ -461,7 +461,7 @@ private:
     void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
-    
+
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -580,10 +580,6 @@ private:
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
-    WMError UpdatePropertyDragEnabled(const sptr<WindowSessionProperty>& property,
-                                      const sptr<SceneSession>& sceneSession);
-    WMError UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
-                                       const sptr<SceneSession>& sceneSession);
     void ClosePipWindowIfExist(WindowType type);
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
@@ -751,7 +747,7 @@ private:
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
-                                bool isFromInnerkits);
+        bool isFromInnerkits);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
     void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
@@ -773,7 +769,6 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     void HandleSpecialExtWindowFlagsChange(int32_t persistentId, ExtensionWindowFlags extWindowFlags,
         ExtensionWindowFlags extWindowActions);
-    void HandleCastScreenDisConnection(uint64_t screenId);
     void ProcessWindowModeType();
     WindowModeType CheckWindowModeType();
     void NotifyRSSWindowModeTypeUpdate();
@@ -805,6 +800,11 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+
+    /*
+     * Screen Manager
+     */
+    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 

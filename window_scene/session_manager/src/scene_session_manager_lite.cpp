@@ -211,17 +211,6 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
-WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
-{
-    return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
-}
-
-WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
-    std::vector<int32_t>& clearFailedIds)
-{
-    return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
-}
-
 WSError SceneSessionManagerLite::RegisterIAbilityManagerCollaborator(int32_t type,
     const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
 {
@@ -233,6 +222,17 @@ WSError SceneSessionManagerLite::UnregisterIAbilityManagerCollaborator(int32_t t
     return SceneSessionManager::GetInstance().UnregisterIAbilityManagerCollaborator(type);
 }
 
+WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
+}
+
+WMError SceneSessionManagerLite::ClearMainSessions(const std::vector<int32_t>& persistentIds,
+    std::vector<int32_t>& clearFailedIds)
+{
+    return SceneSessionManager::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
+}
+
 WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyletype)
 {
     return SceneSessionManager::GetInstance().GetWindowStyleType(windowStyletype);
@@ -241,5 +241,10 @@ WMError SceneSessionManagerLite::GetWindowStyleType(WindowStyleType& windowStyle
 WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
+}
+
+WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().GetAccessibilityWindowInfo(infos);
 }
 } // namespace OHOS::Rosen

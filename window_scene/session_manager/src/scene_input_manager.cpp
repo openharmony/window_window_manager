@@ -28,10 +28,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneI
 const std::string SCENE_INPUT_MANAGER_THREAD = "SceneInputManager";
 const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
 
-constexpr float DIRECTION0 = 0;
-constexpr float DIRECTION90 = 90;
-constexpr float DIRECTION180 = 180;
-constexpr float DIRECTION270 = 270;
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
