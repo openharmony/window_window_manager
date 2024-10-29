@@ -465,7 +465,7 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
 }
 
 /**
- * @tc.name: IsWindowFollowParent01 
+ * @tc.name: IsWindowFollowParent01
  * @tc.desc: IsWindowFollowParent
  * @tc.type: FUNC
  */
