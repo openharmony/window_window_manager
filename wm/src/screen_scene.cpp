@@ -173,6 +173,16 @@ void ScreenScene::SetDisplayDensity(float density)
     density_ = density;
 }
 
+uint64_t ScreenScene::GetDisplayId() const
+{
+    return displayId_;
+}
+
+void ScreenScene::SetDisplayId(DisplayId displayId)
+{
+    displayId_ = displayId;
+}
+
 void ScreenScene::SetDisplayOrientation(int32_t orientation)
 {
     if (orientation < static_cast<int32_t>(DisplayOrientation::PORTRAIT) ||

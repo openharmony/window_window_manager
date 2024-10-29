@@ -53,6 +53,9 @@ public:
 
     void SetDisplayOrientation(int32_t orientation);
 
+    uint64_t GetDisplayId() const override;
+    void SetDisplayId(DisplayId displayId);
+
     WindowState GetWindowState() const override
     {
         return WindowState::STATE_SHOWN;
@@ -85,6 +88,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     float density_ = 1.0f;
     int32_t orientation_;
+    uint64_t displayId_;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
