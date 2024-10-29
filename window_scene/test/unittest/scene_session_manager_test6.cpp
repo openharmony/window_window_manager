@@ -1306,7 +1306,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify4, Function | Smal
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
     sessionInfo.abilityName_ = "DumpSessionWithId";
-    sessionInfo.isSystem_ = true;
+    sessionInfo.isSystem_ = false;
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
     sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -1314,7 +1314,6 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify4, Function | Smal
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetParentSession(sceneSession2);
     ASSERT_NE(nullptr, sceneSession->GetParentSession());
-    sceneSession->isVisible_ = true;
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, sceneSession->property_);
