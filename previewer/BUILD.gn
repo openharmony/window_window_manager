@@ -141,10 +141,10 @@ if (!ispreview) {
     ]
 
     external_deps = [
+      "ability_runtime:ability_manager",
       "ace_engine:ace_uicontent",
       "hilog:libhilog",
       "napi:ace_napi",
-      "ability_runtime:ability_manager",
     ]
 
     cflags_cc = [ "-DWINDOW_PREVIEW" ]

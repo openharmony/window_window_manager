@@ -47,6 +47,7 @@ ohos_shared_library("screensessionmanager_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -54,7 +55,6 @@ ohos_shared_library("screensessionmanager_napi") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "graphic_2d:librender_service_base",
   ]
 
   defines = []

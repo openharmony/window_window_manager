@@ -100,15 +100,15 @@ ohos_shared_library("extensionwindow_napi") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",
-    "bundle_framework:appexecfwk_base",
-    "ability_runtime:ability_manager",
   ]
 
   innerapi_tags = [ "platformsdk" ]
