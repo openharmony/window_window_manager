@@ -6105,4 +6105,41 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     NotifyCaptureStatusChanged();
     return res;
 }
+
+sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
+{
+    DmsXcollie dmsXcollie("DMS:GetPrimaryDisplayInfo", XCOLLIE_TIMEOUT_10S);
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (!screenSession->GetIsExtend()) {
+                TLOGE(WmsLogTag::DMS, "find primary %{public}" PRIu64, screenSession->screenId_);
+                break;
+            }
+        }
+    }
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::DMS, "get extend screen faild use default!");
+        screenSession = GetScreenSession(GetDefaultScreenId());
+    }
+    if (screenSession) {
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGI(WmsLogTag::DMS, "convert display error.");
+            return nullptr;
+        }
+        displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
+        return displayInfo;
+    } else {
+        TLOGE(WmsLogTag::DMS, "failed");
+        return nullptr;
+    }
+}
 } // namespace OHOS::Rosen
