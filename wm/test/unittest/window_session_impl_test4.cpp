@@ -1024,6 +1024,31 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetVirtualPixelRatio
+ * @tc.desc: test GetVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    float vpr = 0.0f;
+    window->property_->SetDisplayId(-1);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_EQ(vpr, 1.0f);
+
+    window->property_->SetDisplayId(0);
+    vpr = window->GetVirtualPixelRatio();
+    ASSERT_NE(vpr, 1.0f);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
+}
+
+/**
  * @tc.name: SetAutoStartPiP
  * @tc.desc: SetAutoStartPiP
  * @tc.type: FUNC
