@@ -28,7 +28,6 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
-#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
