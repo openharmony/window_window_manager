@@ -411,7 +411,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionSnapshot(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<SessionSnapshot> snapshot = std::make_shared<SessionSnapshot>();
-    WSError ret = GetSessionSnapshot(deviceId, persistentId, *snapshot, isLowResolution);
+    WSError ret = GetSession  Snapshot(deviceId, persistentId, *snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
