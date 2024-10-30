@@ -1268,6 +1268,23 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
     return res;
 }
 
+WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto type = GetType();
+    WMError res = WindowHelper::IsMainWindow(type) ?
+                  static_cast<WMError>(hostSession->RemoveStartingWindow()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+    if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Notify success id:%{public}d, type:%{public}d",
+            GetPersistentId(), type);
+    }
+    return res;
+}
+
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
