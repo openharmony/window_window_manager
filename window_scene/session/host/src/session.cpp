@@ -2659,14 +2659,23 @@ WSRect Session::GetSessionRect() const
 }
 
 /** @note @window.layout */
-Rect Session::GetSessionGlobalScaledRect() const
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 {
-    WSRect globalScaledRect = GetSessionGlobalRect();
-    globalScaledRect.width_ *= scaleX_;
-    globalScaledRect.height_ *= scaleY_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
-        GetPersistentId(), globalScaledRect.ToString().c_str());
-    return { globalScaledRect.posX_, globalScaledRect.posY_, globalScaledRect.width_, globalScaledRect.height_ };
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
 }
 
 /** @note @window.layout */
