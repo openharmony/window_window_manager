@@ -3205,13 +3205,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
-            WLOGFD("RequestSessionBack when start session");
-            if (session->GetSessionInfo().abilityInfo != nullptr &&
-                session->GetSessionInfo().abilityInfo->unclearableMission) {
-                TLOGI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
-                return WSError::WS_OK;
-            }
-            session->RequestSessionBack(false);
+            session->RequestSessionBack(true);
             return WSError::WS_OK;
         }
         if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
