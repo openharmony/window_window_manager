@@ -141,6 +141,7 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         vsyncHandler_->PostTask(task, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
     }
 
+    requestVsyncTimes_++;
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
     auto task = [weakThis = weak_from_this()]
         (int64_t timestamp, int64_t frameCount, void* client) {
@@ -262,6 +263,5 @@ void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
         receiver->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS
