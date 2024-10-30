@@ -1077,6 +1077,130 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     window->hostSession_ = nullptr;
     window->SetAutoStartPiP(isAutoStart);
 }
+
+/**
+ * @tc.name: IsPcOrPadCapabilityEnabled
+ * @tc.desc: IsPcOrPadCapabilityEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsPcOrPadCapabilityEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    window->windowSystemConfig_.uiType_ = "pc";
+    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    window->windowSystemConfig_.uiType_ = "phone";
+    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    window->windowSystemConfig_.uiType_ = "pad";
+    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    window->property_->SetIsPcAppInPad(true);
+    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled end";
+}
+
+/**
+ * @tc.name: DestroySubWindow
+ * @tc.desc: DestroySubWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, DestroySubWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: DestroySubWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.uiType_ = "pc";
+
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(subOption, nullptr);
+    subOption->SetWindowName("DestroySubWindow01");
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(subWindow, nullptr);
+    ASSERT_NE(subWindow->property_, nullptr);
+    subWindow->property_->SetPersistentId(2);
+    SessionInfo subSessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    window->windowSystemConfig_.uiType_ = "pc";
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, vec));
+    WindowSessionImpl::subWindowSessionMap_[1].push_back(subWindow);
+    window->DestroySubWindow();
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: UpdateSubWindowStateAndNotify01
+ * @tc.desc: UpdateSubWindowStateAndNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UpdateSubWindowStateAndNotify01");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.uiType_ = "pc";
+
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(subOption, nullptr);
+    subOption->SetWindowName("UpdateSubWindowStateAndNotify011");
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(subWindow, nullptr);
+    ASSERT_NE(subWindow->property_, nullptr);
+    subWindow->property_->SetPersistentId(2);
+    SessionInfo subSessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    window->windowSystemConfig_.uiType_ = "pc";
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, vec));
+    subWindow->UpdateSubWindowStateAndNotify(1, WindowState::STATE_HIDDEN);
+    WindowSessionImpl::subWindowSessionMap_[1].push_back(subWindow);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_HIDDEN);
+    window->state_ = WindowState::STATE_HIDDEN;
+    window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_HIDDEN);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_SHOWN);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_SHOWN);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

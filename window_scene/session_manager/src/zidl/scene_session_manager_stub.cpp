@@ -732,7 +732,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
     uint32_t vectorSize = data.ReadUint32();
     if (vectorSize > MAX_VECTOR_SIZE) {
         WLOGFI("Vector is too big!");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
@@ -908,7 +908,7 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
     WMError errCode = GetVisibilityWindowInfo(infos);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
         WLOGFE("Write visibility window infos failed");
-        return -1;
+        return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
