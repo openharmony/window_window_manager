@@ -239,6 +239,11 @@ public:
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
+
+    virtual sptr<DisplayInfo> GetPrimaryDisplayInfo()
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Rosen
 

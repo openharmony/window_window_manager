@@ -495,10 +495,10 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
 }
 
 /**
-* @tc.name: TriggerBindModalUIExtension01
-* @tc.desc: TriggerBindModalUIExtension01 Test
-* @tc.type: FUNC
-*/
+ * @tc.name: TriggerBindModalUIExtension01
+ * @tc.desc: TriggerBindModalUIExtension01 Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
@@ -506,10 +506,10 @@ HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function
 }
 
 /**
-* @tc.name: TriggerBindModalUIExtension02
-* @tc.desc: TriggerBindModalUIExtension02 Test
-* @tc.type: FUNC
-*/
+ * @tc.name: TriggerBindModalUIExtension02
+ * @tc.desc: TriggerBindModalUIExtension02 Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;

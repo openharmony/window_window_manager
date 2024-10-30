@@ -63,7 +63,7 @@ private:
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void RaiseCallingSession(const WSRect& keyboardPanelRect,
+    void RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateKeyboardAvoidArea();

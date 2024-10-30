@@ -358,7 +358,7 @@ public:
     bool GetFocusable() const;
     void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
+    WSError SetFocusableOnShow(bool isFocusableOnShow); // Used when showing window
     bool IsFocusableOnShow() const;
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
@@ -472,6 +472,8 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+    bool GetIsPendingToBackgroundState() const;
+    void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
@@ -695,6 +697,8 @@ private:
     void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
     void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
 
+    void UpdateGravityWhenUpdateWindowMode(WindowMode mode);
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
@@ -751,7 +755,8 @@ private:
     bool systemTouchable_ { true };
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    std::atomic<bool> isAttach_{ false };
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> isPendingToBackgroundState_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;

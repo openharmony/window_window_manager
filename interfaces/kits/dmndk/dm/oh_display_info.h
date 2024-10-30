@@ -45,7 +45,10 @@
 extern "C" {
 #endif
 
-/** display name length */
+/**
+ * @brief display name length
+ * @since 14
+ */
 #define OH_DISPLAY_NAME_LENGTH 32
 
 /**
@@ -326,7 +329,7 @@ typedef struct {
 } NativeDisplayManager_DisplayInfo;
 
 /**
- * @brief Defines the display structure.
+ * @brief Defines the displays structure.
  *
  * @since 14
  * @version 1.0
