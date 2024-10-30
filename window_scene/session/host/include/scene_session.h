@@ -161,6 +161,7 @@ public:
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
