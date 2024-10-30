@@ -666,7 +666,10 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
+    // only accessed on SSM thread
+    uint32_t dirtyFlags_ = 0;
+    bool isNeedSyncSessionRect_ { true }; // where need sync to session rect,  currently use in split drag
+
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;

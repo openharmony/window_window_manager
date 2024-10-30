@@ -1142,6 +1142,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1238,6 +1239,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isActive_ = false;
     isStarting_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -2704,6 +2706,9 @@ WSRect Session::GetSessionGlobalRect() const
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
     globalRect_ = rect;
 }
 
