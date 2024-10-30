@@ -689,6 +689,7 @@ enum class SessionUIDirtyFlag {
     Z_ORDER = 1 << 5,
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
+    GLOBAL_RECT = 1 << 8,
 };
 
 /**
