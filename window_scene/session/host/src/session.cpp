@@ -547,7 +547,7 @@ WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
             TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+        TLOGND(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
             session->GetPersistentId(), isFocusableOnShow);
         session->focusableOnShow_ = isFocusableOnShow;
     };
@@ -1142,6 +1142,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1211,6 +1212,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    SetIsPendingToBackgroundState(false);
     NotifyBackground();
     return WSError::WS_OK;
 }
@@ -1237,6 +1239,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isActive_ = false;
     isStarting_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1343,6 +1346,18 @@ void Session::SetForegroundInteractiveStatus(bool interactive)
 bool Session::GetForegroundInteractiveStatus() const
 {
     return foregroundInteractiveStatus_.load();
+}
+
+bool Session::GetIsPendingToBackgroundState() const
+{
+    return isPendingToBackgroundState_.load();
+}
+
+void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
+        GetPersistentId(), isPendingToBackgroundState);
+    return isPendingToBackgroundState_.store(isPendingToBackgroundState);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2524,12 +2539,26 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         UpdateGestureBackEnabled();
+        UpdateGravityWhenUpdateWindowMode(mode);
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
     return WSError::WS_OK;
+}
+
+void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
+{
+    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    }
 }
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)
@@ -2677,6 +2706,9 @@ WSRect Session::GetSessionGlobalRect() const
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
     globalRect_ = rect;
 }
 

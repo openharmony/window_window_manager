@@ -381,7 +381,7 @@ public:
  * @class IWindowVisibilityChangedListener
  *
  * @brief Listener to observe one window visibility changed.
-*/
+ */
 class IWindowVisibilityChangedListener : virtual public RefBase {
 public:
     virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
@@ -392,7 +392,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
-*/
+ */
 class IWindowNoInteractionListener : virtual public RefBase {
 public:
     /**

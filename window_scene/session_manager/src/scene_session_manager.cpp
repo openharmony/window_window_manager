@@ -298,6 +298,11 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+    InitVsyncStation();
+}
+
+void SceneSessionManager::InitVsyncStation()
+{
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
@@ -4708,7 +4713,7 @@ void SceneSessionManager::RequestAllAppSessionUnfocus()
 /**
  * request focus and ignore its state
  * only used when app main window start before foreground
-*/
+ */
 WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "RequestSessionFocusImmediately, id: %{public}d", persistentId);
@@ -4765,6 +4770,11 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     }
     if (!sceneSession->IsFocusedOnShow()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "session is not focused on show!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!sceneSession->IsFocusableOnShow() &&
+        (reason == FocusChangeReason::FOREGROUND || reason == FocusChangeReason::APP_FOREGROUND)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable on show!");
         return WSError::WS_DO_NOTHING;
     }
 
@@ -5804,15 +5814,20 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
 
 void SceneSessionManager::ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession)
 {
-    if (IsSessionVisibleForeground(sceneSession)) {
-        if (sceneSession->IsFocusableOnShow()) {
+    if (sceneSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        return;
+    }
+    if (sceneSession->IsFocusableOnShow()) {
+        if (IsSessionVisibleForeground(sceneSession)) {
             RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
         } else {
-            sceneSession->SetFocusableOnShow(true);
+            PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
+            sceneSession->SetPostProcessFocusState(state);
         }
     } else {
-        PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
-        sceneSession->SetPostProcessFocusState(state);
+        TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus when foreground",
+            sceneSession->GetPersistentId());
     }
 }
 
@@ -9325,14 +9340,6 @@ void SceneSessionManager::PostProcessFocus()
             "id: %{public}d, isFocused: %{public}d, reason: %{public}d, focusableOnShow: %{public}d",
             session->GetPersistentId(), session->GetPostProcessFocusState().isFocused_,
             session->GetPostProcessFocusState().reason_, session->IsFocusableOnShow());
-        if (!session->IsFocusableOnShow() &&
-            (session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND ||
-             session->GetPostProcessFocusState().reason_ == FocusChangeReason::APP_FOREGROUND)) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus", session->GetPersistentId());
-            session->ResetPostProcessFocusState();
-            session->SetFocusableOnShow(true);
-            continue;
-        }
         if (focusChanged) {
             session->ResetPostProcessFocusState();
             continue;
@@ -9805,7 +9812,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         if (parentSession) {
             parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
         }
-        if (usage == UIExtensionUsage::MODAL && parentSession) {
+        if (usage == UIExtensionUsage::MODAL && parentSession && parentSession->GetCallingPid() != GetPid()) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
@@ -11045,6 +11052,10 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (pid < 0) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid pid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
     auto task = [this, pid, skip]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (skip) {
@@ -11274,7 +11285,7 @@ WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMul
 WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
-    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
