@@ -2194,18 +2194,18 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_ERROR_NULLPTR);
 
-    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         return WSError::WS_ERROR_NULLPTR;
     };
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_ERROR_NULLPTR);
 
-    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         isLayoutFinished = false;
         return WSError::WS_OK;
     };
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 
-    sceneSession->getIsLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         isLayoutFinished = true;
         return WSError::WS_OK;
     };

@@ -573,7 +573,7 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
         RootScene::staticRootScene_->OnFlushUIParams();
     });
-    SceneSessionManager::GetInstance().SetIsLastFrameLayoutFinishedFunc([] {
+    SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
     });
 }

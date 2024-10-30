@@ -4550,7 +4550,7 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
     onFlushUIParamsFunc_ = std::move(func);
 }
 
-void SceneSessionManager::SetIsLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
+void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
 {
     isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
 }
