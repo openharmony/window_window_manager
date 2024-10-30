@@ -184,7 +184,12 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         property = sptr<WindowSessionProperty>::MakeSptr();
     }
     bool isFromClient = data.ReadBool();
-    const WSError errCode = Foreground(property, isFromClient);
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = Foreground(property, isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -193,7 +198,12 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("[WMSCom] Background!");
     bool isFromClient = data.ReadBool();
-    const WSError errCode = Background(isFromClient);
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = Background(isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -202,7 +212,12 @@ int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
     bool isFromClient = data.ReadBool();
-    WSError errCode = Disconnect(isFromClient);
+    std::string identityToken;
+    if (!data.ReadString(identityToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = Disconnect(isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

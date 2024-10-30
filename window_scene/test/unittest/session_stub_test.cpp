@@ -102,12 +102,22 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, Function | SmallTest | Lev
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+
+    data.WriteBool(false);
+    data.WriteBool(true);
+    data.WriteString("");
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+
+    data.WriteBool(true);
+    data.WriteString("");
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+
+    data.WriteBool(true);
+    data.WriteString("");
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);

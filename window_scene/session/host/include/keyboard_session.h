@@ -40,7 +40,7 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
 
