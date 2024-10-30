@@ -118,7 +118,6 @@ public:
 
     // callback for notify SceneBoard
     struct SessionChangeCallback : public RefBase {
-        NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
@@ -371,6 +370,12 @@ public:
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
+
+    /*
+     * Dialog Window
+     */
+    void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
+
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
     /*
@@ -527,6 +532,12 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
+    
+    /*
+     * Dialog window
+     */
+    NotifyBindDialogSessionFunc onBindDialogTarget_;
+
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
