@@ -356,7 +356,7 @@ enum class FoldStatus: uint32_t {
 
 /**
  * @brief Enumerates the super fold state change events.
-*/
+ */
 enum class SuperFoldStatusChangeEvents : uint32_t {
     UNDEFINED = 0,
     ANGLE_CHANGE_EXPANDED,
@@ -371,7 +371,7 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
 
 /**
  * @brief Enumerates the super fold state.
-*/
+ */
 enum class SuperFoldStatus : uint32_t {
     UNKNOWN,
     FOLDED,
